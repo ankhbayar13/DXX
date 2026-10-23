@@ -170,6 +170,20 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 
 <script>
 const SAVE_KEY = 'nuudelchin_v2';
+function acH(s,seed){ let h1=0xdeadbeef^(seed||0), h2=0x41c6ce57^(seed||0); for(let i=0,ch;i<s.length;i++){ ch=s.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); } h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909); h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909); return (4294967296*(2097151&h2)+(h1>>>0)).toString(36); }
+const AC_SALT='Tn#7qL!x9Ms2$vE4kRw', AC_K='nuud-hаан-1206-тал';
+let acN=0;
+function acFlag(why){ if(typeof S==='undefined'||!S) return; S.cheat=(S.cheat||0)+1; if(Date.now()-acN>4000){ acN=Date.now(); try{ say('⚠ Хууран мэхлэлт илэрлээ'); }catch(e){} } if(S.cheat>=3){ try{ S.res.alt=0; S.res.gold=Math.min(S.res.gold,100); }catch(e){} } }
+function acXor(b){ let o=''; for(let i=0;i<b.length;i++) o+=String.fromCharCode(b.charCodeAt(i)^AC_K.charCodeAt(i%AC_K.length)&127); return o; }
+function acPack(p){ const sig=acH(p+AC_SALT,7)+acH(AC_SALT+p,13); return 'v3.'+sig+'.'+btoa(acXor(unescape(encodeURIComponent(p)))); }
+function acUnpack(r){ if(!r) return null; if(r[0]==='{') return {o:JSON.parse(r),legacy:true}; if(r.slice(0,3)!=='v3.') return null; const i=r.indexOf('.',3); if(i<0) return null; const sig=r.slice(3,i); let p; try{ p=decodeURIComponent(escape(acXor(atob(r.slice(i+1))))); }catch(e){ return null; } if(sig!==acH(p+AC_SALT,7)+acH(AC_SALT+p,13)) return null; return {o:JSON.parse(p)}; }
+function acRead(){ let a=null,b=null; try{ a=acUnpack(localStorage.getItem(SAVE_KEY)); }catch(e){} if(a) return a.o; try{ b=acUnpack(localStorage.getItem(SAVE_KEY+'_b')); }catch(e){} const raw=localStorage.getItem(SAVE_KEY); if(raw){ window._acTamper=1; } return b?b.o:null; }
+function acWrite(){ try{ const old=localStorage.getItem(SAVE_KEY); if(old&&acUnpack(old)) localStorage.setItem(SAVE_KEY+'_b',old); localStorage.setItem(SAVE_KEY,acPack(JSON.stringify(S))); }catch(e){} }
+const acWS=new WeakSet(), acLast={};
+function acMask(o,k){ const d=Object.getOwnPropertyDescriptor(o,k); if(d&&d.get) return; let v=+o[k]||0; if(acWS.has(o)){ acFlag('scan'); v=acLast[k]||0; } let K=(Math.random()*1e6)|0, a=v+K, b=v*3+K*7+13; acLast[k]=v;
+  Object.defineProperty(o,k,{enumerable:true,configurable:true,get(){ const x=a-K, y=(b-K*7-13)/3; if(Math.abs(x-y)>1e-6*Math.max(1,Math.abs(x))+0.01){ acFlag('mem'); const m=Math.min(x,y); a=m+K; b=m*3+K*7+13; return m; } return x; },set(n){ n=+n; if(!isFinite(n)) n=0; K=(Math.random()*1e6)|0; a=n+K; b=n*3+K*7+13; }}); }
+function acHook(){ if(!S||!S.res) return; acMask(S.res,'alt'); acMask(S.res,'gold'); acWS.add(S.res); acLast.alt=S.res.alt; acLast.gold=S.res.gold; }
+
 
 const ANIMALS = {
   honi:  {n:'Хонь',  cost:20,  meat:2, milk:0, wool:1, gold:0},
@@ -181,20 +195,21 @@ const ANIMALS = {
 const SELL = {meat:2, milk:1, wool:1.5, grain:1.5, wood:1};
 
 const HEROES = [
- {id:'chinggis', n:'Чингис хаан', s:5},{id:'subeedei', n:'Сүбээдэй', s:5},{id:'khubilai', n:'Хубилай', s:5},
- {id:'mukhulai', n:'Мухулай', s:4},{id:'jelme', n:'Жэлмэ', s:4},{id:'borte', n:'Бөртэ хатан', s:4},{id:'khasar', n:'Хасар', s:4},
- {id:'boorchu', n:'Бороохул', s:3},{id:'borchi', n:'Борчи', s:3},{id:'zev', n:'Зэв', s:3},{id:'oelun', n:'Өэлүн эх', s:3},{id:'belgutei', n:'Бэлгүтэй', s:3},
+ {id:'chinggis', n:'Чингис хаан', s:5},{id:'subeedei', n:'Сүбээдэй', s:5},{id:'khubilai', n:'Хубилай нояон', s:5},
+ {id:'mukhulai', n:'Мухулай', s:4},{id:'jelme', n:'Зэлмэ', s:4},{id:'borte', n:'Бөртэ хатан', s:4},{id:'khasar', n:'Хасар', s:4},
+ {id:'boorchu', n:'Борохул', s:3},{id:'borchi', n:'Боорчи', s:3},{id:'zev', n:'Зэв', s:3},{id:'oelun', n:'Өэлүн эх', s:3},{id:'belgutei', n:'Бэлгүтэй', s:3},
  {id:'ogodei', n:'Өгөдэй', s:2},{id:'tolui', n:'Толуй', s:2},{id:'jochi', n:'Жочи', s:2},{id:'chagadai', n:'Цагаадай', s:2},
  {id:'khukhchu', n:'Хөхчү', s:1},{id:'arav', n:'Аравтын дарга', s:1},{id:'harvaach', n:'Залуу харваач', s:1}
 ];
 const HTYPE={chinggis:'heavy',khubilai:'heavy',jelme:'heavy',arav:'heavy',khukhchu:'heavy',khasar:'archer',jochi:'archer',harvaach:'archer',belgutei:'archer',borte:'archer',tolui:'archer',ogodei:'archer'};
 const TNAME={heavy:'Хүнд морьт',cav:'Морин цэрэг',archer:'Нумтан'}, TROW={heavy:'Урд эгнээ',cav:'Дунд эгнээ',archer:'Хойд эгнээ'};
 const htype=id=>HTYPE[id]||'cav';
-const FACS=[{n:'Борзигин',e:'🐺',ic:'f_wolf',ids:['chinggis','khasar','belgutei','ogodei','tolui','jochi','chagadai','khubilai']},{n:'Жалайр',e:'🦅',ic:'f_hawk',ids:['jelme','mukhulai','borchi','boorchu','zev']},{n:'Хонгирад',e:'🌙',ic:'f_sky',ids:['borte','oelun','subeedei','khukhchu']},{n:'Нөхөд',e:'🏹',ic:'f_altan',ids:['arav','harvaach']}];
+const FACS=[{n:'Боржигон',e:'🐺',ic:'f_wolf',ids:['chinggis','khasar','belgutei','oelun','ogodei','tolui','jochi','chagadai']},{n:'Дөрвөн хүлэг',e:'🐎',ic:'f_hawk',ids:['mukhulai','borchi','boorchu']},{n:'Дөрвөн нохой',e:'🏹',ic:'f_arrow',ids:['jelme','subeedei','zev','khubilai']},{n:'Нөхөд',e:'🌙',ic:'f_altan',ids:['borte','khukhchu','arav','harvaach']}];
 function squad(){ return Object.keys(S.heroes).sort((a,b)=>heroPower(b)-heroPower(a)).slice(0,heroSlots()); }
 function facBonus(){ const sq=squad(); let best={m:1,txt:''}; FACS.forEach(F=>{ const c=sq.filter(id=>F.ids.includes(id)).length; const m=c>=4?1.35:c>=3?1.2:c>=2?1.08:1; if(m>best.m) best={m,txt:ico(F.ic,22)+' '+F.n+' овог ×'+c+' → +'+Math.round((m-1)*100)+'%'}; }); return best; }
 const RELICS=[{id:'seal',n:'Хааны тамга',ic:'r_seal',st:'atk',v:12,s:5},{id:'banner1',n:'Хөх сүлд',ic:'r_banner1',st:'atk',v:14,s:5},{id:'banner2',n:'Хар сүлд',ic:'r_banner2',st:'hp',v:14,s:5},{id:'goldsword',n:'Алтан илд',ic:'r_goldsword',st:'atk',v:10,s:4},{id:'drum',n:'Бөөгийн хэнгэрэг',ic:'r_drum',st:'hp',v:12,s:4},{id:'hadag',n:'Хөх хадаг',ic:'r_hadag',st:'hp',v:10,s:3},{id:'feather',n:'Бүргэдийн өд',ic:'r_feather',st:'atk',v:6,s:3},{id:'bow',n:'Мөнгөн нум',ic:'r_bow',st:'atk',v:8,s:3},{id:'saddle',n:'Гоёлтой эмээл',ic:'r_saddle',st:'hp',v:8,s:3},{id:'helm',n:'Хөхий малгай',ic:'r_helm',st:'hp',v:7,s:3},{id:'whip',n:'Алтан ташуур',ic:'r_whip',st:'atk',v:5,s:2},{id:'jade',n:'Хаш бөгж',ic:'r_jade',st:'hp',v:6,s:2},{id:'horn',n:'Дайны бүрээ',ic:'r_horn',st:'atk',v:4,s:1},{id:'ironring',n:'Гахиилд',ic:'r_ironring',st:'hp',v:4,s:1}];
-function relicMul(){ let a=1,h=1; S.equip.forEach(id=>{ const r=RELICS.find(x=>x.id===id); if(r&&S.relics[id]){ if(r.st==='atk') a+=r.v/100; else h+=r.v/100; } }); const gm=gearMul(); return {a:a+gm.a,h:h+gm.h}; }
+function relMig(){ if(!S.heq) S.heq={}; if(S.equip&&S.equip.length){ const b=Object.keys(S.heroes).sort((x,y)=>heroPower(y)-heroPower(x))[0]; if(b){ S.heq[b]=(S.heq[b]||[]).concat(S.equip).slice(0,3); S.equip=[]; } } }
+function relicMul(hid){ relMig(); let a=0,h=0; (hid&&S.heq[hid]||[]).forEach(id=>{ const r=RELICS.find(x=>x.id===id); if(r){ if(r.st==='atk') a+=r.v/100; else h+=r.v/100; } }); const gm=gearMul(); return {a:1+a+gm.a,h:1+h+gm.h}; }
 const ZTILE=['mp_grass','mp_forest','mp_desert','mp_snow'];
 const STAGEZ=[{n:'Ногоон тал',e:'🌿',from:0,to:1},{n:'Хангайн ой',e:'🌲',from:2,to:3},{n:'Говийн цөл',e:'🏜️',from:4,to:5},{n:'Алтайн нуруу',e:'🏔️',from:6,to:6}];
 const RATES = [[5,2],[4,6],[3,14],[2,28],[1,50]];
@@ -210,12 +225,15 @@ const ENEMIES = [
 ];
 
 const BUILD = {
-  ger:     {n:'Гэр', spr:'ger', w:30, cost:0, up:100, desc:'Нөөц +20%, баатрын суудал +1, ажилчин нэмнэ'},
+  ger:     {n:'Гэр', spr:'ger', w:30, cost:0, up:100, desc:'Нөөц +20%, баатрын суудал +1. Хүн: 1-2→2, 3→3, 4→4, 5→5'},
+  ger2:    {n:'Гэр 2', spr:'ger', w:30, cost:300, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger3:    {n:'Гэр 3', spr:'ger', w:30, cost:700, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger4:    {n:'Гэр 4', spr:'ger', w:30, cost:1500, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   hashaa:  {n:'Хашаа', w:70, h:44, cost:100, up:80, desc:'Малын тоо +10 (хашаагүй бол 5 мал)'},
   horgo:   {n:'Хорго', spr:'shed', w:26, cost:150, up:60, desc:'Агуулах +200'},
   market:  {n:'Зах', spr:'market', w:22, cost:200, up:120, desc:'Зарах үнэ +25%'},
   hureo:   {n:'Цэргийн хүрээ', spr:'tent', w:26, extra:12, cost:300, up:150, desc:'Баатар, дайн, отгийн хүч +10%'},
-  tarialan:{n:'Тариалан', w:28, h:20, cost:120, up:70, desc:'Тариа ургуулна. Ургац +12 / түвшин'},
+  tarialan:{n:'Тариалан', w:28, h:20, cost:120, up:70, desc:'Тариа ургуулна. Түвшин ахихад 1→8 талбай'},
   airag:   {n:'Айрагийн цех', spr:'airagbarrel', w:13, cost:250, up:120, desc:'Сүүнээс айраг хийнэ (6 сүү → 1 айраг)', proc:{in:{milk:6},out:'airag',t:20}},
   aaruul:  {n:'Ааруулын шон', spr:'cheeserack', w:20, cost:300, up:140, desc:'Сүүнээс ааруул хийнэ (8 сүү → 1)', proc:{in:{milk:8},out:'aaruul',t:25}},
   tos:     {n:'Тосны байшин', spr:'butterhut', w:24, cost:350, up:160, desc:'Сүүнээс тос аргална (10 сүү → 1)', proc:{in:{milk:10},out:'tos',t:30}},
@@ -225,9 +243,9 @@ const BUILD = {
   naadamring:{n:'Бөхийн талбай', spr:'st_arena', w:34, cost:700, up:400, desc:'Наадмын шагнал +20%, хүлээх хугацаа -10% (түвшин бүрт)'},
   suvarga: {n:'Цагаан суварга', spr:'st_stupa', w:14, cost:600, up:350, desc:'Чонын дайралт 15% ховор (түвшин бүрт)'},
   buuz:    {n:'Бууз, хуушуур', spr:'dumptent', w:24, cost:500, up:220, desc:'Мах, тариагаас бууз (4 мах + 2 тариа → 1)', proc:{in:{meat:4,grain:2},out:'buuz',t:35}},
-  stable:  {n:'Морины бааз', spr:'bk_stable', w:34, cost:300, up:150, desc:'Морьт цэрэг бэлтгэнэ (5 мах + 8🪙 → 1)', proc:{in:{meat:5,gold:8},out:'t_cav',t:25}},
-  range:   {n:'Харвааны талбай', spr:'bk_range', w:30, cost:350, up:160, desc:'Нумчин бэлтгэнэ (3 мод + 8🪙 → 1)', proc:{in:{wood:3,gold:8},out:'t_arc',t:25}},
-  yard:    {n:'Жадчны талбай', spr:'bk_yard', w:32, cost:300, up:140, desc:'Жадчин бэлтгэнэ (4 мах + 5🪙 → 1)', proc:{in:{meat:4,gold:5},out:'t_spr',t:22}}
+  stable:  {n:'Морины бааз', spr:'bk_stable', w:34, extra:26, cost:300, up:150, desc:'Морьт цэрэг бэлтгэнэ (5 мах + 8🪙 → 1)', proc:{in:{meat:5,gold:8},out:'t_cav',t:25}},
+  range:   {n:'Харвааны талбай', spr:'bk_range', w:30, extra:26, cost:350, up:160, desc:'Нумчин бэлтгэнэ (3 мод + 8🪙 → 1)', proc:{in:{wood:3,gold:8},out:'t_arc',t:25}},
+  yard:    {n:'Жадчны талбай', spr:'bk_yard', w:32, extra:26, cost:300, up:140, desc:'Жадчин бэлтгэнэ (4 мах + 5🪙 → 1)', proc:{in:{meat:4,gold:5},out:'t_spr',t:22}}
 };
 const PROD=['airag','aaruul','tos','esgii','buuz','stable','range','yard'];
 const TR=[{k:'t_cav',b:'stable',ty:'cav',pw:9,key:'tpc',n:'Морьт'},{k:'t_arc',b:'range',ty:'archer',pw:8,key:'tpa',n:'Нумчин'},{k:'t_spr',b:'yard',ty:'foot',pw:7,key:'tps',n:'Жадчин'}];
@@ -246,7 +264,7 @@ const SEAS=[{k:'spring',n:'Хавар',e:'🌸'},{k:'summer',n:'Зун',e:'☀�
 const SLEN=8*60*1000; let SOV=null;
 const seasonIdx=()=>SOV!=null?SOV:Math.floor(Date.now()/SLEN)%4;
 const seasonK=()=>SEAS[seasonIdx()].k;
-const BKEYS = ['ger','hashaa','horgo','market','hureo','tarialan','airag','aaruul','tos','esgii','buuz','hushuu','ovoo','naadamring','suvarga','stable','range','yard'];
+const BKEYS = ['ger','ger2','ger3','ger4','hashaa','horgo','market','hureo','tarialan','airag','aaruul','tos','esgii','buuz','hushuu','ovoo','naadamring','suvarga','stable','range','yard'];
 const GROW = 45;
 
 const NPCS = [
@@ -336,7 +354,7 @@ function xpHUD(){
   S.pl=S.pl||1; $('xpt').textContent='Lv '+S.pl; $('xpb').style.width=Math.min(100,(S.xp||0)/xpNeed(S.pl)*100)+'%';
   const b=$('qb'); if(b){ const n=qBadge(); b.textContent=n; b.style.display=n?'block':'none'; }
 }
-function hpi(id,h){ const d=SPRDATA['hp_'+id]; return d?'<img src="'+d[0]+'" style="height:'+h+'px;width:'+h+'px;flex:none">':''; }
+function hpi(id,h){ const d=SPRDATA['hp_'+id], f=(typeof skCss==='function'&&S&&S.sk)?skCss(id):''; return d?'<img src="'+d[0]+'" style="height:'+h+'px;width:'+h+'px;flex:none'+(f?';filter:'+f:'')+'">':''; }
 
 // ================= ОВОГ АЙМАГ + ГАЗРЫН ЗУРАГ =================
 const ZCLAN={
@@ -347,7 +365,7 @@ const ZCLAN={
  '1_1':{n:'Хэрэйд',ic:'f_kereid',who:'Ван хан',d:'Тоол голын эрдэнэт хаант овог.',b:'gold'},
  '2_1':{n:'Мэргид',ic:'f_wolf',who:'Тохтоа бэхи',d:'Сэлэнгийн голын дайчин овог.',b:'meat'},
  '0_2':{n:'Уйгур',ic:'f_sky',who:'Идуут',d:'Гүн урлаг, худалдааны зэргэлдээ улс.',b:'wool'},
- '1_2':{n:'Борзигин',ic:'f_wolf',who:'Чингис хаан',d:'Бурхан Халдун, Хөх чонын үр сад. Манай нутаг.',b:'home'},
+ '1_2':{n:'Боржигон',ic:'f_wolf',who:'Чингис хаан',d:'Бурхан Халдун, Хөх чонын үр сад. Манай нутаг.',b:'home'},
  '2_2':{n:'Тайчууд',ic:'f_hawk',who:'Таргутай Хирилтуг',d:'Онон голын хүчирхэг овог.',b:'meat'},
  '0_3':{n:'Тангуд',ic:'f_kereid',who:'Бурхан хаан',d:'Говийн өмнөд цайзтай улс.',b:'grain'},
  '1_3':{n:'Жалайр',ic:'f_arrow',who:'Мухулай',d:'Хэрлэн голын зоригт овог.',b:'milk'},
@@ -421,6 +439,7 @@ const PACKS=[
 const STARTER={id:'starter',mnt:4900,give:{alt:150,gold:3000,meat:300,milk:300,wool:200}};
 const MONTH={id:'month',mnt:9900};
 const PIG={id:'pig',mnt:1900};
+const PASSV={id:'passvip',mnt:14900};
 function fmtMnt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')+'₮'; }
 function vipActive(){ return !!(S.vip&&S.vip.end>Date.now()); }
 function payInit(){ S.paid=S.paid||{}; S.shopT=S.shopT||0; S.pig=S.pig||0; }
@@ -429,6 +448,7 @@ function grantPack(id){
   if(p){ let a=p.alt*(S.paid[id]?1:2); S.res.alt+=a; S.paid[id]=1; say('+'+a+' Алт'+(S.paid[id]&&a>p.alt?' (эхний худалдан авалтын 2 дахин)':'')); }
   else if(id==='starter'){ if(S.paid.starter) return; S.paid.starter=1; const g=STARTER.give; S.res.alt+=g.alt; S.res.gold+=g.gold; ['meat','milk','wool'].forEach(k=>S.res[k]=Math.min(cap(),S.res[k]+g[k])); say('Эхлэлийн багц авлаа!'); }
   else if(id==='month'){ const now=Date.now(); S.vip={end:Math.max(now,(S.vip&&S.vip.end)||0)+30*864e5,last:(S.vip&&S.vip.last)||''}; say('Хааны тэтгэмж идэвхжлээ (30 хоног)'); }
+  else if(id==='passvip'){ if(!S.pass) S.pass={p:0,c:0}; S.pass.vip=1; say('Хүндэт пасс идэвхжлээ!'); }
   else if(id==='pig'){ const a=Math.floor(S.pig); if(a<10) return; S.res.alt+=a; S.pig=0; say('Гахайн хадгаламжаас +'+a+' Алт'); }
   refresh();
 }
@@ -441,7 +461,7 @@ function buyReal(id){
 function openPayInfo(id){ const e=$('payinfo')||(()=>{ const x=document.createElement('div'); x.id='payinfo'; x.onclick=()=>x.style.display='none'; document.body.appendChild(x); return x; })();
   e.innerHTML='<div class="pib"><h3>Төлбөр удахгүй</h3><div class="sm">QPay / картаар төлөх систем одоогоор холбогдоогүй байна. Тун удахгүй нээгдэнэ.</div><div class="sm" style="margin-top:8px">Дарж хаа</div></div>'; e.style.display='flex'; }
 let _tcl=0;
-function shopTitleTap(){ _tcl++; clearTimeout(shopTitleTap.t); shopTitleTap.t=setTimeout(()=>_tcl=0,2500); if(_tcl>=7){ _tcl=0; S.testPay=!S.testPay; say(S.testPay?'ТЕСТ горим АСАВ (төлбөргүй)':'ТЕСТ горим УНТРАВ'); fillM(); } }
+function shopTitleTap(){ _tcl++; clearTimeout(shopTitleTap.t); shopTitleTap.t=setTimeout(()=>_tcl=0,2500); if(_tcl>=7){ _tcl=0; if(!/^(localhost|127\.)/.test(location.hostname)&&location.search.indexOf('dxxtest')<0){ acFlag('test'); return; } S.testPay=!S.testPay; say(S.testPay?'ТЕСТ горим АСАВ (төлбөргүй)':'ТЕСТ горим УНТРАВ'); fillM(); } }
 function shopFree(){ payInit(); if(S.shopT>Date.now()){ say('Үнэгүй сав дараа нээгдэнэ'); return; } S.shopT=Date.now()+4*3600e3; const g=150+Math.floor(Math.random()*250); S.res.gold+=g; say('Үнэгүй сав: +'+g+' 🪙'); qh('shop',1); refresh(); }
 function vipClaim(){ if(!vipActive()) return; const d=new Date().toDateString(); if(S.vip.last===d) return; S.vip.last=d; S.res.alt+=50; say('+50 Алт (Хааны тэтгэмж)'); refresh(); }
 function exch(alt,gold){ if(S.res.alt<alt) return; S.res.alt-=alt; S.res.gold+=gold; refresh(); }
@@ -458,6 +478,7 @@ function shopHTML(){
   payInit(); const now=Date.now(), free=S.shopT<=now, vd=vipActive(), vleft=vd?Math.ceil((S.vip.end-now)/864e5):0;
   let h='<h2 onclick="shopTitleTap()">Дэлгүүр</h2>'+(S.testPay?'<div class="card sm" style="color:#ff9a7a">ТЕСТ горим асаалттай: худалдан авалт үнэгүй өгнө.</div>':'')+
    '<div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div><div class="sm">'+f(S.res.gold)+' 🪙</div></div>';
+  h+='<div class="card sp"><div class="tagx">Шинэ</div><div class="row"><div><h3>🎁 Скин хайрцаг</h3><div class="sm">Монгол хээтэй скин. Домогт нь алтан гэрэлтэнэ!</div></div><button class="btn" onclick="openM(\'box\')">Нээх</button></div></div>';
   h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('q_chest',44)+'<div><h3>Үнэгүй сав</h3><div class="sm">4 цаг тутам</div></div></div><button class="btn" '+(free?'':'disabled')+' onclick="shopFree()">'+(free?'Авах':Math.ceil((S.shopT-now)/60000)+' мин')+'</button></div></div>';
   if(!S.paid.starter) h+='<div class="card sp"><div class="tagx">Нэг удаа</div><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('q_chestopen',54)+'<div><h3>Эхлэлийн багц</h3><div class="sm">150 Алт · 3000 🪙 · 300 мах · 300 сүү · 200 ноос</div></div></div><button class="btn red" onclick="buyReal(\'starter\')">'+fmtMnt(STARTER.mnt)+'</button></div></div>';
   h+='<div class="card sp"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('ui_crown',50)+'<div><h3>Хааны тэтгэмж</h3><div class="sm">30 хоног: өдөр бүр 50 Алт, үйлдвэрлэл +10%</div>'+(vd?'<div class="sm" style="color:#9fe08a">Идэвхтэй · '+vleft+' хоног үлдсэн</div>':'')+'</div></div><button class="btn red" onclick="buyReal(\'month\')">'+fmtMnt(MONTH.mnt)+'</button></div>'+
@@ -478,20 +499,20 @@ function shopBadge(){ payInit(); return (S.shopT<=Date.now())?1:0; }
 
 // ================= НУУЦ ТОВЧОО: АЯН ДАЙН =================
 const CAMP=[
- {n:'Жалайр',ic:'f_arrow',who:'Мухулай',bio:'steppe',river:'Хэрлэн гол',hero:'mukhulai',st:'Хэрлэн голын Жалайрууд хүчтэй морьтон. Тэднийг ялж, найз болгоно.',en:'Мухулай Тэмүжинд үнэнч нөхөр болж нэгдлээ.'},
- {n:'Тайчууд',ic:'f_hawk',who:'Таргутай Хирилтуг',bio:'forest',river:'Онон гол',hero:'borchi',st:'Онон голын Тайчууд. Таргутай Хирилтуг Тэмүжинг барьж боолчилсон. Өшөөгөө ав.',en:'Тайчууд ялагдаж, Онон гол чинийх боллоо.'},
- {n:'Хатагин',ic:'f_sky',who:'Хатагийн тэргүүн',bio:'mountain',river:'Хэнтий уул',hero:'khukhchu',st:'Хэнтийн уулсын Хатагин аймаг. Хад чулуун цайзтай.',en:'Хатагин аймаг нэгдэж, уулын зам нээгдлээ.'},
- {n:'Салжиуд',ic:'f_altan',who:'Салжиудын хан',bio:'steppe',river:'Туул гол',hero:'belgutei',st:'Салжиуд аймаг. Дараа нь Жамухатай өрсөлдөх хүч болно.',en:'Салжиуд тангараг өргөж нэгдлээ.'},
- {n:'Хонгирад',ic:'f_kereid',who:'Дэй сэцэн',bio:'lake',river:'Буйр нуур',hero:'borte',st:'Бөртийн овог Хонгирад. Бөртийг хамгаалж холбоо тогтооно.',en:'Хонгирад овгийн хамт Бөртэ хатан танд нэгдлээ.'},
- {n:'Мэргид',ic:'f_wolf',who:'Тохтоа бэхи',bio:'forest',river:'Сэлэнгэ мөрөн',hero:'boorchu',st:'Мэргидүүд Бөртийг хулгайлсан! Сэлэнгийн эрэгт очиж Бөртийг ав.',en:'Бөртийг аварлаа! Мэргидүүд ялагдлаа.'},
- {n:'Татар',ic:'f_altan',who:'Мэгүжин Сэулт',bio:'lake',river:'Хөлөн Буйр',hero:'khasar',st:'Татарууд эцэг Есүхэйг хорлосон. Өшөөгөө аваарай.',en:'Татар ялагдлаа. Эцгийн өшөө авагдлаа.'},
- {n:'Урианхай',ic:'f_sky',who:'Урианхайн тэргүүн',bio:'mountain',river:'Бурхан Халдун',hero:'subeedei',st:'Бурхан Халдуны ойн Урианхай. Сүбээдэй, Жэлмэ нар эндээс гарсан.',en:'Урианхай нэгдэж, Сүбээдэй цэргийн нэг боллоо.'},
- {n:'Хэрэйд',ic:'f_kereid',who:'Ван хан Тоорил',bio:'steppe',river:'Тооль гол',hero:'ogodei',st:'Эцгийн андын аймаг Хэрэйд. Их аймаг, их цэрэгтэй.',en:'Хэрэйдийг нэгтгэлээ. Монгол улс томорлоо.'},
- {n:'Найман',ic:'f_altan',who:'Таян хан',bio:'mountain',river:'Алтайн нуруу',hero:'chagadai',st:'Хангайн баруун талын Найман улс. Таян хан бичигтэй, цэрэг олонтой.',en:'Найман ялагдаж Алтайн нуруу чинийх боллоо.'},
- {n:'Уйгур',ic:'f_sky',who:'Идуут',bio:'desert',river:'Турфан',hero:'jochi',st:'Уйгурууд. Бичиг үсэг, худалдааны мэргэд. Дайн шаардахгүй, гэхдээ хүчээ үзүүл.',en:'Уйгурууд бичиг үсгээ бидэнд заалаа.'},
- {n:'Тангуд',ic:'f_kereid',who:'Бурхан хаан',bio:'desert',river:'Шар мөрөн',hero:'zev',st:'Тангуд улс. Цайз олонтой, говийн өмнөд талд.',en:'Тангудын цайзууд нэгдлээ.'},
- {n:'Зүрчид',ic:'f_altan',who:'Алтан хаан',bio:'farm',river:'Улаанбаатар',hero:'tolui',st:'Өмнөд хилийн Алтан улс. Хүчирхэг хэрэм, ширхэг цэрэг.',en:'Алтан улсыг ялж их өлзий авлаа.'},
- {n:'Хорезм',ic:'f_hawk',who:'Шах Мухамед',bio:'desert',river:'Амударья',hero:'khubilai',st:'Баруун зүгийн Хорезм. Дэлхийн том улс. Энэ бол хамгийн хүнд тулаан.',en:'Хорезмыг ялж дэлхийн их ертөнц таных боллоо!'}
+ {n:'Жалайр',ic:'f_arrow',who:'Гүн Уа (Мухулайн эцэг)',req:'chinggis',bio:'steppe',river:'Хэрлэн гол',hero:'mukhulai',st:'Хэрлэн голын Жалайр овог. Боржигоны удамшлын албат байсан. 1197 оны орчим тэдний ахмад Гүн Уа хүү Мухулайг Тэмүжинд өгчээ.',en:'Мухулай Тэмүжинд үнэнч нөхөр болж нэгдлээ. Хожим тэр Дөрвөн хүлгийн нэг болно.'},
+ {n:'Тайчууд',ic:'f_hawk',who:'Таргутай Хирилтуг',req:'jelme',bio:'forest',river:'Онон гол',hero:'zev',st:'Онон голын Тайчууд. Таргутай Хирилтуг залуу Тэмүжинг барьж, дөнгө зүүсэн. Тэмүжин Сорган-Шираагийн тусламжтай оргосон.',en:'Тайчууд ялагдлаа (1200-1201 он). Тайчуудын талд байсан Бэсүд овгийн Зуркоодай (1201-1202 онд) Тэмүжинд зүтгэж, "Зэв" нэрийг авав.'},
+ {n:'Хатагин',ic:'f_sky',who:'Хатагийн тэргүүн',req:'borchi',bio:'mountain',river:'Хэнтий уул',hero:'khukhchu',st:'Хатагин аймаг 1200-1201 онд Тэмүжиний эсрэг эвсэлд оролцсон. (Яг нутаг нь тодорхойгүй тул тоглоомд Хэнтий орчим гэж үзүүлэв.)',en:'Хатагин аймаг ялагдлаа. Хөхчү бөө (Тэб Тэнгэр) таны нэгэн болов. Тэр 1206 онд Тэмүжинг Чингис хаан хэмээн өргөмжилсөн.'},
+ {n:'Салжиуд',ic:'f_altan',who:'Салжиудын тэргүүн',req:'khasar',bio:'steppe',river:'Хэрлэн, Онон орчим',hero:'belgutei',st:'Салжиуд аймаг 1201 онд Жамуха "Гурхан" болоход Тэмүжиний эсрэг эвсэлд нэгдсэн. (Яг нутаг нь тодорхойгүй.)',en:'Салжиуд ялагдлаа. Хагас дүү Бэлгүтэй дайны замд хамт болов.'},
+ {n:'Хонгирад',ic:'f_kereid',who:'Дэй сэцэн',req:'chinggis',bio:'lake',river:'Буйр нуур',hero:'borte',st:'Бөртийн овог Хонгирад. Тэмүжин 9 настайдаа Дэй сэцэний охин Бөртэд сүй тавьсан. Түүхэнд Хонгирад Монголын итгэлт хүргэний аймаг байв. Энд хүчээ үзүүлж нэгдэнэ.',en:'Хонгирад овгийн хамт Бөртэ хатан танд нэгдлээ.'},
+ {n:'Мэргид',ic:'f_wolf',who:'Тохтоа бэхи',req:'borchi',bio:'forest',river:'Сэлэнгэ мөрөн',hero:'boorchu',st:'Мэргидүүд Бөртийг хулгайлсан (1177 орчим). Есүхэй Мэргидээс Өэлүнг булаасных нь өшөө байв. Сэлэнгийн хавьд очиж Бөртийг ав.',en:'Бөртийг аварлаа! Мэргидүүд тарж, 1205 онд бүрмөсөн ялагдсан.'},
+ {n:'Татар',ic:'f_altan',who:'Мэгүжин Сэулт',req:'khasar',bio:'lake',river:'Буйр нуур',hero:'khasar',st:'Татарууд Есүхэйг найрын хоолонд хор хийж хөнөөсөн (1171). Тэмүжин 1196 онд Алтан улстай хамт, 1202 онд дангаараа Татарыг цохисон.',en:'Татар ялагдлаа. Эцгийн өшөө авагдлаа. Дүү Хасар Тэмүжинтэй хамт дайтсан.'},
+ {n:'Урианхай',ic:'f_sky',who:'Жарчуудай (Зэлмэгийн эцэг)',req:'jelme',bio:'mountain',river:'Бурхан Халдун',hero:'subeedei',st:'Бурхан Халдун уулын Урианхай. Жарчуудай хүү Зэлмэг Тэмүжинд өгсөн, дүү нь Сүбээдэй дараа нь нэгдсэн (уламжлалт мэдээгээр Урианхай).',en:'Урианхай нэгдэж, Сүбээдэй цэргийн нэг боллоо.'},
+ {n:'Хэрэйд',ic:'f_kereid',who:'Ван хан Тоорил',req:'chinggis',bio:'steppe',river:'Туул гол',hero:'ogodei',st:'Эцгийн андын аймаг Хэрэйд. Тоорил (Ван хан) эхэндээ холбоотон, дараа нь дайсан болсон. 1203 онд Тэмүжин Хэрэйдийг ялсан.',en:'Хэрэйдийг нэгтгэлээ (1203 он). Монгол улс томорлоо.'},
+ {n:'Найман',ic:'f_altan',who:'Таян хан',req:'zev',bio:'mountain',river:'Алтайн нуруу',hero:'chagadai',st:'Хангай, Алтайн хавийн Найман улс. Таян хан бичигтэй, олон цэрэгтэй. 1204 онд Чахирмаутын тулалдаан болсон.',en:'Найман ялагдлаа (1204 он). Тэдний бичээч Тата-Тонга Монголд Уйгур бичгийг нэвтрүүлсэн.'},
+ {n:'Уйгур',ic:'f_sky',who:'Барчуг Идуут',req:'jochi',bio:'desert',river:'Турфан',hero:'jochi',st:'Уйгурууд. Бичиг үсэг, худалдааны мэргэд. 1209 онд Идуут Барчуг сайн дураараа дагаар орсон тул энэ бүлэг жинхэнэ дайн биш, хүчний сорил юм.',en:'Уйгурууд бичиг үсгээ бидэнд заалаа.'},
+ {n:'Тангуд',ic:'f_kereid',who:'Тангудын бурхан хаан',req:'chinggis',bio:'desert',river:'Шар мөрөн',hero:'borchi',st:'Тангуд (Баруун Ся) улс. Чингис хаан 1205, 1207, 1209, 1226-1227 онд аян хийж, 1227 онд нас барсан. Нийслэл Шар мөрний хойд талд.',en:'Тангудын цайзууд нэгдлээ.'},
+ {n:'Зүрчид',ic:'f_altan',who:'Алтан хаан',req:'mukhulai',bio:'farm',river:'Жунду хот',hero:'tolui',st:'Алтан улс (Зүрчид, Жин). 1211 онд Чингис хаан довтолж, 1215 онд нийслэл Жундуг (одоогийн Бээжин орчим) эзэлсэн.',en:'Алтан улсын хойд нутгийг эзэллээ (Жин бүрмөсөн мөхсөн нь 1234 онд).'},
+ {n:'Хорезм',ic:'f_hawk',who:'Шах Мухамед',req:'subeedei',bio:'desert',river:'Амударья',hero:'khubilai',st:'Баруун зүгийн Хорезм. Дундад Азийн том улс. Энэ бол хамгийн хүнд тулаан. (Хубилай нояон: Дөрвөн нохойн нэг.)',en:'Хорезмыг ялав (1219-1221). Шах Мухамед Каспийн арал дээр нас барсан.'}
 ];
 const CSTEP=['Харуулын отог','Бэлчээрийн отог','Цайзын отог','Тэргүүний цэрэг'];
 function cpInit(){ if(!S.camp) S.camp={done:{},join:{}}; }
@@ -641,15 +662,15 @@ function fresh(){
     res:{meat:0, milk:0, wool:0, grain:0, wood:0, gold:50, alt:10, airag:0, aaruul:0, tos:0, esgii:0, buuz:0, hushuu:0, ovoo:0, naadamring:0, suvarga:0, t_cav:0, t_arc:0, t_spr:0}, zones:null, chopped:[], proc:{}, orders:[], ordT:0, lastSeason:null, relics:{}, equip:[], nd:{}, ndw:0,
     animals:{honi:3, yamaa:0, uher:0, aduu:0, temee:0},
     bld:{ger:1, hashaa:0, horgo:0, market:0, hureo:0, tarialan:0, airag:0, aaruul:0, tos:0, esgii:0, buuz:0},
-    pos:{}, sites:{}, upg:{}, farm:{stage:0,t:0},
+    pos:{}, sites:{}, upg:{}, farm:{stage:0,t:0}, dead:[], rev:0,
     pend:{meat:0,milk:0,wool:0,gold:0}, prof:{name:'Хаан',img:'',sp:'npc1'}, heroes:{}, won:0, met:false, last:Date.now(), daily:''
   };
 }
 function load(){
   try{
-    const r = localStorage.getItem(SAVE_KEY);
+    const r = acRead();
     if(r){
-      const o = JSON.parse(r), d = fresh();
+      const o = r, d = fresh();
       S = Object.assign(d, o);
       S.res = Object.assign(d.res, o.res); S.animals = Object.assign(fresh().animals, o.animals);
       S.bld = Object.assign(fresh().bld, o.bld);
@@ -659,11 +680,25 @@ function load(){
   }catch(e){}
   S = fresh();
 }
-function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ acHook(); acWrite(); }
 
 // ---------- тооцоо ----------
 const cap = () => 100 + 200 * S.bld.horgo;
 const herdMax = () => S.bld.hashaa>0 ? 10 + 10*S.bld.hashaa : 5;
+const POPCAP=[2,2,3,4,5];
+const popCap=()=>['ger','ger2','ger3','ger4'].reduce((a,k)=>a+((S.bld[k]>0&&!(S.sites&&S.sites[k]))?POPCAP[Math.min(POPCAP.length,S.bld[k])-1]:0),0)||2;
+const FPL=[1,2,4,6,8], farmPlots=()=>FPL[Math.min(FPL.length,Math.max(1,S.bld.tarialan))-1];
+const STALL=['honi','yamaa','uher','aduu','temee'];
+function killNpc(e){ if(ents.filter(x=>x.kind==='person').length<=1) return false; S.dead=S.dead||[]; S.dead.push(e.idx); ents.splice(ents.indexOf(e),1); refresh(); return true; }
+function zud(){ if(Math.random()>0.55) return; const pr=S.bld.hashaa>0?0.15:0.35; let lost=0; for(const k in S.animals){ const l=Math.floor(S.animals[k]*pr); S.animals[k]-=l; lost+=l; } let t='Зуд боллоо! '+lost+' мал хорогдлоо.';
+  if(Math.random()<(S.bld.ger>=3?0.15:0.35)){ const pp=ents.filter(x=>x.kind==='person'); if(pp.length>1){ const e=pp[pp.length-1], nm=NPCS[e.idx].n; if(killNpc(e)) t+=' '+nm+' даарч нас барлаа.'; } }
+  syncEnts(false); say(t); refresh(); }
+function lootAnimals(n,rp){ if(rp&&Math.random()>0.2) return ''; const got={}; const ks=Object.keys(ANIMALS); let ov=0, mt=0;
+  for(let q=0;q<n;q++){ const k=ks[Math.floor(Math.random()*Math.min(ks.length,2+n))];
+    if(herdCount()>=herdMax()){ ov++; const m=Math.round(ANIMALS[k].cost/4+6); mt+=m; S.res.meat=Math.min(cap(),S.res.meat+m); continue; }
+    S.animals[k]++; got[k]=(got[k]||0)+1; }
+  const t=Object.keys(got).map(k=>ANIMALS[k].n+' ×'+got[k]).join(', '); if(t) syncEnts(false);
+  return (t?'<div class="sm">🐑 Олз: '+t+' (ажилчид хөтлөн ирлээ)</div>':'')+(ov?'<div class="sm">Хашаа дүүрэн тул '+ov+' мал мах болов: +'+mt+' мах</div>':''); }
 const herdCount = () => Object.values(S.animals).reduce((a,b)=>a+b,0);
 const prodMul = () => 1 + 0.2 * (S.bld.ger - 1) + 0.04*(S.bld.ovoo||0) + 0.03*joinedN() + (vipActive()?0.1:0);
 const sellMult = () => S.bld.market>0 ? 1 + 0.25*(S.bld.market-1) : 0.7;
@@ -681,7 +716,8 @@ function upCost(k){ return Math.floor(BUILD[k].up * Math.pow(2, S.bld[k]-1)); }
 function heroPower(id){
   const h = S.heroes[id]; if(!h) return 0;
   const def = HEROES.find(x=>x.id===id);
-  return Math.floor(def.s * 50 * (1 + 0.25*(h-1)));
+  const st=(S.sk&&S.sk.e[id]!=null)?SKT[S.sk.e[id]].bn:0;
+  return Math.floor(def.s * 50 * (1 + 0.25*(h-1)) * (1+st));
 }
 function totalPower(){
   const list = Object.keys(S.heroes).map(heroPower).sort((a,b)=>b-a).slice(0, 3 + S.bld.ger);
@@ -756,9 +792,11 @@ function seasonTick(){
   S.lastSeason=si;
   const msgs=['Хавар ирлээ. Хурга ишиг төллөнө.','Зун ирлээ. Сүү арвин болно.','Намар ирлээ. Тариа, мах арвин.','Өвөл ирлээ! Мал бага өгнө, чоно олширно. Хашаа хэрэгтэй.'];
   say(msgs[si]);
+  if(si===3) zud();
   if(si===0&&herdCount()<herdMax()){ S.animals.honi++; syncEnts(false); say('Хавар ирлээ! Хурга төллөлөө 🐑'); }
 }
 function tick(secs){
+  if(S.dead&&S.dead.length){ S.rev=(S.rev||0)+secs; if(S.rev>600){ S.rev=0; const i=S.dead.shift(); say(NPCS[i].n+' гэр бүлд эргэн нэгдлээ'); syncEnts(false); } }
   const r = rate();
   for(const x in r){
     S.pend[x] = Math.min(150, S.pend[x] + r[x]*secs/60);
@@ -769,6 +807,8 @@ function tick(secs){
   prodTick(secs); ordTick(secs); seasonTick();
 }
 function offline(){
+  if(window._acTamper){ window._acTamper=0; acFlag('save'); }
+  if(Date.now()<S.last-120000){ acFlag('time'); S.last=Date.now(); return; }
   const secs = Math.min((Date.now()-S.last)/1000, 8*3600);
   if(secs>30){ tick(secs); say('Чамайг байхгүй байхад '+Math.floor(secs/60)+' минутын нөөц цугларлаа'); }
   S.last = Date.now();
@@ -876,7 +916,7 @@ function bdims(k,lvl){
   if(!b.spr) return {w:b.w,h:b.h,spr:null};
   const t=tierOf(lvl);
   const nm=(t>1&&SPR[b.spr+t])?b.spr+t:b.spr;
-  const w=k==='ger'?b.w*SPR[nm].iw/SPR[b.spr].iw:b.w*(nm===b.spr?1:1+0.1*(t-1));
+  const w=/^ger\d?$/.test(k)?b.w*SPR[nm].iw/SPR[b.spr].iw:b.w*(nm===b.spr?1:1+0.1*(t-1));
   return {w,h:w*SPR[nm].ih/SPR[nm].iw,spr:nm};
 }
 function brect(k){
@@ -903,6 +943,13 @@ function autoUnlock(){
   for(let c=0;c<ZC;c++) for(let r=0;r<ZR;r++){ if(!zoneOpen(c,r) && S.bld.ger>=zoneReq(c,r)){ S.zones[zk(c,r)]=1; n++; } }
   if(n) say('Шинэ газар нээгдлээ!');
 }
+const riverX=(i,y)=>i?WW*0.87+Math.sin(y/170+1.7)*22:WW*0.17+Math.sin(y/140)*26;
+function drawRiver(){
+  if(!L.river) return; const winter=seasonK()==='winter', now=performance.now()/1000; ctx.save(); ctx.lineJoin='round'; ctx.lineCap='round';
+  L.river.forEach(pts=>{ ctx.beginPath(); pts.forEach((q,i)=>i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y));
+    ctx.lineWidth=9; ctx.strokeStyle=winter?'#9fb8c8':'#2f78b8'; ctx.stroke(); ctx.lineWidth=6; ctx.strokeStyle=winter?'#d6e6ee':'#4c9ad8'; ctx.stroke();
+    if(!winter){ ctx.setLineDash([3,10]); ctx.lineDashOffset=-now*16; ctx.lineWidth=1.2; ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.stroke(); ctx.lineDashOffset=-now*11+5; ctx.lineWidth=0.8; ctx.strokeStyle='rgba(190,230,255,.6)'; ctx.stroke(); ctx.setLineDash([]); } });
+  ctx.restore(); }
 function layout(){
   WW=738; WH=1751;
   ZW=WW/ZC; ZH=WH/ZR;
@@ -930,6 +977,7 @@ function layout(){
     {x:Math.round(WW*0.1),y:Math.round(WH*0.62),w:pw*1.2,h:ph*1.2},{x:Math.round(WW*0.7),y:Math.round(WH*0.78),w:pw*1.2,h:ph*1.2},{x:Math.round(WW*0.4),y:Math.round(WH*0.93),w:pw,h:ph}];
   L.peaks=[{x:4,y:Math.round(WH*0.45),w:56,h:40},{x:WW-60,y:Math.round(WH*0.4),w:56,h:40},{x:Math.round(WW*0.38),y:Math.round(WH*0.1),w:56,h:40},{x:4,y:Math.round(WH*0.86),w:56,h:40},{x:WW-60,y:Math.round(WH*0.9),w:56,h:40},{x:WW-60,y:Math.round(WH*0.62),w:56,h:40}];
   const g=brect('ger'); const gx={x:g.x-20,y:g.y-20,w:g.w+40,h:g.h+80};
+  L.river=[0,1].map(i=>{ const pts=[]; for(let y=40;y<=WH-10;y+=24) pts.push({x:riverX(i,y),y}); return pts; });
   const r=rng(5); L.trees=[];
   const tw=SZ.tree, th=sprH('tree');
   const cz={x:ZW,y:2*ZH,w:ZW,h:ZH};
@@ -939,12 +987,13 @@ function layout(){
     for(const q of L.ponds) if(ovl(rc,q,2)) return;
     for(const q of L.peaks) if(ovl(rc,q,0)) return;
     if(ovl(rc,gx,0)) return;
+    for(let i=0;i<2;i++) if(Math.abs(x+tw/2-riverX(i,y+th))<11) return;
     for(const k of BKEYS){ if(S.pos[k] && ovl(rc,brect(k),1)) return; }
     L.trees.push({x:Math.round(x),y:Math.round(y)});
   };
   for(let y=46;y<WH-8;y+=13){ addTree(-9+r()*6,y+r()*4); addTree(-1+r()*7,y+6+r()*4); addTree(WW-9-r()*4,y+r()*4); addTree(WW-16+r()*6,y+6+r()*4); }
   for(let x=0;x<WW;x+=12){ addTree(x+r()*4,WH-18+r()*6); }
-  for(let c=0;c<70;c++){
+  for(let c=0;c<140;c++){
     const cx=r()*(WW-30)+6, cy=60+r()*(WH-90);
     if(cx>cz.x-8&&cx<cz.x+cz.w+8&&cy>cz.y-8&&cy<cz.y+cz.h+8) continue;
     const n=4+Math.floor(r()*4);
@@ -1026,15 +1075,17 @@ function shadow(cx,cy,w){ ctx.fillStyle='rgba(0,0,0,.22)'; ctx.beginPath(); ctx.
 function lab(x,y,t){ ctx.font='bold 5px monospace'; ctx.textAlign='center'; ctx.fillStyle='#000'; ctx.fillText(t,x+0.4,y+0.4); ctx.fillStyle='#ffe9a0'; ctx.fillText(t,x,y); }
 function bar(x,y,w,p){ R(x-0.5,y-0.5,w+1,3,'#000'); R(x,y,w,2,'#3a2a1a'); R(x,y,w*clamp(p,0,1),2,'#7fc24a'); }
 
-function drawFarm(p,stage){
-  R(p.x,p.y,28,20,'#7a5230'); R(p.x,p.y,28,1,'#9a6a3c'); R(p.x,p.y+19,28,1,'#5e3e22');
-  for(let r=0;r<4;r++){
-    const ry=p.y+3+r*5; R(p.x+1,ry+3,26,1,'#5e3e22');
-    for(let c=0;c<6;c++){
-      const cx=p.x+3+c*4;
+function drawFarm(p,stage,np){
+  np=np||farmPlots();
+  R(p.x,p.y,28,20,'#5e3e22'); R(p.x,p.y,28,1,'#9a6a3c'); R(p.x,p.y+19,28,1,'#4a2f18');
+  for(let i=0;i<8;i++){
+    const px=p.x+1+(i%4)*7, py=p.y+1+Math.floor(i/4)*9, on=i<np;
+    R(px,py,6,8,on?'#7a5230':'#8a7a50');
+    if(!on) continue;
+    for(let r=0;r<2;r++) for(let c=0;c<2;c++){ const cx=px+1+c*3, ry=py+1+r*4;
+      R(cx-1<px?px:cx-1,ry+3,3,1,'#5e3e22');
       if(stage===1){ R(cx,ry+1,2,2,'#58b53c'); }
-      else if(stage===2){ R(cx,ry-1,2,4,'#e8c040'); R(cx,ry-2,2,1,'#f6dc70'); }
-    }
+      else if(stage===2){ R(cx,ry-1,2,4,'#e8c040'); R(cx,ry-2,2,1,'#f6dc70'); } }
   }
 }
 function drawPen(p){
@@ -1045,6 +1096,7 @@ function drawPen(p){
   R(p.x,p.y+d.h,d.w,1,rail); R(p.x,p.y,1,d.h,rail); R(p.x+d.w-1,p.y,1,d.h,rail);
   for(let x=p.x;x<=p.x+d.w;x+=8){ if(x>gx&&x<gx+gw) continue; R(x,p.y-2,1,4,post); R(x,p.y+d.h-2,1,4,post); }
   for(let y=p.y;y<=p.y+d.h;y+=8){ R(p.x,y,1,3,post); R(p.x+d.w-1,y,1,3,post); }
+  const dv='#8a5e2e'; R(p.x+Math.round(d.w/3),p.y+1,1,d.h-1,dv); R(p.x+Math.round(d.w*2/3),p.y+1,1,Math.round(d.h/2),dv); R(p.x+1,p.y+Math.round(d.h/2),Math.round(d.w*2/3),1,dv);
 }
 function drawBuilding(k){
   const r=brect(k), p=S.pos[k], d=bdims(k), site=S.sites[k];
@@ -1059,6 +1111,11 @@ function drawBuilding(k){
       hs.forEach((x,i)=>{ const hx=p.x+i*9.5, hy=p.y+d.h+1; shadow(hx+4.5,hy+sprH('horse')*0.82,8); spr('horse',hx,hy,9); ctx.fillStyle='#000'; ctx.fillRect(hx+2.7,hy-0.3,3.6,2.6); ctx.fillStyle=cols[x.s-1]; ctx.fillRect(hx+3,hy,3,2); });
     }
   }
+  if(/^ger\d?$/.test(k)&&!site&&seasonK()==='winter'){ const nw=performance.now()/1000; for(let i=0;i<5;i++){ const ph=(nw*0.3+i/5)%1, sx=p.x+d.w*0.5+Math.sin(ph*7+i)*1.6+ph*2, sy=p.y+d.h*0.06-ph*15, z=1+Math.round(ph*2.4); ctx.globalAlpha=Math.max(0,(1-ph)*0.9); R(Math.round(sx),Math.round(sy),z,z,'#9aa3b2'); } }
+  { const T=TR.find(x=>x.b===k); if(T&&!site){ const cnt=Math.floor(S.res[T.k]||0), n=Math.min(20,cnt); if(n>0){ const pw=Math.max(d.w,34), px=p.x+(d.w-pw)/2, py=p.y+d.h+2, ph=22; ctx.globalAlpha=1;
+      R(px,py,pw,ph,'#a3a95a'); const rail='#a8763a'; R(px,py,pw,1,rail); R(px,py+ph,pw,1,rail); R(px,py,1,ph,rail); R(px+pw-1,py,1,ph,rail); for(let x=px;x<=px+pw;x+=7){ R(x,py-1,1,3,'#6b4423'); R(x,py+ph-1,1,3,'#6b4423'); }
+      const now=performance.now()/1000, key0=trKey(T,0); for(let i=0;i<n;i++){ const col=i%5,row=Math.floor(i/5), f=Math.floor(now*1.6+i*0.7)%2, kk=trKey(T,f); const sx=px+3+col*((pw-9)/4), sy=py+2+row*5; if(SPR[kk]) spr(kk,Math.round(sx),Math.round(sy),6.5); }
+      if(cnt>20) { ctx.fillStyle='#fff'; ctx.font='bold 4px sans-serif'; ctx.textAlign='left'; ctx.fillText('×'+cnt,px+1,py+ph+5); } } } }
   ctx.globalAlpha=1;
   if(site){
     const w=d.w, h=d.h;
@@ -1161,14 +1218,14 @@ function drawEnt(e,t){
 }
 
 // ---- амьтан, хүн ----
-function animalZone(){
-  if(S.bld.hashaa>0){ const r=brect('hashaa'); return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
+function animalZone(k){
+  if(S.bld.hashaa>0){ const r=brect('hashaa'), i=Math.max(0,STALL.indexOf(k)), W3=(r.w-6)/3, H2=(r.h-6)/2; if(k) return {x:r.x+3+(i%3)*W3+1,y:r.y+3+Math.floor(i/3)*H2+1,w:W3-2,h:H2-2}; return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
   const g=brect('ger'); return {x:g.x-14,y:g.y+g.sh+8,w:g.w+28,h:26};
 }
 function syncEnts(mode){
   const z=animalZone();
   for(const k in ANIMALS){
-    const want=Math.min(S.animals[k],6);
+    const z=animalZone(k); const want=Math.min(S.animals[k],5);
     const have=ents.filter(e=>e.kind==='animal'&&e.type===k);
     while(have.length<want){
       const a={kind:'animal',type:k,x:z.x+Math.random()*Math.max(1,z.w-16),y:z.y+Math.random()*Math.max(1,z.h-14),tx:0,ty:0,dir:1,wait:Math.random()*2,moving:false,speed:4+Math.random()*3};
@@ -1176,18 +1233,20 @@ function syncEnts(mode){
     }
     while(have.length>want){ const a=have.pop(); ents.splice(ents.indexOf(a),1); }
   }
-  const wantP=Math.min(1+S.bld.ger,NPCS.length);
+  S.dead=S.dead||[];
+  const wantP=Math.max(1,Math.min(popCap()-S.dead.length,NPCS.length-S.dead.length));
   const ppl=ents.filter(e=>e.kind==='person');
+  ppl.filter(e=>S.dead.includes(e.idx)).forEach(e=>{ ents.splice(ents.indexOf(e),1); ppl.splice(ppl.indexOf(e),1); });
   const ds=doors();
   while(ppl.length<wantP){
-    const i=ppl.length;
+    let i=0; while(i<NPCS.length&&(S.dead.includes(i)||ppl.some(p=>p.idx===i))) i++; if(i>=NPCS.length) break;
     const e={kind:'person',idx:i,x:ds[0].x-2+i*3,y:ds[0].y+4,tx:0,ty:0,wait:Math.random()*2,moving:false,speed:10+Math.random()*3,dir:1,task:null,sel:false};
     e.tx=e.x; e.ty=e.y; ents.push(e); ppl.push(e);
   }
   while(ppl.length>wantP){ const e=ppl.pop(); ents.splice(ents.indexOf(e),1); }
   if(mode){
     ents.forEach(e=>{
-      if(e.kind==='animal'){ e.x=clamp(e.x,z.x,z.x+Math.max(1,z.w-14)); e.y=clamp(e.y,z.y,z.y+Math.max(1,z.h-12)); e.tx=e.x; e.ty=e.y; }
+      if(e.kind==='animal'){ const z=animalZone(e.type); e.x=clamp(e.x,z.x,z.x+Math.max(1,z.w-14)); e.y=clamp(e.y,z.y,z.y+Math.max(1,z.h-12)); e.tx=e.x; e.ty=e.y; }
       else if(mode==='all'){ e.x=ds[0].x-2+e.idx*3; e.y=ds[0].y+4; e.tx=e.x; e.ty=e.y; e.task=null; e.sel=false; }
     });
     if(mode==='all'){ sel=null; hideBar(); }
@@ -1233,7 +1292,7 @@ function workStep(e,dt){
     else if(fm.stage===2){
       t.prog=t.t/2.5;
       if(t.t>=2.5){
-        const gain=Math.round(12*S.bld.tarialan*(seasonK()==='autumn'?1.5:1)); S.res.grain=Math.min(cap(),S.res.grain+gain); fm.stage=0; fm.t=0;
+        const gain=Math.round(10*farmPlots()*(seasonK()==='autumn'?1.5:1)); S.res.grain=Math.min(cap(),S.res.grain+gain); fm.stage=0; fm.t=0;
         const r=brect('tarialan'); addFloat(r.x+14,r.y,'+'+gain+' тариа','#f6dc70'); endTask(e);
       }
     } else { say('Тариа ургаж байна...'); endTask(e); }
@@ -1262,19 +1321,20 @@ function updPerson(e,dt){
   if(moveTo(e,dt)){ e.wait=1+Math.random()*3; const w=wpPick(e); e.tx=w.x; e.ty=w.y; }
 }
 let ftimer=0, howlT=0;
-let raid=null, raidT=0, raidNext=30;
+let raid=null, raidT=0, raidNext=30, gdT=0;
 function raidStart(){
-  const wolves=ents.filter(e=>e.kind==='wild'&&e.type==='wolf');
+  const kinds=['wolf']; if(S.bld.ger>=2) kinds.push('lynx'); if(S.bld.ger>=3) kinds.push('bear'); const kind=kinds[Math.floor(Math.random()*kinds.length)], KN={wolf:'Чоно',lynx:'Шилүүс',bear:'Баавгай'}[kind];
+  const wolves=ents.filter(e=>e.kind==='wild'&&e.type===kind);
   const an=ents.filter(e=>e.kind==='animal');
   if(!wolves.length||!an.length||herdCount()<2) return;
   const w=wolves[Math.floor(Math.random()*wolves.length)], t=an[Math.floor(Math.random()*an.length)];
   const a=Math.random()*6.283; w.x=t.x+Math.cos(a)*48; w.y=t.y+Math.sin(a)*40; w.raid=true; w.speed=13; w.hp=100;
-  const np=1+(herdCount()>=6&&Math.random()<0.7?1:0)+(herdCount()>=15&&Math.random()<0.6?1:0);
+  const np=kind==='wolf'?1+(herdCount()>=6&&Math.random()<0.7?1:0)+(herdCount()>=15&&Math.random()<0.6?1:0):1;
   const ex=wolves.filter(x=>x!==w).sort(()=>Math.random()-0.5).slice(0,np-1);
   ex.forEach((x,i)=>{ x.x=w.x+(i?-9:9); x.y=w.y+6; x.raid=true; x.speed=13; });
-  w.hp=100+55*ex.length;
-  raid={w,t,bite:0,react:0.6+Math.random()*1.2,age:0,ex,bt:3.2/(1+0.35*ex.length)};
-  say(ex.length?'Чонын сүрэг ('+(ex.length+1)+') малд дайрлаа!':'Чоно малд дайрлаа! Нохой, манаач хөөнө.'); addFloat(w.x,w.y-4,'Чоно!','#ff8a7a');
+  w.hp=(kind==='bear'?260:kind==='lynx'?90:100)+55*ex.length;
+  raid={w,t,kind,nm:KN,bite:0,react:0.6+Math.random()*1.2,age:0,ex,bt:(kind==='bear'?2.4:kind==='lynx'?2.8:3.2)/(1+0.35*ex.length)};
+  say(ex.length?'Чонын сүрэг ('+(ex.length+1)+') малд дайрлаа!':KN+' малд дайрлаа! Нохой, харуул, анчин хөөнө.'); addFloat(w.x,w.y-4,KN+'!','#ff8a7a');
 }
 function raidFlee(msg,col){
   const w=raid.w; w.raid=false; w.hp=null; w.speed=14; w.tx=w.hx; w.ty=w.hy; w.wait=0;
@@ -1285,34 +1345,34 @@ function raidFlee(msg,col){
 function raidStep(dt){
   const r=raid, w=r.w; r.age+=dt; r.bl=(r.bl||0)-dt;
   let victim=null, vd=22; ents.forEach(p=>{ if(p.kind!=='person') return; const d=Math.hypot(p.x-w.x,p.y-w.y); if(d<vd){ vd=d; victim=p; } });
-  if(!ents.includes(r.t)){ const an=ents.filter(e=>e.kind==='animal'); if(!an.length&&!victim){ raidFlee('Чоно буцлаа.'); return; } if(an.length) r.t=an[0]; }
+  if(!ents.includes(r.t)){ const an=ents.filter(e=>e.kind==='animal'); if(!an.length&&!victim){ raidFlee((raid&&raid.nm||'Чоно')+' буцлаа.'); return; } if(an.length) r.t=an[0]; }
   const tgt=victim||r.t;
   w.tx=tgt.x; w.ty=tgt.y; moveTo(w,dt);
   (r.ex||[]).forEach((x,i)=>{ x.tx=w.x+(i?-8:8); x.ty=w.y+5; x.speed=14; moveTo(x,dt); });
   const dd=Math.hypot(w.x-tgt.x,w.y-tgt.y);
   r.react-=dt;
-  const defs=ents.filter(e=>e.kind==='wild'&&e.friend&&(e.type==='dog'||e.type==='guard'));
+  const defs=ents.filter(e=>e.kind==='wild'&&e.friend&&(e.type==='dog'||e.type==='guard'||e.type==='hunter'));
   defs.forEach(e=>{ if(r.react>0&&Math.hypot(e.x-w.x,e.y-w.y)>24&&!victim) return; if(e.task) e.task=null; e.def=true; e.speed=e.type==='guard'?27:32; e.tx=w.x; e.ty=w.y; e.wait=0; });
   let fighting=false;
-  defs.forEach(e=>{ if(e.def&&Math.hypot(e.x-w.x,e.y-w.y)<11){ fighting=true; w.hp-=(e.type==='guard'?70:45)*dt; } });
+  defs.forEach(e=>{ if(e.def&&Math.hypot(e.x-w.x,e.y-w.y)<11){ fighting=true; w.hp-=(e.type==='guard'?70:e.type==='hunter'?60:45)*dt; } });
   if(fighting&&r.bl<=0){ spawnBlood(w.x+4,w.y+3,5); r.bl=0.18; }
-  if(w.hp<=0){ raidFlee('Чоныг хөөлөө!','#8fe39a'); return; }
+  if(w.hp<=0){ raidFlee((r.nm||'Чоно')+'г хөөлөө!','#8fe39a'); return; }
   if(dd<4){
     if(victim){
-      victim.hp=(victim.hp==null?100:victim.hp)-24*dt;
+      victim.hp=(victim.hp==null?100:victim.hp)-(r.kind==='bear'?42:r.kind==='lynx'?30:24)*dt;
       if(r.bl<=0){ spawnBlood(victim.x+3,victim.y+5,5); r.bl=0.2; }
       if(!victim.say) victim.say={t:'Аймаар! Туслаарай!',ttl:2,delay:0};
-      if(victim.hp<=0){ victim.hp=15; victim.task=null; victim.sel=false; raidFlee(NPCS[victim.idx].n+' шархаллаа!','#ff8a7a'); return; }
+      if(victim.hp<=0){ const nm=NPCS[victim.idx].n; if(Math.random()<0.3&&killNpc(victim)){ raidFlee(nm+' '+(r.nm||'Чоно').toLowerCase()+'д алагдлаа 💀','#ff8a7a'); return; } victim.hp=15; victim.task=null; victim.sel=false; raidFlee(nm+' шархаллаа!','#ff8a7a'); return; }
     } else {
       r.bite+=dt; r.t.hp=Math.max(0,100*(1-r.bite/r.bt));
       if(r.bl<=0){ spawnBlood(r.t.x+4,r.t.y+3,4); r.bl=0.3; }
       if(r.bite>r.bt){
-        const ty=r.t.type; if(S.animals[ty]>0 && herdCount()>1){ spawnBlood(r.t.x+4,r.t.y+3,14); S.animals[ty]--; refresh(); raidFlee('Чоно нэг мал аваад явчихлаа!','#ff8a7a'); }
-        else raidFlee('Чоно буцлаа.');
+        const ty=r.t.type; if(S.animals[ty]>0 && herdCount()>1){ spawnBlood(r.t.x+4,r.t.y+3,14); S.animals[ty]--; refresh(); raidFlee((raid.nm||'Чоно')+' нэг мал аваад явчихлаа!','#ff8a7a'); }
+        else raidFlee((raid&&raid.nm||'Чоно')+' буцлаа.');
       }
     }
   }
-  if(r.age>40) raidFlee('Чоно буцлаа.');
+  if(r.age>40) raidFlee((raid&&raid.nm||'Чоно')+' буцлаа.');
 }
 const CHAT=['Өнөөдөр цаг агаар сайхан байна.','Малаа хариулъя.','Чонын дуу сонсогдлоо, сэрэмжтэй байя.','Сүү ээж, айраг боллоо.','Хаан аа, ажил байна уу?','Нар жаргахаас өмнө гэртээ харья.','Хашаагаа бэхжүүлэх хэрэгтэй.','Хурга төллөх цаг боллоо.','Өвөл болохоос өмнө мах бэлдэнэ.','Тэнгэр өршөөг!','Адуу сайхан тарган байна.','Овоон дээр цэнхэр хадаг уяя.'];
 const CHAT2=['Тийм ээ, зөв байна.','Хөөе, сайн байна уу!','Би ч бас тэгж бодсон.','Ажил сайн явж байна.','Хаанд хэлье.','Ёстой тийм!'];
@@ -1351,6 +1411,7 @@ function update(dt){
   fx.forEach(p=>{ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=45*dt; }); fx=fx.filter(p=>p.t<0.8);
   shots.forEach(s=>s.t+=dt*6); shots=shots.filter(s=>s.t<1);
   for(let i=huntQ.length-1;i>=0;i--){ huntQ[i].t-=dt; if(huntQ[i].t<=0){ const q=huntQ.splice(i,1)[0]; mkWild(q.type,q.hx,q.hy); } }
+  gdT=(gdT||0)+dt; if(gdT>8){ gdT=0; ensureGuards(); }
   raidTick(dt); raidT+=dt; if(!raid && raidT>raidNext) raidStart(); if(raid) raidStep(dt);
   ents.forEach(e=>{
     if(e.kind==='person') return updPerson(e,dt);
@@ -1368,7 +1429,7 @@ function update(dt){
       return;
     }
     if(e.wait>0){ e.wait-=dt; e.moving=false; return; }
-    if(moveTo(e,dt)){ e.wait=1+Math.random()*3; e.tx=z.x+Math.random()*Math.max(1,z.w-14); e.ty=z.y+Math.random()*Math.max(1,z.h-12); }
+    if(moveTo(e,dt)){ const zz=animalZone(e.type); e.wait=1+Math.random()*3; e.tx=zz.x+Math.random()*Math.max(1,zz.w-14); e.ty=zz.y+Math.random()*Math.max(1,zz.h-12); }
   });
   for(let i=floats.length-1;i>=0;i--){ floats[i].t+=dt; floats[i].y-=7*dt; if(floats[i].t>1.8) floats.splice(i,1); }
   ftimer+=dt;
@@ -1383,14 +1444,23 @@ function update(dt){
   if(S.farm.stage===2 && !update.ripe){ update.ripe=true; say('Тариа боловсорлоо!'); }
   if(S.farm.stage!==2) update.ripe=false;
 }
+function ensureGuards(){
+  const g=S.pos&&S.pos.ger; if(!g) return; const wantG=Math.min(5,1+Math.floor(S.bld.ger/2)), wantH=Math.min(4,1+Math.floor(S.bld.ger/3)), wantD=Math.min(4,2+Math.floor(S.bld.ger/4));
+  const have=t=>ents.filter(e=>e.kind==='wild'&&e.friend&&e.type===t).length;
+  const mk=(type,nm,dx,dy,rr)=>{ const hx=g.x+dx, hy=g.y+dy; ents.push({kind:'wild',friend:1,name:nm,type,x:hx,y:hy,tx:hx,ty:hy,hx,hy,r:rr,dir:1,wait:Math.random()*3,moving:false,speed:5}); };
+  let n=0; while(have('guard')<wantG&&n++<6) mk('guard','Харуул '+have('guard'),14+have('guard')*14,24+(have('guard')%2)*8,42);
+  while(have('hunter')<wantH&&n++<12) mk('hunter','Анчин '+have('hunter'),-30-have('hunter')*8,30,52);
+  while(have('dog')<wantD&&n++<18) mk('dog','Нохой',-14+have('dog')*14,8,18);
+}
 function initWild(){
   for(let i=ents.length-1;i>=0;i--) if(ents[i].kind==='wild') ents.splice(i,1);
   const r=rng(77);
-  [['wolf',12],['bear',7],['fox',10],['deer',10],['gazelle',10],['lynx',5],['marmot',6],['argali',6],['eagle',5]].forEach(([type,n])=>{
+  [['wolf',30],['bear',16],['fox',14],['deer',12],['gazelle',10],['lynx',12],['marmot',6],['argali',6],['eagle',5]].forEach(([type,n])=>{
     if(!(SPR[type]||WILDDIM[type])) return;
     for(let i=0;i<n;i++){
       let hx,hy,t=0;
-      do{ hx=20+r()*(WW-40); hy=70+r()*(WH-140); t++; } while(t<30 && (hx>ZW-30&&hx<2*ZW+30&&hy>2*ZH-30&&hy<3*ZH+30));
+      const pred=(type==='wolf'||type==='bear'||type==='lynx'), bx=(S.pos&&S.pos.ger?S.pos.ger.x:WW/2), by=(S.pos&&S.pos.ger?S.pos.ger.y:2.5*ZH);
+      do{ hx=20+r()*(WW-40); hy=70+r()*(WH-140); t++; } while(t<60 && ((hx>ZW-30&&hx<2*ZW+30&&hy>2*ZH-30&&hy<3*ZH+30)||(pred&&Math.hypot(hx-bx,hy-by)<(type==='bear'?260:190))));
       ents.push({kind:'wild',type,x:hx,y:hy,tx:hx,ty:hy,hx,hy,r:22,dir:1,wait:r()*3,moving:false,speed:4+r()*3});
     }
   });
@@ -1566,6 +1636,7 @@ function draw(t){
   ctx.drawImage(bgFor(),0,0,WW,WH);
   ctx.imageSmoothingEnabled=true;
   const vis=(x,y,w,h)=>x+w>cam.x-6&&x<cam.x+vw+6&&y+h>cam.y-6&&y<cam.y+vh+6;
+  drawRiver();
   L.ponds.forEach(q=>{ if(vis(q.x,q.y,q.w,q.h)) pondDraw(q); });
   if(S.pos.hashaa&&!(placing&&placing.move&&placing.k==='hashaa')){ if(S.sites.hashaa) ctx.globalAlpha=0.5; drawPen(S.pos.hashaa); ctx.globalAlpha=1; }
   const list=[], th=sprH('tree');
@@ -1737,6 +1808,8 @@ function modalContent(k){
   if(k&&k.startsWith('cmap:')) return cmapHTML(Number(k.slice(5)));
   if(k==='world') return worldHTML();
   if(k==='shop') return shopHTML();
+  if(k==='box') return boxHTML();
+    if(k==='rbox') return rboxHTML();
   if(k==='barilga') return barilgaHTML();
   if(k==='mal'){
     let h='<h2>Мал</h2>'+bCard('hashaa')+'<div class="card sm">Хашаанд '+herdCount()+'/'+herdMax()+' мал багтана.</div>';
@@ -1757,7 +1830,7 @@ function modalContent(k){
     h+='<div class="card"><h3>Миний баатрууд ('+owned.length+'/'+HEROES.length+')</h3><div class="sm">Хамгийн хүчтэй '+heroSlots()+' баатар тулалдаанд оролцоно</div>';
     if(!owned.length) h+='<div class="sm" style="margin-top:8px">Одоохондоо баатар алга. Дээрээс дуудаарай.</div>';
     h+='</div>'+relicsHTML()+'<div class="card">'+'<h3>Баатруудын жагсаалт</h3>';
-    h+=owned.map(x=>'<div class="hero" style="display:flex;gap:8px;align-items:center">'+hpi(x.id,44)+'<div style="flex:1"><span class="s'+x.s+'">'+x.n+'</span> <span class="stars">'+stars(x.s)+'</span></div><div class="sm">Түвшин '+S.heroes[x.id]+' · Хүч '+heroPower(x.id)+'</div></div>').join('')+'</div>';
+    h+=owned.map(x=>'<div class="hero" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+hpi(x.id,44)+'<div style="flex:1"><span class="s'+x.s+'">'+x.n+'</span> <span class="stars">'+stars(x.s)+'</span></div><div class="sm">Түвшин '+S.heroes[x.id]+' · Хүч '+heroPower(x.id)+'</div><button class="btn" style="padding:3px 8px;font-size:11px" onclick="heroInfo(\''+x.id+'\')">ℹ Мэдээлэл</button></div><div class="epi" style="text-align:left;flex-basis:100%;margin:0">'+(HEPI[x.id]||'')+'</div>'+skillOf(x.id)).join('')+'<button class="btn" style="margin-top:8px" onclick="openM(\'box\')">🎁 Скин хайрцаг</button></div>';
     h+='<div class="card"><h3>Цуглуулга</h3><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px">'+HEROES.map(x=>'<div style="text-align:center">'+(S.heroes[x.id]?hpi(x.id,50):'<span style="filter:grayscale(1) brightness(.4);display:inline-block">'+hpi(x.id,50)+'</span>')+'<div style="font-size:9px">'+(S.heroes[x.id]?x.n:'???')+'</div></div>').join('')+'</div></div>';
     return h;
   }
@@ -1777,6 +1850,8 @@ function modalContent(k){
     });
     return h;
   }
+  if(k==='fam'){ const al=ents.filter(x=>x.kind==='person').map(x=>x.idx), dd=S.dead||[];
+    return '<h2>Гэр бүл '+al.length+'/'+popCap()+'</h2><div class="sm" style="margin-bottom:8px">Хүн бүгд гэрт амьдарна. Нэг гэр: 1-2 түвшин 2, 3-р 3, 4-р 4, 5-р 5 хүн. Олон гэр барьж болно.</div>'+al.map(i=>'<div class="card"><b>'+NPCS[i].n+'</b> · '+NPCS[i].role+'</div>').join('')+dd.map(i=>'<div class="card" style="opacity:.6">💀 '+NPCS[i].n+' · нас барсан (удахгүй шинэ хүн ирнэ)</div>').join('')+'<div class="card sm">Чоно, зуд хүн малыг хорогдуулдаг. Хашаа, өндөр түвшний гэр хамгаална.</div>'; }
   if(k==='npc'){
     const n=NPCS[npcIdx];
     return '<h2>'+n.n+'</h2><div class="sm" style="margin-bottom:8px">'+n.role+'</div><div class="card">'+npcText(npcIdx)+'</div>'+
@@ -1809,9 +1884,9 @@ function hideBar(){ $('bar').style.display='none'; }
 // ---------- барилга тавих ----------
 const snap = v => Math.round(v/2)*2;
 let bTab='life';
-const BTABS=[['life','ui_tab_house',['ger','hashaa','horgo','market','tarialan']],['fac','ui_tab_factory',['airag','aaruul','tos','esgii','buuz']],['army','ui_tab_swords',['hureo','stable','range','yard','naadamring']],['stat','ui_tab_statue',['hushuu','ovoo','suvarga']]];
-const BREQ={ger:1,hashaa:1,horgo:1,tarialan:1,market:2,hureo:2,airag:2,aaruul:2,tos:3,esgii:3,buuz:4,naadamring:3,stable:2,range:3,yard:2,ovoo:3,suvarga:4,hushuu:5};
-const BRAR={ger:'green',hashaa:'green',horgo:'green',tarialan:'green',market:'blue',airag:'blue',aaruul:'blue',tos:'blue',esgii:'blue',buuz:'purple',hureo:'purple',naadamring:'purple',stable:'purple',range:'purple',yard:'purple',ovoo:'purple',suvarga:'blue',hushuu:'gold'};
+const BTABS=[['life','ui_tab_house',['ger','ger2','ger3','ger4','hashaa','horgo','market','tarialan']],['fac','ui_tab_factory',['airag','aaruul','tos','esgii','buuz']],['army','ui_tab_swords',['hureo','stable','range','yard','naadamring']],['stat','ui_tab_statue',['hushuu','ovoo','suvarga']]];
+const BREQ={ger:1,ger2:2,ger3:3,ger4:4,hashaa:1,horgo:1,tarialan:1,market:2,hureo:2,airag:2,aaruul:2,tos:3,esgii:3,buuz:4,naadamring:3,stable:2,range:3,yard:2,ovoo:3,suvarga:4,hushuu:5};
+const BRAR={ger:'green',ger2:'green',ger3:'green',ger4:'green',hashaa:'green',horgo:'green',tarialan:'green',market:'blue',airag:'blue',aaruul:'blue',tos:'blue',esgii:'blue',buuz:'purple',hureo:'purple',naadamring:'purple',stable:'purple',range:'purple',yard:'purple',ovoo:'purple',suvarga:'blue',hushuu:'gold'};
 function setBTab(t){ bTab=t; fillM(); }
 function bcard(k){
   const d=BUILD[k], lvl=S.bld[k]||0, site=S.sites[k], req=BREQ[k]||1, locked=!lvl&&!site&&S.bld.ger<req;
@@ -1974,7 +2049,24 @@ cv.addEventListener('pointercancel',ptrUp);
 cv.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(Z*(e.deltaY<0?1.12:0.89),e.clientX,e.clientY); },{passive:false});
 
 // ---------- үйлдэл ----------
-function daily(){ if(S.daily===new Date().toDateString()){ say('Өнөөдрийн бэлэг авсан. Маргааш ирээрэй.'); return; } S.res.gold+=100; S.daily=new Date().toDateString(); say('+100 төгрөг авлаа'); refresh(); }
+function daily(){ evoShow(0); }
+function passAdd(n){ if(!S.pass) S.pass={p:0,c:0}; S.pass.p+=n; }
+const PASSN=20, PASSP=50;
+function passRew(i){ const n=i+1; if(n===PASSN) return {alt:100,relic:4,t:'100 Алт + ★★★★ дурсгал'}; if(n%5===0) return {alt:10+n,t:(10+n)+' Алт'}; if(n%2===0) return {gold:150*n,t:(150*n)+' төгрөг'}; return {meat:120*n,t:(120*n)+' мах'}; }
+const LOGR=[{gold:200,t:'200 төгрөг'},{meat:400,t:'400 мах'},{alt:20,t:'20 Алт'},{gold:600,t:'600 төгрөг'},{alt:30,t:'30 Алт'},{gold:1200,t:'1200 төгрөг'},{alt:100,relic:3,t:'100 Алт + ★★★ дурсгал'}];
+function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s>=r.relic); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' дурсгал олдлоо!'); } }
+function logDay(){ const d=Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5); return d; }
+function logState(){ if(!S.login) S.login={d:-9,n:0}; const t=logDay(), L=S.login; const claimed=L.d===t; const next=claimed?L.n:(L.d===t-1?L.n:0); return {t,claimed,idx:claimed?(L.n+6)%7:next%7}; }
+function logClaim(){ const st=logState(); if(st.claimed){ say('Өнөөдрийн бэлэг авсан'); return; } givR(LOGR[st.idx]); S.login={d:st.t,n:st.idx+1}; S.daily=new Date().toDateString(); passAdd(20); say('Бэлэг авлаа: '+LOGR[st.idx].t); refresh(); evoShow(); }
+function passPrem(i){ const n=i+1; if(n===PASSN) return {alt:200,relic:5,t:'200 Алт + ★★★★★ дурсгал'}; if(n%5===0) return {alt:40+n*2,relic:3,t:(40+n*2)+' Алт + ★★★ дурсгал'}; if(n%2===0) return {gold:400*n,t:(400*n)+' төгрөг'}; return {alt:10,t:'10 Алт'}; }
+function passClaim(){ if(!S.pass) S.pass={p:0,c:0}; const P=S.pass; let n=0; if(P.vip){ P.vc=P.vc||0; while(P.vc<PASSN&&P.p>=(P.vc+1)*PASSP){ givR(passPrem(P.vc)); P.vc++; n++; } } while(P.c<PASSN&&P.p>=(P.c+1)*PASSP){ givR(passRew(P.c)); P.c++; n++; } say(n?n+' шагнал авлаа':'Авах шагнал алга'); refresh(); evoShow(1); }
+function evoShow(tab){ let o=document.getElementById('evov'); if(o) o.remove(); o=document.createElement('div'); o.id='hbio'; o.onclick=e=>{ if(e.target===o) o.remove(); }; const st=logState(); if(!S.pass) S.pass={p:0,c:0}; const P=S.pass; let body;
+  const tabs='<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn'+(tab?'':' red')+'" style="flex:1" onclick="evoShow(0)">7 хоног</button><button class="btn'+(tab?' red':'')+'" style="flex:1" onclick="evoShow(1)">Пасс</button></div>';
+  if(!tab){ body='<div class="hbn" style="font-size:18px">7 хоногийн шагнал</div><div class="sm" style="text-align:center">Өдөр бүр орвол шагнал өснө. Нэг өдөр алгассан бол эхнээс эхэлнэ.</div><div class="evg">'+LOGR.map((r,i)=>{ const done=st.claimed?i<=st.idx:i<st.idx, cur=!st.claimed&&i===st.idx; return '<div class="evd'+(done?' dn':'')+(cur?' cu':'')+'"><b>'+(i+1)+'-р өдөр</b><span>'+r.t+'</span>'+(done?'<i>✓</i>':'')+'</div>'; }).join('')+'</div><button class="btn" style="margin-top:10px;width:100%" '+(st.claimed?'disabled':'')+' onclick="logClaim()">'+(st.claimed?'Өнөөдөр авсан ✓':'Бэлэг авах')+'</button>'; }
+  else { const can=Math.min(PASSN,Math.floor(P.p/PASSP)), cl=P.vip?Math.min(P.c,P.vc||0):P.c; body='<div class="hbn" style="font-size:18px">Пасс · '+P.c+'/'+PASSN+'</div><div class="sm" style="text-align:center">Ялалт +10, өдрийн бэлэг +20, хайрцаг нээх +5 оноо. '+PASSP+' оноо бүрт шагнал.</div><div class="bar" style="height:10px;margin:8px 0"><i style="width:'+Math.min(100,(P.p%PASSP)/PASSP*100)+'%;background:#ffd24a"></i></div><div class="sm" style="text-align:center">Оноо: '+P.p+(P.c<PASSN?' · дараагийн шагнал '+((P.c+1)*PASSP)+' онооны үед':'')+'</div><div class="hbr" style="text-align:center">'+(P.vip?'<b style="color:#9fe08a">✦ Хүндэт пасс идэвхтэй</b>':'<button class="btn red" style="width:100%" onclick="buyReal(\'passvip\')">✦ Хүндэт пасс · '+fmtMnt(PASSV.mnt)+'</button><div class="sm" style="margin-top:3px">Үнэгүй шагналын дээр 🔒 нэмэлт шагнал нээгдэнэ</div>')+'</div><div class="pgl">'+Array.from({length:PASSN},(_,i)=>{ const r=passRew(i), dn=i<P.c, rd=!dn&&P.p>=(i+1)*PASSP; const q=passPrem(i), vd=(P.vc||0)>i, lk=!P.vip; return '<div class="pgi'+(dn?' dn':'')+(rd?' rd':'')+'"><b>'+(i+1)+'</b><span>'+r.t+'</span>'+(dn?'<i>✓</i>':'')+'<span class="pgx'+(lk?' lk':'')+(vd?' dn':'')+'">'+(lk?'🔒 ':'')+q.t+(vd?' ✓':'')+'</span></div>'; }).join('')+'</div><button class="btn" style="margin-top:10px;width:100%" '+(can>cl?'':'disabled')+' onclick="passClaim()">Бүгдийг авах</button>'; }
+  o.innerHTML='<div class="hbc">'+tabs+body+'<button class="btn" style="margin-top:8px;width:100%" onclick="document.getElementById(\'hbio\').remove()">Хаах</button></div>'; document.body.appendChild(o); o.id='hbio'; }
+(function(){ const st=document.createElement('style'); st.textContent='.evg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.evd{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:6px 3px;text-align:center;font-size:11px;display:flex;flex-direction:column;gap:3px;min-height:58px;justify-content:center}.evd b{color:#ffd770;font-size:10px}.evd.cu{border-color:#ffd24a;box-shadow:0 0 10px #ffd24a;background:#4a3414}.evd.dn{opacity:.55}.evd i,.pgi i{position:absolute;top:1px;right:4px;color:#9fe08a;font-style:normal;font-size:14px}.evd:nth-child(7){grid-column:span 2}.pgl{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px;max-height:46vh;overflow:auto}.pgi{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:4px 2px;text-align:center;font-size:10px;display:flex;flex-direction:column;gap:2px;min-height:48px;justify-content:center}.pgi b{color:#ffd770}.pgi.rd{border-color:#ffd24a;box-shadow:0 0 8px #ffd24a}.pgi.dn{opacity:.5}.pgx{margin-top:3px;padding-top:3px;border-top:1px dashed #8a6a2b;color:#ffd24a}.pgx.lk{color:#9a8a6a}.pgx.dn{opacity:.6}'; document.head.appendChild(st); })();
+
 const UPQ=()=>1+(S.bld.ger>=3?1:0)+(S.bld.ger>=5?1:0);
 const upNeed=k=>Math.round(20*Math.pow(2.2,S.bld[k]-1));
 function fmtT(s){ s=Math.max(0,Math.ceil(s)); if(s>=3600) return Math.floor(s/3600)+'ц '+Math.floor(s%3600/60)+'м'; return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
@@ -2052,7 +2144,7 @@ function bldHTML(k){
   else if(k==='hashaa') extra='<button class="btn" onclick="openM(\'mal\')">Мал</button>';
   else if(k==='hureo') extra='<button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button><button class="btn" onclick="openM(\'dain\')">Дайн</button><button class="btn" onclick="openM(\'baatar\')">Баатар</button>';
   else if(k==='naadamring') extra='<button class="btn" onclick="openM(\'naadam\')">Наадам</button>';
-  else if(k==='ger') extra='<button class="btn" onclick="openM(\'barilga\')">Барилга</button>';
+  else if(k==='ger'||/^ger\d$/.test(k)) extra='<button class="btn" onclick="openM(\'barilga\')">Барилга</button><button class="btn" onclick="openM(\'fam\')">👪 Гэр бүл</button>';
   { const T=TR.find(x=>x.b===k); if(T) extra+='<div class="sm" style="width:100%">'+iconHTML(T.k,22)+' '+T.n+': <b>'+f(S.res[T.k]||0)+'</b> · Хүч '+f(trPow(T))+'<br>Бөмбөлөг дээр дарж цэргээ ав. Түвшин ахихад хүчтэй, шинэ дүртэй болно.</div>'; }
   return '<h2>'+d.n+' · '+S.bld[k]+'-р түвшин</h2>'+upCard(k)+'<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" onclick="startMove(\''+k+'\')">🔀 Байрлал зөөх</button>'+extra+'</div></div>';
 }
@@ -2070,14 +2162,31 @@ function startMove(k){
   closeM(); deselect(); const p=S.pos[k]; placing={k,x:p.x,y:p.y,move:true};
   showBar(BUILD[k].n+': шинэ газраа дарна уу',[['✔ Тавих','confirmPlace()'],['✖ Болих','cancelPlace()','red']]);
 }
+function relWorn(id){ relMig(); let n=0; Object.keys(S.heq).forEach(h=>{ if(S.heroes[h]) n+=S.heq[h].filter(x=>x===id).length; }); return n; }
 function relicsHTML(){
-  const own=RELICS.filter(r=>S.relics[r.id]);
-  let h='<div class="card"><h3>Дурсгал ('+S.equip.length+'/3 өмссөн)</h3><div class="sm">Тулалдааны сандуунаас унана.</div>';
+  relMig(); const own=RELICS.filter(r=>S.relics[r.id]);
+  let h='<div class="card"><h3>Дурсгал</h3><div class="sm">Баатар бүр 3 дурсгал өмсөнө. Баатрын мэдээлэл дээр дарж өмсүүлнэ.</div>';
   if(!own.length) h+='<div class="sm" style="margin-top:6px">Одоохондоо дурсгал алга.</div>';
-  own.forEach(r=>{ const on=S.equip.includes(r.id); h+='<div class="row" style="margin-top:6px"><div>'+ico(r.ic,40)+' <b>'+r.n+'</b> <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div><button class="btn'+(on?' red':'')+'" onclick="toggleRelic(\''+r.id+'\')">'+(on?'Тайлах':'Өмсөх')+'</button></div>'; });
-  return h+'</div>';
+  own.forEach(r=>{ const w=relWorn(r.id); h+='<div class="row" style="margin-top:6px"><div>'+ico(r.ic,40)+' <b>'+r.n+'</b> ×'+S.relics[r.id]+' <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'% · өмссөн '+w+'</div></div></div>'; });
+  return h+'<button class="btn" style="margin-top:8px" onclick="openM(\'rbox\')">🏺 Дурсгалын хайрцаг</button></div>';
 }
-function toggleRelic(id){ const i=S.equip.indexOf(id); if(i>=0) S.equip.splice(i,1); else { if(S.equip.length>=3){ say('3 дурсгал л өмсөнө'); return; } S.equip.push(id); } refresh(); }
+const RBOXC=300, RW={1:40,2:30,3:20,4:8,5:2};
+function relPick(){ let r=Math.random()*100, st=1; for(let q=1;q<=5;q++){ if(r<RW[q]){ st=q; break; } r-=RW[q]; } const pool=RELICS.filter(x=>x.s===st); return pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; }
+function relBoxOpen(n){ const cost=n===10?RBOXC*9:RBOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна.'); return; } S.res.alt-=cost; const res=[]; for(let i=0;i<n;i++){ const r=relPick(); S.relics[r.id]=(S.relics[r.id]||0)+1; res.push(r); } passAdd(5*n); refresh();
+  const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Дурсгал нээгдэж байна...</div></div>'; document.body.appendChild(o);
+  setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tier(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tier(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1500); }
+function rboxHTML(){ let h='<h2>Дурсгалын хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div></div><div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<RBOXC?'disabled':'')+' onclick="relBoxOpen(1)">1 удаа · '+RBOXC+' Алт</button><button class="btn" '+(S.res.alt<RBOXC*9?'disabled':'')+' onclick="relBoxOpen(10)">10 удаа · '+(RBOXC*9)+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div><div class="card sm">★ 40% · ★★ 30% · ★★★ 20% · ★★★★ 8% · ★★★★★ 2%<br>Нэг дурсгал олон удаа унавал өөр өөр баатарт өмсүүлж болно.</div>';
+  return h+relicsHTML(); }
+function heroInfo(id,pick){ const H=HEROES.find(x=>x.id===id); if(!H||!S.heroes[id]) return; relMig(); const L=S.heq[id]||(S.heq[id]=[]); let o=document.getElementById('hinf'); if(o) o.remove(); o=document.createElement('div'); o.id='hbio'; o.onclick=e=>{ if(e.target===o){ o.remove(); fillM(); } };
+  let body='';
+  if(pick){ const av=RELICS.filter(r=>(S.relics[r.id]||0)-relWorn(r.id)>0).sort((a,b)=>b.s-a.s);
+    body='<div class="hbn" style="font-size:17px">Дурсгал сонгох</div>'+(av.length?av.map(r=>'<div class="row" style="margin-top:6px"><div>'+ico(r.ic,36)+' <b>'+r.n+'</b> <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div><button class="btn" onclick="relEq(\''+id+'\',\''+r.id+'\')">Өмсөх</button></div>').join(''):'<div class="sm" style="margin-top:8px">Чөлөөт дурсгал алга. Хайрцгаас аваарай.</div>')+'<button class="btn" style="margin-top:10px" onclick="heroInfo(\''+id+'\')">Буцах</button>'; }
+  else { const sk=(S.sk&&S.sk.e[id]!=null)?SKN[S.sk.e[id]][0]+' ('+SKT[S.sk.e[id]].n+')':'Скин байхгүй', rm=relicMul(id);
+    body='<div style="text-align:center"><span style="filter:'+skCss(id)+'">'+hpi(id,84)+'</span></div><div class="hbn">'+H.n+'</div><div class="epi">'+(HEPI[id]||'')+'</div><div class="row"><div class="sm">Түвшин <b>'+S.heroes[id]+'</b> · <span class="stars">'+stars(H.s)+'</span></div><div class="sm">Хүч <b>'+heroPower(id)+'</b></div></div><div class="sm" style="margin-top:4px">Төрөл: '+TNAME[htype(id)]+' · Скин: '+sk+'</div><div class="sm">Дурсгалын бонус: цохилт +'+Math.round((rm.a-1-gearMul().a)*100)+'% · бие +'+Math.round((rm.h-1-gearMul().h)*100)+'%</div>'+skillOf(id)+'<div class="hbn" style="font-size:15px;margin-top:10px">Дурсгал ('+L.length+'/3)</div><div style="display:flex;gap:8px;justify-content:center;margin-top:6px">'+[0,1,2].map(q=>{ const r=L[q]&&RELICS.find(x=>x.id===L[q]); return r?'<div class="rslot on" onclick="relUn(\''+id+'\','+q+')">'+ico(r.ic,44)+'<div class="sm" style="font-size:10px">'+r.n+'</div></div>':'<div class="rslot" onclick="'+(L.length<3?'heroInfo(\''+id+'\',1)':'')+'">+</div>'; }).join('')+'</div><div class="sm" style="text-align:center;margin-top:4px">Өмссөнийг дарвал тайлна</div><div class="row" style="margin-top:12px"><button class="btn" onclick="heroBio(\''+id+'\')">📜 Түүх</button><button class="btn" onclick="document.getElementById(\'hbio\').remove();fillM()">Хаах</button></div>'; }
+  o.innerHTML='<div class="hbc">'+body+'</div>'; document.body.appendChild(o); }
+function relEq(h,r){ const L=S.heq[h]||(S.heq[h]=[]); if(L.length>=3||(S.relics[r]||0)-relWorn(r)<=0) return; L.push(r); heroInfo(h); }
+function relUn(h,q){ S.heq[h].splice(q,1); heroInfo(h); }
+(function(){ const st=document.createElement('style'); st.textContent='.rslot{width:62px;height:70px;border:2px dashed #8a6a2b;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:26px;color:#c9972b;background:#2b1d12}.rslot.on{border:2px solid #ffd24a;border-style:solid;font-size:12px}'; document.head.appendChild(st); })();
 // ---- Наадам ----
 const NAADAM=[
  {k:'raceS',n:'Хурдан морины уралдаан',d:'Богино зам · хурдан морь',e:'🐎',img:'nd_race',cd:180,g:60,st:'horseS',horse:1},
@@ -2118,6 +2227,71 @@ let BT=null;
 const BTV={archer:['u_footarcher','u_archer2'],cav:['u_lightcav','u_horsearcher2','u_flagcav'],heavy:['u_heavycav','u_cav2'],foot:['u_keshig','u_swordshield']};
 const BTE={archer:['bt_archerP'],cav:['bt_lanceR','bt_lanceW','bt_axehorse'],heavy:['bt_heavy'],foot:['bt_swordR','bt_spearW','bt_axeG']};
 const BTSPR_OLD={ p:{archer:'u_footarcher',cav:'u_lightcav',heavy:'u_heavycav',foot:'u_keshig'}, e:{archer:'bt_archerP',cav:'bt_lanceR',heavy:'bt_heavy',foot:'bt_swordR'} };
+
+
+// ===== УР ЧАДВАР, СКИН, ХАЙРЦАГ =====
+const HSK={chinggis:['rally','Тэнгэрийн мандат','Бүх цэрэгт цохилт +30% (8с), 10% эдгээнэ',14,1.2],mukhulai:['rally','Довтолгооны тушаал','Бүх цэрэгт цохилт +30% (8с)',15,0.8],subeedei:['charge','Бүслэлт','Хамгийн хүчтэй дайсан руу давхиж 5 дахин цохино',9,1],borchi:['guard','Боорчийн бамбай','Бүх цэргийн авах гэмтэл -50% (6с)',12,1],khubilai:['guard','Нояны сахилга','Бүх цэргийн авах гэмтэл -50% (6с)',12,1.1],jelme:['guard','Үнэнч хамгаалалт','Бүх цэргийн авах гэмтэл -50% (6с)',11,1],chagadai:['guard','Цагаадайн хууль','Бүх цэргийн авах гэмтэл -50% (6с)',12,0.9],khasar:['volley','Хасарын сум','3 дайсанд 3 дахин сум',8,1],zev:['volley','Зэвийн сум','3 дайсанд 3 дахин сум',7,1],tolui:['volley','Толуйн сум','3 дайсанд 3 дахин сум',8,1],jochi:['volley','Жочийн сум','3 дайсанд 3 дахин сум',8,1],harvaach:['volley','Залуу сум','3 дайсанд 3 дахин сум',9,0.8],boorchu:['charge','Борохулын довтолгоо','Хамгийн хүчтэй дайсан руу давхиж 5 дахин цохино',9,1],belgutei:['charge','Бэлгүтэйн цохилт','Хамгийн хүчтэй дайсан руу давхиж 5 дахин цохино',10,1],arav:['charge','Аравтын дайралт','Хамгийн хүчтэй дайсан руу давхиж 5 дахин цохино',10,0.8],ogodei:['heal','Өгөдэйн ивээл','Бүх цэргийг 18% эдгээнэ',13,1],khukhchu:['heal','Тэнгэрийн залбирал','Бүх цэргийг 18% эдгээнэ',12,1.1]};
+const SKT=[{k:'c',n:'Энгийн',col:'#c3cad3',w:60,ref:30,bn:0},{k:'u',n:'Онцгой',col:'#5aa8ff',w:28,ref:75,bn:0.03},{k:'r',n:'Ер бусын',col:'#c07aff',w:10,ref:150,bn:0.07},{k:'l',n:'Домогт',col:'#ffd24a',w:2,ref:375,bn:0.15}];
+const SKN=[['Хөх дээл','hue-rotate(190deg) saturate(1.1)'],['Ногоон хээ','hue-rotate(80deg) saturate(1.3)'],['Нил сүлд','hue-rotate(250deg) saturate(1.5) contrast(1.05)'],['Алтан гэрэл','sepia(1) saturate(4.5) hue-rotate(-12deg) brightness(1.15) contrast(1.05)']];
+const skS=()=>{ if(!S.sk) S.sk={o:{},e:{},pity:0}; return S.sk; };
+const skT=id=>{ const q=skS(); return q.e[id]==null?null:q.e[id]; };
+const skCss=id=>{ const t=skT(id); return t==null?'':SKN[t][1]; };
+const BOXC=300;
+
+const HEPI={chinggis:'Дэлхийг нэгтгэсэн Хаадын хаан',subeedei:'Далай хүртэл морджээ, Дөрвөн нохойн нэг',khubilai:'Юань гүрнийг үндэслэгч',mukhulai:'Хойд Хятадын Го-ван, Дөрвөн хүлгийн нэг',jelme:'Хааны үнэнч нохой',borte:'Монголын их хатан',khasar:'Мэргэн харвагч, хааны дүү',boorchu:'Хааны чин нөхөр',borchi:'Хааны анхны нөхөр',zev:'Сумны Зэв',oelun:'Үрсийн эх, Монголын эх',belgutei:'Хааны ах, бөхийн дарга',ogodei:'Хархорум байгуулагч',tolui:'Өлгийн эзэн',jochi:'Алтан Ордын эх',chagadai:'Ясын хамгаалагч',khukhchu:'Хааны дагалдагч',arav:'Аравтын жанжин',harvaach:'Залуу мэргэн'};
+const HBIO={
+chinggis:{b:'Тэмүжин. Онон голын хавь төрсөн (он 1162 орчим гэдэг, эрдэмтдийн дунд маргаантай). Эцэг Есүхэй, эх Өэлүн.',m:'—',d:'Аймгуудыг нэгтгэж 1206 онд Их Хурилтайгаар Чингис хаан цол хүртэв. Монгол Улсыг байгуулсан.',x:'1227 онд Тангудын эсрэг аян дайны үеэр өнгөрсөн.'},
+subeedei:{b:'Урианхай аймгийн хүн, Бурхан Халдун орчим төрсөн (1175 орчим). Гарал нь зарим эх сурвалжид өөр бичигдсэн байдаг.',m:'Ах Зэлмийн хамт Чингисийн нөхөр болсон гэдэг.',d:'Дөрвөн нохойн нэг. Калкагийн тулаан (1223), Европын аян (1241) зэрэгт жанжлав.',x:'1248 онд өнгөрсөн.'},
+khubilai:{b:'1215 онд төрсөн. Толуйн хүү, Чингисийн ач.',m:'Чингис хаан 1227 онд өнгөрсөн тул хожим өөрөө хаан болсон.',d:'1260 онд Их хаан болж, 1271 онд Юань гүрнийг тунхаглав. Тоглоомд нояон гэж үзсэн.',x:'1294 онд өнгөрсөн.'},
+mukhulai:{b:'Жалайр аймаг, Хэрлэн голын хавь, 1170 орчим. Эцэг Гүн Уа.',m:'Залуу насандаа эцгийнхээ хамт Чингист алба хаасан.',d:'Дөрвөн хүлгийн нэг. 1217 онд Хойд Хятадыг захирах Го-ван цол авч, Алтан улсыг няцаав.',x:'1223 онд Хятадад аян дайны үеэр өнгөрсөн.'},
+jelme:{b:'Урианхай аймаг, Жарчуудайн хүү. Бурхан Халдун орчим.',m:'Бага насандаа аавынхаа хамт Тэмүжинд ирж, нөхөр болсон.',d:'Дөрвөн нохойн нэг. Тэмүжин хүзүүндээ шархдахад шархыг нь хөхөж аварсан гэдэг (Нууц товчоо).',x:'Нас барсан он тодорхойгүй.'},
+borte:{b:'Хонгирад аймаг, Дэй сэцэний охин, 1161 орчим.',m:'Тэмүжин 9 настайд сүй тавьж, хожим гэрлэсэн.',d:'Мэргидүүд хулгайлж, Тэмүжин аварсан. Жочи, Цагаадай, Өгөдэй, Толуйн эх. Их хатан.',x:'Нас барсан он тодорхойгүй (1230-аад он орчим гэдэг).'},
+khasar:{b:'Чингисийн дүү, Өэлүнгийн хүү. Онон голын хавь.',m:'Бага наснаасаа ахтайгаа хамт өссөн.',d:'Мэргэн харвагч, хүчтэй бөх гэдэг. Олон тулаанд ахынхаа баруун гар болсон.',x:'Нас барсан он тодорхойгүй.'},
+boorchu:{b:'Борохул. Өэлүн эхийн өргөж авсан хүү гэдэг.',m:'Тэмүжиний дотны нөхөр болсон.',d:'Дөрвөн хүлгийн нэг. Хааны хамгаалалтыг даатгуулсан чин нөхөр.',x:'1217 онд Хори-Түмэдийн эсрэг тулалдаанд амь үрэгдсэн гэдэг.'},
+borchi:{b:'Арулат аймаг. Он тодорхойгүй, 1160-аад он орчим.',m:'Тэмүжиний хулгайлагдсан морьдыг хамт эргүүлж авсан анхны нөхөр гэдэг.',d:'Дөрвөн хүлгийн нэг. Чингисийн хамгийн эртний, ойрын нөхөд.',x:'Нас барсан он тодорхойгүй.'},
+zev:{b:'Тайчууд аймгийн Бэсүд овог. Анхны нэр Жиргоодай.',m:'1201 орчим Тэмүжиний морийг сумаар буудсан. Үүнийг нуулгүй хэлээд нөхөр болсон.',d:'«Зэв» нэр авсан (сумны үзүүр). Сүбээдэйтэй Калкагийн аянд оролцсон.',x:'1223-1225 орчим аянаас буцахдаа өнгөрсөн гэдэг.'},
+oelun:{b:'Олхонууд аймаг. Он тодорхойгүй, 1140 орчим.',m:'Есүхэй Мэргидээс булаан авч эхнэр болгосон.',d:'Есүхэй өнгөрсний дараа бяцхан хүүхдүүдээ ганцаараа өсгөсөн. Монгол эхийн жишээ.',x:'Нас барсан он тодорхойгүй.'},
+belgutei:{b:'Есүхэйн нөгөө эхээс төрсөн, Тэмүжиний хагас ах.',m:'Бага наснаасаа хамт өссөн.',d:'Тэмүжинд үнэнч дагалдагч, бөхийн ноён. Арми дотор шийтгэл хэрэгжүүлэх ажил хийсэн.',x:'Нас барсан он тодорхойгүй.'},
+ogodei:{b:'1186 орчим төрсөн. Чингисийн гурав дахь хүү.',m:'Эцгийнхээ олон аянд гарсан.',d:'1229 онд хаан сонгогдож, Хархорум хотыг байгуулав. Алтан улсыг мөхөөв.',x:'1241 оны 12-р сард өнгөрсөн.'},
+tolui:{b:'1192 орчим төрсөн. Чингисийн отгон хүү.',m:'Эцгийнхээ хамт Хятад, Хорезмийн аянд гарсан.',d:'Хааны өлгийн эзэн (гэрийн хүү). Мөнх, Хубилай, Хүлэгүүгийн эцэг.',x:'1232 онд өнгөрсөн.'},
+jochi:{b:'1182 орчим. Бөртийн ууган хүү.',m:'Бөртийг Мэргидээс аврагдсны дараа төрсөн тул гарал нь хожим маргаан үүсгэсэн.',d:'Баруун хойд нутгийг захирсан. Хойч үе нь Алтан Ордыг байгуулсан.',x:'1227 оны эхээр, эцгээсээ өмнө өнгөрсөн.'},
+chagadai:{b:'1183 орчим. Бөртийн хоёр дахь хүү.',m:'Эцгийнхээ аянуудад оролцсон.',d:'Ясын (хуулийн) хамгаалагч. Хойч үе нь Цагаадайн улсыг байгуулсан.',x:'1242 онд өнгөрсөн.'},
+khukhchu:{b:'Нарийн мэдээлэл хомс.',m:'Тэмүжиний нөхдийн нэг гэж тоглоомд үзсэн.',d:'Эхний үеийн дайчин.',x:'Тодорхойгүй.'},
+arav:{b:'Жирийн монгол цэрэг.',m:'—',d:'Арван хүнийг толгойлдог. Чингисийн арми аравт, зуут, мянгатаар зохион байгуулагдсан.',x:'—'},
+harvaach:{b:'Жирийн монгол залуу.',m:'—',d:'Бага наснаасаа морь унаж, нум харвана.',x:'—'}};
+function heroBio(id){ const H=HEROES.find(x=>x.id===id), b=HBIO[id]; if(!H||!b) return; let o=document.getElementById('hbio'); if(o) o.remove(); o=document.createElement('div'); o.id='hbio'; o.onclick=e=>{ if(e.target===o) o.remove(); };
+  const row=(l,t)=>t&&t!=='—'?'<div class="hbr"><b>'+l+'</b><span>'+t+'</span></div>':'';
+  o.innerHTML='<div class="hbc"><div style="text-align:center">'+hpi(id,84)+'</div><div class="hbn">'+H.n+'</div><div class="epi">'+(HEPI[id]||'')+'</div>'+row('📍 Гарал',b.b)+row('🤝 Чингистэй уулзсан',b.m)+row('⚔ Үйлс',b.d)+row('🕯 Өнгөрсөн',b.x)+'<div class="sm" style="margin-top:6px;opacity:.75">Зарим он, гарал эх сурвалжаас хамаарч өөр байж болно.</div><button class="btn" style="margin-top:10px" onclick="document.getElementById(\'hbio\').remove()">Хаах</button></div>'; document.body.appendChild(o); }
+(function(){ const st=document.createElement('style'); st.textContent='#hbio{position:fixed;inset:0;z-index:210;background:#000c;display:flex;align-items:center;justify-content:center;padding:14px}.hbc{background:linear-gradient(#3b2815,#241709);border:3px solid #c9972b;border-radius:14px;padding:16px;max-width:380px;width:100%;max-height:90vh;overflow:auto;color:#f3e4bd}.hbn{text-align:center;font:bold 22px serif;color:#ffd770;margin-top:6px}.epi{text-align:center;font:italic 13px Georgia,serif;color:#e8c36a;letter-spacing:.4px;margin:2px 0 8px;text-shadow:0 1px 0 #000}.epi:before,.epi:after{content:" ❖ ";color:#c9972b;font-style:normal}.many .epi:before,.many .epi:after{content:none}.hbr{margin-top:8px;font-size:13px;line-height:1.35}.hbr b{display:block;color:#ffd770;font-size:12px}'; document.head.appendChild(st); })();
+
+function skPick(){ const q=skS(); let t=3; if(q.pity<49){ let r=Math.random()*100; t=0; for(let i=0;i<4;i++){ if(r<SKT[i].w){ t=i; break; } r-=SKT[i].w; } } q.pity=t===3?0:q.pity+1; return t; }
+function boxOpen(n){ const cost=n===10?BOXC*9:BOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна. Дэлгүүрээс авна уу.'); return; } S.res.alt-=cost; passAdd(5*n); const q=skS(), res=[];
+  for(let i=0;i<n;i++){ const t=skPick(), h=HEROES[Math.floor(Math.random()*HEROES.length)], key=h.id+':'+t, dup=!!q.o[key]; if(dup) S.res.alt+=SKT[t].ref; else { q.o[key]=1; if(q.e[h.id]==null&&S.heroes[h.id]) q.e[h.id]=t; } res.push({h,t,dup}); }
+  refresh(); boxShow(res); }
+function boxShow(res){ let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; const best=Math.max(...res.map(r=>r.t));
+  o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'" id="bxb">'+BOXSVG+'</div><div class="bxt">Хайрцаг нээгдэж байна...</div></div>'; document.body.appendChild(o);
+  setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+r.t+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.t===3?'<i class="bxray2"></i>':'')+'<div style="filter:'+SKN[r.t][1]+'">'+hpi(r.h.id,res.length>1?46:84)+'</div></div><b style="color:'+SKT[r.t].col+'">'+SKT[r.t].n+'</b><div class="sm">'+r.h.n+' · '+SKN[r.t][0]+'</div><div class="epi" style="font-size:'+(res.length>1?10:13)+'px">'+(HEPI[r.h.id]||'')+'</div>'+(r.dup?'<div class="sm">Давхар → +'+SKT[r.t].ref+' Алт</div>':'<div class="sm" style="color:#9fe08a">Шинэ!</div>')+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();if(cur===\'box\')fillM()">Болсон</button></div>'; },1500); }
+const BOXSVG='<svg viewBox="0 0 160 130" width="150"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a4b24"/><stop offset="1" stop-color="#4e2610"/></linearGradient><linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset="1" stop-color="#c38a1d"/></linearGradient></defs><rect x="14" y="52" width="132" height="68" rx="6" fill="url(#bg1)" stroke="#2c1608" stroke-width="3"/><path d="M10 54 Q80 6 150 54 Z" fill="url(#bg1)" stroke="#2c1608" stroke-width="3"/><rect x="14" y="62" width="132" height="10" fill="url(#bg2)"/><rect x="14" y="100" width="132" height="8" fill="url(#bg2)"/><rect x="70" y="52" width="20" height="30" rx="3" fill="url(#bg2)" stroke="#6a4308" stroke-width="2"/><circle cx="80" cy="70" r="4" fill="#4e2610"/><g fill="none" stroke="#f5cf64" stroke-width="3" stroke-linecap="round"><path d="M28 86 q0-12 12-12 q10 0 10 9 q0 7-7 7 q-5 0-5-5"/><path d="M132 86 q0-12-12-12 q-10 0-10 9 q0 7 7 7 q5 0 5-5"/><path d="M30 92 h22 M108 92 h22"/></g><path d="M80 14 l5 9 h-10z" fill="#ffd24a"/></svg>';
+function skillOf(id){ const d=HSK[id]; return d?'<div class="sm" style="color:#ffd770;flex-basis:100%">✦ '+d[1]+' — '+d[2]+'</div>':''; }
+function boxHTML(){ const q=skS(); let h='<h2>Хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div><div class="sm">Баталгаат домогт: '+(50-q.pity)+' нээлтэд</div></div>';
+  h+='<div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<BOXC?'disabled':'')+' onclick="boxOpen(1)">1 удаа · '+BOXC+' Алт</button><button class="btn" '+(S.res.alt<BOXC*9?'disabled':'')+' onclick="boxOpen(10)">10 удаа · '+(BOXC*9)+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div>';
+  h+='<div class="card sm">'+SKT.map(t=>'<span style="color:'+t.col+'"><b>'+t.n+'</b> '+t.w+'%</span>').join(' · ')+'<br>Скин нь баатарын өнгө, хээг өөрчилнө. Бага зэрэг хүч нэмнэ (Домогт +15%). Домогт нь алтан гэрэлтэнэ. Давхар унавал Алт буцаана.</div>';
+  const own=HEROES.filter(x=>[0,1,2,3].some(t=>q.o[x.id+':'+t]));
+  h+='<div class="card"><h3>Миний скин ('+Object.keys(q.o).length+'/'+HEROES.length*4+')</h3>'+(own.length?own.map(x=>'<div class="hero" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="filter:'+skCss(x.id)+'">'+hpi(x.id,40)+'</span><div style="flex:1;min-width:90px"><span class="s'+x.s+'">'+x.n+'</span><div class="epi" style="text-align:left;font-size:11px;margin:0">'+(HEPI[x.id]||'')+'</div>'+(S.heroes[x.id]?'':'<div class="sm">Баатар байхгүй</div>')+'</div>'+[0,1,2,3].map(t=>q.o[x.id+':'+t]?'<button class="btn" style="padding:4px 7px;font-size:11px;border:2px solid '+SKT[t].col+(q.e[x.id]===t?';background:#7a5a18':'')+'" onclick="skEq(\''+x.id+'\','+t+')">'+SKN[t][0]+'</button>':'').join('')+'</div>').join(''):'<div class="sm">Одоохондоо скин алга. Хайрцаг нээгээрэй.</div>')+'</div>';
+  return h; }
+function skEq(id,t){ const q=skS(); if(q.e[id]===t) delete q.e[id]; else q.e[id]=t; fillM(); }
+function castSkill(u){ const d=HSK[u.id]; if(!d) return false; const U=BT.units, al=U.filter(x=>!x.side&&!x.sup&&x.hp>0), en=U.filter(x=>x.side&&x.hp>0); if(!en.length) return false;
+  const lv=Math.max(1,S.heroes[u.id]||1), k=(1+0.12*(lv-1))*(d[4]||1), t=BT.t, hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); };
+  if(d[0]==='rally'){ al.forEach(a=>{ a.bAtk={m:1+0.3*k,t:t+8}; a.hp=Math.min(a.max,a.hp+a.max*0.1*k); }); }
+  else if(d[0]==='guard'){ al.forEach(a=>{ a.shT=t+6*Math.min(1.5,k); }); }
+  else if(d[0]==='heal'){ al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+a.max*0.18*k); }); }
+  else if(d[0]==='volley'){ en.slice().sort(()=>Math.random()-0.5).slice(0,3).forEach(e=>{ hitE(e,3); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }); }
+  else if(d[0]==='charge'){ const tg=en.reduce((a,b)=>b.hp>a.hp?b:a); hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; BT.shake=Math.min(1,(BT.shake||0)+0.6); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }
+  BT.ban={txt:d[1],n:u.name||'',t:0}; BT.shake=Math.min(1,(BT.shake||0)+0.3); for(let q=0;q<14;q++) BT.pt.push({x:u.x+(Math.random()-0.5)*30,y:u.y-10-Math.random()*30,vx:(Math.random()-0.5)*30,vy:-20-Math.random()*30,t:0,l:0.8,c:'spark'});
+  return true; }
+(function(){ const st=document.createElement('style'); st.textContent='#boxov{position:fixed;inset:0;z-index:200;background:#000d;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:auto}.bxs{text-align:center;color:#ffe9b0;font-weight:bold}.bxbox svg{filter:drop-shadow(0 0 14px #ffb53a99)}.bxs .bxbox{animation:bxsh .35s infinite}.bxs .bx3 svg{filter:drop-shadow(0 0 24px #ffd24a)}@keyframes bxsh{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.08)}}.bxrs{position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;max-width:100%}.bxg{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.bxg.many{max-width:420px}.bxc{width:96px;text-align:center;padding:8px 4px;border-radius:12px;background:#2b1d12;border:3px solid #888;animation:bxin .5s both;color:#fff}.bxg:not(.many) .bxc{width:170px;padding:14px}.bxc.t0{border-color:#c3cad3}.bxc.t1{border-color:#5aa8ff;box-shadow:0 0 10px #5aa8ff88}.bxc.t2{border-color:#c07aff;box-shadow:0 0 16px #c07aff}.bxc.t3{border-color:#ffd24a;box-shadow:0 0 26px #ffd24a;background:linear-gradient(#5b3d10,#2b1d12)}.bxa{position:relative;display:flex;justify-content:center}@keyframes bxin{0%{transform:scale(.2) rotate(-20deg);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}.bxray,.bxray2{position:absolute;pointer-events:none}.bxrs.leg .bxray{inset:-300px;left:50%;top:50%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(#ffd24a55 0 8deg,transparent 8deg 22deg);animation:bxrot 8s linear infinite;border-radius:50%;z-index:-1}.bxray2{inset:-14px;background:radial-gradient(circle,#ffe99a 0,#ffd24a44 50%,transparent 70%);animation:bxpl 1.2s infinite;z-index:-1}@keyframes bxrot{to{transform:rotate(360deg)}}@keyframes bxpl{50%{transform:scale(1.25);opacity:.6}}'; document.head.appendChild(st); })();
+
+const hpL=id=>{ if(S.heroes[id]) return heroPower(id); S.heroes[id]=1; const p=heroPower(id); delete S.heroes[id]; return p; };
 const BTDEF={archer:{hp:0.8,atk:1.1,rng:120,spd:22,cd:1.3,w:34},cav:{hp:1.0,atk:1.0,rng:16,spd:46,cd:0.9,w:46},heavy:{hp:1.7,atk:0.9,rng:16,spd:26,cd:1.3,w:48},foot:{hp:1.1,atk:0.9,rng:14,spd:28,cd:1.0,w:34}};
 const BTBEAT={archer:'heavy',heavy:'cav',cav:'archer'};
 function enKey(e,i,t,k){ let fc=e.fc; if(fc==null) fc=(i<0?0:i%5);
@@ -2126,7 +2300,7 @@ function enKey(e,i,t,k){ let fc=e.fc; if(fc==null) fc=(i<0?0:i%5);
 const NLK=/^(en\d_[ac]|bd_)/;
 function startBattle(i,E){
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
-  const e=E||ENEMIES[i], fb=facBonus().m, rm=relicMul(), el=document.createElement('div'); el.id='btl';
+  const e=E||Object.assign({},ENEMIES[i],{rep:i<S.won}), fb=facBonus().m, rm=relicMul(), el=document.createElement('div'); el.id='btl';
   el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bbtn"><button onclick="btSpeed()" id="bsp">×1</button><button onclick="btEnd(true)">Гарах</button></div><div id="bres"></div><button id="bstart" onclick="btGo()">⚔ Эхлэх</button><div id="btray"></div></div>';
   document.body.appendChild(el);
   const port=innerHeight>innerWidth, W2=port?640:innerWidth, H2=port?420:innerHeight; { const sc=innerWidth/640; $('bti').style.cssText=port?'position:absolute;left:0;top:'+Math.round((innerHeight-420*sc)/2)+'px;width:640px;height:420px;transform-origin:0 0;transform:scale('+sc+');overflow:hidden':'position:absolute;inset:0'; }
@@ -2135,7 +2309,7 @@ function startBattle(i,E){
   const rowY={archer:H2*0.88,cav:H2*0.80,heavy:H2*0.72};
   const cnt={archer:0,cav:0,heavy:0,foot:0};
   sq.forEach(id=>{ const t=htype(id), d=BTDEF[t], p=heroPower(id)*fb; const ci=cnt[t]++, y=rowY[t]-Math.floor(ci/4)*H2*0.05;
-    const mx=p*14*d.hp*rm.h; units.push({side:0,key:id==='chinggis'?'u_general':BTV[t][(id.length+cnt[t])%BTV[t].length],type:t,id,name:HEROES.find(x=>x.id===id).n,x:W2*(0.2+0.2*(ci%4))+(t==='cav'?W2*0.05:0),y,hp:mx,max:mx,atk:p*0.5*d.atk*rm.a,cd:Math.random()*d.cd,d}); });
+    const mx=p*14*d.hp*relicMul(id).h; units.push({side:0,key:id==='chinggis'?'u_general':BTV[t][(id.length+cnt[t])%BTV[t].length],type:t,id,name:HEROES.find(x=>x.id===id).n,x:W2*(0.2+0.2*(ci%4))+(t==='cav'?W2*0.05:0),y,hp:mx,max:mx,atk:p*0.5*d.atk*relicMul(id).a,cd:Math.random()*d.cd,d}); });
   const bi=E?E.bi:i, n=Math.min(5,3+bi), mixes=[['heavy','archer','cav'],['cav','foot','archer'],['foot','heavy','cav','archer']], mix=mixes[bi%3];
   const ep=e.p/n; for(let k=0;k<n;k++){ const t=mix[k%mix.length], d=BTDEF[t], row=t==='heavy'?0.30:t==='cav'?0.22:t==='foot'?0.27:0.12; const mx=ep*14*d.hp*0.95;
     units.push({side:1,key:enKey(e,i,t,k),type:t,name:'Дайсан',x:W2*(0.2+0.2*(k%4))+(k%2)*8,y:H2*row+Math.floor(k/4)*H2*0.05+(k%2)*6,hp:mx,max:mx,atk:ep*0.5*d.atk*0.95,cd:Math.random()*d.cd,d}); }
@@ -2145,7 +2319,7 @@ function startBattle(i,E){
   units.forEach((u,i)=>{ u.hx=u.x; u.hy=u.y; const fl=(u.type==='cav')?(i%2?-1:1):0;
     if(fl){ u.x=fl>0?-40:W2+40; u.y=u.side?H2*0.16:H2*0.9; } else { u.y=u.side?-50-(i%3)*18:H2+50+(i%3)*18; }
     u.sx=u.x; u.sy=u.y; u.fdir=u.hx>=u.sx?1:-1; if(!fl) u.fdir=u.fdir||1; });
-  BT.ip=1; BT.wait=true; units.forEach(u=>{ u.x=u.hx; u.y=u.hy; u.mv=false; u.fdir=u.side?-1:1; }); BT.pt=[]; BT.shake=0; BT.fall=[]; musPlay('battle'); BT.fb=fb; BT.rm=rm; BT.sel=[]; btQuick(); btTray();
+  BT.ip=1; BT.wait=true; units.forEach(u=>{ u.x=u.hx; u.y=u.hy; u.mv=false; u.fdir=u.side?-1:1; }); BT.pt=[]; BT.shake=0; BT.fall=[]; musPlay('battle'); BT.fb=fb; BT.rm=rm; BT.sel=[]; BT.req=e.req||null; btQuick(); btTray();
   BT.raf=requestAnimationFrame(btLoop);
 }
 const BIOMAP={steppe:0,forest:1,mountain:4,lake:7,desert:3,farm:8};
@@ -2154,8 +2328,8 @@ const SUPP={borte:{t:'Бүх баатарт хүч +12%'},oelun:{t:'Баатру
 function btRedeploy(){
   const B=BT, rm=B.rm, fb=B.fb, U=B.units=B.units.filter(u=>u.side), cnt={archer:0,cav:0,heavy:0,foot:0};
   const fighters=B.sel.filter(id=>!SUPP[id]), sup=B.sel.find(id=>SUPP[id]);
-  fighters.forEach((id,si)=>{ const t=htype(id), d=BTDEF[t], p=heroPower(id)*fb; cnt[t]++; const mx=p*14*d.hp*rm.h;
-    U.push({side:0,slot:si,key:id==='chinggis'?'u_general':BTV[t][(id.length+cnt[t])%BTV[t].length],type:t,id,name:HEROES.find(x=>x.id===id).n,x:0,y:0,hp:mx,max:mx,atk:p*0.5*d.atk*rm.a,cd:Math.random()*d.cd,d}); });
+  fighters.forEach((id,si)=>{ const t=htype(id), d=BTDEF[t], p=hpL(id)*fb; cnt[t]++; const mx=p*14*d.hp*relicMul(id).h;
+    U.push({side:0,slot:si,key:id==='chinggis'?'u_general':BTV[t][(id.length+cnt[t])%BTV[t].length],type:t,id,name:HEROES.find(x=>x.id===id).n,x:0,y:0,hp:mx,max:mx,atk:p*0.5*d.atk*relicMul(id).a,cd:Math.random()*d.cd,d}); });
   TR.forEach(T=>{ const n=Math.floor(S.res[T.k]||0); if(n<1) return; let hs=U.filter(u=>!u.side&&!u.sup&&u.type===T.ty&&u.id); if(!hs.length) hs=U.filter(u=>!u.side&&!u.sup&&u.id); if(!hs.length) return; const per=n/hs.length, p=trPow(T)/hs.length; hs.forEach(u=>{ const mx=p*14*u.d.hp*rm.h; u.hp+=mx; u.max+=mx; u.atk+=p*0.5*u.d.atk*rm.a; (u.sq=u.sq||[]).push({T,n:per}); }); });
   if(sup==='borte') U.forEach(u=>{ if(!u.side){ u.hp*=1.12; u.max*=1.12; u.atk*=1.12; } });
   if(sup){ U.push({side:0,slot:5,sup:true,id:sup,key:BTV.archer[0],type:'archer',name:HEROES.find(x=>x.id===sup).n,x:0,y:0,hp:1,max:1,atk:0,cd:9,d:BTDEF.archer}); }
@@ -2163,10 +2337,10 @@ function btRedeploy(){
   B.p0=U.filter(u=>!u.side&&!u.sup).reduce((a,u)=>a+u.max,0);
 }
 function btSlotXY(j,W,H){ const s=[[0.40,0.5],[0.32,0.0],[0.32,1.0],[0.16,0.25],[0.16,0.75],[0.05,0.5]][j], y0=H*0.27, y1=H*0.71; return [W*s[0],y0+(y1-y0)*s[1]]; }
-function btTray(){ const t=$('btray'); if(!t||!BT) return; const own=Object.keys(S.heroes).sort((a,b)=>heroPower(b)-heroPower(a)), mx=Math.min(5,heroSlots());
-  t.innerHTML='<div class="bc" onclick="btQuick()"><div style="font-size:22px;margin-top:6px">⚡</div>Хурдан<br>'+BT.sel.filter(x=>!SUPP[x]).length+'/'+mx+'</div>'+own.map(id=>'<div class="bc'+(BT.sel.includes(id)?' on':'')+'" onclick="btPick(\''+id+'\')">'+ico('hp_'+id,34)+'<br>'+(HEROES.find(x=>x.id===id)||{}).n.split(' ')[0]+'<br>'+(SUPP[id]?'✨ Туслах':'⚔'+f(heroPower(id)))+'</div>').join(''); }
-function btPick(id){ if(!BT||!BT.wait||BT.vs) return; const i=BT.sel.indexOf(id), mx=Math.min(5,heroSlots()); if(i>=0) BT.sel.splice(i,1); else if(SUPP[id]){ BT.sel=BT.sel.filter(x=>!SUPP[x]); BT.sel.push(id); say(HEROES.find(x=>x.id===id).n+': '+SUPP[id].t); } else { if(BT.sel.filter(x=>!SUPP[x]).length>=mx){ say('Хамгийн ихдээ '+mx+' баатар'); return; } BT.sel.push(id); } btRedeploy(); btTray(); }
-function btQuick(){ if(!BT||!BT.wait||BT.vs) return; BT.sel=squad().filter(x=>!SUPP[x]).slice(0,Math.min(5,heroSlots())); { const sp=['borte','oelun'].find(x=>S.heroes[x]); if(sp) BT.sel.push(sp); } btRedeploy(); btTray(); }
+function btTray(){ const t=$('btray'); if(!t||!BT) return; const own=Object.keys(S.heroes).filter(x=>x!==BT.req).sort((a,b)=>heroPower(b)-heroPower(a)), mx=Math.min(5,heroSlots()); if(BT.req) own.unshift(BT.req);
+  t.innerHTML='<div class="bc" onclick="btQuick()"><div style="font-size:22px;margin-top:6px">⚡</div>Хурдан<br>'+BT.sel.filter(x=>!SUPP[x]).length+'/'+mx+'</div>'+own.map(id=>'<div class="bc'+(BT.sel.includes(id)?' on':'')+'" onclick="btPick(\''+id+'\')">'+hpi(id,34)+'<br>'+(HEROES.find(x=>x.id===id)||{}).n.split(' ')[0]+'<br>'+(id===BT.req?'📜 Зайлшгүй':SUPP[id]?'✨ Туслах':'⚔'+f(heroPower(id)))+'</div>').join(''); }
+function btPick(id){ if(!BT||!BT.wait||BT.vs) return; if(id===BT.req){ say('Түүхэн баатар зайлшгүй оролцоно'); return; } const i=BT.sel.indexOf(id), mx=Math.min(5,heroSlots()); if(i>=0) BT.sel.splice(i,1); else if(SUPP[id]){ BT.sel=BT.sel.filter(x=>!SUPP[x]); BT.sel.push(id); say(HEROES.find(x=>x.id===id).n+': '+SUPP[id].t); } else { if(BT.sel.filter(x=>!SUPP[x]).length>=mx){ say('Хамгийн ихдээ '+mx+' баатар'); return; } BT.sel.push(id); } btRedeploy(); btTray(); }
+function btQuick(){ if(!BT||!BT.wait||BT.vs) return; BT.sel=(BT.req?[BT.req]:[]).concat(squad().filter(x=>!SUPP[x]&&x!==BT.req)).slice(0,Math.min(5,heroSlots())); { const sp=['borte','oelun'].find(x=>S.heroes[x]); if(sp) BT.sel.push(sp); } btRedeploy(); btTray(); }
 function btGo(){ if(!BT||!BT.wait||BT.vs) return; if(!BT.sel.length){ say('Баатар сонго'); return; } BT.vs=1; const tr=$('btray'); if(tr) tr.remove(); const b=$('bstart'); if(b) b.remove(); const v=document.createElement('div'); v.id='bvs'; v.textContent='VS'; $('bti').appendChild(v); setTimeout(()=>{ if(v.parentNode) v.remove(); if(BT) BT.wait=false; },1000); }
 function btSpeed(){ BT.sp=BT.sp>=3?1:BT.sp+1; $('bsp').textContent='×'+BT.sp; }
 function btLoop(now){
@@ -2182,18 +2356,21 @@ function btStep(dt){
   BT.heal=(BT.heal||0)+dt; if(BT.heal>=1){ BT.heal=0; if(U.some(u=>u.sup&&u.id==='oelun')) U.forEach(u=>{ if(!u.side&&!u.sup&&u.hp>0) u.hp=Math.min(u.max,u.hp+u.max*0.025); }); }
   U.forEach(u=>{ u.tc=0; });
   U.forEach(u=>{ if(u.hp<=0) return; if(u.sup){ u.mv=false; return; } u.cd-=dt;
+    if(u.id&&!u.side&&HSK[u.id]){ u.skc=(u.skc==null?3+Math.random()*3:u.skc)-dt; if(u.skc<=0){ u.skc=castSkill(u)?HSK[u.id][3]:1; } }
     let tg=null,bd=1e9,bs=1e9; U.forEach(o=>{ if(o.side!==u.side&&o.hp>0&&!o.sup){ const dd=Math.hypot(o.x-u.x,o.y-u.y), sc=dd+(o.tc||0)*45; if(sc<bs){ bs=sc; bd=dd; tg=o; } } });
     if(tg) tg.tc=(tg.tc||0)+1;
     if(!tg) return; u.face=tg.x>=u.x?1:-1; if(Math.abs(tg.x-u.x)>12) u.fdir=u.face;
     if(bd>u.d.rng){ const dx=tg.x-u.x, dy=tg.y-u.y, L=Math.hypot(dx,dy)||1; u.x+=dx/L*u.d.spd*dt*1.3; u.y+=dy/L*u.d.spd*dt*1.3; u.mv=true; }
-    else { u.mv=false; if(u.cd<=0){ u.cd=u.d.cd; let dmg=u.atk*(0.9+Math.random()*0.2); const big=BTBEAT[u.type]===tg.type; if(big) dmg*=1.5;
+    else { u.mv=false; if(u.cd<=0){ u.cd=u.d.cd; let dmg=u.atk*(0.9+Math.random()*0.2); if(u.bAtk&&u.bAtk.t>BT.t) dmg*=u.bAtk.m; if(tg.shT>BT.t) dmg*=0.5; const big=BTBEAT[u.type]===tg.type; if(big) dmg*=1.5;
       tg.hp-=dmg; u.hit=0.25; u.atkT=0.5; tg.hurt=0.3; if(tg.hp<=0&&!tg.dead) tg.dead=BT.t; if(big) BT.shake=Math.min(1,BT.shake+0.35);
       for(let q=0;q<(u.type==='archer'?3:6);q++) BT.pt.push({x:tg.x,y:tg.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:u.side?'blood':'spark'}); BT.dm.push({x:tg.x,y:tg.y-30,t:0,v:Math.round(dmg),big,side:u.side});
       BT.fx.push({k:u.type==='archer'?'arrow':(u.type==='heavy'?'slash':'clash'),x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); } }
   });
   for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; for(let b=a+1;b<U.length;b++){ const B=U[b]; if(B.hp<=0||B.side!==A.side) continue; const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy); if(d<52&&d>0.01){ const p=(52-d)/2*Math.min(1,dt*9), ux=dx/d, uy=dy/d; A.x-=ux*p; A.y-=uy*p; B.x+=ux*p; B.y+=uy*p; } } }
+  { const mx=BT.W,my=BT.H; U.forEach(u=>{ if(u.sup) return; u.x=Math.max(22,Math.min(mx-22,u.x)); u.y=Math.max(my*0.22,Math.min(my-16,u.y)); }); }
+  if(BT.ban){ BT.ban.t+=dt; if(BT.ban.t>1.9) BT.ban=null; }
   if(BT.pt) { BT.pt.forEach(p=>{ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=60*dt; }); BT.pt=BT.pt.filter(p=>p.t<p.l); U.forEach(u=>{ if(u.mv&&u.hp>0&&u.type!=='archer'&&Math.random()<dt*3) BT.pt.push({x:u.x,y:u.y,vx:(Math.random()-0.5)*8,vy:-4,t:0,l:0.5,c:'dust'}); }); }
-  BT.fx.forEach(f=>f.t+=dt*4); BT.fx=BT.fx.filter(f=>f.t<1); BT.dm.forEach(d=>d.t+=dt); BT.dm=BT.dm.filter(d=>d.t<1);
+  BT.fx.forEach(f=>f.t+=dt*4); BT.fx=BT.fx.filter(f=>f.t<1); BT.dm.forEach(d=>d.t+=dt); BT.dm=BT.dm.filter(d=>d.t<1.4);
   U.forEach(u=>{ if(u.hit>0) u.hit-=dt; if(u.atkT>0) u.atkT-=dt; if(u.hurt>0) u.hurt-=dt; });
   const pa=U.filter(u=>!u.side&&!u.sup&&u.hp>0), ea=U.filter(u=>u.side&&u.hp>0);
   if(!pa.length||!ea.length||BT.t>75){ let win; if(!ea.length) win=true; else if(!pa.length) win=false; else win=pa.reduce((a,u)=>a+u.hp,0)/BT.p0>=ea.reduce((a,u)=>a+u.hp,0)/BT.e0; btFinish(win); }
@@ -2258,7 +2435,9 @@ function btDraw(t){
     if(u.mv&&u.type==='cav'&&u.hp>0&&SPR.fx0){ const d2=SPR.fx0; c.save(); c.globalAlpha=0.7; c.translate(u.x,u.y-2); c.scale(u.side?1:-1,1); c.drawImage(d2.img,0,-18,34,34*d2.ih/d2.iw); c.restore(); }
     let fallA=0; if(u.hp<=0){ const age=BT.t-(u.dead==null?BT.t:u.dead); fallA=Math.min(1,age/0.35); if(age>2.2) c.globalAlpha=Math.max(0,1-(age-2.2)/1.2); else c.globalAlpha=0.9; if(age>3.4) return; }
     if(u.sq&&u.hp>0){ u.sq.forEach((q,qi)=>{ const s2=SPR[trKey(q.T,u.mv?Math.floor(t*6)%2:0)]; if(!s2||!s2.img.complete||!s2.iw) return; const cn=Math.max(1,Math.min(3,Math.ceil(q.n*u.hp/u.max/6))), mw=u.d.w*0.95, mh=mw*s2.ih/s2.iw; for(let z=0;z<cn;z++){ const ox=(z-(cn-1)/2)*20, oy=12+qi*9+(z%2)*5; c.drawImage(s2.img,u.x+ox-mw/2,u.y+oy-mh,mw,mh); } }); }
-    const bob=u.mv?Math.abs(Math.sin(t*10+u.x))*2:0, lunge=u.hit>0?(u.face||1)*5*(u.hit/0.25):0; c.save(); c.translate(u.x+lunge,u.y-bob); const fd=u.fdir||1, nat=(u.side&&NLK.test(u.key))?-1:1; c.scale(fd*nat,1); if(!u.A){ if(u.hp>0){ c.rotate((u.mv?Math.sin(t*9+u.x*0.1)*0.07:0)+(u.hit>0?0.12*(u.hit/0.25):0)); } else { c.translate(0,0); c.rotate(fallA*1.45); } } if(u.hit>0) c.filter='brightness(1.4)'; c.drawImage(s.img,-w/2,-h,w,h); c.restore(); c.globalAlpha=1; c.filter='none';
+    const bob=u.mv?Math.abs(Math.sin(t*10+u.x))*2:0, lunge=u.hit>0?(u.face||1)*5*(u.hit/0.25):0; c.save(); c.translate(u.x+lunge,u.y-bob); const fd=u.fdir||1, nat=(u.side&&NLK.test(u.key))?-1:1; c.scale(fd*nat,1); if(!u.A){ if(u.hp>0){ c.rotate((u.mv?Math.sin(t*9+u.x*0.1)*0.07:0)+(u.hit>0?0.12*(u.hit/0.25):0)); } else { c.translate(0,0); c.rotate(fallA*1.45); } } { const skt=(!u.side&&u.id)?skT(u.id):null; if(skt!=null&&skt>=2){ const pu=0.6+0.4*Math.sin(t*5), g2=c.createRadialGradient(0,-h*0.45,2,0,-h*0.45,h*0.75); g2.addColorStop(0,skt===3?'rgba(255,225,110,'+(0.55*pu)+')':'rgba(190,120,255,'+(0.4*pu)+')'); g2.addColorStop(1,'rgba(255,200,60,0)'); c.fillStyle=g2; c.fillRect(-h,-h*1.3,h*2,h*1.6); if(skt===3){ for(let q=0;q<5;q++){ const ph=(t*0.7+q/5)%1; c.globalAlpha=1-ph; c.fillStyle='#fff3b0'; c.fillRect(Math.sin(q*7+t)*w*0.3,-h*0.2-ph*h*0.9,2,2); } c.globalAlpha=1; } }
+      c.filter=((skt!=null?SKN[skt][1]:'')+(u.hit>0?' brightness(1.4)':''))||'none'; }
+    c.drawImage(s.img,-w/2,-h,w,h); c.restore(); c.globalAlpha=1; c.filter='none';
     if(u.hp>0){ const bw=w*0.7; c.fillStyle='#000'; c.fillRect(u.x-bw/2-1,u.y-h-7,bw+2,6); c.fillStyle=u.side?'#d9382c':'#6fd04a'; c.fillRect(u.x-bw/2,u.y-h-6,bw*Math.max(0,u.hp/u.max),4);
       { const lb=u.c0?'×'+Math.max(1,Math.ceil(u.c0*u.hp/u.max)):(!u.side?u.name+(u.sq?' ×'+Math.max(1,Math.ceil(u.sq.reduce((a,q)=>a+q.n,0)*u.hp/u.max)):''):''); if(lb){ c.font='bold 11px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000'; c.strokeText(lb,u.x,u.y-h-10); c.fillStyle=u.side?'#ffb0a0':'#ffe9b0'; c.fillText(lb,u.x,u.y-h-10); } } }
   });
@@ -2266,14 +2445,16 @@ function btDraw(t){
     if(f.k==='arrow'){ const s=SPR.fx2; const arc=Math.sin(Math.PI*Math.min(1,f.t*1.3))*-36;  if(s){ const ang=Math.atan2(f.y1-f.y0,f.x1-f.x0)+Math.PI*0.25; c.save(); c.translate(x,y+arc); c.rotate(ang); c.drawImage(s.img,-13,-13,26,26); c.restore(); } else { c.strokeStyle='#f1e3a8'; c.lineWidth=2; c.beginPath(); c.moveTo(x-(f.x1-f.x0)*0.07,y-(f.y1-f.y0)*0.07); c.lineTo(x,y); c.stroke(); } }
     else if(f.t>0.35){ const s=SPR[f.k==='slash'?'fx4':'fx3']; if(s){ const w=26*(1-f.t*0.3); c.globalAlpha=1-f.t; c.drawImage(s.img,f.x1-w/2,f.y1-w/2,w,w*s.ih/s.iw); c.globalAlpha=1; } } });
   (BT.pt||[]).forEach(p=>{ const k=1-p.t/p.l; c.globalAlpha=Math.max(0,k*(p.c==='dust'?0.5:1)); c.fillStyle=p.c==='dust'?'#d8c49a':p.c==='blood'?'#c4352a':'#ffe08a'; const z=p.c==='dust'?3+p.t*6:2; c.fillRect(p.x-z/2,p.y-z/2,z,z); c.globalAlpha=1; });
-  BT.dm.forEach(d=>{ c.globalAlpha=1-d.t; c.font='bold '+(d.big?17:13)+'px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000'; const y=d.y-d.t*34; c.strokeText('-'+d.v,d.x,y); c.fillStyle=d.side?(d.big?'#ffd24a':'#ff6a5a'):'#ff9a7a'; if(!d.side) c.fillStyle='#ffffff'; c.fillText('-'+d.v,d.x,y); c.globalAlpha=1; });
+  BT.dm.forEach(d=>{ if(d.txt) return; c.globalAlpha=Math.max(0,Math.min(1,(1.4-d.t)*2.5)); const pop=d.t<0.12?1+(0.12-d.t)*5:1; c.font='bold '+Math.round((d.big?24:17)*pop)+'px sans-serif'; c.textAlign='center'; c.lineWidth=4; c.strokeStyle='#000'; const y=d.y-d.t*26-(d.big?6:0), tx='-'+d.v; c.strokeText(tx,d.x,y); c.fillStyle=d.side?(d.big?'#ff3a2a':'#ff7a6a'):(d.big?'#ffd24a':'#ffffff'); c.fillText(tx,d.x,y); c.globalAlpha=1; });
+  if(BT.ban){ const b=BT.ban, k=b.t<0.25?b.t/0.25:(b.t>1.5?Math.max(0,(1.9-b.t)/0.4):1), sc=0.6+0.4*Math.min(1,b.t/0.25), cx=W2/2, cy=H2*0.3; c.save(); c.globalAlpha=k; const gr=c.createLinearGradient(0,cy-34,0,cy+34); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(0.5,'rgba(60,20,8,.85)'); gr.addColorStop(1,'rgba(0,0,0,0)'); c.fillStyle=gr; c.fillRect(0,cy-34,W2,68); c.translate(cx,cy); c.scale(sc,sc); c.textAlign='center'; c.lineJoin='round'; c.font='bold 13px sans-serif'; c.lineWidth=3; c.strokeStyle='#000'; c.strokeText(b.n,0,-12); c.fillStyle='#ffe9b0'; c.fillText(b.n,0,-12); c.font='bold 30px serif'; c.lineWidth=6; c.strokeText('✦ '+b.txt+' ✦',0,20); const g2=c.createLinearGradient(0,0,0,26); g2.addColorStop(0,'#fff3b0'); g2.addColorStop(1,'#ffb000'); c.fillStyle=g2; c.fillText('✦ '+b.txt+' ✦',0,20); c.restore(); c.globalAlpha=1; }
   const pa=BT.units.filter(u=>!u.side&&!u.sup).reduce((a,u)=>a+Math.max(0,u.hp),0), ea=BT.units.filter(u=>u.side).reduce((a,u)=>a+Math.max(0,u.hp),0);
   const tm=Math.max(0,75-Math.floor(BT.t)); $('btop').innerHTML='<div class="bb"><i style="width:'+Math.round(100*pa/BT.p0)+'%;background:#6fd04a"></i><span>'+f(Math.ceil(pa/14))+'</span></div><div class="bt">⚔ 0:'+String(tm).padStart(2,'0')+'</div><div class="bb r"><i style="width:'+Math.round(100*ea/BT.e0)+'%;background:#d9382c"></i><span>'+f(Math.ceil(ea/14))+'</span></div>';
 }
+const E_isCamp=e=>!!e.cb;
 function btFinish(win){
   BT.done=true; BT.win=win; const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(win?0.85:0.6)); if(n>keep) lossTxt+=T.n+' -'+(n-keep)+'  '; S.res[T.k]=keep; });
-  if(win){ qh('win',1); S.res.gold+=e.g; S.res.meat+=e.m; if(BT.i===S.won) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="rl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
-    h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+e.g+' 🪙 · +'+e.m+' мах</div>'+extra; }
+  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=rp?Math.round(e.g*0.2):e.g, M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="rl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+    h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+(rp?'<div class="sm">Өмнө нь ялсан тул шагнал 20%</div>':'')+lootAnimals(Math.min(3,1+Math.floor((e.bi||0)/2)),rp)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   $('bres').innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; refresh();
 }
@@ -2296,7 +2477,7 @@ function resetAll(){ if(confirm('Бүх өгөгдлийг устгаад шин
 
 // ================= ДЭЛХИЙН ГАЗРЫН ЗУРАГ (1-р шат: ганцаарчилсан) =================
 const WM_W=3200, WM_H=4400, WM_SPD=55;
-const WM_NAMES=['Татар','Тайчууд','Мэргид','Хэрэйд','Найман','Жалайр','Хонхирад','Мангуд','Уйгур','Тангуд','Алтан улс','Кипчак','Хорезм','Орос'];
+const WM_NAMES=['Татар','Тайчууд','Мэргид','Хэрэйд','Найман','Жалайр','Хонгирад','Мангуд','Уйгур','Тангуд','Алтан улс','Кипчак','Хорезм','Орос'];
 const WM_COL=['#c0392b','#2e86c1','#8e44ad','#d68910','#16a085','#7f8c8d','#c0392b','#2e86c1','#8e44ad','#d68910','#16a085','#7f8c8d','#c0392b','#2e86c1'];
 const WM_P=[150,300,500,800,1200,1700,2300,3000,4000,5200,6800,9000,12000,16000];
 const WM_RT={wood:{n:'Модны хаш',ic:'rs2_wood',k:'wood',g:34},meat:{n:'Ан агнуурын газар',ic:'rs2_meat',k:'meat',g:30},gold:{n:'Алтны уурхай',ic:'rs2_coin',k:'gold',g:60},grain:{n:'Тариан талбай',ic:'rs2_grain',k:'grain',g:28}};
@@ -2314,15 +2495,17 @@ function wmGen(){
   const types=['wood','meat','gold','grain']; tries=0;
   while(nodes.length<46&&tries++<6000){ const x=120+r()*(WM_W-240), y=200+r()*(WM_H-400); if(!ok(x,y,200)) continue; const d=Math.hypot(x-C.x,y-C.y), lv=Math.min(5,1+Math.floor(d/520)); nodes.push({id:'n'+nodes.length,t:'node',x,y,rt:types[nodes.length%4],lv}); }
   tries=0; while(camps.length<20&&tries++<6000){ const x=120+r()*(WM_W-240), y=200+r()*(WM_H-400); if(!ok(x,y,220)) continue; const d=Math.hypot(x-C.x,y-C.y), lv=Math.min(5,1+Math.floor(d/500+r()*0.8)); camps.push({id:'c'+camps.length,t:'camp',x,y,lv,p:Math.round(60*Math.pow(lv,2.1))}); }
+  const chests=[]; tries=0; while(chests.length<12&&tries++<6000){ const x=140+r()*(WM_W-280), y=220+r()*(WM_H-440); const d=Math.hypot(x-C.x,y-C.y); if(d<500||!ok(x,y,150)||!far(x,y,chests,260)) continue; chests.push({id:'t'+chests.length,t:'chest',n:'Эрдэнэс',x,y,v:1+Math.floor(d/650)}); }
   for(let i=0;i<260;i++){ const x=r()*WM_W, y=r()*WM_H; if(Math.hypot(x-C.x,y-C.y)<150) continue; if(lakes.some(l=>x>l.x-20&&x<l.x+l.w+20&&y>l.y-20&&y<l.y+l.h+20)) continue; decor.push({x,y,s:0.8+r()*0.5}); }
   // background (low res)
   const bw=Math.round(WM_W/8), bh=Math.round(WM_H/8), bc=document.createElement('canvas'); bc.width=bw; bc.height=bh; const x=bc.getContext('2d'); x.fillStyle='#78b042'; x.fillRect(0,0,bw,bh);
   const br=wmRng(77); for(let i=0;i<2600;i++){ x.fillStyle=br()<0.5?'rgba(70,120,35,.28)':'rgba(170,215,100,.25)'; const w=2+br()*7; x.fillRect(br()*bw,br()*bh,w,1+br()*3); }
   for(let i=0;i<70;i++){ x.fillStyle='rgba(190,160,90,.28)'; x.beginPath(); x.ellipse(br()*bw,br()*bh,6+br()*14,3+br()*8,0,0,7); x.fill(); }
-  WMD={C,ks,nodes,camps,decor,lakes,bg:bc}; return WMD; }
+  WMD={C,ks,nodes,camps,chests,decor,lakes,bg:bc}; return WMD; }
 function wmSt(){ S.wm=S.wm||{m:[],st:{}}; if(!S.wm.m) S.wm.m=[]; if(!S.wm.st) S.wm.st={}; return S.wm; }
 const wmMax=()=>2+Math.floor((S.bld.ger||1)/5);
-function wmEnt(id){ const D=wmGen(); return D.ks.find(e=>e.id===id)||D.nodes.find(e=>e.id===id)||D.camps.find(e=>e.id===id); }
+function wmEnt(id){ const D=wmGen(); return D.ks.find(e=>e.id===id)||D.nodes.find(e=>e.id===id)||D.camps.find(e=>e.id===id)||D.chests.find(e=>e.id===id); }
+const wmChestOn=e=>{ const st=wmSt(); return st.tr&&st.tr[e.id]&&!(st.tk&&st.tk[e.id]); };
 function wmCd(id){ const t=(wmSt().st[id]||0)-Date.now(); return t>0?Math.ceil(t/1000):0; }
 const wmFmt=s=>{ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
 function wmPw(e){ return e.t==='kingdom'?Math.round(e.p*(1+0.08*(wmSt().st['w'+e.id]||0))):e.p; }
@@ -2332,12 +2515,14 @@ function wmSend(id){
   if(st.m.length>=wmMax()){ say('Бүх цуваа гарсан ('+st.m.length+'/'+wmMax()+')'); return; }
   if(wmCd(id)){ say('Одоохондоо боломжгүй'); return; }
   if(st.m.some(m=>m.tid===id)){ say('Энд цуваа очиж байна'); return; }
-  if(e.t!=='node'&&!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
-  const d=wmDist(e)/WM_SPD; st.m.push({id:'m'+Date.now(),tid:id,t0:Date.now(),d,ty:e.t==='node'?'gather':'attack'});
+  if(e.t!=='node'&&e.t!=='chest'&&!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
+  const d=wmDist(e)/WM_SPD; st.m.push({id:'m'+Date.now(),tid:id,t0:Date.now(),d,ty:(e.t==='node'||e.t==='chest')?'gather':'attack'});
   wmShut(); say('Цуваа гарлаа ('+wmFmt(d)+')'); wmRefreshBar(); }
 function wmProcess(){
   const st=wmSt(); if(!st.m.length) return; const now=Date.now();
+  { const D=wmGen(); st.tr=st.tr||{}; st.m.forEach(m=>{ const e=wmEnt(m.tid); if(!e) return; const el=(now-m.t0)/1000; let p; if(m.ty==='gather'&&el>m.d+20) p=1-Math.min(1,(el-m.d-20)/m.d); else p=Math.min(1,el/m.d); const mx=D.C.x+(e.x-D.C.x)*p, my=D.C.y+(e.y-D.C.y)*p; D.chests.forEach(ch=>{ if(!st.tr[ch.id]&&Math.hypot(ch.x-mx,ch.y-my)<260){ st.tr[ch.id]=1; say('💎 Нуугдсан эрдэнэс олдлоо! Газрын зургаас хар.'); } }); }); }
   st.m=st.m.filter(m=>{ const e=wmEnt(m.tid); if(!e) return false; const el=(now-m.t0)/1000;
+    if(m.ty==='gather'&&e.t==='chest'){ if(el>=2*m.d+10){ const g=Math.round(250*e.v*(1+Math.min(2,totalPower()/1500))), al=1+Math.floor(Math.random()*2*e.v); S.res.gold+=g; S.res.alt+=al; let rt2=''; if(Math.random()<0.35){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; rt2=' + '+r.n; } (st.tk=st.tk||{})[e.id]=1; say('💎 Эрдэнэс: +'+g+' 🪙, +'+al+' Алт'+rt2); addXP(20); refresh(); return false; } return true; }
     if(m.ty==='gather'){ if(el>=2*m.d+20){ const rt=WM_RT[e.rt], pw=totalPower(), g=Math.round(rt.g*e.lv*(1+Math.min(2,pw/1500))); S.res[rt.k]=Math.min(rt.k==='gold'?1e12:cap(),(S.res[rt.k]||0)+g); st.st[m.tid]=now+240000; say(rt.n+': +'+g+' '+(rt.k==='gold'?'🪙':{wood:'мод',meat:'мах',grain:'тариа'}[rt.k])); addXP(8); refresh(); return false; } return true; }
     if(el>=m.d){ if(BT) return true; wmBattle(e); return false; } return true; });
   wmRefreshBar(); }
@@ -2367,7 +2552,7 @@ function wmBind(c){
   c.onpointercancel=e=>{ P.delete(e.pointerId); };
   c.onwheel=e=>{ e.preventDefault(); const wx=WMV.x+e.clientX/WMV.z, wy=WMV.y+e.clientY/WMV.z; WMV.z=Math.max(0.28,Math.min(1.5,WMV.z*(e.deltaY<0?1.12:0.89))); WMV.x=wx-e.clientX/WMV.z; WMV.y=wy-e.clientY/WMV.z; wmClamp(); };
 }
-function wmAll(){ const D=wmGen(); return [{id:'city',t:'city',x:D.C.x,y:D.C.y}].concat(D.ks,D.nodes,D.camps); }
+function wmAll(){ const D=wmGen(); return [{id:'city',t:'city',x:D.C.x,y:D.C.y}].concat(D.ks,D.nodes,D.camps,D.chests.filter(wmChestOn)); }
 function wmTap(px,py){
   const wx=WMV.x+px/WMV.z, wy=WMV.y+py/WMV.z; let best=null,bd=1e9;
   wmAll().forEach(e=>{ const r=(e.t==='city'?46:e.t==='kingdom'?40:30)+10/WMV.z, d=Math.hypot(e.x-wx,(e.y-14)-wy); if(d<r&&d<bd){ bd=d; best=e; } });
@@ -2378,6 +2563,7 @@ function wmSheet(){
   if(e.t==='city'){ h='<h3>🏠 Таны тосгон</h3><div class="sm">Цуваа: '+wmSt().m.length+'/'+wmMax()+' · Хүч '+f(pw)+'</div><button class="btn" onclick="wmShut()">Тосгон руу буцах</button>'; }
   else { const d=wmDist(e)/WM_SPD, cd=wmCd(e.id), busy=wmSt().m.some(m=>m.tid===e.id);
     if(e.t==='node'){ const rt=WM_RT[e.rt]; h='<h3>'+ico(rt.ic,26)+' '+rt.n+' · Lv '+e.lv+'</h3><div class="sm">Цуглуулах: ~'+Math.round(rt.g*e.lv*(1+Math.min(2,pw/1500)))+' · Зам '+wmFmt(d)+' (очих) + 0:20 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Цуглуулах')+'</button>'; }
+    else if(e.t==='chest'){ h='<h3>💎 Нуугдсан эрдэнэс</h3><div class="sm">Алт, Алт болор, заримдаа дурсгал. Зам '+wmFmt(d)+' (очих) + 0:10 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">Цуваа илгээх</button>'; }
     else if(e.t==='camp'){ const ok=pw>=e.p; h='<h3>'+ico('bd_h0',30)+' Бандитын бааз · Lv '+e.lv+'</h3><div class="sm">Дайсны хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
     else { const p=wmPw(e), ok=pw>=p; h='<h3><span style="color:'+e.c+'">⚑</span> '+e.n+' улс</h3><div class="sm">Хүч <b>'+f(p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Ялбал: +'+f(p*0.6)+' 🪙, Алт, оноо</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; } }
   sh.innerHTML=h+'<button class="btn" style="background:#5b3d1e" onclick="WMS=null;wmSheet()">Хаах</button>'; sh.style.display='block'; }
@@ -2400,6 +2586,7 @@ function wmLoop(){
     c.strokeStyle=m.ty==='gather'?'rgba(255,230,120,.75)':'rgba(255,90,70,.8)'; c.lineWidth=2/z+1; c.setLineDash([8,6]); c.beginPath(); c.moveTo(D.C.x,D.C.y-10); c.lineTo(e.x,e.y-10); c.stroke(); c.setLineDash([]);
     items.push({y:my+999,f:()=>{ wmDrawS(c,'u_lightcav',mx,my,26); }}); });
   D.nodes.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.45:1; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(n.x,n.y,16,6,0,0,7); c.fill(); c.fillStyle='#eadfb9'; c.beginPath(); c.arc(n.x,n.y-14,15,0,7); c.fill(); c.strokeStyle='#7a5a2a'; c.lineWidth=2; c.stroke(); const s=SPR[WM_RT[n.rt].ic]; if(s&&s.img.complete) c.drawImage(s.img,n.x-11,n.y-25,22,22*s.ih/s.iw); c.globalAlpha=1; wmLabel(c,'Lv'+n.lv,n.x,n.y+8,'#fff',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-32,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,24,t); }}); });
+  D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.35+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-8,16+4*pu,0,7); c.fill(); c.globalAlpha=1; wmDrawS(c,'ui2_chest',n.x,n.y,28); wmLabel(c,'Эрдэнэс',n.x,n.y+12,'#ffe28a',11); }}); });
   D.camps.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; wmDrawS(c,'tent',n.x,n.y,34); wmDrawS(c,'bd_h0',n.x+16,n.y+4,18); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+14,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-30,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30,t); }}); });
   D.ks.forEach(k=>{ if(!vis(k.x,k.y,90)) return; const cd=wmCd(k.id), sp=k.i<4?'ger':k.i<8?'ger2':k.i<11?'ger3':'ger4'; items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; const w=k.i<4?40:k.i<8?46:k.i<11?56:66; wmDrawS(c,sp,k.x,k.y,w); c.globalAlpha=1; c.fillStyle=k.c; c.fillRect(k.x-1,k.y-w*0.9-14,2,16); c.beginPath(); c.moveTo(k.x+1,k.y-w*0.9-14); c.lineTo(k.x+14,k.y-w*0.9-9); c.lineTo(k.x+1,k.y-w*0.9-4); c.fill(); wmLabel(c,k.n,k.x,k.y+14,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+28,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-w*0.9-20,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,44,t); }}); });
   items.push({y:D.C.y,f:()=>{ wmDrawS(c,'ger'+(S.bld.ger>=10?4:S.bld.ger>=7?3:S.bld.ger>=3?2:''),D.C.x,D.C.y,72); wmLabel(c,'🏠 Таны тосгон',D.C.x,D.C.y+16,'#8fe07a',14); wmLabel(c,'⚔'+f(totalPower()),D.C.x,D.C.y+32,'#ffd770',12); if(WMS==='city') wmRing(c,D.C.x,D.C.y-24,52,t); }});
@@ -2412,20 +2599,20 @@ function wmRing(c,x,y,r,t){ c.strokeStyle='rgba(255,255,160,'+(0.6+0.4*Math.sin(
 
 // ================= v39: ТҮҮХИЙН ӨГҮҮЛЭЛ, ТУЛААНЫ ЗОХИОН БАЙГУУЛАЛТ =================
 const CHST=[
- {why:'Есүхэй баатар нас барсны дараа Тэмүжиний гэр бүл ганцаардаж, овог аймгууд тэднийг орхисон. Хүчтэй нөхөд, үнэнч морьтон хэрэгтэй байлаа. Жалайр овог Хэрлэн, Онон голын сайхан нутагт байсан.',bio:'Мухулай. Жалайр овгийн хүн. Бага наснаасаа Чингис хаанд үнэнчээр үйлчилсэн. Хожим Алтан улсын эсрэг аянд Монгол цэргийг удирдсан хамгийн итгэлт жанжны нэг.'},
- {why:'Эцэг Есүхэй нас барсны дараа Тайчууд Тэмүжиний гэр бүлийг орхин нүүсэн. Хожим тэд Тэмүжинг барьж, хүзүүнд нь дөнгө зүүсэн. Сорганшира нэртэй хүн тусалж, Тэмүжин оргон гарсан. Одоо өшөөгөө авах цаг иржээ.',bio:'Таргутай Хирилтуг. Тайчуудын тэргүүн. Тэмүжинг барьж боолчилсон хүн. Ийм гай зовлонгоос Тэмүжин хатуужиж, хүн олныг итгэлтэй удирдах болсон.'},
- {why:'Оргосны дараа Тэмүжин Хэнтийн уул нуруу, ой модонд нуугдан хүч бүрдүүлсэн. Нуруу дагуу хад чулуун зам, цайзууд бий. Тэнд аймаг нэгдвэл цэргийн зам нээгдэнэ.',bio:'Хатагийн тэргүүн. Уулын аймгийн ахлагч. (Энэ өгүүллэг түүхээс сэдэвлэсэн тоглоомын зохиомж.)'},
- {why:'Тэмүжин өсөхийн хэрээр түүнтэй өрсөлдөх хүч бас үүссэн. Жамуха түүний анд байсан ч дараа нь өрсөлдөгч болсон. Салжиуд, Жадаран зэрэг аймгууд хүчээ нэмж байв.',bio:'Бэлгүтэй. Тэмүжиний хагас дүү. Нууц товчоонд Тэмүжиний хамгийн ойрын нөхдийн нэг. Хүчтэй, шудрага зан бүхий хүн гэж тэмдэглэгдсэн.'},
- {why:'Тэмүжин 9 настайдаа Хонгирадын Дэй сэцэний охин Бөртэтэй сүй тавьсан. Эцэг Есүхэй Бөртийн гэрт Тэмүжинг үлдээгээд буцсан юм. Хонгирад овог Монголын холбоотон болно.',bio:'Дэй сэцэн ба Бөртэ. Бөртэ бол Тэмүжиний хань, Их Монгол Улсын эх хатан. Түүний ухаан, үнэнч байдал Монголын түүхэнд алдартай.'},
- {why:'Тэмүжин, Бөртэ хоёр гэр бүл болсны дараа Мэргидүүд өшөө авах гэж дайрч, Бөртийг хулгайлсан. Тэмүжин Тоорил хан, Жамуха хоёрын тусламжтайгаар Мэргидүүдийг ялж, Бөртийг аварсан.',bio:'Тохтоа бэхи. Мэргидийн тэргүүн. Бөртийг хулгайлсан дайралтыг удирдсан. Энэ дайн Тэмүжиний нэр хүндийг өндөрсгөсөн томоохон тулалдаан.'},
- {why:'Татарууд Монголын эртний дайсан байв. Нууц товчоонд Есүхэйг Татарууд хоолонд хор хийж хөнөөсөн гэж бичсэн. Хожим Тэмүжин Татаруудыг ялж, эцгийн өшөөг авсан.',bio:'Татарын тэргүүн нар. Монголын эртний дайсан. Тэмүжин Татарыг бут цохисны дараа Монголын дорнод нутаг амар тайван болсон.'},
- {why:'Бурхан Халдун уулын ойд Урианхай аймаг амьдардаг. Тэмүжинд хожим хамгийн сайн үйлчилсэн жанжид эндээс гарчээ. Тэдний итгэл, ухаан цэргийн хүчийг нэмж өгнө.',bio:'Сүбээдэй. Урианхай овгийн жанжин. Чингис хааны хамгийн шилдэг жанжны нэг. Хорезм, Орост хүртэл морьтон цэргээ удирдсан.'},
- {why:'Хэрэйдийн Тоорил хан (Ван хан) Тэмүжиний эцэг Есүхэйн анд байсан. Тэмүжин түүнд тусалж олон жил хамт байв. Гэвч хожим харилцаа муудаж, 1203 оны орчим Хэрэйдийг ялсан.',bio:'Тоорил хан (Ван хан). Хэрэйдийн хаан. Есүхэйн анд, Тэмүжиний сүүдэр болсон. Хожим Тэмүжинтэй зөрчилдсөнөөр Хэрэйд улс мөхсөн.'},
- {why:'Хангайн баруун талд Найман улс байв. Таян хан бичиг соёлтой, том цэрэгтэй, Монголд аюул учруулах хүч болжээ. 1204 онд Монгол цэрэг тэднийг ялсан.',bio:'Таян хан. Найман улсын хаан. Тэмүжинтэй зэрэгцэн хүчтэй өрсөлдсөн. Найманыг ялсны дараа Монгол бичиг үсэг нэвтэрч эхэлсэн.'},
- {why:'Уйгурууд бичиг үсэг, худалдаа, гар урлалаараа алдартай. Уйгурын хаан Идуут Монголд сайн дураараа дагаар орсон гэж түүхэнд бий. Энд хүчээ харуулж, нөхөрлөл тогтооно.',bio:'Идуут. Уйгурын хаан. Чингис хаанд найрсаг хандсан. Уйгур бичгээр Монгол бичгийн суурь тавигдсан.'},
- {why:'Тангуд (Баруун Ся) улс Монголын өмнөд зүгт цайз олонтой улс байв. Хэд хэдэн удаа аян хийсэн. Чингис хаан 1227 онд Тангудын эсрэг аян дунд нас барсан гэж түүхэнд бий.',bio:'Бурхан хаан. Тангудын эзэн хаан. Говийн цайзаа хамгаалж байсан ч Монголын цэрэг нэвтэрсэн.'},
- {why:'Алтан улс (Зүрчид, Жин) Монголын нутгийг олон жил дарангуйлж, алба гувчуур авч байв. 1211 оноос Чингис хаан аян хийж, 1215 онд тэдний нийслэлийг эзэлсэн.',bio:'Алтан хаан. Алтан улсын эзэн. Өндөр хэрэм, олон цэрэгтэй байсан ч Монголын хурдан морьтон цэрэгт бууж өгсөн.'},
- {why:'Хорезмын шах Мухамед Монголын худалдаачдыг Отрарт хөнөөсөн. Чингис хаан элч илгээж тайлбар шаардсан ч шах элчийг бас хөнөөсөн. 1219 онд Монголын их аян эхэлсэн.',bio:'Шах Мухамед. Хорезмын шах. Монголын худалдаачин, элчийг хөнөөсөн нь Монголын баруун зүг рүү хийсэн аяныг эхлүүлсэн шалтгаан болсон.'}
+ {why:'1171 онд Есүхэй баатрыг Татарууд хорлож хөнөөсний дараа Тэмүжиний гэр бүлийг овог аймгууд орхисон. Тэмүжин хүчтэй нөхөд хайж байв. Жалайр овог Хэрлэн голын эрэг дагуу, Мэргид, Хэрэйдийн дунд нутаглаж, Боржигоны удамшлын албат байсан ч Монголын нэгдэлд чухал үүрэгтэй байв.',bio:'Мухулай. Жалайр овгийн хүн. Эцэг Гүн Уа нь хүү Мухулайг Тэмүжинд өгсөн. Дөрвөн хүлгийн нэг. Алтан улсын эсрэг 1211 оны аянд Чингис хааны дараагийн жанжин байж, Хойд Хятадын засаг болсон. 1223 онд нас барсан.'},
+ {why:'Есүхэйг нас барсны дараа Тайчууд Тэмүжиний гэр бүлийг орхин нүүсэн. Хожим тэд Тэмүжинг барьж, хүзүүнд нь дөнгө зүүсэн. Сорган-Шира хэмээх хүн нуун хоргодож, Тэмүжин оргон гарсан. 1200-1201 онд Тэмүжин Тайчуудыг ялав. (Алдарт Далан Балжудын тулалдаан 1201 оны намар, зарим эх сурвалжид 1202 онд бичигддэг.)',bio:'Таргутай Хирилтуг. Тайчуудын тэргүүн. Тэмүжинг барьж боолчилсон. Тайчууд ялагдсаны дараа тэдний талд байсан Бэсүд овгийн Зуркоодай (хожим Зэв) Тэмүжиний морийг сумдсан гэдгээ хэлж, уучлагдан жанжин болсон.'},
+ {why:'1200-1201 онд Хатагин, Салжиуд, Дөрвөд, Татар зэрэг аймгууд Тэмүжиний эсрэг эвсэв. Тэд Жамухаг "Гурхан" өргөмжилсөн. Хатагин аймгийн яг нутаг нь тодорхойгүй тул энэ бүлгийг Хэнтий орчмоор үзүүлэв.',bio:'Хатагийн тэргүүн. (Тодорхой нэр мэдэгдэхгүй.) Хөхчү бол Мөнлигийн хүү, бөө Тэб Тэнгэр. Тэр 1206 онд Онон мөрөнд Тэмүжинг Чингис хаан хэмээн өргөмжилсөн.'},
+ {why:'Тэмүжин ба Жамуха 1173 онд анд тангарагласан ч хожим салсан. 1201 онд Салжиуд, Хатагин зэрэг аймгууд Жамухаг Гурхан болгон Тэмүжиний эсрэг эвсэв. Жамуха хожим өөрийнхөө хүмүүсэд барьж өгөгдөн, Тэмүжинд цаазлагдсан (оныг эх сурвалжууд өөр өөрөөр бичдэг).',bio:'Бэлгүтэй. Есүхэйн хүү, Тэмүжиний хагас дүү. 1202 онд Татаруудыг устгах төлөвлөгөөг ил болгосон тухай Нууц товчоонд бий.'},
+ {why:'Тэмүжин 9 настайдаа Хонгирадын Дэй сэцэний охин Бөртэтэй сүй тавьсан. Есүхэй Тэмүжинг Дэй сэцэнд үлдээгээд буцахдаа Татарт хорлогдсон (1171). 1177 оны орчим Тэмүжин Бөртэ хоёр гэр бүл болсон.',bio:'Бөртэ. Хонгирад овгийн Дэй сэцэний охин, Тэмүжиний хань, Жочи, Цагаадай, Өгөдэй, Толуйн эх. Түүний ухаан, үнэнч байдал Монголын түүхэнд алдартай.'},
+ {why:'Есүхэй Мэргидийн Чиледүгээс Өэлүнг булаасан юм. 1177 оны орчим Мэргидүүд өшөөгөө авах гэж Бөртийг хулгайлсан. Тэмүжин Хэрэйдийн Тоорил хан, Жамуха хоёрын тусламжтай Мэргидийг цохиж Бөртийг авсан.',bio:'Тохтоа бэхи. Мэргидийн тэргүүн. Бөртийг хулгайлсан дайралтыг удирдсан. Мэргидийг 1205 онд бүрмөсөн ялсан ч Тохтоа оргож тарсан.'},
+ {why:'Татарууд Монголын эртний дайсан байв. Нууц товчоонд Есүхэйг Татарууд найрын хоолонд хор хийж хөнөөсөн гэж бичсэн (1171). 1196 онд Тэмүжин Алтан улстай хамт Татарыг цохиж, 1202 онд бүрэн ялсан.',bio:'Мэгүжин Сэулт. Татарын тэргүүн. Татар ялагдсанаар Монголын дорнод нутаг Тэмүжинд захирагдсан.'},
+ {why:'Бурхан Халдун уулын ойд Урианхай аймаг амьдардаг. Нууц товчоонд Жарчуудай өөрийн хүү Зэлмэг Тэмүжин нялх байхад нь бэлэглэж, хожим дүү нь Сүбээдэй мөн нэгдсэн. Сүүлийн үеийн судлаачид Сүбээдэйг Урианхай байсныг эргэлзэх нь бий.',bio:'Сүбээдэй. Хорезм (1219-1221), Хойд Кавказ ба Калкын тулалдаан (1223), Орос (1237-1240), Унгар (Мохи, 1241) хүртэл аянд жанжлан, 1248 онд Туул голын хавьд гэртээ нас барсан.'},
+ {why:'Хэрэйдийн Тоорил хан (Ван хан) Тэмүжиний эцэг Есүхэйн анд байсан. Тэмүжин түүнд тусалсан. Гэвч 1203 онд харилцаа тасарч, Тэмүжин Хэрэйдийг ялсан. Тоорил зугатаж явахдаа Найманд алагдсан.',bio:'Тоорил хан (Ван хан). Хэрэйдийн хаан, Есүхэйн анд. Алтан улсаас "Ван" цол авсан. Өөрийн хүү Сэнгүмийн өдөөлтөөр Тэмүжинтэй дайсагнаж, Хэрэйд улс мөхсөн.'},
+ {why:'Хангай, Алтайн хавьд Найман улс байв. Таян хан бичиг соёлтой, том цэрэгтэй байв. 1204 оны 5-р сард Чахирмаутын тулалдаанд Тэмүжин Таяныг ялсан.',bio:'Таян хан. Найман улсын хаан. Найманыг ялсны дараа тэдний бичээч Тата-Тонга Уйгур бичгийг Монголд нэвтрүүлж, тамга хэрэглэх болсон.'},
+ {why:'Уйгурууд бичиг үсэг, худалдаа, гар урлалаараа алдартай. 1209 онд Уйгурын Идуут Барчуг Чингис хаанд сайн дураараа дагаар орсон. Тиймээс энэ нь жинхэнэ дайн биш, харин хүчээ үзүүлэх сорил юм.',bio:'Барчуг Идуут. Уйгурын хаан ("Идуут" бол цол). Чингис хаанд найрсаг хандсан. Чингис хаан охиноо түүнд өгсөн. Уйгур бичиг Монгол бичгийн үндэс болсон.'},
+ {why:'Тангуд (Баруун Ся) улс Монголын өмнөд зүгт цайз олонтой улс байв. Чингис хаан 1205, 1207, 1209-1210 онд аян хийж, 1226-1227 онд сүүлчийн аяндаа Тангудын эсрэг явж байхдаа 1227 онд нас барсан.',bio:'Тангудын хаан. Нийслэл Жунсин (одоогийн Иньчуань) Шар мөрний хойд талд оршиж байв. Тангуд улс 1227 онд мөхсөн.'},
+ {why:'Алтан улс (Зүрчид, Жин) тал нутгийн аймгуудаас алба авч, тэднийг бие биентэй нь зөрчилдүүлж захирч байв. 1210 онд Жин Чингис хаанаас дагаар орохыг шаардахад татгалзсан. 1211 оны Едүлингийн тулалдаанд Монгол ялж, 1213-1214 онд Жундуг бүсэлж, 1215 оны 6-р сарын 1-нд нийслэл Жундуг (одоогийн Бээжин) эзэлсэн. Алтан улс бүрмөсөн мөхсөн нь 1234 онд Өгөдэйн үед болсон.',bio:'Алтан хаан (Жин улсын хаан). Өндөр хэрэмтэй хотууд, их цэрэгтэй байсан ч Монголын хурдан цэрэгт ялагдаж хойд нутгаа алдсан.'},
+ {why:'1218 онд Хорезмын Отрарын захирагч Монголын 450 орчим худалдаачдыг хөнөөсөн. Чингис хаан элч илгээж тайлбар шаардсан ч Шах Мухамед элчийг хөнөөж, бусдын сахлыг хусаж доромжилсон. 1219 онд Монголын их аян эхэлсэн.',bio:'Шах Мухамед II. Хорезмын шах. Элч худалдаачдыг хөнөөсөн нь Монголын баруун зүг рүү хийсэн аяны шалтгаан болсон. Шах 1220-1221 онд Каспийн далайн нэгэн арал дээр нас барсан. (Хубилай нояон бол Дөрвөн нохойн нэг, хожмын Хубилай хаан биш.)'}
 ];
 function stTxt(ci,s){ const t=CAMP[ci], k=CHST[ci];
   return [t.river+' орчимд '+t.n+' аймгийн харуул байна. Тэднийг чимээгүй цохиж, замыг нээнэ.',
@@ -2437,14 +2624,14 @@ function scard(ci,s,go){
   e.innerHTML='<div class="sci"><div class="sch">'+ico(t.ic,36)+'<div><b>'+(ci+1)+'-р бүлэг · '+t.n+'</b><div class="sm">'+(s+1)+'/4 · '+(s===3?t.who:CSTEP[s])+'</div></div></div>'+
    (s===0?'<div class="sct"><b>Яагаад дайн болов?</b><br>'+k.why+'</div>':'')+
    '<div class="sct">'+stTxt(ci,s)+'</div>'+(s===3?'<div class="sct" style="color:#ffd770"><b>Түүхэн хүн:</b><br>'+k.bio+'</div>':'')+
-   '<div class="sm" style="margin:6px 0">Түүхээс сэдэвлэсэн өгүүллэг</div><button class="btn red" id="scgo">Тулалдах</button> <button class="btn" style="background:#5b3d1e" id="scno">Буцах</button></div>';
+   '<div class="sct" style="color:#9fe08a"><b>📜 Түүхэн баатар:</b> '+((HEROES.find(x=>x.id===t.req)||{}).n||'')+' энэ тулаанд зайлшгүй оролцоно'+(S.heroes[t.req]?'':' (өөрийн баатар биш ч тус болно)')+'</div><div class="sm" style="margin:6px 0">Түүхээс сэдэвлэсэн өгүүллэг</div><button class="btn red" id="scgo">Тулалдах</button> <button class="btn" style="background:#5b3d1e" id="scno">Буцах</button></div>';
   document.body.appendChild(e); $('scgo').onclick=()=>{ e.remove(); go(); }; $('scno').onclick=()=>e.remove(); }
 function campStart(ci,s,skip){
   if(!stOpen(ci,s)){ say('Эхлээд өмнөх алхмыг дуусга'); return; }
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   if(!skip){ scard(ci,s,()=>campStart(ci,s,1)); return; }
   const t=CAMP[ci], p=stepP(ci,s); closeM();
-  startBattle(0,{n:t.n+': '+CSTEP[s],fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+s)/4)),cb:()=>campWin(ci,s),back:'cmap:'+ci,map:ci===13?9:ci===5?5:BIOMAP[t.bio]});
+  startBattle(0,{n:t.n+': '+CSTEP[s],fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+s)/4)),req:t.req,rep:!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]),cb:()=>campWin(ci,s),back:'cmap:'+ci,map:ci===13?9:ci===5?5:BIOMAP[t.bio]});
 }
 function btLayout(U,W,H,e){
   const cols=s=>s?{heavy:0.62,foot:0.62,cav:0.73,archer:0.85}:{heavy:0.38,foot:0.38,cav:0.27,archer:0.15};
@@ -2486,10 +2673,11 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) Object.ke
 (function(){ const b=document.createElement('button'); b.id='musb'; b.setAttribute('onclick','musToggle()'); $('rcol').appendChild(b); musBtn(); })();
 
 // ---------- эхлүүлэх ----------
-load(); offline(); resize(); updateHUD(); setIcons();
+load(); acHook(); offline(); resize(); updateHUD(); setIcons();
 if(!S.met) setTimeout(()=>say('Дорж өвгөнийг дарж сонгоод, газар луу чиглүүлээрэй'),600);
 addEventListener('resize',resize);
-setInterval(()=>{ tick(1); S.last=Date.now(); updateHUD(); },1000);
+setInterval(()=>{ acHook(); tick(1); S.last=Date.now(); updateHUD(); },1000);
+setInterval(()=>{ try{ const w=outerWidth-innerWidth>200, h=outerHeight-innerHeight>260; if((w||h)&&!S.dev){ S.dev=1; acFlag('dev'); } }catch(e){} },5000);
 setInterval(save,10000);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); else { offline(); refresh(); } });
 requestAnimationFrame(frame);
@@ -2497,6 +2685,7 @@ requestAnimationFrame(frame);
 (function(){ const b=document.createElement('button'); b.setAttribute('onclick',"openM('quests')"); b.innerHTML='<span><img class="mi" data-ic="q_daily"></span>Даалгавар<em id="qb"></em>'; $('rcol').appendChild(b); setIcons(); })();
 
 (function(){ [['shop','ui_gem','Дэлгүүр','shb'],['camp','m_map','Түүхэн аян',''],['wmap','ui2_map','Дэлхий','']].forEach(([k,ic,t,em])=>{ const b=document.createElement('button'); b.setAttribute('onclick',"openM('"+k+"')"); b.innerHTML='<span><img class="mi" data-ic="'+ic+'"></span>'+t+(em?'<em id="'+em+'"></em>':''); $('rcol').appendChild(b); }); setIcons(); })();
+(function(){ const st=document.createElement('style'); st.textContent='#lcol{position:fixed;left:6px;z-index:3;display:flex;flex-direction:row;gap:6px}#lcol button{position:relative;width:60px;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-size:10px;font-weight:bold;padding:2px 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 0 #1a0f06}'; document.head.appendChild(st); const l=document.createElement('div'); l.id='lcol'; document.body.appendChild(l); const rc=$('rcol'); [...rc.querySelectorAll('button')].forEach(b=>{ const o=b.getAttribute('onclick')||''; if(/openM\('(shop|camp|wmap)'\)/.test(o)) l.appendChild(b); }); function pos(){ const p=$('pcard'); if(p){ l.style.top=(p.getBoundingClientRect().bottom+8)+'px'; } } pos(); setInterval(pos,1000); addEventListener('resize',pos); })();
 </script>
 <script>
 (function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');

@@ -209,7 +209,7 @@ function squad(){ return Object.keys(S.heroes).sort((a,b)=>heroPower(b)-heroPowe
 function facBonus(){ const sq=squad(); let best={m:1,txt:''}; FACS.forEach(F=>{ const c=sq.filter(id=>F.ids.includes(id)).length; const m=c>=4?1.35:c>=3?1.2:c>=2?1.08:1; if(m>best.m) best={m,txt:ico(F.ic,22)+' '+F.n+' овог ×'+c+' → +'+Math.round((m-1)*100)+'%'}; }); return best; }
 const RELICS=[{id:'seal',n:'Хааны тамга',ic:'r_seal',st:'atk',v:12,s:5},{id:'banner1',n:'Хөх сүлд',ic:'r_banner1',st:'atk',v:14,s:5},{id:'banner2',n:'Хар сүлд',ic:'r_banner2',st:'hp',v:14,s:5},{id:'goldsword',n:'Алтан илд',ic:'r_goldsword',st:'atk',v:10,s:4},{id:'drum',n:'Бөөгийн хэнгэрэг',ic:'r_drum',st:'hp',v:12,s:4},{id:'hadag',n:'Хөх хадаг',ic:'r_hadag',st:'hp',v:10,s:3},{id:'feather',n:'Бүргэдийн өд',ic:'r_feather',st:'atk',v:6,s:3},{id:'bow',n:'Мөнгөн нум',ic:'r_bow',st:'atk',v:8,s:3},{id:'saddle',n:'Гоёлтой эмээл',ic:'r_saddle',st:'hp',v:8,s:3},{id:'helm',n:'Хөхий малгай',ic:'r_helm',st:'hp',v:7,s:3},{id:'whip',n:'Алтан ташуур',ic:'r_whip',st:'atk',v:5,s:2},{id:'jade',n:'Хаш бөгж',ic:'r_jade',st:'hp',v:6,s:2},{id:'horn',n:'Дайны бүрээ',ic:'r_horn',st:'atk',v:4,s:1},{id:'ironring',n:'Гахиилд',ic:'r_ironring',st:'hp',v:4,s:1}];
 function relMig(){ if(!S.heq) S.heq={}; if(S.equip&&S.equip.length){ const b=Object.keys(S.heroes).sort((x,y)=>heroPower(y)-heroPower(x))[0]; if(b){ S.heq[b]=(S.heq[b]||[]).concat(S.equip).slice(0,3); S.equip=[]; } } }
-function relicMul(hid){ relMig(); let a=0,h=0; (hid&&S.heq[hid]||[]).forEach(id=>{ const r=RELICS.find(x=>x.id===id); if(r){ if(r.st==='atk') a+=r.v/100; else h+=r.v/100; } }); const gm=gearMul(); return {a:1+a+gm.a,h:1+h+gm.h}; }
+function relicMul(hid){ relMig(); let a=0,h=0; (hid&&S.heq[hid]||[]).forEach(id=>{ const r=RELICS.find(x=>x.id===id); if(r){ if(r.st==='atk') a+=r.v/100; else h+=r.v/100; } }); const gm=gearMul(); return {a:1+a+gm.a+rsb('mil_atk'),h:1+h+gm.h+rsb('mil_hp')}; }
 const ZTILE=['mp_grass','mp_forest','mp_desert','mp_snow'];
 const STAGEZ=[{n:'Ногоон тал',e:'🌿',from:0,to:1},{n:'Хангайн ой',e:'🌲',from:2,to:3},{n:'Говийн цөл',e:'🏜️',from:4,to:5},{n:'Алтайн нуруу',e:'🏔️',from:6,to:6}];
 const RATES = [[5,2],[4,6],[3,14],[2,28],[1,50]];
@@ -251,7 +251,7 @@ const BUILD = {
 };
 const PROD=['airag','aaruul','tos','esgii','buuz','stable','range','yard'];
 const TR=[{k:'t_cav',b:'stable',ty:'cav',pw:9,key:'tpc',n:'Морьт'},{k:'t_arc',b:'range',ty:'archer',pw:8,key:'tpa',n:'Нумчин'},{k:'t_spr',b:'yard',ty:'foot',pw:7,key:'tps',n:'Жадчин'}];
-const trPow=T=>Math.floor((S.res[T.k]||0)*T.pw*(1+0.35*Math.max(0,(S.bld[T.b]||1)-1)));
+const trPow=T=>Math.floor((S.res[T.k]||0)*T.pw*(1+0.35*Math.max(0,(S.bld[T.b]||1)-1))*(1+rsb('mil_troop')));
 const trTier=T=>Math.min(4,1+Math.floor(((S.bld[T.b]||1)-1)/2));
 const trKey=(T,f)=>T.key==='tps'?'tps'+(trTier(T)-1):T.key+((trTier(T)-1)*2+(f||0));
 const GEAR=[{id:'helm',n:'Дуулга',c:0,st:'h',v:[3,6,10]},{id:'armor',n:'Хуяг',c:1,st:'h',v:[3,6,10]},{id:'boots',n:'Гутал',c:2,st:'a',v:[2,4,7]},{id:'bow',n:'Нум',c:3,st:'a',v:[3,6,10]},{id:'sabre',n:'Сэлэм',c:4,st:'a',v:[3,6,10]},{id:'saddle',n:'Эмээл',c:5,st:'h',v:[2,4,7]},{id:'quiver',n:'Сумны уут',c:6,st:'a',v:[2,4,7]},{id:'belt',n:'Бүс',c:7,st:'h',v:[2,4,7]}];
@@ -320,9 +320,9 @@ const XPG={col:0.2,win:25,up:20,ord:12,nd:12,sell:5};
 function xpNeed(l){ return Math.floor(30+l*l*14); }
 function dqInit(){ const d=new Date().toDateString(); if(!S.dq||S.dq.d!==d) S.dq={d:d,c:{},cl:{},box:0}; }
 function qh(t,n){ S.st=S.st||{}; S.st[t]=(S.st[t]||0)+n; dqInit(); S.dq.c[t]=(S.dq.c[t]||0)+n; addXP((XPG[t]||0)*n); }
-function addXP(n){ if(!(n>0)) return; S.pig=Math.min(500,(S.pig||0)+n*0.06); S.xp=(S.xp||0)+n; S.pl=S.pl||1; while(S.xp>=xpNeed(S.pl)){ S.xp-=xpNeed(S.pl); S.pl++; lvUp(S.pl); } }
+function addXP(n){ if(!(n>0)) return; n=Math.round(n*(1+rsb('cul_xp'))); S.pig=Math.min(500,(S.pig||0)+n*0.06); S.xp=(S.xp||0)+n; S.pl=S.pl||1; while(S.xp>=xpNeed(S.pl)){ S.xp-=xpNeed(S.pl); S.pl++; lvUp(S.pl); } }
 function lvUp(l){
-  const g=100*l; S.res.gold+=g; S.res.alt+=2;
+  const g=100*l; S.res.gold+=g; S.res.alt+=2; sfx('lvl'); vib([30,40,30]);
   let e=$('lvup'); if(!e){ e=document.createElement('div'); e.id='lvup'; e.onclick=()=>{e.style.display='none'}; document.body.appendChild(e); }
   e.innerHTML='<div class="lvb">'+ico('ui_lvbanner',150)+'<div class="lvt">ТҮВШИН '+l+'!</div><div class="lvr">+'+g+' 🪙 · +2 Алт</div><div class="sm">Дарж хаа</div></div>'; e.style.display='flex';
 }
@@ -685,10 +685,10 @@ function load(){
 function save(){ acHook(); acWrite(); }
 
 // ---------- тооцоо ----------
-const cap = () => 100 + 200 * S.bld.horgo;
-const herdMax = () => S.bld.hashaa>0 ? 10 + 10*S.bld.hashaa : 5;
+const cap = () => 100 + 200 * S.bld.horgo + rsb('eco_cap');
+const herdMax = () => (S.bld.hashaa>0 ? 10 + 10*S.bld.hashaa : 5) + rsb('eco_herd');
 const POPCAP=[2,2,3,4,5];
-const popCap=()=>['ger','ger2','ger3','ger4','ger5'].reduce((a,k)=>a+((S.bld[k]>0&&!(S.sites&&S.sites[k]))?POPCAP[Math.min(POPCAP.length,S.bld[k])-1]:0),0)||2;
+const popCap=()=>['ger','ger2','ger3','ger4','ger5'].reduce((a,k)=>a+((S.bld[k]>0&&!(S.sites&&S.sites[k]))?POPCAP[Math.min(POPCAP.length,S.bld[k])-1]:0),0)+Math.floor(rsb('cul_pop'))||2;
 const FPL=[1,2,4,6,8], farmPlots=()=>FPL[Math.min(FPL.length,Math.max(1,S.bld.tarialan))-1];
 const STALL=['honi','yamaa','uher','aduu','temee'];
 function killNpc(e){ if(ents.filter(x=>x.kind==='person').length<=1) return false; S.dead=S.dead||[]; S.dead.push(e.idx); ents.splice(ents.indexOf(e),1); refresh(); return true; }
@@ -702,8 +702,8 @@ function lootAnimals(n,rp){ if(rp&&Math.random()>0.2) return ''; const got={}; c
   const t=Object.keys(got).map(k=>ANIMALS[k].n+' ×'+got[k]).join(', '); if(t) syncEnts(false);
   return (t?'<div class="sm">🐑 Олз: '+t+' (ажилчид хөтлөн ирлээ)</div>':'')+(ov?'<div class="sm">Хашаа дүүрэн тул '+ov+' мал мах болов: +'+mt+' мах</div>':''); }
 const herdCount = () => Object.values(S.animals).reduce((a,b)=>a+b,0);
-const prodMul = () => 1 + 0.2 * (S.bld.ger - 1) + 0.04*(S.bld.ovoo||0) + 0.03*joinedN() + (vipActive()?0.1:0);
-const sellMult = () => S.bld.market>0 ? 1 + 0.25*(S.bld.market-1) : 0.7;
+const prodMul = () => 1 + rsb('eco_prod') + 0.2 * (S.bld.ger - 1) + 0.04*(S.bld.ovoo||0) + 0.03*joinedN() + (vipActive()?0.1:0);
+const sellMult = () => (S.bld.market>0 ? 1 + 0.25*(S.bld.market-1) : 0.7)*(1+rsb('eco_sell'));
 function rate(){
   const r = {meat:0, milk:0, wool:0, gold:0};
   for(const k in ANIMALS){ const a=ANIMALS[k], c=S.animals[k]; for(const x in r) r[x]+=a[x]*c; }
@@ -719,7 +719,7 @@ function heroPower(id){
   const h = S.heroes[id]; if(!h) return 0;
   const def = HEROES.find(x=>x.id===id);
   const st=(S.sk&&S.sk.e[id]!=null)?SKT[S.sk.e[id]].bn:0;
-  return Math.floor(def.s * 50 * (1 + 0.25*(h-1)) * (1+st));
+  return Math.floor(def.s * 50 * (1 + 0.25*(h-1)) * (1+st) * (1+rsb('mil_all')));
 }
 function totalPower(){
   const list = Object.keys(S.heroes).map(heroPower).sort((a,b)=>b-a).slice(0, 3 + S.bld.ger);
@@ -805,14 +805,15 @@ function tick(secs){
   }
   if(S.farm.stage===1){ const sk=seasonK(); if(sk!=='winter'){ S.farm.t += secs*(sk==='spring'?1.2:1); if(S.farm.t>=GROW){ S.farm.stage=2; } } }
   if(S.upg) for(const k in S.upg) S.upg[k].p+=secs;
+  if(S.rs&&S.rs.cur) S.rs.cur.left-=secs;
   for(const k in S.sites) S.sites[k].p+=secs*0.5;
   prodTick(secs); ordTick(secs); seasonTick();
 }
 function offline(){
   if(window._acTamper){ window._acTamper=0; acFlag('save'); }
   if(Date.now()<S.last-120000){ acFlag('time'); S.last=Date.now(); return; }
-  const secs = Math.min((Date.now()-S.last)/1000, 8*3600);
-  if(secs>30){ tick(secs); say('Чамайг байхгүй байхад '+Math.floor(secs/60)+' минутын нөөц цугларлаа'); }
+  const secs = Math.min((Date.now()-S.last)/1000, 12*3600);
+  if(secs>30){ const b0={}; for(const k in S.res) b0[k]=S.res[k]; tick(secs); if(secs>=300 && typeof offPop==='function'){ const g={}; for(const k in S.res){ const d=S.res[k]-(b0[k]||0); if(d>=1&&k!=='alt') g[k]=d; } offPop(g,secs); } else say('Чамайг байхгүй байхад '+Math.floor(secs/60)+' минутын нөөц цугларлаа'); }
   S.last = Date.now();
 }
 
@@ -1812,6 +1813,10 @@ function modalContent(k){
   if(k==='shop') return shopHTML();
   if(k==='box') return boxHTML();
     if(k==='rbox') return rboxHTML();
+  if(k==='res') return resHTML();
+  if(k==='arena') return arenaHTML();
+  if(k==='pwr') return pwrHTML();
+  if(k==='sup') return supHTML();
   if(k==='barilga') return barilgaHTML();
   if(k==='mal'){
     let h='<h2>Мал</h2>'+bCard('hashaa')+'<div class="card sm">Хашаанд '+herdCount()+'/'+herdMax()+' мал багтана.</div>';
@@ -1825,7 +1830,7 @@ function modalContent(k){
   }
   if(k==='baatar'){
     let h='<h2>Баатар</h2><div class="card"><h3>Баатар дуудах</h3>'+
-      '<div class="sm">5★ 2%, 4★ 6%, 3★ 14%, 2★ 28%, 1★ 50%. Давхцвал баатар хүчирхэгжинэ.</div>'+
+      '<div class="sm">5★ 2%, 4★ 6%, 3★ 14%, 2★ 28%, 1★ 50%. Давхцвал баатар хүчирхэгжинэ.</div><div class="sm" style="color:#ffd35a">Баталгаат 5★: '+sumPity()+' дуудлагад</div>'+
       '<div style="margin-top:8px" class="row"><button class="btn" '+(S.res.alt<sumAlt(1)?'disabled':'')+' onclick="summon(1)">1 удаа · '+sumAlt(1)+' '+ico('ui_gem',20)+'</button>'+
       '<button class="btn" '+(S.res.alt<sumAlt(10)?'disabled':'')+' onclick="summon(10)">10 удаа · '+sumAlt(10)+' '+ico('ui_gem',20)+'</button></div></div>';
     const owned=HEROES.filter(x=>S.heroes[x.id]).sort((a,b)=>b.s-a.s||heroPower(b.id)-heroPower(a.id));
@@ -2052,7 +2057,7 @@ cv.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(Z*(e.deltaY<0?1.12:
 
 // ---------- үйлдэл ----------
 function daily(){ evoShow(0); }
-function passAdd(n){ if(!S.pass) S.pass={p:0,c:0}; S.pass.p+=n; }
+function passAdd(n){ if(!S.pass) S.pass={p:0,c:0}; S.pass.p+=Math.round(n*evBonus().p*(1+rsb('cul_pass'))); }
 const PASSN=20, PASSP=50;
 function passRew(i){ const n=i+1; if(n===PASSN) return {alt:60,relic:4}; if(n===10) return {alt:30,relic:3}; if(n%5===0) return {alt:20}; return {alt:n%2?5:8}; }
 const LOGR=[{alt:5},{alt:8},{alt:10},{alt:12},{alt:15},{alt:20},{alt:50,relic:3}];
@@ -2060,12 +2065,12 @@ function rewT(r){ return ico('ui_gem',16)+' <b>'+r.alt+'</b>'+(r.relic?'<br><sma
 function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s>=r.relic); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' дурсгал олдлоо!'); } }
 function logDay(){ const d=Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5); return d; }
 function logState(){ if(!S.login) S.login={d:-9,n:0}; const t=logDay(), L=S.login; const claimed=L.d===t; const next=claimed?L.n:(L.d===t-1?L.n:0); return {t,claimed,idx:claimed?(L.n+6)%7:next%7}; }
-function logClaim(){ const st=logState(); if(st.claimed){ say('Өнөөдрийн бэлэг авсан'); return; } givR(LOGR[st.idx]); S.login={d:st.t,n:st.idx+1}; S.daily=new Date().toDateString(); passAdd(20); say('Бэлэг авлаа: +'+LOGR[st.idx].alt+' Алт'); refresh(); evoShow(); }
+function logClaim(){ const st=logState(); if(st.claimed){ say('Өнөөдрийн бэлэг авсан'); return; } givR(LOGR[st.idx]); sfx('coin'); vib(30); S.login={d:st.t,n:st.idx+1}; S.daily=new Date().toDateString(); passAdd(20); say('Бэлэг авлаа: +'+LOGR[st.idx].alt+' Алт'); refresh(); evoShow(); }
 function passPrem(i){ const n=i+1; if(n===PASSN) return {alt:200,relic:5}; if(n%5===0) return {alt:50,relic:3}; return {alt:n%2?15:20}; }
-function passClaim(){ if(!S.pass) S.pass={p:0,c:0}; const P=S.pass; let n=0; if(P.vip){ P.vc=P.vc||0; while(P.vc<PASSN&&P.p>=(P.vc+1)*PASSP){ givR(passPrem(P.vc)); P.vc++; n++; } } while(P.c<PASSN&&P.p>=(P.c+1)*PASSP){ givR(passRew(P.c)); P.c++; n++; } say(n?n+' шагнал авлаа':'Авах шагнал алга'); refresh(); evoShow(1); }
+function passClaim(){ if(!S.pass) S.pass={p:0,c:0}; const P=S.pass; let n=0; if(P.vip){ P.vc=P.vc||0; while(P.vc<PASSN&&P.p>=(P.vc+1)*PASSP){ givR(passPrem(P.vc)); P.vc++; n++; } } while(P.c<PASSN&&P.p>=(P.c+1)*PASSP){ givR(passRew(P.c)); P.c++; n++; } say(n?n+' шагнал авлаа':'Авах шагнал алга'); sfx(n?'coin':'err'); refresh(); evoShow(1); }
 function evoShow(tab){ let o=document.getElementById('hbio'); if(o) o.remove(); o=document.createElement('div'); o.id='hbio'; o.onclick=e=>{ if(e.target===o) o.remove(); }; const st=logState(); if(!S.pass) S.pass={p:0,c:0}; const P=S.pass; let body;
-  const tabs='<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn'+(tab?'':' red')+'" style="flex:1" onclick="evoShow(0)">7 хоног</button><button class="btn'+(tab?' red':'')+'" style="flex:1" onclick="evoShow(1)">Пасс</button></div>';
-  if(!tab){ body='<div class="hbn" style="font-size:18px">7 хоногийн шагнал</div><div class="sm" style="text-align:center">Өдөр бүр орвол шагнал өснө. Нэг өдөр алгассан бол эхнээс эхэлнэ.</div><div class="evg">'+LOGR.map((r,i)=>{ const done=st.claimed?i<=st.idx:i<st.idx, cur=!st.claimed&&i===st.idx; return '<div class="evd'+(done?' dn':'')+(cur?' cu':'')+'"><b>'+(i+1)+'-р өдөр</b><span>'+rewT(r)+'</span>'+(done?'<i>✓</i>':'')+'</div>'; }).join('')+'</div><button class="btn" style="margin-top:10px;width:100%" '+(st.claimed?'disabled':'')+' onclick="logClaim()">'+(st.claimed?'Өнөөдөр авсан ✓':'Бэлэг авах')+'</button>'; }
+  const eb=evBonus(), tabs=(eb.n?'<div class="sm" style="text-align:center;color:#ffd24a;margin-bottom:6px">🎉 '+eb.n+': ялалтын төгрөг ×'+eb.g+', Пасс оноо ×'+eb.p+'</div>':'')+'<div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn'+(tab?'':' red')+'" style="flex:1" onclick="evoShow(0)">7 хоног</button><button class="btn'+(tab?' red':'')+'" style="flex:1" onclick="evoShow(1)">Пасс</button></div>';
+  if(!tab){ body='<div class="hbn" style="font-size:18px">7 хоногийн шагнал</div><div class="sm" style="text-align:center">Өдөр бүр орвол шагнал өснө. Нэг өдөр алгассан бол эхнээс эхэлнэ.</div><div class="evg">'+LOGR.map((r,i)=>{ const done=st.claimed?i<=st.idx:i<st.idx, cur=!st.claimed&&i===st.idx; return '<div class="evd'+(done?' dn':'')+(cur?' cu':'')+'"><b>'+(i+1)+'-р өдөр</b><span>'+rewT(r)+'</span>'+(done?'<i>✓</i>':'')+'</div>'; }).join('')+'</div><button class="btn" style="margin-top:10px;width:100%" '+(st.claimed?'disabled':'')+' onclick="logClaim()">'+(st.claimed?'Өнөөдөр авсан ✓':'Бэлэг авах')+'</button><button class="btn" style="margin-top:6px;width:100%" onclick="document.getElementById(\'hbio\').remove();S.tutDone=0;tutShow(0)">📖 Заавар дахин үзэх</button>'; }
   else { const can=Math.min(PASSN,Math.floor(P.p/PASSP)), cl=P.vip?Math.min(P.c,P.vc||0):P.c; body='<div class="hbn" style="font-size:18px">Пасс · '+P.c+'/'+PASSN+'</div><div class="sm" style="text-align:center">Ялалт +10, өдрийн бэлэг +20, хайрцаг +5, баатар дуудах +2 оноо. '+PASSP+' оноо бүрт шагнал.</div><div class="bar" style="height:10px;margin:8px 0"><i style="width:'+Math.min(100,(P.p%PASSP)/PASSP*100)+'%;background:#ffd24a"></i></div><div class="sm" style="text-align:center">Оноо: '+P.p+'</div>'+(P.vip?'<div style="text-align:center;margin-top:6px;color:#9fe08a;font-weight:bold">✦ Хүндэт пасс идэвхтэй</div>':'<button class="btn red" style="width:100%;margin-top:8px" onclick="buyReal(\'passvip\')">✦ Хүндэт пасс · '+fmtMnt(PASSV.mnt)+'</button>')+'<div class="pssh"><span>Шат</span><span>Үнэгүй</span><span>Хүндэт</span></div><div class="pssl">'+Array.from({length:PASSN},(_,i)=>{ const r=passRew(i), q=passPrem(i), dn=i<P.c, vd=(P.vc||0)>i, rd=!dn&&P.p>=(i+1)*PASSP, lk=!P.vip; return '<div class="pssi'+(rd?' rd':'')+'"><b class="pssn">'+(i+1)+'</b><div class="pssc'+(dn?' dn':'')+'">'+rewT(r)+(dn?'<i>✓</i>':'')+'</div><div class="pssc pssp'+(vd?' dn':'')+(lk?' pssk':'')+'">'+rewT(q)+(lk?'<i class="lkk">🔒</i>':'')+(vd?'<i>✓</i>':'')+'</div></div>'; }).join('')+'</div><button class="btn" style="margin-top:10px;width:100%" '+(can>cl?'':'disabled')+' onclick="passClaim()">Бүгдийг авах</button>'; }
   o.innerHTML='<div class="hbc">'+tabs+body+'<button class="btn" style="margin-top:8px;width:100%" onclick="document.getElementById(\'hbio\').remove()">Хаах</button></div>'; document.body.appendChild(o); }
 (function(){ const st=document.createElement('style'); st.textContent='.evg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.evd{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:6px 3px;text-align:center;font-size:11px;display:flex;flex-direction:column;gap:3px;min-height:58px;justify-content:center}.evd b{color:#ffd770;font-size:10px}.evd.cu{border-color:#ffd24a;box-shadow:0 0 10px #ffd24a;background:#4a3414}.evd.dn{opacity:.55}.evd i,.pssi i{position:absolute;top:1px;right:4px;color:#9fe08a;font-style:normal;font-size:14px}.evd:nth-child(7){grid-column:span 2}.pssh,.pssi{display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:stretch}.pssh{margin-top:10px;font-size:11px;color:#c9b58a;text-align:center}.pssl{display:flex;flex-direction:column;gap:5px;margin-top:4px;max-height:42vh;overflow:auto}.pssi{padding:0;background:none;border:0}.pssn{display:flex;align-items:center;justify-content:center;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;color:#ffd770;font-size:13px}.pssi.rd .pssn{border-color:#ffd24a;box-shadow:0 0 8px #ffd24a}.pssc{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:4px 6px;text-align:center;font-size:13px;min-height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center}.pssc img{vertical-align:middle}.pssc small{font-size:10px;color:#e8c36a}.pssc.pssp{border-color:#a8841f;background:#3a2a10}.pssc.pssk{opacity:.7}.pssc.dn{opacity:.45}.pssc i{position:absolute;top:1px;right:4px;color:#9fe08a;font-style:normal;font-size:13px}.pssc i.lkk{color:#fff;font-size:12px}'; document.head.appendChild(st); })();
@@ -2081,7 +2086,7 @@ function upgrade(k){
   const c=upCost(k); if(S.res.gold<c){ say('Төгрөг хүрэхгүй байна'); return; }
   S.res.gold-=c; S.upg[k]={p:0,need:upNeed(k)}; say(BUILD[k].n+' сайжруулж эхэллээ'); refresh();
 }
-function upDone(k){ delete S.upg[k]; S.bld[k]++; qh('up',1); say(BUILD[k].n+' '+S.bld[k]+'-р түвшинд хүрлээ!'); buildBg(); syncEnts(true); refresh(); }
+function upDone(k){ sfx('build'); vib(30); delete S.upg[k]; S.bld[k]++; if(k==='ger') setTimeout(ageCheck,400); qh('up',1); say(BUILD[k].n+' '+S.bld[k]+'-р түвшинд хүрлээ!'); buildBg(); syncEnts(true); refresh(); }
 function upRush(k){ const u=S.upg&&S.upg[k]; if(!u) return; const c=Math.max(1,Math.ceil((u.need-u.p)/30)); if(S.res.alt<c){ say('Алт хүрэхгүй байна'); return; } S.res.alt-=c; u.p=u.need; upDone(k); }
 function upSweep(){
   Object.keys(S.upg||{}).forEach(k=>{ const u=S.upg[k]; if(u&&u.p>=u.need) upDone(k); });
@@ -2136,13 +2141,14 @@ function summon(n){
   const c=sumAlt(n); if(S.res.alt<c){ say('Алт хүрэхгүй байна. Дэлгүүрээс авна уу.'); return; }
   S.res.alt-=c;
   const got=[];
-  for(let i=0;i<n;i++){ const h=roll(), nw=!S.heroes[h.id]; S.heroes[h.id]=(S.heroes[h.id]||0)+1; got.push({h,nw,s:h.s,n:h.n}); }
+  S.sp=S.sp||0;
+  for(let i=0;i<n;i++){ let h=roll(); S.sp++; if(h.s>=5) S.sp=0; else if(S.sp>=50){ const pl=HEROES.filter(x=>x.s===5); h=pl[Math.floor(Math.random()*pl.length)]; S.sp=0; } const nw=!S.heroes[h.id]; S.heroes[h.id]=(S.heroes[h.id]||0)+1; got.push({h,nw,s:h.s,n:h.n}); }
   got.sort((a,b)=>b.s-a.s); passAdd(2*n);
   refresh(); sumShow(got);
 }
-function sumShow(got){ const tier=g=>g.s>=5?3:g.s===4?2:g.s===3?1:0, best=Math.max(...got.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov';
+function sumShow(got){ const tier=g=>g.s>=5?3:g.s===4?2:g.s===3?1:0, best=Math.max(...got.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box');
   o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Баатар дуудаж байна...</div></div>'; document.body.appendChild(o);
-  setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(got.length>1?' many':'')+'">'+got.map((g,i)=>'<div class="bxc t'+tier(g)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(g.s>=5?'<i class="bxray2"></i>':'')+hpi(g.h.id,got.length>1?46:84)+'</div><b style="color:'+SKT[tier(g)].col+'">'+stars(g.s)+'</b><div class="sm">'+g.n+'</div>'+(g.nw?'<div class="sm" style="color:#9fe08a">Шинэ!</div>':'<div class="sm">Түвшин +1</div>')+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1400); }
+  setTimeout(()=>{ if(!o.parentNode) return; sfxRev(best); o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(got.length>1?' many':'')+'">'+got.map((g,i)=>'<div class="bxc t'+tier(g)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(g.s>=5?'<i class="bxray2"></i>':'')+hpi(g.h.id,got.length>1?46:84)+'</div><b style="color:'+SKT[tier(g)].col+'">'+stars(g.s)+'</b><div class="sm">'+g.n+'</div>'+(g.nw?'<div class="sm" style="color:#9fe08a">Шинэ!</div>':'<div class="sm">Түвшин +1</div>')+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1400); }
 function bldHTML(k){
   const d=BUILD[k]; let extra='';
   if(k==='market') extra='<button class="btn" onclick="closeM();sellAll()">Бүгдийг зарах</button>';
@@ -2178,8 +2184,8 @@ function relicsHTML(){
 const RBOXC=300, RW={1:40,2:30,3:20,4:8,5:2};
 function relPick(){ let r=Math.random()*100, st=1; for(let q=1;q<=5;q++){ if(r<RW[q]){ st=q; break; } r-=RW[q]; } const pool=RELICS.filter(x=>x.s===st); return pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; }
 function relBoxOpen(n){ const cost=n===10?RBOXC*9:RBOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна.'); return; } S.res.alt-=cost; const res=[]; for(let i=0;i<n;i++){ const r=relPick(); S.relics[r.id]=(S.relics[r.id]||0)+1; res.push(r); } passAdd(5*n); refresh();
-  const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Дурсгал нээгдэж байна...</div></div>'; document.body.appendChild(o);
-  setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tier(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tier(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1500); }
+  const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Дурсгал нээгдэж байна...</div></div>'; document.body.appendChild(o);
+  setTimeout(()=>{ if(!o.parentNode) return; sfxRev(best); o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tier(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tier(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1500); }
 function rboxHTML(){ let h='<h2>Дурсгалын хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div></div><div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<RBOXC?'disabled':'')+' onclick="relBoxOpen(1)">1 удаа · '+RBOXC+' Алт</button><button class="btn" '+(S.res.alt<RBOXC*9?'disabled':'')+' onclick="relBoxOpen(10)">10 удаа · '+(RBOXC*9)+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div><div class="card sm">★ 40% · ★★ 30% · ★★★ 20% · ★★★★ 8% · ★★★★★ 2%<br>Нэг дурсгал олон удаа унавал өөр өөр баатарт өмсүүлж болно.</div>';
   return h+relicsHTML(); }
 function heroInfo(id,pick){ const H=HEROES.find(x=>x.id===id); if(!H||!S.heroes[id]) return; relMig(); const L=S.heq[id]||(S.heq[id]=[]); let o=document.getElementById('hinf'); if(o) o.remove(); o=document.createElement('div'); o.id='hbio'; o.onclick=e=>{ if(e.target===o){ o.remove(); fillM(); } };
@@ -2273,9 +2279,9 @@ function skPick(){ const q=skS(); let t=3; if(q.pity<49){ let r=Math.random()*10
 function boxOpen(n){ const cost=n===10?BOXC*9:BOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна. Дэлгүүрээс авна уу.'); return; } S.res.alt-=cost; passAdd(5*n); const q=skS(), res=[];
   for(let i=0;i<n;i++){ const t=skPick(), h=HEROES[Math.floor(Math.random()*HEROES.length)], key=h.id+':'+t, dup=!!q.o[key]; if(dup) S.res.alt+=SKT[t].ref; else { q.o[key]=1; if(q.e[h.id]==null&&S.heroes[h.id]) q.e[h.id]=t; } res.push({h,t,dup}); }
   refresh(); boxShow(res); }
-function boxShow(res){ let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; const best=Math.max(...res.map(r=>r.t));
+function boxShow(res){ let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); const best=Math.max(...res.map(r=>r.t));
   o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'" id="bxb">'+BOXSVG+'</div><div class="bxt">Хайрцаг нээгдэж байна...</div></div>'; document.body.appendChild(o);
-  setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+r.t+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.t===3?'<i class="bxray2"></i>':'')+'<div style="filter:'+SKN[r.t][1]+'">'+hpi(r.h.id,res.length>1?46:84)+'</div></div><b style="color:'+SKT[r.t].col+'">'+SKT[r.t].n+'</b><div class="sm">'+r.h.n+' · '+SKN[r.t][0]+'</div><div class="epi" style="font-size:'+(res.length>1?10:13)+'px">'+(HEPI[r.h.id]||'')+'</div>'+(r.dup?'<div class="sm">Давхар → +'+SKT[r.t].ref+' Алт</div>':'<div class="sm" style="color:#9fe08a">Шинэ!</div>')+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();if(cur===\'box\')fillM()">Болсон</button></div>'; },1500); }
+  setTimeout(()=>{ if(!o.parentNode) return; sfxRev(best); o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+r.t+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.t===3?'<i class="bxray2"></i>':'')+'<div style="filter:'+SKN[r.t][1]+'">'+hpi(r.h.id,res.length>1?46:84)+'</div></div><b style="color:'+SKT[r.t].col+'">'+SKT[r.t].n+'</b><div class="sm">'+r.h.n+' · '+SKN[r.t][0]+'</div><div class="epi" style="font-size:'+(res.length>1?10:13)+'px">'+(HEPI[r.h.id]||'')+'</div>'+(r.dup?'<div class="sm">Давхар → +'+SKT[r.t].ref+' Алт</div>':'<div class="sm" style="color:#9fe08a">Шинэ!</div>')+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();if(cur===\'box\')fillM()">Болсон</button></div>'; },1500); }
 const BOXSVG='<svg viewBox="0 0 160 130" width="150"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a4b24"/><stop offset="1" stop-color="#4e2610"/></linearGradient><linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset="1" stop-color="#c38a1d"/></linearGradient></defs><rect x="14" y="52" width="132" height="68" rx="6" fill="url(#bg1)" stroke="#2c1608" stroke-width="3"/><path d="M10 54 Q80 6 150 54 Z" fill="url(#bg1)" stroke="#2c1608" stroke-width="3"/><rect x="14" y="62" width="132" height="10" fill="url(#bg2)"/><rect x="14" y="100" width="132" height="8" fill="url(#bg2)"/><rect x="70" y="52" width="20" height="30" rx="3" fill="url(#bg2)" stroke="#6a4308" stroke-width="2"/><circle cx="80" cy="70" r="4" fill="#4e2610"/><g fill="none" stroke="#f5cf64" stroke-width="3" stroke-linecap="round"><path d="M28 86 q0-12 12-12 q10 0 10 9 q0 7-7 7 q-5 0-5-5"/><path d="M132 86 q0-12-12-12 q-10 0-10 9 q0 7 7 7 q5 0 5-5"/><path d="M30 92 h22 M108 92 h22"/></g><path d="M80 14 l5 9 h-10z" fill="#ffd24a"/></svg>';
 function skillOf(id){ const d=HSK[id]; return d?'<div class="sm" style="color:#ffd770;flex-basis:100%">✦ '+d[1]+' — '+d[2]+'</div>':''; }
 function boxHTML(){ const q=skS(); let h='<h2>Хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div><div class="sm">Баталгаат домогт: '+(50-q.pity)+' нээлтэд</div></div>';
@@ -2292,7 +2298,7 @@ function castSkill(u){ const d=HSK[u.id]; if(!d) return false; const U=BT.units,
   else if(d[0]==='heal'){ al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+a.max*0.18*k); }); }
   else if(d[0]==='volley'){ en.slice().sort(()=>Math.random()-0.5).slice(0,3).forEach(e=>{ hitE(e,3); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }); }
   else if(d[0]==='charge'){ const tg=en.reduce((a,b)=>b.hp>a.hp?b:a); hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; BT.shake=Math.min(1,(BT.shake||0)+0.6); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }
-  BT.ban={txt:d[1],n:u.name||'',t:0}; BT.shake=Math.min(1,(BT.shake||0)+0.3); for(let q=0;q<14;q++) BT.pt.push({x:u.x+(Math.random()-0.5)*30,y:u.y-10-Math.random()*30,vx:(Math.random()-0.5)*30,vy:-20-Math.random()*30,t:0,l:0.8,c:'spark'});
+  BT.ban={txt:d[1],n:u.name||'',t:0}; sfx('skill'); vib(30); BT.shake=Math.min(1,(BT.shake||0)+0.3); for(let q=0;q<14;q++) BT.pt.push({x:u.x+(Math.random()-0.5)*30,y:u.y-10-Math.random()*30,vx:(Math.random()-0.5)*30,vy:-20-Math.random()*30,t:0,l:0.8,c:'spark'});
   return true; }
 (function(){ const st=document.createElement('style'); st.textContent='#boxov{position:fixed;inset:0;z-index:200;background:#000d;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:auto}.bxs{text-align:center;color:#ffe9b0;font-weight:bold}.bxbox svg{filter:drop-shadow(0 0 14px #ffb53a99)}.bxs .bxbox{animation:bxsh .35s infinite}.bxs .bx3 svg{filter:drop-shadow(0 0 24px #ffd24a)}@keyframes bxsh{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.08)}}.bxrs{position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;max-width:100%}.bxg{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.bxg.many{max-width:420px}.bxc{width:96px;text-align:center;padding:8px 4px;border-radius:12px;background:#2b1d12;border:3px solid #888;animation:bxin .5s both;color:#fff}.bxg:not(.many) .bxc{width:170px;padding:14px}.bxc.t0{border-color:#c3cad3}.bxc.t1{border-color:#5aa8ff;box-shadow:0 0 10px #5aa8ff88}.bxc.t2{border-color:#c07aff;box-shadow:0 0 16px #c07aff}.bxc.t3{border-color:#ffd24a;box-shadow:0 0 26px #ffd24a;background:linear-gradient(#5b3d10,#2b1d12)}.bxa{position:relative;display:flex;justify-content:center}@keyframes bxin{0%{transform:scale(.2) rotate(-20deg);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}.bxray,.bxray2{position:absolute;pointer-events:none}.bxrs.leg .bxray{inset:-300px;left:50%;top:50%;width:900px;height:900px;margin:-450px 0 0 -450px;background:repeating-conic-gradient(#ffd24a55 0 8deg,transparent 8deg 22deg);animation:bxrot 8s linear infinite;border-radius:50%;z-index:-1}.bxray2{inset:-14px;background:radial-gradient(circle,#ffe99a 0,#ffd24a44 50%,transparent 70%);animation:bxpl 1.2s infinite;z-index:-1}@keyframes bxrot{to{transform:rotate(360deg)}}@keyframes bxpl{50%{transform:scale(1.25);opacity:.6}}'; document.head.appendChild(st); })();
 
@@ -2342,11 +2348,11 @@ function btRedeploy(){
   B.p0=U.filter(u=>!u.side&&!u.sup).reduce((a,u)=>a+u.max,0);
 }
 function btSlotXY(j,W,H){ const s=[[0.40,0.5],[0.32,0.0],[0.32,1.0],[0.16,0.25],[0.16,0.75],[0.05,0.5]][j], y0=H*0.27, y1=H*0.71; return [W*s[0],y0+(y1-y0)*s[1]]; }
-function btTray(){ const t=$('btray'); if(!t||!BT) return; const own=Object.keys(S.heroes).filter(x=>x!==BT.req).sort((a,b)=>heroPower(b)-heroPower(a)), mx=Math.min(5,heroSlots()); if(BT.req) own.unshift(BT.req);
+function btTray(){ try{ matchHint(); }catch(e){} const t=$('btray'); if(!t||!BT) return; const own=Object.keys(S.heroes).filter(x=>x!==BT.req).sort((a,b)=>heroPower(b)-heroPower(a)), mx=Math.min(5,heroSlots()); if(BT.req) own.unshift(BT.req);
   t.innerHTML='<div class="bc" onclick="btQuick()"><div style="font-size:22px;margin-top:6px">⚡</div>Хурдан<br>'+BT.sel.filter(x=>!SUPP[x]).length+'/'+mx+'</div>'+own.map(id=>'<div class="bc'+(BT.sel.includes(id)?' on':'')+'" onclick="btPick(\''+id+'\')">'+hpi(id,34)+'<br>'+(HEROES.find(x=>x.id===id)||{}).n.split(' ')[0]+'<br>'+(id===BT.req?'📜 Зайлшгүй':SUPP[id]?'✨ Туслах':'⚔'+f(heroPower(id)))+'</div>').join(''); }
 function btPick(id){ if(!BT||!BT.wait||BT.vs) return; if(id===BT.req){ say('Түүхэн баатар зайлшгүй оролцоно'); return; } const i=BT.sel.indexOf(id), mx=Math.min(5,heroSlots()); if(i>=0) BT.sel.splice(i,1); else if(SUPP[id]){ BT.sel=BT.sel.filter(x=>!SUPP[x]); BT.sel.push(id); say(HEROES.find(x=>x.id===id).n+': '+SUPP[id].t); } else { if(BT.sel.filter(x=>!SUPP[x]).length>=mx){ say('Хамгийн ихдээ '+mx+' баатар'); return; } BT.sel.push(id); } btRedeploy(); btTray(); }
 function btQuick(){ if(!BT||!BT.wait||BT.vs) return; BT.sel=(BT.req?[BT.req]:[]).concat(squad().filter(x=>!SUPP[x]&&x!==BT.req)).slice(0,Math.min(5,heroSlots())); { const sp=['borte','oelun'].find(x=>S.heroes[x]); if(sp) BT.sel.push(sp); } btRedeploy(); btTray(); }
-function btGo(){ if(!BT||!BT.wait||BT.vs) return; if(!BT.sel.length){ say('Баатар сонго'); return; } BT.vs=1; const tr=$('btray'); if(tr) tr.remove(); const b=$('bstart'); if(b) b.remove(); const v=document.createElement('div'); v.id='bvs'; v.textContent='VS'; $('bti').appendChild(v); setTimeout(()=>{ if(v.parentNode) v.remove(); if(BT) BT.wait=false; },1000); }
+function btGo(){ if(!BT||!BT.wait||BT.vs) return; if(!BT.sel.length){ say('Баатар сонго'); return; } BT.vs=1; { const m=document.getElementById('bmatch'); if(m) m.remove(); } sfx('horn'); vib(40); const tr=$('btray'); if(tr) tr.remove(); const b=$('bstart'); if(b) b.remove(); const v=document.createElement('div'); v.id='bvs'; v.textContent='VS'; $('bti').appendChild(v); setTimeout(()=>{ if(v.parentNode) v.remove(); if(BT) BT.wait=false; },1000); }
 function btSpeed(){ BT.sp=BT.sp>=3?1:BT.sp+1; $('bsp').textContent='×'+BT.sp; }
 function btLoop(now){
   if(!BT) return; const dt=Math.min(0.05,(now-BT.last)/1000)*BT.sp; BT.last=now;
@@ -2361,13 +2367,13 @@ function btStep(dt){
   BT.heal=(BT.heal||0)+dt; if(BT.heal>=1){ BT.heal=0; if(U.some(u=>u.sup&&u.id==='oelun')) U.forEach(u=>{ if(!u.side&&!u.sup&&u.hp>0) u.hp=Math.min(u.max,u.hp+u.max*0.025); }); }
   U.forEach(u=>{ u.tc=0; });
   U.forEach(u=>{ if(u.hp<=0) return; if(u.sup){ u.mv=false; return; } u.cd-=dt;
-    if(u.id&&!u.side&&HSK[u.id]){ u.skc=(u.skc==null?3+Math.random()*3:u.skc)-dt; if(u.skc<=0){ u.skc=castSkill(u)?HSK[u.id][3]:1; } }
+    if(u.id&&!u.side&&HSK[u.id]){ u.skc=(u.skc==null?3+Math.random()*3:u.skc)-dt; if(u.skc<=0){ u.skc=castSkill(u)?HSK[u.id][3]*(1-Math.min(0.5,rsb('cul_cd'))):1; } }
     let tg=null,bd=1e9,bs=1e9; U.forEach(o=>{ if(o.side!==u.side&&o.hp>0&&!o.sup){ const dd=Math.hypot(o.x-u.x,o.y-u.y), sc=dd+(o.tc||0)*45; if(sc<bs){ bs=sc; bd=dd; tg=o; } } });
     if(tg) tg.tc=(tg.tc||0)+1;
     if(!tg) return; u.face=tg.x>=u.x?1:-1; if(Math.abs(tg.x-u.x)>12) u.fdir=u.face;
     if(bd>u.d.rng){ const dx=tg.x-u.x, dy=tg.y-u.y, L=Math.hypot(dx,dy)||1; u.x+=dx/L*u.d.spd*dt*1.3; u.y+=dy/L*u.d.spd*dt*1.3; u.mv=true; }
     else { u.mv=false; if(u.cd<=0){ u.cd=u.d.cd; let dmg=u.atk*(0.9+Math.random()*0.2); if(u.bAtk&&u.bAtk.t>BT.t) dmg*=u.bAtk.m; if(tg.shT>BT.t) dmg*=0.5; const big=BTBEAT[u.type]===tg.type; if(big) dmg*=1.5;
-      tg.hp-=dmg; u.hit=0.25; u.atkT=0.5; tg.hurt=0.3; if(tg.hp<=0&&!tg.dead) tg.dead=BT.t; if(big) BT.shake=Math.min(1,BT.shake+0.35);
+      tg.hp-=dmg; u.hit=0.25; u.atkT=0.5; if(big) { sfx('big',90); vib(15); } else sfx(u.type==='archer'?'bow':u.type==='heavy'?'slash':'hit',70); tg.hurt=0.3; if(tg.hp<=0&&!tg.dead) tg.dead=BT.t; if(big) BT.shake=Math.min(1,BT.shake+0.35);
       for(let q=0;q<(u.type==='archer'?3:6);q++) BT.pt.push({x:tg.x,y:tg.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:u.side?'blood':'spark'}); BT.dm.push({x:tg.x,y:tg.y-30,t:0,v:Math.round(dmg),big,side:u.side});
       BT.fx.push({k:u.type==='archer'?'arrow':(u.type==='heavy'?'slash':'clash'),x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); } }
   });
@@ -2457,13 +2463,13 @@ function btDraw(t){
 }
 const E_isCamp=e=>!!e.cb;
 function btFinish(win){
-  BT.done=true; BT.win=win; const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(win?0.85:0.6)); if(n>keep) lossTxt+=T.n+' -'+(n-keep)+'  '; S.res[T.k]=keep; });
-  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=rp?Math.round(e.g*0.2):e.g, M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="rl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+  BT.done=true; BT.win=win; sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(win?0.85:0.6)); if(n>keep) lossTxt+=T.n+' -'+(n-keep)+'  '; S.res[T.k]=keep; });
+  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="rl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+(rp?'<div class="sm">Өмнө нь ялсан тул шагнал 20%</div>':'')+lootAnimals(Math.min(3,1+Math.floor((e.bi||0)/2)),rp)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   $('bres').innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; refresh();
 }
-function btEnd(force){ if(!BT) return; cancelAnimationFrame(BT.raf); const pv=BT; BT=null; musPlay('village'); const el=$('btl'); if(el) el.remove(); if(pv.win&&pv.e&&pv.e.cb){ try{ pv.e.cb(); }catch(x){} } if(pv.e&&pv.e.back) setTimeout(()=>openM(pv.e.back),60); }
+function btEnd(force){ if(!BT) return; cancelAnimationFrame(BT.raf); const pv=BT; BT=null; musPlay('village'); const el=$('btl'); if(el) el.remove(); if(pv.win&&pv.e&&pv.e.cb){ try{ pv.e.cb(); }catch(x){} } else if(!pv.win&&pv.e&&pv.e.cbl){ try{ pv.e.cbl(); }catch(x){} } if(pv.e&&pv.e.back) setTimeout(()=>openM(pv.e.back),60); }
 function fight(i,chance){
   const e=ENEMIES[i];
   if(i>S.won) return;
@@ -2667,6 +2673,163 @@ function chsEnter(){ if(!chOpen(CHI)){ say('Өмнөх бүлгийг ялсна
 (function(){ const st=document.createElement('style'); st.textContent='#chs{position:fixed;inset:0;z-index:7;background:#111;color:#fff;overflow:hidden}#chbg{position:absolute;inset:-10px;background-size:cover;background-position:center;filter:blur(5px) brightness(.45)}#chx{position:absolute;left:10px;top:10px;width:42px;height:42px;border-radius:21px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font-size:20px;font-weight:bold}#cht{position:absolute;left:62px;top:14px;font-size:24px;font-weight:bold;text-shadow:0 2px 4px #000}#chp{position:absolute;left:14px;top:66px;background:#c9972b;color:#2a1a08;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:bold;line-height:1.5}#chm{position:absolute;inset:0}.cc{position:absolute;left:0;right:0;top:50%;transform:translateY(-52%);text-align:center}.ct{font-size:30px;font-weight:bold;color:#bfe9ff;text-shadow:0 2px 6px #000}.cn2{font-size:14px;color:#ffe9b0;text-shadow:0 2px 4px #000;margin-bottom:6px}.cw{font-size:15px;font-weight:bold;margin-top:8px;text-shadow:0 2px 4px #000}.sd{position:absolute;top:50%;transform:translateY(-50%);opacity:.75}.isl{position:relative;display:inline-block}.isl .ip{position:relative;padding:12px 14px 26px;background:radial-gradient(ellipse at 50% 85%,#6aa84a 0,#4d7d33 55%,#6b4a26 56%,#3d2a14 100%);border-radius:50%/42% 42% 58% 58%;box-shadow:0 14px 18px #0008}.isl.big .ip{padding:20px 30px 44px}.il{position:absolute;right:-14px;bottom:2px}.lk{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:34px;text-shadow:0 2px 6px #000;font-weight:bold}.chn{position:absolute;bottom:64px;width:54px;height:46px;background:#0007;color:#ffd770;font-size:26px;border:0;border-radius:10px;z-index:2}#chl{left:calc(50% - 64px)}#chr{left:calc(50% + 10px)}#chmsg{position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:15px;font-weight:bold;text-shadow:0 2px 4px #000}#chh,#chw{position:absolute;bottom:60px;background:#3b2815ee;border:2px solid #c9972b;border-radius:12px;color:#ffe9b0;font-size:11px;padding:6px 8px}#chh{left:10px}#chw{right:10px}'; document.head.appendChild(st); })();
 
 // ================= ХӨГЖИМ =================
+
+
+// ================= ҮЕ · СУДАЛГАА · ХАРХОРУМ · ЯЛАЛТЫН ЗАМ · ТЭМЦЭЭН =================
+const AGES=[{n:'Хөдөөгийн үе',s:'I',min:1,e:'🌾'},{n:'Аймгийн үе',s:'II',min:5,e:'🏕'},{n:'Хаант улсын үе',s:'III',min:9,e:'🏯'},{n:'Эзэнт гүрний үе',s:'IV',min:13,e:'👑'}];
+function ageIdx(){ let a=0; AGES.forEach((x,i)=>{ if(S.bld.ger>=x.min) a=i; }); return a; }
+const BR={e:{n:'Эдийн засаг',c:'#7ad05a',e:'💰'},m:{n:'Цэрэг',c:'#ff7a6a',e:'⚔'},c:{n:'Соёл',c:'#7ab8ff',e:'📜'}};
+const TECH=[
+ {id:'e1',b:'e',n:'Бэлчээрийн мэдлэг',d:'Үйлдвэрлэл +10%',ef:{eco_prod:0.10},age:0,e:'🌿'},
+ {id:'e2',b:'e',n:'Арьс ширний урлал',d:'Зарах үнэ +10%',ef:{eco_sell:0.10},age:0,e:'🧵'},
+ {id:'e3',b:'e',n:'Агуулахын шинэчлэл',d:'Нөөцийн багтаамж +150',ef:{eco_cap:150},age:1,e:'📦'},
+ {id:'e4',b:'e',n:'Малын үүлдэр',d:'Хашаанд +5 мал',ef:{eco_herd:5},age:1,e:'🐑'},
+ {id:'e5',b:'e',n:'Торгоны зам',d:'Үйлдвэрлэл +15%, зарах үнэ +15%',ef:{eco_prod:0.15,eco_sell:0.15},age:2,e:'🐪'},
+ {id:'m1',b:'m',n:'Эвэр нум',d:'Цэргийн хүч +10%',ef:{mil_troop:0.10},age:0,e:'🏹'},
+ {id:'m2',b:'m',n:'Төмөр хуяг',d:'Баатрын бие +10%',ef:{mil_hp:0.10},age:0,e:'🛡'},
+ {id:'m3',b:'m',n:'Хурц илд',d:'Баатрын цохилт +10%',ef:{mil_atk:0.10},age:1,e:'🗡'},
+ {id:'m4',b:'m',n:'Хурдан морьд',d:'Баатрын хүч +8%',ef:{mil_all:0.08},age:1,e:'🐎'},
+ {id:'m5',b:'m',n:'Их хааны ухаан',d:'Цохилт, бие, цэрэг +10%',ef:{mil_atk:0.10,mil_hp:0.10,mil_troop:0.10},age:2,e:'🧠'},
+ {id:'c1',b:'c',n:'Бичиг үсэг',d:'Туршлага +15%',ef:{cul_xp:0.15},age:0,e:'✍'},
+ {id:'c2',b:'c',n:'Ясын хууль',d:'Скилл 8% хурдан бэлэн болно',ef:{cul_cd:0.08},age:0,e:'⚖'},
+ {id:'c3',b:'c',n:'Тэнгэрийн шүтлэг',d:'Пасс оноо +20%',ef:{cul_pass:0.20},age:1,e:'☁'},
+ {id:'c4',b:'c',n:'Элч, шуудан',d:'Нэг хүнээр олон суурьшина (+1)',ef:{cul_pop:1},age:1,e:'📮'},
+ {id:'c5',b:'c',n:'Их хуралдай',d:'Туршлага +15%, скилл +8%, пасс +20%',ef:{cul_xp:0.15,cul_cd:0.08,cul_pass:0.20},age:2,e:'🏛'}];
+const WSTG=[
+ {n:'Суурь тавих',c:{gold:5000,wood:400},ef:{eco_prod:0.05},d:'Үйлдвэрлэл +5%'},
+ {n:'Хана босгох',c:{gold:15000,wood:900,grain:300},ef:{mil_all:0.03},d:'Баатрын хүч +3%'},
+ {n:'Тэнгэрийн дээвэр',c:{gold:40000,wood:1500,wool:300},ef:{eco_sell:0.10},d:'Зарах үнэ +10%'},
+ {n:'Алтан бумба',c:{gold:90000,meat:400,grain:600,alt:50},ef:{cul_pass:0.10,cul_xp:0.10},d:'Пасс +10%, туршлага +10%'},
+ {n:'Хархорумын ордон',c:{gold:200000,wood:3000,alt:200},ef:{eco_prod:0.10,mil_all:0.05},d:'Үйлдвэрлэл +10%, хүч +5% · «Их Хаан» цол'}];
+function rsb(k){ let v=0; const d=S.rs&&S.rs.done; if(d) TECH.forEach(t=>{ if(d[t.id]&&t.ef[k]) v+=t.ef[k]; }); const w=S.hk||0; for(let i=0;i<w&&i<WSTG.length;i++) if(WSTG[i].ef[k]) v+=WSTG[i].ef[k]; return v; }
+function rsSecs(t){ const n=Number(t.id[1]); return Math.round(120*Math.pow(n,2.3)); }
+function rsCost(t){ const n=Number(t.id[1]), c={gold:Math.round(300*Math.pow(3,n-1))}; if(t.b==='e') c.wood=60*n; else if(t.b==='m') c.wool=20*n; else c.milk=40*n; return c; }
+const RESN={gold:'🪙',wood:'мод',grain:'үр',wool:'ноос',meat:'мах',milk:'сүү',alt:'Алт'};
+const costTxt=c=>Object.keys(c).map(k=>(S.res[k]||0)>=c[k]?f(c[k])+' '+RESN[k]:'<span style="color:#ff8a7a">'+f(c[k])+' '+RESN[k]+'</span>').join(' · ');
+function qa(e,sz){ return '<span class="qa" style="font-size:'+(sz||26)+'px">'+e+'<i>?</i></span>'; }
+function rsInit(){ if(!S.rs) S.rs={cur:null,done:{}}; if(S.hk==null) S.hk=0; if(!S.vic) S.vic={}; if(S.ageSeen==null) S.ageSeen=ageIdx(); }
+function ageCheck(){ rsInit(); if(document.getElementById('tutov')) return; const a=ageIdx(); if(a>S.ageSeen){ S.ageSeen=a; const A=AGES[a]; sfx('lvl'); vib([60,40,60]); const e=document.getElementById('tutov')||document.createElement('div'); e.id='tutov'; e.innerHTML='<div class="tutb" style="top:30%;text-align:center"><div style="font-size:40px">'+qa(A.e,44)+'</div><div style="font:bold 22px serif;color:#ffd770;margin:6px 0">'+A.s+' ҮЕ: '+A.n+'</div><div>Шинэ судалгаа, хүч чадал нээгдлээ!</div><div class="row" style="margin-top:10px"><span></span><button class="btn red" onclick="document.getElementById(\'tutov\').remove()">Үргэлжлүүлэх</button></div></div>'; document.body.appendChild(e); } }
+function rsStart(id){ rsInit(); const t=TECH.find(x=>x.id===id); if(!t||S.rs.done[id]||S.rs.cur) return; const prev=TECH.find(x=>x.b===t.b&&Number(x.id[1])===Number(id[1])-1); if(prev&&!S.rs.done[prev.id]) return; if(ageIdx()<t.age){ say(AGES[t.age].n+'-д нээгдэнэ'); return; } const c=rsCost(t); if(!canPay(c)){ say('Нөөц хүрэхгүй байна'); sfx('err'); return; } for(const k in c) S.res[k]-=c[k]; S.rs.cur={id,left:rsSecs(t),tot:rsSecs(t)}; sfx('build'); say(t.n+' судалж эхэллээ'); fillM(); refresh(); }
+function rsDone(){ const c=S.rs.cur; if(!c) return; const t=TECH.find(x=>x.id===c.id); S.rs.done[c.id]=1; S.rs.cur=null; passAdd(15); sfx('lvl'); vib([40,30,40]); say('Судалгаа дууслаа: '+t.n); if(cur==='res') fillM(); refresh(); }
+function rsRush(){ rsInit(); const c=S.rs.cur; if(!c) return; const left=Math.max(0,c.left), g=Math.max(1,Math.ceil(left/300)); if(S.res.alt<g){ say('Алт хүрэхгүй байна'); sfx('err'); return; } S.res.alt-=g; rsDone(); }
+let RTAB=0; function rsTab(n){ RTAB=n; fillM(); }
+function fmtT(sec){ sec=Math.max(0,Math.ceil(sec)); const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; return (h?h+'ц ':'')+(h||m?m+'м ':'')+s+'с'; }
+function resHTML(){ rsInit(); const a=ageIdx(), A=AGES[a]; let h='<h2>'+qa('🔬',28)+' Судалгаа</h2><div class="card row"><div>'+qa(A.e,30)+' <b>'+A.s+' үе · '+A.n+'</b></div><div class="sm">'+(a<3?'Дараагийн үе: гол гэр '+AGES[a+1].min+'-р түвшин':'Дээд үе')+'</div></div>';
+  h+='<div style="display:flex;gap:5px;margin-bottom:8px">'+['🔬 Судалгаа','🏯 Хархорум','🏆 Ялалт'].map((x,i)=>'<button class="btn'+(RTAB===i?' red':'')+'" style="flex:1;padding:6px 2px;font-size:12px" onclick="rsTab('+i+')">'+x+'</button>').join('')+'</div>';
+  if(RTAB===1) return h+wonderHTML(); if(RTAB===2) return h+victoryHTML();
+  const c=S.rs.cur; if(c){ const t=TECH.find(x=>x.id===c.id), left=c.left; h+='<div class="card"><div class="row"><div>'+qa(t.e,26)+' <b>'+t.n+'</b><div class="sm">Үлдсэн: <b id="rsrem">'+fmtT(left)+'</b></div></div><button class="btn red" onclick="rsRush()">⚡ '+Math.max(1,Math.ceil(Math.max(0,left)/300))+' Алт</button></div><div class="bar" style="height:8px;margin-top:6px"><i id="rsbar" style="width:'+Math.min(100,100-left/c.tot*100)+'%;background:#ffd24a"></i></div></div>'; }
+  ['e','m','c'].forEach(b=>{ h+='<div class="card"><h3 style="color:'+BR[b].c+'">'+BR[b].e+' '+BR[b].n+'</h3>'; TECH.filter(t=>t.b===b).forEach(t=>{ const done=S.rs.done[t.id], cu=c&&c.id===t.id, n=Number(t.id[1]), prev=TECH.find(x=>x.b===b&&Number(x.id[1])===n-1), blk=prev&&!S.rs.done[prev.id], lockA=a<t.age, cs=rsCost(t);
+    h+='<div class="row" style="margin-top:6px;opacity:'+(done?0.6:1)+'"><div style="flex:1">'+qa(t.e,22)+' <b>'+t.n+'</b>'+(done?' ✓':'')+'<div class="sm">'+t.d+'</div>'+(done||cu?'':'<div class="sm">'+(lockA?'🔒 '+AGES[t.age].n+'-д нээгдэнэ':blk?'🔒 Өмнөхийг судал':costTxt(cs)+' · '+fmtT(rsSecs(t)))+'</div>')+'</div>'+(done||cu||lockA||blk?'':'<button class="btn" '+(c?'disabled':'')+' onclick="rsStart(\''+t.id+'\')">Судлах</button>')+'</div>'; }); h+='</div>'; });
+  return h; }
+function wonderHTML(){ const w=S.hk||0; const ok=S.bld.ger>=9; let h='<div class="card" style="text-align:center">'+qa(w>=5?'🏯':'🏗',64)+'<h3>Хархорум · '+w+'/5</h3><div class="sm">Монголын эзэнт гүрний нийслэл. Шат бүрт байнгын бонус.'+(ok?'':' Гол гэр 9-р түвшинд нээгдэнэ.')+'</div></div>';
+  WSTG.forEach((x,i)=>{ const done=i<w, nxt=i===w; h+='<div class="card" style="opacity:'+(done?0.6:1)+'"><div class="row"><div style="flex:1"><b>'+(i+1)+'. '+x.n+(done?' ✓':'')+'</b><div class="sm">'+x.d+'</div>'+(done?'':'<div class="sm">'+costTxt(x.c)+'</div>')+'</div>'+(nxt&&ok?'<button class="btn" onclick="wdBuild()">Барих</button>':'')+'</div></div>'; });
+  return h; }
+function wdBuild(){ rsInit(); const i=S.hk||0, x=WSTG[i]; if(!x||S.bld.ger<9) return; if(!canPay(x.c)){ say('Нөөц хүрэхгүй байна'); sfx('err'); return; } for(const k in x.c) S.res[k]-=x.c[k]; S.hk=i+1; sfx('win'); vib([60,40,60,40,120]); say('Хархорум: '+x.n+' барилаа!'); passAdd(25); if(S.hk>=5){ S.res.alt+=500; S.title='Их Хаан'; say('Хархорум дууслаа! «Их Хаан» цол +500 Алт'); } fillM(); refresh(); }
+function vicProg(){ rsInit(); const T=k=>TECH.filter(t=>t.b===k&&S.rs.done[t.id]).length; let cd=0; try{ cpInit(); cd=Object.keys(S.camp.done).length; }catch(e){}
+  return [{k:'m',n:'Дэлхийн байлдан дагуулагч',d:'Аян дайны 56 тулалдаан',v:cd,t:56,r:300},{k:'e',n:'Их эдийн засагч',d:'Хархорумын 5 шат + эдийн засгийн 5 судалгаа',v:(S.hk||0)+T('e'),t:10,r:300},{k:'c',n:'Мэргэн хаан',d:'Бүх 15 судалгаа',v:T('e')+T('m')+T('c'),t:15,r:300}]; }
+function victoryHTML(){ let h='<div class="card sm">Гурван замаар дэлхийг эзэл. Бүрийг дуусгахад цол болон 300 Алт.</div>'; vicProg().forEach(x=>{ const ok=x.v>=x.t, got=S.vic[x.k]; h+='<div class="card"><div class="row"><div style="flex:1">'+qa('🏆',24)+' <b>'+x.n+'</b><div class="sm">'+x.d+'</div><div class="bar" style="height:8px;margin-top:5px"><i style="width:'+Math.min(100,x.v/x.t*100)+'%;background:#ffd24a"></i></div><div class="sm">'+Math.min(x.v,x.t)+' / '+x.t+'</div></div>'+(got?'<span style="color:#9fe08a">✓</span>':'<button class="btn" '+(ok?'':'disabled')+' onclick="vicClaim(\''+x.k+'\')">+'+x.r+' Алт</button>')+'</div></div>'; }); return h; }
+function vicClaim(k){ const x=vicProg().find(y=>y.k===k); if(!x||x.v<x.t||S.vic[k]) return; S.vic[k]=1; S.res.alt+=x.r; sfx('win'); vib([60,40,60]); say('Цол: '+x.n+' · +'+x.r+' Алт'); fillM(); refresh(); }
+setInterval(()=>{ try{ rsInit(); if(S.rs.cur){ const left=S.rs.cur.left; if(left<=0) rsDone(); else if(cur==='res'){ const r=document.getElementById('rsrem'); if(r) r.textContent=fmtT(left); const b=document.getElementById('rsbar'); if(b) b.style.width=Math.min(100,100-left/S.rs.cur.tot*100)+'%'; } } ageCheck(); }catch(e){} },1000);
+// ---- ТЭМЦЭЭН ----
+const ARN=['Мэргид','Татар','Тайчууд','Найман','Хэрэйд','Жалайр','Хонгирад','Уйгур','Тангуд','Хиргис'], ARR=[['Шинэ дайчин',0],['Мянгат',150],['Зуут',400],['Түмэн',800],['Жанжин',1400],['Их хаан',2200]];
+const dayKey=()=>new Date().toDateString();
+function arInit(){ if(!S.ar) S.ar={r:0,d:'',n:0,w:0,l:0}; if(S.ar.d!==dayKey()){ S.ar.d=dayKey(); S.ar.n=0; } }
+function arRank(r){ let x=ARR[0]; ARR.forEach(a=>{ if(r>=a[1]) x=a; }); return x; }
+function hsh(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0); }
+function arOpps(){ const P=Math.max(150,totalPower()), d=dayKey(); return [0.75,1,1.3].map((m,i)=>({i,n:ARN[hsh(d+i)%ARN.length]+' '+['отог','цэрэг','жанжин'][i],p:Math.round(P*m),m,pts:[15,25,40][i]})); }
+function arBoard(){ const d=dayKey(), me=S.ar.r, L=[]; for(let i=0;i<9;i++){ const b=Math.round(150+(hsh(d+'b'+i)%2200)); L.push({n:['Сүбээдэй-фэн','Хулан','Тэмүүжин-2','Алтангэрэл','Баатар Б.','Эрдэнэ','Номин','Дорж','Хас'][i],r:b,me:0}); } L.push({n:'Та',r:me,me:1}); return L.sort((a,b)=>b.r-a.r); }
+function arenaHTML(){ arInit(); const A=S.ar, rk=arRank(A.r), free=Math.max(0,5-A.n); let h='<h2>'+qa('🏟',28)+' Тэмцээн</h2><div class="card row"><div><b>'+rk[0]+'</b><div class="sm">Оноо: '+A.r+' · Ялалт '+A.w+' · Ялагдал '+A.l+'</div></div><div class="sm">Өнөөдөр үнэгүй: <b>'+free+'</b>/5</div></div>';
+  arOpps().forEach(o=>{ h+='<div class="card"><div class="row"><div><b>'+o.n+'</b><div class="sm">Хүч '+f(o.p)+' · Ялвал +'+o.pts+' оноо, +'+Math.round(o.p*0.15)+' 🪙</div></div><button class="btn" onclick="arFight('+o.i+')">'+(free>0?'Тулах':'Тулах · 5 Алт')+'</button></div></div>'; });
+  h+='<div class="card"><h3>Тэргүүлэгчид</h3>'+arBoard().map((x,i)=>'<div class="row" style="'+(x.me?'color:#ffd770;font-weight:bold':'')+'"><span>'+(i+1)+'. '+x.n+'</span><span>'+x.r+'</span></div>').join('')+'<div class="sm" style="margin-top:6px">Бодит тоглогчтой жагсаалт Firebase холбогдсоны дараа.</div></div>'; return h; }
+function arFight(i){ arInit(); if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; } const A=S.ar, o=arOpps()[i]; if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); sfx('err'); return; } S.res.alt-=5; } A.n++;
+  closeM(); startBattle(0,{n:'Тэмцээн: '+o.n,p:o.p,g:Math.round(o.p*0.15),m:Math.round(o.p*0.04),bi:Math.min(6,Math.floor(i*2)),rep:false,cb:()=>{ A.r+=o.pts; A.w++; S.res.alt+=1; passAdd(5); },cbl:()=>{ A.r=Math.max(0,A.r-Math.round(o.pts/2)); A.l++; },back:'arena'}); }
+// ---- ДАЙСНЫ БҮРЭЛДЭХҮҮН ----
+function matchHint(){ if(!BT) return; const E=BT.units.filter(u=>u.side&&!u.sup), c={heavy:0,cav:0,archer:0}; E.forEach(u=>{ if(c[u.type]!=null) c[u.type]+=Math.max(1,u.c0||1); }); const tot=c.heavy+c.cav+c.archer||1, top=Object.keys(c).sort((a,b)=>c[b]-c[a])[0], ctr=Object.keys(BTBEAT).find(k=>BTBEAT[k]===top);
+  let el=document.getElementById('bmatch'); if(!el){ el=document.createElement('div'); el.id='bmatch'; const p=document.getElementById('bti')||document.getElementById('btl'); if(p) p.appendChild(el); else return; }
+  el.innerHTML='<b>Дайсан:</b> 🛡 '+Math.round(c.heavy/tot*100)+'% · 🐎 '+Math.round(c.cav/tot*100)+'% · 🏹 '+Math.round(c.archer/tot*100)+'%<br><span>Зөвлөгөө: '+TNAME[top]+' олон тул <b>'+TNAME[ctr]+'</b> сайн</span>'; }
+(function(){ const st=document.createElement('style'); st.textContent='.qa{position:relative;display:inline-block;line-height:1}.qa i{position:absolute;right:-7px;top:-5px;background:#ffd24a;color:#3b2815;border-radius:50%;width:12px;height:12px;font:bold 9px/12px sans-serif;text-align:center;font-style:normal}#bmatch{position:absolute;left:50%;transform:translateX(-50%);top:44px;z-index:3;background:#241709dd;border:2px solid #c9972b;border-radius:8px;padding:3px 8px;font-size:11px;color:#ffe9b0;text-align:center;white-space:nowrap}#bmatch span{color:#ffd770}'; document.head.appendChild(st);
+ setTimeout(()=>{ const l=document.getElementById('lcol'); if(l&&!l.querySelector('[data-x]')){ [['res','🔬','Судалгаа'],['arena','🏟','Тэмцээн']].forEach(([k,e,t])=>{ const b=document.createElement('button'); b.setAttribute('data-x',k); b.setAttribute('onclick',"openM('"+k+"')"); b.innerHTML='<span>'+qa(e,24)+'</span>'+t; l.appendChild(b); }); } },50); })();
+
+
+// ================= EQ: офлайн шагнал, хүчний задаргаа, нөөц нэмэх, даалгаврын зурвас =================
+function offPop(g,secs){ let o=document.getElementById('offov'); if(o) o.remove(); o=document.createElement('div'); o.id='offov'; o.style.cssText='position:fixed;inset:0;z-index:60;background:#000a;display:flex;align-items:center;justify-content:center';
+  const rows=Object.keys(g).filter(k=>g[k]>=1).map(k=>'<div style="background:#5a3f22;border:2px solid #c9972b;border-radius:8px;padding:6px 10px;text-align:center;min-width:64px"><div style="font-size:18px">'+(RESN[k]||k)+'</div><b>+'+f(g[k])+'</b></div>').join('');
+  const h=Math.floor(secs/3600), m=Math.floor(secs%3600/60);
+  o.innerHTML='<div style="background:#3b2815;border:3px solid #c9972b;border-radius:14px;padding:14px;max-width:310px;width:88%;color:#ffe9b0;text-align:center"><h2 style="margin:0 0 6px">🐎 Нүүдлийн шагнал</h2><div class="sm">Таныг '+(h?h+' цаг ':'')+m+' минут байхгүй байхад нутаг үйлдвэрлэлээ. (Дээд нь 12 цаг)</div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0">'+(rows||'<div class="sm">Бага зэрэг</div>')+'</div><button class="btn" style="width:100%" onclick="document.getElementById(\'offov\').remove();sfx&&sfx(\'ok\')">Цуглуулах</button></div>';
+  document.body.appendChild(o); }
+function pwrHTML(){
+  const ids=Object.keys(S.heroes), hs=ids.map(heroPower).sort((a,b)=>b-a), top=hs.slice(0,3+S.bld.ger).reduce((a,b)=>a+b,0), tr=TR.reduce((a,T)=>a+trPow(T),0), tot=totalPower();
+  const row=(n,v)=>'<div class="row" style="padding:3px 0"><span>'+n+'</span><b>'+(typeof v==='number'?f(v):v)+'</b></div>';
+  const relB=ids.reduce((a,id)=>a+(S.heq&&S.heq[id]?S.heq[id].length:0),0);
+  let h='<h2>⚔ Хүчний задаргаа</h2><div class="card"><div class="row"><b>Нийт хүч</b><b style="color:#ffd35a">'+f(tot)+'</b></div></div>';
+  h+='<div class="card"><h3>Баатрууд</h3>'+row('Тулалдах '+Math.min(hs.length,3+S.bld.ger)+' баатар',top)+row('Нийт баатар',ids.length)+row('Зүүсэн дурсгал',relB)+'</div>';
+  h+='<div class="card"><h3>Цэрэг</h3>'+TR.map(T=>row(T.n+' ('+f(S.res[T.k]||0)+')',trPow(T))).join('')+row('Нийт цэрэг',tr)+'</div>';
+  h+='<div class="card"><h3>Нэмэгдэл</h3>'+row('Цэргийн хүрээ',Math.round(0.1*Math.max(0,S.bld.hureo-1)*100)+'%')+row('Хүшүү',Math.round(0.05*(S.bld.hushuu||0)*100)+'%')+row('Судалгаа (бүх хүч)',Math.round(rsb('mil_all')*100)+'%')+'</div>';
+  h+='<div class="card"><button class="btn" style="width:100%" onclick="openM(\'sup\')">💰 Нөөц нэмэх</button><div style="height:6px"></div><button class="btn" style="width:100%" onclick="openM(\'res\')">🔬 Хүчирхэгжих (Судалгаа)</button></div>';
+  return h; }
+const SUP=[{a:10,g:2000},{a:30,g:7500},{a:100,g:30000}];
+function supHTML(){ let h='<h2>💰 Нөөц нэмэх</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div><div class="sm">'+f(S.res.gold)+' 🪙</div></div>';
+  h+=SUP.map((p,i)=>'<div class="card"><div class="row"><div><h3>🪙 '+f(p.g)+'</h3><div class="sm">Төгрөгийн уут</div></div><button class="btn" '+(S.res.alt<p.a?'disabled':'')+' onclick="supBuy('+i+')">'+p.a+' '+ico('ui_gem',20)+'</button></div></div>').join('');
+  return h+'<div class="card sm">Хямдхан багцууд том ашигтай. Төгрөгөөр барилга, зэр зэвсэг сайжруулна.</div>'; }
+function supBuy(i){ const p=SUP[i]; if(S.res.alt<p.a){ say('Алт хүрэхгүй'); return; } S.res.alt-=p.a; S.res.gold+=p.g; say('+'+f(p.g)+' 🪙'); refresh(); }
+function sumPity(){ S.sp=S.sp||0; return 50-S.sp; }
+function dqBar(){ try{ dqInit(); const l=document.getElementById('lcol'); if(!l) return; let b=document.getElementById('dqbar'); if(!b){ b=document.createElement('div'); b.id='dqbar'; b.style.cssText='grid-column:1/3;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-size:10px;font-weight:bold;padding:3px 6px;text-align:center;width:130px;box-sizing:border-box;box-shadow:0 2px 0 #1a0f06'; b.setAttribute('onclick',"openM('quests')"); l.appendChild(b); }
+  const q=DQ.find(x=>!S.dq.cl[x.k]); b.innerHTML=q?'📜 '+q.n+' <span style="color:#ffd35a">'+Math.min(q.g,S.dq.c[q.k]||0)+'/'+q.g+'</span>':'📜 Бүгд дууссан ✓'; }catch(e){} }
+setInterval(dqBar,1500); setTimeout(()=>{ dqBar(); const p=document.querySelector('#pcard .pi'); if(p) p.addEventListener('click',e=>{ e.stopPropagation(); openM('pwr'); },true); },120);
+
+// ================= ДУУ (WebAudio), ЧИЧИРГЭЭ, ЗААВАР, АРГА ХЭМЖЭЭ =================
+const SFX={c:null,last:{}};
+function sfxCtx(){ if(!SFX.c){ try{ SFX.c=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } } if(SFX.c.state==='suspended'){ try{ SFX.c.resume(); }catch(e){} } return SFX.c; }
+function sTone(f,d,ty,v,sl,dl){ const c=sfxCtx(); if(!c) return; const t=c.currentTime+(dl||0), o=c.createOscillator(), g=c.createGain(); o.type=ty||'sine'; o.frequency.setValueAtTime(f,t); if(sl) o.frequency.exponentialRampToValueAtTime(Math.max(20,f*sl),t+d); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(v||0.15,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+d+0.02); }
+function sNoise(d,v,fc,dl){ const c=sfxCtx(); if(!c) return; const n=Math.floor(c.sampleRate*d), b=c.createBuffer(1,n,c.sampleRate), a=b.getChannelData(0); for(let i=0;i<n;i++) a[i]=(Math.random()*2-1)*(1-i/n); const t=c.currentTime+(dl||0), s=c.createBufferSource(), f=c.createBiquadFilter(), g=c.createGain(); f.type='bandpass'; f.frequency.value=fc||1500; s.buffer=b; g.gain.value=v||0.2; s.connect(f); f.connect(g); g.connect(c.destination); s.start(t); }
+const SFXD={
+ tap:()=>sTone(620,0.05,'triangle',0.06),
+ coin:()=>{ sTone(1200,0.08,'square',0.07); sTone(1600,0.14,'square',0.07,0,0.07); },
+ build:()=>{ sNoise(0.08,0.25,500); sTone(150,0.12,'square',0.12,0.5); sTone(220,0.12,'square',0.1,0.5,0.12); },
+ hit:()=>{ sNoise(0.07,0.22,900); sTone(180,0.08,'square',0.1,0.5); },
+ slash:()=>{ sNoise(0.12,0.22,2800); sTone(900,0.1,'sawtooth',0.05,0.4); },
+ bow:()=>{ sTone(500,0.09,'triangle',0.08,2.2); sNoise(0.05,0.1,3500,0.07); },
+ big:()=>{ sNoise(0.14,0.32,600); sTone(110,0.2,'square',0.18,0.4); },
+ skill:()=>{ [440,660,880,1320].forEach((f,i)=>sTone(f,0.22,'triangle',0.1,1.01,i*0.06)); sNoise(0.3,0.1,4000,0.1); },
+ horn:()=>{ sTone(196,0.5,'sawtooth',0.12,1.08); sTone(294,0.5,'sawtooth',0.08,1.08,0.02); },
+ win:()=>[523,659,784,1047].forEach((f,i)=>sTone(f,0.28,'triangle',0.13,0,i*0.13)),
+ lose:()=>[392,330,262,196].forEach((f,i)=>sTone(f,0.35,'sawtooth',0.09,0,i*0.2)),
+ box:()=>{ for(let i=0;i<6;i++) sNoise(0.06,0.18,300+i*60,i*0.14); sTone(120,0.8,'sine',0.12,1.5); },
+ rev0:()=>sTone(660,0.2,'triangle',0.12),
+ rev1:()=>{ sTone(660,0.2,'triangle',0.12); sTone(880,0.25,'triangle',0.12,0,0.12); },
+ rev2:()=>[660,880,1100].forEach((f,i)=>sTone(f,0.3,'triangle',0.13,0,i*0.1)),
+ rev3:()=>{ [523,659,784,1047,1319,1568].forEach((f,i)=>sTone(f,0.5,'triangle',0.13,0,i*0.09)); sNoise(0.8,0.1,6000,0.3); },
+ lvl:()=>[392,523,659,784,1047].forEach((f,i)=>sTone(f,0.3,'triangle',0.12,0,i*0.1)),
+ err:()=>sTone(160,0.15,'sawtooth',0.1)
+};
+function sfx(n,th){ if(typeof MUSV!=='undefined'&&!MUSV.on) return; const now=performance.now(), g=th||0; if(g&&SFX.last[n]&&now-SFX.last[n]<g) return; SFX.last[n]=now; try{ SFXD[n]&&SFXD[n](); }catch(e){} }
+function sfxRev(t){ sfx('rev'+Math.max(0,Math.min(3,t||0))); vib(t>=3?[60,40,60,40,120]:t>=2?[40,30,40]:25); }
+function vib(p){ try{ if((typeof MUSV==='undefined'||MUSV.on)&&navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+document.addEventListener('pointerdown',e=>{ const b=e.target&&e.target.closest&&e.target.closest('button'); if(b&&!b.disabled) sfx('tap',60); },true);
+// арга хэмжээ
+function evBonus(){ const d=new Date(), wd=d.getDay(), m=d.getMonth(), dd=d.getDate(); if(m===6&&dd>=10&&dd<=16) return {n:'Наадмын баяр',g:1.5,p:2}; if(wd===0||wd===6) return {n:'Амралтын өдрийн урамшуулал',g:1.25,p:2}; return {n:'',g:1,p:1}; }
+// заавар
+const TUT=[
+ {t:'Тавтай морил, Хаан минь! Богино заавар үзье.',e:null},
+ {t:'Дээр нөөц байна: мах, сүү, ноос, үр тариа, мод, төгрөг, Алт.',e:'#res'},
+ {t:'Энд таны түвшин, цэргийн хүч, малын тоо байна.',e:'#pcard'},
+ {t:'Барилга: гэр, хашаа, тариалан, цэргийн хүрээ барина.',e:'#menu button:nth-child(1)'},
+ {t:'Мал: хонь, үхэр, адуу ав. Мал нөөц гаргана.',e:'#menu button:nth-child(2)'},
+ {t:'Баатар: Алтаар баатар дууд, дурсгал өмсүүл.',e:'#menu button:nth-child(3)'},
+ {t:'Дайн: дайсан руу довтолж шагнал ав.',e:'#menu button:nth-child(4)'},
+ {t:'Үйл явдал: өдөр бүрийн бэлэг, 7 хоног, Пасс.',e:'#rcol button:first-child'},
+ {t:'Дэлгүүр: Алт, хайрцаг, скин. Түүхэн аян ба Дэлхий доор байна.',e:'#lcol button:first-child'},
+ {t:'Заавар дууслаа! Бэлэг: +20 Алт. Амжилт хүсье!',e:null}];
+let TUTI=-1;
+function tutShow(i){ TUTI=i; let o=document.getElementById('tutov'); if(!o){ o=document.createElement('div'); o.id='tutov'; document.body.appendChild(o); }
+  if(i>=TUT.length){ o.remove(); S.tutDone=1; S.res.alt+=20; refresh(); sfx('coin'); say('+20 Алт'); return; }
+  const st=TUT[i], el=st.e&&document.querySelector(st.e), r=el?el.getBoundingClientRect():null; let ring='', top;
+  if(r){ ring='<div class="tutr" style="left:'+(r.left-4)+'px;top:'+(r.top-4)+'px;width:'+(r.width+8)+'px;height:'+(r.height+8)+'px"></div>'; top=r.top>innerHeight*0.5?Math.max(10,r.top-150):Math.min(innerHeight-170,r.bottom+14); } else top=innerHeight*0.35;
+  o.innerHTML=ring+'<div class="tutb" style="top:'+top+'px"><div>'+st.t+'</div><div class="row" style="margin-top:8px">'+(i<TUT.length-1?'<button class="btn" onclick="tutSkip()">Алгасах</button>':'<span></span>')+'<button class="btn red" onclick="tutShow('+(i+1)+')">'+(i===TUT.length-1?'Авах':'Дараах ('+(i+1)+'/'+(TUT.length-1)+')')+'</button></div></div>'; }
+function tutSkip(){ const o=document.getElementById('tutov'); if(o) o.remove(); S.tutDone=1; TUTI=-1; }
+function tutCheck(){ if(S.tutDone||TUTI>=0) return; const sp=document.getElementById('splash'); if(sp&&getComputedStyle(sp).display!=='none') return; if((S.pl||1)>3||(S.won||0)>2){ S.tutDone=1; return; } tutShow(0); }
+setInterval(tutCheck,2500);
+(function(){ const st=document.createElement('style'); st.textContent='#tutov{position:fixed;inset:0;z-index:300;background:#0007}.tutr{position:fixed;border:3px solid #ffd24a;border-radius:12px;box-shadow:0 0 0 9999px #0008,0 0 18px #ffd24a;animation:tutp 1s infinite;pointer-events:none}@keyframes tutp{50%{box-shadow:0 0 0 9999px #0008,0 0 30px #ffd24a}}.tutb{position:fixed;left:14px;right:14px;max-width:360px;margin:0 auto;background:linear-gradient(#3b2815,#241709);border:3px solid #c9972b;border-radius:14px;padding:14px;color:#ffe9b0;font-size:15px;line-height:1.35}.tutb .row{display:flex;gap:8px;justify-content:space-between}'; document.head.appendChild(st); })();
 const MUSV={a:{},on:true,unl:false,want:'village'};
 try{ MUSV.on=localStorage.getItem('mus')!=='0'; }catch(e){}
 function musGet(k){ if(!MUSV.a[k]){ const a=new Audio(MUS[k]); a.loop=true; a.volume=k==='battle'?0.55:0.4; MUSV.a[k]=a; } return MUSV.a[k]; }
@@ -2689,7 +2852,7 @@ requestAnimationFrame(frame);
 (function(){ const b=document.createElement('button'); b.setAttribute('onclick',"openM('quests')"); b.innerHTML='<span><img class="mi" data-ic="q_daily"></span>Даалгавар<em id="qb"></em>'; $('rcol').appendChild(b); setIcons(); })();
 
 (function(){ [['shop','ui_gem','Дэлгүүр','shb'],['camp','m_map','Түүхэн аян',''],['wmap','ui2_map','Дэлхий','']].forEach(([k,ic,t,em])=>{ const b=document.createElement('button'); b.setAttribute('onclick',"openM('"+k+"')"); b.innerHTML='<span><img class="mi" data-ic="'+ic+'"></span>'+t+(em?'<em id="'+em+'"></em>':''); $('rcol').appendChild(b); }); setIcons(); })();
-(function(){ const st=document.createElement('style'); st.textContent='@media(max-width:380px){#season{left:182px!important;padding:2px 5px!important;font-size:10px!important}}#lcol{position:fixed;left:6px;z-index:3;display:flex;flex-direction:row;gap:6px}#lcol button{position:relative;width:60px;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-size:10px;font-weight:bold;padding:2px 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 0 #1a0f06}'; document.head.appendChild(st); const l=document.createElement('div'); l.id='lcol'; document.body.appendChild(l); const rc=$('rcol'); [...rc.querySelectorAll('button')].forEach(b=>{ const o=b.getAttribute('onclick')||''; if(/openM\('(shop|camp|wmap)'\)/.test(o)) l.appendChild(b); }); function pos(){ const p=$('pcard'); if(p){ l.style.top=(p.getBoundingClientRect().bottom+8)+'px'; } } pos(); setInterval(pos,1000); addEventListener('resize',pos); })();
+(function(){ const st=document.createElement('style'); st.textContent='@media(max-width:380px){#season{left:182px!important;padding:2px 5px!important;font-size:10px!important}}#lcol{position:fixed;left:6px;z-index:3;display:grid;grid-template-columns:62px 62px;gap:6px}#lcol button{position:relative;width:62px;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-size:10px;font-weight:bold;padding:2px 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 0 #1a0f06}'; document.head.appendChild(st); const l=document.createElement('div'); l.id='lcol'; document.body.appendChild(l); const rc=$('rcol'); [...rc.querySelectorAll('button')].forEach(b=>{ const o=b.getAttribute('onclick')||''; if(/openM\('(shop|camp|wmap)'\)/.test(o)) l.appendChild(b); }); function pos(){ const p=$('pcard'); if(p){ l.style.top=(p.getBoundingClientRect().bottom+8)+'px'; } } pos(); setInterval(pos,1000); addEventListener('resize',pos); })();
 </script>
 <script>
 (function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');

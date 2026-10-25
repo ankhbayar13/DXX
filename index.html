@@ -183,10 +183,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 #splash .pt{color:#ffe9b0;font-size:13px;margin-top:6px;text-shadow:0 1px 3px #000}
 #splash .go{display:none;width:100%;padding:14px;font-size:20px;font-weight:bold;color:#3a2200;background:linear-gradient(#ffe27a,#d99a1a);border:3px solid #7a4e00;border-radius:14px;box-shadow:0 3px 0 #5a3a00}
 #splash .go:active{transform:translateY(2px)}
-#ld.w .pb i{width:30%!important;animation:ldw 1.3s ease-in-out infinite}@keyframes ldw{0%{margin-left:-30%}100%{margin-left:100%}}#ld.w .pt{font-size:13px;line-height:1.35;padding:0 14px}</style>
+#ld.w .pb i{width:30%!important;animation:ldw 1.3s ease-in-out infinite}@keyframes ldw{0%{margin-left:-30%}100%{margin-left:100%}}#ld.w .pt{font-size:13px;line-height:1.35;padding:0 14px}@keyframes gop{0%,100%{box-shadow:inset 0 0 0 2px #7a5314,inset 0 0 16px #0007,0 4px 14px #000a,0 0 14px #ffd77033}50%{box-shadow:inset 0 0 0 2px #7a5314,inset 0 0 16px #0007,0 4px 14px #000a,0 0 26px #ffd770aa}}@keyframes gosh{0%{background-position:-160% 0}60%,100%{background-position:260% 0}}#splash .go{position:relative;padding:15px 14px 14px;font:900 24px/1 Georgia,'Palatino Linotype','Book Antiqua',serif;letter-spacing:3px;color:#ffd96b;text-shadow:0 2px 0 #2d1a00,0 0 12px #ffb43099;background:linear-gradient(#27569f,#10306b 55%,#0a1f4a);border:3px solid #e6b94d;border-radius:12px;animation:gop 2.2s ease-in-out infinite;overflow:hidden}#splash .go:before,#splash .go:after{content:'❖';position:absolute;top:50%;transform:translateY(-50%);font-size:18px;color:#e6b94d;text-shadow:0 1px 2px #000}#splash .go:before{left:14px}#splash .go:after{right:14px}#splash .go i{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#ffffff55 50%,transparent 65%) no-repeat;background-size:60% 100%;animation:gosh 3.2s ease-in-out infinite;pointer-events:none}#splash .pb{height:16px;background:linear-gradient(#0a1c40,#12306a);border:2px solid #e6b94d;border-radius:9px;box-shadow:inset 0 2px 5px #000a,0 2px 8px #0008}#splash .pb i{background:linear-gradient(#fff0a8,#f0b429 50%,#b9780f)}#splash .pt{font:italic 600 14px/1.4 Georgia,'Palatino Linotype',serif;color:#ffeab5;letter-spacing:.3px;margin-top:8px;text-shadow:0 1px 0 #000,0 0 8px #000c}#ld.w .pt{font-size:13.5px}#splmus{font:italic 700 14px Georgia,serif!important;color:#ffeab5!important}</style>
 </head>
 <body>
-<div id="splash"><div class="lg"></div><div class="bt2"><button class="go" id="goBtn">⚔ Тоглох</button><div id="ld" class="w"><div class="pb"><i id="pbi"></i></div><div class="pt" id="ptx">Тоглоомын файл татаж байна (~13 MB). Эхний удаа удаан, дараа нь хурдан. Хүлээнэ үү…</div></div></div></div>
+<div id="splash"><div class="lg"></div><div class="bt2"><button class="go" id="goBtn">ТОГЛОХ<i></i></button><div id="ld" class="w"><div class="pb"><i id="pbi"></i></div><div class="pt" id="ptx">Тоглоомын файл татаж байна (~13 MB). Эхний удаа удаан, дараа нь хурдан. Хүлээнэ үү…</div></div></div></div>
 <script>(function(){ var on=true; try{ on=localStorage.getItem('mus')!=='0'; }catch(e){} if(!on) return;
  var a=new Audio(), done=0, sp=document.getElementById('splash'); a.loop=true; a.volume=0.8; a.preload='none'; a.src='loading.m4a?v=1'; window.DXX_SPL=a;
  var st=document.createElement('style'); st.textContent='#splmus{position:absolute;left:0;right:0;top:14px;text-align:center;color:#ffe9b0;font:bold 13px sans-serif;text-shadow:0 1px 3px #000;display:none;z-index:3;animation:splp 1.6s ease-in-out infinite;pointer-events:none}@keyframes splp{0%,100%{opacity:.55}50%{opacity:1}}'; document.head.appendChild(st);
@@ -4190,8 +4190,9 @@ function chpicLoad(i,cb){
   CHOK[i]=2; CHTRY[i]=Date.now();
   const im=new Image(); im._cbs=[cb]; CHIM[i]=im;
   im.onload=()=>{ CHOK[i]=1; (im._cbs||[]).forEach(f=>f&&f(1)); im._cbs=[]; };
-  im.onerror=()=>{ CHOK[i]=0; CHTRY[i]=Date.now(); (im._cbs||[]).forEach(f=>f&&f(0)); im._cbs=[]; };
-  im.src='ch'+(i+1)+'.jpg?v=1';
+  const alts=['ch'+(i+1)+'.jpg?v=1','ch/ch'+(i+1)+'.jpg?v=1','img/ch'+(i+1)+'.jpg?v=1']; let ai=0;
+  im.onerror=()=>{ if(++ai<alts.length){ im.src=alts[ai]; return; } CHOK[i]=0; CHTRY[i]=Date.now(); (im._cbs||[]).forEach(f=>f&&f(0)); im._cbs=[]; try{ const m=document.getElementById('chmsg'); if(m&&CHI===i&&!m.querySelector('.chnf')) m.insertAdjacentHTML('beforeend','<div class=\"chnf\" style=\"position:fixed;left:0;right:0;bottom:3px;text-align:center;font-size:11px;font-weight:normal;opacity:.85\">ch'+(i+1)+'.jpg олдсонгүй (GitHub-д upload хийгээгүй)</div>'); }catch(e){} };
+  im.src=alts[0];
 }
 function chpicLayout(){
   const e=document.getElementById('chs'), st=document.getElementById('chst'); if(!e||!st||!st.dataset.i) return;

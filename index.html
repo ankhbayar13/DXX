@@ -2153,7 +2153,7 @@ function modalContent(k){
   }
   return '';
 }
-function fillM(){ if(window.GATE&&$('gate')){ gateRender(1); return; } $('mbody').innerHTML=mBack()+modalContent(cur); updBtns(); }
+function fillM(){ if(window.GATE&&$('gate')){ gateRender(1); return; } $('mbody').innerHTML=mBack()+modalContent(cur); try{ uifScan(); }catch(e){} updBtns(); }
 var MBACK=0;
 function mBack(){ return (MBACK&&cur&&cur!=='menu')?'<button id="mback" class="btn" style="position:absolute;left:10px;top:10px;z-index:3;padding:5px 11px;font-size:14px" onclick="openM(\'menu\')">‹ Цэс</button>':''; }
 function openM(k){
@@ -2199,7 +2199,7 @@ function bcard(k){
   else if(locked) foot='<div class="bs lk">🔒 Гол гэр '+req+'-р түвшин хэрэгтэй (одоо '+S.bld.ger+')</div>';
   else foot='<div class="bs ds">'+d.desc+'</div><button class="btn" data-c="'+d.cost+'" onclick="startPlace(\''+k+'\')">Барих · '+f(d.cost)+' 🪙</button>';
   return '<div class="bcard'+(locked?' lock':'')+'"><div class="in"><div class="nm">'+d.n+'</div><div class="pic"'+(lvl?' onclick="openM(\'bld:'+k+'\')"':(!locked&&!site?' onclick="startPlace(\''+k+'\')"':''))+'>'+sp+'</div>'+foot+'</div>'+
-    '<img class="fr" src="'+SPRDATA[locked?'bf3':({green:'bf0',blue:'bf1',purple:'bf2',gold:'bf2'})[BRAR[k]]||'bf0'][0]+'">'+(locked?'<img class="lockimg" src="'+SPRDATA.ui_lock[0]+'">':'')+(isNew?'<img class="newb" src="'+SPRDATA.ui_new[0]+'">':'')+'</div>';
+    (lvl?'<i class="blv">'+lvl+'</i>':'')+'<img class="fr" src="'+SPRDATA[locked?'bf3':({green:'bf0',blue:'bf1',purple:'bf2',gold:'bf2'})[BRAR[k]]||'bf0'][0]+'">'+(locked?'<img class="lockimg" src="'+SPRDATA.ui_lock[0]+'">':'')+(isNew?'<img class="newb" src="'+SPRDATA.ui_new[0]+'">':'')+'</div>';
 }
 function barilgaHTML(){
   const tab=BTABS.find(t=>t[0]===bTab)||BTABS[0], pc=ents.filter(e=>e.kind==='person').length;
@@ -2515,7 +2515,7 @@ function hdImg(id,dim,cls,px){ const d=SPRDATA['hp_'+id]; if(!d) return ''; cons
   if(px&&!sm&&px>=128) px=Math.max(64,Math.floor(px/64)*64);
   return '<img class="'+(cls||'hd-img')+'" src="'+d[0]+'" style="image-rendering:'+(sm?'auto':'pixelated')+(px?';height:'+px+'px;width:'+px+'px':'')+(f?';filter:'+f:'')+'">'; }
 function hCard(x){ const id=x.id, ow=!!S.heroes[id], r=RAR[x.s], t=Math.min(4,Math.max(0,x.s-1)), up=ow&&canStar(id), cl=htype(id);
-  return '<div class="hc'+(ow?'':' hcn')+'" style="--g:'+r.g+'" onclick="heroInfo(\''+id+'\')"><i class="hc-c">'+CLSI[cl]+'</i>'+(up?'<i class="hc-up">⬆</i>':'')+
+  return '<div class="hc'+(ow?'':' hcn')+' hr'+x.s+'" style="--g:'+r.g+'" onclick="heroInfo(\''+id+'\')"><i class="hc-c">'+CLSI[cl]+'</i>'+(up?'<i class="hc-up">⬆</i>':'')+
     '<div class="hc-a"'+(ow?'':' style="filter:grayscale(1) brightness(.45)"')+'>'+hpf(id,56,t)+'</div><div class="hc-n">'+(ow||admOn()?x.n:'???')+'</div>'+
     (ow?'<div class="hc-l">Lv '+hlv(id)+'</div>'+stRow(starOf(id),11):'<div class="hc-x">Эзэмшээгүй</div>')+'</div>'; }
 function heroListHTML(){
@@ -4123,7 +4123,7 @@ function gmainCard(){ const L=S.bld.ger||1, g=S.upg&&S.upg.ger, spn=(typeof TSET
   if(g) foot=upFoot('ger');
   else if(L>=MAXB) foot='<div class="bs">Дээд түвшин ('+MAXB+')</div>';
   else foot='<div class="bs">'+L+'-р түвшин</div><button class="btn" onclick="openM(\'bld:ger\')">⬆ Lv '+(L+1)+'</button>';
-  return '<div class="bcard"><div class="in"><div class="nm">Гол гэр</div><div class="pic" onclick="openM(\'bld:ger\')"><img class="bi" src="'+spd[0]+'"></div>'+foot+'</div><img class="fr" src="'+SPRDATA.bf2[0]+'"></div>'; }
+  return '<div class="bcard"><div class="in"><div class="nm">Гол гэр</div><div class="pic" onclick="openM(\'bld:ger\')"><img class="bi" src="'+spd[0]+'"></div>'+foot+'</div><i class="blv">'+L+'</i><img class="fr" src="'+SPRDATA.bf2[0]+'"></div>'; }
 
 
 // ===== 57: баатрын «Хүч» дурсгал/зэвсэг/гэгээнтнийг тооцно; 💎 Ид шидийн чулууг Алтаар авна =====
@@ -4533,6 +4533,59 @@ function menuHTML(){
   '.mnc{position:relative;box-sizing:border-box;border:solid transparent;border-width:14px;border-image-slice:70 70 70 70 fill;border-image-repeat:stretch;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
   '.mnc img{width:112%;margin:-6px -6% -10px;display:block;pointer-events:none}.mnc:active{transform:scale(.97)}'+
   '.mnc em{position:absolute;top:0;right:2px;z-index:2;background:#d33;color:#fff;border-radius:9px;font-size:11px;padding:1px 6px;font-style:normal;border:1px solid #fff8}';
+  document.head.appendChild(st); })();
+
+
+/* p32/uiframes.js — 91: баатар/барилгын картын шинэ хүрээ (ui.bin) */
+var UIF=null, UIST=0;
+function uifLoad(){
+  if(UIF||UIST===1) return;
+  if(UIST===2&&Date.now()-(window.UIT||0)<15000) return;
+  UIST=1;
+  try{
+    fetch('ui.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
+      hd.forEach(x=>{ o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
+      UIF=o; UIST=3;
+      const rs=document.documentElement.style; ['fh1','fh2','fh3','fh4','fh5'].forEach(k=>rs.setProperty('--'+k,'url('+o[k]+')'));
+      document.body.classList.add('uif');
+      try{ if($('modal').style.display==='flex') fillM(); }catch(e){}
+    }).catch(()=>{ UIST=2; window.UIT=Date.now(); });
+  }catch(e){ UIST=2; window.UIT=Date.now(); }
+}
+setTimeout(()=>{ try{ uifLoad(); }catch(e){} },3500);
+function uifScan(){
+  if(!UIF) return; const m=$('mbody'); if(!m) return;
+  m.querySelectorAll('.bcard>img.fr:not([data-u])').forEach(im=>{
+    const s=im.getAttribute('src'); let n='fb0';
+    if(SPRDATA.bf1&&s===SPRDATA.bf1[0]) n='fb1'; else if(SPRDATA.bf2&&s===SPRDATA.bf2[0]) n='fb2'; else if(SPRDATA.bf3&&s===SPRDATA.bf3[0]) n='fb3';
+    im.setAttribute('data-u','1'); im.src=UIF[n]; });
+  m.querySelectorAll('.hc-n:not([data-u])').forEach(e=>{ e.setAttribute('data-u','1'); const L=e.textContent.length; e.style.fontSize=(L<=8?11:L<=11?9.5:L<=14?8:7)+'px'; });
+  m.querySelectorAll('.hc-a:not([data-u])').forEach(e=>{ e.setAttribute('data-u','1'); const im=e.querySelector('img'); if(im){ const src=im.getAttribute('src'); e.innerHTML='<img class="hcp" src="'+src+'">'; } });
+  m.querySelectorAll('.hc-l:not([data-u])').forEach(e=>{ e.setAttribute('data-u','1'); e.textContent=e.textContent.replace(/^Lv\s*/,''); });
+}
+(function(){ const st=document.createElement('style');
+  st.textContent=
+  'body.uif .bcard{aspect-ratio:3/4;background:none;border-radius:0}'+
+  'body.uif .bcard>.fr{image-rendering:auto;object-fit:fill}'+
+  'body.uif .bcard .in{inset:0!important;padding:13.5% 13% 31% 13%;box-sizing:border-box;justify-content:flex-start;gap:3px}'+
+  'body.uif .bcard .nm{position:absolute;left:16%;right:16%;top:83%;height:9%;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:#ffe9b0;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;z-index:2}'+
+  'body.uif .bcard .blv{position:absolute;left:4.5%;top:2.5%;width:23%;height:17%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:bold;font-size:12px;color:#ffe9b0;text-shadow:0 1px 2px #000;z-index:2}'+
+  'body.uif .bcard .bs{font-size:9px}'+
+  'body.uif .bcard .btn{width:70%;padding:1px 2px;border-width:6px;border-image-width:6px;font-size:10px;line-height:1.15;min-height:0}'+
+  'body.uif .bcard.lock .in{justify-content:flex-end}body.uif .bcard.lock .pic{display:none}body.uif .bcard.lock .bs.lk{position:static;transform:none;top:auto;left:auto;font-size:9.5px;font-weight:bold;padding:3px 5px;margin-bottom:2%;max-width:100%}'+
+  'body.uif .hc{aspect-ratio:3/4;padding:0;border:0;border-radius:0;box-shadow:none;overflow:visible;background:center/100% 100% no-repeat;container-type:inline-size}'+
+  'body.uif .hc.hr1{background-image:var(--fh1)}body.uif .hc.hr2{background-image:var(--fh2)}body.uif .hc.hr3{background-image:var(--fh3)}body.uif .hc.hr4{background-image:var(--fh4)}body.uif .hc.hr5{background-image:var(--fh5)}'+
+  'body.uif .hc-a{position:absolute;left:12.5%;right:11.5%;top:14.5%;bottom:30%;margin:0;display:block;overflow:hidden;border-radius:2px;-webkit-mask-image:radial-gradient(circle at 3.5cqw -4.6cqw,transparent 0,transparent 13cqw,#000 13.3cqw);mask-image:radial-gradient(circle at 3.5cqw -4.6cqw,transparent 0,transparent 13cqw,#000 13.3cqw)}'+
+  'body.uif .hcp{width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block;border-radius:0;box-shadow:inset 0 -14px 12px -8px #000a}'+
+  'body.uif .hc-n{position:absolute;left:15%;right:15%;top:83%;height:9%;margin:0;display:flex;align-items:center;justify-content:center;font-weight:bold;white-space:nowrap;overflow:hidden}'+
+  'body.uif .hc-l{position:absolute;left:4.5%;top:2.5%;width:23%;height:17%;display:flex;align-items:center;justify-content:center;font-size:10px}'+
+  'body.uif .hc>.hstr{position:absolute;left:0;right:0;top:60.5%;text-align:center;font-size:10px!important;line-height:1;text-shadow:0 1px 2px #000,0 0 3px #000;z-index:2}'+
+  'body.uif .hc.hr1 .hc-n,body.uif .hc.hr2 .hc-n{top:84.3%}body.uif .hc.hr2 .hc-l{top:3.8%}'+
+  'body.uif .hc-x{position:absolute;left:0;right:0;top:64%;margin:0;font-size:9px}'+
+  'body.uif .hc .hstr span{color:#ffffff55}body.uif .hc .hstr span.on{color:#ffd35a}'+
+  'body.uif .hc-c{left:auto;right:15%;top:16%;width:17px;height:17px;line-height:17px;text-align:center;font-size:10px;background:#000b;border-radius:50%;z-index:2}'+
+  'body.uif .hc-up{right:2%;top:1%}';
   document.head.appendChild(st); })();
 
 </script><script>(function(){

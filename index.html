@@ -4182,7 +4182,20 @@ setInterval(tkSync,600); setTimeout(tkSync,300);
 
 // ===== Түүхэн аян: 14 бүлгийн бэлэн зураг =====
 const CHCAL=[{"n":1,"w":980,"h":1604,"X":[7.5,6.6],"c14":[31.2,14.8],"c4":[30.8,18.6],"bat":[14.2,84.8],"rat":[85.0,83.7],"ent":[50.0,82.5],"c14c":"#462d1c","c4c":"#251810"},{"n":2,"w":941,"h":1672,"X":[10.0,7.0],"c14":[34.2,15.8],"c4":[33.8,19.7],"bat":[13.8,84.1],"la":[40.0,84.0],"ra":[60.0,84.0],"rat":[85.8,84.1],"ent":[50.0,92.6],"c14c":"#261108","c4c":"#241008"},{"n":3,"w":852,"h":1846,"X":[8.2,8.1],"c14":[37.5,15.5],"c4":[37.5,18.8],"bat":[13.2,83.1],"la":[40.0,83.1],"ra":[60.0,83.1],"rat":[86.2,83.1],"ent":[50.0,91.2],"c14c":"#1d1109","c4c":"#1d120a"},{"n":4,"w":852,"h":1846,"X":[10.0,6.6],"c14":[36.8,14.3],"c4":[36.2,17.7],"bat":[13.8,85.0],"la":[39.2,84.3],"ra":[60.0,84.3],"rat":[85.0,85.0],"ent":[50.5,91.7],"c14c":"#4a2713","c4c":"#331c0f"},{"n":5,"w":940,"h":1672,"X":[10.0,7.0],"c14":[36.8,15.5],"c4":[36.8,19.0],"bat":[13.8,83.9],"la":[40.0,84.8],"ra":[60.0,84.8],"rat":[86.2,84.8],"ent":[50.0,92.8],"c14c":"#422212","c4c":"#2e180e"},{"n":6,"w":851,"h":1847,"X":[8.0,5.8],"c14":[34.2,13.1],"c4":[34.2,16.6],"bat":[13.2,83.5],"la":[40.0,83.5],"ra":[60.0,83.5],"rat":[86.2,83.2],"ent":[50.5,91.6],"c14c":"#38190d","c4c":"#2e1409"},{"n":7,"w":941,"h":1672,"X":[12.5,10.1],"c14":[32.5,18.6],"c4":[33.2,22.5],"bat":[13.2,85.4],"la":[39.2,85.8],"ra":[61.2,85.8],"rat":[86.8,85.4],"ent":[51.2,93.1],"c14c":"#21110b","c4c":"#20100a"},{"n":8,"w":941,"h":1672,"X":[13.0,7.7],"c14":[35.0,16.2],"c4":[35.0,20.1],"bat":[12.8,85.4],"la":[40.0,85.4],"ra":[60.0,85.4],"rat":[86.8,85.8],"ent":[50.0,92.9],"c14c":"#381b0b","c4c":"#2d1408"},{"n":9,"w":851,"h":1847,"X":[11.2,8.1],"c14":[35.0,16.2],"c4":[35.0,19.7],"bat":[13.0,82.4],"la":[38.8,82.4],"ra":[60.8,82.4],"rat":[86.2,82.6],"ent":[50.0,88.9],"c14c":"#442111","c4c":"#33190d"},{"n":10,"w":852,"h":1846,"X":[10.0,7.5],"c14":[35.8,15.9],"c4":[35.8,19.4],"bat":[13.2,80.8],"la":[40.5,81.0],"ra":[60.0,81.0],"rat":[85.8,81.0],"ent":[50.0,88.8],"c14c":"#321a0e","c4c":"#321a0e"},{"n":11,"w":941,"h":1672,"X":[13.0,9.6],"c14":[35.0,18.0],"c4":[35.0,22.1],"bat":[13.0,85.4],"la":[40.0,87.2],"ra":[60.0,87.2],"rat":[86.8,85.4],"ent":[51.2,93.6],"c14c":"#2c1308","c4c":"#260f06"},{"n":12,"w":941,"h":1671,"X":[14.5,10.1],"c14":[36.2,18.3],"c4":[36.2,22.2],"bat":[13.0,85.2],"la":[40.0,85.5],"ra":[60.0,85.5],"rat":[86.8,85.5],"ent":[50.0,92.9],"c14c":"#351004","c4c":"#250b03"},{"n":13,"w":941,"h":1672,"X":[13.0,8.0],"c14":[35.0,16.3],"c4":[35.0,20.1],"bat":[13.2,85.4],"la":[40.0,85.8],"ra":[59.5,85.8],"rat":[86.2,85.4],"ent":[50.0,93.1],"c14c":"#260d03","c4c":"#280e03"},{"n":14,"w":941,"h":1672,"X":[11.2,8.2],"c14":[35.0,17.9],"c4":[35.0,21.5],"bat":[12.5,84.8],"la":[50.0,84.7],"rat":[88.0,84.8],"ent":[50.0,92.2],"c14c":"#311406","c4c":"#281208"}];
+const CHOFF=[[0, 811259], [811259, 1099084], [1910343, 1151769], [3062112, 1112832], [4174944, 1133453], [5308397, 1228005], [6536402, 1154233], [7690635, 1228306], [8918941, 1211029], [10129970, 1242797], [11372767, 1304810], [12677577, 1284091], [13961668, 1321859], [15283527, 1282281]];
 const CHIM={}, CHOK={}, CHTRY={};
+function chpicBin(i,cb){
+  const a=CHOFF[i][0], l=CHOFF[i][1], mk=buf=>URL.createObjectURL(new Blob([buf],{type:'image/jpeg'}));
+  try{
+    if(window.CHALL){ cb(mk(window.CHALL.slice(a,a+l))); return; }
+    if(!window.fetch){ cb(null); return; }
+    fetch('ch.bin?v=1',{headers:{Range:'bytes='+a+'-'+(a+l-1)}}).then(r=>{
+      if(r.status===206) return r.arrayBuffer();
+      if(r.status===200) return r.arrayBuffer().then(buf=>{ window.CHALL=buf; return buf.slice(a,a+l); });
+      throw 0; })
+    .then(buf=>{ if(buf.byteLength!==l) throw 0; cb(mk(buf)); }).catch(()=>cb(null));
+  }catch(e){ cb(null); }
+}
 function chpicLoad(i,cb){
   if(CHOK[i]===1){ cb&&cb(1); return; }
   if(CHOK[i]===0&&Date.now()-(CHTRY[i]||0)<8000){ cb&&cb(0); return; }
@@ -4190,9 +4203,10 @@ function chpicLoad(i,cb){
   CHOK[i]=2; CHTRY[i]=Date.now();
   const im=new Image(); im._cbs=[cb]; CHIM[i]=im;
   im.onload=()=>{ CHOK[i]=1; (im._cbs||[]).forEach(f=>f&&f(1)); im._cbs=[]; };
-  const alts=['ch'+(i+1)+'.jpg?v=1','ch/ch'+(i+1)+'.jpg?v=1','img/ch'+(i+1)+'.jpg?v=1']; let ai=0;
-  im.onerror=()=>{ if(++ai<alts.length){ im.src=alts[ai]; return; } CHOK[i]=0; CHTRY[i]=Date.now(); (im._cbs||[]).forEach(f=>f&&f(0)); im._cbs=[]; try{ const m=document.getElementById('chmsg'); if(m&&CHI===i&&!m.querySelector('.chnf')) m.insertAdjacentHTML('beforeend','<div class=\"chnf\" style=\"position:fixed;left:0;right:0;bottom:3px;text-align:center;font-size:11px;font-weight:normal;opacity:.85\">ch'+(i+1)+'.jpg олдсонгүй (GitHub-д upload хийгээгүй)</div>'); }catch(e){} };
-  im.src=alts[0];
+  const alts=['ch'+(i+1)+'.jpg?v=1','ch/ch'+(i+1)+'.jpg?v=1','img/ch'+(i+1)+'.jpg?v=1']; let ai=-1;
+  const fail=()=>{ CHOK[i]=0; CHTRY[i]=Date.now(); (im._cbs||[]).forEach(f=>f&&f(0)); im._cbs=[]; try{ const m=document.getElementById('chmsg'); if(m&&CHI===i&&!m.querySelector('.chnf')) m.insertAdjacentHTML('beforeend','<div class=\"chnf\" style=\"position:fixed;left:0;right:0;bottom:3px;text-align:center;font-size:11px;font-weight:normal;opacity:.85\">ch.bin олдсонгүй (GitHub-д upload хийгээгүй)</div>'); }catch(e){} };
+  const nextSrc=()=>{ ai++; if(ai===0){ chpicBin(i,u=>{ if(u) im.src=u; else nextSrc(); }); } else if(ai<=alts.length) im.src=alts[ai-1]; else fail(); };
+  im.onerror=nextSrc; nextSrc();
 }
 function chpicLayout(){
   const e=document.getElementById('chs'), st=document.getElementById('chst'); if(!e||!st||!st.dataset.i) return;

@@ -183,10 +183,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 #splash .pt{color:#ffe9b0;font-size:13px;margin-top:6px;text-shadow:0 1px 3px #000}
 #splash .go{display:none;width:100%;padding:14px;font-size:20px;font-weight:bold;color:#3a2200;background:linear-gradient(#ffe27a,#d99a1a);border:3px solid #7a4e00;border-radius:14px;box-shadow:0 3px 0 #5a3a00}
 #splash .go:active{transform:translateY(2px)}
-</style>
+#ld.w .pb i{width:30%!important;animation:ldw 1.3s ease-in-out infinite}@keyframes ldw{0%{margin-left:-30%}100%{margin-left:100%}}#ld.w .pt{font-size:13px;line-height:1.35;padding:0 14px}</style>
 </head>
 <body>
-<div id="splash"><div class="lg"></div><div class="bt2"><button class="go" id="goBtn">⚔ Тоглох</button><div id="ld"><div class="pb"><i id="pbi"></i></div><div class="pt" id="ptx">Ачаалж байна…</div></div></div></div>
+<div id="splash"><div class="lg"></div><div class="bt2"><button class="go" id="goBtn">⚔ Тоглох</button><div id="ld" class="w"><div class="pb"><i id="pbi"></i></div><div class="pt" id="ptx">Тоглоомын файл татаж байна (~13 MB). Эхний удаа удаан, дараа нь хурдан. Хүлээнэ үү…</div></div></div></div>
 <canvas id="cv"></canvas>
 <div id="res"></div>
 <div id="pcard"><div class="av" onclick="openM(&#39;profile&#39;)"><img id="avi"><b id="plv">1</b></div><div class="pi"><div class="pl pn" id="pname">Хаан</div><div class="pl">⚔ <b id="pw">0</b></div><div class="pl">🐑 <b id="pherd">0</b><div class="hb"><i id="pbar"></i></div></div></div></div>
@@ -201,10 +201,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 <div id="modal"><div class="box"><button class="x" onclick="closeM()">✕</button><div id="mbody"></div></div></div>
 <div id="msg" class="msg"></div>
 
-<script src="d1.js?v=3b55f40b"></script>
-<script src="d2.js?v=dfd2f674"></script>
-<script src="d3.js?v=23a70e0f"></script>
-<script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.ger) m.push('d1'); else { if(!SPRDATA.nw0_r) m.push('d2'); if(!SPRDATA.an_honi) m.push('d3'); } }catch(e){ m.push('d?'); }
+<script src="d1.js?v=56b28b72"></script>
+<script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.ger) m.push('d1'); }catch(e){ m.push('d?'); }
  if(!m.length) return; window.DXX_MISSING=m; var d=document.createElement('div'); d.id='dxxmiss'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#1b120a;color:#ffe9b0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px sans-serif;text-align:center;padding:24px';
  d.innerHTML='<div style="font-size:44px">\ud83d\udcf6</div><h2 style="color:#ffd770;margin:8px 0">Тоглоомын файл бүрэн татагдсангүй</h2><div style="max-width:300px;margin-bottom:18px">Интернет сул байна. Сүлжээгээ шалгаад дахин оролдоно уу.</div><button onclick="location.reload()" style="padding:12px 26px;font-size:17px;font-weight:bold;border-radius:12px;border:3px solid #ffd770;background:#a8641a;color:#fff">Дахин ачаалах</button>';
  document.documentElement.appendChild(d); })();</script>
@@ -916,12 +914,31 @@ const HCH={hunter:10,guard:3};                     // найз анчин, ха�
 const ANK={honi:'sheep',yamaa:'goat',uher:'cow',aduu:'horse',temee:'camel'};
 const WLN={wolf:'wolf',bear:'bear',lynx:'lynx',fox:'fox',deer:'deer',marmot:'marmot',eagle:'eagle',leopard:'leopard'};
 const NWAX={};
-(function(){
-  for(const k in NWF){ const f=NWF[k], bs=SPR[k]; if(!bs) continue;
-    for(let i=0;i<f[0];i++){ SPR[k+i]={img:bs.img,iw:f[1],ih:f[2],sx:i*f[1],sy:0}; SZ[k+i]=f[1]*f[4]; NWAX[k+i]=f[3]*f[4]; } }
-  for(const j in NWJ){ const J=NWJ[j], bs=SPR[j]; if(!bs) continue;
-    J.p.forEach((q,i)=>{ SPR[j+'_'+i]={img:bs.img,iw:q[1],ih:J.H,sx:q[0],sy:0}; SZ[j+'_'+i]=q[1]*J.upp; NWAX[j+'_'+i]=q[2]*J.upp; }); }
-})();
+// ===== 56: ПРОГРЕССИВ АЧААЛАЛТ — дүрсний (nw/an/jb/wl/wd) зургууд арын дэвсгэр дээр татагдана =====
+// Татагдаагүй байхад хүн/малын оронд сүүдэр (stub) харуулна; ирмэгц жинхэнэ зургаар солигдоно.
+const NWSTUB={};
+function nwStub(kind,w,h){ w=Math.max(8,Math.round(w)); h=Math.max(8,Math.round(h)); const key=kind+w+'x'+h; if(NWSTUB[key]) return NWSTUB[key];
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.fillStyle='rgba(35,22,10,0.55)';
+  if(kind==='p'){ g.beginPath(); g.arc(w*0.5,h*0.15,w*0.14,0,6.3); g.fill(); g.beginPath(); g.moveTo(w*0.3,h*0.3); g.lineTo(w*0.7,h*0.3); g.lineTo(w*0.8,h*0.95); g.lineTo(w*0.2,h*0.95); g.closePath(); g.fill(); }
+  else { g.beginPath(); g.ellipse(w*0.46,h*0.5,w*0.36,h*0.24,0,0,6.3); g.fill(); g.beginPath(); g.ellipse(w*0.82,h*0.3,w*0.11,h*0.12,0,0,6.3); g.fill(); g.fillRect(w*0.2,h*0.6,w*0.05,h*0.35); g.fillRect(w*0.62,h*0.6,w*0.05,h*0.35); }
+  const im=new Image(); try{ im.src=c.toDataURL(); }catch(e){} return NWSTUB[key]=im; }
+function nwBuild(){
+  for(const k in NWF){ const f=NWF[k], bs=SPR[k], isW=/^(wl_|wd_)/.test(k); if(!bs&&isW) continue;
+    const kind=/^nw/.test(k)?'p':'a', st=bs?null:nwStub(kind,f[1],f[2]);
+    for(let i=0;i<f[0];i++){ const o=SPR[k+i]; if(o&&o.real){ SZ[k+i]=f[1]*f[4]; NWAX[k+i]=f[3]*f[4]; continue; }
+      SPR[k+i]=bs?{img:bs.img,iw:f[1],ih:f[2],sx:i*f[1],sy:0,real:1}:{img:st,iw:f[1],ih:f[2],sx:0,sy:0};
+      SZ[k+i]=f[1]*f[4]; NWAX[k+i]=f[3]*f[4]; } }
+  for(const j in NWJ){ const J=NWJ[j], bs=SPR[j];
+    J.p.forEach((q,i)=>{ const id=j+'_'+i, o=SPR[id]; if(o&&o.real){ SZ[id]=q[1]*J.upp; NWAX[id]=q[2]*J.upp; return; }
+      SPR[id]=bs?{img:bs.img,iw:q[1],ih:J.H,sx:q[0],sy:0,real:1}:{img:nwStub('p',q[1],J.H),iw:q[1],ih:J.H,sx:0,sy:0};
+      SZ[id]=q[1]*J.upp; NWAX[id]=q[2]*J.upp; }); }
+}
+// шинэ ирсэн зургуудыг SPR-д бүртгээд, кадруудыг дахин угсарна
+function dxxLate(){ try{
+  for(const k in SPRDATA){ if(!SPR[k]){ const im=new Image(); im.src=SPRDATA[k][0]; SPR[k]={img:im,iw:SPRDATA[k][1],ih:SPRDATA[k][2]}; } }
+  nwBuild(); }catch(e){ try{ console.error('dxxLate',e); }catch(x){} } }
+nwBuild();
+
 // чөлөөт цагийн ажил: f=поз дугаарууд, dt=солих хугацаа, d=[min,max] секунд
 const NWACT={
  0:[{f:[0],d:[5,9]},{f:[2],d:[4,7]},{f:[4,5],dt:.7,d:[5,8]},{f:[6,7],dt:.7,d:[4,7]}],
@@ -4081,9 +4098,24 @@ function gmainCard(){ const L=S.bld.ger||1, g=S.upg&&S.upg.ger, spn=(typeof TSET
   else foot='<div class="bs">'+L+'-р түвшин</div><button class="btn" onclick="openM(\'bld:ger\')">⬆ Lv '+(L+1)+'</button>';
   return '<div class="bcard"><div class="in"><div class="nm">Гол гэр</div><div class="pic" onclick="openM(\'bld:ger\')"><img class="bi" src="'+spd[0]+'"></div>'+foot+'</div><img class="fr" src="'+SPRDATA.bf2[0]+'"></div>'; }
 
-</script>
+</script><script>(function(){
+ var F=[["e1.js", "4aaef25b"], ["e2.js", "f1c089e1"], ["e3.js", "39bde75b"], ["e4.js", "a2280f43"]],i=0,tries=0,failed=0,bar=document.createElement('div'),stl=document.createElement('style');
+ stl.textContent='@keyframes dxxlb{0%{background-position:-45% 0}100%{background-position:145% 0}}';
+ bar.id='dxxlb'; bar.style.cssText='position:fixed;left:0;top:0;height:3px;width:100%;z-index:99998;pointer-events:none;background:linear-gradient(90deg,transparent,#ffd770,transparent) no-repeat;background-size:45% 100%;animation:dxxlb 1.2s linear infinite';
+ document.head.appendChild(stl); document.documentElement.appendChild(bar);
+ function fin(){ try{ bar.remove(); }catch(e){} window.DXX_LATE_DONE=1; }
+ function next(){ if(i>=F.length){ fin(); return; } var f=F[i], s=document.createElement('script');
+  s.src=f[0]+'?v='+f[1]+(tries?'&r='+tries:''); s.async=true;
+  s.onload=function(){ if(window.DXXL&&window.DXXL[f[0]]){ i++; tries=0; next(); } else bad(s); };
+  s.onerror=function(){ bad(s); }; document.head.appendChild(s); }
+ function bad(s){ try{ s.parentNode.removeChild(s); }catch(e){} tries++; if(tries>12){ failed=1; bar.style.animation='none'; bar.style.background='#c0392b'; return; } setTimeout(next,Math.min(12000,1200*tries)); }
+ window.addEventListener('online',function(){ if(failed){ failed=0; tries=0; bar.style.background='linear-gradient(90deg,transparent,#ffd770,transparent) no-repeat'; bar.style.backgroundSize='45% 100%'; bar.style.animation='dxxlb 1.2s linear infinite'; next(); } });
+ var st=0; function go(){ if(st) return; st=1; setTimeout(next,50); }
+ if(document.readyState==='complete') go(); else { window.addEventListener('load',go); setTimeout(go,8000); }
+})();</script>
+
 <script>
-(function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');
+(function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');document.getElementById('ld').className='';
 var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
 i.style.width=p+'%';x.textContent=t[Math.min(3,p/26|0)];},260);
 document.getElementById('goBtn').onclick=function(){var s=document.getElementById('splash');s.classList.add('off');setTimeout(function(){s.remove()},600);};

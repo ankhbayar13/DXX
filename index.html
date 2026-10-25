@@ -2031,7 +2031,7 @@ function profHTML(){
     '<div class="pfXp"><i><b style="width:'+Math.min(100,xp/need*100)+'%"></b></i><span>'+f(xp)+' / '+f(need)+' XP</span></div>'+
     '<div class="pfSt">'+st(0,f(totalPower()),'Хүч')+st(1,hn,'Баатар')+st(2,S.bld.ger,'Гэр Lv')+st(3,zn,'Газар')+st(4,f(tr),'Цэрэг')+st(5,bn,'Барилга')+'</div>'+
     '<div class="pfDv"></div><div class="pfLr">'+MED.map((m,i)=>lr(m[0],m[1](),i)).join('')+'</div></div>'+
-    '<div class="card" onclick="openM(\'rank\')" style="display:flex;justify-content:space-between;align-items:center"><b>👑 Хааны зэрэг: Lv '+rkLv()+' · '+rkNames()[rkLv()]+'</b><span style="color:#ffd770">›</span></div>'+'<div class="card" style="text-align:center"><div style="margin:2px 0 4px" class="sm">Нэр (14 тэмдэгт хүртэл)</div>'+
+    pidCard()+'<div class="card" onclick="openM(\'rank\')" style="display:flex;justify-content:space-between;align-items:center"><b>👑 Хааны зэрэг: Lv '+rkLv()+' · '+rkNames()[rkLv()]+'</b><span style="color:#ffd770">›</span></div>'+'<div class="card" style="text-align:center"><div style="margin:2px 0 4px" class="sm">Нэр (14 тэмдэгт хүртэл)</div>'+
     '<input id="pnm" maxlength="14" value="'+(S.prof.name||'').replace(/"/g,'')+'" style="width:100%;font-size:16px;padding:8px;border-radius:8px;border:2px solid #c9972b;background:#2b1d12;color:#fff;text-align:center">'+
     '<div style="margin-top:8px"><button class="btn" onclick="setName($(\'pnm\').value)">Нэр хадгалах</button></div></div>'+
     '<div class="card"><div class="sm" style="margin-bottom:6px">Өөрийн зураг (утасны зургаас)</div>'+
@@ -3402,17 +3402,18 @@ async function clInit(){ try{
 }catch(e){ CL.st='Интернет холбогдсонгүй'; CL.err=(e&&(e.code||e.message))||''; if(cur==='cloud') fillM(); } }
 function clUser(){ const u=FBM&&FBM.auth.currentUser; CL.uid=u?u.uid:null; CL.email=u&&!u.isAnonymous?u.email:null; }
 async function clReg(){ const e=($('clem')||{}).value||'', p=($('clpw')||{}).value||''; if(!e||p.length<6){ say('Имэйл, 6+ тэмдэгттэй нууц үг'); return; }
-  try{ const {Au,auth}=FBM; await Au.linkWithCredential(auth.currentUser,Au.EmailAuthProvider.credential(e.trim(),p)); clUser(); CL.st='Холбогдсон · '+CL.email; if(!S.regBonus){ S.regBonus=1; S.res.alt+=100; try{ refresh(); }catch(e){} say('Бүртгэгдлээ ✓ +100 Алт бэлэг!'); } else say('Бүртгэгдлээ ✓'); save(); await clPush(true); fillM(); }
-  catch(x){ say(clErr(x)); } }
+  try{ const {Au,auth}=FBM; if(!auth.currentUser) await Au.signInAnonymously(auth); await Au.linkWithCredential(auth.currentUser,Au.EmailAuthProvider.credential(e.trim(),p)); clUser(); CL.pv=''; CL.msg=''; CL.st='Холбогдсон · '+CL.email; if(!S.regBonus){ S.regBonus=1; S.res.alt+=100; try{ refresh(); }catch(e){} say('Бүртгэгдлээ ✓ +100 Алт бэлэг!'); } else say('Бүртгэгдлээ ✓'); save(); await clPush(true); fillM(); }
+  catch(x){ clMsg(clErr(x)); if(/email-already|credential-already/.test((x&&x.code)||'')){ CL.ev=($('clem')||{}).value||''; CL.pv=''; CL.tab='in'; fillM(); clMsg('Энэ имэйл бүртгэлтэй байна. Нууц үгээрээ нэвтэрнэ үү'); } } }
 async function clReset(){ const e=(($('clem')||{}).value||'').trim(); if(!e){ say('Имэйлээ дээр бичээд дахин дар'); return; } try{ const {Au,auth}=FBM; await Au.sendPasswordResetEmail(auth,e); say('Сэргээх холбоос имэйл рүү илгээгдлээ (спам хавтсыг ч харна уу)'); }catch(x){ say(clErr(x)); } }
-function clErr(x){ const c=(x&&x.code)||''; return c.includes('email-already')||c.includes('credential-already')?'Энэ имэйл бүртгэлтэй. "Нэвтрэх" дар':c.includes('invalid-email')?'Имэйл буруу':c.includes('weak')?'Нууц үг сул':c.includes('wrong')||c.includes('invalid-credential')||c.includes('user-not-found')?'Имэйл эсвэл нууц үг буруу':c.includes('user-not-found')&&0||c.includes('operation-not-allowed')?'Имэйл нэвтрэлт идэвхжээгүй':'Алдаа: '+c; }
-async function clLB(){ if(!CL.ok){ say('Интернет холбогдоогүй'); return; } try{ const {F,db}=FBM; const q=F.query(F.collection(db,'lb'),F.orderBy('p','desc'),F.limit(20)); const s=await F.getDocs(q); CL.lb=s.docs.map(d=>Object.assign({id:d.id},d.data())); fillM(); }catch(e){ say('Жагсаалт ачаалж чадсангүй'); } }
+function clErr(x){ const c=(x&&x.code)||''; const _n=clErr2(c); if(_n) return _n; return c.includes('email-already')||c.includes('credential-already')?'Энэ имэйл бүртгэлтэй. "Нэвтрэх" дар':c.includes('invalid-email')?'Имэйл буруу':c.includes('weak')?'Нууц үг сул':c.includes('wrong')||c.includes('invalid-credential')||c.includes('user-not-found')?'Имэйл эсвэл нууц үг буруу':c.includes('user-not-found')&&0||c.includes('operation-not-allowed')?'Имэйл нэвтрэлт идэвхжээгүй':'Алдаа: '+c; }
+async function clLB(){ if(!CL.ok){ say('Интернет холбогдоогүй'); return; } try{ const {F,db}=FBM; const q=F.query(F.collection(db,'lb'),F.orderBy('p','desc'),F.limit(80)); const s=await F.getDocs(q); CL.lbAll=s.docs.map(d=>Object.assign({id:d.id},d.data())); const _seen={}; CL.lb=CL.lbAll.filter(x=>{ if(!x.r) return false; const k=String(x.n||'').trim().toLowerCase(); if(_seen[k]) return false; _seen[k]=1; return true; }).slice(0,20); fillM(); }catch(e){ say('Жагсаалт ачаалж чадсангүй'); } }
 function cloudHTML(){ let h='<h2>☁ Cloud, тэргүүлэгчид</h2><div class="card"><h3>Төлөв</h3><div class="sm">'+CL.st+'</div>'+(CL.last?'<div class="sm">Сүүлд хадгалсан: '+new Date(CL.last).toLocaleTimeString()+'</div>':'')+(CL.err&&!CL.ok?'<div class="sm">'+clErrTxt(CL.err)+'</div>':'')+'</div>';
   if(!CL.ok) return h+'<div class="card"><button class="btn" onclick="clInit()">Дахин оролдох</button></div>';
-  if(CL.email) h+='<div class="card"><h3>Бүртгэл</h3><div class="sm">'+CL.email+'</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="clPush()">☁ Одоо хадгал</button><button class="btn" onclick="clPull()">⬇ Сэргээх</button><button class="btn red" onclick="clOut()">Гарах</button></div></div>';
-  else h+='<div class="card"><h3>Бүртгэл</h3><div class="sm">Өөр төхөөрөмж дээр тоглоомоо үргэлжлүүлэхийн тулд имэйлээр бүртгүүл.</div><div class="sm" style="color:#ffd770">🎁 Бүртгүүлбэл <b>+100 Алт</b> бэлэг (нэг удаа)!</div><input id="clem" type="email" placeholder="Имэйл" style="width:100%;font-size:16px;padding:8px;margin-top:6px;border-radius:8px;border:2px solid #c9972b;background:#2b1d12;color:#fff"><input id="clpw" type="password" placeholder="Нууц үг (6+)" style="width:100%;font-size:16px;padding:8px;margin-top:6px;border-radius:8px;border:2px solid #c9972b;background:#2b1d12;color:#fff"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="clReg()">Бүртгүүлэх</button><button class="btn" style="background:#5b3d1e" onclick="clLogin()">Нэвтрэх</button></div><div style="margin-top:8px"><a href="javascript:clReset()" style="color:#ffd770;font-size:13px">Нууц үг мартсан уу?</a></div><div class="sm" style="margin-top:6px">Өөр утсан дээр: имэйл, нууц үгээ бичээд "Нэвтрэх" дар. Хадгалсан тоглоом автоматаар ачаалагдана.</div></div>';
+  if(CL.email) h+='<div class="card"><h3>Бүртгэл</h3><div class="sm">'+CL.email+'</div><div class="sm">🆔 ID: <b style="color:#ffd770">#'+myPid()+'</b></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="clPush()">☁ Одоо хадгал</button><button class="btn" onclick="clPull()">⬇ Сэргээх</button><button class="btn red" onclick="clOut()">Гарах</button></div></div>';
+  else h+=clAuthCard();
+  h+=pidFindCard();
   h+='<div class="card"><h3>Тэргүүлэгчид</h3><button class="btn" onclick="clLB()">Жагсаалт шинэчлэх</button>';
-  if(CL.lb) h+='<div style="margin-top:8px">'+CL.lb.map((x,i)=>'<div class="row" style="padding:3px 0'+(x.id===CL.uid?';color:#ffd770;font-weight:bold':'')+'"><span style="display:flex;align-items:center;gap:4px">'+(i+1)+'. <img src="'+PEM[lvEm(x.l||1)]+'" style="height:22px">'+String(x.n||'').replace(/[<>&]/g,'')+' <span class="sm">Lv '+(x.l||1)+'</span></span><span>'+f(x.p||0)+'</span></div>').join('')+'</div>';
+  if(CL.lb) h+='<div class="sm" style="margin-top:6px">Имэйлээр бүртгүүлсэн тоглогчид л жагсаалтад гарна.'+(CL.lb.length?'':' Одоохондоо хоосон.')+'</div><div style="margin-top:8px">'+CL.lb.map((x,i)=>'<div class="row" style="padding:3px 0'+(x.id===CL.uid?';color:#ffd770;font-weight:bold':'')+'"><span style="display:flex;align-items:center;gap:4px">'+(i+1)+'. <img src="'+PEM[lvEm(x.l||1)]+'" style="height:22px">'+String(x.n||'').replace(/[<>&]/g,'')+' <span class="sm">Lv '+(x.l||1)+'</span></span><span>'+f(x.p||0)+'</span></div>').join('')+'</div>';
   return h+'</div>'; }
 setTimeout(clInit,2500);
 
@@ -3431,7 +3432,7 @@ async function clFetch(){ if(!CL.ok) return; try{ const {F,db}=FBM;
   const n=(CL.gifts||[]).filter(g=>giftOpen(g)).length; if(n>0&&!CL.gn){ CL.gn=1; try{ say('🎁 Шинэ бэлэг байна: ☁ Cloud'); }catch(e){} }
   if(cur==='cloud') fillM();
 }catch(e){ CL.err=(e&&(e.code||e.message))||''; } }
-function giftOpen(g){ S.gcl=S.gcl||{}; return !S.gcl[g.id]&&(g.exp||0)>Date.now(); }
+function giftOpen(g){ S.gcl=S.gcl||{}; return !S.gcl[g.id]&&(g.exp||0)>Date.now()&&(!g.to||String(g.to)===String(myPid())); }
 function giftClaim(id){ const g=(CL.gifts||[]).find(x=>x.id===id); if(!g||!giftOpen(g)) return; S.gcl=S.gcl||{}; S.gcl[id]=1;
   const au=Math.min(1e6,Math.max(0,+g.gold||0)), aa=Math.min(1e4,Math.max(0,+g.alt||0)), as=Math.min(1e4,Math.max(0,+g.st||0));
   S.res.gold+=au; S.res.alt+=aa; if(as>0) stnGain(as); save(); say('🎁 Авлаа: '+(au?'+'+f(au)+' 🪙 ':'')+(aa?'+'+aa+' Алт ':'')+(as?'+'+as+' 💎':'')); clPush(true); refresh(); fillM(); }
@@ -3446,14 +3447,16 @@ const _cloudHTML0=cloudHTML;
 cloudHTML=function(){ return _cloudHTML0()+giftsHTML()+(isAdm()?adminHTML():''); };
 const _inp='width:100%;font-size:16px;padding:8px;margin-top:6px;border-radius:8px;border:2px solid #c9972b;background:#2b1d12;color:#fff;box-sizing:border-box';
 function adminHTML(){ let h='<div class="card" style="border-color:#ff8a7a"><h3>🛠 Админ</h3>';
-  h+='<div class="sm">Бэлэг илгээх (бүх тоглогчид)</div><input id="ag_t" placeholder="Гарчиг" maxlength="30" style="'+_inp+'"><div style="display:flex;gap:6px"><input id="ag_g" type="number" placeholder="Зоос" style="'+_inp+'"><input id="ag_a" type="number" placeholder="Алт" style="'+_inp+'"><input id="ag_s" type="number" placeholder="💎" style="'+_inp+'"></div><input id="ag_d" type="number" placeholder="Хэдэн өдөр хүчинтэй (7)" style="'+_inp+'"><button class="btn" style="margin-top:8px" onclick="adminGift()">🎁 Бэлэг илгээх</button>';
+  h+='<div class="sm">Бэлэг илгээх (ID хоосон бол бүх тоглогчид)</div><input id="ag_to" inputmode="numeric" maxlength="7" placeholder="Хүлээн авагчийн ID (жишээ #123456)" style="'+_inp+'"><input id="ag_t" placeholder="Гарчиг" maxlength="30" style="'+_inp+'"><div style="display:flex;gap:6px"><input id="ag_g" type="number" placeholder="Зоос" style="'+_inp+'"><input id="ag_a" type="number" placeholder="Алт" style="'+_inp+'"><input id="ag_s" type="number" placeholder="💎" style="'+_inp+'"></div><input id="ag_d" type="number" placeholder="Хэдэн өдөр хүчинтэй (7)" style="'+_inp+'"><button class="btn" style="margin-top:8px" onclick="adminGift()">🎁 Бэлэг илгээх</button>';
   h+='<div class="sm" style="margin-top:12px">Зарлал (шуудан руу орно)</div><input id="an_t" placeholder="Гарчиг" maxlength="40" style="'+_inp+'"><textarea id="an_x" placeholder="Текст" maxlength="300" rows="3" style="'+_inp+'"></textarea><button class="btn" style="margin-top:8px" onclick="adminAnn()">📣 Зарлал нийтлэх</button>';
-  const all=CL.gifts||[]; if(all.length) h+='<div class="sm" style="margin-top:12px">Бэлгүүд:</div>'+all.map(g=>'<div class="row" style="padding:2px 0"><span class="sm">'+esc2(g.title)+' · '+Math.max(0,Math.ceil(((g.exp||0)-Date.now())/864e5))+' өдөр</span><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'gifts\',\''+g.id+'\')">✕</button></div>').join('');
-  if(CL.lb) h+='<div class="sm" style="margin-top:12px">Тэргүүлэгчээс хасах:</div>'+CL.lb.map(x=>'<div class="row" style="padding:2px 0"><span class="sm">'+esc2(x.n)+' · '+f(x.p||0)+'</span><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'lb\',\''+x.id+'\')">✕</button></div>').join('');
+  const all=CL.gifts||[]; if(all.length) h+='<div class="sm" style="margin-top:12px">Бэлгүүд:</div>'+all.map(g=>'<div class="row" style="padding:2px 0"><span class="sm">'+esc2(g.title)+(g.to?' → #'+g.to:'')+' · '+Math.max(0,Math.ceil(((g.exp||0)-Date.now())/864e5))+' өдөр</span><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'gifts\',\''+g.id+'\')">✕</button></div>').join('');
+  if(!CL.lbAll&&!CL.lbReq){ CL.lbReq=1; clLB(); }
+  h+=admList();
   return h+'</div>'; }
-async function adminGift(){ if(!isAdm()) return; const v=i=>($(i)||{}).value||''; const t=v('ag_t').trim().slice(0,30); const g=Math.max(0,+v('ag_g')||0), a=Math.max(0,+v('ag_a')||0), s=Math.max(0,+v('ag_s')||0), d=Math.min(60,Math.max(1,+v('ag_d')||7));
+async function adminGift(){ if(!isAdm()) return; const v=i=>($(i)||{}).value||''; const t=v('ag_t').trim().slice(0,30); const g=Math.max(0,+v('ag_g')||0), a=Math.max(0,+v('ag_a')||0), s=Math.max(0,+v('ag_s')||0), d=Math.min(60,Math.max(1,+v('ag_d')||7)), to=v('ag_to').replace(/\D/g,'');
+  if(to&&to.length!==6){ say('ID 6 оронтой байна'); return; }
   if(!t||(!g&&!a&&!s)){ say('Гарчиг, дор хаяж нэг шагнал бич'); return; }
-  try{ const {F,db}=FBM; await F.addDoc(F.collection(db,'gifts'),{title:t,gold:g,alt:a,st:s,exp:Date.now()+d*864e5,t:Date.now()}); say('Бэлэг илгээгдлээ ✓'); clFetch(); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
+  try{ const {F,db}=FBM; await F.addDoc(F.collection(db,'gifts'),{title:t,gold:g,alt:a,st:s,to:to?+to:0,exp:Date.now()+d*864e5,t:Date.now()}); say('Бэлэг илгээгдлээ ✓'); clFetch(); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 async function adminAnn(){ if(!isAdm()) return; const t=(($('an_t')||{}).value||'').trim().slice(0,40)||'Зарлал', x=(($('an_x')||{}).value||'').trim().slice(0,300); if(!x){ say('Текст бич'); return; }
   try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{title:t,text:x,t:Date.now()}); say('Зарлал нийтлэгдлээ ✓'); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 async function adminDel(col,id){ if(!isAdm()||!confirm('Устгах уу?')) return; try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,col,id)); say('Устгагдлаа'); if(col==='lb') clLB(); else clFetch(); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
@@ -3538,7 +3541,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
     const {F,db}=FBM; const d=acPack(JSON.stringify(S));
     await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); lsSet('dxx_own',CL.uid);
     let nm=(S.prof&&S.prof.name)||'Хаан'; nm=String(nm).slice(0,14);
-    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now()});
+    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid)});
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
   }catch(e){ if(!quiet) say('Хадгалж чадсангүй'); CL.err=(e&&(e.code||e.message))||''; }
   CL.busy=0; if(cur==='cloud') fillM(); try{ nameSync(); }catch(e){} return ok; }
@@ -3552,7 +3555,7 @@ async function clPull(){ if(!CL.ok) return; dxAsk('Cloud-д хадгалсан �
 async function clLogin(){ const e=($('clem')||{}).value||'', p=($('clpw')||{}).value||''; if(!e||!p){ say('Имэйл, нууц үгээ бич'); return; }
   const {Au,auth,F,db}=FBM; window._clR=1; let reload=0;
   try{
-    await Au.signInWithEmailAndPassword(auth,e.trim(),p); clUser();
+    await Au.signInWithEmailAndPassword(auth,e.trim(),p); clUser(); CL.pv=''; CL.msg='';
     const s=await F.getDoc(F.doc(db,'saves',CL.uid)); const d=s.exists()?s.data().d:null;
     if(d&&acUnpack(d)){
       const hasLocal=(S.pl||1)>1||(S.won||0)>0||totalPower()>300;
@@ -3561,7 +3564,7 @@ async function clLogin(){ const e=($('clem')||{}).value||'', p=($('clpw')||{}).v
       go(); return;
     }
     lsSet('dxx_own',CL.uid); CL.st='Холбогдсон · '+CL.email; say('Нэвтэрлээ ✓ (энэ тоглоом бүртгэлд холбогдлоо)'); window._clR=0; await clPush(true); fillM();
-  }catch(x){ say(clErr(x)); }
+  }catch(x){ clMsg(clErr(x)); }
   finally{ if(!reload) window._clR=0; } }
 async function clOut(){ if(!CL.ok) return; dxAsk('Гарах уу? Энэ утсан дээрх тоглоом арилж, шинэ тоглоом эхэлнэ. Таны тоглоом cloud-д хадгалагдана, дахин нэвтэрвэл буцаж ирнэ.','Гарах',async()=>{
     const own=lsGet('dxx_own'); const mis=own&&own!==CL.uid;
@@ -4281,6 +4284,70 @@ function rlMulti(o,ids,done){
       document.getElementById('rlk').onclick=end; },600); },800);
 }
 (function(){ const st=document.createElement('style'); st.textContent='.rmw{width:100%}.rms{position:relative;height:56px;overflow:hidden;margin:2px 0}.rmt{position:absolute;left:0;top:2px;display:flex;gap:4px;will-change:transform}.rmt .rlc{flex:0 0 50px;width:50px;height:52px;margin:0;border-width:2px}.rml{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:#ffd24a;box-shadow:0 0 6px #ffd24a}'; document.head.appendChild(st); })();
+
+
+// ---- Тоглогчийн ID, бүртгэл/нэвтрэх дэлгэц, админ жагсаалт ----
+function pidOf(uid){ let h=2166136261; const s=String(uid||''); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return 100000+(h%900000); }
+function myPid(){ return CL.uid?pidOf(CL.uid):0; }
+function pidCopy(){ const t='#'+myPid(); try{ navigator.clipboard.writeText(t).then(()=>say('ID хуулагдлаа: '+t),()=>say('Миний ID: '+t)); }catch(e){ say('Миний ID: '+t); } }
+function pidCard(){ const p=myPid();
+  return '<div class="card" style="text-align:center"><div class="sm">🆔 Миний ID дугаар</div>'+
+    (p?'<div style="font-size:30px;font-weight:bold;color:#ffd770;letter-spacing:2px;margin:4px 0">#'+p+'</div><button class="btn" onclick="pidCopy()">📋 Хуулах</button><div class="sm" style="margin-top:6px">Найздаа энэ дугаараа өгвөл ☁ Cloud цэснээс чамайг хайж олно.</div>'
+      :'<div class="sm" style="margin-top:6px">Интернетэд холбогдмогц ID дугаар гарна.</div>')+'</div>'; }
+// бүртгэл/нэвтрэх
+function clTab(t){ CL.ev=($('clem')||{}).value||CL.ev||''; CL.pv=($('clpw')||{}).value||''; CL.tab=t; CL.msg=''; fillM(); }
+function clMsg(t,ok){ CL.msg=t; CL.msgOk=!!ok; const m=$('clmsg'); if(m){ m.textContent=t; m.style.color=ok?'#9be37a':'#ff9a8a'; m.style.display=t?'block':'none'; } if(t) try{ say(t); }catch(e){} }
+function clEye(){ const p=$('clpw'); if(p) p.type=p.type==='password'?'text':'password'; }
+function clChk(){ const e=(($('clem')||{}).value||'').trim(), p=($('clpw')||{}).value||'';
+  if(!e){ clMsg('Имэйлээ бичнэ үү'); return null; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ clMsg('Имэйл буруу байна. Жишээ: bat@gmail.com'); return null; }
+  if(!p){ clMsg('Нууц үгээ бичнэ үү'); return null; }
+  if(CL.tab!=='in'&&p.length<6){ clMsg('Нууц үг 6-аас дээш тэмдэгттэй байх ёстой'); return null; }
+  return [e,p]; }
+async function clGo(){ if(CL.go) return; const v=clChk(); if(!v) return; CL.go=1; const b=$('clgo'); if(b){ b.disabled=true; b.style.opacity=.6; }
+  clMsg('Түр хүлээнэ үү…',1);
+  try{ if(CL.tab==='in') await clLogin(); else await clReg(); }catch(x){ clMsg(clErr(x)); }
+  CL.go=0; const b2=$('clgo'); if(b2){ b2.disabled=false; b2.style.opacity=1; } }
+function clAuthCard(){ const tab=CL.tab==='in'?'in':'reg', reg=tab==='reg';
+  const tb=(k,t)=>'<div onclick="clTab(\''+k+'\')" style="flex:1;text-align:center;padding:9px 4px;border-radius:9px 9px 0 0;font-weight:bold;cursor:pointer;'+(tab===k?'background:linear-gradient(#e0a93a,#a8741c);color:#2b1706':'background:#2b1d12;color:#c9a46a')+'">'+t+'</div>';
+  return '<div class="card" style="padding:0;overflow:hidden"><div style="display:flex;gap:2px;background:#1a0f06">'+tb('reg','✍ Бүртгүүлэх')+tb('in','🔑 Нэвтрэх')+'</div><div style="padding:12px">'+
+    (reg?'<div style="background:#3a2a10;border:1px solid #c9972b;border-radius:9px;padding:8px;margin-bottom:8px;font-size:14px;line-height:1.5">🎁 <b style="color:#ffd770">+100 Алт</b> бэлэг (нэг удаа)<br>☁ Өөр утсан дээр тоглоомоо үргэлжлүүлнэ<br>🏆 Тэргүүлэгчдийн жагсаалтад орно<br>🆔 Өөрийн ID дугаартай болно</div>'
+      :'<div class="sm" style="margin-bottom:8px">Өмнө бүртгүүлсэн бол имэйл, нууц үгээрээ нэвтэр. Хадгалсан тоглоом автоматаар ачаалагдана.</div>')+
+    '<div class="sm">Имэйл</div><input id="clem" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="bat@gmail.com" value="'+esc2(CL.ev||'')+'" style="'+_inp+'">'+
+    '<div class="sm" style="margin-top:8px">Нууц үг'+(reg?' (6+ тэмдэгт)':'')+'</div><div style="position:relative"><input id="clpw" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" placeholder="••••••" value="'+esc2(CL.pv||'')+'" style="'+_inp+';padding-right:44px"><span onclick="clEye()" style="position:absolute;right:6px;top:12px;font-size:20px;cursor:pointer;padding:0 6px">👁</span></div>'+
+    '<div id="clmsg" style="margin-top:8px;font-size:14px;min-height:0;display:'+(CL.msg?'block':'none')+';color:'+(CL.msgOk?'#9be37a':'#ff9a8a')+'">'+esc2(CL.msg||'')+'</div>'+
+    '<button class="btn" id="clgo" style="width:100%;margin-top:10px;padding:11px;font-size:17px" onclick="clGo()">'+(reg?'Бүртгүүлэх':'Нэвтрэх')+'</button>'+
+    '<div style="margin-top:10px;text-align:center"><a href="javascript:clReset()" style="color:#ffd770;font-size:13px">Нууц үг мартсан уу?</a></div></div></div>'; }
+// ID-гаар хайх
+async function pidFind(){ const raw=(($('pfq')||{}).value||'').replace(/[^0-9]/g,''); const n=+raw;
+  if(raw.length!==6){ say('6 оронтой ID бич (жишээ: #123456)'); return; }
+  CL.pfr='...'; fillM2();
+  try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('pid','==',n),F.limit(5)));
+    CL.pfr=s.docs.map(d=>Object.assign({id:d.id},d.data())); CL.pfn=n; }
+  catch(e){ CL.pfr=null; say('Хайж чадсангүй: '+(((e&&e.code)||'').replace('permission-denied','эрх нээгдээгүй'))); }
+  fillM2(); }
+function fillM2(){ const el=$('pfres'); if(el) el.innerHTML=pidRes(); }
+function pidRes(){ const r=CL.pfr; if(!r) return ''; if(r==='...') return '<div class="sm">Хайж байна…</div>';
+  if(!r.length) return '<div class="sm">#'+CL.pfn+' дугаартай тоглогч олдсонгүй.</div>';
+  return r.map(x=>'<div class="row" style="padding:4px 0"><span style="display:flex;align-items:center;gap:4px"><img src="'+PEM[lvEm(x.l||1)]+'" style="height:22px"><b>'+esc2(x.n)+'</b> <span class="sm">Lv '+(x.l||1)+' · #'+(x.pid||pidOf(x.id))+'</span></span><span>'+f(x.p||0)+'</span></div>').join(''); }
+function pidFindCard(){ return '<div class="card"><h3>🔍 Тоглогч хайх</h3><div class="sm">Найзынхаа ID дугаарыг бичнэ үү.</div><div style="display:flex;gap:6px"><input id="pfq" inputmode="numeric" maxlength="7" placeholder="#123456" style="'+_inp+'"><button class="btn" style="margin-top:6px" onclick="pidFind()">Хай</button></div><div id="pfres" style="margin-top:6px">'+pidRes()+'</div></div>'; }
+// админ: тоглогчдын жагсаалт
+function admQ(){ CL.aq=(($('adq')||{}).value||'').trim().toLowerCase(); const el=$('adl'); if(el) el.innerHTML=admRows(); }
+function admRows(){ const q=(CL.aq||'').replace('#',''); const L=(CL.lbAll||[]).filter(x=>!q||String(x.n||'').toLowerCase().includes(q)||String(x.pid||pidOf(x.id)).includes(q));
+  if(!L.length) return '<div class="sm">Олдсонгүй</div>';
+  return L.map(x=>{ const p=x.pid||pidOf(x.id); return '<div class="row" style="padding:3px 0;gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere"><b style="color:#ffd770">#'+p+'</b> '+esc2(x.n)+' · Lv '+(x.l||1)+' · '+f(x.p||0)+' '+(x.r?'✉':'👤')+'</span><button class="btn" style="padding:2px 8px" onclick="admTo('+p+')">🎁</button><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'lb\',\''+x.id+'\')">✕</button></div>'; }).join(''); }
+function admTo(p){ const e=$('ag_to'); if(e){ e.value=p; try{ e.scrollIntoView({block:'center'}); }catch(x){} } say('Бэлэг: #'+p+' тоглогчид. Гарчиг, шагналаа бичээд илгээ'); }
+function admList(){ return '<div class="sm" style="margin-top:12px">👥 Тоглогчид ('+(CL.lbAll?CL.lbAll.length:0)+'):</div>'+(CL.lbAll?'<input id="adq" oninput="admQ()" placeholder="Нэр эсвэл ID хайх" value="'+esc2(CL.aq||'')+'" style="'+_inp+'"><div id="adl" style="margin-top:6px;max-height:320px;overflow-y:auto">'+admRows()+'</div>':'<button class="btn" style="margin-top:6px" onclick="clLB()">Жагсаалт ачаалах</button>'); }
+function clErr2(c){ c=String(c||'');
+  if(/network-request-failed/.test(c)) return 'Интернет холболт тасарлаа. Сүлжээгээ шалгаад дахин оролдоно уу';
+  if(/too-many-requests/.test(c)) return 'Хэт олон оролдлоо. Хэдэн минут хүлээгээд дахин оролдоно уу';
+  if(/user-disabled/.test(c)) return 'Энэ бүртгэл хаагдсан байна';
+  if(/missing-password/.test(c)) return 'Нууц үгээ бичнэ үү';
+  if(/missing-email/.test(c)) return 'Имэйлээ бичнэ үү';
+  if(/operation-not-allowed|admin-restricted/.test(c)) return 'Имэйл бүртгэл серверт идэвхжээгүй байна (админ Firebase-д Email/Password-г асаах хэрэгтэй)';
+  if(/requires-recent-login/.test(c)) return 'Дахин нэвтэрч орно уу';
+  if(/quota-exceeded/.test(c)) return 'Серверийн хязгаар хэтэрсэн. Дараа дахин оролдоно уу';
+  return ''; }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

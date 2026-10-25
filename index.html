@@ -1990,7 +1990,8 @@ function updBtns(){
     b.disabled=false; b.classList.toggle('poor', S.res.gold < Number(b.dataset.c) || (b.dataset.h==='1' && herdCount()>=herdMax()));
   });
 }
-function refresh(){ autoUnlock(); updateHUD(); syncEnts(false); if(cur) fillM(); save(); }
+function fillMA(){ const a=document.activeElement; if(a&&a.closest&&a.closest('#mbody')&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&!/^(button|checkbox|radio|file|submit)$/.test(a.type)))) return; fillM(); }
+function refresh(){ autoUnlock(); updateHUD(); syncEnts(false); if(cur) fillMA(); save(); }
 
 function buildCard(k){
   const d=BUILD[k];
@@ -2152,15 +2153,18 @@ function modalContent(k){
   }
   return '';
 }
-function fillM(){ if(window.GATE&&$('gate')){ gateRender(1); return; } $('mbody').innerHTML=modalContent(cur); updBtns(); }
+function fillM(){ if(window.GATE&&$('gate')){ gateRender(1); return; } $('mbody').innerHTML=mBack()+modalContent(cur); updBtns(); }
+var MBACK=0;
+function mBack(){ return (MBACK&&cur&&cur!=='menu')?'<button id="mback" class="btn" style="position:absolute;left:10px;top:10px;z-index:3;padding:5px 11px;font-size:14px" onclick="openM(\'menu\')">‹ Цэс</button>':''; }
 function openM(k){
   if(k==='wmap'){ cancelPlace(); deselect(); wmOpen(); return; }
   if(k==='camp'){ cancelPlace(); deselect(); chsOpen(); return; }
   if((k==='baatar'||k==='dain'||k==='gear') && S.bld.hureo<1){ say('Эхлээд Цэргийн хүрээ бариарай'); return; }
   cancelPlace(); deselect();
+  MBACK=(k==='menu')?0:(cur==='menu')?1:((cur&&$('modal').style.display==='flex')?MBACK:0);
   cur=k; $('modal').style.display='flex'; fillM(); { const g=$('msg'); if(g&&g.style.display==='block') g.style.top='46px'; }
 }
-function closeM(){ cur=null; $('modal').style.display='none'; { const g=$('msg'); if(g) g.style.top=''; } }
+function closeM(){ cur=null; MBACK=0; $('modal').style.display='none'; { const g=$('msg'); if(g) g.style.top=''; } }
 $('modal').addEventListener('pointerdown',e=>{ if(e.target===$('modal')) closeM(); });
 
 function menuGo(k){ if(k==='zarah') sellAll(); else openM(k); }
@@ -3400,8 +3404,8 @@ async function clInit(){ try{
   setInterval(()=>{ if(!document.hidden) clPush(true); },90000);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) clPush(true); });
   setTimeout(()=>clPush(true),8000);
-  if(cur==='cloud') fillM();
-}catch(e){ CL.st='Интернет холбогдсонгүй'; CL.err=(e&&(e.code||e.message))||''; if(cur==='cloud') fillM(); } }
+  if(cur==='cloud') fillMA();
+}catch(e){ CL.st='Интернет холбогдсонгүй'; CL.err=(e&&(e.code||e.message))||''; if(cur==='cloud') fillMA(); } }
 function clUser(){ const u=FBM&&FBM.auth.currentUser; CL.uid=u?u.uid:null; CL.email=u&&!u.isAnonymous?u.email:null; }
 async function clReg(){ const e=($('clem')||{}).value||'', p=($('clpw')||{}).value||''; if(!e||p.length<6){ say('Имэйл, 6+ тэмдэгттэй нууц үг'); return; }
   try{ const {Au,auth}=FBM; if(!auth.currentUser) await Au.signInAnonymously(auth); await Au.linkWithCredential(auth.currentUser,Au.EmailAuthProvider.credential(e.trim(),p)); clUser(); CL.pv=''; CL.msg=''; CL.st='Холбогдсон · '+CL.email; if(!S.regBonus){ S.regBonus=1; S.res.alt+=100; try{ refresh(); }catch(e){} say('Бүртгэгдлээ ✓ +100 Алт бэлэг!'); } else say('Бүртгэгдлээ ✓'); save(); await clPush(true); fillM(); }
@@ -3430,7 +3434,7 @@ async function clFetch(){ if(!CL.ok) return; try{ const {F,db}=FBM;
   const a=await F.getDoc(F.doc(db,'ann','main')); CL.ann=a.exists()?a.data():null;
   if(CL.ann&&CL.ann.t&&(S.annT||0)<CL.ann.t){ S.annT=CL.ann.t; try{ mailAdd(esc2(CL.ann.title||'Зарлал'),esc2(CL.ann.text||'')); }catch(e){} save(); }
   const n=(CL.gifts||[]).filter(g=>giftOpen(g)).length; if(n>0&&!CL.gn){ CL.gn=1; try{ say('🎁 Шинэ бэлэг байна: ☁ Cloud'); }catch(e){} }
-  if(cur==='cloud') fillM();
+  if(cur==='cloud') fillMA();
 }catch(e){ CL.err=(e&&(e.code||e.message))||''; } }
 function giftOpen(g){ S.gcl=S.gcl||{}; return !S.gcl[g.id]&&(g.exp||0)>Date.now()&&(!g.to||String(g.to)===String(myPid())); }
 function giftClaim(id){ const g=(CL.gifts||[]).find(x=>x.id===id); if(!g||!giftOpen(g)) return; S.gcl=S.gcl||{}; S.gcl[id]=1;
@@ -3544,7 +3548,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
     await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap()});
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
   }catch(e){ if(!quiet) say('Хадгалж чадсангүй'); CL.err=(e&&(e.code||e.message))||''; }
-  CL.busy=0; if(cur==='cloud') fillM(); try{ nameSync(); }catch(e){} return ok; }
+  CL.busy=0; if(cur==='cloud') fillMA(); try{ nameSync(); }catch(e){} return ok; }
 function clAdopt(d,uid){ window._clR=1; try{ localStorage.setItem(SAVE_KEY,d); localStorage.setItem(SAVE_KEY+'_b',d); }catch(e){} lsSet('dxx_own',uid); say('Сэргээж байна…'); setTimeout(()=>location.reload(),600); }
 async function clPull(){ if(!CL.ok) return; dxAsk('Cloud-д хадгалсан тоглоомоор энэ утсан дээрх одоогийн тоглоомыг солих уу?','Тийм, соль',async()=>{ try{
     const {F,db}=FBM; const s=await F.getDoc(F.doc(db,'saves',CL.uid));
@@ -4297,11 +4301,25 @@ function pidCard(){ const p=myPid();
 // бүртгэл/нэвтрэх
 function clTab(t){ CL.ev=($('clem')||{}).value||CL.ev||''; CL.pv=($('clpw')||{}).value||''; CL.tab=t; CL.msg=''; fillM(); }
 function clMsg(t,ok){ CL.msg=t; CL.msgOk=!!ok; const m=$('clmsg'); if(m){ m.textContent=t; m.style.color=ok?'#9be37a':'#ff9a8a'; m.style.display=t?'block':'none'; } if(t) try{ say(t); }catch(e){} }
-function clEye(){ const p=$('clpw'); if(p) p.type=p.type==='password'?'text':'password'; }
+function pshowOn(){ return CL.pshow===undefined?(CL.tab!=='in'):CL.pshow; }
+function clEye(){ if(!CL.textpw){ CL.pshow=!pshowOn(); pinDraw(); return; } const p=$('clpw'); if(p) p.type=p.type==='password'?'text':'password'; }
+function pinKey(k){ let v=(CL.pv||'').replace(/\D/g,''); if(k==='x') v=v.slice(0,-1); else if(v.length<6) v+=k; CL.pv=v; const h=$('clpw'); if(h) h.value=v; pinDraw(); }
+function pinDraw(){ const d=$('clpd'); if(!d) return; const v=(CL.pv||'').replace(/\D/g,''), sh=pshowOn();
+  d.innerHTML=[0,1,2,3,4,5].map(i=>'<span style="width:38px;height:46px;border:2px solid '+(i===v.length?'#ffd770':'#c9972b')+';border-radius:9px;background:#2b1d12;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#ffe9b0">'+(i<v.length?(sh?v[i]:'●'):'')+'</span>').join(''); }
+function pwMode(t){ CL.pv=($('clpw')||{}).value||CL.pv||''; CL.ev=($('clem')||{}).value||CL.ev||''; CL.textpw=t; CL.msg=''; if(window.GATE&&$('gate')) gateRender(1); else fillM(); }
+function pwBlock(reg){ const kb=['1','2','3','4','5','6','7','8','9','','0','x'];
+  if(CL.textpw) return '<div class="sm" style="margin-top:8px">Нууц үг'+(reg?' (6+ тэмдэгт)':'')+'</div><div style="position:relative"><input id="clpw" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" placeholder="••••••" value="'+esc2(CL.pv||'')+'" style="'+_inp+';padding-right:44px"><span onclick="clEye()" style="position:absolute;right:6px;top:12px;font-size:20px;cursor:pointer;padding:0 6px">👁</span></div><div style="margin-top:8px;text-align:center"><a href="javascript:pwMode(0)" style="color:#ffd770;font-size:13px">← 6 оронтой тоо руу буцах</a></div>';
+  const v=(CL.pv||'').replace(/\D/g,'');
+  return '<div class="sm" style="margin-top:10px">'+(reg?'Нууц код (6 оронтой тоо сонго)':'Нууц код (6 оронтой тоо)')+' <span onclick="clEye()" style="font-size:18px;cursor:pointer;padding:0 6px">👁</span></div>'+
+    '<input id="clpw" type="hidden" value="'+v+'"><div id="clpd" style="display:flex;gap:6px;justify-content:center;margin:6px 0"></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:6px auto">'+kb.map(k=>k===''?'<div></div>':'<div onclick="pinKey(\''+k+'\')" style="height:40px;display:flex;align-items:center;justify-content:center;font-size:'+(k==='x'?'22':'24')+'px;font-weight:bold;color:#ffe9b0;background:linear-gradient(#4a3418,#2b1d12);border:2px solid #c9972b;border-radius:10px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation">'+(k==='x'?'⌫':k)+'</div>').join('')+'</div>'+
+    '<div class="sm" style="text-align:center;font-size:12px;line-height:1.4">🔒 Энэ нь зөвхөн тоглоомын код. Имэйлийнхээ нууц үгийг бүү бич.</div>'+
+    '<div style="margin-top:6px;text-align:center"><a href="javascript:pwMode(1)" style="color:#ffd770;font-size:13px">Өөр нууц үг ашиглах (үсэгтэй)</a></div><img src="data:," width="1" height="1" onerror="pinDraw()" style="display:none">'; }
 function clChk(){ const e=(($('clem')||{}).value||'').trim(), p=($('clpw')||{}).value||'';
   if(!e){ clMsg('Имэйлээ бичнэ үү'); return null; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ clMsg('Имэйл буруу байна. Жишээ: bat@gmail.com'); return null; }
   if(!p){ clMsg('Нууц үгээ бичнэ үү'); return null; }
+  if(!CL.textpw&&!/^\d{6}$/.test(p)){ clMsg('Нууц код 6 оронтой тоо байх ёстой'); return null; }
   if(CL.tab!=='in'&&p.length<6){ clMsg('Нууц үг 6-аас дээш тэмдэгттэй байх ёстой'); return null; }
   return [e,p]; }
 async function clGo(){ if(CL.go) return; const v=clChk(); if(!v) return; CL.go=1; const b=$('clgo'); if(b){ b.disabled=true; b.style.opacity=.6; }
@@ -4311,10 +4329,10 @@ async function clGo(){ if(CL.go) return; const v=clChk(); if(!v) return; CL.go=1
 function clAuthCard(){ const tab=CL.tab==='in'?'in':'reg', reg=tab==='reg';
   const tb=(k,t)=>'<div onclick="clTab(\''+k+'\')" style="flex:1;text-align:center;padding:9px 4px;border-radius:9px 9px 0 0;font-weight:bold;cursor:pointer;'+(tab===k?'background:linear-gradient(#e0a93a,#a8741c);color:#2b1706':'background:#2b1d12;color:#c9a46a')+'">'+t+'</div>';
   return '<div class="card" style="padding:0;overflow:hidden"><div style="display:flex;gap:2px;background:#1a0f06">'+tb('reg','✍ Бүртгүүлэх')+tb('in','🔑 Нэвтрэх')+'</div><div style="padding:12px">'+
-    (reg?'<div style="background:#3a2a10;border:1px solid #c9972b;border-radius:9px;padding:8px;margin-bottom:8px;font-size:14px;line-height:1.5">🎁 <b style="color:#ffd770">+100 Алт</b> бэлэг (нэг удаа)<br>☁ Өөр утсан дээр тоглоомоо үргэлжлүүлнэ<br>🏆 Тэргүүлэгчдийн жагсаалтад орно<br>🆔 Өөрийн ID дугаартай болно</div>'
+    (reg?'<div style="background:#3a2a10;border:1px solid #c9972b;border-radius:9px;padding:6px 8px;margin-bottom:6px;font-size:13px;line-height:1.4">🎁 <b style="color:#ffd770">+100 Алт</b> бэлэг (нэг удаа)<br>☁ Өөр утсан дээр тоглоомоо үргэлжлүүлнэ<br>🏆 Тэргүүлэгчдийн жагсаалтад орно<br>🆔 Өөрийн ID дугаартай болно</div>'
       :'<div class="sm" style="margin-bottom:8px">Өмнө бүртгүүлсэн бол имэйл, нууц үгээрээ нэвтэр. Хадгалсан тоглоом автоматаар ачаалагдана.</div>')+
     '<div class="sm">Имэйл</div><input id="clem" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="bat@gmail.com" value="'+esc2(CL.ev||'')+'" style="'+_inp+'">'+
-    '<div class="sm" style="margin-top:8px">Нууц үг'+(reg?' (6+ тэмдэгт)':'')+'</div><div style="position:relative"><input id="clpw" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" placeholder="••••••" value="'+esc2(CL.pv||'')+'" style="'+_inp+';padding-right:44px"><span onclick="clEye()" style="position:absolute;right:6px;top:12px;font-size:20px;cursor:pointer;padding:0 6px">👁</span></div>'+
+    pwBlock(reg)+
     '<div id="clmsg" style="margin-top:8px;font-size:14px;min-height:0;display:'+(CL.msg?'block':'none')+';color:'+(CL.msgOk?'#9be37a':'#ff9a8a')+'">'+esc2(CL.msg||'')+'</div>'+
     '<button class="btn" id="clgo" style="width:100%;margin-top:10px;padding:11px;font-size:17px" onclick="clGo()">'+(reg?'Бүртгүүлэх':'Нэвтрэх')+'</button>'+
     '<div style="margin-top:10px;text-align:center"><a href="javascript:clReset()" style="color:#ffd770;font-size:13px">Нууц үг мартсан уу?</a></div></div></div>'; }
@@ -4410,12 +4428,12 @@ async function socPoll(){ if(!CL.ok||!CL.email||CL.rpoll) return; CL.rpoll=1;
     let ch=0; for(const x of out.filter(x=>x.st==='ok')){ S.friends=S.friends||[]; if(!isFr(x.to)&&S.friends.length<30){ let n='',l=1,p=0; try{ const s=await F.getDoc(F.doc(db,'lb',x.to)); if(s.exists()){ n=s.data().n; l=s.data().l; p=s.data().p; } }catch(e){} S.friends.push({id:x.to,n:n,l:l,p:p}); ch++; try{ say('🤝 '+(n||'Тоглогч')+' найзын хүсэлтийг чинь зөвшөөрлөө!'); }catch(e){} }
       try{ await F.deleteDoc(F.doc(db,'freq',frKey(CL.uid,x.to))); }catch(e){} }
     if(ch){ save(); try{ clPush(true); }catch(e){} }
-    socBadge(); if(cur==='soc') fillM(); }catch(e){}
+    socBadge(); if(cur==='soc') fillMA(); }catch(e){}
   CL.rpoll=0; }
 setInterval(()=>{ if(!document.hidden) socPoll(); },45000); setTimeout(socPoll,9000);
 async function socFetchFr(){ if(!CL.ok||CL.frBusy||!(S.friends||[]).length) return; CL.frBusy=1; CL.fd=CL.fd||{};
   try{ const {F,db}=FBM; await Promise.all(S.friends.map(async fr=>{ try{ const s=await F.getDoc(F.doc(db,'lb',fr.id)); if(s.exists()){ const d=s.data(); CL.fd[fr.id]=d; fr.n=d.n||fr.n; fr.l=d.l||fr.l; fr.p=d.p||fr.p; } }catch(e){} })); save(); }catch(e){}
-  CL.frBusy=0; if(cur==='soc') fillM(); }
+  CL.frBusy=0; if(cur==='soc') fillMA(); }
 function socView(){ const r=CL.sv, p=r.pid||pidOf(r.id), v=r.v, me=r.id===CL.uid; const g=SPRDATA[BUILD.ger.spr];
   let h='<div style="margin-bottom:6px"><button class="btn" style="background:#5b3d1e" onclick="socBack()">‹ Буцах</button></div>'+
    '<div class="card" style="text-align:center"><img src="'+PEM[lvEm(r.l||1)]+'" style="height:44px"><div style="font-size:20px;font-weight:bold;color:#ffd770;overflow-wrap:anywhere">'+esc2(r.n)+'</div><div class="sm">#'+p+' · Түвшин '+(r.l||1)+'</div><div style="margin-top:4px">⚔ Хүч <b>'+f(r.p||0)+'</b></div>'+

@@ -3307,7 +3307,7 @@ const MENU=[
  {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['🎵','Хөгжим',"musToggle()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
-function menuHTML(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
+function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
   return '<h2>☰ Цэс</h2>'+MENU.map(g=>'<div class="card"><h3>'+(SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]]?'<img src="'+SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]][0]+'" style="height:24px;vertical-align:middle;margin-right:4px">':'')+g.t.replace(/^\S+\s/,'')+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+g.i.map(x=>{ const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0; return '<button class="btn" style="position:relative;padding:12px 4px;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px" onclick="'+x[2]+'">'+(SPRDATA[MIC[x[1]]]?'<img src="'+SPRDATA[MIC[x[1]]][0]+'" style="width:46px;height:46px">':'<span style="font-size:26px">'+x[0]+'</span>')+x[1]+(bd?'<em style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:10px;padding:0 5px;font-style:normal">'+bd+'</em>':'')+'</button>'; }).join('')+'</div></div>').join(''); }
 (function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')","openM('soc')"];
   function fix(){ const l=document.getElementById('lcol'), r=document.getElementById('rcol'); if(!l||!r) return;
@@ -4193,15 +4193,14 @@ setInterval(tkSync,600); setTimeout(tkSync,300);
 
 
 // ===== Түүхэн аян: 14 бүлгийн бэлэн зураг =====
-const CHCAL=[{"n":1,"w":980,"h":1604,"X":[7.5,6.6],"c14":[31.2,14.8],"c4":[30.8,18.6],"bat":[14.2,84.8],"rat":[85.0,83.7],"ent":[50.0,82.5],"c14c":"#462d1c","c4c":"#251810"},{"n":2,"w":941,"h":1672,"X":[10.0,7.0],"c14":[34.2,15.8],"c4":[33.8,19.7],"bat":[13.8,84.1],"la":[40.0,84.0],"ra":[60.0,84.0],"rat":[85.8,84.1],"ent":[50.0,92.6],"c14c":"#261108","c4c":"#241008"},{"n":3,"w":852,"h":1846,"X":[8.2,8.1],"c14":[37.5,15.5],"c4":[37.5,18.8],"bat":[13.2,83.1],"la":[40.0,83.1],"ra":[60.0,83.1],"rat":[86.2,83.1],"ent":[50.0,91.2],"c14c":"#1d1109","c4c":"#1d120a"},{"n":4,"w":852,"h":1846,"X":[10.0,6.6],"c14":[36.8,14.3],"c4":[36.2,17.7],"bat":[13.8,85.0],"la":[39.2,84.3],"ra":[60.0,84.3],"rat":[85.0,85.0],"ent":[50.5,91.7],"c14c":"#4a2713","c4c":"#331c0f"},{"n":5,"w":940,"h":1672,"X":[10.0,7.0],"c14":[36.8,15.5],"c4":[36.8,19.0],"bat":[13.8,83.9],"la":[40.0,84.8],"ra":[60.0,84.8],"rat":[86.2,84.8],"ent":[50.0,92.8],"c14c":"#422212","c4c":"#2e180e"},{"n":6,"w":851,"h":1847,"X":[8.0,5.8],"c14":[34.2,13.1],"c4":[34.2,16.6],"bat":[13.2,83.5],"la":[40.0,83.5],"ra":[60.0,83.5],"rat":[86.2,83.2],"ent":[50.5,91.6],"c14c":"#38190d","c4c":"#2e1409"},{"n":7,"w":941,"h":1672,"X":[12.5,10.1],"c14":[32.5,18.6],"c4":[33.2,22.5],"bat":[13.2,85.4],"la":[39.2,85.8],"ra":[61.2,85.8],"rat":[86.8,85.4],"ent":[51.2,93.1],"c14c":"#21110b","c4c":"#20100a"},{"n":8,"w":941,"h":1672,"X":[13.0,7.7],"c14":[35.0,16.2],"c4":[35.0,20.1],"bat":[12.8,85.4],"la":[40.0,85.4],"ra":[60.0,85.4],"rat":[86.8,85.8],"ent":[50.0,92.9],"c14c":"#381b0b","c4c":"#2d1408"},{"n":9,"w":851,"h":1847,"X":[11.2,8.1],"c14":[35.0,16.2],"c4":[35.0,19.7],"bat":[13.0,82.4],"la":[38.8,82.4],"ra":[60.8,82.4],"rat":[86.2,82.6],"ent":[50.0,88.9],"c14c":"#442111","c4c":"#33190d"},{"n":10,"w":852,"h":1846,"X":[10.0,7.5],"c14":[35.8,15.9],"c4":[35.8,19.4],"bat":[13.2,80.8],"la":[40.5,81.0],"ra":[60.0,81.0],"rat":[85.8,81.0],"ent":[50.0,88.8],"c14c":"#321a0e","c4c":"#321a0e"},{"n":11,"w":941,"h":1672,"X":[13.0,9.6],"c14":[35.0,18.0],"c4":[35.0,22.1],"bat":[13.0,85.4],"la":[40.0,87.2],"ra":[60.0,87.2],"rat":[86.8,85.4],"ent":[51.2,93.6],"c14c":"#2c1308","c4c":"#260f06"},{"n":12,"w":941,"h":1671,"X":[14.5,10.1],"c14":[36.2,18.3],"c4":[36.2,22.2],"bat":[13.0,85.2],"la":[40.0,85.5],"ra":[60.0,85.5],"rat":[86.8,85.5],"ent":[50.0,92.9],"c14c":"#351004","c4c":"#250b03"},{"n":13,"w":941,"h":1672,"X":[13.0,8.0],"c14":[35.0,16.3],"c4":[35.0,20.1],"bat":[13.2,85.4],"la":[40.0,85.8],"ra":[59.5,85.8],"rat":[86.2,85.4],"ent":[50.0,93.1],"c14c":"#260d03","c4c":"#280e03"},{"n":14,"w":941,"h":1672,"X":[11.2,8.2],"c14":[35.0,17.9],"c4":[35.0,21.5],"bat":[12.5,84.8],"la":[50.0,84.7],"rat":[88.0,84.8],"ent":[50.0,92.2],"c14c":"#311406","c4c":"#281208"}];
-const CHOFF=[[0, 811259], [811259, 1099084], [1910343, 1151769], [3062112, 1112832], [4174944, 1133453], [5308397, 1228005], [6536402, 1154233], [7690635, 1228306], [8918941, 1211029], [10129970, 1242797], [11372767, 1304810], [12677577, 1284091], [13961668, 1321859], [15283527, 1282281]];
+const CHCAL=[{"n":1,"w":1080,"h":1920,"X":[7.4,10.1],"c14":[31.3,17.66],"c4":[30.2,21.0],"bat":[14.7,80.6],"rat":[83.7,80.6],"ent":[50,82],"c14c":"#3f2819","c4c":"#23160e"},{"n":2,"w":1080,"h":1920,"X":[8.8,7.3],"c14":[33.4,15.9],"c4":[33.2,19.8],"bat":[13.8,84.8],"rat":[86.0,84.8],"la":[39.8,84.5],"ra":[60.0,84.5],"ent":[50,92.7],"c14c":"#251007","c4c":"#240f07"},{"n":3,"w":888,"h":1920,"X":[9.0,8.2],"c14":[37.1,15.5],"c4":[36.9,18.96],"bat":[13.0,82.9],"rat":[86.8,82.9],"la":[39.5,83.1],"ra":[60.3,83.1],"ent":[50,91.35],"c14c":"#1a0e06","c4c":"#190e07"},{"n":4,"w":888,"h":1920,"X":[10.4,6.9],"c14":[35.1,14.5],"c4":[35.3,17.8],"bat":[13.7,84.9],"rat":[86.3,84.9],"la":[39.5,84.9],"ra":[60.3,84.9],"ent":[50,91.9],"c14c":"#4a2712","c4c":"#321b0e"},{"n":5,"w":1080,"h":1920,"X":[9.7,7.6],"c14":[34.4,15.5],"c4":[34.0,19.05],"bat":[14.0,85.0],"rat":[86.3,85.0],"la":[40.8,85.0],"ra":[60.2,85.0],"ent":[50.2,93.2],"c14c":"#3c1e0f","c4c":"#29150c"},{"n":6,"w":888,"h":1920,"X":[9.6,6.3],"c14":[35.4,13.4],"c4":[34.8,16.6],"bat":[13.8,83.7],"rat":[86.2,83.7],"la":[39.6,83.7],"ra":[60.2,83.7],"ent":[50.2,91.5],"c14c":"#2d130a","c4c":"#260f06"},{"n":7,"w":1080,"h":1920,"X":[12.5,10.4],"c14":[34.9,18.75],"c4":[34.4,22.4],"bat":[13.2,86.0],"rat":[87.5,86.0],"la":[39.6,86.0],"ra":[60.3,86.0],"ent":[50.2,93.4],"c14c":"#170b06","c4c":"#1b0d08"},{"n":8,"w":1080,"h":1920,"X":[13.0,7.2],"c14":[34.7,16.35],"c4":[34.3,20.2],"bat":[13.2,86.1],"rat":[87.2,86.1],"la":[40.0,86.1],"ra":[60.0,86.1],"ent":[50.8,93.4],"c14c":"#2b1308","c4c":"#291107"},{"n":9,"w":888,"h":1920,"X":[12.2,8.2],"c14":[34.3,16.35],"c4":[34.6,19.7],"bat":[13.3,81.2],"rat":[87.0,81.2],"la":[39.4,81.2],"ra":[60.8,81.2],"ent":[50,89.0],"c14c":"#432110","c4c":"#32190d"},{"n":10,"w":888,"h":1920,"X":[11.5,7.7],"c14":[35.3,16.2],"c4":[35.2,19.7],"bat":[13.7,81.2],"rat":[86.5,81.2],"la":[40.0,81.2],"ra":[60.3,81.2],"ent":[50,89.2],"c14c":"#30180c","c4c":"#311a0d"},{"n":11,"w":1080,"h":1920,"X":[12.0,9.5],"c14":[34.4,18.4],"c4":[34.6,22.5],"bat":[13.5,87.0],"rat":[86.9,87.0],"la":[40.2,87.0],"ra":[60.2,87.0],"ent":[50,94.2],"c14c":"#2c1308","c4c":"#220d04"},{"n":12,"w":1080,"h":1920,"X":[13.0,10.5],"c14":[34.8,18.5],"c4":[34.8,22.5],"bat":[13.5,85.8],"rat":[86.9,85.8],"la":[40.0,85.8],"ra":[60.3,85.8],"ent":[50,93.1],"c14c":"#2e0e03","c4c":"#210902"},{"n":13,"w":1080,"h":1920,"X":[13.0,7.9],"c14":[34.6,16.35],"c4":[34.4,20.3],"bat":[13.3,86.9],"rat":[86.7,86.9],"la":[40.0,86.9],"ra":[59.7,86.9],"ent":[50,93.5],"c14c":"#240b02","c4c":"#260c02"},{"n":14,"w":1080,"h":1920,"X":[13.0,8.6],"c14":[35.0,17.9],"c4":[35.2,21.7],"bat":[12.9,86.0],"rat":[87.2,86.0],"la":[50.1,84.8],"ent":[50,92.3],"c14c":"#2f1306","c4c":"#241007"}]; const CHOFF=[[0, 917200], [917200, 1223040], [2140240, 979763], [3120003, 940891], [4060894, 1262759], [5323653, 1029844], [6353497, 1285337], [7638834, 1352980], [8991814, 1021880], [10013694, 1051333], [11065027, 1411955], [12476982, 1400893], [13877875, 1428135], [15306010, 1396236]];
 const CHIM={}, CHOK={}, CHTRY={};
 function chpicBin(i,cb){
   const a=CHOFF[i][0], l=CHOFF[i][1], mk=buf=>URL.createObjectURL(new Blob([buf],{type:'image/jpeg'}));
   try{
     if(window.CHALL){ cb(mk(window.CHALL.slice(a,a+l))); return; }
     if(!window.fetch){ cb(null); return; }
-    fetch('ch.bin?v=1',{headers:{Range:'bytes='+a+'-'+(a+l-1)}}).then(r=>{
+    fetch('ch.bin?v=2',{headers:{Range:'bytes='+a+'-'+(a+l-1)}}).then(r=>{
       if(r.status===206) return r.arrayBuffer();
       if(r.status===200) return r.arrayBuffer().then(buf=>{ window.CHALL=buf; return buf.slice(a,a+l); });
       throw 0; })
@@ -4242,7 +4241,7 @@ function chpicBuild(i){
   const c=CHCAL[i], op=chOpen(i), jn=!!S.camp.join[i], n=chDoneN(i), jt=joinedN();
   st.dataset.i=i; st.className=op?'':'lock';
   const hs=(k,w,h,act)=>c[k]?'<div class="hs" style="left:'+(c[k][0]-w/2)+'%;top:'+(c[k][1]-h/2)+'%;width:'+w+'%;height:'+h+'%" onclick="'+act+'"></div>':'';
-  const pt=(k,txt,col)=>'<div class="chpt" style="left:'+(c[k][0]-5.4)+'%;top:'+(c[k][1]-2.1)+'%;width:12%;height:4.2%;background:'+col+'"><b>'+txt+'</b></div>';
+  const pt=(k,txt,col)=>'<div class="chpt" style="left:'+(c[k][0]-2.9)+'%;top:'+(c[k][1]-2.1)+'%;width:7%;height:4.2%;background:'+col+'"><b>'+txt+'</b></div>';
   let h='<img class="chim" src="'+CHIM[i].src+'">';
   if(jt!==0) h+=pt('c14',jt+'/14',c.c14c);
   if(n!==0) h+=pt('c4',n+'/4',c.c4c);
@@ -4493,6 +4492,48 @@ async function giftPoll(){ if(!CL.ok||!CL.email||CL.gpb) return; CL.gpb=1;
     S.gseen=mx; giftAuto(); }catch(e){}
   CL.gpb=0; }
 setInterval(()=>{ if(!document.hidden) giftPoll(); },120000); setTimeout(giftPoll,7000);
+
+
+/* p32/menuimg.js — 88: цэсийн зурагтай товчнууд (menu.bin) */
+var MNI=null, MNST=0;
+function mnLoad(cb){
+  if(MNI){ cb&&cb(); return; }
+  if(MNST===1) return;
+  if(MNST===2&&Date.now()-(window.MNT||0)<15000) return;
+  MNST=1;
+  try{
+    fetch('menu.bin?v=2').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
+      hd.forEach(x=>{ o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
+      MNI=o; MNST=3;
+      cb&&cb();
+      try{ if(typeof cur!=='undefined'&&cur==='menu'&&$('modal').style.display==='flex') fillM(); }catch(e){}
+    }).catch(()=>{ MNST=2; window.MNT=Date.now(); });
+  }catch(e){ MNST=2; window.MNT=Date.now(); }
+}
+setTimeout(()=>{ try{ mnLoad(); }catch(e){} },4000);
+function menuHTML(){
+  if(!MNI){ mnLoad(); return menuHTMLold(); }
+  const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0, fr=MNI._frameD?' style="border-image-source:url('+MNI._frameD+')"':'';
+  let h='<h2>☰ Цэс</h2>';
+  MENU.forEach(g=>{
+    const nm=g.t.replace(/^\S+\s/,'');
+    const items=g.i.map(x=>{
+      const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0, u=MNI[x[1]];
+      if(!u) return '<button class="btn" style="padding:12px 4px;font-size:14px" onclick="'+x[2]+'">'+x[0]+' '+x[1]+'</button>';
+      return '<div class="mnc"'+fr+' onclick="'+x[2]+'"><img src="'+u+'" alt="'+x[1]+'">'+(bd?'<em>'+bd+'</em>':'')+'</div>';
+    }).join('');
+    h+='<div class="mnh">'+nm+'</div><div class="mng">'+items+'</div>';
+  });
+  return h;
+}
+(function(){ const st=document.createElement('style');
+  st.textContent='.mnh{color:#ffd770;font-weight:bold;font-size:15px;margin:12px 4px 2px;text-shadow:0 1px 0 #000}'+
+  '.mng{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}'+
+  '.mnc{position:relative;box-sizing:border-box;border:solid transparent;border-width:14px;border-image-slice:70 70 70 70 fill;border-image-repeat:stretch;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
+  '.mnc img{width:112%;margin:-6px -6% -10px;display:block;pointer-events:none}.mnc:active{transform:scale(.97)}'+
+  '.mnc em{position:absolute;top:0;right:2px;z-index:2;background:#d33;color:#fff;border-radius:9px;font-size:11px;padding:1px 6px;font-style:normal;border:1px solid #fff8}';
+  document.head.appendChild(st); })();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

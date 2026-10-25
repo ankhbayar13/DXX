@@ -4176,11 +4176,16 @@ setInterval(tkSync,600); setTimeout(tkSync,300);
     if(cards.length<2){ try{ sfxRev(tier(cards[0])); }catch(e){} return; }
     btns.forEach(b=>{ b.disabled=true; b.style.opacity=.4; });
     cards.forEach(c=>{ c.style.animation='none'; c.style.setProperty('--cb',cb); c.classList.add('cl'); });
-    let i=0;
-    const open=()=>{ if(!o.parentNode) return; if(i>=cards.length){ btns.forEach(b=>{ b.disabled=false; b.style.opacity=''; }); return; }
+    let i=0, sk=0, tm=0;
+    const done=()=>{ btns.forEach(b=>{ b.disabled=false; b.style.opacity=''; }); const k=document.getElementById('sqk'); if(k) k.remove(); };
+    const kb=document.createElement('button'); kb.className='btn'; kb.id='sqk'; kb.textContent='Алгасах'; kb.style.cssText='display:block;margin:8px auto';
+    const host=btns[0]?btns[0].parentNode:o.querySelector('.bxrs'); if(host){ if(btns[0]) host.insertBefore(kb,btns[0]); else host.appendChild(kb); }
+    kb.onclick=()=>{ sk=1; clearTimeout(tm); open(); };
+    const open=()=>{ if(!o.parentNode) return; if(i>=cards.length){ done(); return; }
+      if(sk){ while(i<cards.length){ const c=cards[i++]; c.classList.remove('cl'); c.classList.add('pp'); } try{ sfxRev(3); }catch(e){} done(); return; }
       const c=cards[i++]; c.classList.remove('cl'); c.classList.add('pp'); try{ sfxRev(tier(c)); }catch(e){}
-      setTimeout(open, tier(c)>=2?950:620); };
-    setTimeout(open,450);
+      tm=setTimeout(open, tier(c)>=2?950:620); };
+    tm=setTimeout(open,450);
   }
   const inner=new MutationObserver(()=>{ const n=document.querySelector('#boxov'); if(!n) return; const r=n.querySelector('.bxrs:not([data-sq])'); if(r){ r.setAttribute('data-sq','1'); seqOpen(n); } });
   new MutationObserver(ms=>{ ms.forEach(m=>m.addedNodes.forEach(n=>{ if(n.id==='boxov') inner.observe(n,{childList:true}); })); }).observe(document.body,{childList:true});

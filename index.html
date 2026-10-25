@@ -2097,6 +2097,7 @@ function modalContent(k){
   if(k&&k.startsWith('zone:')) return zoneHTML(k.slice(5));
   if(k==='profile') return profHTML();
   if(k==='cloud') return cloudHTML();
+  if(k==='soc') return socHTML();
   if(k==='quests') return questsHTML();
   if(k==='map') return campHTML();
   if(k&&k.startsWith('cmap:')) return cmapHTML(Number(k.slice(5)));
@@ -2151,7 +2152,7 @@ function modalContent(k){
   }
   return '';
 }
-function fillM(){ $('mbody').innerHTML=modalContent(cur); updBtns(); }
+function fillM(){ if(window.GATE&&$('gate')){ gateRender(1); return; } $('mbody').innerHTML=modalContent(cur); updBtns(); }
 function openM(k){
   if(k==='wmap'){ cancelPlace(); deselect(); wmOpen(); return; }
   if(k==='camp'){ cancelPlace(); deselect(); chsOpen(); return; }
@@ -3304,10 +3305,11 @@ const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наад
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTML(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
   return '<h2>☰ Цэс</h2>'+MENU.map(g=>'<div class="card"><h3>'+(SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]]?'<img src="'+SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]][0]+'" style="height:24px;vertical-align:middle;margin-right:4px">':'')+g.t.replace(/^\S+\s/,'')+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+g.i.map(x=>{ const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0; return '<button class="btn" style="position:relative;padding:12px 4px;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px" onclick="'+x[2]+'">'+(SPRDATA[MIC[x[1]]]?'<img src="'+SPRDATA[MIC[x[1]]][0]+'" style="width:46px;height:46px">':'<span style="font-size:26px">'+x[0]+'</span>')+x[1]+(bd?'<em style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:10px;padding:0 5px;font-style:normal">'+bd+'</em>':'')+'</button>'; }).join('')+'</div></div>').join(''); }
-(function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')"];
+(function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')","openM('soc')"];
   function fix(){ const l=document.getElementById('lcol'), r=document.getElementById('rcol'); if(!l||!r) return;
     { const old=l.querySelector('[data-x=menu]'); if(old) old.remove(); }
     if(!r.querySelector('[data-x=menu]')){ const b=document.createElement('button'); b.setAttribute('data-x','menu'); b.setAttribute('onclick',"openM('menu')"); b.innerHTML='<span style="font-size:22px">☰</span>Цэс<em id="menub" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
+    if(!r.querySelector('[data-x=soc]')){ const b=document.createElement('button'); b.setAttribute('data-x','soc'); b.setAttribute('onclick',"openM('soc')"); b.innerHTML='<span style="font-size:22px">👥</span>Найз<em id="socb" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
     [...l.children,...r.children].forEach(b=>{ if(b.tagName!=='BUTTON') return; const o=b.getAttribute('onclick')||''; if(!KEEP.includes(o)) b.style.display='none'; else if(b.style.display==='none') b.style.display=''; if(o==="openM('menu')") b.style.order=3; });
     const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0, e=document.getElementById('menub'); if(e){ e.textContent=mb+qb||''; e.style.display=(mb+qb)?'block':'none'; } }
   setInterval(fix,600); setTimeout(fix,350); })();
@@ -3411,10 +3413,8 @@ function cloudHTML(){ let h='<h2>☁ Cloud, тэргүүлэгчид</h2><div cl
   if(!CL.ok) return h+'<div class="card"><button class="btn" onclick="clInit()">Дахин оролдох</button></div>';
   if(CL.email) h+='<div class="card"><h3>Бүртгэл</h3><div class="sm">'+CL.email+'</div><div class="sm">🆔 ID: <b style="color:#ffd770">#'+myPid()+'</b></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" onclick="clPush()">☁ Одоо хадгал</button><button class="btn" onclick="clPull()">⬇ Сэргээх</button><button class="btn red" onclick="clOut()">Гарах</button></div></div>';
   else h+=clAuthCard();
-  h+=pidFindCard();
-  h+='<div class="card"><h3>Тэргүүлэгчид</h3><button class="btn" onclick="clLB()">Жагсаалт шинэчлэх</button>';
-  if(CL.lb) h+='<div class="sm" style="margin-top:6px">Имэйлээр бүртгүүлсэн тоглогчид л жагсаалтад гарна.'+(CL.lb.length?'':' Одоохондоо хоосон.')+'</div><div style="margin-top:8px">'+CL.lb.map((x,i)=>'<div class="row" style="padding:3px 0'+(x.id===CL.uid?';color:#ffd770;font-weight:bold':'')+'"><span style="display:flex;align-items:center;gap:4px">'+(i+1)+'. <img src="'+PEM[lvEm(x.l||1)]+'" style="height:22px">'+String(x.n||'').replace(/[<>&]/g,'')+' <span class="sm">Lv '+(x.l||1)+'</span></span><span>'+f(x.p||0)+'</span></div>').join('')+'</div>';
-  return h+'</div>'; }
+  h+='<div class="card"><button class="btn" onclick="openM(\'soc\')">👥 Найзууд, тэргүүлэгчид →</button></div>';
+  return h; }
 setTimeout(clInit,2500);
 
 // ================= Бэлэг, зарлал, админ =================
@@ -3541,7 +3541,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
     const {F,db}=FBM; const d=acPack(JSON.stringify(S));
     await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); lsSet('dxx_own',CL.uid);
     let nm=(S.prof&&S.prof.name)||'Хаан'; nm=String(nm).slice(0,14);
-    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid)});
+    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap()});
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
   }catch(e){ if(!quiet) say('Хадгалж чадсангүй'); CL.err=(e&&(e.code||e.message))||''; }
   CL.busy=0; if(cur==='cloud') fillM(); try{ nameSync(); }catch(e){} return ok; }
@@ -4292,7 +4292,7 @@ function myPid(){ return CL.uid?pidOf(CL.uid):0; }
 function pidCopy(){ const t='#'+myPid(); try{ navigator.clipboard.writeText(t).then(()=>say('ID хуулагдлаа: '+t),()=>say('Миний ID: '+t)); }catch(e){ say('Миний ID: '+t); } }
 function pidCard(){ const p=myPid();
   return '<div class="card" style="text-align:center"><div class="sm">🆔 Миний ID дугаар</div>'+
-    (p?'<div style="font-size:30px;font-weight:bold;color:#ffd770;letter-spacing:2px;margin:4px 0">#'+p+'</div><button class="btn" onclick="pidCopy()">📋 Хуулах</button><div class="sm" style="margin-top:6px">Найздаа энэ дугаараа өгвөл ☁ Cloud цэснээс чамайг хайж олно.</div>'
+    (p?'<div style="font-size:30px;font-weight:bold;color:#ffd770;letter-spacing:2px;margin:4px 0">#'+p+'</div><button class="btn" onclick="pidCopy()">📋 Хуулах</button><div class="sm" style="margin-top:6px">Найздаа энэ дугаараа өгвөл 👥 Найз цэснээс чамайг хайж олно.</div>'
       :'<div class="sm" style="margin-top:6px">Интернетэд холбогдмогц ID дугаар гарна.</div>')+'</div>'; }
 // бүртгэл/нэвтрэх
 function clTab(t){ CL.ev=($('clem')||{}).value||CL.ev||''; CL.pv=($('clpw')||{}).value||''; CL.tab=t; CL.msg=''; fillM(); }
@@ -4329,7 +4329,7 @@ async function pidFind(){ const raw=(($('pfq')||{}).value||'').replace(/[^0-9]/g
 function fillM2(){ const el=$('pfres'); if(el) el.innerHTML=pidRes(); }
 function pidRes(){ const r=CL.pfr; if(!r) return ''; if(r==='...') return '<div class="sm">Хайж байна…</div>';
   if(!r.length) return '<div class="sm">#'+CL.pfn+' дугаартай тоглогч олдсонгүй.</div>';
-  return r.map(x=>'<div class="row" style="padding:4px 0"><span style="display:flex;align-items:center;gap:4px"><img src="'+PEM[lvEm(x.l||1)]+'" style="height:22px"><b>'+esc2(x.n)+'</b> <span class="sm">Lv '+(x.l||1)+' · #'+(x.pid||pidOf(x.id))+'</span></span><span>'+f(x.p||0)+'</span></div>').join(''); }
+  return r.map(socRow).join(''); }
 function pidFindCard(){ return '<div class="card"><h3>🔍 Тоглогч хайх</h3><div class="sm">Найзынхаа ID дугаарыг бичнэ үү.</div><div style="display:flex;gap:6px"><input id="pfq" inputmode="numeric" maxlength="7" placeholder="#123456" style="'+_inp+'"><button class="btn" style="margin-top:6px" onclick="pidFind()">Хай</button></div><div id="pfres" style="margin-top:6px">'+pidRes()+'</div></div>'; }
 // админ: тоглогчдын жагсаалт
 function admQ(){ CL.aq=(($('adq')||{}).value||'').trim().toLowerCase(); const el=$('adl'); if(el) el.innerHTML=admRows(); }
@@ -4348,6 +4348,96 @@ function clErr2(c){ c=String(c||'');
   if(/requires-recent-login/.test(c)) return 'Дахин нэвтэрч орно уу';
   if(/quota-exceeded/.test(c)) return 'Серверийн хязгаар хэтэрсэн. Дараа дахин оролдоно уу';
   return ''; }
+
+
+// ---- Заавал бүртгэл/нэвтрэх хаалга: бүртгэлгүй, интернетгүй бол тоглохгүй ----
+window.GATE=(location.search.indexOf('dxxtest')<0);
+const GATE_T0=Date.now();
+(function(){ const st=document.createElement('style'); st.textContent='#gate{position:fixed;inset:0;z-index:350;background:radial-gradient(ellipse at 50% 20%,#3a2a14,#120a04 75%);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 14px 30px;box-sizing:border-box;color:#ffe9b0}#gate .gw{max-width:420px;margin:0 auto}#gate h1{font:bold 24px Georgia,serif;text-align:center;color:#ffd770;text-shadow:0 2px 6px #000;margin:10px 0 2px}#gate .gs{text-align:center;font-size:14px;margin-bottom:12px;color:#e8cf9a}.msg{z-index:450!important}'; document.head.appendChild(st); })();
+function gateOk(){ return !!(CL.ok&&CL.email&&navigator.onLine!==false&&!window._clR); }
+function gateMode(){ if(!CL.ok) return (CL.err||navigator.onLine===false||Date.now()-GATE_T0>14000)?'off':'load'; if(navigator.onLine===false) return 'off'; return 'auth'; }
+function gateRetry(){ CL.err=''; CL.ri=Date.now(); try{ clInit(); }catch(e){} gateRender(1); }
+
+function gateRender(force){ const g=$('gate'); if(!g) return;
+  const e=$('clem'), p=$('clpw'); if(e) CL.ev=e.value; if(p) CL.pv=p.value;
+  const m=gateMode(), key=m+'|'+CL.tab+'|'+(CL.msg||''); if(!force&&g._k===key) return; g._k=key;
+  let b;
+  if(m==='load') b='<div class="card" style="text-align:center"><div style="font-size:30px">⏳</div><div class="sm">Холбогдож байна…</div></div>';
+  else if(m==='off') b='<div class="card" style="text-align:center"><div style="font-size:34px">📡</div><h3 style="margin:6px 0">Интернет холбогдоогүй</h3><div class="sm">Энэ тоглоом интернеттэй үед л тоглогдоно. Wi-Fi эсвэл мобайл дата асаагаад дахин оролдоно уу.</div><button class="btn" style="margin-top:10px;padding:10px 20px" onclick="gateRetry()">🔄 Дахин оролдох</button></div>';
+  else b='<div class="gs">Тоглохын тулд бүртгүүл эсвэл нэвтэр</div>'+clAuthCard();
+  g.innerHTML='<div class="gw"><h1>Тал Нутгийн Хаан</h1>'+b+'</div>'; }
+function gateTick(){ if(!window.GATE) return; const sp=$('splash'), spOn=sp&&!sp.classList.contains('off'); let g=$('gate');
+  if(gateOk()){ if(g) g.remove(); return; }
+  if(spOn) return;
+  if(!g){ g=document.createElement('div'); g.id='gate'; document.body.appendChild(g); gateRender(1); }
+  else gateRender();
+  if(!CL.ok&&navigator.onLine!==false&&gateMode()==='off'&&Date.now()-(CL.ri||0)>6000){ CL.ri=Date.now(); try{ clInit(); }catch(e){} } }
+setInterval(gateTick,500); window.addEventListener('online',gateTick); window.addEventListener('offline',gateTick); setTimeout(gateTick,50);
+
+
+// ---- Найзууд, тэргүүлэгчид (тусдаа цэс) ----
+function socSnap(){ const b={}; Object.keys(S.bld||{}).forEach(k=>{ if(S.bld[k]>0&&BUILD[k]) b[k]=S.bld[k]; }); const h={}; Object.keys(S.heroes||{}).forEach(k=>{ h[k]=S.heroes[k]; }); return {b:b,h:h,z:Object.keys(S.zones||{}).length,w:S.won||0}; }
+const socId=s=>String(s).replace(/[^\w-]/g,'');
+function isFr(id){ return (S.friends||[]).some(x=>x.id===id); }
+function socRow(x){ const p=x.pid||pidOf(x.id), me=x.id===CL.uid;
+  return '<div class="row" onclick="socOpen(\''+socId(x.id)+'\')" style="padding:7px 2px;cursor:pointer;border-bottom:1px solid #4a3418'+(me?';color:#ffd770;font-weight:bold':'')+'"><span style="display:flex;align-items:center;gap:6px;min-width:0"><img src="'+PEM[lvEm(x.l||1)]+'" style="height:26px"><span style="min-width:0;overflow-wrap:anywhere"><b>'+esc2(x.n)+'</b>'+(isFr(x.id)?' 🤝':'')+(me?' (би)':'')+'<div class="sm">Lv '+(x.l||1)+' · #'+p+'</div></span></span><span style="white-space:nowrap">'+f(x.p||0)+' ›</span></div>'; }
+function socTab(t){ CL.stab=t; CL.sv=null; if(t==='rq') socPoll(); if(t==='lb'&&!CL.lb) clLB(); if(t==='fr') socFetchFr(); fillM(); }
+function socOpen(id){ const pools=[CL.lbAll||[],CL.pfr&&CL.pfr!=='...'?CL.pfr:[],Object.keys(CL.fd||{}).map(k=>Object.assign({id:k},CL.fd[k]))]; let r=null; pools.forEach(a=>{ a.forEach(x=>{ if(!r&&x.id===id) r=x; }); }); if(!r) return; CL.sv=r; fillM(); const mb=$('mbody'); if(mb) mb.scrollTop=0; }
+function socBack(){ CL.sv=null; fillM(); }
+function socFr(id){ S.friends=S.friends||[]; const i=S.friends.findIndex(x=>x.id===id);
+  if(i>=0){ S.friends.splice(i,1); say('Найзын жагсаалтаас хаслаа'); save(); try{ clPush(true); }catch(e){} fillM(); return; }
+  socReq(id); }
+const frKey=(a,b)=>a+'_'+b;
+async function socReq(id){ if(id===CL.uid){ say('Энэ чи өөрөө шүү 🙂'); return; } if((S.friends||[]).length>=30){ say('Найз 30 хүртэл байна'); return; }
+  if((CL.rin||[]).some(x=>x.from===id)){ socAcc(id); return; }
+  try{ const {F,db}=FBM; const r=CL.sv||{}; await F.setDoc(F.doc(db,'freq',frKey(CL.uid,id)),{from:CL.uid,to:id,fn:String(S.prof.name||'Хаан').slice(0,14),fl:S.pl||1,fp:Math.floor(totalPower()),st:'p',t:Date.now()});
+    CL.rout=(CL.rout||[]).filter(x=>x.to!==id).concat([{from:CL.uid,to:id,st:'p'}]); say('📩 Найзын хүсэлт илгээгдлээ'); fillM(); }
+  catch(e){ const c=String((e&&e.code)||''); say(/permission/.test(c)?'Firebase-д "freq" дүрэм нэмэгдээгүй байна (админд хэл)':'Илгээж чадсангүй. Интернетээ шалгаад дахин оролд'); } }
+async function socCancel(id){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'freq',frKey(CL.uid,id))); CL.rout=(CL.rout||[]).filter(x=>x.to!==id); say('Хүсэлт цуцлагдлаа'); fillM(); }catch(e){ say('Алдаа гарлаа'); } }
+async function socAcc(from){ const q=(CL.rin||[]).find(x=>x.from===from); if(!q) return; S.friends=S.friends||[];
+  if(S.friends.length>=30){ say('Найз 30 хүртэл байна'); return; }
+  try{ const {F,db}=FBM; await F.updateDoc(F.doc(db,'freq',frKey(from,CL.uid)),{st:'ok'});
+    if(!isFr(from)) S.friends.push({id:from,n:q.fn||'',l:q.fl||1,p:q.fp||0}); CL.rin=CL.rin.filter(x=>x.from!==from); save(); try{ clPush(true); }catch(e){} say('🤝 '+(q.fn||'Тоглогч')+' найз боллоо!'); socBadge(); fillM(); }
+  catch(e){ say('Зөвшөөрч чадсангүй. Дахин оролд'); } }
+async function socDec(from){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'freq',frKey(from,CL.uid))); CL.rin=(CL.rin||[]).filter(x=>x.from!==from); say('Татгалзлаа'); socBadge(); fillM(); }catch(e){ say('Алдаа гарлаа'); } }
+function socBadge(){ const e=$('socb'); if(!e) return; const n=(CL.rin||[]).length; e.textContent=n||''; e.style.display=n?'block':'none'; }
+async function socPoll(){ if(!CL.ok||!CL.email||CL.rpoll) return; CL.rpoll=1;
+  try{ const {F,db}=FBM; const a=await F.getDocs(F.query(F.collection(db,'freq'),F.where('to','==',CL.uid))); CL.rin=a.docs.map(d=>d.data()).filter(x=>x.st==='p');
+    const b=await F.getDocs(F.query(F.collection(db,'freq'),F.where('from','==',CL.uid))); const out=b.docs.map(d=>d.data()); CL.rout=out.filter(x=>x.st==='p');
+    let ch=0; for(const x of out.filter(x=>x.st==='ok')){ S.friends=S.friends||[]; if(!isFr(x.to)&&S.friends.length<30){ let n='',l=1,p=0; try{ const s=await F.getDoc(F.doc(db,'lb',x.to)); if(s.exists()){ n=s.data().n; l=s.data().l; p=s.data().p; } }catch(e){} S.friends.push({id:x.to,n:n,l:l,p:p}); ch++; try{ say('🤝 '+(n||'Тоглогч')+' найзын хүсэлтийг чинь зөвшөөрлөө!'); }catch(e){} }
+      try{ await F.deleteDoc(F.doc(db,'freq',frKey(CL.uid,x.to))); }catch(e){} }
+    if(ch){ save(); try{ clPush(true); }catch(e){} }
+    socBadge(); if(cur==='soc') fillM(); }catch(e){}
+  CL.rpoll=0; }
+setInterval(()=>{ if(!document.hidden) socPoll(); },45000); setTimeout(socPoll,9000);
+async function socFetchFr(){ if(!CL.ok||CL.frBusy||!(S.friends||[]).length) return; CL.frBusy=1; CL.fd=CL.fd||{};
+  try{ const {F,db}=FBM; await Promise.all(S.friends.map(async fr=>{ try{ const s=await F.getDoc(F.doc(db,'lb',fr.id)); if(s.exists()){ const d=s.data(); CL.fd[fr.id]=d; fr.n=d.n||fr.n; fr.l=d.l||fr.l; fr.p=d.p||fr.p; } }catch(e){} })); save(); }catch(e){}
+  CL.frBusy=0; if(cur==='soc') fillM(); }
+function socView(){ const r=CL.sv, p=r.pid||pidOf(r.id), v=r.v, me=r.id===CL.uid; const g=SPRDATA[BUILD.ger.spr];
+  let h='<div style="margin-bottom:6px"><button class="btn" style="background:#5b3d1e" onclick="socBack()">‹ Буцах</button></div>'+
+   '<div class="card" style="text-align:center"><img src="'+PEM[lvEm(r.l||1)]+'" style="height:44px"><div style="font-size:20px;font-weight:bold;color:#ffd770;overflow-wrap:anywhere">'+esc2(r.n)+'</div><div class="sm">#'+p+' · Түвшин '+(r.l||1)+'</div><div style="margin-top:4px">⚔ Хүч <b>'+f(r.p||0)+'</b></div>'+
+   (me?'':'<div style="margin-top:8px">'+(isFr(r.id)?'<button class="btn red" onclick="socFr(\''+socId(r.id)+'\')">✕ Найзаас хасах</button>':(CL.rout||[]).some(x=>x.to===r.id)?'<div class="sm">⏳ Хүсэлт илгээсэн, хариу хүлээж байна</div><button class="btn red" style="margin-top:4px" onclick="socCancel(\''+socId(r.id)+'\')">Цуцлах</button>':(CL.rin||[]).some(x=>x.from===r.id)?'<button class="btn" onclick="socAcc(\''+socId(r.id)+'\')">✓ Хүсэлтийг зөвшөөрөх</button>':'<button class="btn" onclick="socFr(\''+socId(r.id)+'\')">➕ Найз болгох</button>')+'</div>')+'</div>';
+  if(!v){ return h+'<div class="card"><div class="sm">Гэрийн мэдээлэл хараахан алга. Тоглогч дахин тоглоомдоо ороход шинэчлэгдэнэ.</div></div>'; }
+  const b=v.b||{}, ks=BKEYS.filter(k=>b[k]);
+  h+='<div class="card"><h3>🏠 Гэр</h3><div style="display:flex;align-items:center;gap:10px">'+(g?'<img src="'+g[0]+'" style="height:64px">':'')+'<div><div>Гол гэр: <b>Lv '+(b.ger||1)+'</b></div><div class="sm">Нээсэн газар: '+(v.z||0)+' · Ялсан тулаан: '+f(v.w||0)+'</div></div></div>'+
+   '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">'+ks.map(k=>'<span style="background:#2b1d12;border:1px solid #6b4a24;border-radius:8px;padding:3px 7px;font-size:12px">'+esc2(BUILD[k].n)+' <b style="color:#ffd770">'+b[k]+'</b></span>').join('')+'</div></div>';
+  const hs=Object.keys(v.h||{}).filter(id=>HEROES.find(x=>x.id===id)&&SPRDATA['hp_'+id]).sort((a,c)=>(v.h[c]||0)-(v.h[a]||0));
+  h+='<div class="card"><h3>⚔ Баатрууд ('+hs.length+')</h3>'+(hs.length?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+hs.map(id=>{ const st=Math.max(0,(v.h[id]||1)-1); return '<div style="text-align:center;width:56px">'+hpi(id,52,1)+'<div class="sm" style="font-size:11px">'+esc2(HEROES.find(x=>x.id===id).n.split(' ')[0])+'</div><div style="font-size:11px;color:#ffd770">'+(st?'★'.repeat(st):'')+'</div></div>'; }).join('')+'</div>':'<div class="sm">Баатар алга</div>')+'</div>';
+  return h; }
+function socHTML(){ const t=CL.stab||'lb';
+  let h='<h2>👥 Найзууд</h2>';
+  if(!CL.ok) return h+'<div class="card"><div class="sm">Интернет холбогдоогүй.</div><button class="btn" onclick="clInit()">Дахин оролдох</button></div>';
+  if(CL.sv) return h+socView();
+  const tb=(k,n)=>'<div onclick="socTab(\''+k+'\')" style="flex:1;text-align:center;padding:9px 2px;border-radius:9px 9px 0 0;font-weight:bold;font-size:13px;white-space:nowrap;cursor:pointer;'+(t===k?'background:linear-gradient(#e0a93a,#a8741c);color:#2b1706':'background:#2b1d12;color:#c9a46a')+'">'+n+'</div>';
+  const nq=(CL.rin||[]).length; h+='<div style="display:flex;gap:2px;background:#1a0f06;border-radius:9px 9px 0 0">'+tb('lb','🏆 Топ')+tb('fr','🤝 Найз')+tb('rq','📩 Хүсэлт'+(nq?' <b style="color:#fff;background:#d33;border-radius:8px;padding:0 5px">'+nq+'</b>':''))+tb('find','🔍 Хайх')+'</div>';
+  if(t==='lb'){ if(!CL.lb&&!CL.lbReq2){ CL.lbReq2=1; clLB(); }
+    h+='<div class="card"><button class="btn" onclick="clLB()">🔄 Шинэчлэх</button>'+(CL.lb?'<div style="margin-top:6px">'+(CL.lb.length?CL.lb.map((x,i)=>'<div style="display:flex;align-items:center"><span style="width:26px;font-weight:bold;color:'+(i<3?'#ffd770':'#c9a46a')+'">'+(i+1)+'.</span><div style="flex:1;min-width:0">'+socRow(x)+'</div></div>').join(''):'<div class="sm">Одоохондоо хоосон.</div>')+'</div>':'<div class="sm" style="margin-top:6px">Ачаалж байна…</div>')+'</div>'; }
+  else if(t==='fr'){ const L=(S.friends||[]).map(x=>Object.assign({id:x.id,n:x.n,l:x.l,p:x.p},CL.fd&&CL.fd[x.id]||{},{id:x.id})).sort((a,c)=>(c.p||0)-(a.p||0)); if(!CL.fd&&!CL.frBusy) socFetchFr();
+    h+='<div class="card">'+(L.length?'<div class="sm">Найз '+L.length+'/30 · дарвал гэрийг нь үзнэ</div>'+L.map(socRow).join(''):'<div class="sm">Найз алга байна. «🔍 Хайх» таб руу орж найзынхаа ID дугаарыг бичээд найз болго.</div><button class="btn" style="margin-top:8px" onclick="socTab(\'find\')">🔍 Хайх</button>')+'</div>'; }
+  else if(t==='rq'){ if(!CL.rin) socPoll(); const L=CL.rin||[];
+    h+='<div class="card">'+(L.length?L.map(x=>'<div class="row" style="padding:7px 0;border-bottom:1px solid #4a3418;gap:6px"><span style="min-width:0;overflow-wrap:anywhere"><b>'+esc2(x.fn)+'</b><div class="sm">Lv '+(x.fl||1)+' · ⚔ '+f(x.fp||0)+'</div></span><span style="display:flex;gap:5px;flex:none"><button class="btn" style="padding:6px 10px" onclick="socAcc(\''+socId(x.from)+'\')">✓</button><button class="btn red" style="padding:6px 10px" onclick="socDec(\''+socId(x.from)+'\')">✕</button></span></div>').join(''):'<div class="sm">Одоогоор найзын хүсэлт алга.</div>')+'<button class="btn" style="margin-top:8px;background:#5b3d1e" onclick="CL.rin=null;socPoll()">🔄 Шинэчлэх</button></div>'; }
+  else { h+=pidCard()+pidFindCard(); }
+  return h; }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

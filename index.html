@@ -3342,12 +3342,12 @@ const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наад
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
   return '<h2>☰ Цэс</h2>'+MENU.map(g=>'<div class="card"><h3>'+(SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]]?'<img src="'+SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]][0]+'" style="height:24px;vertical-align:middle;margin-right:4px">':'')+g.t.replace(/^\S+\s/,'')+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+g.i.map(x=>{ const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0; return '<button class="btn" style="position:relative;padding:12px 4px;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px" onclick="'+x[2]+'">'+(SPRDATA[MIC[x[1]]]?'<img src="'+SPRDATA[MIC[x[1]]][0]+'" style="width:46px;height:46px">':'<span style="font-size:26px">'+x[0]+'</span>')+x[1]+(bd?'<em style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:10px;padding:0 5px;font-style:normal">'+bd+'</em>':'')+'</button>'; }).join('')+'</div></div>').join(''); }
-(function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')","openM('soc')"];
+(function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')","openM('soc')","chatOpen()"];
   function fix(){ const l=document.getElementById('lcol'), r=document.getElementById('rcol'); if(!l||!r) return;
     { const old=l.querySelector('[data-x=menu]'); if(old) old.remove(); }
     if(!r.querySelector('[data-x=menu]')){ const b=document.createElement('button'); b.setAttribute('data-x','menu'); b.setAttribute('onclick',"openM('menu')"); b.innerHTML='<span style="font-size:22px">☰</span>Цэс<em id="menub" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
     if(!r.querySelector('[data-x=soc]')){ const b=document.createElement('button'); b.setAttribute('data-x','soc'); b.setAttribute('onclick',"openM('soc')"); b.innerHTML='<span style="font-size:22px">👥</span>Найз<em id="socb" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
-    [...l.children,...r.children].forEach(b=>{ if(b.tagName!=='BUTTON') return; const o=b.getAttribute('onclick')||''; if(!KEEP.includes(o)) b.style.display='none'; else if(b.style.display==='none') b.style.display=''; if(o==="openM('menu')") b.style.order=3; });
+    [...l.children,...r.children].forEach(b=>{ if(b.tagName!=='BUTTON') return; const o=b.getAttribute('onclick')||''; if(!KEEP.includes(o)) b.style.display='none'; else if(b.style.display==='none') b.style.display=''; if(o==="openM('menu')") b.style.order=3; if(o==="chatOpen()") b.style.order=6; });
     [...l.children].forEach(b=>{ const o=(b.getAttribute&&b.getAttribute('onclick'))||''; if(o==="openM('shop')"||o==="openM('camp')"){ b.style.order=(o==="openM('shop')")?4:5; b.style.display=''; r.appendChild(b); } });
     const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0, e=document.getElementById('menub'); if(e){ e.textContent=mb+qb||''; e.style.display=(mb+qb)?'block':'none'; } }
   setInterval(fix,600); setTimeout(fix,350); })();
@@ -5175,6 +5175,55 @@ function musGet(k){ if(!MUSV.a[k]){ const a=new Audio(musUrl(k)); a.loop=true; a
 function musVolSet(v){ MUSV.vol=Math.max(0,Math.min(1,v)); try{ localStorage.setItem('musv',String(MUSV.vol)); }catch(e){} musApply(); const t=document.getElementById('mvt'); if(t) t.textContent=Math.round(MUSV.vol*100)+'%'; }
 function musVolOpen(){ let d=document.getElementById('mvol'); if(!d){ d=document.createElement('div'); d.id='mvol'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center'; d.onclick=e=>{ if(e.target===d) d.style.display='none'; }; document.body.appendChild(d); }
   d.innerHTML='<div style="width:min(86vw,320px);background:#2b1d12;border:3px solid #c9972b;border-radius:14px;padding:16px;color:#fff;text-align:center;box-shadow:0 8px 30px #000a"><h3 style="margin:0 0 10px;color:#ffd770">🎵 Хөгжмийн дуу</h3><div id="mvt" style="font-size:26px;font-weight:900;margin-bottom:8px">'+Math.round(MUSV.vol*100)+'%</div><input id="mvr" type="range" min="0" max="100" step="5" value="'+Math.round(MUSV.vol*100)+'" style="width:100%;height:34px" oninput="musVolSet(this.value/100)"><div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="musToggle();musVolOpen()">'+(MUSV.on?'🔇 Хаах':'🎵 Нээх')+'</button><button class="btn red" style="flex:1" onclick="document.getElementById(\'mvol\').style.display=\'none\'">Болсон</button></div></div>'; d.style.display='flex'; try{ closeM(); }catch(e){} }
+
+
+/* p32/chat.js — 127: Нийтийн чат (Firestore 'chat') */
+var CHT={on:0,unsub:null,msgs:[],last:0,sel:null,hid:{}};
+try{ CHT.hid=JSON.parse(localStorage.getItem('chhid')||'{}')||{}; }catch(e){}
+(function(){ const st=document.createElement('style'); st.textContent=
+'#chat{position:fixed;left:0;top:0;right:0;bottom:0;z-index:310;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center}'+
+'#chat .kP{width:min(94vw,430px);height:min(78vh,620px);background:#2b1d12;border:3px solid #c9972b;border-radius:14px;display:flex;flex-direction:column;box-shadow:0 8px 30px #000a;overflow:hidden}'+
+'#chat .kH{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#3b2815;color:#ffd770;font-weight:900;font-size:16px;border-bottom:2px solid #c9972b}'+
+'#chat .kH button{background:#7a2a20;border:2px solid #e0b24a;color:#fff;border-radius:8px;font-size:15px;padding:2px 10px}'+
+'#chat .kL{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}'+
+'#chat .kM{display:flex;gap:7px;align-items:flex-start}'+
+'#chat .kM img{width:34px;height:40px;object-fit:cover;object-position:top;border-radius:7px;border:2px solid #c9972b;background:#3b2815;flex:none}'+
+'#chat .kB{background:#3f2d1a;border-radius:10px;padding:5px 9px;color:#fff;font-size:13px;line-height:1.3;max-width:calc(100% - 46px);word-break:break-word}'+
+'#chat .kM.me .kB{background:#4d3a16}'+
+'#chat .kN{font-size:11px;font-weight:900;color:#ffd770}#chat .kN i{font-style:normal;color:#9fd0ff;margin-left:4px}#chat .kN s{text-decoration:none;color:#aa9;font-weight:400;margin-left:6px;font-size:10px}'+
+'#chat .kA{display:flex;gap:6px;margin-top:4px}#chat .kA button{background:#5a3b17;border:1px solid #c9972b;color:#ffe9b0;border-radius:7px;font-size:11px;padding:2px 8px}'+
+'#chat .kF{display:flex;gap:6px;padding:8px;background:#3b2815;border-top:2px solid #c9972b}'+
+'#chat .kF input{flex:1;font-size:16px;padding:8px;border-radius:8px;border:2px solid #c9972b;background:#2b1d12;color:#fff;min-width:0}'+
+'#chat .kF button{background:linear-gradient(#f0c24a,#b97d12);border:2px solid #f6e3a0;color:#3b2200;font-weight:900;border-radius:8px;padding:0 14px;font-size:15px}'+
+'#chat .kE{text-align:center;color:#c9b890;font-size:13px;padding:20px 8px}';
+document.head.appendChild(st);
+const b=document.createElement('button'); b.setAttribute('onclick','chatOpen()'); b.innerHTML='<span style="font-size:24px;line-height:1.1">💬</span>Чат'; const rc=document.getElementById('rcol'); if(rc) rc.appendChild(b);
+const d=document.createElement('div'); d.id='chat'; d.onclick=e=>{ if(e.target===d) chatClose(); }; d.innerHTML='<div class="kP"><div class="kH"><span>💬 Нийтийн чат</span><button onclick="chatClose()">✕</button></div><div class="kL" id="chl2"></div><div class="kF"><input id="chin" maxlength="120" placeholder="Зурвас бичих…" autocomplete="off"><button onclick="chatSend()">Илгээх</button></div></div>'; document.body.appendChild(d);
+d.querySelector('#chin').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); chatSend(); } }); })();
+const CH_BAD=['новш','шалз','гичий','хөгшин гичий','сойз','пизд','хуц '];
+function chClean(t){ let s=String(t||'').replace(/[<>&"]/g,'').replace(/\s+/g,' ').trim().slice(0,120); CH_BAD.forEach(w=>{ const re=new RegExp(w.trim(),'ig'); s=s.replace(re,m=>'*'.repeat(m.length)); }); return s; }
+function chatOpen(){ const d=document.getElementById('chat'); d.style.display='flex'; try{ closeM(); }catch(e){} CHT.on=1; chatDraw();
+  if(!CL.ok||!FBM){ chatInfo('Интернет холбогдоогүй байна. Түр хүлээгээд дахин нээнэ үү.'); try{ clInit(); }catch(e){} return; }
+  try{ const {F,db}=FBM; if(CHT.unsub){ try{ CHT.unsub(); }catch(e){} }
+    CHT.unsub=F.onSnapshot(F.query(F.collection(db,'chat'),F.orderBy('t','desc'),F.limit(50)),s=>{ CHT.msgs=s.docs.map(x=>Object.assign({id:x.id},x.data())).reverse(); chatDraw(true); },e=>{ chatInfo((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Чат холбогдсонгүй'); }); }catch(e){ chatInfo('Чат холбогдсонгүй'); } }
+function chatClose(){ const d=document.getElementById('chat'); if(d) d.style.display='none'; CHT.on=0; if(CHT.unsub){ try{ CHT.unsub(); }catch(e){} CHT.unsub=null; } }
+function chatInfo(t){ const l=document.getElementById('chl2'); if(l) l.innerHTML='<div class="kE">'+t+'</div>'; }
+function chTime(t){ try{ const d=t&&t.toDate?t.toDate():(t?new Date(t):null); if(!d) return ''; return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }catch(e){ return ''; } }
+function chatDraw(scroll){ const l=document.getElementById('chl2'); if(!l) return; const me=CL.uid, ms=CHT.msgs.filter(m=>!CHT.hid[m.uid]);
+  if(!ms.length){ l.innerHTML='<div class="kE">Одоогоор зурвас алга. Эхний зурвасыг та бичээрэй!</div>'; return; }
+  const near=l.scrollHeight-l.scrollTop-l.clientHeight<80;
+  l.innerHTML=ms.map(m=>{ const av=(typeof SPRDATA!=='undefined'&&SPRDATA[m.sp||'npc1'])?SPRDATA[m.sp||'npc1'][0]:'';
+    return '<div class="kM'+(m.uid===me?' me':'')+'"><img src="'+av+'"><div class="kB" onclick="chatSel(\''+m.id+'\')"><div class="kN">'+esc2(m.n||'Хаан')+'<i>Lv '+(m.lv||1)+'</i><s>'+chTime(m.t)+'</s></div>'+esc2(m.m)+(CHT.sel===m.id?'<div class="kA">'+(m.uid!==me?'<button onclick="event.stopPropagation();chatHide(\''+m.uid+'\')">🚫 Нуух</button>':'')+(isAdm()?'<button onclick="event.stopPropagation();chatDel(\''+m.id+'\')">🗑 Устгах</button>':'')+'</div>':'')+'</div></div>'; }).join('');
+  if(scroll===true&&near||scroll===2) l.scrollTop=l.scrollHeight; }
+function chatSel(id){ CHT.sel=CHT.sel===id?null:id; chatDraw(); }
+function chatHide(u){ CHT.hid[u]=1; try{ localStorage.setItem('chhid',JSON.stringify(CHT.hid)); }catch(e){} CHT.sel=null; chatDraw(); try{ say('Энэ хүний зурвасыг нуулаа'); }catch(e){} }
+async function chatDel(id){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'chat',id)); CHT.sel=null; }catch(e){ try{ say('Устгаж чадсангүй'); }catch(_){} } }
+async function chatSend(){ const i=document.getElementById('chin'); if(!i) return; const now=Date.now();
+  if(!CL.ok||!FBM){ try{ say('Интернет холбогдоогүй'); }catch(e){} return; }
+  if(now-CHT.last<3000){ try{ say('3 секунд хүлээнэ үү'); }catch(e){} return; }
+  const t=chClean(i.value); if(!t) return; CHT.last=now; i.value='';
+  try{ const {F,db}=FBM; await F.addDoc(F.collection(db,'chat'),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:(S.prof.sp&&/^npc\d+$/.test(S.prof.sp))?S.prof.sp:'npc1',m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
+  catch(e){ try{ say((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Илгээж чадсангүй'); }catch(_){} } }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

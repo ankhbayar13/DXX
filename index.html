@@ -225,7 +225,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 <div id="modal"><div class="box"><button class="x" onclick="closeM()">✕</button><div id="mbody"></div></div></div>
 <div id="msg" class="msg"></div>
 
-<script src="d1.js?v=a6432269"></script>
+<script src="d1.js?v=4bd29424"></script>
 <script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.b_meat) m.push('d1'); }catch(e){ m.push('d?'); }
  if(!m.length) return; window.DXX_MISSING=m; var d=document.createElement('div'); d.id='dxxmiss'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#1b120a;color:#ffe9b0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px sans-serif;text-align:center;padding:24px';
  d.innerHTML='<div style="font-size:44px">\ud83d\udcf6</div><h2 style="color:#ffd770;margin:8px 0">Тоглоомын файл бүрэн татагдсангүй</h2><div style="max-width:300px;margin-bottom:18px">Интернет сул байна. Сүлжээгээ шалгаад дахин оролдоно уу.</div><button onclick="location.reload()" style="padding:12px 26px;font-size:17px;font-weight:bold;border-radius:12px;border:3px solid #ffd770;background:#a8641a;color:#fff">Дахин ачаалах</button>';
@@ -2271,7 +2271,7 @@ function completeSite(k){
 
 // ---------- ажилчин сонгох, чиглүүлэх ----------
 function select(e){
-  if(sel) sel.sel=false;
+  if(sel) sel.sel=false; if(e.kind==='person'){ try{ voxSay(e.idx); }catch(_){} }
   sel=e; e.sel=true; e.task=null; e.amb=null;
   S.met=true;
   const nm=e.kind==='person'?NPCS[e.idx].n:e.name;
@@ -2282,7 +2282,7 @@ function select(e){
 function deselect(){ if(sel){ sel.sel=false; sel=null; } group=false; hideBar(); }
 function groupMode(){ deselect(); cancelPlace(); group=true; showBar('Бүх ажилчин: газар, барилга, тариалан дээр дарна',[['Болих','deselect()','red']]); }
 const FTALK={wolf:'',dog:'Гав! Гав!',guard:'Манаач: Бүгд амар, дарга аа. Намайг хаана зогсоох вэ?',hunter:'Анчин: Өнөөдөр буга олжилно, дарга аа.'};
-function talkSel(){ if(!sel) return; if(sel.friend){ const s=sel; deselect(); s.say={t:FTALK[s.type]||'...',ttl:3,delay:0}; return; } const i=sel.idx; deselect(); npcIdx=i; cur='npc'; $('modal').style.display='flex'; fillM(); }
+function talkSel(){ if(!sel) return; if(sel.friend){ const s=sel; deselect(); s.say={t:FTALK[s.type]||'...',ttl:3,delay:0}; return; } const i=sel.idx; deselect(); try{ voxSay(i); }catch(_){} npcIdx=i; cur='npc'; $('modal').style.display='flex'; fillM(); }
 function command(x,y,off){
   const e=sel;
   const ew=entW(e), eh=entH(e), ecx=entCx(e);
@@ -4933,8 +4933,10 @@ function obWay(e){
   const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h}, T={x:e.tx+cx,y:e.ty+h};
   if(Math.hypot(T.x-P.x,T.y-P.y)<2) return null;
   const m=1.6, an=(e.kind==='animal');
-  { const O0=obList().filter(R=>!(an&&R.k==='hashaa')); const Rp=O0.find(R=>obIn(P,R)); if(Rp){ const q=obExit(P,Rp,2.5); return {x:q.x-cx,y:q.y-h}; }
-    const Rt=O0.find(R=>obIn(T,R)); if(Rt){ const q=obExit(T,Rt,2.5); T.x=q.x; T.y=q.y; if(Math.hypot(T.x-P.x,T.y-P.y)<1.5) return {x:T.x-cx,y:T.y-h,arr:1}; T.arr=1; } }
+  { const O0=obList().filter(R=>!(an&&R.k==='hashaa')), mm=1.6, E0=O0.map(R=>({k:R.k,x0:R.x0-mm,y0:R.y0-mm,x1:R.x1+mm,y1:R.y1+mm}));
+    const exo=(Q,R)=>{ const c=[[Q.y-R.y0,Q.x,R.y0-0.8],[R.y1-Q.y,Q.x,R.y1+0.8],[Q.x-R.x0,R.x0-0.8,Q.y],[R.x1-Q.x,R.x1+0.8,Q.y]].sort((u,v)=>u[0]-v[0]).map(u=>({x:u[1],y:u[2]})); return c.find(z=>z.x>6&&z.y>44&&z.x<WW-6&&z.y<WH-6&&!E0.some(o=>obIn(z,o)))||c[0]; };
+    const Rp=E0.find(R=>obIn(P,R)); if(Rp){ const q=exo(P,Rp); return {x:q.x-cx,y:q.y-h}; }
+    const Rt=E0.find(R=>obIn(T,R)); if(Rt){ const q=exo(T,Rt); T.x=q.x; T.y=q.y; if(Math.hypot(T.x-P.x,T.y-P.y)<1.5) return {x:T.x-cx,y:T.y-h,arr:1}; T.arr=1; } }
   const O=obList().filter(R=>!(an&&R.k==='hashaa')).map(R=>({k:R.k,x0:R.x0-m,y0:R.y0-m,x1:R.x1+m,y1:R.y1+m}));
   if(!O.length) return null;
   const act=O.filter(R=>!obIn(P,R)&&!obIn(T,R));
@@ -5147,6 +5149,19 @@ function barterHTML(){
    +'<div class="sm" style="text-align:center;margin:4px 0">1. Дээр өгөх, 2. доор авах материалаа сонго. 3. Хэдийг солихоо дар:</div>'
    +'<div style="display:flex;gap:6px;justify-content:center"><button class="btn" '+(have<10?'disabled':'')+' onclick="brDo(10)">10 '+ITEMS[BART.f].n+'<br><span class="sm">→ '+brGet(10)+' '+ITEMS[BART.t].n+'</span></button><button class="btn" '+(have<50?'disabled':'')+' onclick="brDo(50)">50 '+ITEMS[BART.f].n+'<br><span class="sm">→ '+brGet(50)+' '+ITEMS[BART.t].n+'</span></button><button class="btn" '+(have<1?'disabled':'')+' onclick="brDo(\'all\')">Бүгд ('+have+')<br><span class="sm">→ '+brGet(have)+' '+ITEMS[BART.t].n+'</span></button></div></div>';
 }
+
+
+/* p32/vox.js — 125: NPC дээр дарахад дуугарна (voice.bin) */
+var VOX={b:{},ids:{},cur:null,last:{},ok:0};
+(function(){ function ld(){ try{ const c=sfxCtx(); if(!c) return setTimeout(ld,3000);
+  fetch('voice.bin?v=1').then(r=>r.arrayBuffer()).then(buf=>{ const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+    hd.forEach(([nm,off,len])=>{ const ab=buf.slice(base+off,base+off+len), idx=+nm.split('_')[0].slice(1);
+      const done=b=>{ if(VOX.b[nm]) return; VOX.b[nm]=b; (VOX.ids[idx]=VOX.ids[idx]||[]).push(nm); }; try{ const p=c.decodeAudioData(ab,done,()=>{}); if(p&&p.then) p.then(done,()=>{}); }catch(e){} }); VOX.ok=1; }).catch(()=>{}); }catch(e){} }
+  setTimeout(ld,4000); })();
+function voxSay(idx){ try{ const L=VOX.ids[idx]; if(!L||!L.length) return false; const c=sfxCtx(); if(!c) return false;
+  if(VOX.cur){ try{ VOX.cur.stop(); }catch(e){} VOX.cur=null; }
+  let pick=L[Math.floor(Math.random()*L.length)]; if(L.length>1&&pick===VOX.last[idx]) pick=L[(L.indexOf(pick)+1)%L.length]; VOX.last[idx]=pick;
+  const s=c.createBufferSource(), g=c.createGain(); s.buffer=VOX.b[pick]; g.gain.value=1; s.connect(g); g.connect(c.destination); s.start(0); VOX.cur=s; s.onended=()=>{ if(VOX.cur===s) VOX.cur=null; }; return true; }catch(e){ return false; } }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

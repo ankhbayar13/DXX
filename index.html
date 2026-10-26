@@ -383,7 +383,7 @@ function addXP(n){ if(!(n>0)) return; n=Math.round(n*(1+rsb('cul_xp')+0.08*(S.bl
 function lvUp(l){
   const g=100*l; S.res.gold+=g; S.res.alt+=2; sfx('lvl'); vib([30,40,30]);
   let e=$('lvup'); if(!e){ e=document.createElement('div'); e.id='lvup'; e.onclick=()=>{e.style.display='none'}; document.body.appendChild(e); }
-  e.innerHTML='<div class="lvb">'+ico('ui_lvbanner',150)+'<div class="lvt">ТҮВШИН '+l+'!</div><div class="lvr">+'+g+' 🪙 · +2 Алт</div><div class="sm">Дарж хаа</div></div>'; e.style.display='flex';
+  e.innerHTML='<div class="lvb">'+ico('ui_lvbanner',200)+'<div class="lvt">ТҮВШИН '+l+'!</div><div class="lvr">+'+g+' 🪙 · +2 Алт</div><div class="sm">Дарж хаа</div></div>'; e.style.display='flex';
 }
 function chCur(){ return CHAP[S.chap||0]||null; }
 function chDone(c){ return c.t.every(i=>TASKS[i].ok()); }
@@ -1257,7 +1257,7 @@ function drawPen(p){
 function drawBuilding(k){
   const r=brect(k), p=S.pos[k], d=bdims(k), site=S.sites[k];
   if(site){ ctx.globalAlpha=0.35+0.4*clamp(site.p/site.need,0,1); }
-  if(k==='tarialan'){ drawFarm(p,site?0:S.farm.stage); }
+  if(isFarmK(k)){ drawFarm(p,site?0:S.farm.stage,k==='tarialan'?undefined:farmPlK(k)); }
   else {
     spr(d.spr,p.x,p.y,d.w);
     if(k==='hureo' && !site){
@@ -1463,7 +1463,7 @@ function syncEnts(mode){
     if(mode==='all'){ sel=null; hideBar(); }
   }
 }
-function moveTo(e,dt){
+function moveTo0(e,dt){
   const dx=e.tx-e.x, dy=e.ty-e.y, d=Math.hypot(dx,dy);
   if(d<0.6){ e.moving=false; return true; }
   const s=Math.min(d,e.speed*dt);
@@ -1477,8 +1477,10 @@ function wpPick(e){
   return {x:d.x-entCx(e)+(Math.random()*6-3),y:d.y+3-entH(e)};
 }
 function endTask(e){ e.task=null; e.wait=1.5; if(e.friend){ e.hx=e.x; e.hy=e.y; e.speed=5; } refresh(); }
-function depotOk(k){ return S.bld[k]>0&&S.pos[k]&&!(S.sites&&S.sites[k]); }
-function haulTo(e,k,res,amt){ if(!depotOk(k)) return false; const r=brect(k); giveTask(e,{type:'haul',res:res,amt:amt,x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e),phase:'go',t:0}); e.say={t:{wood:'Модоо зөөе',meat:'Махаа зөөе',grain:'Тариагаа зөөе'}[res]||'Зөөе',ttl:2,delay:0}; return true; }
+function dOk0(k){ return S.bld[k]>0&&S.pos[k]&&!(S.sites&&S.sites[k]); }
+function depotKey(k,e){ const L=[k].concat((typeof MG!=='undefined'&&MG[k])||[]).filter(dOk0); if(!L.length) return null; if(L.length===1||!e) return L[0]; let b=L[0],bd=1e9; L.forEach(q=>{ const r=brect(q), d=Math.hypot(r.x+r.w/2-(e.x||0), r.y+r.h-(e.y||0)); if(d<bd){ bd=d; b=q; } }); return b; }
+function depotOk(k){ return !!depotKey(k); }
+function haulTo(e,k,res,amt){ k=depotKey(k,e); if(!k) return false; const r=brect(k); giveTask(e,{type:'haul',res:res,amt:amt,x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e),phase:'go',t:0}); e.say={t:{wood:'Модоо зөөе',meat:'Махаа зөөе',grain:'Тариагаа зөөе'}[res]||'Зөөе',ttl:2,delay:0}; return true; }
 const BUT={honi:25,yamaa:22,uher:60,aduu:90,temee:140};
 function butcher(an){ if(!depotOk('mahcex')){ say('Махны цех баригдаагүй'); return; } if((S.animals[an]||0)<1){ say('Мал алга'); return; }
   const ppl=ents.filter(e=>e.kind==='person'&&!e.sel&&(!e.task||e.task.type==='farm')); if(!ppl.length){ say('Чөлөөтэй ажилчин алга'); return; }
@@ -1493,7 +1495,7 @@ function workStep(e,dt){
   } else if(t.type==='wood'){
     if(!L.trees.includes(t.tr)){ endTask(e); return; }
     t.prog=t.t/6; e.dir=t.tr.x+SZ.tree/2>e.x?1:-1;
-    if(t.t>=6){ const i=L.trees.indexOf(t.tr); if(i>=0){ L.trees.splice(i,1); S.chopped.push(t.tr.x+'_'+t.tr.y); } const g=5+Math.floor(Math.random()*4); if(depotOk('modcex')){ haulTo(e,'modcex','wood',Math.round(g*(1+0.2*(S.bld.modcex-1)))); } else { S.res.wood=(S.res.wood||0)+g; addFloat(t.tr.x+4,t.tr.y,'+'+g+' мод','#d9a35a'); endTask(e); } }
+    if(t.t>=6){ const i=L.trees.indexOf(t.tr); if(i>=0){ L.trees.splice(i,1); S.chopped.push(t.tr.x+'_'+t.tr.y); } const g=5+Math.floor(Math.random()*4); if(depotOk('modcex')){ haulTo(e,'modcex','wood',Math.round(g*(1+0.2*((S.bld[depotKey('modcex',e)]||1)-1)))); } else { S.res.wood=(S.res.wood||0)+g; addFloat(t.tr.x+4,t.tr.y,'+'+g+' мод','#d9a35a'); endTask(e); } }
   } else if(t.type==='haul'){
     t.prog=Math.min(1,t.t/0.7); if(t.t>=0.7){ const a=t.amt; S.res[t.res]=(t.res==='wood'?(S.res.wood||0)+a:Math.min(cap(),(S.res[t.res]||0)+a)); addFloat(e.x,e.y-6,'+'+a+' '+({wood:'мод',meat:'мах',grain:'тариа'}[t.res]||''),{wood:'#d9a35a',meat:'#ff8a7a',grain:'#f6dc70'}[t.res]); sfx&&sfx('ok'); endTask(e); }
   } else if(t.type==='butchgo'){
@@ -1514,7 +1516,7 @@ function workStep(e,dt){
     else if(fm.stage===2){
       t.prog=t.t/2.5;
       if(t.t>=2.5){
-        const gain=Math.round(10*farmPlots()*(seasonK()==='autumn'?1.5:1)); fm.stage=0; fm.t=0;
+        const gain=Math.round(10*farmTot()*(seasonK()==='autumn'?1.5:1)); fm.stage=0; fm.t=0;
         if(depotOk('horgo')){ haulTo(e,'horgo','grain',gain); } else { S.res.grain=Math.min(cap(),S.res.grain+gain); const r=brect('tarialan'); addFloat(r.x+14,r.y,'+'+gain+' тариа','#f6dc70'); endTask(e); }
       }
     } else { say('Тариа ургаж байна...'); endTask(e); }
@@ -1942,7 +1944,7 @@ function draw(t){
     const k=placing.k, d=bdims(k,1), ok=freeSpot(k,placing.x,placing.y);
     ctx.globalAlpha=0.7;
     if(k==='hashaa') drawPen({x:placing.x,y:placing.y});
-    else if(k==='tarialan') drawFarm({x:placing.x,y:placing.y},0);
+    else if(isFarmK(k)) drawFarm({x:placing.x,y:placing.y},0,k==='tarialan'?undefined:1);
     else spr(d.spr,placing.x,placing.y,d.w);
     ctx.globalAlpha=1;
     ctx.fillStyle=ok?'rgba(60,220,60,.3)':'rgba(230,50,50,.4)';
@@ -2126,7 +2128,7 @@ function modalContent(k){
       const a=ANIMALS[id], cost=Math.floor(a.cost*(1+S.animals[id]*0.1)), prod=[];
       if(a.meat) prod.push('мах '+a.meat); if(a.milk) prod.push('сүү '+a.milk); if(a.wool) prod.push('ноос '+a.wool); if(a.gold) prod.push('🪙 '+a.gold);
       h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('an_'+id,56)+'<div><h3>'+a.n+' · '+S.animals[id]+'</h3><div class="sm">Минутад (нэг мал): '+prod.join(', ')+'</div></div></div>'+
-        '<button class="btn" data-c="'+cost+'" data-h="1" onclick="buy(\''+id+'\','+cost+')">'+f(cost)+' 🪙</button></div></div>';
+        ''+(PEN[id]&&!penOpen(id)?'<div style="flex:none;width:86px;text-align:center;font-size:11px;font-weight:bold;color:#ffb0a0;line-height:1.3">🔒 Гол гэр<br>'+PEN[id].req+'-р түвшин</div>':'<button class="btn" data-c="'+cost+'" data-h="1" onclick="buy(\''+id+'\','+cost+')">'+f(cost)+' 🪙</button>')+'</div></div>';
     }
     return h;
   }
@@ -2188,12 +2190,27 @@ function hideBar(){ $('bar').style.display='none'; }
 // ---------- барилга тавих ----------
 const snap = v => Math.round(v/2)*2;
 let bTab='life';
-const BTABS=[['life','ui_tab_house',['gmain','gerx','pen:honi','pen:yamaa','pen:uher','pen:aduu','pen:temee','horgo','market','tarialan','modcex','mahcex','well','healer']],['fac','ui_tab_factory',['airag','aaruul','tos','esgii','buuz']],['army','ui_tab_swords',['hureo','stable','range','yard','naadamring','smith','school','tower']],['stat','ui_tab_statue',['hushuu','ovoo','suvarga','temple']]];
+const BTABS=[['life','ui_tab_house',['gmain','gerx','pen:honi','horgo','market','tarialan','modcex','mahcex','well','healer']],['fac','ui_tab_factory',['airag','aaruul','tos','esgii','buuz']],['army','ui_tab_swords',['hureo','stable','range','yard','naadamring','smith','school','tower']],['stat','ui_tab_statue',['hushuu','ovoo','suvarga','temple']]];
 const BREQ={modcex:1,mahcex:2,ger:1,ger2:2,ger3:3,ger4:4,ger5:5,hashaa:1,horgo:1,tarialan:1,market:2,hureo:2,airag:2,aaruul:2,tos:3,esgii:3,buuz:4,naadamring:3,stable:2,range:3,yard:2,ovoo:3,suvarga:4,hushuu:5,well:2,healer:3,smith:3,school:4,tower:3,temple:5};
 const BRAR={modcex:'green',mahcex:'blue',ger:'green',ger2:'green',ger3:'green',ger4:'green',ger5:'green',hashaa:'green',horgo:'green',tarialan:'green',market:'blue',airag:'blue',aaruul:'blue',tos:'blue',esgii:'blue',buuz:'purple',hureo:'purple',naadamring:'purple',stable:'purple',range:'purple',yard:'purple',ovoo:'purple',suvarga:'blue',hushuu:'gold',well:'green',healer:'blue',smith:'purple',school:'purple',tower:'blue',temple:'gold'};
+
+/* p32/multi.js — 102: тариалан, модны цехийг 5 хүртэл барих */
+var MG={tarialan:['tarialan2','tarialan3','tarialan4','tarialan5'],modcex:['modcex2','modcex3','modcex4','modcex5']};
+(function(){ const M=[1.6,2.4,3.4,4.6];
+  ['tarialan','modcex'].forEach(b=>{ MG[b].forEach((k,i)=>{ const o=Object.assign({},BUILD[b]); o.n=BUILD[b].n+' '+(i+2); o.cost=Math.round(BUILD[b].cost*M[i]/10)*10; BUILD[k]=o; BREQ[k]=i+2; BRAR[k]=BRAR[b]||'green'; if(BKEYS.indexOf(k)<0) BKEYS.push(k); }); });
+  const L=BTABS[0][2]; let i=L.indexOf('tarialan'); if(i>=0&&L.indexOf('tarx')<0) L.splice(i+1,0,'tarx'); i=L.indexOf('modcex'); if(i>=0&&L.indexOf('modx')<0) L.splice(i+1,0,'modx');
+})();
+function isFarmK(k){ return k==='tarialan'||MG.tarialan.indexOf(k)>=0; }
+function farmPlK(k){ return FPL[Math.min(FPL.length,Math.max(1,S.bld[k]||1))-1]; }
+function farmTot(){ let n=farmPlots(); MG.tarialan.forEach(k=>{ if(S.bld[k]>0&&S.pos[k]&&!(S.sites&&S.sites[k])) n+=farmPlK(k); }); return n; }
+function mgCard(b){ const L=MG[b], nx=L.find(k=>!(S.bld[k]>0)&&!S.sites[k]), have=(S.bld[b]>0||S.sites[b]?1:0)+L.filter(k=>S.bld[k]>0||S.sites[k]).length, req=nx?BREQ[nx]:0, noBase=!(S.bld[b]>0), locked=nx&&(noBase||S.bld.ger<req);
+  const spn=b==='tarialan'?(BUILD.tarialan.spr):(TSET.modcex?TSET.modcex[Math.max(0,Math.min(TSET.modcex.length-1,(S.bld.modcex||1)-1))]:BUILD.modcex.spr);
+  let foot; if(!nx) foot='<div class="bs">Бүгд баригдсан ('+have+'/5)</div>'; else if(noBase) foot='<div class="bs lk">Эхлээд '+BUILD[b].n+' бариарай</div>'; else if(locked) foot='<div class="bs lk">'+have+'/5 · Гол гэр '+req+'-р түвшинд нээгдэнэ</div>'; else foot='<div class="bs">'+have+'/5 · '+(b==='tarialan'?'Тариа нэмж ургуулна':'Мод хурдан зөөнө')+'</div><button class="btn" data-c="'+BUILD[nx].cost+'" onclick="startPlace(\''+nx+'\')">Барих · '+f(BUILD[nx].cost)+' 🪙</button>';
+  return '<div class="bcard'+(locked?' lock':'')+'"><div class="in"><div class="nm">'+BUILD[b].n+' +</div><div class="pic"'+(nx&&!locked?' onclick="startPlace(\''+nx+'\')"':'')+'>'+(SPRDATA[spn]?'<img class="bi" src="'+SPRDATA[spn][0]+'">':'<div class="be">🌾</div>')+'</div>'+foot+'</div><img class="fr" src="'+SPRDATA[locked?'bf3':'bf0'][0]+'">'+(locked?'<img class="lockimg" src="'+SPRDATA.ui_lock[0]+'">':'')+'</div>'; }
+
 function setBTab(t){ bTab=t; fillM(); }
 function bcard(k){
-  if(k==='gmain') return gmainCard(); if(k==='gerx') return gerCard(); if(k.startsWith('pen:')) return penCard(k.slice(4));
+  if(k==='gmain') return gmainCard(); if(k==='gerx') return gerCard(); if(k==='tarx') return mgCard('tarialan'); if(k==='modx') return mgCard('modcex'); if(k.startsWith('pen:')) return penCard(k.slice(4));
   const d=BUILD[k], lvl=S.bld[k]||0, site=S.sites[k], req=BREQ[k]||1, locked=!lvl&&!site&&S.bld.ger<req;
   S.seenB=S.seenB||{};
   const isNew=!lvl&&!site&&!locked&&!S.seenB[k];
@@ -2272,7 +2289,7 @@ function command(x,y,off){
     if(x>=r.x-2&&x<=r.x+r.w+2&&y>=r.y-3&&y<=r.y+r.h+2){
       const spot={x:r.x+r.w/2-ecx,y:r.y+r.sh+3-eh};
       if(S.sites[k]) task={type:'build',k,x:spot.x,y:spot.y,phase:'go',t:0};
-      else if(k==='tarialan') task={type:'farm',x:spot.x,y:spot.y,phase:'go',t:0};
+      else if(isFarmK(k)) task={type:'farm',x:spot.x,y:spot.y,phase:'go',t:0};
       else task={type:'move',x:spot.x,y:spot.y,phase:'go',t:0};
       break;
     }
@@ -2435,7 +2452,7 @@ function idleJobs(){
   }
 }
 setInterval(()=>{ document.querySelectorAll('.upt').forEach(el=>{ const u=S.upg&&S.upg[el.dataset.k]; if(u) el.textContent=fmtT(u.need-u.p); }); document.querySelectorAll('.upb').forEach(el=>{ const u=S.upg&&S.upg[el.dataset.k]; if(u){ const h=upRushLbl(u); if(el.dataset.l!==h){ el.dataset.l=h; el.innerHTML=h; } } }); },1000);
-function buy(k,c){ if(S.res.gold<c){ noGold(); return; } if(penCap(k)<=0){ say(PEN[k].n+' барина уу'); return; } if((S.animals[k]||0)>=penCap(k)||herdCount()>=herdMax()){ say(PEN[k].n+' дүүрэн. Сайжруулна уу'); return; } S.res.gold-=c; S.animals[k]++; refresh(); }
+function buy(k,c){ if(S.res.gold<c){ noGold(); return; } if(!penOpen(k)){ say('Гол гэр '+PEN[k].req+'-р түвшинд нээгдэнэ'); return; } if(penCap(k)<=0){ say('Малын хашаа барина уу'); return; } if((S.animals[k]||0)>=penCap(k)||herdCount()>=herdMax()){ say(PEN[k].n+' дүүрэн. Сайжруулна уу'); return; } S.res.gold-=c; S.animals[k]++; refresh(); }
 function sellAll(){
   qh('sell',1); let g=0; for(const k in SELL){ g+=S.res[k]*SELL[k]*sellMult(); S.res[k]=0; }
   S.res.gold+=g;
@@ -3285,19 +3302,22 @@ setTimeout(()=>{ const l=document.getElementById('lcol'); if(l&&!l.querySelector
 // ================= EB: Хашааны хэсгүүд, нэг "Гэр" карт =================
 const PEN={honi:{n:'Хонины хашаа',cost:100,req:1},yamaa:{n:'Ямааны хашаа',cost:200,req:2},uher:{n:'Үхрийн хашаа',cost:400,req:3},aduu:{n:'Морины хашаа',cost:700,req:4},temee:{n:'Тэмээний хашаа',cost:1200,req:5}};
 const PMAX=5;
-function penGet(){ if(!S.pens){ S.pens={}; if(S.bld.hashaa>0){ for(const t in PEN){ if(t==='honi') S.pens[t]=Math.min(PMAX,S.bld.hashaa); else if((S.animals[t]||0)>0) S.pens[t]=1; } } } return S.pens; }
-function penLv(t){ const v=penGet()[t]||0; return v||((t==='honi'&&(S.bld.hashaa||0)>0)?1:0); }
+function penGet(){ if(!S.pens){ S.pens={}; if(S.bld.hashaa>0){ for(const t in PEN){ if(t==='honi') S.pens[t]=Math.min(PMAX,S.bld.hashaa); else if((S.animals[t]||0)>0) S.pens[t]=1; } } }
+  if(!S.penM){ let m=0; for(const t in S.pens) m=Math.max(m,S.pens[t]||0); S.pens={honi:m}; S.penM=1; }
+  return S.pens; }
+function penOpen(t){ return S.bld.ger>=PEN[t].req; }
+function penLv(t){ const v=penGet().honi||((S.bld.hashaa||0)>0?1:0); return (v>0&&penOpen(t))?v:0; }
 function penCap(t){ const l=penLv(t); if(l>0) return 5+5*l+2*Math.max(0,(S.bld.hashaa||1)-1); return t==='honi'&&!(S.bld.hashaa>0||S.sites.hashaa)?5:0; }
-function penUpCost(t){ const i=Object.keys(PEN).indexOf(t)+1; return 80*penLv(t)*i; }
-function penAct(t){ const P=PEN[t], l=penLv(t); if(S.bld.ger<P.req){ say('Гол гэр '+P.req+'-р түвшинд нээгдэнэ'); return; }
+function penUpCost(t){ const n=Object.keys(PEN).filter(penOpen).length; return Math.round(80*penLv('honi')*(1+0.5*(n-1))); }
+function penAct(t){ t='honi'; const P=PEN[t], l=penLv(t); if(S.bld.ger<P.req){ say('Гол гэр '+P.req+'-р түвшинд нээгдэнэ'); return; }
   if(l>=PMAX){ say('Дээд түвшин'); return; }
-  if(l>0||S.pos.hashaa){ const c=l>0?penUpCost(t):P.cost; if(S.res.gold<c){ noGold(); return; } S.res.gold-=c; penGet()[t]=l+1; say(P.n+(l?' сайжирлаа':' баригдлаа')); syncEnts(true); refresh(); return; }
+  if(l>0||S.pos.hashaa){ const c=l>0?penUpCost(t):P.cost; if(S.res.gold<c){ noGold(); return; } S.res.gold-=c; penGet()[t]=l+1; say('Малын хашаа'+(l?' сайжирлаа':' баригдлаа')); syncEnts(true); refresh(); return; }
   if(S.res.gold<P.cost){ noGold(); return; }
   closeM(); deselect(); const d=bdims('hashaa',1); placing={k:'hashaa',pen:t,x:snap(cam.x+W/Z/2-d.w/2),y:snap(cam.y+H/Z/2-d.h/2)}; { const a=autoSpot('hashaa'); if(a){ placing.x=a.x; placing.y=a.y; } }
-  showBar(P.n+': ногоон бол «Тавих» дар. Улаан бол өөр газар дар',[['✔ Тавих','confirmPlace()'],['✖ Болих','cancelPlace()','red']]); }
+  showBar('Малын хашаа: ногоон бол «Тавих» дар. Улаан бол өөр газар дар',[['✔ Тавих','confirmPlace()'],['✖ Болих','cancelPlace()','red']]); }
 function penCard(t){ const P=PEN[t], l=penLv(t), locked=S.bld.ger<P.req;
   let foot; if(locked) foot='<div class="bs lk">🔒 Гол гэр '+P.req+'-р түвшин хэрэгтэй (одоо '+S.bld.ger+')</div>'; else if(l>=PMAX) foot='<div class="bs">Дээд түвшин · '+penCap(t)+' мал</div>'; else foot='<div class="bs">'+(l?l+'-р түвшин · '+penCap(t)+' мал':'Мал: '+(5+5)+' хүртэл')+'</div><button class="btn" data-c="'+(l?penUpCost(t):P.cost)+'" onclick="penAct(\''+t+'\')">'+(l?'⬆ ':'Барих · ')+f(l?penUpCost(t):P.cost)+' 🪙</button>';
-  return '<div class="bcard'+(locked?' lock':'')+'"><div class="in"><div class="nm">'+P.n+'</div><div class="pic"'+(!locked&&l<PMAX?' onclick="penAct(\''+t+'\')"':'')+'>'+(SPRDATA['pen_'+t]?'<img class="bi" style="image-rendering:auto" src="'+SPRDATA['pen_'+t][0]+'">':ico('an_'+t,52))+'</div>'+foot+'</div><img class="fr" src="'+SPRDATA[locked?'bf3':'bf0'][0]+'">'+(locked?'<img class="lockimg" src="'+SPRDATA.ui_lock[0]+'">':'')+'</div>'; }
+  return '<div class="bcard'+(locked?' lock':'')+'"><div class="in"><div class="nm">'+P.n+'</div><div class="pic"'+(!locked&&l<PMAX?' onclick="penAct(\''+t+'\')"':'')+'>'+(SPRDATA.pn3||SPRDATA['pen_'+t]?'<img class="bi" style="image-rendering:auto" src="'+(SPRDATA.pn3||SPRDATA['pen_'+t])[0]+'">':ico('an_'+t,52))+'</div>'+foot+'</div><img class="fr" src="'+SPRDATA[locked?'bf3':'bf0'][0]+'">'+(locked?'<img class="lockimg" src="'+SPRDATA.ui_lock[0]+'">':'')+'</div>'; }
 function penPanel(){ return '<div class="card"><h3>Хашааны хэсгүүд</h3>'+Object.keys(PEN).map(t=>{ const l=penLv(t); return '<div class="row" style="padding:3px 0"><span>'+ico('an_'+t,24)+' '+PEN[t].n+' · <b>'+(S.animals[t]||0)+'/'+penCap(t)+'</b></span><span class="sm">'+(l?l+'-р түвшин':'байхгүй')+'</span></div>'; }).join('')+'<button class="btn" style="margin-top:6px" onclick="openM(\'barilga\')">🔨 Хашаа барих / сайжруулах</button></div>'; }
 const GK=['ger2','ger3','ger4','ger5'];
 function gerNext(){ return GK.find(k=>!(S.bld[k]>0)&&!S.sites[k]); }
@@ -4704,7 +4724,7 @@ function icLoad(){
   if(ICST===2&&Date.now()-(window.ICT||0)<15000) return;
   ICST=1;
   try{
-    fetch('icons.bin?v=2').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+    fetch('icons.bin?v=3').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
       const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
       hd.forEach(x=>{ if(x[3]) ICD[x[0]]=[x[3],x[4]]; o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
       IC=o; ICST=3; icApply();
@@ -4719,6 +4739,7 @@ function icApply(){
     [0,1,2].forEach(i=>{ const k='c'+i; if(IC[k]&&ICD[k]) SPRDATA['chest'+i]=[IC[k],ICD[k][0],ICD[k][1]]; });
     try{ if(IC.c0) BOXSVG='<img src="'+SPRDATA.chest0[0]+'" style="width:150px">'; }catch(e){}
     try{ if(IC.c0&&ICD.c0){ const im=new Image(); im.src=IC.c0; SPR.ui2_chest={img:im,iw:ICD.c0[0],ih:ICD.c0[1]}; SPRDATA.ui2_chest=[IC.c0,ICD.c0[0],ICD.c0[1]]; } }catch(e){}
+    try{ if(IC.lvup&&ICD.lvup) SPRDATA.ui_lvbanner=[IC.lvup,ICD.lvup[0],ICD.lvup[1]]; }catch(e){}
     try{ efBuild(); }catch(e){}
     updateHUD();
     if($('modal')&&$('modal').style.display==='flex') fillM();
@@ -4814,12 +4835,13 @@ function bldApply(){
   try{
     const TWN={"market": [24, 33, 42], "modcex": [22, 28, 34], "mahcex": [22, 28, 34], "naadamring": [28, 38, 48], "well": [14, 18, 23], "horgo": [22, 29, 38], "smith": [22, 27, 32], "school": [26, 31, 38], "healer": [24, 28, 34], "tower": [15, 19, 23], "temple": [22, 28, 36], "stable": [26, 31, 37, 43, 48], "range": [26, 31, 37, 43, 48], "yard": [26, 31, 37, 43, 48], "ger": [40, 44, 48, 52, 62], "hureo": [26, 33, 42], "airag": [16, 20, 24], "aaruul": [16, 20, 25], "tos": [18, 22, 27], "esgii": [20, 25, 30], "hushuu": [18, 23, 29], "ovoo": [18, 23, 29], "suvarga": [14, 19, 25], "buuz": [20, 25, 30]};
     for(const k in TWN) TW2[k]=TWN[k];
+    try{ MG.modcex.forEach(k=>{ TW2[k]=TW2.modcex; TSET[k]=TSET.modcex; }); }catch(e){}
     TSET.ger=['gerT1','gerT2','gerT3','gerT4','gerT5'];
     ['ger','ger2','ger3','ger4','ger5'].forEach(k=>{ BUILD[k].spr='gerT1'; });
     const NB={hureo:'nb_hureo',airag:'nb_airag',aaruul:'nb_aaruul',tos:'nb_tos',esgii:'nb_esgii',hushuu:'nb_hushuu',ovoo:'nb_ovoo',suvarga:'nb_suvarga',buuz:'nb_buuz'};
     for(const k in NB){ if(SPR[NB[k]+'1']){ TSET[k]=[NB[k]+'1',NB[k]+'2',NB[k]+'3']; BUILD[k].spr=NB[k]+'1'; } }
     BUILD.market.spr='mk1';
-    if(SPR.fm_ripe){ BUILD.tarialan.spr='fm_ripe'; BUILD.tarialan.w=34; }
+    if(SPR.fm_ripe){ BUILD.tarialan.spr='fm_ripe'; BUILD.tarialan.w=34; (MG.tarialan||[]).forEach(k=>{ if(BUILD[k]){ BUILD[k].spr='fm_ripe'; BUILD[k].w=34; } }); }
     if($('modal')&&$('modal').style.display==='flex') fillM();
   }catch(e){}
 }
@@ -4863,6 +4885,60 @@ function skUi(){ if(!BT||BT.wait) return; const bti=document.getElementById('bti
   const man=skManual();
   hs.forEach(u=>{ const el=bar.querySelector('[data-id="'+u.id+'"]'); if(!el) return; const dead=u.hp<=0, rdy=!dead&&(u.skc!=null&&u.skc<=0), tot=u.skt||5, f=dead?1:(u.skc==null?1:Math.max(0,Math.min(1,u.skc/tot)));
     el.className='skb'+(rdy?' rdy':'')+(rdy&&man?' man':'')+(dead?' dead':''); el.firstChild.nextSibling&&0; const c=el.querySelector('.sk-c'); c.style.height=(f*100)+'%'; }); }
+
+
+/* p32/pen1.js — 103: нэг Малын хашаа (түвшин ахихад мал нээгдэнэ) */
+function penCard(t){ const l=penLv('honi'), site=S.sites&&S.sites.hashaa, open=Object.keys(PEN).filter(penOpen), nxt=Object.keys(PEN).find(x=>!penOpen(x)), lk=!l&&!site&&S.bld.ger<1;
+  let foot;
+  if(site) foot='<div class="bs">⏳ Баригдаж байна</div>';
+  else if(l>=PMAX) foot='<div class="bs">Дээд түвшин · '+penCap('honi')+' мал</div>';
+  else foot='<div class="bs">'+(l?l+'-р түвшин · '+penCap('honi')+' мал':'Хонь '+penCap('honi')+' хүртэл')+'</div><button class="btn" data-c="'+(l?penUpCost('honi'):PEN.honi.cost)+'" onclick="penAct(\'honi\')">'+(l?'⬆ ':'Барих · ')+f(l?penUpCost('honi'):PEN.honi.cost)+' 🪙</button>';
+  const names={honi:'Хонь',yamaa:'Ямаа',uher:'Үхэр',aduu:'Морь',temee:'Тэмээ'};
+  const info='<div class="sm" style="font-size:10px;line-height:1.2;padding:0 4px">'+open.map(x=>names[x]).join(', ')+(nxt?' · '+names[nxt]+': Гол гэр '+PEN[nxt].req+'-р түвшин':'')+'</div>';
+  const pic=SPRDATA.pn3?'<img class="bi" style="image-rendering:auto;max-width:76%;max-height:84%" src="'+SPRDATA.pn3[0]+'">':ico('an_honi',52);
+  return '<div class="bcard"><div class="in"><div class="nm">Малын хашаа</div><div class="pic"'+(!site&&l<PMAX?' onclick="penAct(\'honi\')"':'')+'>'+pic+'</div>'+info+foot+'</div>'+(l?'<i class="blv">'+l+'</i>':'')+'<img class="fr" src="'+SPRDATA.bf0[0]+'"></div>'; }
+function penPanel(){ return '<div class="card"><h3>Малын хашаа'+(penLv('honi')?' · '+penLv('honi')+'-р түвшин':'')+'</h3>'+Object.keys(PEN).map(t=>{ const o=penOpen(t); return '<div class="row" style="padding:3px 0"><span>'+ico('an_'+t,24)+' '+({honi:'Хонь',yamaa:'Ямаа',uher:'Үхэр',aduu:'Морь',temee:'Тэмээ'})[t]+' · <b>'+(S.animals[t]||0)+'/'+penCap(t)+'</b></span><span class="sm">'+(o?'':'🔒 Гол гэр '+PEN[t].req+'-р түвшин')+'</span></div>'; }).join('')+'<button class="btn" style="margin-top:6px" onclick="openM(\'barilga\')">🔨 Хашаа барих / сайжруулах</button></div>'; }
+
+
+/* p32/avoid.js — 105: ажилчид, мал барилгыг тойрч явна */
+var OBC={t:-1e9,L:[]};
+function obList(){ const now=performance.now(); if(now-OBC.t<300) return OBC.L; OBC.t=now; const L=[];
+  try{ BKEYS.forEach(k=>{ if(!S.pos[k]||isFarmK(k)) return; const r=brect(k); if(!r) return; const pen=(k==='hashaa');
+    const x0=r.x+r.w*(pen?0.02:0.06), x1=r.x+r.w*(pen?0.98:0.94), y1=r.y+r.sh, y0=pen?r.y+r.sh*0.12:r.y+r.sh*0.5; L.push({k,x0,y0,x1,y1}); }); }catch(e){}
+  OBC.L=L; return L; }
+function obHit(P,T,R){ const dx=T.x-P.x, dy=T.y-P.y; let t0=0,t1=1;
+  for(const [p,q,lo,hi] of [[P.x,dx,R.x0,R.x1],[P.y,dy,R.y0,R.y1]]){ if(Math.abs(q)<1e-9){ if(p<=lo||p>=hi) return -1; } else { let a=(lo-p)/q, b=(hi-p)/q; if(a>b){ const s=a; a=b; b=s; } t0=Math.max(t0,a); t1=Math.min(t1,b); if(t0>=t1) return -1; } }
+  return t0; }
+const obIn=(p,R)=>p.x>R.x0&&p.x<R.x1&&p.y>R.y0&&p.y<R.y1;
+function obExit(Q,R,m){ const dl=Q.x-R.x0, dr=R.x1-Q.x, du=Q.y-R.y0, dd=R.y1-Q.y, mn=Math.min(dl,dr,du,dd); if(mn===dd) return {x:Q.x,y:R.y1+m}; if(mn===du) return {x:Q.x,y:R.y0-m}; if(mn===dl) return {x:R.x0-m,y:Q.y}; return {x:R.x1+m,y:Q.y}; }
+function obWay(e){
+  if(e.kind==='wild'&&!e.friend&&e.type!=='dog') return null;
+  const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h}, T={x:e.tx+cx,y:e.ty+h};
+  if(Math.hypot(T.x-P.x,T.y-P.y)<2) return null;
+  const m=1.6, an=(e.kind==='animal');
+  { const O0=obList().filter(R=>!(an&&R.k==='hashaa')); const Rp=O0.find(R=>obIn(P,R)); if(Rp){ const q=obExit(P,Rp,2.5); return {x:q.x-cx,y:q.y-h}; }
+    const Rt=O0.find(R=>obIn(T,R)); if(Rt){ const q=obExit(T,Rt,2.5); T.x=q.x; T.y=q.y; if(Math.hypot(T.x-P.x,T.y-P.y)<1.5) return {x:T.x-cx,y:T.y-h,arr:1}; T.arr=1; } }
+  const O=obList().filter(R=>!(an&&R.k==='hashaa')).map(R=>({k:R.k,x0:R.x0-m,y0:R.y0-m,x1:R.x1+m,y1:R.y1+m}));
+  if(!O.length) return null;
+  const act=O.filter(R=>!obIn(P,R)&&!obIn(T,R));
+  let best=null,bt=2; for(const R of act){ const t=obHit(P,T,{x0:R.x0+0.8,y0:R.y0+0.8,x1:R.x1-0.8,y1:R.y1-0.8}); if(t>=0&&t<bt){ bt=t; best=R; } }
+  if(!best) return T.arr?{x:T.x-cx,y:T.y-h,arr:1}:null;
+  const o=1.2, C=[[best.x0-o,best.y0-o],[best.x1+o,best.y0-o],[best.x0-o,best.y1+o],[best.x1+o,best.y1+o]];
+  let bc=null,bd=1e9,fc=null,fd=1e9; const sh=R=>({x0:R.x0+0.8,y0:R.y0+0.8,x1:R.x1-0.8,y1:R.y1-0.8});
+  for(const c of C){ const W={x:c[0],y:c[1]}; if(W.x<6||W.y<44||W.x>WW-6||W.y>WH-6) continue; if(act.some(R=>obIn(W,R))) continue; if(Math.hypot(W.x-P.x,W.y-P.y)<2) continue;
+    let ok=true; for(const R of act){ if(R===best) continue; if(obHit(P,W,sh(R))>=0){ ok=false; break; } } if(!ok) continue;
+    if(obHit(P,W,sh(best))>=0) continue;
+    const d=Math.hypot(W.x-P.x,W.y-P.y)+Math.hypot(T.x-W.x,T.y-W.y);
+    if(obHit(W,T,sh(best))<0&&!act.some(R=>R!==best&&obHit(W,T,sh(R))>=0)){ if(d<bd){ bd=d; bc=W; } } else if(d<fd){ fd=d; fc=W; } }
+  if(!bc) bc=fc;
+  if(!bc) return T.arr?{x:T.x-cx,y:T.y-h,arr:1}:null;
+  return {x:bc.x-cx,y:bc.y-h}; }
+function moveTo(e,dt){
+  const now=performance.now(); let w=null;
+  if(!(e._ob0&&now<e._ob0)){ try{ w=obWay(e); }catch(x){} }
+  if(w){ const pp=e._pp; if(!pp||now-pp.t>1500){ if(pp&&Math.hypot(e.x-pp.x,e.y-pp.y)<3) e._ob0=now+2500; e._pp={x:e.x,y:e.y,t:now}; }
+    const tx=e.tx,ty=e.ty; e.tx=w.x; e.ty=w.y; const r=moveTo0(e,dt); e.tx=tx; e.ty=ty; return !!(w.arr&&r); }
+  e._pp=null; return moveTo0(e,dt); }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

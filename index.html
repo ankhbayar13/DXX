@@ -212,8 +212,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 <div id="modal"><div class="box"><button class="x" onclick="closeM()">✕</button><div id="mbody"></div></div></div>
 <div id="msg" class="msg"></div>
 
-<script src="d1.js?v=56b28b72"></script>
-<script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.ger) m.push('d1'); }catch(e){ m.push('d?'); }
+<script src="d1.js?v=a6432269"></script>
+<script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.b_meat) m.push('d1'); }catch(e){ m.push('d?'); }
  if(!m.length) return; window.DXX_MISSING=m; var d=document.createElement('div'); d.id='dxxmiss'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#1b120a;color:#ffe9b0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px sans-serif;text-align:center;padding:24px';
  d.innerHTML='<div style="font-size:44px">\ud83d\udcf6</div><h2 style="color:#ffd770;margin:8px 0">Тоглоомын файл бүрэн татагдсангүй</h2><div style="max-width:300px;margin-bottom:18px">Интернет сул байна. Сүлжээгээ шалгаад дахин оролдоно уу.</div><button onclick="location.reload()" style="padding:12px 26px;font-size:17px;font-weight:bold;border-radius:12px;border:3px solid #ffd770;background:#a8641a;color:#fff">Дахин ачаалах</button>';
  document.documentElement.appendChild(d); })();</script>
@@ -276,27 +276,27 @@ const ENEMIES = [
 ];
 
 const BUILD = {
-  ger:     {n:'Гэр', spr:'ger', w:40, cost:0, up:100, desc:'Нөөц +20%, баатрын суудал +1. Хүн: 1-2→2, 3→3, 4→4, 5→5'},
-  ger2:    {n:'Гэр 2', spr:'ger', w:30, cost:300, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
-  ger3:    {n:'Гэр 3', spr:'ger', w:30, cost:700, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
-  ger4:    {n:'Гэр 4', spr:'ger', w:30, cost:1500, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
-  ger5:    {n:'Гэр 5', spr:'ger', w:30, cost:3000, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger:     {n:'Гэр', spr:'gerT1', w:40, cost:0, up:100, desc:'Нөөц +20%, баатрын суудал +1. Хүн: 1-2→2, 3→3, 4→4, 5→5'},
+  ger2:    {n:'Гэр 2', spr:'gerT1', w:30, cost:300, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger3:    {n:'Гэр 3', spr:'gerT1', w:30, cost:700, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger4:    {n:'Гэр 4', spr:'gerT1', w:30, cost:1500, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
+  ger5:    {n:'Гэр 5', spr:'gerT1', w:30, cost:3000, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   hashaa:  {n:'Хашаа', w:70, h:44, cost:40, up:80, desc:'Бүх хашааны хэсгийн дэд бүтэц. Түвшин бүр +2 мал/хэсэг'},
   horgo:   {n:'Хорго', spr:'hay1', w:27, cost:150, up:60, desc:'Агуулах +200'},
-  market:  {n:'Зах', spr:'market', w:22, cost:200, up:120, desc:'Зарах үнэ +25%'},
+  market:  {n:'Зах', spr:'mk1', w:22, cost:200, up:120, desc:'Зарах үнэ +25%'},
   modcex:  {n:'Модны цех', spr:'mod1', w:26, cost:250, up:150, desc:'Ажилчид мод тайраад энд зөөнө. Түвшин бүр +20% мод'},
   mahcex:  {n:'Махны цех', spr:'mah1', w:26, cost:500, up:250, desc:'Хашаанаас мал аваад энд нядалж мах гаргана'},
-  hureo:   {n:'Цэргийн хүрээ', spr:'tent', w:26, extra:12, cost:300, up:150, desc:'Баатар, дайн, отгийн хүч +10%'},
+  hureo:   {n:'Цэргийн хүрээ', spr:'nb_hureo1', w:26, extra:12, cost:300, up:150, desc:'Баатар, дайн, отгийн хүч +10%'},
   tarialan:{n:'Тариалан', w:28, h:20, cost:120, up:70, desc:'Тариа ургуулна. Түвшин ахихад 1→8 талбай'},
-  airag:   {n:'Айрагийн цех', spr:'airagbarrel', w:13, cost:250, up:120, desc:'Сүүнээс айраг хийнэ (6 сүү → 1 айраг)', proc:{in:{milk:6},out:'airag',t:20}},
-  aaruul:  {n:'Ааруулын шон', spr:'cheeserack', w:20, cost:300, up:140, desc:'Сүүнээс ааруул хийнэ (8 сүү → 1)', proc:{in:{milk:8},out:'aaruul',t:25}},
-  tos:     {n:'Тосны байшин', spr:'butterhut', w:24, cost:350, up:160, desc:'Сүүнээс тос аргална (10 сүү → 1)', proc:{in:{milk:10},out:'tos',t:30}},
-  esgii:   {n:'Эсгийн талбай', spr:'feltyard', w:22, cost:400, up:180, desc:'Ноосноос эсгий хийнэ (8 ноос → 1)', proc:{in:{wool:8},out:'esgii',t:30}},
-  hushuu:  {n:'Чингис хааны хөшөө', spr:'st_chinggis', w:24, cost:900, up:500, desc:'Баатруудын хүч +5% (түвшин бүрт)'},
-  ovoo:    {n:'Обоо', spr:'st_ovoo', w:22, cost:400, up:250, desc:'Бүх нөөц +4% (түвшин бүрт)'},
+  airag:   {n:'Айрагийн цех', spr:'nb_airag1', w:13, cost:250, up:120, desc:'Сүүнээс айраг хийнэ (6 сүү → 1 айраг)', proc:{in:{milk:6},out:'airag',t:20}},
+  aaruul:  {n:'Ааруулын шон', spr:'nb_aaruul1', w:20, cost:300, up:140, desc:'Сүүнээс ааруул хийнэ (8 сүү → 1)', proc:{in:{milk:8},out:'aaruul',t:25}},
+  tos:     {n:'Тосны байшин', spr:'nb_tos1', w:24, cost:350, up:160, desc:'Сүүнээс тос аргална (10 сүү → 1)', proc:{in:{milk:10},out:'tos',t:30}},
+  esgii:   {n:'Эсгийн талбай', spr:'nb_esgii1', w:22, cost:400, up:180, desc:'Ноосноос эсгий хийнэ (8 ноос → 1)', proc:{in:{wool:8},out:'esgii',t:30}},
+  hushuu:  {n:'Чингис хааны хөшөө', spr:'nb_hushuu1', w:24, cost:900, up:500, desc:'Баатруудын хүч +5% (түвшин бүрт)'},
+  ovoo:    {n:'Обоо', spr:'nb_ovoo1', w:22, cost:400, up:250, desc:'Бүх нөөц +4% (түвшин бүрт)'},
   naadamring:{n:'Бөхийн талбай', spr:'are1', w:32, cost:700, up:400, desc:'Наадмын шагнал +20%, хүлээх хугацаа -10% (түвшин бүрт)'},
-  suvarga: {n:'Цагаан суварга', spr:'st_stupa', w:14, cost:600, up:350, desc:'Чонын дайралт 15% ховор (түвшин бүрт)'},
-  buuz:    {n:'Бууз, хуушуур', spr:'dumptent', w:24, cost:500, up:220, desc:'Мах, тариагаас бууз (4 мах + 2 тариа → 1)', proc:{in:{meat:4,grain:2},out:'buuz',t:35}},
+  suvarga: {n:'Цагаан суварга', spr:'nb_suvarga1', w:14, cost:600, up:350, desc:'Чонын дайралт 15% ховор (түвшин бүрт)'},
+  buuz:    {n:'Бууз, хуушуур', spr:'nb_buuz1', w:24, cost:500, up:220, desc:'Мах, тариагаас бууз (4 мах + 2 тариа → 1)', proc:{in:{meat:4,grain:2},out:'buuz',t:35}},
   well:    {n:'Худаг', spr:'well1', w:21, cost:350, up:200, desc:'Үйлдвэрлэл +3% (түвшин бүрт)'},
   smith:   {n:'Дарханы газар', spr:'smi1', w:27, cost:600, up:300, desc:'Зэр зэвсгийн үнэ -6% (түвшин бүрт)'},
   school:  {n:'Баатрын сургууль', spr:'sch1', w:30, cost:800, up:400, desc:'Туршлага +8% (түвшин бүрт)'},
@@ -902,6 +902,7 @@ const floats = [];
 let placing = null, sel = null, group = false;
 
 const SPR={};
+(function(){ const TP='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGBgAAAABQABpfZFQAAAAABJRU5ErkJggg=='; const D={"gerT1":[237,176],"gerT2":[369,258],"gerT3":[419,293],"gerT4":[444,329],"gerT5":[820,397],"sch1":[355,182],"sch2":[657,252],"sch3":[820,362],"mk1":[241,184],"mk2":[609,236],"mk3":[820,351],"mod1":[408,196],"mod2":[729,248],"mod3":[820,353],"mah1":[342,211],"mah2":[634,250],"mah3":[820,337],"are1":[307,193],"are2":[561,247],"are3":[820,351],"well1":[443,305],"well2":[507,454],"well3":[820,604],"smi1":[333,202],"smi2":[585,285],"smi3":[820,349],"hea1":[303,183],"hea2":[584,258],"hea3":[820,362],"twr1":[332,558],"twr2":[384,819],"twr3":[516,1034],"tem1":[378,316],"tem2":[497,472],"tem3":[660,705],"nb_hureo1":[345,328],"nb_hureo2":[447,330],"nb_hureo3":[820,310],"nb_airag1":[377,381],"nb_airag2":[488,449],"nb_airag3":[686,627],"nb_aaruul1":[374,286],"nb_aaruul2":[490,473],"nb_aaruul3":[658,703],"nb_tos1":[399,322],"nb_tos2":[491,445],"nb_tos3":[667,640],"nb_esgii1":[393,347],"nb_esgii2":[473,450],"nb_esgii3":[678,644],"nb_hushuu1":[348,430],"nb_hushuu2":[470,592],"nb_hushuu3":[695,842],"nb_ovoo1":[349,364],"nb_ovoo2":[471,529],"nb_ovoo3":[689,806],"nb_suvarga1":[333,361],"nb_suvarga2":[494,533],"nb_suvarga3":[689,831],"nb_buuz1":[396,354],"nb_buuz2":[485,509],"nb_buuz3":[662,684],"bk_range":[331,292],"bk_range2":[392,335],"bk_range3":[408,392],"bk_range4":[494,464],"bk_range5":[577,547],"bk_yard":[322,273],"bk_yard2":[365,325],"bk_yard3":[422,390],"bk_yard4":[495,432],"bk_yard5":[552,537],"hay1":[343,250],"hay2":[481,344],"hay3":[820,424],"bk_stable":[334,297],"bk_stable2":[369,337],"bk_stable3":[406,398],"bk_stable4":[459,442],"bk_stable5":[555,560],"fm_locked":[242,108],"fm_plow":[242,108],"fm_sprout":[242,108],"fm_ripe":[242,108],"pn3":[457,273]}; for(const k in D) if(!SPRDATA[k]) SPRDATA[k]=[TP,D[k][0],D[k][1]]; })();
 for(const k in SPRDATA){const im=new Image();im.src=SPRDATA[k][0];SPR[k]={img:im,iw:SPRDATA[k][1],ih:SPRDATA[k][2]};}
 
 
@@ -991,17 +992,19 @@ function resize(){
 }
 
 // ---- барилгын хэмжээ ----
-const TSET={market:['mk1','mk2','mk3'],horgo:['hay1','hay2','hay3'],modcex:['mod1','mod2','mod3'],mahcex:['mah1','mah2','mah3'],naadamring:['are1','are2','are3'],well:['well1','well2','well3'],smith:['smi1','smi2','smi3'],school:['sch1','sch2','sch3'],healer:['hea1','hea2','hea3'],tower:['twr1','twr2','twr3'],temple:['tem1','tem2','tem3'],
+var TW2={}; const TSET={market:['mk1','mk2','mk3'],horgo:['hay1','hay2','hay3'],modcex:['mod1','mod2','mod3'],mahcex:['mah1','mah2','mah3'],naadamring:['are1','are2','are3'],well:['well1','well2','well3'],smith:['smi1','smi2','smi3'],school:['sch1','sch2','sch3'],healer:['hea1','hea2','hea3'],tower:['twr1','twr2','twr3'],temple:['tem1','tem2','tem3'],
  stable:['bk_stable','bk_stable2','bk_stable3','bk_stable4','bk_stable5'],range:['bk_range','bk_range2','bk_range3','bk_range4','bk_range5'],yard:['bk_yard','bk_yard2','bk_yard3','bk_yard4','bk_yard5']};
 const tierOf = lvl => lvl<=2?1:lvl<=4?2:lvl<=6?3:lvl<=9?4:5;
-function bdims(k,lvl){
+var BSC=1.3;
+function bdims(k,lvl){ const r=bdims0(k,lvl); if(r.spr){ r.w*=BSC; r.h*=BSC; } return r; }
+function bdims0(k,lvl){
   lvl = lvl || Math.max(1,S.bld[k]);
   const b=BUILD[k];
   if(!b.spr) return {w:b.w,h:b.h,spr:null};
   const t=tierOf(lvl), isG=/^ger\d?$/.test(k);
-  if(isG&&SPR.gerT1){ const gt=k==='ger'?tierOf(lvl):1, gn='gerT'+gt, gw=b.w*SPR[gn].iw/SPR.gerT1.iw; return {w:gw,h:gw*SPR[gn].ih/SPR[gn].iw,spr:gn}; }
+  if(isG&&SPR.gerT1){ const gt=k==='ger'?tierOf(lvl):1, gn='gerT'+gt, gw=(k==='ger'&&TW2.ger)?TW2.ger[gt-1]:b.w*SPR[gn].iw/SPR.gerT1.iw; return {w:gw,h:gw*SPR[gn].ih/SPR[gn].iw,spr:gn}; }
   const TS=TSET[k]; let nm;
-  if(TS&&SPR[TS[0]]){ const n=TS.length, i=n===5?t-1:(lvl<=3?0:lvl<=6?1:Math.min(n-1,2)); nm=SPR[TS[Math.min(i,n-1)]]?TS[Math.min(i,n-1)]:TS[0]; const w0=b.w*Math.pow(SPR[nm].iw/SPR[TS[0]].iw,0.8); return {w:w0,h:w0*SPR[nm].ih/SPR[nm].iw,spr:nm}; }
+  if(TS&&SPR[TS[0]]){ const n=TS.length, i=n===5?t-1:(lvl<=3?0:lvl<=6?1:Math.min(n-1,2)); nm=SPR[TS[Math.min(i,n-1)]]?TS[Math.min(i,n-1)]:TS[0]; const w0=(TW2[k]&&TW2[k][Math.min(i,TW2[k].length-1)])||b.w*Math.pow(SPR[nm].iw/SPR[TS[0]].iw,0.8); return {w:w0,h:w0*SPR[nm].ih/SPR[nm].iw,spr:nm}; }
   nm=(!isG&&t>1&&SPR[b.spr+t])?b.spr+t:b.spr;
   const w=/^ger\d?$/.test(k)?b.w*SPR[nm].iw/SPR[b.spr].iw:b.w*(nm===b.spr?1:1+0.1*(t-1));
   return {w,h:w*SPR[nm].ih/SPR[nm].iw,spr:nm};
@@ -1226,7 +1229,7 @@ function lab(x,y,t){ ctx.font='bold 5px monospace'; ctx.textAlign='center'; ctx.
 function bar(x,y,w,p){ R(x-0.5,y-0.5,w+1,3,'#000'); R(x,y,w,2,'#3a2a1a'); R(x,y,w*clamp(p,0,1),2,'#7fc24a'); }
 
 function drawFarm(p,stage,np){
-  np=np||farmPlots();
+  np=np||farmPlots(); if(typeof fmDraw==='function'&&fmDraw(p,stage,np)) return;
   R(p.x,p.y,28,20,'#5e3e22'); R(p.x,p.y,28,1,'#9a6a3c'); R(p.x,p.y+19,28,1,'#4a2f18');
   for(let i=0;i<8;i++){
     const px=p.x+1+(i%4)*7, py=p.y+1+Math.floor(i/4)*9, on=i<np;
@@ -1240,6 +1243,7 @@ function drawFarm(p,stage,np){
 }
 function drawPen(p){
   const d=BUILD.hashaa;
+  { const _g=(typeof penGeom==='function')?penGeom({x:p.x,y:p.y,w:d.w,h:d.h}):null; if(_g){ spr('pn3',_g.X,_g.Y,_g.W); return; } }
   { const s0=SPR.pen_empty; if(s0&&s0.img.complete&&s0.img.naturalWidth){ const W=d.w*0.96, H=W*s0.ih/s0.iw; spr('pen_empty',p.x+d.w/2-W/2,p.y+d.h/2-H*0.56,W); return; } }
   R(p.x,p.y,d.w,d.h,'#a3a95a'); for(let i=0;i<d.w*d.h/14;i++){ R(p.x+((i*37)%d.w),p.y+((i*53)%d.h),1,1,i%2?'#8f9650':'#b9bd6c'); }
   const rail='#a8763a', post='#6b4423', gx=p.x+d.w/2-4, gw=8;
@@ -1426,7 +1430,7 @@ function drawEnt(e,t){
 
 // ---- амьтан, хүн ----
 function animalZone(k){
-  if(S.bld.hashaa>0){ const r=brect('hashaa'), i=Math.max(0,STALL.indexOf(k)), W3=(r.w-6)/3, H2=(r.h-6)/2; if(k) return {x:r.x+3+(i%3)*W3+1,y:r.y+3+Math.floor(i/3)*H2+1,w:W3-2,h:H2-2}; return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
+  if(S.bld.hashaa>0){ { const _g=(typeof penGeom==='function')?penGeom(brect('hashaa')):null; if(_g){ if(k) return penCell(_g,Math.max(0,STALL.indexOf(k))); return {x:_g.X+_g.W*0.05,y:_g.Y+_g.H*0.15,w:_g.W*0.9,h:_g.H*0.6}; } } const r=brect('hashaa'), i=Math.max(0,STALL.indexOf(k)), W3=(r.w-6)/3, H2=(r.h-6)/2; if(k) return {x:r.x+3+(i%3)*W3+1,y:r.y+3+Math.floor(i/3)*H2+1,w:W3-2,h:H2-2}; return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
   const g=brect('ger'); return {x:g.x-14,y:g.y+g.sh+8,w:g.w+28,h:26};
 }
 function syncEnts(mode){
@@ -2856,7 +2860,7 @@ function btBG(W2,H2,dp){
   // trampled dirt in middle
   c.fillStyle='rgba(130,95,50,.22)'; c.beginPath(); c.ellipse(W2/2,hz+(H2-hz)*0.55,W2*0.3,(H2-hz)*0.42,0,0,7); c.fill();
   // camps
-  const gr=SPR.ger, gw=Math.min(46,W2*0.2), gh=gw*gr.ih/gr.iw;
+  const gr=SPR.gerT1, gw=Math.min(46,W2*0.2), gh=gw*gr.ih/gr.iw;
   const camp=(cx,dark)=>{ [[0,0.14],[0.5,0.3],[-0.2,0.44]].forEach(([dx,fy],i)=>{ const x=cx+dx*gw*1.1-gw/2, y=hz+(H2-hz)*fy; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(x+gw/2,y+gh-1,gw*0.5,gw*0.1,0,0,7); c.fill(); c.save(); if(dark) c.filter='brightness(.45) sepia(.8) hue-rotate(-20deg)'; c.drawImage(gr.img,x,y,gw,gh); c.restore(); }); };
   camp(W2*0.11,false); camp(W2*0.89,true);
   const sulde=(x,y,col)=>{ c.fillStyle='#4a2c12'; c.fillRect(x,y-34,2,36); c.fillStyle='#e8c24a'; c.fillRect(x-1,y-38,4,5); c.fillStyle=col; c.beginPath(); c.moveTo(x+2,y-32); c.lineTo(x+16,y-27); c.lineTo(x+2,y-21); c.lineTo(x+10,y-27); c.closePath(); c.fill(); for(let i=0;i<3;i++){ c.fillRect(x+3+i*4,y-31+i*0.5,3,9-i); } };
@@ -2882,7 +2886,7 @@ function btDraw(t){
   const shk=BT.shake||0; if(shk>0) c.setTransform(dp,0,0,dp,(Math.random()-0.5)*8*shk*dp,(Math.random()-0.5)*8*shk*dp);
   if(!BT.bg){ const bk='bgm'+btMap(), s=SPR[bk];
     if(s&&s.img.complete&&s.iw){ const cb=document.createElement('canvas'); cb.width=Math.round(W2*dp); cb.height=Math.round(H2*dp); const x=cb.getContext('2d'); x.imageSmoothingEnabled=false; const sc=Math.max(cb.width/s.iw,cb.height/s.ih), dw=s.iw*sc, dh=s.ih*sc; x.drawImage(s.img,(cb.width-dw)/2,(cb.height-dh)/2,dw,dh); BT.bg=cb; }
-    else if(SPR.ger&&SPR.ger.img.complete) BT.bg=btBG(W2,H2,dp); }
+    else if(SPR.gerT1&&SPR.gerT1.img.complete&&SPR.gerT1.img.naturalWidth) BT.bg=btBG(W2,H2,dp); }
   if(BT.bg) c.drawImage(BT.bg,0,0,W2,H2); else { c.fillStyle='#6f9a42'; c.fillRect(0,0,W2,H2); }
   if(BT.wait&&!BT.vs){ const mx=Math.min(5,heroSlots()); for(let j=0;j<6;j++){ if(j<5&&BT.sel.filter(x=>!SUPP[x]).length>j) continue; if(j===5&&(BT.sel.some(x=>SUPP[x])||!Object.keys(S.heroes).some(x=>SUPP[x]))) continue; const s=btSlotXY(j,W2,H2); c.strokeStyle=j===5?'#ffd24a':j<mx?'#5aa8ff':'#777'; c.globalAlpha=j<mx?1:0.5; c.lineWidth=3; c.beginPath(); c.ellipse(s[0],s[1]+2,30,11,0,0,7); c.stroke(); c.globalAlpha=1; } }
   const list=BT.units.slice().sort((a,b)=>a.y-b.y);
@@ -4775,6 +4779,52 @@ function hudBadge(fi,W){
     b.textContent=S.pl||1; b.style.fontSize=Math.max(9,Math.round(W*0.14))+'px'; b.style.left=(fi.offsetLeft+0.820*W)+'px'; b.style.top=(fi.offsetTop+0.764*W*0.979)+'px'; }catch(e){}
 }
 
+
+/* p32/bld2.js — 96: шинэ барилгын зураг (bld2.bin) */
+var BLST=0;
+function bldLoad(){
+  if(BLST===1||BLST===3) return;
+  if(BLST===2&&Date.now()-(window.BLT||0)<5000) return;
+  BLST=1;
+  try{
+    fetch('bld2.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+      hd.forEach(x=>{ const u=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})), im=new Image(); im.src=u; SPRDATA[x[0]]=[u,x[3],x[4]]; SPR[x[0]]={img:im,iw:x[3],ih:x[4]}; });
+      bldApply(); BLST=3;
+    }).catch(()=>{ BLST=2; window.BLT=Date.now(); });
+  }catch(e){ BLST=2; window.BLT=Date.now(); }
+}
+try{ bldLoad(); }catch(e){}
+setInterval(()=>{ try{ if(BLST!==3) bldLoad(); }catch(e){} },6000);
+(function(){ const NB={hureo:'nb_hureo',airag:'nb_airag',aaruul:'nb_aaruul',tos:'nb_tos',esgii:'nb_esgii',hushuu:'nb_hushuu',ovoo:'nb_ovoo',suvarga:'nb_suvarga',buuz:'nb_buuz'}; for(const k in NB) TSET[k]=[NB[k]+'1',NB[k]+'2',NB[k]+'3']; TSET.ger=['gerT1','gerT2','gerT3','gerT4','gerT5']; })();
+function bldApply(){
+  try{
+    const TWN={"market": [24, 33, 42], "modcex": [22, 28, 34], "mahcex": [22, 28, 34], "naadamring": [28, 38, 48], "well": [14, 18, 23], "horgo": [22, 29, 38], "smith": [22, 27, 32], "school": [26, 31, 38], "healer": [24, 28, 34], "tower": [15, 19, 23], "temple": [22, 28, 36], "stable": [26, 31, 37, 43, 48], "range": [26, 31, 37, 43, 48], "yard": [26, 31, 37, 43, 48], "ger": [40, 44, 48, 52, 62], "hureo": [26, 33, 42], "airag": [16, 20, 24], "aaruul": [16, 20, 25], "tos": [18, 22, 27], "esgii": [20, 25, 30], "hushuu": [18, 23, 29], "ovoo": [18, 23, 29], "suvarga": [14, 19, 25], "buuz": [20, 25, 30]};
+    for(const k in TWN) TW2[k]=TWN[k];
+    TSET.ger=['gerT1','gerT2','gerT3','gerT4','gerT5'];
+    ['ger','ger2','ger3','ger4','ger5'].forEach(k=>{ BUILD[k].spr='gerT1'; });
+    const NB={hureo:'nb_hureo',airag:'nb_airag',aaruul:'nb_aaruul',tos:'nb_tos',esgii:'nb_esgii',hushuu:'nb_hushuu',ovoo:'nb_ovoo',suvarga:'nb_suvarga',buuz:'nb_buuz'};
+    for(const k in NB){ if(SPR[NB[k]+'1']){ TSET[k]=[NB[k]+'1',NB[k]+'2',NB[k]+'3']; BUILD[k].spr=NB[k]+'1'; } }
+    BUILD.market.spr='mk1';
+    if(SPR.fm_ripe){ BUILD.tarialan.spr='fm_ripe'; BUILD.tarialan.w=34; }
+    if($('modal')&&$('modal').style.display==='flex') fillM();
+  }catch(e){}
+}
+
+/* farm + pen (pixel art) */
+const PENC={x0:.05,x1:.96,y0:.1,y1:.8};
+function penGeom(r){ const s=SPR.pn3; if(!s||!s.img.complete||!s.img.naturalWidth) return null; const W=r.w, H=W*s.ih/s.iw; return {s,W,H,X:r.x,Y:r.y+r.h-H}; }
+function penCell(g,i){ const c=PENC, cw=(c.x1-c.x0)/3, ch=(c.y1-c.y0)/2; return {x:g.X+(c.x0+(i%3)*cw)*g.W,y:g.Y+(c.y0+Math.floor(i/3)*ch)*g.H,w:cw*g.W,h:ch*g.H}; }
+function fmDraw(p,stage,np){
+  const L=SPR.fm_locked, T=SPR[['fm_plow','fm_sprout','fm_ripe'][stage]||'fm_plow'];
+  if(!L||!T||!L.img.complete||!T.img.complete||!L.img.naturalWidth||!T.img.naturalWidth) return false;
+  const d=bdims('tarialan'), W=d.w, H=d.h, iw=L.iw, ih=L.ih;
+  ctx.drawImage(L.img,p.x,p.y,W,H);
+  const O=[0,4,1,5,2,6,3,7];
+  for(let q=0;q<Math.min(8,np);q++){ const i=O[q], c=i%4, r=(i/4)|0, sx=c*iw/4, sw=iw/4, sy=r===0?0:ih/2, sh=ih/2; ctx.drawImage(T.img,sx,sy,sw,sh,p.x+c*W/4,p.y+sy/ih*H,W/4,H*sh/ih); }
+  return true;
+}
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;
@@ -4811,7 +4861,7 @@ function hudBadge(fi,W){
 
 <script>
 (function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');document.getElementById('ld').className='';
-var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
+var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100&&window.BLST!==3&&(Date.now()-(window.DXXT0||(window.DXXT0=Date.now())))<45000){p=96;}else if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
 i.style.width=p+'%';x.textContent=t[Math.min(3,p/26|0)];},260);
 document.getElementById('goBtn').onclick=function(){try{window.DXX_SPLSTOP&&DXX_SPLSTOP();}catch(e){}var s=document.getElementById('splash');s.classList.add('off');setTimeout(function(){s.remove()},600);};
 

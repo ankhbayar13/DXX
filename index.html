@@ -3337,7 +3337,7 @@ const MENU=[
  {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
- {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['🎵','Хөгжим',"musToggle()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
+ {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
@@ -5162,6 +5162,19 @@ function voxSay(idx){ try{ const L=VOX.ids[idx]; if(!L||!L.length) return false;
   if(VOX.cur){ try{ VOX.cur.stop(); }catch(e){} VOX.cur=null; }
   let pick=L[Math.floor(Math.random()*L.length)]; if(L.length>1&&pick===VOX.last[idx]) pick=L[(L.indexOf(pick)+1)%L.length]; VOX.last[idx]=pick;
   const s=c.createBufferSource(), g=c.createGain(); s.buffer=VOX.b[pick]; g.gain.value=1; s.connect(g); g.connect(c.destination); s.start(0); VOX.cur=s; s.onended=()=>{ if(VOX.cur===s) VOX.cur=null; }; return true; }catch(e){ return false; } }
+
+
+/* p32/musvol.js — 126: хөгжмийн дууны тохируулга (Цэс → Бусад → Хөгжим) */
+MUSV.vol=1; try{ const v=parseFloat(localStorage.getItem('musv')); if(v>=0&&v<=1) MUSV.vol=v; }catch(e){}
+MUSV.g={}; MUSV.u={};
+function musUrl(k){ if(MUSV.u[k]) return MUSV.u[k]; let u=MUS[k]; try{ const s=MUS[k], i=s.indexOf(','), bin=atob(s.slice(i+1)), n=bin.length, ar=new Uint8Array(n); for(let j=0;j<n;j++) ar[j]=bin.charCodeAt(j); u=URL.createObjectURL(new Blob([ar],{type:'audio/mpeg'})); }catch(e){ u=MUS[k]; } MUSV.u[k]=u; return u; }
+function musApply(){ Object.keys(MUSV.a).forEach(k=>{ const a=MUSV.a[k], base=k==='battle'?0.55:0.4; if(MUSV.g[k]){ a.volume=1; try{ MUSV.g[k].gain.value=(base/0.4)*MUSV.vol; }catch(e){} } else a.volume=Math.min(1,base*MUSV.vol); }); }
+function musGet(k){ if(!MUSV.a[k]){ const a=new Audio(musUrl(k)); a.loop=true; a.volume=Math.min(1,(k==='battle'?0.55:0.4)*MUSV.vol); MUSV.a[k]=a;
+  try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=(k==='battle'?0.55/0.4:1)*MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g[k]=g; } }catch(e){} }
+  return MUSV.a[k]; }
+function musVolSet(v){ MUSV.vol=Math.max(0,Math.min(1,v)); try{ localStorage.setItem('musv',String(MUSV.vol)); }catch(e){} musApply(); const t=document.getElementById('mvt'); if(t) t.textContent=Math.round(MUSV.vol*100)+'%'; }
+function musVolOpen(){ let d=document.getElementById('mvol'); if(!d){ d=document.createElement('div'); d.id='mvol'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center'; d.onclick=e=>{ if(e.target===d) d.style.display='none'; }; document.body.appendChild(d); }
+  d.innerHTML='<div style="width:min(86vw,320px);background:#2b1d12;border:3px solid #c9972b;border-radius:14px;padding:16px;color:#fff;text-align:center;box-shadow:0 8px 30px #000a"><h3 style="margin:0 0 10px;color:#ffd770">🎵 Хөгжмийн дуу</h3><div id="mvt" style="font-size:26px;font-weight:900;margin-bottom:8px">'+Math.round(MUSV.vol*100)+'%</div><input id="mvr" type="range" min="0" max="100" step="5" value="'+Math.round(MUSV.vol*100)+'" style="width:100%;height:34px" oninput="musVolSet(this.value/100)"><div style="display:flex;gap:8px;margin-top:12px"><button class="btn" style="flex:1" onclick="musToggle();musVolOpen()">'+(MUSV.on?'🔇 Хаах':'🎵 Нээх')+'</button><button class="btn red" style="flex:1" onclick="document.getElementById(\'mvol\').style.display=\'none\'">Болсон</button></div></div>'; d.style.display='flex'; try{ closeM(); }catch(e){} }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

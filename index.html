@@ -318,7 +318,7 @@ const gcm=()=>Math.max(0.5,1-0.06*(S.bld.smith||0));
 const gearLv=id=>((S.gear||{})[id])||0;
 function gearMul(){ let a=0,h=0; GEAR.forEach(g=>{ const l=gearLv(g.id); if(l>0){ if(g.st==='a') a+=g.v[l-1]; else h+=g.v[l-1]; } }); return {a:a/100,h:h/100}; }
 const ITEMS={meat:{n:'Мах',e:'🥩',p:2},milk:{n:'Сүү',e:'🥛',p:1},wool:{n:'Ноос',e:'🧶',p:1.5},grain:{n:'Тариа',e:'🌾',p:1.5},wood:{n:'Мод',e:'🪵',p:1},
- airag:{n:'Айраг',ic:'ic_airag',p:6},aaruul:{n:'Ааруул',ic:'ic_cheese',p:5},tos:{n:'Тос',ic:'ic_butter',p:8},esgii:{n:'Эсгий',ic:'ic_felt',p:7},buuz:{n:'Бууз',ic:'ic_dump',p:10},
+ airag:{n:'Айраг',ic:'ic_airag',p:10},aaruul:{n:'Ааруул',ic:'ic_cheese',p:16},tos:{n:'Тос',ic:'ic_butter',p:20},esgii:{n:'Эсгий',ic:'ic_felt',p:24},buuz:{n:'Бууз',ic:'ic_dump',p:22},
  t_cav:{n:'Морьт',ic:'ic_tcav',p:0},t_arc:{n:'Нумчин',ic:'ic_tarc',p:0},t_spr:{n:'Жадчин',ic:'ic_tspr',p:0}};
 const ITEMBLD={airag:'airag',aaruul:'aaruul',tos:'tos',esgii:'esgii',buuz:'buuz'};
 const SEAS=[{k:'spring',n:'Хавар',e:'🌸'},{k:'summer',n:'Зун',e:'☀️'},{k:'autumn',n:'Намар',e:'🍂'},{k:'winter',n:'Өвөл',e:'❄️'}];
@@ -800,7 +800,7 @@ function prodTick(secs){
     st.t+=secs;
     let guard=0;
     while(st.t>=per&&guard++<2000){
-      if(st.ready>=20){ st.t=per; break; }
+      if(st.ready>=prodMax(k)){ st.t=per; break; }
       if(!canPay(b.in)){ st.t=per; break; }
       for(const x in b.in) S.res[x]-=b.in[x];
       st.ready++; st.t-=per;
@@ -2170,7 +2170,7 @@ function openM(k){
 function closeM(){ cur=null; MBACK=0; $('modal').style.display='none'; { const g=$('msg'); if(g) g.style.top=''; } }
 $('modal').addEventListener('pointerdown',e=>{ if(e.target===$('modal')) closeM(); });
 
-function menuGo(k){ if(k==='zarah') sellAll(); else openM(k); }
+function menuGo(k){ if(k==='zarah') openM('agh'); else openM(k); }
 $('menu').innerHTML=[['barilga','m_barilga','Барилга'],['mal','m_mal','Мал'],['baatar','m_baatar','Баатар'],['dain','m_dain','Дайн'],['zarah','m_zarah','Зарах']]
   .map((b,i)=>'<button onclick="menuGo(\''+b[0]+'\')" style="background-image:url('+SPRDATA['mb'+i][0]+')"><i>'+b[2]+'</i></button>').join('');
 (function(){ const st=document.createElement('style'); st.textContent='#menu{gap:2px;padding:4px 4px;background:#2c1d0f}#menu button{background-color:transparent;background-size:100% 100%;background-repeat:no-repeat;border:0!important;border-radius:0;padding:0;aspect-ratio:200/209;position:relative;display:block;image-rendering:pixelated}#menu button i{position:absolute;left:12%;right:12%;bottom:5%;height:17%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11.5px;font-weight:bold;color:#ffe9b0;text-shadow:0 1px 2px #000,0 0 3px #000;white-space:nowrap;pointer-events:none}#menu button:active{background-color:transparent;filter:brightness(1.25)}#menu button.hint{filter:drop-shadow(0 0 6px #ffe27a) brightness(1.2)}'; document.head.appendChild(st); })();
@@ -2475,7 +2475,7 @@ function sumShow(got){ const tier=g=>g.s>=5?3:g.s===4?2:g.s===3?1:0, best=Math.m
   rlRun(o,got.map(g=>g.h.id),()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(got.length>1?' many':'')+'">'+got.map((g,i)=>'<div class="bxc t'+tier(g)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(g.s>=5?'<i class="bxray2"></i>':'')+hpi(g.h.id,got.length>1?46:84,1)+'</div><b style="color:'+SKT[tier(g)].col+'">'+stars(g.s)+'</b><div class="sm">'+g.n+'</div>'+(g.nw?'<div class="sm" style="color:#9fe08a">Шинэ!</div>':(g.up?'<div class="sm" style="color:#ffd770">★ Од нэмэгдлээ → '+g.st+'★</div>':'<div class="sm">Хэлтэрхий +'+DUPSH+'</div>'))+'</div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; }); }
 function bldHTML(k){
   const d=BUILD[k]; let extra='';
-  if(k==='market') extra='<button class="btn" onclick="closeM();sellAll()">Бүгдийг зарах</button>';
+  if(k==='market') extra='<button class="btn" onclick="openM(\'agh\')">Агуулах</button>';
   else if(k==='hashaa') extra='<button class="btn" onclick="openM(\'mal\')">Мал</button>';
   else if(k==='modcex') extra='<div class="sm" style="width:100%">Ажилчид мод тайраад энд зөөнө. Модыг ойрхон газар цех тавьбал хурдан. Түвшин бүр +20% мод.</div>';
   else if(k==='mahcex') extra='<div class="sm" style="width:100%">Нядлах мал сонго. Ажилчин хашаанаас авч ирнэ.</div>'+Object.keys(BUT).map(a=>'<button class="btn" '+((S.animals[a]||0)<1?'disabled':'')+' onclick="butcher(\''+a+'\')">'+ANIMALS[a].n+' ('+(S.animals[a]||0)+') → '+Math.round(BUT[a]*(1+0.15*((S.bld.mahcex||1)-1)))+' 🥩</button>').join('');
@@ -2483,7 +2483,7 @@ function bldHTML(k){
   else if(k==='naadamring') extra='<button class="btn" onclick="openM(\'naadam\')">Наадам</button>';
   else if(k==='ger'||/^ger\d$/.test(k)) extra='<button class="btn" onclick="openM(\'barilga\')">Барилга</button><button class="btn" onclick="openM(\'fam\')">👪 Гэр бүл</button>';
   { const T=TR.find(x=>x.b===k); if(T) extra+='<div class="sm" style="width:100%">'+iconHTML(T.k,22)+' '+T.n+': <b>'+f(S.res[T.k]||0)+'</b> · Хүч '+f(trPow(T))+'<br>Бөмбөлөг дээр дарж цэргээ ав. Түвшин ахихад хүчтэй, шинэ дүртэй болно.</div>'; }
-  return '<h2>'+d.n+' · '+S.bld[k]+'-р түвшин</h2>'+upCard(k,1)+'<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" onclick="startMove(\''+k+'\')">🔀 Байрлал зөөх</button>'+extra+'</div></div>';
+  return '<h2>'+d.n+' · '+S.bld[k]+'-р түвшин</h2>'+prodPanel(k)+(k==='market'?barterHTML():'')+upCard(k,1)+'<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" onclick="startMove(\''+k+'\')">🔀 Байрлал зөөх</button>'+extra+'</div></div>';
 }
 function troopCard(){ return '<div class="card"><h3>Цэрэг</h3><div class="row" style="gap:6px;flex-wrap:wrap">'+TR.map(T=>'<div>'+iconHTML(T.k,26)+' '+T.n+' <b>'+f(S.res[T.k]||0)+'</b>'+(S.bld[T.b]?'':' <span class="sm">(барилга байхгүй)</span>')+'</div>').join('')+'</div><div class="sm" style="margin:6px 0">Цэргийн барилга бариад, бөмбөлөг дээр дарж цэргээ ав.</div><button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button></div>'; }
 function gearHTML(){
@@ -3866,9 +3866,9 @@ const AGHK=['meat','milk','wool','grain','wood','airag','aaruul','tos','esgii','
 let AGHC=0;
 function aghTotal(){ let t=0; AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n>=1) t+=Math.floor(n*ITEMS[k].p*sellMult()); }); return t; }
 function aghHTML(){
-  let h='<h2>'+ico('or_depot',36)+' Агуулах</h2>', any=false, tot=aghTotal();
+  let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>'+f(cap())+'</b> нэг бүрд'+(S.bld.horgo>0?' · Хорго Lv '+S.bld.horgo:' · Хорго барьбал +200')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
   AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n<1) return; any=true;
-    h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'</div><button class="btn" onclick="sellItem(\''+k+'\')">Зарах '+f(Math.floor(n*ITEMS[k].p*sellMult()))+' 🪙</button></div></div>'; });
+    h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" onclick="sellItem(\''+k+'\')">Зарах '+f(Math.floor(n*ITEMS[k].p*sellMult()))+' 🪙</button></div></div>'; });
   if(!any) return h+'<div class="card"><div class="sm" style="text-align:center;padding:10px 4px">Агуулах хоосон байна.<br>Хашаан дээрх бөмбөлгийг дарж мах, сүү, ноос цуглуулаад дараа нь энд зарна.</div></div>';
   const arm=AGHC&&Date.now()<AGHC;
   h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Захиалгад хэрэгтэй зүйлээ үлдээж, бусдыг нь тус тусад нь зарж болно.</div></div>';
@@ -4718,7 +4718,7 @@ function icLoad(){
   if(ICST===2&&Date.now()-(window.ICT||0)<15000) return;
   ICST=1;
   try{
-    fetch('icons.bin?v=9').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+    fetch('icons.bin?v=10').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
       const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
       hd.forEach(x=>{ if(x[3]) ICD[x[0]]=[x[3],x[4]]; o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
       IC=o; ICST=3; icApply();
@@ -4961,7 +4961,7 @@ var RADK=null, RADT=0;
 '@keyframes radIn{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}';
 document.head.appendChild(st);
 const d=document.createElement('div'); d.id='rad'; document.body.appendChild(d); })();
-const RADSP={market:['💰','Бүгдийг зарах',"radClose();sellAll()",'bag'],hureo:['⚔','Дайн',"radClose();openM('dain')",'war'],naadamring:['🏇','Наадам',"radClose();openM('naadam')",'horse'],hashaa:['🐑','Мал',"radClose();openM('mal')",'sheep']};
+const RADSP={market:['🔄','Солилцоо',"radClose();openM('bld:market')",'barter'],hureo:['⚔','Дайн',"radClose();openM('dain')",'war'],naadamring:['🏇','Наадам',"radClose();openM('naadam')",'horse'],hashaa:['🐑','Мал',"radClose();openM('mal')",'sheep']};
 function radSp(k){ if(RADSP[k]) return RADSP[k]; if(k==='ger'||/^ger\d$/.test(k)) return ['🏠','Барилга',"radClose();openM('barilga')",'ger']; return null; }
 function radBtns(k){
   const l=[], up=S.upg&&S.upg[k], mx=(S.bld[k]||0)>=MAXB;
@@ -5089,6 +5089,50 @@ function ndPlayCards(){
   return D.map(function(c){ var left=Math.max(0,3-c.a.n);
     return '<div class="card"><img src="'+SPRDATA[c.img][0]+'" style="width:100%;border-radius:8px;border:2px solid #c9972b;margin-bottom:6px;display:block"><div class="row"><div><h3><img src="'+SPRDATA['cup'+c.cup][0]+'" style="height:30px;vertical-align:middle;margin-right:4px">'+c.n+'</h3><div class="sm">'+c.d+'</div><div class="sm">Өнөөдөр: <b>'+left+'/3</b> · '+c.st(c.a)+'</div></div><button class="btn" '+(left?'':'disabled')+' onclick="'+c.fn+'">'+(left?'Оролцох':'Маргааш')+'</button></div></div>';
   }).join('');
+}
+
+
+/* p32/prodpanel.js — 122: цехийн цонх (юунаас юу гарах, материал, явц, агуулахад ав, зарах) */
+function prodPanel(k){
+  var d=BUILD[k], b=d&&d.proc; if(!b) return '';
+  var st=(S.proc&&S.proc[k])||{t:0,ready:0}, L=S.bld[k]||1, per=b.t/(1+0.25*(L-1)), out=ITEMS[b.out]||{n:b.out,p:0}, ok=canPay(b.in), inV=0;
+  var inn=Object.keys(b.in).map(function(x){ var need=b.in[x], have=Math.floor(S.res[x]||0), g=have>=need; inV+=(x==='gold'?need:(ITEMS[x]?ITEMS[x].p:0)*need);
+    return '<span style="color:'+(g?'#8fe39a':'#ff9a8a')+'">'+(x==='gold'?'🪙':ITEMS[x].n)+' '+need+' <span class="sm">('+have+')</span></span>'; }).join(' + ');
+  var ready=Math.floor(st.ready||0), pr=Math.round(((st.t||0)/per)*100); if(pr>100) pr=100;
+  var stat=ready>=prodMax(k)?'<span style="color:#ffd770">Дүүрсэн, агуулахад ав</span>':(ok?'<span style="color:#8fe39a">Ажиллаж байна</span>':'<span style="color:#ff9a8a">Материал дутуу, зогссон</span>');
+  var h='<div class="card"><h3 class="rb">Үйлдвэрлэл</h3><div class="sm" style="text-align:center">'+inn+' → '+iconHTML(b.out,22)+' <b>1 '+out.n+'</b></div>';
+  if(out.p>0) h+='<div class="sm" style="text-align:center">Үнэ: <b>'+out.p+'</b> 🪙 · Орц: '+Math.round(inV)+' 🪙 · Ашиг: <b style="color:#9be07a">+'+Math.round(out.p-inV)+'</b></div>';
+  h+='<div class="sm" style="text-align:center;margin-top:3px">1 ширхэг: <b>'+fmtT(per)+'</b> · '+stat+'</div>';
+  h+='<div style="height:8px;background:#1a0f06;border:1px solid #6b4a1e;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+pr+'%;background:#d9a431"></div></div>';
+  h+='<div class="row"><div class="sm">Бэлэн: <b>'+ready+'/'+prodMax(k)+'</b>'+(out.p>0?' · Агуулахад: <b>'+Math.floor(S.res[b.out]||0)+'</b>':'')+'</div><div style="display:flex;gap:6px"><button class="btn" '+(ready<1?'disabled':'')+' onclick="collectProd(\''+k+'\')">Агуулахад ав</button>'+(out.p>0?'<button class="btn" '+((S.res[b.out]||0)<1?'disabled':'')+' onclick="sellItem(\''+b.out+'\')">Зарах</button>':'')+'</div></div></div>';
+  return h;
+}
+
+
+/* p32/market2.js — 123: цехийн багтаамж, Захын солилцоо (30% алдагдал), Зарах товч = Агуулах */
+function prodMax(k){ return 10+4*(S.bld[k]||1); }
+var BART={f:'meat',t:'wood'}, BRK=['meat','milk','wool','grain','wood'];
+function brLoss(){ return Math.max(0.1,0.3-0.015*((S.bld.market||1)-1)); }
+function brGet(n){ return Math.floor(n*ITEMS[BART.f].p*(1-brLoss())/ITEMS[BART.t].p); }
+function brSet(w,k){ BART[w]=k; refresh(); }
+function brDo(n){
+  var f=BART.f, t=BART.t; if(f===t){ say('Өөр материал сонго'); return; }
+  var have=Math.floor(S.res[f]||0); if(n==='all') n=have; n=Math.min(n,have); if(n<1){ say('Материал дутуу'); return; }
+  var get=brGet(n), room=Math.floor(cap()-(S.res[t]||0));
+  if(room<1){ say('Агуулах дүүрэн! Хорго барь.'); return; }
+  if(get>room){ get=room; n=Math.min(have,Math.ceil(get*ITEMS[t].p/(ITEMS[f].p*(1-brLoss())))); }
+  if(get<1){ say('Хэт бага'); return; }
+  S.res[f]-=n; S.res[t]=(S.res[t]||0)+get; say(n+' '+ITEMS[f].n+' → '+get+' '+ITEMS[t].n); try{ sfx('coin'); }catch(e){} refresh();
+}
+function barterHTML(){
+  if(!BART||BART.f===BART.t) BART.t=BRK.find(function(x){return x!==BART.f;});
+  function chips(w){ return BRK.map(function(k){ var on=BART[w]===k; return '<button class="btn" style="flex:1 1 0;min-width:0;padding:2px 0;opacity:'+(on?1:0.5)+';'+(on?'outline:2px solid #ffd770;':'')+'" onclick="brSet(\''+w+'\',\''+k+'\')">'+iconHTML(k,22)+'</button>'; }).join(' '); }
+  var have=Math.floor(S.res[BART.f]||0), n10=brGet(10);
+  return '<div class="card"><h3 class="rb">Солилцоо</h3><div class="sm" style="text-align:center">Хураамж <b>'+Math.round(brLoss()*100)+'%</b> · Захын түвшин өсөхөд буурна</div>'
+   +'<div class="sm" style="margin-top:6px">Өгөх: '+iconHTML(BART.f,20)+' <b>'+ITEMS[BART.f].n+'</b> <span class="sm">('+have+')</span></div><div style="display:flex;gap:3px;margin:3px 0">'+chips('f')+'</div>'
+   +'<div class="sm">Авах: '+iconHTML(BART.t,20)+' <b>'+ITEMS[BART.t].n+'</b> <span class="sm">('+Math.floor(S.res[BART.t]||0)+')</span></div><div style="display:flex;gap:3px;margin:3px 0">'+chips('t')+'</div>'
+   +'<div class="sm" style="text-align:center;margin:4px 0">1. Дээр өгөх, 2. доор авах материалаа сонго. 3. Хэдийг солихоо дар:</div>'
+   +'<div style="display:flex;gap:6px;justify-content:center"><button class="btn" '+(have<10?'disabled':'')+' onclick="brDo(10)">10 '+ITEMS[BART.f].n+'<br><span class="sm">→ '+brGet(10)+' '+ITEMS[BART.t].n+'</span></button><button class="btn" '+(have<50?'disabled':'')+' onclick="brDo(50)">50 '+ITEMS[BART.f].n+'<br><span class="sm">→ '+brGet(50)+' '+ITEMS[BART.t].n+'</span></button><button class="btn" '+(have<1?'disabled':'')+' onclick="brDo(\'all\')">Бүгд ('+have+')<br><span class="sm">→ '+brGet(have)+' '+ITEMS[BART.t].n+'</span></button></div></div>';
 }
 
 </script><script>(function(){

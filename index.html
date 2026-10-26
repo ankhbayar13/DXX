@@ -1963,8 +1963,8 @@ function updateHUD(){
   $('res').innerHTML=cells.map(([k])=>'<div class="rc"><div class="ri">'+(RICON[k]?'<img src="'+RICON[k]+'">':k==='wood'?'<span class="em">🪵</span>':'<b class="coin'+(k==='alt'?' alt':'')+'">'+(k==='alt'?'А':'🪙')+'</b>')+'</div><div class="rv"><span>'+cn(S.res[k])+'</span>'+(r[k]>0?'<small>+'+(r[k]<10?r[k].toFixed(1):Math.round(r[k]))+'/м</small>':'')+'</div></div>').join('');
   const av=$('avi'), pk=S.prof.img?('u'+S.prof.img.length):(S.prof.sp||'npc1');
   if(av&&av.dataset.k!==pk){ av.src=S.prof.img||(SPRDATA[S.prof.sp]||SPRDATA.npc1)[0]; av.dataset.k=pk; av.className=S.prof.img?'ph':''; }
-  try{ const a=av&&av.parentNode, L=S.pl||1, ft=L<5?0:L<10?1:L<20?2:L<30?3:4, fh=PFH[ft]; if(a&&a.parentNode){ let fi=$('avf'); if(!fi){ fi=document.createElement('img'); fi.id='avf'; fi.style.cssText='position:absolute;pointer-events:none;z-index:3'; a.parentNode.style.position='relative'; a.parentNode.appendChild(fi); }
-    const W=44/(2*fh[2])*1.04; a.style.border='0'; a.style.width=a.style.height='44px'; if(fi.dataset.k!==String(ft)){ fi.src=PFR[ft]; fi.dataset.k=ft; } fi.style.width=W+'px'; fi.style.left=(a.offsetLeft+22-fh[0]*W)+'px'; fi.style.top=(a.offsetTop+22-fh[1]*W*1.0)+'px'; a.style.overflow='hidden'; } }catch(e){}
+  try{ const a=av&&av.parentNode, L=S.pl||1, ft=L<5?0:L<10?1:L<20?2:L<30?3:4, fh=(typeof HUDN!=='undefined'&&HUDN)?HUDF:PFH[ft]; if(a&&a.parentNode){ let fi=$('avf'); if(!fi){ fi=document.createElement('img'); fi.id='avf'; fi.style.cssText='position:absolute;pointer-events:none;z-index:3'; a.parentNode.style.position='relative'; a.parentNode.appendChild(fi); }
+    const W=44/(2*fh[2])*1.04; a.style.border='0'; a.style.width=a.style.height='44px'; const _hk=(typeof HUDN!=='undefined'&&HUDN)?'n'+ft:String(ft); if(fi.dataset.k!==_hk){ fi.src=(typeof HUDN!=='undefined'&&HUDN)?HUDN.ring:PFR[ft]; fi.dataset.k=_hk; } fi.style.width=W+'px'; fi.style.left=(a.offsetLeft+22-fh[0]*W)+'px'; fi.style.top=(a.offsetTop+22-fh[1]*W*1.0)+'px'; a.style.overflow='hidden'; try{ hudBadge(fi,W); }catch(e){} } }catch(e){}
   $('pname').textContent=S.prof.name||'Хаан';
   $('pw').textContent=f(totalPower());
   $('plv').textContent=S.bld.ger;
@@ -2094,6 +2094,7 @@ function modalContent(k){
   if(k==='gear') return gearHTML();
   if(k==='orders') return ordersHTML();
   if(k==='naadam') return naadamHTML();
+  if(k==='ndlb') return ndLbHTML();
   if(k==='agh') return aghHTML();
   if(k&&k.startsWith('zone:')) return zoneHTML(k.slice(5));
   if(k==='profile') return profHTML();
@@ -2129,6 +2130,7 @@ function modalContent(k){
   if(k==='summon') return summonHTML();
   if(k==='relics') return '<h2>Дурсгал</h2><button class="btn" onclick="openM(\'baatar\')">‹ Баатар</button>'+relicsHTML();
   if(k==='naadam') return naadamHTML();
+  if(k==='ndlb') return ndLbHTML();
   if(k==='dain'){
     const P=totalPower(), fb=facBonus(), rm=relicMul();
     let h='<h2>Дайн</h2>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Дурсгал: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
@@ -2654,7 +2656,7 @@ function ntTrain(k){ const t=NTRAIN.find(x=>x.k===k); S.ntT=S.ntT||{}; if(!t||(S
 function naadamHTML(){
   const now=Date.now(); S.ntT=S.ntT||{};
   let h='<h2>'+ico('nd_khadag',34)+' Наадам</h2><div class="card"><div class="sm">Эхлээд бэлтгэл хийж түвшингээ өсгө, дараа нь тэмцээнд оролц. Бэлтгэл өндөр байх тусам түрүүлэх магадлал нэмэгдэнэ. Түрүүлсэн: '+ico('nd_cup',22)+' '+S.ndw+'</div></div>';
-  h+='<h3 style="margin:8px 0 4px">🎮 Өөрөө тогло</h3>'+archCardHTML()+raceCardHTML()+wrestCardHTML();
+  h+='<button class="btn" style="width:100%;margin:6px 0 2px" onclick="openM(\'ndlb\')">🏆 Наадмын жагсаалт</button><h3 style="margin:8px 0 4px">🎮 Өөрөө тогло</h3>'+archCardHTML()+raceCardHTML()+wrestCardHTML();
   h+='<h3 style="margin:8px 0 4px">Бэлтгэл</h3>';
   NTRAIN.forEach(t=>{ const l=ntL(t.k), c=ntCost(t), left=Math.max(0,Math.ceil(((S.ntT[t.k]||0)-now)/1000)), full=l>=10, ok=Object.keys(c).every(r=>(S.res[r]||0)>=c[r]);
     h+='<div class="card"><div class="row"><div><b>'+t.e+' '+t.n+'</b> <span class="sm">Lv '+l+'/10</span><div class="sm">'+t.d+' · '+Object.keys(c).map(r=>c[r]+' '+RN[r]).join(', ')+(left?' · ⏳'+Math.floor(left/60)+':'+String(left%60).padStart(2,'0'):'')+'</div></div><button class="btn" '+(full||left||!ok?'disabled':'')+' onclick="ntTrain(\''+t.k+'\')">'+(full?'Дээд':'Бэлтгэх')+'</button></div></div>'; });
@@ -3545,7 +3547,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
     const {F,db}=FBM; const d=acPack(JSON.stringify(S));
     await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); lsSet('dxx_own',CL.uid);
     let nm=(S.prof&&S.prof.name)||'Хаан'; nm=String(nm).slice(0,14);
-    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap()});
+    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:Date.now(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap(),na:ndMine().na,nr:ndMine().nr,nw:ndMine().nw});
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
   }catch(e){ if(!quiet) say('Хадгалж чадсангүй'); CL.err=(e&&(e.code||e.message))||''; }
   CL.busy=0; if(cur==='cloud') fillMA(); try{ nameSync(); }catch(e){} return ok; }
@@ -3791,7 +3793,7 @@ setInterval(chPop,1200);
 let ARC=null;
 function archInfo(){ const d=new Date().toDateString(); if(!S.arc||S.arc.d!==d) S.arc={d:d,n:0,alt:0,best:(S.arc&&S.arc.best)||0}; return S.arc; }
 function archCardHTML(){ const a=archInfo(), left=Math.max(0,3-a.n);
-  return '<div class="card"><h3 class="rb">🏹 Сур харваа</h3><div class="sm" style="text-align:center">Сур зүүн баруун хөдөлнө. Сум голын шугамаар нисдэг тул сур голд <b>очих гэж байхад</b> товш. 5 сум, дээд оноо 50. Харвааны сур Lv '+ntL('arch')+' (өндөр байх тусам сур том).</div>'+
+  return '<div class="card"><h3 class="rb">'+icTr(0,'🏹')+' Сур харваа</h3><div class="sm" style="text-align:center">Сур зүүн баруун хөдөлнө. Сум голын шугамаар нисдэг тул сур голд <b>очих гэж байхад</b> товш. 5 сум, дээд оноо 50. Харвааны сур Lv '+ntL('arch')+' (өндөр байх тусам сур том).</div>'+
     '<div class="row" style="margin-top:6px"><div class="sm">Өнөөдөр: <b>'+left+'/3</b> оролдлого · Шилдэг: <b>'+(a.best||0)+'</b>/50</div><button class="btn" '+(left?'':'disabled')+' onclick="archOpen()">'+(left?'Тоглох':'Маргааш')+'</button></div></div>'; }
 function archOpen(){ const a=archInfo(); if(a.n>=3){ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); return; }
   closeM(); a.n++; save();
@@ -3833,10 +3835,10 @@ function archDrawOld(t){ const A=ARC, c=A.c, dp=A.dp, w=A.w, h=A.h; c.setTransfo
   if(A.st==='pop'){ c.font='bold 34px sans-serif'; const y=ty-R-20-A.pt*18; c.fillStyle=A.sc[A.sc.length-1]>=8?'#ffd35a':A.sc[A.sc.length-1]>0?'#fff':'#ff9a7a'; c.strokeText(A.pop,w/2,y); c.fillText(A.pop,w/2,y); } }
 function archFinish(){ const A=ARC, a=archInfo(), tot=A.sc.reduce((x,y)=>x+y,0), nr=S.bld.naadamring||0;
   const gold=Math.round(tot*10*(1+0.2*nr)*(1+0.05*A.lv)); S.res.gold+=gold; let alt=0; if(tot>=45&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; }
-  const nb=tot>(a.best||0); if(nb) a.best=tot; qh('nd',1); try{ rkAdd(2,'Сур харваа'); }catch(e){} save(); sfx(tot>=30?'win':'lvl');
+  const nb=tot>(a.best||0); if(nb) a.best=tot; qh('nd',1); try{ rkAdd(2,'Сур харваа'); }catch(e){} save(); try{ clPush(true); }catch(e){} sfx(tot>=30?'win':'lvl');
   const grade=tot>=45?'Мэргэн!':tot>=35?'Гайхалтай!':tot>=25?'Сайн!':tot>=12?'Дунд':'Дахин оролд';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
-  r.innerHTML='<h2>🏹 '+grade+'</h2><div class="big">'+tot+' / 50</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb&&tot>0?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
+  r.innerHTML=icRes('a',tot>=40?3:tot>=25?2:tot>=12?1:0)+'<h2>🏹 '+grade+'</h2><div class="big">'+tot+' / 50</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb&&tot>0?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
   A.o.appendChild(r); r.querySelector('#archexit').onclick=archClose; const ag=r.querySelector('#archagain'); if(ag) ag.onclick=()=>{ const o=A.o; cancelAnimationFrame(A.raf); ARC=null; o.remove(); archOpen(); }; }
 
 
@@ -3867,7 +3869,7 @@ let RCE=null;
 const RCEC=['#e0483a','#3a7bd5','#e8c23a','#9c5bd6','#45b36b'];   // эгнээний өнгө
 function raceInfo(){ const d=new Date().toDateString(); if(!S.rce||S.rce.d!==d) S.rce={d:d,n:0,alt:0,best:(S.rce&&S.rce.best)||0}; return S.rce; }
 function raceCardHTML(){ const a=raceInfo(), left=Math.max(0,3-a.n);
-  return '<div class="card"><h3 class="rb">🐎 Морин уралдаа</h3><div class="sm" style="text-align:center">Морио <b>хурдан товшиж</b> давхиул. Эрч (ногоон зурвас) дуусвал морь ядарч удаашрана. Төгсгөлийн шулуун дээр эрч бага зарцуулна, тэнд бүх хүчээ гарга. 5 морь, түрүүлбэл Алт. Морины хурд Lv '+ntL('horseS')+', тэсвэр Lv '+ntL('horseL')+'.</div>'+
+  return '<div class="card"><h3 class="rb">'+icTr(1,'🐎')+' Морин уралдаа</h3><div class="sm" style="text-align:center">Морио <b>хурдан товшиж</b> давхиул. Эрч (ногоон зурвас) дуусвал морь ядарч удаашрана. Төгсгөлийн шулуун дээр эрч бага зарцуулна, тэнд бүх хүчээ гарга. 5 морь, түрүүлбэл Алт. Морины хурд Lv '+ntL('horseS')+', тэсвэр Lv '+ntL('horseL')+'.</div>'+
     '<div class="row" style="margin-top:6px"><div class="sm">Өнөөдөр: <b>'+left+'/3</b> оролдлого · Шилдэг: <b>'+(a.best?a.best.toFixed(1)+'с':'-')+'</b></div><button class="btn" '+(left?'':'disabled')+' onclick="raceOpen()">'+(left?'Уралдах':'Маргааш')+'</button></div></div>'; }
 function raceOpen(){ const a=raceInfo(); if(a.n>=3){ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); return; }
   closeM(); a.n++; save();
@@ -3942,10 +3944,10 @@ function raceDrawOld(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h; c.setTransfo
   if(R.st==='fin'&&!R.done){ c.font='bold 40px sans-serif'; c.fillStyle=R.place<=3?'#ffd35a':'#fff'; const tx=R.place+'-р байр'; c.lineWidth=5; c.strokeText(tx,w/2,h*0.5); c.fillText(tx,w/2,h*0.5); } }
 function raceFinish(){ const R=RCE, a=raceInfo(), pl=R.place, tm=R.hs[R.me].fin, nr=S.bld.naadamring||0;
   const gold=Math.round([180,110,70,40,20][pl-1]*(1+0.2*nr)*(1+0.05*R.lvS)); S.res.gold+=gold; let alt=0; if(pl===1&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; }
-  const nb=(!a.best||tm<a.best); if(nb) a.best=tm; qh('nd',1); try{ rkAdd(2,'Морин уралдаа'); }catch(e){} save();
+  const nb=(!a.best||tm<a.best); if(nb) a.best=tm; qh('nd',1); try{ rkAdd(2,'Морин уралдаа'); }catch(e){} save(); try{ clPush(true); }catch(e){}
   const title=pl===1?'Түрүү!':pl===2?'Шүүс!':pl===3?'Гуравдугаар':pl+'-р байр';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
-  r.innerHTML='<h2>🐎 '+title+'</h2><div class="big">'+pl+' / 5</div><div>Хугацаа '+tm.toFixed(1)+'с</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
+  r.innerHTML=icRes('r',pl===1?3:pl===2?2:pl===3?1:0)+'<h2>🐎 '+title+'</h2><div class="big">'+pl+' / 5</div><div>Хугацаа '+tm.toFixed(1)+'с</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
   R.o.appendChild(r); r.querySelector('#archexit').onclick=raceClose; const ag=r.querySelector('#archagain'); if(ag) ag.onclick=()=>{ const o=R.o; cancelAnimationFrame(R.raf); RCE=null; o.remove(); raceOpen(); }; }
 
 
@@ -4011,7 +4013,7 @@ function mgDiff(){ return Math.max(0,Math.min(10,Math.floor((S.bld.ger||1)*0.8+(
 const WRN=['Шинэ бөх','Харцага','Начин','Заан','Арслан','Аварга'], WRNM=['Дорж','Бат','Болд','Ганаа','Мөнх','Тэмүүлэн','Сүх','Баяр'];
 function wrestInfo(){ const d=new Date().toDateString(); if(!S.wrs||S.wrs.d!==d) S.wrs={d:d,n:0,alt:0,tw:(S.wrs&&S.wrs.tw)||0}; return S.wrs; }
 function wrestCardHTML(){ const a=wrestInfo(), left=Math.max(0,3-a.n);
-  return '<div class="card"><h3 class="rb">🤼 Бөхийн барилдаан</h3><div class="sm" style="text-align:center">Өрсөлдөгч ямар зүг рүү түлхэж байгааг <b>сум</b> заана. <b>Тэр зүгийн товчийг хурдан дар</b>. Саарал ✖ сум бол хуурмаг, <b>дарж болохгүй</b>. 2 унагаавал ялна. Бөхийн хүч Lv '+ntL('wrest')+' (өндөр байх тусам цаг их).</div>'+
+  return '<div class="card"><h3 class="rb">'+icTr(2,'🤼')+' Бөхийн барилдаан</h3><div class="sm" style="text-align:center">Өрсөлдөгч ямар зүг рүү түлхэж байгааг <b>сум</b> заана. <b>Тэр зүгийн товчийг хурдан дар</b>. Саарал ✖ сум бол хуурмаг, <b>дарж болохгүй</b>. 2 унагаавал ялна. Бөхийн хүч Lv '+ntL('wrest')+' (өндөр байх тусам цаг их).</div>'+
     '<div class="row" style="margin-top:6px"><div class="sm">Өнөөдөр: <b>'+left+'/3</b> оролдлого · Нийт ялалт: <b>'+(a.tw||0)+'</b></div><button class="btn" '+(left?'':'disabled')+' onclick="wrestOpen()">'+(left?'Барилдах':'Маргааш')+'</button></div></div>'; }
 function wrestOpen(){ const a=wrestInfo(); if(a.n>=3){ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); return; }
   closeM(); a.n++; save();
@@ -4145,10 +4147,10 @@ function wrestDrawN(t){ const R=WRS, c=R.c, dp=R.dp, w=R.w, h=R.h, G=wrestGeo(),
   if(R.mt>0&&R.msg&&R.st!=='count'){ c.font='bold '+(R.st==='fall'?46:30)+'px sans-serif'; c.fillStyle=R.fcol||'#fff'; c.lineWidth=5; c.strokeStyle='#000a'; const my=R.st==='fall'?acy0+12:ay-ar*0.45; c.strokeText(R.msg,w/2,my); c.fillText(R.msg,w/2,my); } }
 function wrestFinish(){ const R=WRS, a=wrestInfo(), W=R.sc[0], L=R.sc[1], nr=S.bld.naadamring||0, win=W>=2;
   const base=win?(L===0?300:200):(W===1?100:40), gold=Math.round(base*(1+0.2*nr)*(1+0.05*R.lv)); S.res.gold+=gold; let alt=0; if(win&&L===0&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; } if(win) a.tw=(a.tw||0)+1;
-  qh('nd',1); try{ rkAdd(2,'Бөхийн барилдаан'); }catch(e){} save();
+  qh('nd',1); try{ rkAdd(2,'Бөхийн барилдаан'); }catch(e){} save(); try{ clPush(true); }catch(e){}
   const title=win?(L===0?'Аварга!':'Ялав!'):'Ялагдлаа';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
-  r.innerHTML='<h2>🤼 '+title+'</h2><div class="big">'+W+' – '+L+'</div><div>'+(win?'Та '+R.foe+'-г ялав':R.foe+' ялав')+'</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
+  r.innerHTML=icRes('w',win?(L===0?3:2):(W===1?1:0))+'<h2>🤼 '+title+'</h2><div class="big">'+W+' – '+L+'</div><div>'+(win?'Та '+R.foe+'-г ялав':R.foe+' ялав')+'</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
   R.o.appendChild(r); r.querySelector('#archexit').onclick=wrestClose; const ag=r.querySelector('#archagain'); if(ag) ag.onclick=()=>{ const o=R.o; cancelAnimationFrame(R.raf); WRS=null; o.remove(); wrestOpen(); }; }
 
 
@@ -4688,6 +4690,90 @@ function raceDrawN(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h, N=NDR; c.setTr
 // ---------- бөх ----------
 function wrestDraw(t){ try{ ndLoad(); }catch(e){} return NDR?wrestDrawN(t):wrestDrawOld(t); }
 function ndWr(c,im,x,fy,k,foe){ const W=im.width*k, H=im.height*k; c.save(); c.translate(x,fy); if(foe) c.scale(-1,1); c.drawImage(im,-W,-H,W,H); c.restore(); }
+
+
+/* p32/icons.js — 93: ресурсын дүрс, медаль, цом (icons.bin) */
+var IC=null, ICST=0;
+function icLoad(){
+  if(IC||ICST===1) return;
+  if(ICST===2&&Date.now()-(window.ICT||0)<15000) return;
+  ICST=1;
+  try{
+    fetch('icons.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
+      hd.forEach(x=>{ o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
+      IC=o; ICST=3; icApply();
+    }).catch(()=>{ ICST=2; window.ICT=Date.now(); });
+  }catch(e){ ICST=2; window.ICT=Date.now(); }
+}
+setTimeout(()=>{ try{ icLoad(); }catch(e){} },4500);
+function icApply(){
+  try{
+    ['meat','milk','wool','grain','wood','gold','alt'].forEach(k=>{ if(IC['r_'+k]) RICON[k]=IC['r_'+k]; });
+    ['meat','milk','wool','grain','wood'].forEach(k=>{ if(IC['r_'+k]&&ITEMS[k]){ SPRDATA['nd_'+k]=[IC['r_'+k]]; ITEMS[k].ic='nd_'+k; } });
+    updateHUD();
+    if($('modal')&&$('modal').style.display==='flex') fillM();
+  }catch(e){}
+}
+const ICMED={a:[1,5,9],r:[0,4,11],w:[3,6,10]}, ICTRO={a:0,r:1,w:2};
+function icRes(g,tier){ if(!IC||tier<1) return ''; const k=tier>=3?'t'+ICTRO[g]:'m'+ICMED[g][tier-1], hh=tier>=3?132:96;
+  return '<div style="text-align:center;margin:-2px 0 4px"><img src="'+IC[k]+'" style="height:'+hh+'px;filter:drop-shadow(0 4px 6px #0009)"></div>'; }
+function icTr(n,fb){ return IC&&IC['t'+n]?'<img src="'+IC['t'+n]+'" style="height:36px;vertical-align:middle;margin-right:2px">':fb; }
+
+
+/* p32/ndlb.js — 94: Наадмын жагсаалт (Firebase lb дахь na/nr/nw талбар) */
+var NDLB={a:null,r:null,w:null}, NDLBT=0, NDTAB='a';
+function ndMine(){ try{ const A=(S.arc&&S.arc.best)||0, Rr=(S.rce&&S.rce.best)||0, W=(S.wrs&&S.wrs.tw)||0; return {na:Math.floor(A),nr:Rr>0?Math.round(Rr*10):99999,nw:Math.floor(W)}; }catch(e){ return {na:0,nr:99999,nw:0}; } }
+async function ndLbLoad(){
+  if(!CL.ok){ say('Интернет холбогдоогүй'); return; }
+  try{ const {F,db}=FBM, out={};
+    for(const [k,f,dir] of [['a','na','desc'],['r','nr','asc'],['w','nw','desc']]){
+      const s=await F.getDocs(F.query(F.collection(db,'lb'),F.orderBy(f,dir),F.limit(40))), seen={};
+      out[k]=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>{ if(!x.r) return false; const v=x[f]; if(!(f==='nr'?v>0&&v<99999:v>0)) return false; const nk=String(x.n||'').trim().toLowerCase(); if(seen[nk]) return false; seen[nk]=1; return true; }).slice(0,15); }
+    NDLB=out; NDLBT=Date.now(); if(cur==='ndlb') fillM();
+  }catch(e){ NDLBT=-1; say('Жагсаалт ачаалж чадсангүй'); if(cur==='ndlb') fillM(); } }
+function ndTab(t){ NDTAB=t; fillM(); }
+function ndLbHTML(){
+  if(!NDLBT&&CL.ok){ NDLBT=-2; ndLbLoad(); }
+  const tabs=[['a','🏹 Харвалт'],['r','🐎 Уралдаан'],['w','🤼 Бөх']], me=ndMine();
+  let h='<h2>🏆 Наадмын жагсаалт</h2><div style="display:flex;gap:5px;margin-bottom:8px">'+tabs.map(x=>'<button class="btn'+(NDTAB===x[0]?' red':'')+'" style="flex:1;padding:6px 2px;font-size:12px" onclick="ndTab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
+  const mv=NDTAB==='a'?(me.na>0?me.na+' / 50':'-'):NDTAB==='r'?(me.nr<99999?(me.nr/10).toFixed(1)+'с':'-'):(me.nw>0?me.nw+' ялалт':'-');
+  h+='<div class="card row"><div class="sm">Таны шилдэг:</div><b style="color:#ffd770">'+mv+'</b></div>';
+  if(!CL.ok) return h+'<div class="card"><div class="sm">Интернэт холбогдоогүй байна. Cloud-д нэвтэрсний дараа жагсаалт харагдана.</div></div><button class="btn" onclick="openM(\'naadam\')">← Наадам</button>';
+  if(!CL.email) h+='<div class="card sm" style="color:#ffd770">Жагсаалтад орохын тулд ☁ Cloud цэсэнд бүртгүүлнэ үү.</div>';
+  const L=NDLB[NDTAB];
+  if(NDLBT===-1) h+='<div class="card"><button class="btn" onclick="NDLBT=0;fillM()">Дахин оролдох</button></div>';
+  else if(!L) h+='<div class="card"><div class="sm" style="text-align:center">Ачаалж байна…</div></div>';
+  else if(!L.length) h+='<div class="card"><div class="sm" style="text-align:center">Одоогоор хэн ч байхгүй. Түрүүлж орох боломж танд байна!</div></div>';
+  else L.forEach((x,i)=>{ const v=NDTAB==='a'?x.na+' / 50':NDTAB==='r'?(x.nr/10).toFixed(1)+'с':x.nw+' ялалт', mk=i<3?['🥇','🥈','🥉'][i]:(i+1)+'.';
+    h+='<div class="card row" style="'+(x.id===CL.uid?'border-color:#ffd770':'')+'"><div><b>'+mk+'</b> '+esc2(x.n||'Хаан')+' <span class="sm">Lv '+(x.l||1)+'</span></div><b style="color:#ffd770">'+v+'</b></div>'; });
+  h+='<div style="display:flex;gap:6px;margin-top:6px"><button class="btn" style="flex:1" onclick="NDLBT=0;fillM()">⟳ Шинэчлэх</button><button class="btn red" style="flex:1" onclick="openM(\'naadam\')">← Наадам</button></div>';
+  return h; }
+
+
+/* p32/hud.js — 95: дээд HUD-ийн шинэ аватар хүрээ, ресурсын мөр (hud.bin) */
+var HUDN=null, HUDST=0, HUDF=[0.4943,0.4855,0.3206,0.979];
+function hudLoad(){
+  if(HUDN||HUDST===1) return;
+  if(HUDST===2&&Date.now()-(window.HUDT||0)<15000) return;
+  HUDST=1;
+  try{
+    fetch('hud.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
+      hd.forEach(x=>{ o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
+      HUDN=o; HUDST=3;
+      const st=document.createElement('style'); st.id='css95';
+      st.textContent='body.hudn #res{border-image:url('+o.rbar+') 0 200 0 200 fill/0 40px 0 40px stretch!important;padding-left:16px!important;padding-right:16px!important}';
+      document.head.appendChild(st); document.body.classList.add('hudn');
+      try{ const fi=$('avf'); if(fi){ fi.dataset.k=''; } updateHUD(); }catch(e){}
+    }).catch(()=>{ HUDST=2; window.HUDT=Date.now(); });
+  }catch(e){ HUDST=2; window.HUDT=Date.now(); }
+}
+setTimeout(()=>{ try{ hudLoad(); }catch(e){} },3000);
+function hudBadge(fi,W){
+  try{ if(!HUDN||!fi) return; let b=$('avl'); if(!b){ b=document.createElement('b'); b.id='avl'; b.style.cssText='position:absolute;pointer-events:none;z-index:4;color:#fff;font:bold 11px sans-serif;text-shadow:0 1px 2px #000,0 0 3px #000;transform:translate(-50%,-50%);line-height:1'; fi.parentNode.appendChild(b); }
+    b.textContent=S.pl||1; b.style.fontSize=Math.max(9,Math.round(W*0.14))+'px'; b.style.left=(fi.offsetLeft+0.820*W)+'px'; b.style.top=(fi.offsetTop+0.764*W*0.979)+'px'; }catch(e){}
+}
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

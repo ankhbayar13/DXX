@@ -6267,6 +6267,28 @@ function weakBox(P,need){
 })();
 
 
+// ===== тактик сонгох алхмыг авч, Тагнуул + Дайрах =====
+(function(){
+  const _s=wmSelSheet;
+  wmSelSheet=function(id){
+    _s(id);
+    try{
+      const sh=$('wmsheet'); const e=wmEnt(id); if(!sh||!e) return;
+      const btn=[...sh.querySelectorAll('button')].find(b=>(b.getAttribute('onclick')||'').indexOf('wmTacSheet')>=0);
+      if(!btn) return;
+      const box=document.createElement('div'); box.style.cssText='margin:8px 0 2px;text-align:center';
+      if(wmScouted(e)) box.innerHTML='<div class="sm">🔍 Дайсан: <b>'+WM_TYN[wmEty(e)]+'</b> цэрэг түлхүү</div>';
+      else box.innerHTML='<button class="btn" style="width:100%" onclick="wmScout(\''+id+'\')">🔍 Тагнуул · '+f(wmScoutCost(e))+' 🪙</button><div class="sm">Дайсны цэргийн төрлийг мэдэхэд тусална (заавал биш)</div>';
+      btn.parentNode.insertBefore(box,btn);
+      btn.textContent='⚔ Дайрах';
+      btn.setAttribute('onclick',"wmSend('"+id+"',0)");
+      btn.style.cssText+=';width:100%;font-size:20px;padding:13px 10px;margin-top:6px';
+    }catch(err){}
+  };
+  wmTacSheet=function(id){ wmSelSheet(id); };
+})();
+
+
 // ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====
 (function(){
 const IW=1024, IH=1536, MAIN=['meat','wool','wood'];

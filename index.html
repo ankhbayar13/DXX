@@ -661,7 +661,8 @@ function cmapHTML(ci){
    '<div class="mapw" style="aspect-ratio:3/4"><img src="'+m.url+'" class="mapi" style="inset:0;width:100%;height:100%">'+nb+'</div>';
   h+='<div class="card">';
   for(let s=0;s<4;s++){ const p=stepP(ci,s), P=totalPower(), done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), ratio=P/p, lv=ratio>=1.3?'Амархан':ratio>=0.9?'Тэнцүү':ratio>=0.6?'Хэцүү':'Маш хэцүү';
-    h+='<div class="row" style="margin-bottom:6px"><div><b>'+(s+1)+'. '+(s===3?t.who:CSTEP[s])+(done?' ✓':'')+'</b><div class="sm">Дайсны хүч '+f(p)+' · '+lv+' · +'+f(Math.round(p*0.45))+' 🪙</div></div><button class="btn red" '+(open?'':'disabled')+' onclick="campStart('+ci+','+s+')">'+(done?'Дахин':open?'Дайрах':'🔒')+'</button></div>'; }
+    h+='<div class="row" style="margin-bottom:6px"><div><b>'+(s+1)+'. '+(s===3?t.who:CSTEP[s])+(done?' ✓':'')+'</b><div class="sm">Дайсны хүч '+f(p)+' · '+lv+(ratio<0.9?' <b style="color:#ff8a7a">⚠ Хүч дутуу</b>':'')+' · +'+f(Math.round(p*0.45))+' 🪙</div></div><button class="btn red" '+(open?'':'disabled')+' onclick="campStart('+ci+','+s+')">'+(done?'Дахин':open?'Дайрах':'🔒')+'</button></div>'; }
+  { const _nx=[0,1,2,3].find(s=>!S.camp.done[ci+':'+s]&&stOpen(ci,s)); if(_nx!=null){ const _w=weakBox(totalPower(),stepP(ci,_nx)*0.9); if(_w) h+=_w; } }
   h+='<div class="sm">Тэргүүнийг ялбал аймаг нэгдэнэ: +'+f(1000*(ci+1))+' 🪙, +'+(3+ci)+' Алт, баатар '+((HEROES.find(x=>x.id===t.hero)||{}).n||'')+'.</div></div>';
   if(!op) h+='<div class="card sm">Энэ мап одоохондоо хаалттай. Өмнөх аймгийг нэгтгэ.</div>';
   return h;
@@ -3060,7 +3061,7 @@ function wmSheet(){
     else if(e.t==='clan'){ const ok=pw>=e.p; h='<h3><span style="color:'+e.c+'">⚔</span> '+e.n+(e.real?'':' (NPC)')+'</h3><div class="sm">'+CLN[e.cl].n+' клан · Дайсан: <b>'+wmTyTxt(e)+'</b></div><div class="sm">Хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Ялбал: клан оноо +'+wmCwPts(e,null)+(e.real?' (бодит тоглогч ×1.5)':'')+'</div>'+(e.real?'<div class="sm">'+wmShieldTxt(e)+(wmLootPct(e)?' · Ялбал нөөцийн '+wmLootPct(e)+'%-ийг дээрэмдэнэ':'')+'</div>':'')+'<button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
     else if(e.t==='camp'){ const ok=pw>=e.p; h='<h3>'+ico('bd_h0',30)+' Бандитын бааз · Lv '+e.lv+'</h3><div class="sm">Дайсны хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
     else { const p=wmPw(e), ok=pw>=p; h='<h3><span style="color:'+e.c+'">⚑</span> '+e.n+' улс</h3><div class="sm">Хүч <b>'+f(p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Дайсан: <b>'+wmTyTxt(e)+'</b> · Ялбал: +'+f(p*0.6)+' 🪙, Алт, оноо</div>'+(((wmSt().st['w'+e.id])||0)===0?'<div class="sm" style="color:#ffd770"><b>🏆 Анхны эзлэлт: тусгай шагнал</b></div>':'')+'<button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; } }
-  if(e.t==='kingdom'||e.t==='camp'||e.t==='clan') h=h.replace('</h3>','</h3>'+wmPowLine(e)); sh.innerHTML=h+'<button class="btn" style="background:#5b3d1e" onclick="WMS=null;wmSheet()">Хаах</button>'; sh.style.display='block'; }
+  if(e.t==='kingdom'||e.t==='camp'||e.t==='clan'){ h=h.replace('</h3>','</h3>'+wmPowLine(e)); const _wk=weakBox(pw,e.t==='kingdom'?wmPw(e):e.p); if(_wk) h=h.replace('<button class="btn red"',_wk+'<button class="btn red"'); } sh.innerHTML=h+'<button class="btn" style="background:#5b3d1e" onclick="WMS=null;wmSheet()">Хаах</button>'; sh.style.display='block'; }
 function wmRefreshBar(){ const b=$('wmbar'); if(!b) return; const st=wmSt(), now=Date.now();
   b.innerHTML='🚩 Цуваа '+st.m.length+'/'+wmMax()+st.m.map(m=>{ const e=wmEnt(m.tid)||m.tg, el=(now-m.t0)/1000, rem=m.ty==='gather'?2*m.d+20-el:m.d-el; return '<div class="mrc">'+(m.ty==='gather'?'⛏':m.ty==='visit'?'🐎':'⚔')+' '+(e?(e.n||(WM_RT[e.rt]&&WM_RT[e.rt].n)||'Бааз'):'')+' · '+wmFmt(rem)+'</div>'; }).join(''); }
 setInterval(()=>{ if(WMV&&WMV.on) wmRefreshBar(); },1000);
@@ -6236,6 +6237,32 @@ function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mo
       s.textContent='🛡'+(n>=10000?(n/1000).toFixed(1)+'k':n);
     }catch(e){}
     return r;
+  };
+})();
+
+
+// ===== хүч дутуу сануулга + цэргийн зардал =====
+function trCostTxt(k){ const b=BUILD[k]&&BUILD[k].proc; if(!b) return ''; return Object.keys(b.in).map(x=>(x==='gold'?'🪙':(RESN[x]||x))+' '+b.in[x]).join(' + '); }
+function trOne(T){ return Math.floor(T.pw*(1+0.35*Math.max(0,(S.bld[T.b]||1)-1))*(1+rsb('mil_troop'))); }
+function weakBox(P,need){
+  if(!(P<need)) return '';
+  const lack=Math.ceil(need-P);
+  const btn=TR.map(T=>{ const ic=T.ty==='cav'?'🐎':T.ty==='archer'?'🏹':'🗡'; return S.bld[T.b]?'<button class="btn" style="font-size:12px;padding:5px 8px" onclick="try{wmShut()}catch(e){};openM(\'bld:'+T.b+'\')">'+ic+' '+T.n+'</button>':''; }).join('');
+  const none=TR.every(T=>!S.bld[T.b]);
+  return '<div style="margin:6px 0;padding:6px 8px;border:1px solid #b0402f;border-radius:8px;background:rgba(90,20,12,.55);text-align:center"><div class="sm" style="color:#ffb3a6;font-size:13px">⚠ <b>Таны цэргийн хүч хүрэлцэхгүй</b> (дутуу ~'+f(lack)+')</div><div class="sm">Цэргээ үйлдвэрлэж хүчээ нэмээд дайр.</div>'+(none?'<div class="sm">Морины бааз, Харваачдын талбай, Жадчны талбай барь.</div>':'<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:4px">'+btn+'</div>')+'</div>';
+}
+(function(){
+  const _p=prodPanel;
+  prodPanel=function(k){
+    let h=_p.apply(this,arguments);
+    try{
+      const T=TR.find(x=>x.b===k);
+      if(T&&h){
+        const b=BUILD[k].proc, per=b.t/(1+0.25*((S.bld[k]||1)-1));
+        h='<div class="card" style="text-align:center;border-color:#ffd770"><b style="font-size:15px;color:#ffe9a8">1 '+T.n+' = '+trCostTxt(k)+'</b><div class="sm">'+fmtT(per)+' тутамд 1 цэрэг бэлэн болно · нэг цэрэг <b style="color:#9be07a">+'+f(trOne(T))+' хүч</b></div></div>'+h;
+      }
+    }catch(e){}
+    return h;
   };
 })();
 

@@ -6221,6 +6221,123 @@ function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mo
   document.body.appendChild(o); const t0=Date.now();
   iv=setInterval(()=>{ if(innerWidth>innerHeight){ clearInterval(iv); setTimeout(go,350); } else if(Date.now()-t0>(ok?30000:2500)){ go(); } },150);
 }; const _be=btEnd; btEnd=function(f){ const r=_be(f); if(!BT){ window.BT_LAND=0; try{ screen.orientation.unlock(); }catch(e){} } return r; }; })();
+
+// ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====
+(function(){
+const IW=1024, IH=1536, MAIN=['meat','wool','wood'];
+const IMG='rts/off_panel.webp?v=1';
+function offCss(){
+  if(document.getElementById('offcss')) return;
+  const s=document.createElement('style'); s.id='offcss';
+  s.textContent='@keyframes offGl{0%,100%{opacity:.3;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}'
+   +'@keyframes offSh{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}'
+   +'@keyframes offIn{0%{transform:scale(.86);opacity:0}100%{transform:scale(1);opacity:1}}'
+   +'#offov .ob{position:absolute;cursor:pointer;border-radius:10px;-webkit-tap-highlight-color:transparent}'
+   +'#offov .ob:active{background:rgba(255,235,170,.24)}'
+   +'#offov .ot{position:absolute;display:flex;align-items:center;line-height:1;font-family:Roboto,"Noto Sans","Segoe UI",Arial,sans-serif;font-weight:800;color:#f6e8b8;text-shadow:0 2px 0 #3b2208,0 0 5px #000c;pointer-events:none;white-space:nowrap;letter-spacing:.4px}';
+  document.head.appendChild(s);
+}
+function offFly(k,el){
+  try{
+    const r=el.getBoundingClientRect();
+    const idx={meat:0,milk:1,wool:2,grain:3,wood:4,gold:5,alt:6}[k];
+    const cells=document.querySelectorAll('#res .rc');
+    const tg=cells[idx==null?0:idx]||cells[0];
+    const t=tg?tg.getBoundingClientRect():{left:innerWidth/2,top:10,width:20,height:20};
+    const sx=r.left+r.width/2, sy=r.top+r.height/2, ex=t.left+t.width/2, ey=t.top+t.height/2;
+    let ic='';
+    try{ if(ITEMS[k]) ic=iconHTML(k,26); }catch(e){}
+    if(!ic) ic='<span style="font-size:22px">'+(RESN[k]||'')+'</span>';
+    for(let i=0;i<7;i++){
+      const d=document.createElement('div');
+      d.style.cssText='position:fixed;z-index:80;left:'+(sx-13)+'px;top:'+(sy-13)+'px;pointer-events:none;line-height:1';
+      d.innerHTML=ic; document.body.appendChild(d);
+      const jx=(Math.random()-.5)*70, jy=(Math.random()-.5)*50;
+      const a=d.animate([
+        {transform:'translate(0,0) scale(1)',opacity:1},
+        {transform:'translate('+jx+'px,'+jy+'px) scale(1.25)',opacity:1,offset:.25},
+        {transform:'translate('+(ex-sx)+'px,'+(ey-sy)+'px) scale(.45)',opacity:.9}
+      ],{duration:850,delay:i*70,easing:'cubic-bezier(.4,0,.6,1)',fill:'both'});
+      a.onfinish=()=>d.remove();
+    }
+  }catch(e){}
+}
+offPop=function(){
+  const P=S.offp; if(!P) return;
+  offCss();
+  let o=document.getElementById('offov'); if(o) o.remove();
+  o=document.createElement('div'); o.id='offov';
+  o.style.cssText='position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center';
+  const W=Math.floor(Math.min(innerWidth*0.97,innerHeight*0.97*IW/IH,480)), u=W/IW, Hh=Math.round(W*IH/IW);
+  const cap=rkOffS(), secs=Math.min(P.secs,cap), pct=Math.max(0,Math.min(1,secs/cap)), full=pct>=0.999;
+  const hh=Math.floor(secs/3600), mm=Math.floor(secs%3600/60), hrs=Math.max(1,P.secs/3600);
+  const pad=n=>String(n).padStart(2,'0');
+  P.rt=P.rt||{};
+  MAIN.forEach(k=>{ if(P.rt[k]==null) P.rt[k]=(P.g[k]||0)/hrs; });
+  const A=(x0,y0,x1,y1)=>'left:'+(x0/IW*100).toFixed(3)+'%;top:'+(y0/IH*100).toFixed(3)+'%;width:'+((x1-x0)/IW*100).toFixed(3)+'%;height:'+((y1-y0)/IH*100).toFixed(3)+'%;';
+  const T=(x0,y0,x1,y1,sz,txt,al,extra,id)=>'<div class="ot"'+(id?' id="'+id+'"':'')+' style="'+A(x0,y0,x1,y1)+'font-size:'+(sz*u).toFixed(1)+'px;justify-content:'+(al||'center')+';'+(extra||'')+'">'+txt+'</div>';
+  const fit=(t,a,b,c)=>t.length>7?c:t.length>5?b:a;
+  let h='<div id="offw" style="position:relative;width:'+W+'px;height:'+Hh+'px;animation:offIn .28s ease-out">';
+  h+='<img src="'+IMG+'" style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none" draggable="false" alt="">';
+  if(full) h+='<div style="position:absolute;'+A(120,215,340,415)+'border-radius:50%;background:radial-gradient(circle,rgba(255,215,90,.9),rgba(255,170,30,0) 68%);mix-blend-mode:screen;animation:offGl 1.4s ease-in-out infinite;pointer-events:none"></div>';
+  h+=T(400,468,624,534,56,pad(hh)+':'+pad(mm),'center',full?'color:#ffd75a;':'');
+  // зурвас
+  const fw=pct>0?Math.max(2.5,pct*100):0;
+  h+='<div style="position:absolute;'+A(198,545,818,577)+'border-radius:5px;overflow:hidden;pointer-events:none"><i style="display:block;position:relative;overflow:hidden;height:100%;width:'+fw+'%;border-radius:5px;background:'+(full?'linear-gradient(180deg,#ffe58a,#f2a91b 55%,#c97a0a)':'linear-gradient(180deg,#8fd8ff,#2f8fff 55%,#1565d8)')+';box-shadow:inset 0 2px 3px rgba(255,255,255,.55)'+(full?',0 0 10px #ffc83a':'')+'">'+(full?'<b style="position:absolute;top:0;left:0;width:30%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:offSh 1.8s linear infinite"></b>':'')+'</i></div>';
+  // хурд /ц
+  const RX=[[293,392],[530,632],[782,872]];
+  MAIN.forEach((k,i)=>{ const tx=f(P.rt[k])+'/ц'; h+=T(RX[i][0],680,RX[i][1],716,fit(tx,30,26,22),tx,'flex-start'); });
+  // шагналын 3 хайрцаг
+  const BX=[[213,397],[418,607],[627,812]];
+  const NX=[[222,388],[428,598],[636,804]];
+  MAIN.forEach((k,i)=>{
+    h+=T(NX[i][0],1000,NX[i][1],1050,44,'','center','','offn_'+k);
+    h+='<div id="offd_'+k+'" style="position:absolute;'+A(BX[i][0],880,BX[i][1],1070)+'background:rgba(8,4,0,.6);border-radius:10px;display:none;align-items:center;justify-content:center;pointer-events:none;color:#8fe88f;font:900 '+(70*u).toFixed(0)+'px/1 Arial,sans-serif;text-shadow:0 2px 4px #000"></div>';
+    h+='<div class="ob" data-k="'+k+'" id="offb_'+k+'" style="'+A(BX[i][0],880,BX[i][1],1070)+'"></div>';
+  });
+  h+=T(215,1072,810,1104,30,'','center','color:#e8d7a0;font-weight:700','offex');
+  h+='<div class="ob" id="offall" style="'+A(138,1108,886,1228)+'border-radius:18px"></div>';
+  h+='</div>';
+  o.innerHTML=h;
+  const bx={};
+  MAIN.forEach(k=>{ bx[k]=o.querySelector('#offb_'+k); bx[k].onclick=e=>{ e.stopPropagation(); offClaim(k); }; });
+  o._bx=bx;
+  o.querySelector('#offall').onclick=e=>{ e.stopPropagation(); offClaim(); };
+  o.onclick=e=>{ if(e.target===o) o.remove(); };
+  o._upd=()=>{
+    MAIN.forEach(k=>{
+      const v=Math.floor(P.g[k]||0), done=!!(P.cl&&P.cl[k]);
+      const n=o.querySelector('#offn_'+k), d=o.querySelector('#offd_'+k);
+      const tx=v>=1?f(v):'0';
+      if(n){ n.textContent=done?'':tx; n.style.fontSize=((fit(tx,44,34,28))*u).toFixed(1)+'px'; }
+      if(d){ d.style.display=(done||v<1)?'flex':'none'; d.textContent=done?'✓':''; }
+    });
+    const ex=Object.keys(P.g).filter(k=>MAIN.indexOf(k)<0&&(P.g[k]||0)>=1).map(k=>(RESN[k]||k)+' '+f(P.g[k])).join('  ·  ');
+    const e2=o.querySelector('#offex'); if(e2) e2.textContent=ex?'+ '+ex:'';
+  };
+  o._upd();
+  document.body.appendChild(o);
+};
+offClaim=function(k){
+  const P=S.offp; if(!P) return;
+  const o=document.getElementById('offov'), bx=(o&&o._bx)||{};
+  const anyEl=(o&&o.firstChild)||document.body;
+  const take=(kk,el)=>{
+    const v=Math.floor(P.g[kk]||0); if(v<1) return 0;
+    S.res[kk]=(S.res[kk]||0)+v; P.g[kk]=0; (P.cl||(P.cl={}))[kk]=1;
+    offFly(kk,el||bx[kk]||anyEl); return v;
+  };
+  if(k){ take(k,bx[k]); } else { Object.keys(P.g).forEach(kk=>take(kk)); }
+  const mainLeft=MAIN.some(x=>(P.g[x]||0)>=1);
+  if(k&&mainLeft){ try{ sfx('ok'); vib(20); }catch(e){} refresh(); if(o&&o._upd) o._upd(); return; }
+  if(k) Object.keys(P.g).forEach(kk=>take(kk,bx.wood||bx.meat||anyEl));
+  S.offp=null; if(o) o.remove();
+  try{ sfx('ok'); vib([30,20,30]); }catch(e){}
+  say('Нүүдлийн шагнал авлаа!'); refresh();
+};
+setTimeout(()=>{ try{ const im=new Image(); im.src=IMG; }catch(e){} },300);
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

@@ -6243,7 +6243,7 @@ function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mo
 // ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====
 (function(){
 const IW=1024, IH=1536, MAIN=['meat','wool','wood'];
-const IMG='rts/off_panel.webp?v=1';
+const IMG='rts/off_panel.webp?v=2';
 function offCss(){
   if(document.getElementById('offcss')) return;
   const s=document.createElement('style'); s.id='offcss';
@@ -6298,22 +6298,24 @@ offPop=function(){
   let h='<div id="offw" style="position:relative;width:'+W+'px;height:'+Hh+'px;animation:offIn .28s ease-out">';
   h+='<img src="'+IMG+'" style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none" draggable="false" alt="">';
   if(full) h+='<div style="position:absolute;'+A(120,215,340,415)+'border-radius:50%;background:radial-gradient(circle,rgba(255,215,90,.9),rgba(255,170,30,0) 68%);mix-blend-mode:screen;animation:offGl 1.4s ease-in-out infinite;pointer-events:none"></div>';
-  h+=T(400,468,624,534,56,pad(hh)+':'+pad(mm),'center',full?'color:#ffd75a;':'');
+  h+=T(400,424,624,462,38,'Хугацаа','center','font-weight:600;color:#efe2b4;text-shadow:0 1px 0 #2a1805,0 0 4px #000a');
+  h+=T(400,456,624,520,56,pad(hh)+':'+pad(mm),'center',full?'color:#ffd75a;':'');
   // зурвас
   const fw=pct>0?Math.max(2.5,pct*100):0;
-  h+='<div style="position:absolute;'+A(198,545,818,577)+'border-radius:5px;overflow:hidden;pointer-events:none"><i style="display:block;position:relative;overflow:hidden;height:100%;width:'+fw+'%;border-radius:5px;background:'+(full?'linear-gradient(180deg,#ffe58a,#f2a91b 55%,#c97a0a)':'linear-gradient(180deg,#8fd8ff,#2f8fff 55%,#1565d8)')+';box-shadow:inset 0 2px 3px rgba(255,255,255,.55)'+(full?',0 0 10px #ffc83a':'')+'">'+(full?'<b style="position:absolute;top:0;left:0;width:30%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:offSh 1.8s linear infinite"></b>':'')+'</i></div>';
+  h+='<div style="position:absolute;'+A(208,531,814,568)+'border-radius:5px;overflow:hidden;pointer-events:none"><i style="display:block;position:relative;overflow:hidden;height:100%;width:'+fw+'%;border-radius:5px;background:'+(full?'linear-gradient(180deg,#ffe58a,#f2a91b 55%,#c97a0a)':'linear-gradient(180deg,#8fd8ff,#2f8fff 55%,#1565d8)')+';box-shadow:inset 0 2px 3px rgba(255,255,255,.55)'+(full?',0 0 10px #ffc83a':'')+'">'+(full?'<b style="position:absolute;top:0;left:0;width:30%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:offSh 1.8s linear infinite"></b>':'')+'</i></div>';
   // хурд /ц
-  const RX=[[293,392],[530,632],[782,872]];
-  MAIN.forEach((k,i)=>{ const tx=f(P.rt[k])+'/ц'; h+=T(RX[i][0],680,RX[i][1],716,fit(tx,30,26,22),tx,'flex-start'); });
+  const RX=[[290,392],[526,622],[762,868]];
+  MAIN.forEach((k,i)=>{ const tx=f(P.rt[k])+'/ц'; h+=T(RX[i][0],668,RX[i][1],706,fit(tx,32,27,22),tx,'flex-start'); });
   // шагналын 3 хайрцаг
   const BX=[[213,397],[418,607],[627,812]];
   const NX=[[222,388],[428,598],[636,804]];
   MAIN.forEach((k,i)=>{
-    h+=T(NX[i][0],1000,NX[i][1],1050,44,'','center','','offn_'+k);
+    h+=T(NX[i][0],1008,NX[i][1],1056,44,'','center','','offn_'+k);
     h+='<div id="offd_'+k+'" style="position:absolute;'+A(BX[i][0],880,BX[i][1],1070)+'background:rgba(8,4,0,.6);border-radius:10px;display:none;align-items:center;justify-content:center;pointer-events:none;color:#8fe88f;font:900 '+(70*u).toFixed(0)+'px/1 Arial,sans-serif;text-shadow:0 2px 4px #000"></div>';
     h+='<div class="ob" data-k="'+k+'" id="offb_'+k+'" style="'+A(BX[i][0],880,BX[i][1],1070)+'"></div>';
   });
   h+=T(215,1072,810,1104,30,'','center','color:#e8d7a0;font-weight:700','offex');
+  h+=T(190,1250,834,1300,32,'Дээд нь 12 цагийн ашиг цугларна','center','font-weight:600;color:#e6d6a2;text-shadow:0 1px 0 #2a1805,0 0 4px #000a');
   h+='<div class="ob" id="offall" style="'+A(138,1108,886,1228)+'border-radius:18px"></div>';
   h+='</div>';
   o.innerHTML=h;

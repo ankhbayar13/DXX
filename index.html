@@ -2988,7 +2988,7 @@ function wmGen(){
   while(nodes.length<46&&tries++<6000){ const x=120+r()*(WM_W-240), y=200+r()*(WM_H-400); if(!ok(x,y,200)) continue; const d=Math.hypot(x-C.x,y-C.y), lv=Math.min(5,1+Math.floor(d/520)); nodes.push({id:'n'+nodes.length,t:'node',x,y,rt:types[nodes.length%4],lv}); }
   tries=0; while(camps.length<20&&tries++<6000){ const x=120+r()*(WM_W-240), y=200+r()*(WM_H-400); if(!ok(x,y,220)) continue; const d=Math.hypot(x-C.x,y-C.y), lv=Math.min(5,1+Math.floor(d/500+r()*0.8)); camps.push({id:'c'+camps.length,t:'camp',x,y,lv,p:Math.round(60*Math.pow(lv,2.1))}); }
   const chests=[]; tries=0; while(chests.length<12&&tries++<6000){ const x=140+r()*(WM_W-280), y=220+r()*(WM_H-440); const d=Math.hypot(x-C.x,y-C.y); if(d<500||!ok(x,y,150)||!far(x,y,chests,260)) continue; chests.push({id:'t'+chests.length,t:'chest',n:'Эрдэнэс',x,y,v:1+Math.floor(d/650)}); }
-  wmDecorGen(decor,r,C,ks,lakes);
+  wmDecorGen(decor,r,C,ks,lakes,nodes,camps,chests);
   WMD={C,ks,nodes,camps,chests,decor,lakes,wk:wmWeek(),cl:wmClanId()}; WMD.bg=wmBg(WMD); return WMD; }
 function wmSt(){ S.wm=S.wm||{m:[],st:{}}; if(!S.wm.m) S.wm.m=[]; if(!S.wm.st) S.wm.st={}; return S.wm; }
 const wmMax=()=>2+Math.floor((S.bld.ger||1)/5);
@@ -3069,24 +3069,26 @@ function wmLoop(){
   const vw=cv.clientWidth/z, vh=cv.clientHeight/z, vis=(x,y,m)=>x>WMV.x-m&&x<WMV.x+vw+m&&y>WMV.y-m&&y<WMV.y+vh+m;
   // fog border
   c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14; c.strokeRect(0,0,WM_W,WM_H);
-  try{ wmRivDraw(c); }catch(e){}
-  D.lakes.forEach(l=>{ if(vis(l.x,l.y,300)){ const s=SPR.pond; if(s&&s.img.complete) c.drawImage(s.img,l.x,l.y,l.w*1.6,l.h*1.6*s.ih/s.iw*1.2); } });
-  const items=[]; D.decor.forEach(d=>{ if(vis(d.x,d.y,d.k==='mt'?170:60)) items.push({y:d.y,f:()=>wmDecorDraw(c,d)}); });
+  try{ wmPano(c); wmRivDraw(c,t); }catch(e){}
+  try{ wmLakes(c,D,vis); }catch(e){}
+  const items=[]; D.decor.forEach(d=>{ if(vis(d.x,d.y,d.big||(d.k==='mt'?170:70))) items.push({y:d.flat?-1e6+d.y:d.y,f:()=>wmDecorDraw(c,d)}); });
   // marches lines
   const st=wmSt(), now=Date.now();
   st.m.forEach(m=>{ const e=wmEnt(m.tid)||m.tg; if(!e) return; const el=(now-m.t0)/1000; let p, back=false; if(m.ty==='gather'&&el>m.d+20){ p=1-Math.min(1,(el-m.d-20)/m.d); back=true; } else p=Math.min(1,el/m.d); const mx=D.C.x+(e.x-D.C.x)*p, my=D.C.y+(e.y-D.C.y)*p;
     c.strokeStyle=m.ty==='gather'?'rgba(255,230,120,.75)':'rgba(255,90,70,.8)'; c.lineWidth=2/z+1; c.setLineDash([8,6]); c.beginPath(); c.moveTo(D.C.x,D.C.y-10); c.lineTo(e.x,e.y-10); c.stroke(); c.setLineDash([]);
-    items.push({y:my+999,f:()=>{ wmDrawS(c,'u_lightcav',mx,my,26); }}); });
-  D.nodes.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.45:1; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(n.x,n.y,16,6,0,0,7); c.fill(); c.fillStyle='#eadfb9'; c.beginPath(); c.arc(n.x,n.y-14,15,0,7); c.fill(); c.strokeStyle='#7a5a2a'; c.lineWidth=2; c.stroke(); const s=SPR[WM_RT[n.rt].ic]; if(s&&s.img.complete) c.drawImage(s.img,n.x-11,n.y-25,22,22*s.ih/s.iw); c.globalAlpha=1; wmLabel(c,'Lv'+n.lv,n.x,n.y+8,'#fff',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-32,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,24,t); }}); });
-  D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.35+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-8,16+4*pu,0,7); c.fill(); c.globalAlpha=1; wmDrawS(c,'ui2_chest',n.x,n.y,28); wmLabel(c,'Эрдэнэс',n.x,n.y+12,'#ffe28a',11); }}); });
-  D.camps.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; wmDrawS(c,'tent',n.x,n.y,34); wmDrawS(c,'bd_h0',n.x+16,n.y+4,18); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+14,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-30,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30,t); }}); });
-  D.ks.forEach(k=>{ if(!vis(k.x,k.y,90)) return; const cd=wmCd(k.id), sp=k.i<4?'ger':k.i<8?'ger2':k.i<11?'ger3':'ger4'; items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; const w=k.i<4?40:k.i<8?46:k.i<11?56:66; wmCastle(c,k,w); c.globalAlpha=1; c.fillStyle=k.c; c.fillRect(k.x-1,k.y-w*0.9-14,2,16); c.beginPath(); c.moveTo(k.x+1,k.y-w*0.9-14); c.lineTo(k.x+14,k.y-w*0.9-9); c.lineTo(k.x+1,k.y-w*0.9-4); c.fill(); wmLabel(c,k.n,k.x,k.y+14,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+28,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-w*0.9-20,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,44,t); }}); });
+    items.push({y:my+999,f:()=>{ try{ wmArmyDraw(c,m,mx,my,t,back,e); }catch(x){ wmDrawS(c,'u_lightcav',mx,my,26); } }}); });
+  try{ wmNodes(c,D,vis,items,t); }catch(e){ wmNodes0(c,D,vis,items,t); }
+  try{ wmChests(c,D,vis,items,t); }catch(e){ wmChests0(c,D,vis,items,t); }
+  try{ wmCamps(c,D,vis,items,t); }catch(e){ wmCamps0(c,D,vis,items,t); }
+  try{ wmKs(c,D,vis,items,t); }catch(e){ wmKs0(c,D,vis,items,t); }
+  try{ wmKsFx(c,D,vis,items,t); }catch(e){}
   items.push({y:D.C.y,f:()=>{ wmDrawS(c,'ger'+(S.bld.ger>=10?4:S.bld.ger>=7?3:S.bld.ger>=3?2:''),D.C.x,D.C.y,72); wmLabel(c,'🏠 Таны тосгон · Lv '+S.bld.ger,D.C.x,D.C.y+16,'#8fe07a',14); wmLabel(c,'⚔'+f(totalPower()),D.C.x,D.C.y+32,'#ffd770',12); if(WMS==='city') wmRing(c,D.C.x,D.C.y-24,52,t); }});
+  try{ wmHomeFx(c,D,t,items); }catch(e){}
   try{ wmClanDraw(c,D,z,t,vis,items); }catch(e){}
   try{ wmYamDraw(c,t,vis,items); }catch(e){}
   items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
   // minimap
-  const mm=$('wmmini'); if(mm){ const m=mm.getContext('2d'), sx=mm.width/WM_W, sy=mm.height/WM_H; m.fillStyle='#35602a'; m.fillRect(0,0,mm.width,mm.height); D.ks.forEach(k=>{ m.fillStyle=k.c; m.fillRect(k.x*sx-2,k.y*sy-2,4,4); }); D.camps.forEach(k=>{ m.fillStyle='#222'; m.fillRect(k.x*sx-1,k.y*sy-1,2,2); }); CLN.forEach(q=>{ m.strokeStyle=q.c; m.lineWidth=1; m.strokeRect(q.x*sx-3,q.y*sy-3,6,6); }); m.fillStyle='#8fff8f'; m.fillRect(D.C.x*sx-3,D.C.y*sy-3,6,6); m.strokeStyle='#fff'; m.lineWidth=1; m.strokeRect(WMV.x*sx,WMV.y*sy,vw*sx,vh*sy); }
+  const mm=$('wmmini'); if(mm){ const m=mm.getContext('2d'), sx=mm.width/WM_W, sy=mm.height/WM_H; try{ wmMini(m,D,mm); }catch(e){ m.fillStyle='#35602a'; m.fillRect(0,0,mm.width,mm.height); } D.ks.forEach(k=>{ m.fillStyle=k.c; m.fillRect(k.x*sx-2,k.y*sy-2,4,4); }); D.camps.forEach(k=>{ m.fillStyle='#222'; m.fillRect(k.x*sx-1,k.y*sy-1,2,2); }); CLN.forEach(q=>{ m.strokeStyle=q.c; m.lineWidth=1; m.strokeRect(q.x*sx-3,q.y*sy-3,6,6); }); m.fillStyle='#8fff8f'; m.fillRect(D.C.x*sx-3,D.C.y*sy-3,6,6); m.strokeStyle='#fff'; m.lineWidth=1; m.strokeRect(WMV.x*sx,WMV.y*sy,vw*sx,vh*sy); }
   requestAnimationFrame(wmLoop); }
 function wmRing(c,x,y,r,t){ c.strokeStyle='rgba(255,255,160,'+(0.6+0.4*Math.sin(t*6))+')'; c.lineWidth=2.5; c.beginPath(); c.ellipse(x,y+r*0.5,r,r*0.45,0,0,7); c.stroke(); }
 (function(){ const st=document.createElement('style'); st.textContent='#wmap{position:fixed;inset:0;z-index:7;background:#35602a}#wmx{position:absolute;left:10px;top:10px;width:42px;height:42px;border-radius:21px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font-size:20px;font-weight:bold}#wmhome{position:absolute;right:10px;bottom:90px;width:46px;height:46px;border-radius:23px;background:#3b2815ee;border:2px solid #c9972b;font-size:22px}#wmmini{position:absolute;right:10px;top:10px;border:2px solid #c9972b;border-radius:6px;background:#000;opacity:.92}#wmbar{position:absolute;left:62px;top:10px;right:112px;min-height:34px;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-size:12px;font-weight:bold;padding:5px 8px}.mrc{font-weight:normal;font-size:11px;color:#ffd9a0;margin-top:2px}#wmsheet{display:none;position:absolute;left:8px;right:8px;bottom:10px;background:#3b2815f5;border:2px solid #c9972b;border-radius:12px;padding:10px;color:#ffe9b0}#wmsheet h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:6px}#wmsheet .btn{margin:6px 6px 0 0}'; document.head.appendChild(st); })();
@@ -5466,7 +5468,7 @@ async function cwFetch(force){ if(CWD.busy) return; if(!force&&Date.now()-CWD.t<
     const [a,b]=await Promise.all([get(k),get(op)]); CWD.my=a; CWD.op=b; CWD.t=Date.now(); CWD.off=0; CWD.w=w; CWD.opId=op; CWD._k=''; }catch(e){ CWD.err=1; } CWD.busy=0; try{ if(WMV&&WMV.on) wmRefreshBar(); }catch(e){} }
 function wmCwEnts(){ const k=wmClanId(); if(k<0||typeof totalPower!=='function') return []; const w=wmWeek(), key=k+'_'+w+'_'+CWD.t; if(CWD._k===key&&CWD._e) return CWD._e;
   const op=wmOpp(k,w), z=CLN[op], P=Math.max(150,totalPower()), L=[], TY=['heavy','cav','archer'];
-  const place=id=>{ const h=hsh(String(id)), a=(h%360)*Math.PI/180, rad=120+((h>>>8)%150); return {x:Math.max(80,Math.min(WM_W-80,z.x+Math.cos(a)*rad)),y:Math.max(120,Math.min(WM_H-80,z.y+Math.sin(a)*rad*0.75))}; };
+  const place=id=>{ const h=hsh(String(id)), a=(h%360)*Math.PI/180, rad=210+((h>>>8)%170); return {x:Math.max(80,Math.min(WM_W-80,z.x+Math.cos(a)*rad)),y:Math.max(120,Math.min(WM_H-80,z.y+Math.sin(a)*rad*0.8))}; };
   const real=(CWD.w===w&&CWD.opId===op?CWD.op:[]).filter(x=>x.p>0&&!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,10);
   real.forEach(x=>{ const q=place(x.id); L.push({id:'cw'+x.id,t:'clan',x:q.x,y:q.y,n:esc2(String(x.n||'Тоглогч').slice(0,12)),p:Math.round(x.p),real:1,cl:op,c:z.c,ty:TY[hsh(String(x.id))%3],uid:x.id,act:Math.max(0,(wmNow()-(x.t||0))/3600e3),rs:x.rs||null}); });
   for(let i=0;L.length<6;i++){ const id='n'+i+'_'+op+'_'+w, q=place(id); L.push({id:'cw'+id,t:'clan',x:q.x,y:q.y,n:'Клан цэрэг '+(i+1),p:Math.round(P*(0.65+0.13*i)),real:0,cl:op,c:z.c,ty:TY[hsh(id)%3]}); }
@@ -5650,6 +5652,246 @@ function cwTerrHTML(){ const T=wmTerr(); if(!T) return '<div class="sm">🗺 Н�
 (function(){ const _o=cwPrev; cwPrev=async function(){ await _o(); try{ wmTerrSet(CWD.prev); }catch(e){} }; })();
 (function(){ const _o=wmOpen; wmOpen=function(){ _o(); try{ cwPrev(); cwRaidCheck(true); }catch(e){} }; })();
 (function(){ const st=document.createElement('style'); st.textContent='.wsr{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.wsr2{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;margin:4px 0}.wsb{background:#5b3d1e;border:1px solid #8a6a3a;color:#ffe9b0;border-radius:8px;padding:4px 8px;font-size:12px;line-height:1.2}.wsb span{font-size:10px;color:#ffd770}.wsb.on{background:#c9972b;color:#2a1a0c;border-color:#ffe28a}.wsb.on span{color:#4a2c10}.wsb:disabled{opacity:.4}'; document.head.appendChild(st); })();
+
+
+/* p32/wm4.js — 152/153: Дэлхийн газрын зураг: AI зураг (wmterr.bin + wmterr2.bin) — уул, ус, мод, өвс, амьтан, клан төв, гэр, бааз, нөөц, цэрэг, бүрхүүл, текстур */
+var WMT={ok:0,ld:0,tx:{},tl:{},mode:'overlay',al:0.38};
+function wmtBin(url,put){ return fetch(url).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+  const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+  return Promise.all(hd.map(([nm,off,len,w,h])=>new Promise(res=>{ const im=new Image(); im.onload=()=>{ let pr=null; try{ pr=put(nm,im,w,h); }catch(e){} Promise.resolve(pr).then(res,res); }; im.onerror=()=>res(); im.src=URL.createObjectURL(new Blob([buf.slice(base+off,base+off+len)],{type:'image/webp'})); }))); }); }
+function wmtLoad(){ if(WMT.ld) return; WMT.ld=1;
+  const put=(nm,im,w,h)=>{ if(/^wm_wt\d+$/.test(nm)){ const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const g=cv.getContext('2d'); g.drawImage(im,0,0,w,h); g.globalCompositeOperation='destination-in'; const rg=g.createRadialGradient(w/2,h/2,Math.min(w,h)*0.36,w/2,h/2,Math.min(w,h)*0.64); rg.addColorStop(0,'rgba(0,0,0,1)'); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,w,h); return new Promise(r=>{ const i2=new Image(); i2.onload=()=>{ SPR[nm]={img:i2,iw:w,ih:h}; r(); }; i2.onerror=()=>r(); i2.src=cv.toDataURL('image/png'); }); }
+    if(nm.indexOf('wm_tx_')===0) WMT.tx[nm.slice(6)]=im; else if(nm.indexOf('wm_tl_')===0){ const m=/^wm_tl_([a-z]+)(\d+)$/.exec(nm); if(m) (WMT.tl[m[1]]=WMT.tl[m[1]]||[])[+m[2]]=im; } else SPR[nm]={img:im,iw:w,ih:h}; };
+  const tr=(u,n)=>wmtBin(u,put).catch(()=>{ if(n<3) return new Promise(r=>setTimeout(r,5000)).then(()=>tr(u,n+1)); });
+  Promise.all([tr('wmterr.bin?v=2',0),tr('wmterr2.bin?v=1',0),tr('wmterr3.bin?v=1',0),tr('wmterr4.bin?v=1',0)]).then(()=>{ WMT.ok=1; try{ if(typeof WMD!=='undefined'&&WMD) WMD.bg=wmBg(WMD); }catch(e){} }); }
+function wmS(k){ const s=SPR[k]; return (s&&s.img&&s.img.complete&&s.img.naturalWidth)?s:null; }
+(function(){ const _o=wmOpen; wmOpen=function(){ try{ wmtLoad(); }catch(e){} _o(); }; })();
+const wmH2=(x,y)=>((Math.floor(x)*73856093)^(Math.floor(y)*19349663))>>>0;
+
+// ---- шороон текстур: бодит зургаас жижиг "тамга" хэлбэрээр дүүргэнэ ----
+const _wmBg0=wmBg;
+wmBg=function(D){ const pc=_wmBg0(D); if(!WMT.ok||!WMT.tx.g) return pc; try{ return wmTexBake(pc); }catch(e){ return pc; } };
+// гэрийн дэлгэцийн газар — ЗУНЫ хувилбараар тогтмол (улирлаас үл хамаарна)
+function wmGroundSummer(){ if(WMT.G) return WMT.G; for(const k of GALL) if(!gsrc(k)) return null; const mk=k=>{ const im=gsrc(k), c=document.createElement('canvas'); c.width=c.height=256; c.getContext('2d').drawImage(im,0,0,256,256); return c; };
+  const G={pat:ctx.createPattern(mk('gt0'),'repeat'),patch:{},dirt:[mk('gd0'),mk('gd1')]};
+  GVAR.forEach(k=>{ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d'); x.drawImage(mk(k),0,0); x.globalCompositeOperation='destination-in'; const gr=x.createRadialGradient(128,128,0,128,128,128); gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(0.5,'rgba(0,0,0,.92)'); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=gr; x.fillRect(0,0,256,256); G.patch[k]=c; });
+  return WMT.G=G; }
+function wmGroundWinter(){ if(WMT.GW) return WMT.GW; for(const k of GALL) if(!gsrc(k)) return null; const mk=k=>tintCanvas(gsrc(k),256,256,'winter',0.62);
+  const G={pat:ctx.createPattern(mk('gt0'),'repeat'),patch:{}}; GVAR.forEach(k=>{ const c=document.createElement('canvas'); c.width=c.height=256; const x=c.getContext('2d'); x.drawImage(mk(k),0,0); x.globalCompositeOperation='destination-in'; const gr=x.createRadialGradient(128,128,0,128,128,128); gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(0.5,'rgba(0,0,0,.92)'); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=gr; x.fillRect(0,0,256,256); G.patch[k]=c; }); return WMT.GW=G; }
+function wmTexBake(pc){ const K=0.625, W2=Math.round(WM_W*K), H2=Math.round(WM_H*K), cv=document.createElement('canvas'); cv.width=W2; cv.height=H2; const x=cv.getContext('2d'); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high';
+  const T=WMT.tx, TL=WMT.tl, r=wmRng(991), ss=(a,b,v)=>{ const t=Math.max(0,Math.min(1,(v-a)/(b-a))); return t*t*(3-2*t); };
+  const tmp=document.createElement('canvas'); tmp.width=tmp.height=420; const t=tmp.getContext('2d');
+  // бодит хавтангаас (236 өргөн) дөрвөлжин тамга: ~460 дэлхийн пиксел, захыг уусгана
+  const stampT=(lst,cx,cy,al,Sw)=>{ if(!lst||!lst.length||al<0.04) return; const S=Math.round((Sw||440)*K), im=lst[Math.floor(r()*lst.length)]; if(!im) return; const sq=Math.min(im.width,im.height), sx=r()*(im.width-sq), sy=r()*(im.height-sq); t.globalCompositeOperation='source-over'; t.clearRect(0,0,420,420);
+    if(r()<0.5){ t.save(); t.translate(S,0); t.scale(-1,1); t.drawImage(im,sx,sy,sq,sq,0,0,S,S); t.restore(); } else t.drawImage(im,sx,sy,sq,sq,0,0,S,S);
+    t.globalCompositeOperation='destination-in'; const g=t.createRadialGradient(S/2,S/2,S*0.22,S/2,S/2,S/2); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)'); t.fillStyle=g; t.fillRect(0,0,S,S);
+    x.globalAlpha=Math.min(1,al); x.drawImage(tmp,0,0,S,S,cx*K-S/2,cy*K-S/2,S,S); x.globalAlpha=1; };
+  const pick=(L,a,b)=>L?L.slice(a,b):null, cat=(...a)=>[].concat.apply([],a.filter(Boolean));
+  const MID=cat(pick(TL.rd,0,8),pick(TL.au,4,8),pick(TL.fo,4,8)), MIDG=cat(pick(TL.rd,0,8),pick(TL.rd,0,4),pick(TL.au,4,8));
+  const NORTH=cat(pick(TL.wi,0,8)), TAIGA=cat(pick(TL.fo,0,8),pick(TL.fo,4,8)), AUT=pick(TL.au,0,4), GOBI=pick(TL.go,0,8), GOBI2=pick(TL.go,8,12);
+  const TH=[null,pick(TL.au,4,8),pick(TL.au,0,4),pick(TL.fo,8,12),pick(TL.wi,4,8),pick(TL.go,0,8),pick(TL.au,4,8),pick(TL.fo,0,8),pick(TL.au,0,4),pick(TL.fo,4,8)];
+  // гэрийн дэлгэцийн ЯГ ТЭР газар (groundSet): gt0 суурь + цэцэгтэй/өвстэй толбо — улирлын өнгөтэй
+  let G=null; try{ G=wmGroundSummer(); }catch(e){}
+  if(G&&G.pat){ x.save(); x.scale(K,K); const m=new DOMMatrix(), gs=76/256; m.scaleSelf(gs,gs); G.pat.setTransform(m); x.fillStyle=G.pat; x.fillRect(0,0,WM_W,WM_H);
+    const CS=60, PS=130, GV=['gt1','gt2','gt3','gf0','gf1','gf2','gf3']; for(let j=-1;j<WM_H/CS+2;j++) for(let i=-1;i<WM_W/CS+2;i++){ if(gHash(i,j,1)>0.72) continue; const c=G.patch[GV[Math.floor(gHash(i,j,2)*GV.length)]]; if(!c) continue; const px=(i+0.5+(gHash(i,j,3)-0.5)*0.9)*CS, py=(j+0.5+(gHash(i,j,4)-0.5)*0.9)*CS, sz=PS*(0.8+0.4*gHash(i,j,5)); x.drawImage(c,px-sz/2,py-sz/2,sz,sz); }
+    x.restore(); }
+  else { x.drawImage(T.g,0,0,W2,H2); }
+  // ХОЙД ӨВӨЛ: таны өвлийн хавтангийн цэвэр цасан хэсгээс тамга (зөөлөн шилжилттэй)
+  try{ const sn=[]; ['wm_wt8','wm_wt0'].forEach(k=>{ const q=wmS(k); if(!q) return; const c=document.createElement('canvas'); c.width=c.height=150; c.getContext('2d').drawImage(q.img,45,50,150,150,0,0,150,150); sn.push(c); });
+    if(sn.length){ const ST2=110; for(let gy=-1; gy<1700/ST2; gy++) for(let gx=-1; gx<WM_W/ST2+1; gx++){ const wx=gx*ST2+(gy&1?ST2/2:0)+(r()-0.5)*50, wy=gy*ST2+(r()-0.5)*50, p=1-ss(450,1180,wy); if(p>0.03) stampT(sn,wx,wy,Math.min(1,p*1.7),240); } } }catch(e){}
+  // бүс нутгийн зөөлөн өнгө (хойд сэрүүн, өмнө хуурай)
+  x.globalCompositeOperation='soft-light'; x.globalAlpha=0.55; x.drawImage(pc,0,0,W2,H2); x.globalCompositeOperation='source-over'; x.globalAlpha=1;
+  // шороон замууд: клануудыг (MST) ба улсуудыг ойрын кланаар холбоно
+  try{ const E=[], inT=[0], rest=[1,2,3,4,5,6,7,8,9]; while(rest.length){ let bi=-1,bj=-1,bd=1e12; inT.forEach(a=>rest.forEach(b=>{ const d=Math.hypot(CLN[a].x-CLN[b].x,CLN[a].y-CLN[b].y); if(d<bd){ bd=d; bi=a; bj=b; } })); E.push([CLN[bi],CLN[bj]]); inT.push(bj); rest.splice(rest.indexOf(bj),1); }
+    WM_KPOS.forEach(p=>{ let b=null,bd=1e12; CLN.forEach(q=>{ const d=Math.hypot(q.x-p[0],q.y-p[1]); if(d<bd){ bd=d; b=q; } }); E.push([{x:p[0],y:p[1]},b]); });
+    const rdT=(G&&G.dirt&&G.dirt.length)?G.dirt:pick(TL.rd,8,12), rr=wmRng(4711);
+    if(rdT&&rdT.length) E.forEach(([a,b],ei)=>{ const L=Math.hypot(b.x-a.x,b.y-a.y), n=Math.max(2,Math.round(L/22)), ph=rr()*6, nx=-(b.y-a.y)/L, ny=(b.x-a.x)/L; for(let k=0;k<=n;k++){ const u=k/n, off=Math.sin(u*9+ph)*26+Math.sin(u*23+ph*2)*8, px=a.x+(b.x-a.x)*u+nx*off, py=a.y+(b.y-a.y)*u+ny*off; stampT(rdT,px,py,0.8,64); } }); }catch(e){}
+  
+  try{ wmZoneLines(x,W2,H2); }catch(e){}
+  return cv; }
+// клан бүсийн хил: хамгийн ойрын клан төвөөр хуваана, өөрийн ба дайсан бүс нь тод
+function wmZoneLines(x,W2,H2){ const BW=800, BH=1100, sc=WM_W/BW, my=wmClanId(), op=my>=0?wmOpp(my,wmWeek()):-1, zone=new Uint8Array(BW*BH), c2=document.createElement('canvas'); c2.width=BW; c2.height=BH; const t=c2.getContext('2d'), im=t.createImageData(BW,BH), d=im.data;
+  for(let j=0;j<BH;j++){ const wy=j*sc; for(let i=0;i<BW;i++){ const wx=i*sc; let zi=0, zd=1e12; for(let q=0;q<10;q++){ const dx=wx-CLN[q].x, dy=wy-CLN[q].y, dd=dx*dx+dy*dy; if(dd<zd){ zd=dd; zi=q; } } zone[j*BW+i]=zi; } }
+  for(let j=0;j<BH-1;j++) for(let i=0;i<BW-1;i++){ const z0=zone[j*BW+i], z1=zone[j*BW+i+1], z2=zone[(j+1)*BW+i]; if(z0!==z1||z0!==z2){ const o=(j*BW+i)*4, mine=(z0===my||z1===my||z2===my), en=(z0===op||z1===op||z2===op); d[o]=255; d[o+1]=mine?235:en?150:220; d[o+2]=mine?150:en?120:150; d[o+3]=mine?230:en?200:120; } }
+  t.putImageData(im,0,0); x.imageSmoothingEnabled=true; x.drawImage(c2,0,0,W2,H2); }
+function wmMini(m,D,mm){ if(D.miniSrc!==D.bg){ D.miniSrc=D.bg; const c=document.createElement('canvas'); c.width=mm.width; c.height=mm.height; c.getContext('2d').drawImage(D.bg,0,0,mm.width,mm.height); D.mini=c; } m.drawImage(D.mini,0,0); }
+
+// ---- уул ----
+const _wmMt0=wmMt;
+function wmMtK(x,y){ const h=wmH2(x,y), u=(h%1000)/1000;
+  if(y<1080) return u<0.72?'wm_sn'+[0,1,3,4,0,3][h%6]:'wm_sn'+(u<0.86?2:5);
+  if(y>3300) return u<0.45?'wm_cl'+(4+h%2):u<0.75?'wm_mh'+(2+h%2):'wm_cl'+[0,6,7][h%3];
+  if(x<650) return u<0.3?'wm_mh'+(2+h%4):u<0.6?'wm_cl'+[2,3,4,5,6,7][h%6]:u<0.8?'wm_mh'+(4+h%2):'wm_cl'+[0,1][h%2];
+  return u<0.45?'wm_mh'+(h%2):u<0.75?'wm_mh'+(2+h%2):u<0.9?'wm_mh'+(4+h%2):'wm_cl'+[0,3,6][h%3]; }
+wmMt=function(c,x,y,s){ const k=wmMtK(x,y), sp=wmS(k); if(!sp) return _wmMt0(c,x,y,s); const w=130*s, h=w*sp.ih/sp.iw; c.drawImage(sp.img,x-w/2,y-h*0.9,w,h); };
+function wmSprDraw(c,d){ const s=wmS(d.n); if(!s) return; const w=d.sc?d.sc*s.iw:d.w, h=w*s.ih/s.iw, y0=d.y-h*(d.flat?0.5:0.92);
+  if(d.fl){ c.save(); c.translate(d.x,0); c.scale(-1,1); c.drawImage(s.img,-w/2,y0,w,h); c.restore(); } else c.drawImage(s.img,d.x-w/2,y0,w,h); }
+// мод: хуучин "tree" decor-ыг шинэ зургаар (бүс бүрт тохирсон)
+function wmTreeK(x,y,h){ const u=(h%1000)/1000, near=(i)=>Math.hypot(x-CLN[i].x,y-CLN[i].y)<520;
+  if(near(2)||near(8)) return 'wm_t_au'+(h%4);
+  if(y<1050) return u<0.88?'wm_t_sw'+(h%4):'wm_t_bt'+(h%4);
+  if(y<1500) return u<0.4?'wm_t_sp'+(h%4):u<0.75?'wm_t_lc'+(h%4):'wm_t_bi'+(h%4);
+  if(y>3500) return u<0.5?'wm_t_ds'+(h%2):u<0.72?'wm_t_bt'+(h%4):u<0.85?'wm_t_el'+(h%2):u<0.93?'wm_t_st0':'wm_t_lg0';
+  if(x<650) return u<0.4?'wm_t_sp'+(h%4):u<0.7?'wm_t_lc'+(h%4):'wm_t_bi'+(h%4);
+  return u<0.38?'wm_t_bi'+(h%4):u<0.56?'wm_t_el'+(h%2):u<0.74?'wm_t_lc'+(h%4):u<0.88?'wm_t_sp'+(h%4):u<0.94?'wm_t_ap0':'wm_t_sb0'; }
+function wmTreeDraw(c,d){ if(!WMT.ok) return false; const h=wmH2(d.x,d.y); const k=d.nk||(d.nk=wmTreeK(d.x,d.y,h>>>3)), s=wmS(k); if(!s) return false; const w=0.16*s.iw*d.s, hh=w*s.ih/s.iw; c.drawImage(s.img,d.x-w/2,d.y-hh*0.92,w,hh); return true; }
+function wmBushDraw(c,d){ if(!WMT.ok) return false; const h=wmH2(d.x,d.y)>>>3; let k; if(d.k==='pr_deadtree') k=d.y<900?'wm_t_bt'+(h%4):'wm_t_ds'+(h%2); else k=d.y>3300?'wm_gB'+(8+h%4):'wm_gA'+(12+h%4); const s=wmS(k); if(!s) return false; const w=(d.k==='pr_deadtree'?0.13:0.19)*s.iw*d.s, hh=w*s.ih/s.iw; c.drawImage(s.img,d.x-w/2,d.y-hh*0.9,w,hh); return true; }
+// амьтад
+function wmAniDraw(c,d){ const s=wmS(d.n); if(!s) return; const t=performance.now()/1000, a=t*d.sp+d.ph, ox=Math.sin(a)*d.ax, up=Math.cos(a)>=0, w=d.sc*s.iw, h=w*s.ih/s.iw, y0=d.y-h*0.9+Math.abs(Math.sin(a*4))*1.2;
+  if(up||d.n==='wm_an11'){ c.drawImage(s.img,d.x+ox-w/2,y0,w,h); } else { c.save(); c.translate(d.x+ox,0); c.scale(-1,1); c.drawImage(s.img,-w/2,y0,w,h); c.restore(); } }
+wmDecorDraw=function(c,d){ if(d.k==='spr') wmSprDraw(c,d); else if(d.k==='ani') wmAniDraw(c,d); else if(d.k==='mt') wmMt(c,d.x,d.y,d.s);
+  else if(d.k==='tree'&&wmTreeDraw(c,d)){} else if((d.k==='pr_bush'||d.k==='pr_deadtree')&&wmBushDraw(c,d)){} else wmDrawS(c,d.k||'tree',d.x,d.y,(d.w||26)*d.s); };
+
+// ---- нэмэлт чимэглэл: хавцал, даваа, ус, өвс, цэцэг, амьтан, ой ----
+const _wmDG0=wmDecorGen;
+wmDecorGen=function(decor,r,C,ks,lakes,nodes,camps,chests){ _wmDG0(decor,r,C,ks,lakes); wmDecClean(decor); try{ wmDecorGen2(decor,r,C,ks,lakes,nodes||[],camps||[],chests||[]); }catch(e){} };
+function wmDecClean(decor){ const keep=[]; decor.forEach(d=>{ if(d.k==='mt'){ if(d.x<330||d.x>WM_W-330||d.y<430||d.y>WM_H-430){ d.s*=0.72; keep.push(d); } } else if(d.k==='tree'){ if(wmH2(d.x,d.y)%100<45) keep.push(d); } else if(d.k==='pr_deadtree'||d.k==='camel'){ if(wmH2(d.x,d.y)%100<30) keep.push(d); } }); decor.length=0; keep.forEach(d=>decor.push(d)); }
+function wmDecorGen2(decor,r,C,ks,lakes,nodes,camps,chests){
+  const near=(L,x,y,d)=>L.some(o=>Math.hypot(o.x-x,o.y-y)<d);
+  const riv=(x,y,d)=>{ for(let i=0;i<WM_RIV.length;i+=2){ if(Math.abs(WM_RIV[i][0]-x)<d&&Math.abs(WM_RIV[i][1]-y)<d) return 1; } return 0; };
+  const lak=(x,y,m)=>lakes.some(l=>x>l.x-m&&x<l.x+l.w*1.7+m&&y>l.y-m&&y<l.y+l.h*2.1+m);
+  const free=(x,y,m,rv)=>{ if(x<50||x>WM_W-50||y<70||y>WM_H-50) return 0; if(Math.hypot(x-C.x,y-C.y)<150+m) return 0; if(near(ks,x,y,70+m)||near(CLN,x,y,200+m)||near(nodes,x,y,40+m)||near(camps,x,y,55+m)||near(chests,x,y,40+m)) return 0; if(lak(x,y,m)) return 0; if(rv&&riv(x,y,rv)) return 0; return 1; };
+  const GSZ=n=>/^wm_fl/.test(n)?0.34:/^wm_fm/.test(n)?0.34:/^wm_re/.test(n)?0.45:/^wm_gp/.test(n)?0.28:1;
+  const add=(n,x,y,w,o)=>decor.push(Object.assign({x:x,y:y,k:'spr',n:n,w:w*GSZ(n)},o||{}));
+  const addS=(n,x,y,sc,o)=>decor.push(Object.assign({x:x,y:y,k:'spr',n:n,sc:sc},o||{}));
+  // 1) даваа/хавцал (3 ширхэг)
+  [[430,1750],[380,2650]].forEach((p,i)=>{ for(let q=0;q<30;q++){ const x=p[0]+(r()-0.5)*260, y=p[1]+(r()-0.5)*260; if(free(x,y,170,70)){ add('wm_ps'+i,x,y,230,{big:300,fl:r()<0.5?1:0}); break; } } });
+  // 2) баруун, зүүн хязгаарын нуруу
+  for(let y=1300;y<3300;y+=170){ const x=110+r()*190; if(free(x,y,120,60)) add('wm_rd'+(r()<0.5?0:1),x,y,140+r()*30,{big:200,fl:r()<0.5?1:0}); }
+  for(let y=1900;y<3900;y+=210){ const x=WM_W-110-r()*170; if(free(x,y,120,60)) add('wm_rd'+(r()<0.5?0:1),x,y,135+r()*30,{big:200,fl:1}); }
+  // 4) нуурын эрэг
+  lakes.forEach((l,i)=>{ const cx=l.x+l.w*0.8, cy=l.y+l.h*0.8; if(cy<1500) return; for(let k=0;k<7;k++){ const a=r()*6.283, x=cx+Math.cos(a)*l.w*0.92, y=cy+Math.sin(a)*l.h*1.0; if(free(x,y,-60,0)) add('wm_re'+Math.floor(r()*6),x,y,58+r()*22); }
+    for(let k=0;k<3;k++){ const a=r()*6.283, d=r()*0.5, x=cx+Math.cos(a)*l.w*d, y=cy+Math.sin(a)*l.h*d*0.9; add(k?'wm_lily':'wm_rkw',x,y,k?70:54,{flat:1}); } });
+  // 5) өвс, цэцэг: бөөгнөрөл + ганц ганц, 32 өвс бүгдийг янз бүрээр хольно
+  const ok=(x,y)=>free(x,y,-30,34), RS=(a,b)=>a+r()*(b-a), R4=()=>Math.floor(r()*4);
+  const THEME=(x,y)=>{ const L=[]; const A=(pre,a,b,w)=>{ for(let i=a;i<b;i++) for(let q=0;q<w;q++) L.push(pre+i); };
+    if(y<1500){ A('wm_gA',0,4,2); A('wm_gA',4,8,2); A('wm_gA',8,12,3); A('wm_gB',4,8,1); A('wm_gA',12,16,1); }
+    else if(y>3300){ A('wm_gB',0,4,3); A('wm_gB',4,8,3); A('wm_gB',8,12,2); A('wm_gB',12,16,1); A('wm_gA',12,16,1); }
+    else if(x<650){ A('wm_gA',0,4,2); A('wm_gB',0,4,2); A('wm_gB',4,8,2); A('wm_gA',8,12,2); A('wm_gB',12,16,1); A('wm_gA',12,16,1); }
+    else { A('wm_gA',0,4,3); A('wm_gA',4,8,3); A('wm_gA',8,12,3); A('wm_gB',12,16,2); A('wm_gB',0,4,1); A('wm_gA',12,16,1); }
+    return L; };
+  let n=0, tries=0; while(n<110&&tries++<5000){ const cx=60+r()*(WM_W-120), cy=120+r()*(WM_H-220); if(!ok(cx,cy)) continue; const L=THEME(cx,cy), cnt=2+Math.floor(r()*4), big=r()<0.3?1.25:1;
+    for(let j=0;j<cnt;j++){ const x=cx+(r()-0.5)*130, y=cy+(r()-0.5)*80; if(!ok(x,y)) continue; decor.push({x:x,y:y,k:'spr',n:L[Math.floor(r()*L.length)],sc:RS(0.11,0.2)*big,fl:r()<0.5?1:0}); n++; } }
+  tries=0; n=0; while(n<220&&tries++<6000){ const x=60+r()*(WM_W-120), y=120+r()*(WM_H-220); if(!ok(x,y)) continue; const L=THEME(x,y); decor.push({x:x,y:y,k:'spr',n:L[Math.floor(r()*L.length)],sc:RS(0.09,0.16),fl:r()<0.5?1:0}); n++; }
+  // цэцэгт нуга (хойд, баруунаас бусад)
+  tries=0; n=0; while(n<26&&tries++<5000){ const cx=80+r()*(WM_W-160), cy=300+r()*(WM_H-700); if(!ok(cx,cy)||cy<1300||cy>3400) continue; const fam=R4(), cnt=4+Math.floor(r()*5); for(let j=0;j<cnt;j++){ const fx=cx+(r()-0.5)*110, fy=cy+(r()-0.5)*60; if(!ok(fx,fy)) continue; add('wm_fl'+(fam*4+R4()),fx,fy,RS(38,62),{fl:r()<0.5?1:0}); } if(r()<0.5) add('wm_fm'+Math.floor(r()*6),cx,cy+4,RS(70,110),{fl:r()<0.5?1:0}); n++; }
+  tries=0; n=0; while(n<8&&tries++<3000){ const x=80+r()*(WM_W-160), y=1300+r()*2100; if(!ok(x,y)) continue; add('wm_gp'+Math.floor(r()*6),x,y,RS(100,160),{flat:1}); n++; }
+  // 6) ой бөөгнөрөл
+  const grove=(x,y,nm,cnt,sc)=>{ for(let q=0;q<cnt;q++){ const gx=x+(r()-0.5)*40, gy=y+(r()-0.5)*40; if(ok(gx,gy)) addS(nm,gx,gy,sc,{big:140}); } };
+  tries=0; n=0; while(n<30&&tries++<4000){ const x=80+r()*(WM_W-160), y=160+r()*(WM_H-300); if(!free(x,y,60,50)) continue; let nm=null; const u=r();
+    if(y<1100) continue; else if(y<1600) nm=u<0.4?'wm_fo2':u<0.7?'wm_fo0':'wm_fo1'; else if(y>3500) continue;
+    else if(Math.hypot(x-CLN[2].x,y-CLN[2].y)<600||Math.hypot(x-CLN[8].x,y-CLN[8].y)<600) nm=u<0.5?'wm_fo4':'wm_fo5'; else if(x<650) nm=u<0.5?'wm_fo0':'wm_fo2'; else { if(u>0.18) continue; nm=u<0.09?'wm_fo1':'wm_fo5'; }
+    addS(nm,x,y,0.17,{big:90}); n++; }
+  // 7) чулуу олборлолт (баруун уул)
+  tries=0; n=0; while(n<3&&tries++<2000){ const x=120+r()*500, y=1300+r()*2100; if(!free(x,y,80,60)) continue; addS('wm_rs'+(6+Math.floor(r()*3)),x,y,0.22,{big:90}); n++; }
+  wmDecorGen3(decor,r,free,add,addS);
+  // 8) амьтад (аажуухан явна)
+  const AN=[[0,1,3,4,6,7],[0,1,4,5,8,9],[1,2,8,10,11,9],[2,3,7,6,4]];
+  tries=0; n=0; while(n<26&&tries++<4000){ const x=100+r()*(WM_W-200), y=200+r()*(WM_H-380); if(!free(x,y,10,40)) continue; const zi=y<1500?0:y>3300?2:x<650?3:1, L=AN[zi], i=L[Math.floor(r()*L.length)];
+    decor.push({x:x,y:y,k:'ani',n:'wm_an'+i,sc:0.14+(i===6||i===10?0.02:0)+(i===11?-0.03:0),ph:r()*6.28,sp:0.18+r()*0.12,ax:14+r()*26}); n++; } }
+
+// ---- нуур, гол, уулсын нуруу ----
+function wmLakes(c,D,vis){ D.lakes.forEach((l,i)=>{ const cx=l.x+l.w*0.8, cy=l.y+l.h*0.8; if(!vis(cx,cy,400)) return; const wt=cy<1500&&wmS('wm_wt3'), k=cy<1500?(wt?'wm_wt'+[3,4,11,5][i%4]:'wm_fz'+(i%6)):'wm_lk'+(i%3), s=wmS(k);
+    if(s){ const w=l.w*(wt?1.35:1.95), h=w*s.ih/s.iw; c.drawImage(s.img,cx-w/2,cy-h/2,w,h); return; }
+    const p=SPR.pond; if(p&&p.img.complete) c.drawImage(p.img,l.x,l.y,l.w*1.6,l.h*1.6*p.ih/p.iw*1.2); }); }
+var WM_RP=null;
+wmRivDraw=function(c,t){ /* гол зурахгүй */ };
+function wmPano(c){ const s=wmS('wm_pano'); if(!s) return; const w=1800, h=w*s.ih/s.iw, y=332-h; c.drawImage(s.img,-100,y,w,h); c.save(); c.translate(WM_W+100,0); c.scale(-1,1); c.drawImage(s.img,0,y,w,h); c.restore(); }
+
+// ================= 153: байгууламж, цэрэг, бүрхүүл =================
+const WM_HR=6*3600e3;
+function wmHmIdx(p){ return p<400?0:p<1500?1:p<5000?2:3; }
+function wmDome(c,x,y,kind,t,sc){ const k=kind===2?'wm_sh2':kind===1?'wm_sh1':'wm_sh0', s=wmS(k); if(!s) return; const w=(sc||0.25)*s.iw, h=w*s.ih/s.iw; c.save(); c.globalAlpha=kind===0?(0.62+0.18*Math.sin(t*2)):kind===1?(0.5+0.12*Math.sin(t*3)):(0.7); c.drawImage(s.img,x-w/2,y+9-h,w,h); c.restore(); }
+function wmSmoke(c,x,y,t,w){ const s=wmS('wm_rf2'); if(!s) return; const ww=w||44, hh=ww*s.ih/s.iw; c.save(); c.globalAlpha=0.9; c.drawImage(s.img,x-ww/2,y-hh+4,ww,hh); c.restore(); }
+function wmHomeFx(c,D,t,items){ if(!WMT.ok) return; const raided=S.raidSeen&&(wmNow()-S.raidSeen)<WM_HR;
+  items.push({y:D.C.y+2,f:()=>{ wmDome(c,D.C.x,D.C.y,raided?2:0,t,0.27); if(raided) wmSmoke(c,D.C.x+34,D.C.y+4,t,40); }}); }
+function wmKsFx(c,D,vis,items,t){ if(!WMT.ok) return; D.ks.forEach(k=>{ if(!wmCd(k.id)||!vis(k.x,k.y,90)) return; const s=wmS('wm_bf3'); if(!s) return; items.push({y:k.y+3,f:()=>{ const w=0.17*s.iw, h=w*s.ih/s.iw; c.drawImage(s.img,k.x+36,k.y+6-h,w,h); }}); }); }
+// цэрэг: тоогоор нь хэмжээ, төрлөөр нь зураг
+function wmArmyInfo(m){ if(m._ar&&Date.now()-m._ar.t<1500) return m._ar; const n={cav:0,archer:0,foot:0}; try{ TR.forEach(T=>{ const pcT=(m.pc&&m.pc[T.ty]!=null)?m.pc[T.ty]:1; n[T.ty]+=Math.floor((S.res[T.k]||0)*pcT); }); }catch(e){}
+  let tot=n.cav+n.archer+n.foot, ty=n.cav>=n.archer&&n.cav>=n.foot?'cav':n.archer>=n.foot?'archer':'foot'; if(m.ty!=='attack'){ ty='cav'; tot=Math.min(tot,12); }
+  const sz=tot<30?0:tot<300?1:tot<3000?2:tot<30000?3:4, set={cav:['cA','cB'],archer:['aA','aB','aC'],foot:['fA','fB','fC','fD']}[ty], k=set[hsh(String(m.id))%set.length];
+  return m._ar={t:Date.now(),k:'wm_ar_'+k+sz,tot:tot,ty:ty,sz:sz}; }
+function wmArmyDraw(c,m,mx,my,t,back,e){ const A=wmArmyInfo(m), s=WMT.ok&&wmS(A.k);
+  if(!s){ wmDrawS(c,'u_lightcav',mx,my,26); return; }
+  const w=0.46*s.iw, h=w*s.ih/s.iw, bob=Math.sin(t*9+hsh(String(m.id)))*1.3; c.drawImage(s.img,mx-w/2,my-h*0.88+bob,w,h);
+  if(m.ty==='attack'&&A.tot>0) wmLabel(c,'⚔'+f(A.tot),mx,my+10,'#ffe28a',10);
+  if(e&&m.ty==='attack'&&!back){ const b=wmS('wm_bf0'); if(b){ const bw=0.17*b.iw, bh=bw*b.ih/b.iw; c.save(); c.globalAlpha=0.65+0.3*Math.sin(t*6); c.drawImage(b.img,e.x-bw/2,e.y-bh-6,bw,bh); c.restore(); } } }
+// нөөцийн цэг, авдар, бандит бааз
+function wmNodes(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_rs0'))) return wmNodes0(c,D,vis,items,t);
+  D.nodes.forEach(n=>{ if(!vis(n.x,n.y,70)) return; const cd=wmCd(n.id), sz=n.lv<=2?0:n.lv<=4?1:2; let key; if(n.rt==='grain') key=sz===0?'wm_rf5':'wm_rf4'; else key='wm_rs'+({wood:0,meat:3,gold:9}[n.rt]+sz); const s=wmS(key); if(!s) return;
+    items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.45:1; const w=(n.rt==='grain'?0.27:0.30)*s.iw*(0.9+0.06*n.lv), h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.8,w,h); c.globalAlpha=1; wmLabel(c,'Lv'+n.lv,n.x,n.y+h*0.2+6,'#fff',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-h*0.8,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,24+n.lv*2,t); }}); }); }
+function wmChests(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_ch0'))) return wmChests0(c,D,vis,items,t);
+  D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; const s=wmS('wm_ch'+(n.v<=1?0:n.v===2?1:n.v===3?2:3)); if(!s) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.3+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-12,20+5*pu,0,7); c.fill(); c.globalAlpha=1; const w=0.36*s.iw, h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.85,w,h); wmLabel(c,'Эрдэнэс',n.x,n.y+10,'#ffe28a',11); }}); }); }
+function wmCamps(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_bc0'))) return wmCamps0(c,D,vis,items,t);
+  D.camps.forEach(n=>{ if(!vis(n.x,n.y,80)) return; const cd=wmCd(n.id), s=wmS('wm_bc'+Math.min(4,n.lv-1)); if(!s) return;
+    items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; const w=0.28*s.iw*(0.92+0.04*n.lv), h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.8,w,h); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+h*0.2+8,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-h*0.8-4,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30+n.lv*2,t); }}); }); }
+// клан төв, бусад тоглогчийн гэр, ям
+wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=0?wmOpp(my,w):-1, ok=WMT.ok&&wmS('wm_hq0'), now=wmNow();
+  items.push({y:D.C.y+1,f:()=>{ wmLabel(c,'🛡 Хамгаалалттай',D.C.x,D.C.y+46,'#9fd0ff',11); }});
+  CLN.forEach((q,i)=>{ if(!vis(q.x,q.y,320)) return; const isMy=i===my, isOp=i===op, s=ok?wmS('wm_hq'+i):null, ww=s?(isMy||isOp?0.85:0.78)*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
+    items.push({y:1e5+qy,f:()=>{ c.save(); c.globalAlpha=isMy||isOp?0.9:0.6; wmLabel(c,(isMy?'⚑ ':isOp?'⚔ ':'')+q.n+' клан'+(wmTerr()&&wmTerr().z===i?(wmTerr().win?' 🏴 эзэмшил':' ⚠ эзлэгдсэн'):''),qx,qy-(s?hh*0.86:(isMy?78:44)),isMy?'#ffe28a':isOp?'#ff9a8a':'#fff',isMy||isOp?20:17); c.restore(); }});
+    items.push({y:qy,f:()=>{ if(s){ c.drawImage(s.img,qx-ww/2,qy-hh*0.88,ww,hh); } else if(!isMy){ c.fillStyle=q.c; c.fillRect(q.x-1.5,q.y-46,3,48); c.beginPath(); c.moveTo(q.x+1.5,q.y-46); c.lineTo(q.x+26,q.y-38); c.lineTo(q.x+1.5,q.y-30); c.fill(); } }}); });
+  const rows=CWD.w===w?CWD.my:[]; rows.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{ const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
+    items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(x.p||0)):null; if(s){ const ww=0.20*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
+  wmCwEnts().forEach(e=>{ if(!vis(e.x,e.y,70)) return; const cd=wmCd(e.id);
+    items.push({y:e.y,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(e.p)):null, imm=e.real&&e.uid&&CWD.rd&&CWD.rd[e.uid]&&now-CWD.rd[e.uid]<WM_HR; c.globalAlpha=cd?0.45:1; let hh=44;
+      if(s){ const ww=0.25*s.iw; hh=ww*s.ih/s.iw; c.drawImage(s.img,e.x-ww/2,e.y-hh*0.82,ww,hh); } else wmDrawS(c,'ger2',e.x,e.y,40);
+      c.fillStyle=e.c; c.fillRect(e.x-1,e.y-hh-8,2,16); c.beginPath(); c.moveTo(e.x+1,e.y-hh-8); c.lineTo(e.x+14,e.y-hh-3); c.lineTo(e.x+1,e.y-hh+2); c.fill(); c.globalAlpha=1;
+      if(e.real&&ok){ if(imm){ wmDome(c,e.x,e.y,2,t,0.24); wmSmoke(c,e.x+30,e.y+2,t,36); } else if(e.act<12) wmDome(c,e.x,e.y,0,t,0.24); else if(e.act<24) wmDome(c,e.x,e.y,1,t,0.24); }
+      wmLabel(c,e.n,e.x,e.y+13,e.real?'#ffd0c8':'#e8b8a8',11); wmLabel(c,'⚔'+f(e.p),e.x,e.y+25,'#ffd770',10); if(e.real) wmLabel(c,wmShieldTxt(e),e.x,e.y+36,e.act<12?'#9fd0ff':'#ffb070',9); if(cd) wmLabel(c,'🛡'+wmFmt(cd),e.x,e.y-hh-8,'#9fd0ff',10); if(WMS===e.id) wmRing(c,e.x,e.y-14,36,t); }}); }); };
+wmYamDraw=function(c,t,vis,items){ const Y=(S.wm&&S.wm.yam)||{}; wmYams().forEach(y=>{ if(!vis(y.x,y.y,90)) return; const on=!!Y[y.id], s=WMT.ok?wmS('wm_ym'+(hsh(String(y.id))%3)):null;
+  items.push({y:y.y,f:()=>{ if(s){ if(on){ c.globalAlpha=0.35; c.fillStyle='#6fd04a'; c.beginPath(); c.ellipse(y.x,y.y-6,44,16,0,0,7); c.fill(); c.globalAlpha=1; } const w=0.27*s.iw, h=w*s.ih/s.iw; c.drawImage(s.img,y.x-w/2,y.y-h*0.8,w,h); }
+    else { c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(y.x,y.y,22,7,0,0,7); c.fill(); wmDrawS(c,'tent',y.x,y.y,32); c.fillStyle=on?'#6fd04a':'#ffd24a'; c.fillRect(y.x-1,y.y-44,2,18); c.beginPath(); c.moveTo(y.x+1,y.y-44); c.lineTo(y.x+15,y.y-39); c.lineTo(y.x+1,y.y-34); c.fill(); }
+    wmLabel(c,'🐎 Ям'+(on?' ✓':''),y.x,y.y+16,on?'#9fe89a':'#ffe28a',11); if(WMS===y.id) wmRing(c,y.x,y.y-12,32,t); }}); }); };
+// тактикийн дүрс
+(function(){ const _t=wmTacSheet; wmTacSheet=function(id){ _t(id); try{ const sh=$('wmsheet'); if(!sh||!WMT.ok) return; const IC={'🏹':0,'🌧':1,'🔄':2,'⚔':4}; sh.querySelectorAll('button').forEach(b=>{ for(const k in IC){ const s=wmS('wm_tc'+IC[k]); if(s&&b.innerHTML.indexOf(k)>=0&&b.innerHTML.indexOf('<img')<0){ b.innerHTML=b.innerHTML.replace(k,'<img src="'+s.img.src+'" style="width:30px;height:30px;vertical-align:middle;margin-right:4px">'); break; } } if(b.innerHTML.indexOf('🔍')>=0){ const s=wmS('wm_tc3'); if(s) b.innerHTML=b.innerHTML.replace('🔍','<img src="'+s.img.src+'" style="width:26px;height:26px;vertical-align:middle;margin-right:4px">'); } }); }catch(e){} }; })();
+
+// ---- 154: уул, хад, даваа, өвлийн хойд, олон мод ----
+function wmDecorGen3(decor,r,free,add,addS){ const RS=(a,b)=>a+r()*(b-a);
+  const mt=(x,y,s0)=>{ if(free(x,y,60,0)) decor.push({x:x,y:y,k:'mt',s:s0,big:200}); };
+  // хойд нуруу (цастай) — 2 эгнээ
+  for(let x=60;x<WM_W;x+=125){ mt(x+(r()-0.5)*60,170+r()*110,RS(1.0,1.4)); if(r()<0.8) mt(x+60+(r()-0.5)*60,330+r()*120,RS(0.85,1.2)); }
+  // баруун, зүүн нуруу
+  for(let y=1000;y<4000;y+=120){ mt(70+r()*170,y+(r()-0.5)*50,RS(0.85,1.3)); if(r()<0.5) mt(250+r()*90,y+60,RS(0.7,1.0)); mt(WM_W-70-r()*150,y+60+(r()-0.5)*50,RS(0.85,1.3)); }
+  // өмнөд захын хаднууд
+  for(let x=80;x<WM_W;x+=100+r()*110){ mt(x,WM_H-90-r()*110,RS(0.9,1.5)); if(r()<0.5) mt(x+50,WM_H-230-r()*60,RS(0.8,1.2)); }
+  // тусгаар уулс (хойд хагаст), хад, чулуу
+  let n=0,t=0; while(n<9&&t++<600){ const x=250+r()*(WM_W-500), y=450+r()*1100; if(free(x,y,90,0)){ mt(x,y,RS(0.8,1.1)); n++; } }
+  n=0; t=0; while(n<26&&t++<1500){ const x=80+r()*(WM_W-160), y=300+r()*(WM_H-500), wk=x<480||x>WM_W-480; if(wk&&y>1150&&free(x,y,40,30)){ addS('wm_cl'+Math.floor(r()*8),x,y,RS(0.15,0.22),{big:100,fl:r()<0.5?1:0}); n++; } }
+  n=0; t=0; while(n<12&&t++<1000){ const x=120+r()*(WM_W-240), y=1200+r()*(WM_H-1500); if(x>500&&x<WM_W-500) continue; if(free(x,y,60,40)){ addS('wm_rs'+(6+Math.floor(r()*3)),x,y,0.22,{big:90}); n++; } }
+  // таны өвлийн зургаас: цастай ой, хад, агуй, өндөр тавцан (хойд хагаст)
+  { const big=(nm,x,y,sc)=>decor.push({x:x,y:y,k:'spr',n:nm,sc:sc,flat:1,big:180,fl:r()<0.5?1:0});
+    n=0; t=0; while(n<14&&t++<3000){ const x=120+r()*(WM_W-240), y=250+r()*650; if(free(x,y,110,0)){ big('wm_wt1',x,y,RS(0.7,0.95)); n++; } }
+    n=0; t=0; while(n<12&&t++<3000){ const x=120+r()*(WM_W-240), y=250+r()*650; if(free(x,y,110,0)){ big(['wm_wt2','wm_wt7','wm_wt9'][Math.floor(r()*3)],x,y,RS(0.65,0.85)); n++; } } }
+  // мод: бүс бүрт өөр — олон
+  const tree=(x,y)=>decor.push({x:x,y:y,k:'tree',s:RS(0.85,1.3),w:26});
+  const forest=(cx,cy,cnt,rad)=>{ for(let i=0;i<cnt;i++){ const a=r()*6.283, d=Math.sqrt(r())*rad, x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d*0.75; if(free(x,y,-10,24)) tree(x,y); } };
+  n=0; t=0; while(n<30&&t++<3000){ const x=80+r()*(WM_W-160), y=1150+r()*450; if(free(x,y,80,30)){ forest(x,y,10+Math.floor(r()*12),90); n++; } } // тайга (ногоон)
+  n=0; t=0; while(n<26&&t++<3000){ const x=80+r()*(WM_W-160), y=1500+r()*1900; if(free(x,y,80,30)){ forest(x,y,6+Math.floor(r()*8),70); n++; } } // дунд
+  for(let i=0;i<150;i++){ const x=80+r()*(WM_W-160), y=450+r()*(WM_H-900); if(free(x,y,-10,24)) tree(x,y); }
+}
+
+// ---- 155: улсуудын түүхэн бүтэц (нүүдэлчин отог / суурин хот) ----
+const WM_KW=[160,165,165,180,180,190,195,210,210,215,225,235,240,240];
+function wmKs(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_kg0'))) return wmKs0(c,D,vis,items,t);
+  D.ks.forEach(k=>{ if(!vis(k.x,k.y,110)) return; const s=wmS('wm_kg'+k.i); if(!s){ return wmKs1(c,k,vis,items,t); } const cd=wmCd(k.id), w=WM_KW[k.i]||150, h=w*s.ih/s.iw;
+    items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(k.x,k.y,w*0.42,w*0.1,0,0,7); c.fill(); c.drawImage(s.img,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
+      wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); }
+
+
+function wmNodes0(c,D,vis,items,t){
+  D.nodes.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.45:1; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(n.x,n.y,16,6,0,0,7); c.fill(); c.fillStyle='#eadfb9'; c.beginPath(); c.arc(n.x,n.y-14,15,0,7); c.fill(); c.strokeStyle='#7a5a2a'; c.lineWidth=2; c.stroke(); const s=SPR[WM_RT[n.rt].ic]; if(s&&s.img.complete) c.drawImage(s.img,n.x-11,n.y-25,22,22*s.ih/s.iw); c.globalAlpha=1; wmLabel(c,'Lv'+n.lv,n.x,n.y+8,'#fff',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-32,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,24,t); }}); });
+}
+function wmChests0(c,D,vis,items,t){
+  D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.35+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-8,16+4*pu,0,7); c.fill(); c.globalAlpha=1; wmDrawS(c,'ui2_chest',n.x,n.y,28); wmLabel(c,'Эрдэнэс',n.x,n.y+12,'#ffe28a',11); }}); });
+}
+function wmCamps0(c,D,vis,items,t){
+  D.camps.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; wmDrawS(c,'tent',n.x,n.y,34); wmDrawS(c,'bd_h0',n.x+16,n.y+4,18); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+14,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-30,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30,t); }}); });
+}
+function wmKs0(c,D,vis,items,t){
+  D.ks.forEach(k=>{ if(!vis(k.x,k.y,90)) return; const cd=wmCd(k.id), sp=k.i<4?'ger':k.i<8?'ger2':k.i<11?'ger3':'ger4'; items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; const w=k.i<4?40:k.i<8?46:k.i<11?56:66; wmCastle(c,k,w); c.globalAlpha=1; c.fillStyle=k.c; c.fillRect(k.x-1,k.y-w*0.9-14,2,16); c.beginPath(); c.moveTo(k.x+1,k.y-w*0.9-14); c.lineTo(k.x+14,k.y-w*0.9-9); c.lineTo(k.x+1,k.y-w*0.9-4); c.fill(); wmLabel(c,k.n,k.x,k.y+14,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+28,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-w*0.9-20,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,44,t); }}); });
+}
+function wmKs1(c,k,vis,items,t){ wmKs0(c,{ks:[k]},vis,items,t); }
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

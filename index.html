@@ -6306,9 +6306,14 @@ function wmHeroChip(hid,hole,full){
       let s=$('wmheroes');
       if(!s){ s=document.createElement('div'); s.id='wmheroes'; s.style.cssText='position:absolute;left:62px;right:112px;display:flex;gap:6px;overflow-x:auto;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;padding:3px 6px;color:#ffe9b0;z-index:2'; w.appendChild(s); }
       s.style.top=(b.offsetTop+b.offsetHeight+4)+'px';
-      const ids=squad();
-      const html=ids.length?ids.map(h=>wmHeroChip(h,26,false)).join(''):'<div class="sm">Баатар алга</div>';
+      s.style.flexDirection='column'; s.style.gap='3px'; s.style.overflowX='hidden';
+      const ids=squad(), pp=wmPowParts();
+      const tp=[['cav','Морьт'],['archer','Харваач'],['foot','Явган']].map(x=>{ const ic=(typeof WM_TYI!=='undefined'&&WM_TYI[x[0]])?WM_TYI[x[0]][0]:''; return '<span title="'+x[1]+'" style="white-space:nowrap">'+ic+' '+x[1]+' <span style="color:#fff">'+cn(pp[x[0]]||0)+'</span></span>'; }).join('');
+      const html='<div style="display:flex;gap:8px;font-size:11px;font-weight:bold;color:#ffd770;flex-wrap:wrap">'+tp+'</div><div style="display:flex;gap:6px;overflow-x:auto">'+(ids.length?ids.map(h=>wmHeroChip(h,26,false)).join(''):'<div class="sm">Баатар алга</div>')+'</div>';
       if(s._h!==html){ s.innerHTML=html; s._h=html; }
+      const cb=$('wmcl'); let lb=$('wmcll');
+      if(cb&&!lb){ lb=document.createElement('div'); lb.id='wmcll'; lb.textContent='Клан'; lb.style.cssText='position:absolute;width:'+cb.offsetWidth+'px;text-align:center;font-size:11px;font-weight:bold;color:#ffe9b0;text-shadow:0 1px 2px #000,0 0 3px #000;pointer-events:none;z-index:2'; w.appendChild(lb); }
+      if(cb&&lb){ lb.style.left=cb.offsetLeft+'px'; lb.style.top=(cb.offsetTop+cb.offsetHeight+1)+'px'; }
     }catch(e){}
   };
   const _s2=wmSelSheet;

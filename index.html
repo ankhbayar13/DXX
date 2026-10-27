@@ -816,8 +816,9 @@ function prodTick(secs){
       if(st.ready>=prodMax(k)){ st.t=per; break; }
       if(!canPay(b.in)){ st.t=per; break; }
       for(const x in b.in) S.res[x]-=b.in[x];
-      st.ready++; st.t-=per;
+      if(b.out&&b.out.indexOf('t_')===0){ S.res[b.out]=(S.res[b.out]||0)+1; st.tn=(st.tn||0)+1; } else st.ready++; st.t-=per;
     }
+    if(b.out&&b.out.indexOf('t_')===0){ if(st.ready>=1){ st.tn=(st.tn||0)+st.ready; S.res[b.out]=(S.res[b.out]||0)+st.ready; st.ready=0; } if(st.tn>0&&secs<20){ try{ if(S.pos[k]){ const r=brect(k); addFloat(r.x+r.w/2,r.y-8,'+'+st.tn+' '+ITEMS[b.out].n,'#ffe9a0'); } }catch(e){} } st.tn=0; }
   });
 }
 function orderPool(){ const p=['meat','milk','wool','grain','wood']; PROD.forEach(k=>{ if(S.bld[k]>0&&ITEMS[k]) p.push(k); }); return p; }
@@ -892,7 +893,7 @@ function offline(){
   if(window._acTamper){ window._acTamper=0; acFlag('save'); }
   if(Date.now()<S.last-120000){ acFlag('time'); S.last=Date.now(); return; }
   const secs = Math.min((Date.now()-S.last)/1000, rkOffS());
-  if(secs>30){ const b0={},p0={}; for(const k in S.res) b0[k]=S.res[k]; for(const k in S.pend) p0[k]=S.pend[k]; tick(secs); if(secs>=300 && typeof offPop==='function'){ const P=S.offp||(S.offp={g:{},secs:0,st:0,xp:0}); for(const k in S.res){ const d=S.res[k]-(b0[k]||0); if(d>=1&&k!=='alt'){ P.g[k]=(P.g[k]||0)+d; S.res[k]=b0[k]; } } for(const k in S.pend){ const d=S.pend[k]-(p0[k]||0); if(d>=1){ P.g[k]=(P.g[k]||0)+d; S.pend[k]=p0[k]||0; } } P.secs=Math.min(rkOffS(),P.secs+secs); const hh=secs/3600; if(S.bld.tarialan) P.g.grain=(P.g.grain||0)+Math.floor(hh*40*S.bld.tarialan); P.g.wood=(P.g.wood||0)+Math.floor(hh*(25+8*(S.bld.ger||1))); P.st=0; P.xp=0; offPop(); if(typeof mailAdd==='function') mailAdd('Нүүдлийн шагнал',Math.floor(secs/3600)+' цагийн нөөц цугларсан.'); } else say('Чамайг байхгүй байхад '+Math.floor(secs/60)+' минутын нөөц цугларлаа'); }
+  if(secs>30){ const b0={},p0={}; for(const k in S.res) b0[k]=S.res[k]; for(const k in S.pend) p0[k]=S.pend[k]; tick(secs); if(secs>=300 && typeof offPop==='function'){ const P=S.offp||(S.offp={g:{},secs:0,st:0,xp:0}); for(const k in S.res){ const d=S.res[k]-(b0[k]||0); if(d>=1&&k!=='alt'&&k.indexOf('t_')!==0){ P.g[k]=(P.g[k]||0)+d; S.res[k]=b0[k]; } } for(const k in S.pend){ const d=S.pend[k]-(p0[k]||0); if(d>=1){ P.g[k]=(P.g[k]||0)+d; S.pend[k]=p0[k]||0; } } P.secs=Math.min(rkOffS(),P.secs+secs); const hh=secs/3600; if(S.bld.tarialan) P.g.grain=(P.g.grain||0)+Math.floor(hh*40*S.bld.tarialan); P.g.wood=(P.g.wood||0)+Math.floor(hh*(25+8*(S.bld.ger||1))); P.st=0; P.xp=0; offPop(); if(typeof mailAdd==='function') mailAdd('Нүүдлийн шагнал',Math.floor(secs/3600)+' цагийн нөөц цугларсан.'); } else say('Чамайг байхгүй байхад '+Math.floor(secs/60)+' минутын нөөц цугларлаа'); }
   S.last = Date.now();
 }
 
@@ -2501,7 +2502,7 @@ function bldHTML(k){
   else if(k==='hureo') extra='<button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button><button class="btn" onclick="openM(\'dain\')">Дайн</button><button class="btn" onclick="openM(\'baatar\')">Баатар</button>';
   else if(k==='naadamring') extra='<button class="btn" onclick="openM(\'naadam\')">Наадам</button>';
   else if(k==='ger'||/^ger\d$/.test(k)) extra='<button class="btn" onclick="openM(\'barilga\')">Барилга</button><button class="btn" onclick="openM(\'fam\')">👪 Гэр бүл</button>';
-  { const T=TR.find(x=>x.b===k); if(T) extra+='<div class="sm" style="width:100%">'+iconHTML(T.k,22)+' '+T.n+': <b>'+f(S.res[T.k]||0)+'</b> · Хүч '+f(trPow(T))+'<br>Бөмбөлөг дээр дарж цэргээ ав. Түвшин ахихад хүчтэй, шинэ дүртэй болно.</div>'; }
+  { const T=TR.find(x=>x.b===k); if(T) extra+='<div class="sm" style="width:100%">'+iconHTML(T.k,22)+' '+T.n+': <b>'+f(S.res[T.k]||0)+'</b> · Хүч '+f(trPow(T))+'<br>Цэрэг автоматаар хүчинд нэмэгдэнэ. Түвшин ахихад хүчтэй, шинэ дүртэй болно.</div>'; }
   return '<h2>'+d.n+' · '+S.bld[k]+'-р түвшин</h2>'+prodPanel(k)+(k==='market'?barterHTML():'')+upCard(k,1)+'<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" onclick="startMove(\''+k+'\')">🔀 Байрлал зөөх</button>'+extra+'</div></div>';
 }
 function troopCard(){ return '<div class="card"><h3>Цэрэг</h3><div class="row" style="gap:6px;flex-wrap:wrap">'+TR.map(T=>'<div>'+iconHTML(T.k,26)+' '+T.n+' <b>'+f(S.res[T.k]||0)+'</b>'+(S.bld[T.b]?'':' <span class="sm">(барилга байхгүй)</span>')+'</div>').join('')+'</div><div class="sm" style="margin:6px 0">Цэргийн барилга бариад, бөмбөлөг дээр дарж цэргээ ав.</div><button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button></div>'; }
@@ -5134,7 +5135,7 @@ function prodPanel(k){
   if(out.p>0) h+='<div class="sm" style="text-align:center">Үнэ: <b>'+out.p+'</b> 🪙 · Орц: '+Math.round(inV)+' 🪙 · Ашиг: <b style="color:#9be07a">+'+Math.round(out.p-inV)+'</b></div>';
   h+='<div class="sm" style="text-align:center;margin-top:3px">1 ширхэг: <b>'+fmtT(per)+'</b> · '+stat+'</div>';
   h+='<div style="height:8px;background:#1a0f06;border:1px solid #6b4a1e;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+pr+'%;background:#d9a431"></div></div>';
-  h+='<div class="row"><div class="sm">Бэлэн: <b>'+ready+'/'+prodMax(k)+'</b>'+(out.p>0?' · Агуулахад: <b>'+Math.floor(S.res[b.out]||0)+'</b>':'')+'</div><div style="display:flex;gap:6px"><button class="btn" '+(ready<1?'disabled':'')+' onclick="collectProd(\''+k+'\')">Агуулахад ав</button>'+(out.p>0?'<button class="btn" '+((S.res[b.out]||0)<1?'disabled':'')+' onclick="sellItem(\''+b.out+'\')">Зарах</button>':'')+'</div></div></div>';
+  if(b.out.indexOf('t_')===0) h+='<div class="sm" style="text-align:center">Цэрэг: <b>'+Math.floor(S.res[b.out]||0)+'</b> · хүчинд автоматаар нэмэгдэнэ</div></div>'; else h+='<div class="row"><div class="sm">Бэлэн: <b>'+ready+'/'+prodMax(k)+'</b>'+(out.p>0?' · Агуулахад: <b>'+Math.floor(S.res[b.out]||0)+'</b>':'')+'</div><div style="display:flex;gap:6px"><button class="btn" '+(ready<1?'disabled':'')+' onclick="collectProd(\''+k+'\')">Агуулахад ав</button>'+(out.p>0?'<button class="btn" '+((S.res[b.out]||0)<1?'disabled':'')+' onclick="sellItem(\''+b.out+'\')">Зарах</button>':'')+'</div></div></div>';
   return h;
 }
 
@@ -6222,6 +6223,23 @@ function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mo
   iv=setInterval(()=>{ if(innerWidth>innerHeight){ clearInterval(iv); setTimeout(go,350); } else if(Date.now()-t0>(ok?30000:2500)){ go(); } },150);
 }; const _be=btEnd; btEnd=function(f){ const r=_be(f); if(!BT){ window.BT_LAND=0; try{ screen.orientation.unlock(); }catch(e){} } return r; }; })();
 
+// ===== цэргийн тоо HUD дээр =====
+(function(){
+  const _u=updateHUD;
+  updateHUD=function(){
+    const r=_u.apply(this,arguments);
+    try{
+      const pw=document.getElementById('pw'); if(!pw) return r;
+      let s=document.getElementById('ptr');
+      if(!s){ s=document.createElement('span'); s.id='ptr'; s.style.cssText='font-size:11px;margin-left:6px;white-space:nowrap;color:#ffe9a8'; pw.parentNode.appendChild(s); }
+      const n=TR.reduce((a,T)=>a+Math.floor(S.res[T.k]||0),0);
+      s.textContent='🛡'+(n>=10000?(n/1000).toFixed(1)+'k':n);
+    }catch(e){}
+    return r;
+  };
+})();
+
+
 // ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====
 (function(){
 const IW=1024, IH=1536, MAIN=['meat','wool','wood'];
@@ -6312,7 +6330,7 @@ offPop=function(){
       if(n){ n.textContent=done?'':tx; n.style.fontSize=((fit(tx,44,34,28))*u).toFixed(1)+'px'; }
       if(d){ d.style.display=(done||v<1)?'flex':'none'; d.textContent=done?'✓':''; }
     });
-    const ex=Object.keys(P.g).filter(k=>MAIN.indexOf(k)<0&&(P.g[k]||0)>=1).map(k=>(RESN[k]||k)+' '+f(P.g[k])).join('  ·  ');
+    const ex=Object.keys(P.g).filter(k=>MAIN.indexOf(k)<0&&(P.g[k]||0)>=1).map(k=>(RESN[k]||(ITEMS[k]&&ITEMS[k].n)||k)+' '+f(P.g[k])).join('  ·  ');
     const e2=o.querySelector('#offex'); if(e2) e2.textContent=ex?'+ '+ex:'';
   };
   o._upd();

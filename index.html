@@ -2179,7 +2179,7 @@ function wLocked(k){ const w=WLOCK[k]; return !!(w&&(S.bld.ger||1)<w[0]&&!admOn(
 function openM(k){
   try{ radClose(); }catch(e){}
   if(wLocked(k)){ say(WLOCK[k][1]+': Гол гэр '+WLOCK[k][0]+'-р түвшинд хүрэхэд нээгдэнэ (одоо '+(S.bld.ger||1)+')'); return; }
-  if(k==='wmap'){ if(!worldOpen()&&!admOn()){ say('Түүхэн аяныг дуусгахад нээгдэнэ ('+joinedN()+'/14 аймаг)'); return; } cancelPlace(); deselect(); wmOpen(); return; }
+  if(k==='wmap'){ if((S.pl||1)<5&&!worldOpen()&&!admOn()){ say('🌍 Дэлхий 5-р түвшинд нээгдэнэ (одоо '+(S.pl||1)+'-р түвшин)'); try{ sfx('err'); }catch(e){} return; } cancelPlace(); deselect(); wmOpen(); return; }
   if(k==='camp'){ cancelPlace(); deselect(); chsOpen(); return; }
   if((k==='baatar'||k==='dain'||k==='gear') && S.bld.hureo<1){ say('Эхлээд Цэргийн хүрээ бариарай'); return; }
   cancelPlace(); deselect();

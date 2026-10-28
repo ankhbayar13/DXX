@@ -5850,7 +5850,7 @@ wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=
       wmLabel(c,e.n,e.x,e.y+13,e.real?'#ffd0c8':'#e8b8a8',11); wmLabel(c,'⚔'+f(e.p),e.x,e.y+25,'#ffd770',10); if(e.real) wmLabel(c,wmShieldTxt(e),e.x,e.y+36,e.act<12?'#9fd0ff':'#ffb070',9); if(cd) wmLabel(c,'🛡'+wmFmt(cd),e.x,e.y-hh-8,'#9fd0ff',10); if(WMS===e.id) wmRing(c,e.x,e.y-14,36,t); }}); }); };
 wmYamDraw=function(c,t,vis,items){ const Y=(S.wm&&S.wm.yam)||{}; wmYams().forEach(y=>{ if(!vis(y.x,y.y,90)) return; const on=!!Y[y.id], s=WMT.ok?wmS('wm_ym'+(hsh(String(y.id))%3)):null;
   items.push({y:y.y,f:()=>{ if(s){ if(on){ c.globalAlpha=0.35; c.fillStyle='#6fd04a'; c.beginPath(); c.ellipse(y.x,y.y-6,44,16,0,0,7); c.fill(); c.globalAlpha=1; } const w=0.27*s.iw, h=w*s.ih/s.iw; c.drawImage(s.img,y.x-w/2,y.y-h*0.8,w,h); }
-    else { c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(y.x,y.y,22,7,0,0,7); c.fill(); wmDrawS(c,'tent',y.x,y.y,32); c.fillStyle=on?'#6fd04a':'#ffd24a'; c.fillRect(y.x-1,y.y-44,2,18); c.beginPath(); c.moveTo(y.x+1,y.y-44); c.lineTo(y.x+15,y.y-39); c.lineTo(y.x+1,y.y-34); c.fill(); }
+    else { wmDrawS(c,'tent',y.x,y.y,32); c.fillStyle=on?'#6fd04a':'#ffd24a'; c.fillRect(y.x-1,y.y-44,2,18); c.beginPath(); c.moveTo(y.x+1,y.y-44); c.lineTo(y.x+15,y.y-39); c.lineTo(y.x+1,y.y-34); c.fill(); }
     wmLabel(c,'🐎 Ям'+(on?' ✓':''),y.x,y.y+16,on?'#9fe89a':'#ffe28a',11); if(WMS===y.id) wmRing(c,y.x,y.y-12,32,t); }}); }); };
 // тактикийн дүрс
 (function(){ const _t=wmTacSheet; wmTacSheet=function(id){ _t(id); try{ const sh=$('wmsheet'); if(!sh||!WMT.ok) return; const IC={'🏹':0,'🌧':1,'🔄':2,'⚔':4}; sh.querySelectorAll('button').forEach(b=>{ for(const k in IC){ const s=wmS('wm_tc'+IC[k]); if(s&&b.innerHTML.indexOf(k)>=0&&b.innerHTML.indexOf('<img')<0){ b.innerHTML=b.innerHTML.replace(k,'<img src="'+s.img.src+'" style="width:30px;height:30px;vertical-align:middle;margin-right:4px">'); break; } } if(b.innerHTML.indexOf('🔍')>=0){ const s=wmS('wm_tc3'); if(s) b.innerHTML=b.innerHTML.replace('🔍','<img src="'+s.img.src+'" style="width:26px;height:26px;vertical-align:middle;margin-right:4px">'); } }); }catch(e){} }; })();
@@ -5884,7 +5884,7 @@ function wmDecorGen3(decor,r,free,add,addS){ const RS=(a,b)=>a+r()*(b-a);
 const WM_KW=[160,165,165,180,180,190,195,210,210,215,225,235,240,240];
 function wmKs(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_kg0'))) return wmKs0(c,D,vis,items,t);
   D.ks.forEach(k=>{ if(!vis(k.x,k.y,110)) return; const s=wmS('wm_kg'+k.i); if(!s){ return wmKs1(c,k,vis,items,t); } const cd=wmCd(k.id), w=WM_KW[k.i]||150, h=w*s.ih/s.iw;
-    items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.fillStyle='rgba(0,0,0,.22)'; c.beginPath(); c.ellipse(k.x,k.y,w*0.42,w*0.1,0,0,7); c.fill(); c.drawImage(s.img,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
+    items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.drawImage(s.img,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
       wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); }
 
 // ---- 156: гэрийн дэлгэцийн захын мод — улирлын ойн зураг ----

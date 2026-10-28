@@ -7280,7 +7280,7 @@ function ckAnOpen(k){
   const d=CKD.docs[k]||{};
   const o=ck6Modal('ckan','<h3>📢 Кланы мэдэгдэл</h3><div class="sm" style="text-align:center;margin-bottom:8px">Бүх гишүүнд харагдана · '+CKANL+' тэмдэгт хүртэл</div>'
    +'<textarea id="ckanin" rows="3" maxlength="'+CKANL+'" placeholder="Жишээ: Бямба гараг дайн, бүгд орно" autocomplete="off">'+esc2(d.an||'')+'</textarea>'
-   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckan\')">Дараа</button>'+(d.an?'<button class="btn" onclick="ckAnSave('+k+',1)">Устгах</button>':'')+'<button class="btn" style="background:#3a6d2a" onclick="ckAnSave('+k+')">Нийтлэх</button></div>');
+   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckan\')">Дараа</button>'+(d.an?'<button class="btn" onclick="ckAnSave('+k+',1)">Устгах</button>':'')+'<button class="btn ckjoin" onclick="ckAnSave('+k+')">Нийтлэх</button></div>');
   try{ const i=document.getElementById('ckanin'); i.focus(); }catch(e){}
 }
 async function ckAnSave(k,clear){
@@ -7309,7 +7309,7 @@ function ckEntOpen(k){
    +'<div class="sm">Доод хүч (⚔) · 0 = хязгааргүй</div><input id="ckmp" type="number" inputmode="numeric" min="0" max="10000000" value="'+(d.mp||0)+'">'
    +'<div class="chips">'+CKMPC.map(v=>'<button class="btn" onclick="document.getElementById(\'ckmp\').value='+v+'">'+(v?cn(v):'Хязгааргүй')+'</button>').join('')+'</div>'
    +'<div class="sm" style="margin-top:10px">Нэгдэх арга</div><div class="chips" id="ckjm"><button class="btn'+(CK6.jm?'':' on')+'" onclick="CK6.jm=0;ckJmMark()">Шууд орно</button><button class="btn'+(CK6.jm?' on':'')+'" onclick="CK6.jm=1;ckJmMark()">Хүсэлтээр (Хаан зөвшөөрнө)</button></div>'
-   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckent\')">Дараа</button><button class="btn" style="background:#3a6d2a" onclick="ckEntSave('+k+')">Хадгалах</button></div>');
+   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckent\')">Дараа</button><button class="btn ckjoin" onclick="ckEntSave('+k+')">Хадгалах</button></div>');
 }
 function ckJmMark(){ const c=document.getElementById('ckjm'); if(!c) return; [].forEach.call(c.children,(b,i)=>{ b.classList.toggle('on',i===CK6.jm); }); }
 async function ckEntSave(k){
@@ -7479,7 +7479,7 @@ function ck6Reqs(k,role){
   const a=CK6.req[k]||[]; if(!a.length) return '';
   let h='<div class="ckmh"><span>📨 Нэгдэх хүсэлт</span><span class="sm">'+a.length+'</span></div>';
   a.forEach(r=>{ h+='<div class="ckrq"><div style="flex:1;min-width:0" onclick="ckInfo('+k+',\''+r.id+'\')"><div class="nm">'+esc2(String(r.n||'Тоглогч').slice(0,14))+' <span class="sm">ℹ</span></div><div class="sb">Lv '+(r.l||1)+' · ⚔ '+cn(r.p||0)+' · '+ckWhen(r.t)+'</div></div>'
-    +'<button class="btn" style="padding:3px 12px;background:#3a6d2a" onclick="ckReqAnswer('+k+',\''+r.id+'\',1)">✓</button><button class="btn" style="padding:3px 12px" onclick="ckReqAnswer('+k+',\''+r.id+'\',0)">✕</button></div>'; });
+    +'<button class="btn ckjoin" style="padding:3px 12px" onclick="ckReqAnswer('+k+',\''+r.id+'\',1)">✓</button><button class="btn" style="padding:3px 12px" onclick="ckReqAnswer('+k+',\''+r.id+'\',0)">✕</button></div>'; });
   return h;
 }
 function ck6LogSec(k,d){

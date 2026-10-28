@@ -402,12 +402,12 @@ const TASKS = [
 ];
 
 
-const TH={1:0,2:1,3:0,4:0,5:0,6:0,7:2,8:3,9:0,10:3,11:3,12:3}, TM=['Барилга','Мал','Баатар','Дайн'];
+const TH={1:0,2:1,3:0,4:0,5:0,6:0,7:2,8:3,9:-1,10:3,11:3,12:3}, TM=['Барилга','Мал','Баатар','Дайн'];
 (function(){ const st=document.createElement('style'); st.textContent='#menu button.hint{animation:hintb 0.9s ease-in-out infinite;border-color:#fff3a0;box-shadow:0 0 12px #ffd770;position:relative}#menu button.hint::before{content:"👇";position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px}@keyframes hintb{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}'; document.head.appendChild(st); })();
 const CHAP=[
- {n:'1-р бүлэг · Нутаг тогтох',ic:'q_ch1',t:[0,1,2,3,4],r:{gold:300,alt:5}},
+ {n:'1-р бүлэг · Нутаг тогтох',ic:'q_ch1',t:[0,1,2,3,9,4],r:{gold:300,alt:5}},
  {n:'2-р бүлэг · Цэргээ бэлд',ic:'q_ch2',t:[5,6,7],r:{gold:500,alt:8}},
- {n:'3-р бүлэг · Дайны зам',ic:'q_ch3',t:[8,9],r:{gold:800,alt:12}},
+ {n:'3-р бүлэг · Дайны зам',ic:'q_ch3',t:[8],r:{gold:800,alt:12}},
  {n:'4-р бүлэг · Нууц товчоо',ic:'q_ch2',t:[10,11,12],r:{gold:5000,alt:40}}
 ];
 const DQ=[
@@ -3832,11 +3832,14 @@ document.head.appendChild(st); })();
 
 // ================= ЭХНИЙ АЛХАМУУД: даалгавар бүрийн жижиг шагнал, "зоос хүрэхгүй" заавар =================
 const TKREW=[60,80,60,100,120,100,150,0,200,300,200,300,500];
+/* Даалгаврын шагналд материал: дараагийн алхамд хэрэгтэй зүйлийг өгнө (Гэр 2-т мод 25, тариа 15 хэрэгтэй) */
+const TKMAT={2:{wood:25},3:{grain:15}};
 function tkPay(){ try{ if(!S||!S.res) return; S.tp=S.tp||{};
   if(!S.tpv){ S.tpv=1; TASKS.forEach((t,i)=>{ if(t.ok()) S.tp[i]=1; }); return; }
-  let g=0, nm='';
-  for(let i=0;i<TASKS.length;i++){ if(!S.tp[i]&&TASKS[i].ok()){ S.tp[i]=1; if(TKREW[i]){ g+=TKREW[i]; nm=TASKS[i].t; } } }
-  if(g){ S.res.gold+=g; sfx('coin'); say('✔ '+nm+' · +'+g+' 🪙'); refresh(); } }catch(e){} }
+  let g=0, nm='', mt='';
+  for(let i=0;i<TASKS.length;i++){ if(!S.tp[i]&&TASKS[i].ok()){ S.tp[i]=1; if(TKREW[i]){ g+=TKREW[i]; nm=TASKS[i].t; }
+    const M=TKMAT[i]; if(M){ for(const k in M){ S.res[k]=(S.res[k]||0)+M[k]; mt+=' · +'+M[k]+(k==='wood'?' 🪵':k==='grain'?' 🌾':' '+k); } if(!g){ g=0.0001; nm=TASKS[i].t; } } } }
+  if(g){ if(g>=1){ S.res.gold+=g; } sfx('coin'); say('✔ '+nm+(g>=1?' · +'+g+' 🪙':'')+mt); refresh(); } }catch(e){} }
 setInterval(tkPay,700);
 function noGold(){ say('Зоос хүрэхгүй. Доорх «Зарах» товчоор мах, ноосоо зарна'); window.SELLH=Date.now()+7000; try{ updateHUD(); }catch(e){} }
 // Барилга тавихад хамгийн ойр чөлөөт (ногоон) газрыг автоматаар сонгоно (нүдэнд харагдах хэсэгт, HUD-д дарагдахгүй)
@@ -8209,12 +8212,17 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     const T=TASKS[o].t, k=KEY[o];
     if(k&&S.sites&&S.sites[k]) return [T,'Ажилчин барьж байна. Хүлээнэ үү.'];
     if(k){ const need=(typeof BREQ!=='undefined'&&BREQ[k])||1;
-      if(S.bld.ger<need) return [T,'Эхлээд «Барилга» → «Гол гэр»-ийг сайжруул (Гол гэр '+need+'-р түвшин хэрэгтэй).'];
+      if(S.bld.ger<need) return [T,'Эхлээд Гол гэр '+need+'-р түвшин хэрэгтэй: «Барилга» → «Гол гэр» картыг дар.'];
       return [T,'«Барилга» → «'+(k==='hashaa'?'Малын хашаа':(BUILD[k]&&BUILD[k].n||'…'))+'» → «Барих» → ногоон бол «Тавих».']; }
     if(o===2) return [T,'«Мал» товч → Хонь дээрх зоосны товчийг дар.'];
     if(o===7) return [T,'«Баатар» товчийг дар → баатраа сонго.'];
     if(o===8) return [T,'«Дайн» товчийг дар → Татар отгийг сонго.'];
-    if(o===9) return [T,'«Барилга» → «Гол гэр» картыг дар.'];
+    if(o===9){ let n={wood:25,grain:15}; try{ n=gerNeed(); }catch(e){}
+      const W=Math.floor(S.res.wood||0), G=Math.floor(S.res.grain||0), c=(typeof upCost==='function')?upCost('ger'):100;
+      if(W<n.wood) return [T,'Мод '+n.wood+' хэрэгтэй (одоо '+W+'). Хүнийг дарж «Мод» ажил өг.'];
+      if(G<n.grain) return [T,'Тариа '+n.grain+' хэрэгтэй (одоо '+G+'). Тариалан ургуулж хураа.'];
+      if(S.res.gold<c) return [T,'Зоос '+c+' хэрэгтэй. Доорх «Зарах» товчоор зоос ав.'];
+      return [T,'«Барилга» → «Гол гэр» картыг дар → «Сайжруул».']; }
     if(o>=10) return [T,'Зүүн талын «Түүхэн аян» товчийг дар.'];
     return [T,''];
   }

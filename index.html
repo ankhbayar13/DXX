@@ -2791,7 +2791,7 @@ function startBattle(i,E){
   const e=E||Object.assign({},ENEMIES[i],{rep:i<S.won}), fb=facBonus().m, rm=relicMul(), el=document.createElement('div'); el.id='btl';
   el.className='wt'; el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bbtn"><button onclick="btSpeed()" id="bsp">×1</button><button onclick="skToggle()" id="bauto">Авто</button><button onclick="btEnd(true)">Гарах</button></div><div id="bres"></div><div id="btpan"><div id="bthd"></div><div id="btray"></div><div id="bact"><button id="bexit" onclick="btEnd(true)">Гарах</button><button id="bq" onclick="btQuick()">⚡ Шилдэг</button><button id="bstart" onclick="btGo()">⚔ ЭХЛЭХ</button></div></div></div>';
   document.body.appendChild(el);
-  const port=innerHeight>innerWidth, VW=port?380:Math.max(560,Math.min(innerWidth,820)), SC=innerWidth/VW, W2=VW, H2=innerHeight/SC;
+  const BW=el.clientWidth||innerWidth, BH=el.clientHeight||innerHeight, port=BH>BW, VW=port?380:Math.max(560,Math.min(BW,820)), SC=BW/VW, W2=VW, H2=BH/SC;
   const cv2=$('bc'), dp=Math.min(3,(devicePixelRatio||1)*SC); cv2.width=Math.round(W2*dp); cv2.height=Math.round(H2*dp); cv2.style.cssText='width:100%;height:100%;display:block';
   const units=[]; const sq=(E&&E.hs&&E.hs.length)?E.hs.filter(id=>S.heroes[id]&&!(typeof SUPP!=='undefined'&&SUPP[id])):squad(); if(!sq.length) squad().forEach(x=>sq.push(x));
   const rowY={archer:H2*0.88,cav:H2*0.80,heavy:H2*0.72};

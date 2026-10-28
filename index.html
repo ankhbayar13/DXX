@@ -820,7 +820,7 @@ const MAXB=20;
 function upCost(k){ return Math.floor(BUILD[k].up * Math.pow(1.6, Math.min(S.bld[k],MAXB)-1)); }
 function heroPower(id){
   const h = S.heroes[id]; if(!h) return 0;
-  const def = HEROES.find(x=>x.id===id);
+  const def = HEROES.find(x=>x.id===id); if(!def) return 0;
   const st=0;
   return Math.floor(def.s * 50 * (1 + 0.25*(h-1)) * (1+st) * (1+rsb('mil_all')) * (1+hxP(id)));
 }
@@ -3450,7 +3450,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) Object.ke
 (function(){ const b=document.createElement('button'); b.id='musb'; b.setAttribute('onclick','musToggle()'); $('rcol').appendChild(b); musBtn(); })();
 
 // ---------- эхлүүлэх ----------
-load(); acHook(); resize(); updateHUD(); setIcons();
+try{ load(); }catch(e){ window.DXXINITERR=(window.DXXINITERR||'')+' load:'+e.message; } try{ acHook(); }catch(e){ window.DXXINITERR=(window.DXXINITERR||'')+' ac:'+e.message; } try{ resize(); }catch(e){ window.DXXINITERR=(window.DXXINITERR||'')+' rs:'+e.message; } try{ updateHUD(); }catch(e){ window.DXXINITERR=(window.DXXINITERR||'')+' hud:'+e.message; } try{ setIcons(); }catch(e){ window.DXXINITERR=(window.DXXINITERR||'')+' ic:'+e.message; }
 if(!S.met) setTimeout(()=>say('Мөнлиг өвгөнийг дарж сонгоод, газар луу чиглүүлээрэй'),600);
 addEventListener('resize',resize);
 setInterval(()=>{ acHook(); tick(1); S.last=Date.now(); updateHUD(); },1000);
@@ -8421,6 +8421,39 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
         ['🛡 Манаач',"nbJob('guard')"],[sp?(sp.ic+' '+sp.lab):'⭐ Онцлог',"nbJob('spec')"],['💬 Ярих','talkSel()'],['✕','deselect()','red']]);
     }catch(x){}
   };
+})();
+
+
+/* p32/safe.js — 195: үндсэн давталт алдаанд тэсвэртэй (нэг алдаанаас болж дэлгэц зогсохгүй) + алдааг дэлгэцэнд жижиг зурвасаар харуулна */
+(function(){
+  let lastRun=Date.now(), errN=0, errT=0, lastMsg='', pill=null;
+  function note(tag,e){
+    try{
+      const now=Date.now(); if(now-errT>5000) errN=0; errT=now; errN++;
+      const st=(e&&e.stack)?String(e.stack).split('\n').slice(1,3).map(x=>x.replace(/https?:\/\/[^\s)]+\/([^\s):/]+)/g,'$1').trim()).join(' | '):'';
+      lastMsg=tag+': '+((e&&e.message)||e)+(st?' @ '+st:'');
+      window.DXXLASTERR=lastMsg;
+      if(errN>=15&&!pill){
+        pill=document.createElement('div'); pill.id='dxxerr';
+        pill.style.cssText='position:fixed;left:6px;right:6px;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);z-index:99996;background:#7a1a12ee;color:#fff;border:1px solid #ffb4a8;border-radius:10px;padding:6px 26px 6px 8px;font:11px/1.3 monospace;word-break:break-all;max-height:84px;overflow:hidden';
+        pill.innerHTML='<span id="dxxerrt"></span><button style="position:absolute;right:2px;top:0;background:none;border:0;color:#fff;font-size:18px;padding:3px 7px" onclick="this.parentNode.remove();window.DXXERRX=1">×</button>';
+        if(!window.DXXERRX) document.body.appendChild(pill);
+      }
+      const t=document.getElementById('dxxerrt'); if(t) t.textContent='⚠ '+lastMsg;
+    }catch(_){}
+  }
+  window.dxxNote=note;
+  let lt=0;
+  frame=function(now){
+    requestAnimationFrame(frame); lastRun=Date.now();
+    const dt=Math.min(0.05,(now-lt)/1000||0.016); lt=now;
+    try{ update(dt); }catch(e){ note('update',e); }
+    try{ draw(now/1000); }catch(e){ note('draw',e); }
+  };
+  /* хэрэв давталт зогссон бол сэргээнэ */
+  setInterval(()=>{ try{ if(Date.now()-lastRun>2500){ lastRun=Date.now(); requestAnimationFrame(frame); } }catch(e){} },2000);
+  /* мэдэгдэж буй эвдэрсэн өгөгдлөөс хамгаална */
+  try{ const _hp=heroPower; heroPower=function(id){ try{ return _hp.apply(this,arguments); }catch(e){ return 0; } }; }catch(e){}
 })();
 
 </script><script>(function(){

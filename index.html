@@ -6396,7 +6396,7 @@ async function ckBuy(k){
     S.res.alt=Math.max(0,(S.res.alt||0)-CK.BUY); S.ckOwn=k;
     CKD.docs[k]={ow:uid,on:nm,sl:CK.SL0,tt:{},t:Date.now(),v:1}; CKD.t=Date.now();
     try{ save(); }catch(e){}
-    say('👑 Та '+CLN[k].n+' кланы Хаан боллоо!'); try{ sfx('ok'); vib([30,20,60]); }catch(e){}
+    say('👑 Та '+CLN[k].n+' кланы Хаан боллоо!'); try{ sfx('ok'); vib([30,20,60]); }catch(e){} try{ ckLog(k,'buy',nm); }catch(e){}
     if(S.clan!==k){ if(typeof wmSt==='function'&&wmSt().m.length) say('Цуваа буцаж ирсний дараа өөрийн клан руугаа нэгдээрэй'); else CK_JOIN(k); }
     try{ refresh(); }catch(e){}
     try{ clPush(true); }catch(e){}
@@ -6427,7 +6427,7 @@ async function ckSlots(){
     });
     S.res.alt=Math.max(0,(S.res.alt||0)-CK.SLC); d.sl=ns; CKD.t=Date.now();
     try{ save(); }catch(e){}
-    say('➕ +'+CK.SLP+' слот нэмэгдлээ ('+ns+')'); try{ sfx('ok'); }catch(e){}
+    say('➕ +'+CK.SLP+' слот нэмэгдлээ ('+ns+')'); try{ sfx('ok'); }catch(e){} try{ ckLog(k,'slot','',ns); }catch(e){}
     try{ refresh(); }catch(e){}
   }catch(e){ say('Слот нэмж чадсангүй. Алт хасагдаагүй.'); try{ sfx('err'); }catch(x){} }
   finally{ CKD.busy=0; ckRender(); }
@@ -6439,7 +6439,7 @@ async function ckTitle(k,uid,ti){
   try{
     const {F,db}=FBM, ref=F.doc(db,'clans','c'+k); let tt={};
     await F.runTransaction(db,async tx=>{ const s=await tx.get(ref); if(!s.exists()||s.data().ow!==CL.uid) throw new Error('notowner'); tt=Object.assign({},s.data().tt||{}); if(ti) tt[uid]=ti; else delete tt[uid]; tx.update(ref,{tt:tt}); });
-    d.tt=tt; say(ti?('🎖 «'+CK_TT[ti]+'» цол өглөө'):'Цол авлаа'); try{ sfx('ok'); }catch(e){}
+    d.tt=tt; say(ti?('🎖 «'+CK_TT[ti]+'» цол өглөө'):'Цол авлаа'); try{ sfx('ok'); }catch(e){} try{ ckLog(k,'title',((CKD.mem[k]||[]).find(x=>x.id===uid)||{}).n||'',ti); }catch(e){}
   }catch(e){ say('Цол өгч чадсангүй'); }
   finally{ CKD.busy=0; ckRender(); }
 }
@@ -6452,7 +6452,7 @@ function ckKickAsk(k,uid){
 async function ckKick(k,uid){
   if(!ckOn()||CKD.busy) return;
   const d=CKD.docs[k]; if(!d||d.ow!==CL.uid||uid===d.ow) return;
-  CKD.busy=1;
+  CKD.busy=1; const knm=((CKD.mem[k]||[]).find(x=>x.id===uid)||{}).n||'';
   try{
     const {F,db}=FBM, ref=F.doc(db,'clans','c'+k); let kk={}, tt={};
     await F.runTransaction(db,async tx=>{
@@ -6462,7 +6462,7 @@ async function ckKick(k,uid){
       tx.update(ref,{kk:kk,tt:tt});
     });
     d.kk=kk; d.tt=tt; CKD.mem[k]=(CKD.mem[k]||[]).filter(x=>x.id!==uid);
-    say('Гишүүнийг хаслаа (7 хоног нэгдэж чадахгүй)'); try{ sfx('ok'); }catch(e){}
+    say('Гишүүнийг хаслаа (7 хоног нэгдэж чадахгүй)'); try{ sfx('ok'); }catch(e){} try{ ckLog(k,'kick',knm); }catch(e){}
   }catch(e){ say('Хасаж чадсангүй'); try{ sfx('err'); }catch(x){} }
   finally{ CKD.busy=0; ckRender(); }
 }
@@ -7086,7 +7086,7 @@ async function ckNameSave(k){
     d.nm=nm; d.nc=nc; CKD.t=Date.now();
     try{ save(); }catch(e){}
     const o=document.getElementById('cknm'); if(o) o.remove();
-    say('⚑ Клан «'+nm+'» боллоо'+(cost?' (−'+cost+' Алт)':'')); try{ sfx('ok'); }catch(e){}
+    say('⚑ Клан «'+nm+'» боллоо'+(cost?' (−'+cost+' Алт)':'')); try{ sfx('ok'); }catch(e){} try{ ckLog(k,'name',nm); }catch(e){}
     try{ refresh(); }catch(e){}
   }catch(e){ say('Нэр хадгалж чадсангүй. Алт хасагдаагүй.'); try{ sfx('err'); }catch(x){} }
   finally{ CKD.busy=0; try{ ckRender(); }catch(e){} }
@@ -7173,14 +7173,14 @@ ckRender=function(){
      +'<div class="ckin" style="color:#cdb98a;margin-top:0">Клан эзэмшсэн хүн <b style="color:#ffd770">Хаан</b> болж, гишүүддээ цол өгнө</div>'
      +'<div class="ckact" style="margin-top:8px">'+bt('🏆 Кланы зэрэглэл · Аварга','ckRank()','','', 'full')+'</div><div style="height:4px"></div>';
     CLN.forEach((q,i)=>{ const d=CKD.docs[i], n=ckCnt(i), my=S.clan===i, loaded=!!CKD.mem[i], sl=d&&d.ow?(d.sl||CK.SL0):0, full=!!(d&&d.ow&&loaded&&n>=sl);
-      let chip; if(my) chip='<span class="ckchip ckgrn">Чиний клан</span>'; else if(!(d&&d.ow)) chip=on?'<span class="ckchip ckgold">👑 '+CK.BUY+' '+ckGem(12)+'</span>':'<span class="ckchip">Эзэнгүй</span>'; else if(full) chip='<span class="ckchip ckred">Дүүрсэн</span>'; else chip='<span class="ckchip ckblue">Нээлттэй</span>';
+      let chip; if(my) chip='<span class="ckchip ckgrn">Чиний клан</span>'; else if(!(d&&d.ow)) chip=on?'<span class="ckchip ckgold">👑 '+CK.BUY+' '+ckGem(12)+'</span>':'<span class="ckchip">Эзэнгүй</span>'; else if(full) chip='<span class="ckchip ckred">Дүүрсэн</span>'; else chip='<span class="ckchip ckblue">'+(d.jm===1?'Хүсэлтээр':'Нээлттэй')+(d.mp?' · ⚔'+cn(d.mp)+'+':'')+'</span>';
       h+='<div class="ckcard'+(my?' me':'')+'" onclick="ckShow('+i+')">'+ckPen(q,'sm2')
         +'<div style="flex:1;min-width:0"><div class="nm">'+q.n+'</div><div class="sb">'+(d&&d.ow?'👑 '+esc2(String(d.on||'Хаан')):'Эзэнгүй клан · Хаан хэрэгтэй')+'</div>'
         +(d&&d.ow?(loaded?'<div class="ckbar"><i style="width:'+Math.min(100,n/sl*100)+'%"></i></div><div class="sb" style="margin-top:2px">'+n+' / '+sl+' гишүүн</div>':'<div class="sb" style="margin-top:2px">'+sl+' слот</div>'):'')+'</div>'+chip+'</div>';
     });
     o.innerHTML=wrap(h); return;
   }
-  const k=V.k, q=CLN[k], d=CKD.docs[k], rows=ckRows(k), tot=rows.reduce((a,x)=>a+(x.p||0),0), isOwner=!!(d&&d.ow===me), sl=d&&d.ow?(d.sl||CK.SL0):0, mx=Math.max(1,...rows.map(x=>x.p||0));
+  const k=V.k, q=CLN[k], d=CKD.docs[k], rows=ckRows(k), tot=rows.reduce((a,x)=>a+(x.p||0),0), isOwner=!!(d&&d.ow===me), sl=d&&d.ow?(d.sl||CK.SL0):0, mx=Math.max(1,...rows.map(x=>x.p||0)), role=ckRole(k);
   h=hdr('<button class="btn" style="padding:2px 10px" onclick="ckList()">‹ Бүх клан</button>','',X)
    +'<div class="ckhero" style="--cc:'+q.c+'">'+ckPen(q,'lg')+'<div class="nm">'+q.n+' клан</div>'
    +(d&&d.ow?'<div class="ckking">👑 Хаан <b>'+esc2(String(d.on||'Хаан'))+'</b></div>':'<div class="ckking" style="color:#cfc09a">Эзэнгүй клан</div>')
@@ -7190,6 +7190,7 @@ ckRender=function(){
   if(!on) h+='<div class="ckin" style="color:#ffb070">Интернэт/нэвтрэлт байхгүй: мэдээлэл хуучирсан байж болно, клан авах боломжгүй.</div>';
   else if(CKD.err) h+='<div class="ckin" style="color:#ffb070">Кланы мэдээлэл ачаалж чадсангүй ('+esc2(CKD.err)+')</div>';
   const left=cwBannerLeft(d);
+  try{ h+=ck6Head(k,d,rows,role,left); }catch(e){}
   if(left>0) h+='<div class="ckin" style="color:#ffd770;font-weight:800">🚩 Дайны тугнэл мандсан · '+Math.floor(left/3600e3)+'ц үлдсэн · дайны оноо ×1.5</div>';
   if(d&&d.ow) h+='<div class="ckin" style="color:#cdb98a">Хаан, «Жанжин» цолтой гишүүн: дайны оноо +10%</div>';
   // товчууд
@@ -7198,24 +7199,330 @@ ckRender=function(){
     else h+='<div class="ckact">'+bt(CKD.cf===k?'⚠ Дахин дар: '+CK.BUY+' '+ckGem(16)+' зарцуулна':'👑 Худалдаж авах · '+CK.BUY+' '+ckGem(16),'ckBuyAsk('+k+')','',CKD.busy||!on,'full'+(CKD.cf===k?' ckwarn':''))+'</div><div class="ckin" style="color:#cdb98a">Хаан болж, '+CK.SL0+' слоттой клантай болно. Гишүүддээ цол өгнө. Алт буцаагдахгүй.</div>';
   }
   let ac='';
+  try{ ac+=ck6Btns(k,d,role); }catch(e){}
   if(isOwner) ac+=bt(d.nm?'✏ Нэр солих · 1000 '+ckGem(14):'✏ Нэрлэх · Үнэгүй','ckNameOpen('+k+')','',CKD.busy);
   if(isOwner) ac+=bt('➕ +'+CK.SLP+' слот · '+CK.SLC+' '+ckGem(14),'ckSlots()','',CKD.busy||sl>=CK.MAX);
   if(S.clan===k||isOwner) ac+=bt('💬 Кланы чат','chatOpen('+k+')','',0,'ckchat full');
-  if(d&&d.ow&&d.ow===me&&wmClanId()===k&&!left){ const used=d.wb&&d.wb.w===wmWeek(); ac+=bt('🚩 Дайны тугнэл · 24ц ×1.5'+(used?' (энэ 7х ашигласан)':''),'ckBanner()','',used||CKD.busy,'full ckbn'); }
-  if(S.clan!==k&&myK<0) ac+=bt('Энэ клан руу нэгдэх','CK_JOINASK('+k+')','',!!(d&&d.ow&&rows.length>=sl),'full ckjoin');
+  if(role&&wmClanId()===k&&!left){ const used=d.wb&&d.wb.w===wmWeek(); ac+=bt('🚩 Дайны тугнэл · 24ц ×1.5'+(used?' (энэ 7х ашигласан)':''),'ckBanner()','',used||CKD.busy,'full ckbn'); }
+  if(S.clan!==k&&myK<0) ac+=ck6JoinBtn(k,d,rows,sl);
   if(ac) h+='<div class="ckact">'+ac+'</div>';
   if(S.clan!==k&&d&&d.ow&&rows.length>=sl&&myK<0) h+='<div class="ckin" style="color:#ffb070">Клан дүүрсэн</div>';
+  try{ h+=ck6Reqs(k,role); }catch(e){}
   h+='<div class="ckmh"><span>Гишүүд</span><span class="sm">'+rows.length+'</span></div>';
   if(!rows.length) h+='<div class="ckin" style="color:#cdb98a;padding:8px 0">Гишүүн одоогоор алга.</div>';
   rows.forEach((x,i)=>{
     const own=!!(d&&x.id===d.ow), ti=(d&&d.tt&&d.tt[x.id])|0, ag=ckAgo(x.t), onl=ag==='онлайн';
     const tsel=(isOwner&&!own)?'<select onchange="ckTitle('+k+',\''+x.id+'\',this.value)" style="font-size:11px;background:#3b2815;color:#ffe9b0;border:1px solid #c9972b;border-radius:6px;max-width:84px">'+CK_TT.map((t,j)=>'<option value="'+j+'"'+(j===ti?' selected':'')+'>'+(t||'Цолгүй')+'</option>').join('')+'</select>':(own?'<span class="ckchip ckgold" style="font-size:10px">Хаан</span>':(ti?'<span class="ckchip ckgrn" style="font-size:10px">'+CK_TT[ti]+'</span>':''));
     h+='<div class="ckm'+(x.id===me?' me':'')+'"><span class="rk">'+(['🥇','🥈','🥉'][i]||(i+1))+'</span><span class="dot" style="background:'+(onl?'#5fe06a':'#6b6b6b')+'"></span>'
-      +'<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(own?'👑 ':'')+'<b>'+esc2(String(x.n||'Тоглогч').slice(0,14))+'</b>'+(x.id===me?' <span class="sm">(чи)</span>':'')+'</div><div class="sm">'+(x.l?'Lv '+x.l+' · ':'')+(ag&&!onl?ag+' өмнө':onl?'онлайн':'')+'</div><div class="pb"><i style="width:'+Math.max(3,Math.round((x.p||0)/mx*100))+'%"></i></div></div>'
+      +'<div style="flex:1;min-width:0" onclick="ckInfo('+k+',\''+x.id+'\')"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(own?'👑 ':'')+'<b>'+esc2(String(x.n||'Тоглогч').slice(0,14))+'</b>'+(x.id===me?' <span class="sm">(чи)</span>':'')+' <span class="sm">ℹ</span></div><div class="sm">'+(x.l?'Lv '+x.l+' · ':'')+(ag&&!onl?ag+' өмнө':onl?'онлайн':'')+'</div><div class="pb"><i style="width:'+Math.max(3,Math.round((x.p||0)/mx*100))+'%"></i></div></div>'
       +tsel+((isOwner&&!own)?'<button class="btn" onclick="ckKickAsk('+k+',\''+x.id+'\')" style="padding:1px 7px;font-size:11px;'+(CKX.kc===x.id?'color:#ffd0c8;font-weight:900':'')+'">'+(CKX.kc===x.id?'⚠ Хасах?':'✕')+'</button>':'')+'<b class="pw">⚔ '+cn(x.p||0)+'</b></div>';
   });
+  try{ h+=ck6LogSec(k,d); }catch(e){}
   o.innerHTML=wrap(h);
 };
+
+
+/* 180: Клан — мэдэгдэл, орох хүч + хүсэлт, Хаан байхгүй үед түр удирдагч, түүх, гишүүний мэдээлэл */
+const CKIDLE=3*864e5, CKANL=100, CKRQTTL=3*864e5;
+var CK6={log:{},logT:{},logOpen:{},req:{},reqT:{},busy:0,jm:0};
+(function(){ const st=document.createElement('style'); st.textContent=
+'.ckan{margin:8px 10px 0;padding:8px 10px;border-radius:10px;background:linear-gradient(#4a3512,#33230c);border:1px solid #c9972b;font-size:13px;color:#ffe9b0;word-break:break-word}.ckan small{display:block;font-size:11px;color:#cdb98a;margin-top:3px}'+
+'.ckan b{color:#ffd770}.ckpill{margin:8px 10px 0;padding:6px 10px;border-radius:10px;background:#00000055;border:1px solid #6b4a24;font-size:12px;text-align:center;color:#cdb98a}.ckpill.warn{border-color:#a8504a;color:#ffb0a0}.ckpill.ok{border-color:#5a9a4a;color:#9be07a}.ckpill.gold{border-color:#c9972b;color:#ffd770}'+
+'.ckrq{display:flex;align-items:center;gap:8px;margin:5px 10px 0;padding:7px 9px;border-radius:10px;background:linear-gradient(#2c3f2a,#1f2d1c);border:1px solid #4f7a46}.ckrq .nm{font-weight:900;color:#fff2c8}.ckrq .sb{font-size:11px;color:#cdb98a}'+
+'.ckmd{position:fixed;inset:0;z-index:430;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center}.ckmd>div{width:min(92vw,350px);max-height:88vh;overflow:auto;background:linear-gradient(#34200f,#24160a);border:2px solid #c9972b;border-radius:14px;color:#ffe9b0;padding:14px;box-shadow:0 8px 30px #000a}'+
+'.ckmd h3{margin:0 0 6px;font-size:19px;color:#ffd770;text-align:center}.ckmd .sm{font-size:12px;color:#cdb98a}.ckmd input,.ckmd textarea{width:100%;box-sizing:border-box;font-size:16px;padding:9px;border-radius:9px;border:2px solid #c9972b;background:#2b1d12;color:#fff;font-family:inherit}'+
+'.ckmd .row{display:flex;gap:8px;margin-top:10px}.ckmd .row .btn{flex:1}.ckmd .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.ckmd .chips .btn{padding:3px 9px;font-size:12px}.ckmd .on{outline:2px solid #ffd770}'+
+'.ckinf{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;margin-top:8px}.ckinf span:nth-child(odd){color:#cdb98a}.ckinf span:nth-child(even){text-align:right;font-weight:800;color:#ffd770}'+
+'.cklg{margin:4px 10px 0;font-size:12px}.cklg div{display:flex;gap:8px;padding:4px 2px;border-top:1px solid #5b3d1e66}.cklg div span:first-child{flex:none;width:72px;color:#cdb98a}';
+ document.head.appendChild(st); })();
+function ckWhen(t){ if(!t) return ''; const m=Math.max(0,Math.floor((wmNow()-t)/60000)); if(m<2) return 'дөнгөж сая'; if(m<60) return m+' мин өмнө'; const h=Math.floor(m/60); return h<48?h+' цагийн өмнө':Math.floor(h/24)+' өдрийн өмнө'; }
+function ck6Modal(id,html){ let o=document.getElementById(id); if(o) o.remove(); o=document.createElement('div'); o.id=id; o.className='ckmd'; o.onclick=e=>{ if(e.target===o) o.remove(); }; o.innerHTML='<div>'+html+'</div>'; document.body.appendChild(o); return o; }
+function ck6Close(id){ const o=document.getElementById(id); if(o) o.remove(); }
+
+// ---- Хаан байхгүй үед түр удирдагч ----
+function ckOwnerSeen(k){ const d=CKD.docs[k]; if(!d||!d.ow) return 0; if(d.ow===CL.uid) return wmNow(); const m=(CKD.mem[k]||[]).find(x=>x.id===d.ow); return (m&&m.t)||0; }
+function ckIdleDays(k){ return Math.max(0,Math.floor((wmNow()-ckOwnerSeen(k))/864e5)); }
+function ckIdle(k){ const d=CKD.docs[k]; if(!d||!d.ow||!ckOn()) return false; const t=ckOwnerSeen(k); return !!t&&wmNow()-t>CKIDLE; }
+function ckActing(k){
+  if(!ckIdle(k)) return '';
+  const d=CKD.docs[k], tt=d.tt||{}; let best=null;
+  ckRows(k).forEach(x=>{ const ti=tt[x.id]|0; if(!ti||x.id===d.ow||ckKicked(d,x.id)) return; if(x.id!==CL.uid&&wmNow()-(x.t||0)>=CKIDLE) return;
+    if(!best||ti<best.ti||(ti===best.ti&&(x.p||0)>best.p)) best={id:x.id,ti:ti,p:x.p||0}; });
+  return best?best.id:'';
+}
+function ckRole(k){ const d=CKD.docs[k]; if(k==null||k<0||!ckOn()||!d||!d.ow) return ''; if(d.ow===CL.uid) return 'own'; if(S.clan===k&&ckActing(k)===CL.uid) return 'act'; return ''; }
+async function ckPatch(k,patch,role){
+  const {F,db}=FBM, ref=F.doc(db,'clans','c'+k);
+  if(role==='own') await F.runTransaction(db,async tx=>{ const s=await tx.get(ref); if(!s.exists()||s.data().ow!==CL.uid) throw new Error('notowner'); tx.update(ref,patch); });
+  else await F.updateDoc(ref,patch);
+  const d=CKD.docs[k]; if(d) Object.assign(d,patch);
+}
+
+// ---- түүх ----
+function ckLog(k,e,n,x){ try{ if(!ckOn()||k==null||k<0) return; const {F,db}=FBM; F.addDoc(F.collection(db,'clanlog','c'+k,'e'),{t:wmNow(),u:CL.uid,e:e,n:String(n||'').slice(0,14),x:Math.floor(+x||0)}).catch(()=>{}); CK6.logT[k]=0; }catch(er){} }
+async function ckLogFetch(k,force){
+  if(!ckOn()) return [];
+  if(!force&&CK6.logT[k]&&Date.now()-CK6.logT[k]<60000) return CK6.log[k]||[];
+  try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'clanlog','c'+k,'e'),F.orderBy('t','desc'),F.limit(20)));
+    CK6.log[k]=s.docs.map(d=>d.data()); CK6.logT[k]=Date.now(); }catch(e){ CK6.log[k]=CK6.log[k]||[]; CK6.logE=1; }
+  return CK6.log[k]||[];
+}
+function ckLogTxt(r){ const n='<b>'+esc2(r.n||'Тоглогч')+'</b>';
+  switch(r.e){ case 'join': return n+' нэгдлээ'; case 'leave': return n+' кланаас гарлаа'; case 'kick': return n+' хасагдлаа'; case 'title': return n+(r.x?' — «'+(CK_TT[r.x]||'')+'» цол авлаа':' — цолгүй боллоо');
+    case 'name': return 'Клан «<b>'+esc2(r.n)+'</b>» нэртэй боллоо'; case 'slot': return '➕ Слот <b>'+r.x+'</b> боллоо'; case 'buy': return n+' клан авч <b>Хаан</b> боллоо';
+    case 'banner': return '🚩 Дайны тугнэл мандлаа'; case 'ann': return '📢 '+n+' мэдэгдэл шинэчиллээ'; case 'mode': return '🚪 Орох нөхцөл өөрчлөгдөв'+(r.x?' (⚔ '+cn(r.x)+'+)':' (хүч шаардахгүй)'); }
+  return n; }
+function ckLogToggle(k){ CK6.logOpen[k]=!CK6.logOpen[k]; ckRender(); if(CK6.logOpen[k]) ckLogFetch(k,false).then(()=>ckRender()); }
+
+// ---- мэдэгдэл ----
+function ckAnOpen(k){
+  const role=ckRole(k); if(!role){ say('Зөвхөн Хаан (эсвэл түр удирдагч) мэдэгдэл бичнэ'); return; }
+  const d=CKD.docs[k]||{};
+  const o=ck6Modal('ckan','<h3>📢 Кланы мэдэгдэл</h3><div class="sm" style="text-align:center;margin-bottom:8px">Бүх гишүүнд харагдана · '+CKANL+' тэмдэгт хүртэл</div>'
+   +'<textarea id="ckanin" rows="3" maxlength="'+CKANL+'" placeholder="Жишээ: Бямба гараг дайн, бүгд орно" autocomplete="off">'+esc2(d.an||'')+'</textarea>'
+   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckan\')">Дараа</button>'+(d.an?'<button class="btn" onclick="ckAnSave('+k+',1)">Устгах</button>':'')+'<button class="btn" style="background:#3a6d2a" onclick="ckAnSave('+k+')">Нийтлэх</button></div>');
+  try{ const i=document.getElementById('ckanin'); i.focus(); }catch(e){}
+}
+async function ckAnSave(k,clear){
+  if(CKD.busy) return; const inp=document.getElementById('ckanin'); if(!inp) return;
+  if(!ckOn()){ say('Интернэтэд холбогдсон үед бичнэ'); return; }
+  const tx=clear?'':ckNameNorm(inp.value);
+  if(tx.length>CKANL){ say('Хамгийн ихдээ '+CKANL+' тэмдэгт'); return; }
+  if(tx&&typeof chClean==='function'&&chClean(tx)!==tx){ say('Зохисгүй үг байна'); try{ sfx('err'); }catch(e){} return; }
+  CKD.busy=1;
+  try{
+    await ckFetch(true); await ckMem(k,false);
+    const role=ckRole(k); if(!role){ say('Танд мэдэгдэл бичих эрх алга'); return; }
+    const at=wmNow(); await ckPatch(k,{an:tx,at:at},role); S.ckAnS=at; try{ save(); }catch(e){}
+    ck6Close('ckan'); say(tx?'📢 Мэдэгдэл нийтлэгдлээ':'Мэдэгдэл устлаа'); try{ sfx('ok'); }catch(e){}
+    if(tx) ckLog(k,'ann',S.prof.name||'Хаан');
+  }catch(e){ say('Хадгалж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  finally{ CKD.busy=0; try{ ckRender(); }catch(e){} }
+}
+
+// ---- орох нөхцөл: хүч, хүсэлт ----
+const CKMPC=[0,2000,5000,10000,25000,50000];
+function ckEntOpen(k){
+  const role=ckRole(k); if(!role){ say('Зөвхөн Хаан (эсвэл түр удирдагч) тохируулна'); return; }
+  const d=CKD.docs[k]||{}; CK6.jm=d.jm===1?1:0;
+  ck6Modal('ckent','<h3>🚪 Орох нөхцөл</h3><div class="sm" style="text-align:center;margin-bottom:8px">Нэгдэхэд шаардах доод хүч. Одоо байгаа гишүүдэд нөлөөлөхгүй.</div>'
+   +'<div class="sm">Доод хүч (⚔) · 0 = хязгааргүй</div><input id="ckmp" type="number" inputmode="numeric" min="0" max="10000000" value="'+(d.mp||0)+'">'
+   +'<div class="chips">'+CKMPC.map(v=>'<button class="btn" onclick="document.getElementById(\'ckmp\').value='+v+'">'+(v?cn(v):'Хязгааргүй')+'</button>').join('')+'</div>'
+   +'<div class="sm" style="margin-top:10px">Нэгдэх арга</div><div class="chips" id="ckjm"><button class="btn'+(CK6.jm?'':' on')+'" onclick="CK6.jm=0;ckJmMark()">Шууд орно</button><button class="btn'+(CK6.jm?' on':'')+'" onclick="CK6.jm=1;ckJmMark()">Хүсэлтээр (Хаан зөвшөөрнө)</button></div>'
+   +'<div class="row"><button class="btn" onclick="ck6Close(\'ckent\')">Дараа</button><button class="btn" style="background:#3a6d2a" onclick="ckEntSave('+k+')">Хадгалах</button></div>');
+}
+function ckJmMark(){ const c=document.getElementById('ckjm'); if(!c) return; [].forEach.call(c.children,(b,i)=>{ b.classList.toggle('on',i===CK6.jm); }); }
+async function ckEntSave(k){
+  if(CKD.busy) return; const inp=document.getElementById('ckmp'); if(!inp) return;
+  if(!ckOn()){ say('Интернэт байхгүй'); return; }
+  const mp=Math.max(0,Math.min(1e7,Math.floor(+inp.value||0))), jm=CK6.jm?1:0;
+  CKD.busy=1;
+  try{
+    await ckFetch(true); await ckMem(k,false);
+    const role=ckRole(k); if(!role){ say('Танд эрх алга'); return; }
+    await ckPatch(k,{mp:mp,jm:jm},role);
+    ck6Close('ckent'); say('🚪 Орох нөхцөл хадгалагдлаа'); try{ sfx('ok'); }catch(e){}
+    ckLog(k,'mode',S.prof.name||'Хаан',mp);
+  }catch(e){ say('Хадгалж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  finally{ CKD.busy=0; try{ ckRender(); }catch(e){} }
+}
+// нэгдэх: хүч шалгах, хүсэлтээр бол хүсэлт илгээх, түүхэнд бичих
+var _ck6prev=cwJoin;
+function ck6Join(i){
+  const a=S.clan; _ck6prev(i); let n=0;
+  const iv=setInterval(()=>{ n++; if(S.clan===i&&a!==i){ clearInterval(iv); const nm=S.prof.name||'Тоглогч'; if(a!=null&&a>=0) ckLog(a,'leave',nm); ckLog(i,'join',nm); try{ if(CKD.view&&CKD.view.k===i) ckShow(i); }catch(e){} } else if(n>20) clearInterval(iv); },500);
+}
+cwJoin=function(i){
+  if(!ckOn()||S.clan===i||ckOwnerK()>=0){ _ck6prev(i); return; }
+  Promise.all([ckFetch(false),ckMem(i,false)]).then(()=>{
+    const d=CKD.docs[i];
+    if(d&&d.ow){
+      if(ckKicked(d,CL.uid)){ say('Таныг энэ кланаас хассан (7 хоног нэгдэж болохгүй)'); try{ sfx('err'); }catch(e){} return; }
+      const pw=Math.floor(totalPower());
+      if((d.mp||0)>pw){ say('⚔ Танай хүч дутаж байна: хэрэгтэй '+f(d.mp)+', чинийх '+f(pw)); try{ sfx('err'); }catch(e){} return; }
+      const n=ckCnt(i), sl=d.sl||CK.SL0; if(n>=sl){ say('Клан дүүрсэн ('+n+'/'+sl+' слот)'); try{ sfx('err'); }catch(e){} return; }
+      if(d.jm===1){ ckReqSend(i); return; }
+    }
+    ck6Join(i);
+  }).catch(()=>ck6Join(i));
+};
+async function ckReqSend(i){
+  if(CK6.busy) return; CK6.busy=1;
+  try{
+    if(S.ckRq&&S.ckRq.k!==i&&wmNow()-S.ckRq.t<CKRQTTL){ say('Чи '+CLN[S.ckRq.k].n+' кланд хүсэлт илгээсэн байна. Эхлээд цуцлаарай'); try{ sfx('err'); }catch(e){} return; }
+    const {F,db}=FBM, r={u:CL.uid,n:String(S.prof.name||'Тоглогч').slice(0,14),p:Math.floor(totalPower()),l:S.pl||1,t:wmNow(),st:0};
+    await F.setDoc(F.doc(db,'clanreq','c'+i,'r',CL.uid),r);
+    S.ckRq={k:i,t:r.t}; try{ save(); }catch(e){}
+    say('📨 Хүсэлт илгээлээ. Хаан зөвшөөрвөл автоматаар нэгдэнэ'); try{ sfx('ok'); }catch(e){}
+  }catch(e){ say('Хүсэлт илгээж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  finally{ CK6.busy=0; try{ ckRender(); }catch(e){} }
+}
+async function ckReqCancel(){
+  if(!S.ckRq||CK6.busy) return; CK6.busy=1; const k=S.ckRq.k;
+  try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'clanreq','c'+k,'r',CL.uid)); S.ckRq=null; try{ save(); }catch(e){} say('Хүсэлт цуцлагдлаа'); }
+  catch(e){ say('Цуцалж чадсангүй'); }
+  finally{ CK6.busy=0; try{ ckRender(); }catch(e){} }
+}
+async function ckReqPoll(){
+  try{
+    if(!ckOn()||!S.ckRq||CK6.busy) return; const {k,t}=S.ckRq, {F,db}=FBM, ref=F.doc(db,'clanreq','c'+k,'r',CL.uid);
+    if(wmNow()-t>CKRQTTL){ S.ckRq=null; try{ save(); }catch(e){} try{ await F.deleteDoc(ref); }catch(e){} return; }
+    const s=await F.getDoc(ref);
+    if(!s.exists()){ if(wmNow()-t>20000){ S.ckRq=null; try{ save(); }catch(e){} say('Хүсэлт '+CLN[k].n+' кланд татгалзагдлаа'); } return; }
+    if(s.data().st===1){
+      if(typeof wmSt==='function'&&wmSt().m.length){ return; }
+      S.ckRq=null; try{ save(); }catch(e){} try{ await F.deleteDoc(ref); }catch(e){}
+      say('✅ '+CLN[k].n+' кланд хүсэлт зөвшөөрөгдлөө'); try{ sfx('ok'); }catch(e){}
+      ck6Join(k);
+    }
+  }catch(e){}
+}
+async function ckReqFetch(k,force){
+  if(!ckOn()) return [];
+  if(!force&&CK6.reqT[k]&&Date.now()-CK6.reqT[k]<30000) return CK6.req[k]||[];
+  try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'clanreq','c'+k,'r'),F.limit(30))); const now=wmNow();
+    CK6.req[k]=s.docs.map(x=>Object.assign({id:x.id},x.data())).filter(r=>r.st===0&&now-(r.t||0)<CKRQTTL).sort((a,b)=>(a.t||0)-(b.t||0)); CK6.reqT[k]=Date.now();
+  }catch(e){ CK6.req[k]=CK6.req[k]||[]; }
+  return CK6.req[k]||[];
+}
+async function ckReqAnswer(k,uid,ok){
+  if(CKD.busy) return; const role=ckRole(k); if(!role){ say('Танд эрх алга'); return; }
+  if(ok){ const d=CKD.docs[k], sl=d.sl||CK.SL0; if(ckCnt(k)>=sl){ say('Клан дүүрсэн ('+sl+' слот). Слот нэмнэ үү'); try{ sfx('err'); }catch(e){} return; } }
+  CKD.busy=1;
+  try{ const {F,db}=FBM, ref=F.doc(db,'clanreq','c'+k,'r',uid);
+    if(ok) await F.updateDoc(ref,{st:1}); else await F.deleteDoc(ref);
+    CK6.req[k]=(CK6.req[k]||[]).filter(r=>r.id!==uid);
+    say(ok?'✅ Зөвшөөрлөө. Тоглогч орж ирэхэд нэгдэнэ':'Татгалзлаа'); try{ sfx('ok'); }catch(e){}
+  }catch(e){ say('Хариулж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  finally{ CKD.busy=0; try{ ckRender(); }catch(e){} }
+}
+
+// ---- гишүүний мэдээлэл ----
+async function ckInfo(k,uid){
+  let r=(CKD.mem[k]||[]).find(x=>x.id===uid);
+  ck6Modal('ckinf','<h3>Ачаалж байна…</h3>');
+  if(!r||!r.v){ try{ const {F,db}=FBM, s=await F.getDoc(F.doc(db,'lb',uid)); if(s.exists()) r=Object.assign({id:uid},s.data()); }catch(e){} }
+  if(!r){ ck6Modal('ckinf','<h3>Мэдээлэл олдсонгүй</h3><div class="row"><button class="btn" onclick="ck6Close(\'ckinf\')">Хаах</button></div>'); return; }
+  const v=r.v||{}, W=wmWeek(), wk=w=>r.cw===w?(r.cs||0):(r.pw===w?(r.ps||0):0), hn=v.h?Object.keys(v.h).length:0, bl=v.b?Object.keys(v.b).reduce((a,x)=>a+(v.b[x]||0),0):0;
+  const d=CKD.docs[k], ti=d&&d.tt&&d.tt[uid]|0, own=d&&d.ow===uid;
+  const rows=[['⚔ Нийт хүч',cn(r.p||0)],['⭐ Түвшин','Lv '+(r.l||1)],['🕒 Сүүлд орсон',ck6Seen(r.t)]];
+  if(hn) rows.push(['🦸 Баатар',hn]); if(v.z) rows.push(['🗺 Эзэлсэн нутаг',v.z]); if(v.w) rows.push(['🏆 Ялсан тулаан',cn(v.w)]); if(bl) rows.push(['🏠 Барилгын нийт түвшин',bl]);
+  rows.push(['⚑ Клан дайн (энэ 7х / өнгөрсөн)',f(wk(W))+' / '+f(wk(W-1))]);
+  if(r.hw===W&&r.hs) rows.push(['🏹 Энэ 7х-ийн ан',f(r.hs)]);
+  if(r.na) rows.push(['🎯 Харвааны дээд',f(r.na)]); if(r.nw) rows.push(['🤼 Барилдааны ялалт',f(r.nw)]);
+  rows.push(['✉ Бүртгэл',r.r?'имэйлтэй ✓':'бүртгэлгүй']);
+  ck6Modal('ckinf','<h3>'+(own?'👑 ':'')+esc2(String(r.n||'Тоглогч').slice(0,14))+'</h3>'+(ti?'<div class="sm" style="text-align:center">Цол: <b style="color:#9be07a">'+CK_TT[ti]+'</b></div>':'')
+    +'<div class="ckinf">'+rows.map(x=>'<span>'+x[0]+'</span><span>'+x[1]+'</span>').join('')+'</div>'
+    +'<div class="row"><button class="btn" onclick="ck6Close(\'ckinf\')">Хаах</button></div>');
+}
+function ck6Seen(t){ if(!t) return '—'; const m=Math.floor((wmNow()-t)/60000); return m<15?'онлайн':ckWhen(t); }
+
+// ---- Дайны тугнэл: Хаан эсвэл түр удирдагч ----
+ckBanner=async function(){
+  if(!ckOn()||CKD.busy) return;
+  const k=wmClanId(); if(k<0) return;
+  await ckMem(k,false); const role=ckRole(k);
+  if(!role){ say('Дайны тугнэлийг зөвхөн өөрийн кланы Хаан (эсвэл түр удирдагч) мандуулна'); return; }
+  CKD.busy=1;
+  try{
+    const {F,db}=FBM, ref=F.doc(db,'clans','c'+k), W=wmWeek(); let wb=null;
+    if(role==='own'){
+      await F.runTransaction(db,async tx=>{ const s=await tx.get(ref); if(!s.exists()||s.data().ow!==CL.uid) throw new Error('notowner'); const o=s.data().wb; if(o&&o.w===W) throw new Error('used'); wb={w:W,t:wmNow()}; tx.update(ref,{wb:wb}); });
+    } else {
+      const s=await F.getDoc(ref); const o=s.exists()&&s.data().wb; if(o&&o.w===W) throw new Error('used'); wb={w:W,t:wmNow()}; await F.updateDoc(ref,{wb:wb});
+    }
+    if(CKD.docs[k]) CKD.docs[k].wb=wb; else CKD.docs[k]={ow:CL.uid,wb:wb};
+    say('🚩 Дайны тугнэл мандлаа! 24 цагийн турш клан дайны оноо ×1.5'); try{ sfx('ok'); vib([30,20,60]); }catch(e){}
+    ckLog(k,'banner',S.prof.name||'');
+  }catch(e){ say(e&&e.message==='used'?'Энэ долоо хоногт тугнэлээ аль хэдийн мандуулсан':'Тугнэл мандуулж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  finally{ CKD.busy=0; try{ ckRender(); }catch(e){} try{ cwRender(); }catch(e){} }
+};
+(function(){ const _cr=cwRender; cwRender=function(){ _cr();
+  try{ const p=$('cwp'); if(!p||wmClanId()<0||CWD.pick) return; const k=wmClanId(), d=CKD.docs[k];
+    if(d&&d.ow&&d.ow!==CL.uid&&ckRole(k)==='act'&&!cwBannerLeft(d)&&!p.querySelector('.ckactb')){ const used=d.wb&&d.wb.w===wmWeek();
+      p.insertAdjacentHTML('beforeend','<button class="btn ckactb" style="width:100%;margin-top:4px" '+(used?'disabled ':'')+'onclick="ckBanner()">🚩 Дайны тугнэл (түр удирдагч)'+(used?' · энэ 7 хоногт ашигласан':'')+'</button>'); }
+  }catch(e){} }; })();
+
+// ---- ckRender-д орох хэсгүүд (clan5.js дуудна) ----
+function ck6Head(k,d,rows,role,left){
+  if(!(d&&d.ow)) return '';
+  let h='';
+  const me=CL.uid, pw=Math.floor(totalPower());
+  if(d.an) h+='<div class="ckan">📢 <b>Хааны мэдэгдэл</b><div style="margin-top:3px">'+esc2(d.an)+'</div><small>'+ckWhen(d.at)+'</small></div>';
+  const ent=(d.mp?'⚔ '+cn(d.mp)+'+ хүч':'Хүч шаардахгүй')+' · '+(d.jm===1?'хүсэлтээр':'шууд орно');
+  h+='<div class="ckpill">🚪 Орох нөхцөл: <b style="color:#ffd770">'+ent+'</b></div>';
+  if(S.clan!==k&&d.mp&&pw<d.mp) h+='<div class="ckpill warn">⚔ Танай хүч дутаж байна: чинийх '+cn(pw)+' / хэрэгтэй '+cn(d.mp)+'</div>';
+  if(role&&(CK6.req[k]||[]).length) h+='<div class="ckpill gold">📨 '+CK6.req[k].length+' тоглогч нэгдэх хүсэлт илгээсэн · доор харна уу</div>';
+  if(S.ckRq&&S.ckRq.k===k&&S.clan!==k) h+='<div class="ckpill gold">📨 Хүсэлт илгээсэн · Хаан зөвшөөрөхийг хүлээж байна</div>';
+  if(ckIdle(k)){
+    const act=ckActing(k), ar=act&&rows.find(x=>x.id===act), days=ckIdleDays(k);
+    h+='<div class="ckpill warn">💤 Хаан '+days+' өдөр ороогүй</div>';
+    if(ar) h+='<div class="ckpill ok">'+(act===me?'👑 Чи түр удирдагч боллоо: ':'👑 Түр удирдагч: ')+'<b>'+esc2(String(ar.n||'').slice(0,14))+'</b> · мэдэгдэл, орох нөхцөл, хүсэлт, тугнэл. Хасах, цол, нэр, слот — Хаанд.</div>';
+    else h+='<div class="ckpill">Цолтой идэвхтэй гишүүн байхгүй тул түр удирдагч алга.</div>';
+  } else if(role==='own'&&!ckRows(k).some(x=>x.id!==d.ow&&d.tt&&d.tt[x.id])) {
+    h+='<div class="ckpill">💡 3+ өдөр ороогүй бол хамгийн өндөр цолтой гишүүн түр удирдана. Цол өгч тохируул.</div>';
+  }
+  return h;
+}
+function ck6Btns(k,d,role){
+  if(!role) return '';
+  const b=(t,fn,cls)=>'<button class="btn'+(cls?' '+cls:'')+'" onclick="'+fn+'">'+t+'</button>';
+  return b('📢 Мэдэгдэл','ckAnOpen('+k+')')+b('🚪 Орох нөхцөл','ckEntOpen('+k+')');
+}
+function ck6JoinBtn(k,d,rows,sl){
+  if(S.ckRq&&S.ckRq.k===k) return '<button class="btn full ckwarn" onclick="ckReqCancel()">✕ Хүсэлт цуцлах</button>';
+  const full=!!(d&&d.ow&&rows.length>=sl);
+  return '<button class="btn full ckjoin" '+(full?'disabled ':'')+'onclick="CK_JOINASK('+k+')">'+(d&&d.jm===1?'📨 Хүсэлт илгээх':'Энэ клан руу нэгдэх')+'</button>';
+}
+function ck6Reqs(k,role){
+  if(!role) return '';
+  const a=CK6.req[k]||[]; if(!a.length) return '';
+  let h='<div class="ckmh"><span>📨 Нэгдэх хүсэлт</span><span class="sm">'+a.length+'</span></div>';
+  a.forEach(r=>{ h+='<div class="ckrq"><div style="flex:1;min-width:0" onclick="ckInfo('+k+',\''+r.id+'\')"><div class="nm">'+esc2(String(r.n||'Тоглогч').slice(0,14))+' <span class="sm">ℹ</span></div><div class="sb">Lv '+(r.l||1)+' · ⚔ '+cn(r.p||0)+' · '+ckWhen(r.t)+'</div></div>'
+    +'<button class="btn" style="padding:3px 12px;background:#3a6d2a" onclick="ckReqAnswer('+k+',\''+r.id+'\',1)">✓</button><button class="btn" style="padding:3px 12px" onclick="ckReqAnswer('+k+',\''+r.id+'\',0)">✕</button></div>'; });
+  return h;
+}
+function ck6LogSec(k,d){
+  if(!(d&&d.ow)) return '';
+  const open=!!CK6.logOpen[k]; let h='<div class="ckact"><button class="btn full" onclick="ckLogToggle('+k+')">📜 Кланы түүх '+(open?'▴':'▾')+'</button></div>';
+  if(open){ const a=CK6.log[k]; h+='<div class="cklg">'+(!a?'<div><span></span><span>Ачаалж байна…</span></div>':(!a.length?'<div><span></span><span>Түүх хоосон байна</span></div>':a.map(r=>'<div><span>'+ckWhen(r.t)+'</span><span>'+ckLogTxt(r)+'</span></div>').join('')))+'</div>'; }
+  return h;
+}
+// ---- өгөгдөл ачаалах ----
+function ck6After(k){
+  Promise.all([ckFetch(false),ckMem(k,false)]).then(()=>{
+    if(ckRole(k)) ckReqFetch(k,false).then(()=>{ try{ ckRender(); }catch(e){} });
+    if(S.ckRq&&S.ckRq.k===k) ckReqPoll().then(()=>{ try{ ckRender(); }catch(e){} });
+    if(CK6.logOpen[k]) ckLogFetch(k,false).then(()=>{ try{ ckRender(); }catch(e){} });
+  }).catch(()=>{});
+}
+(function(){
+  const _s=ckShow; ckShow=function(k){ _s(k); ck6After(k); };
+  const _o=ckOpen; ckOpen=function(k){ _o(k); try{ if(CKD.view&&CKD.view.k!=null) ck6After(CKD.view.k); }catch(e){} };
+})();
+// ---- мэдэгдэл (toast), хүсэлтийн шалгалт ----
+async function ck6Poll(){
+  try{
+    if(!ckOn()) return;
+    await ckReqPoll();
+    const k=S.clan; if(k==null||k<0) return;
+    await ckFetch(false); await ckMem(k,false);
+    const d=CKD.docs[k]; if(!d||!d.ow) return;
+    if(d.an&&d.at&&(S.ckAnS||0)<d.at){ S.ckAnS=d.at; try{ save(); }catch(e){} say('📢 '+CLN[k].n+': '+d.an); }
+    const role=ckRole(k);
+    if(role==='act'&&S.ckAct!==k+':'+Math.floor(wmNow()/864e5)){ S.ckAct=k+':'+Math.floor(wmNow()/864e5); say('👑 Хаан удаан ороогүй тул чи түр удирдагч боллоо'); }
+    if(role&&d.jm===1){ const a=await ckReqFetch(k,true); const key=a.length?a.map(x=>x.id).join(','):''; if(key&&S.ckRqS!==key){ S.ckRqS=key; say('📨 Кланд '+a.length+' хүсэлт ирсэн байна'); } if(!key) S.ckRqS=''; }
+  }catch(e){}
+}
+setTimeout(ck6Poll,17000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) setTimeout(ck6Poll,2500); });
+setInterval(()=>{ if(!document.hidden&&S.ckRq) ckReqPoll(); },4*60000);
+// ---- кланы чат: хадгалсан мэдэгдэл ----
+(function(){ const _co=chatOpen; chatOpen=function(room){ _co(room);
+  try{ const c=document.getElementById('chat'); if(!c) return; let p=document.getElementById('chpin'); if(p) p.remove();
+    const k=(typeof room==='number')?room:null; if(k==null) return;
+    const put=()=>{ const d=CKD.docs[k]; let q=document.getElementById('chpin'); if(q) q.remove(); if(!d||!d.an||CHT.room!==k) return; q=document.createElement('div'); q.id='chpin'; q.style.cssText='margin:4px 8px;padding:6px 9px;border-radius:9px;background:#4a3512;border:1px solid #c9972b;color:#ffe9b0;font-size:13px;word-break:break-word;flex:none'; q.innerHTML='📢 <b>'+esc2(d.an)+'</b>'; const h=c.querySelector('.kH'); if(h&&h.parentNode) h.parentNode.insertBefore(q,h.nextSibling); };
+    put(); if(ckOn()) ckFetch(false).then(put).catch(()=>{});
+  }catch(e){} }; })();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

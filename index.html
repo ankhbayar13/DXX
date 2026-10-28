@@ -5251,7 +5251,7 @@ var TERR={ok:0,tn:{}};
 (function(){ function ld(n){ try{ fetch('terr.bin?v=2').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
   const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl; let left=hd.length;
   hd.forEach(([nm,off,len,w,h])=>{ const im=new Image(); im.onload=()=>{ SPR[nm]={img:im,iw:w,ih:h}; if(--left===0){ TERR.ok=1; try{ for(const k in gCache) delete gCache[k]; RC=null; }catch(e){} } }; im.onerror=()=>{ --left; }; im.src=URL.createObjectURL(new Blob([buf.slice(base+off,base+off+len)],{type:'image/webp'})); });
- }).catch(()=>{ if(n<3) setTimeout(()=>ld(n+1),6000); }); }catch(e){} }
+ }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,4000+n*2500)); }); }catch(e){} }
  setTimeout(()=>ld(0),1500); })();
 const _gs0=groundSet;
 groundSet=function(){ const G=_gs0(); if(!G) return G; if(false&&!G.nw){ const sk=seasonK(), s=SPR['gr_'+sk]; if(s&&s.img.complete&&s.img.naturalWidth){ const c=document.createElement('canvas'); c.width=c.height=768; c.getContext('2d').drawImage(s.img,0,0,768,768); G.pat=ctx.createPattern(c,'repeat'); G.nw=1; } } return G; };
@@ -5271,7 +5271,7 @@ Object.assign(BHN,{"chinggis":{"idle":4,"walk":6,"run":6,"atk":6,"hit":2,"die":4
 var HRO={ok:0,buf:null,hd:null,base:0,done:{}};
 (function(){ function ld(n){ try{ fetch('hero.bin?v=2').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
   const dv=new DataView(buf), hl=dv.getUint32(0,true); HRO.hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))); HRO.base=4+hl; HRO.buf=buf; HRO.ok=1; try{ heroPrep(); }catch(e){}
- }).catch(()=>{ if(n<3) setTimeout(()=>ld(n+1),8000); }); }catch(e){} }
+ }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
  setTimeout(()=>ld(0),3500); })();
 function heroMk(id){ if(!HRO.ok||HRO.done[id]||!BHN[id]) return; HRO.done[id]=1; const by={}, names=[]; let left=0;
   const fin=()=>{ if(--left>0) return; let ok=null; names.forEach(([n,o])=>{ if(by[o]&&by[o].ok&&!ok) ok=by[o]; }); if(!ok){ HRO.done[id]=0; return; }
@@ -5293,7 +5293,7 @@ var ENR={ok:0,done:0};
   hd.forEach(([nm,off,len,w,h])=>{ names.push([nm,off,w,h]); if(by[off]) return; const im=new Image(); by[off]=im; left++;
     im.onload=()=>{ if(--left===0&&!bad){ names.forEach(([n2,o2,w2,h2])=>{ SPR[n2]={img:by[o2],iw:w2,ih:h2}; }); ENR.ok=1; } }; im.onerror=()=>{ bad=1; left--; };
     im.src=URL.createObjectURL(new Blob([new Uint8Array(buf,base+off,len)],{type:'image/webp'})); });
- }).catch(()=>{ if(n<3) setTimeout(()=>ld(n+1),8000); }); }catch(e){} }
+ }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
  setTimeout(()=>ld(0),11000); })();
 const EVAR={foot:['esword','espear','eshaman'],heavy:['eaxe'],archer:['ebow'],cav:['ehorse','ehbow']};
 
@@ -5669,7 +5669,7 @@ function wmtBin(url,put){ return fetch(url).then(r=>{ if(!r.ok) throw 0; return 
 function wmtLoad(){ if(WMT.ld) return; WMT.ld=1;
   const put=(nm,im,w,h)=>{ if(/^wm_wt\d+$/.test(nm)){ const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const g=cv.getContext('2d'); g.drawImage(im,0,0,w,h); g.globalCompositeOperation='destination-in'; const rg=g.createRadialGradient(w/2,h/2,Math.min(w,h)*0.36,w/2,h/2,Math.min(w,h)*0.64); rg.addColorStop(0,'rgba(0,0,0,1)'); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,w,h); return new Promise(r=>{ const i2=new Image(); i2.onload=()=>{ SPR[nm]={img:i2,iw:w,ih:h}; r(); }; i2.onerror=()=>r(); i2.src=cv.toDataURL('image/png'); }); }
     if(nm.indexOf('wm_tx_')===0) WMT.tx[nm.slice(6)]=im; else if(nm.indexOf('wm_tl_')===0){ const m=/^wm_tl_([a-z]+)(\d+)$/.exec(nm); if(m) (WMT.tl[m[1]]=WMT.tl[m[1]]||[])[+m[2]]=im; } else SPR[nm]={img:im,iw:w,ih:h}; };
-  const tr=(u,n)=>wmtBin(u,put).catch(()=>{ if(n<3) return new Promise(r=>setTimeout(r,5000)).then(()=>tr(u,n+1)); });
+  const tr=(u,n)=>wmtBin(u,put).catch(()=>{ if(n<40) return new Promise(r=>setTimeout(r,Math.min(30000,5000+n*2500))).then(()=>tr(u,n+1)); });
   Promise.all([tr('wmterr.bin?v=2',0),tr('wmterr2.bin?v=1',0),tr('wmterr3.bin?v=1',0),tr('wmterr4.bin?v=1',0)]).then(()=>{ WMT.ok=1; try{ if(typeof WMD!=='undefined'&&WMD) WMD.bg=wmBg(WMD); }catch(e){} }); }
 function wmS(k){ const s=SPR[k]; return (s&&s.img&&s.img.complete&&s.img.naturalWidth)?s:null; }
 (function(){ const _o=wmOpen; wmOpen=function(){ try{ wmtLoad(); }catch(e){} _o(); }; })();
@@ -7818,6 +7818,23 @@ function regTick(){
   if(want&&due&&!busy){ d.style.display='block'; REG.shown=Date.now(); S.regT=Date.now(); S.regN=(S.regN||0)+1; try{ save(); }catch(e){} }
 }
 REG.shown=0; setInterval(regTick,1500);
+
+
+/* 186: файл татах алдааг өөрөө засах — сүлжээ тасарвал дахин дахин оролдоно */
+setInterval(()=>{ try{
+  if(document.hidden) return;
+  if(typeof ICST!=='undefined'&&ICST===2&&typeof icLoad==='function') icLoad();
+  if(typeof MNST!=='undefined'&&MNST===2&&typeof mnLoad==='function') mnLoad();
+  if(typeof UIST!=='undefined'&&UIST===2&&typeof uifLoad==='function') uifLoad();
+  if(typeof NDST!=='undefined'&&NDST===2&&typeof ndLoad==='function') ndLoad();
+  if(typeof HUDST!=='undefined'&&HUDST===2&&typeof hudLoad==='function') hudLoad();
+  if(typeof BLST!=='undefined'&&BLST===2&&typeof bldLoad==='function') bldLoad();
+}catch(e){} },8000);
+// утас дэвсгэрээс буцаж ирэхэд зураг алга болсон бол дахин ачаална
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; setTimeout(()=>{ try{
+  const bad=[...document.querySelectorAll('img.mi')].filter(i=>i.complete&&i.naturalWidth===0&&i.src).length;
+  if(bad>=3){ if(typeof IC!=='undefined'&&IC){ IC=null; ICST=0; } icLoad(); }
+}catch(e){} },1500); });
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

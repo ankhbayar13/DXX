@@ -7013,6 +7013,30 @@ async function ckNameSave(k){
     CKD.bg=1; ckFetch(false).then(()=>{ CKD.bg=0; const s=JSON.stringify(CLN.map(q=>q.n)); if(CKD.ns!==s){ CKD.ns=s; try{ if($('cwp')) cwRender(); }catch(e){} } }).catch(()=>{ CKD.bg=0; });
   }catch(e){} }; })();
 
+
+/* 176: түүхэн аян — зайлшгүй оролцох баатар эзэмшээгүй ч шинэ төрхтэй (hero.bin-ээс) ачаалагдана */
+(function(){
+  const _hp=heroPrep;
+  heroPrep=function(){
+    try{ _hp(); }catch(e){}
+    try{
+      if(!HRO.ok) return;
+      const ids=[];
+      if(typeof BT!=='undefined'&&BT){
+        if(BT.req) ids.push(BT.req);
+        if(BT.e&&BT.e.req) ids.push(BT.e.req);
+        (BT.units||[]).forEach(u=>{ if(!u.side&&u.id) ids.push(u.id); });
+      }
+      ids.filter((x,i)=>ids.indexOf(x)===i).forEach(heroMk);
+    }catch(e){}
+  };
+  const _sb=startBattle;
+  startBattle=function(i,E){
+    try{ if(E&&E.req) heroMk(E.req); }catch(e){}
+    return _sb.apply(this,arguments);
+  };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

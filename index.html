@@ -8305,6 +8305,23 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
       ctx.restore();
     }catch(e){ try{ ctx.restore(); }catch(_){} }
   };
+  /* ---------- 5) Аймгийн 4-р тулааныг ялмагц дараагийн аймгийн газрын зураг автоматаар нээгдэнэ ---------- */
+  try{
+    const _cw=campWin;
+    campWin=function(ci,s){
+      const was=!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]);
+      const r=_cw.apply(this,arguments);
+      if(s===3&&!was){ window.CPNEXT=ci+1; setTimeout(()=>{ window.CPNEXT=null; },4000); }
+      return r;
+    };
+    const _om=openM;
+    openM=function(k){
+      try{ const N=window.CPNEXT;
+        if(N!=null&&typeof k==='string'&&k==='cmap:'+(N-1)){ window.CPNEXT=null; if(N<CAMP.length&&chOpen(N)) arguments[0]='cmap:'+N; }
+      }catch(e){}
+      return _om.apply(this,arguments);
+    };
+  }catch(e){}
 })();
 
 </script><script>(function(){

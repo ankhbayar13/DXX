@@ -3384,7 +3384,7 @@ const MENU=[
  {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
- {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
+ {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
@@ -3624,7 +3624,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
   const own=lsGet('dxx_own'); if(own&&own!==CL.uid&&CL.email){ CL.err='Өөр бүртгэлийн өгөгдөл'; if(!quiet) say('Энэ утсан дээрх тоглоом өөр бүртгэлийнх тул cloud руу хадгалсангүй'); return false; }
   CL.busy=1; let ok=false; try{
     const {F,db}=FBM; const d=acPack(JSON.stringify(S));
-    await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); lsSet('dxx_own',CL.uid);
+    try{ await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1,s:S.src||''}); }catch(e1){ if(!S.src) throw e1; await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); } lsSet('dxx_own',CL.uid);
     let nm=(S.prof&&S.prof.name)||'Хаан'; nm=String(nm).slice(0,14);
     await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:wmNow(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap(),na:ndMine().na,nr:ndMine().nr,nw:ndMine().nw,cl:wmClanId(),cs:wmCsGet().s,cw:wmCsGet().w,ps:wmCsGet().ps,pw:wmCsGet().pw,hs:wmHuntGet().s,hw:wmHuntGet().w,rs:[Math.floor(S.res.gold||0),Math.floor(S.res.meat||0),Math.floor(S.res.wood||0),Math.floor(S.res.grain||0)]});
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
@@ -8603,6 +8603,33 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   setInterval(()=>{ try{ if(Date.now()-lastRun>2500){ lastRun=Date.now(); requestAnimationFrame(frame); } }catch(e){} },2000);
   /* мэдэгдэж буй эвдэрсэн өгөгдлөөс хамгаална */
   try{ const _hp=heroPower; heroPower=function(id){ try{ return _hp.apply(this,arguments); }catch(e){ return 0; } }; }catch(e){}
+})();
+
+
+/* p32/invite.js — 198: тоглогч хаанаас ирсэн (?src=...) хэмжилт + «Найзаа урь» товч */
+(function(){
+  const BASE='https://talnutgiinhaan.com/';
+  /* 1) Хаяг дээрх ?src=нэр -ийг тоглогч анх орохдоо л нэг удаа хадгална (S.src, үүлэнд s талбар болно) */
+  function grab(){
+    try{
+      if(typeof S==='undefined'||!S||S.src) return;
+      const m=/[?&]src=([A-Za-z0-9_-]{1,24})/.exec(location.search||'');
+      if(m){ S.src=m[1]; save(); }
+    }catch(e){}
+  }
+  let n=0; const iv=setInterval(()=>{ grab(); if(++n>10||(typeof S!=='undefined'&&S&&S.src)) clearInterval(iv); },1500);
+
+  /* 2) Найзаа урих: утасны хуваалцах цэс, байхгүй бол хаягийг хуулна */
+  window.inviteFriend=function(){
+    try{
+      const id=(typeof CL!=='undefined'&&CL.uid)?String(CL.uid).slice(0,6):'x';
+      const url=BASE+'?src=f'+id, text='«Тал Нутгийн Хаан» — монгол нүүдэлчний тоглоом. Хамт тоглоцгооё!';
+      if(navigator.share){ navigator.share({title:'Тал Нутгийн Хаан',text:text,url:url}).catch(()=>{}); return; }
+      const done=()=>{ try{ say('Хаяг хуулагдлаа: talnutgiinhaan.com'); }catch(e){} };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text+' '+url).then(done,()=>{ try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }); }
+      else { try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }
+    }catch(e){}
+  };
 })();
 
 </script><script>(function(){

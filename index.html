@@ -8542,6 +8542,15 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     }catch(e){ try{ ctx.restore(); }catch(_){} }
   };
 
+  /* ---------- алхах хурд: хүн, амьтан хэт хурдан байсан тул 35%-аар удаашруулав (аюул, тулааны үед хэвээр) ---------- */
+  window.WALKK=0.65;
+  const _mvTo=moveTo;
+  moveTo=function(e,dt){
+    let k=window.WALKK||1;
+    if(e.raid||e.def||(e.post&&e.post.k==='hide')) k=1;
+    return _mvTo.call(this,e,dt*k);
+  };
+
   /* ---------- өдрийн цагийн жижиг тэмдэг ---------- */
   (function(){
     const s=document.createElement('style');

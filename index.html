@@ -225,7 +225,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 <div id="modal"><div class="box"><button class="x" onclick="closeM()">✕</button><div id="mbody"></div></div></div>
 <div id="msg" class="msg"></div>
 
-<script src="d1.js?v=85f00b08r2"></script>
+<script src="d1.js?v=85f00b08"></script>
 <script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.b_meat) m.push('d1'); }catch(e){ m.push('d?'); }
  if(!m.length) return; window.DXX_MISSING=m; var d=document.createElement('div'); d.id='dxxmiss'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#1b120a;color:#ffe9b0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px sans-serif;text-align:center;padding:24px';
  d.innerHTML='<div style="font-size:44px">\ud83d\udcf6</div><h2 style="color:#ffd770;margin:8px 0">Тоглоомын файл бүрэн татагдсангүй</h2><div style="max-width:300px;margin-bottom:18px">Интернет сул байна. Сүлжээгээ шалгаад дахин оролдоно уу.</div><button onclick="location.reload()" style="padding:12px 26px;font-size:17px;font-weight:bold;border-radius:12px;border:3px solid #ffd770;background:#a8641a;color:#fff">Дахин ачаалах</button>';
@@ -3359,13 +3359,13 @@ const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наад
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
   return '<h2>☰ Цэс</h2>'+MENU.map(g=>'<div class="card"><h3>'+(SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]]?'<img src="'+SPRDATA[MSEC[g.t.replace(/^\S+\s/,'')]][0]+'" style="height:24px;vertical-align:middle;margin-right:4px">':'')+g.t.replace(/^\S+\s/,'')+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+g.i.map(x=>{ const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0; return '<button class="btn" style="position:relative;padding:12px 4px;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px" onclick="'+x[2]+'">'+(SPRDATA[MIC[x[1]]]?'<img src="'+SPRDATA[MIC[x[1]]][0]+'" style="width:46px;height:46px">':'<span style="font-size:26px">'+x[0]+'</span>')+x[1]+(bd?'<em style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:10px;padding:0 5px;font-style:normal">'+bd+'</em>':'')+'</button>'; }).join('')+'</div></div>').join(''); }
-(function(){ const KEEP=["openM('shop')","openM('camp')","daily()","openM('menu')","openM('soc')","chatOpen()"];
+(function(){ const KEEP=["openM('shop')","daily()","openM('menu')","openM('soc')","chatOpen()"];
   function fix(){ const l=document.getElementById('lcol'), r=document.getElementById('rcol'); if(!l||!r) return;
     { const old=l.querySelector('[data-x=menu]'); if(old) old.remove(); }
     if(!r.querySelector('[data-x=menu]')){ const b=document.createElement('button'); b.setAttribute('data-x','menu'); b.setAttribute('onclick',"openM('menu')"); b.innerHTML='<span style="font-size:22px">☰</span>Цэс<em id="menub" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
     if(!r.querySelector('[data-x=soc]')){ const b=document.createElement('button'); b.setAttribute('data-x','soc'); b.setAttribute('onclick',"openM('soc')"); b.innerHTML='<span style="font-size:22px">👥</span>Найз<em id="socb" style="position:absolute;top:-4px;right:-4px;background:#d33;color:#fff;border-radius:9px;font-size:9px;padding:0 4px;font-style:normal;display:none"></em>'; r.appendChild(b); }
-    [...l.children,...r.children].forEach(b=>{ if(b.tagName!=='BUTTON') return; const o=b.getAttribute('onclick')||''; if(!KEEP.includes(o)) b.style.display='none'; else if(b.style.display==='none') b.style.display=''; if(o==="openM('menu')") b.style.order=3; if(o==="chatOpen()") b.style.order=6; });
-    [...l.children].forEach(b=>{ const o=(b.getAttribute&&b.getAttribute('onclick'))||''; if(o==="openM('shop')"||o==="openM('camp')"){ b.style.order=(o==="openM('shop')")?4:5; b.style.display=''; r.appendChild(b); } });
+    [...l.children,...r.children].forEach(b=>{ if(b.tagName!=='BUTTON') return; const o=b.getAttribute('onclick')||''; if(!KEEP.includes(o)) b.style.display='none'; else if(b.style.display==='none') b.style.display=''; if(o==="openM('menu')") b.style.order=-1; if(o==="daily()") b.style.order=3; if(o==="chatOpen()") b.style.order=6; });
+    [...l.children].forEach(b=>{ const o=(b.getAttribute&&b.getAttribute('onclick'))||''; if(o==="openM('shop')"){ b.style.order=4; b.style.display=''; r.appendChild(b); } });
     const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0, e=document.getElementById('menub'); if(e){ e.textContent=mb+qb||''; e.style.display=(mb+qb)?'block':'none'; } }
   setInterval(fix,600); setTimeout(fix,350); })();
 
@@ -5182,7 +5182,7 @@ function voxSay(idx){ try{ const L=VOX.ids[idx]; if(!L||!L.length) return false;
 
 
 /* p32/musvol.js — 126: хөгжмийн дууны тохируулга (Цэс → Бусад → Хөгжим) */
-MUSV.vol=1; try{ const v=parseFloat(localStorage.getItem('musv')); if(v>=0&&v<=1) MUSV.vol=v; }catch(e){}
+MUSV.vol=0.3; try{ const v=parseFloat(localStorage.getItem('musv')); if(v>=0&&v<=1) MUSV.vol=v; }catch(e){}
 MUSV.g={}; MUSV.u={};
 function musUrl(k){ if(MUSV.u[k]) return MUSV.u[k]; let u=MUS[k]; try{ const s=MUS[k], i=s.indexOf(','), bin=atob(s.slice(i+1)), n=bin.length, ar=new Uint8Array(n); for(let j=0;j<n;j++) ar[j]=bin.charCodeAt(j); u=URL.createObjectURL(new Blob([ar],{type:'audio/mpeg'})); }catch(e){ u=MUS[k]; } MUSV.u[k]=u; return u; }
 function musApply(){ Object.keys(MUSV.a).forEach(k=>{ const a=MUSV.a[k], base=k==='battle'?0.55:0.4; if(MUSV.g[k]){ a.volume=1; try{ MUSV.g[k].gain.value=(base/0.4)*MUSV.vol; }catch(e){} } else a.volume=Math.min(1,base*MUSV.vol); }); }

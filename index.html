@@ -5839,7 +5839,7 @@ wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=
     items.push({y:1e5+qy,f:()=>{ c.save(); c.globalAlpha=isMy||isOp?0.9:0.6; wmLabel(c,(isMy?'⚑ ':isOp?'⚔ ':'')+q.n+' клан'+(wmTerr()&&wmTerr().z===i?(wmTerr().win?' 🏴 эзэмшил':' ⚠ эзлэгдсэн'):''),qx,qy-(s?hh*0.86:(isMy?78:44)),isMy?'#ffe28a':isOp?'#ff9a8a':'#fff',isMy||isOp?20:17); c.restore(); }});
     items.push({y:qy,f:()=>{ if(s){ c.drawImage(s.img,qx-ww/2,qy-hh*0.88,ww,hh); } else if(!isMy){ c.fillStyle=q.c; c.fillRect(q.x-1.5,q.y-46,3,48); c.beginPath(); c.moveTo(q.x+1.5,q.y-46); c.lineTo(q.x+26,q.y-38); c.lineTo(q.x+1.5,q.y-30); c.fill(); } }}); });
   const rows=CWD.w===w?CWD.my:[]; rows.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{ const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
-    items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(x.p||0)):null; if(s){ const ww=0.20*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
+    items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(x.p||0)):null; if(s){ const ww=0.27*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
   wmCwEnts().forEach(e=>{ if(!vis(e.x,e.y,70)) return; const cd=wmCd(e.id);
     items.push({y:e.y,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(e.p)):null, imm=e.real&&e.uid&&CWD.rd&&CWD.rd[e.uid]&&now-CWD.rd[e.uid]<WM_HR; c.globalAlpha=cd?0.45:1; let hh=44;
       if(s){ const ww=0.25*s.iw; hh=ww*s.ih/s.iw; c.drawImage(s.img,e.x-ww/2,e.y-hh*0.82,ww,hh); } else wmDrawS(c,'ger2',e.x,e.y,40);
@@ -7676,6 +7676,27 @@ function jamBtnUpd(){
 (function(){ if(document.getElementById('jamb')) return;
   const b=document.createElement('div'); b.id='jamb'; b.onclick=jamOpen; b.innerHTML='<div class="jr2" style="background-image:url('+SPRDATA.hp_jamukha[0]+')"></div><b>45ө</b><i>!</i>'; document.body.appendChild(b);
   setInterval(jamBtnUpd,800); })();
+
+
+/* 182: газрын зураг дээр кланы гишүүдийн гэр — кланы жагсаалттай нэгтгэж, хассан гишүүнийг нууна */
+(function(){
+  const _d=wmClanDraw;
+  wmClanDraw=function(c,D,z,t,vis,items){
+    const k=wmClanId(), sv=CWD.my, sw=CWD.w; let m=null;
+    try{
+      if(k>=0){
+        const w=wmWeek(), seen={}, out=[], d=(typeof CKD!=='undefined')?CKD.docs[k]:null;
+        const add=x=>{ if(!x||!x.id||seen[x.id]) return; if(d&&typeof ckKicked==='function'&&ckKicked(d,x.id)) return; seen[x.id]=1; out.push(x); };
+        try{ if(typeof ckRows==='function') ckRows(k).forEach(add); }catch(e){}
+        (sw===w?sv:[]).forEach(add);
+        out.sort((a,b)=>(b.p||0)-(a.p||0)); m=out;
+      }
+    }catch(e){ m=null; }
+    if(m){ CWD.my=m; CWD.w=wmWeek(); }
+    try{ return _d.apply(this,arguments); } finally{ CWD.my=sv; CWD.w=sw; }
+  };
+  const _o=wmOpen; wmOpen=function(){ _o(); try{ const k=wmClanId(); if(k>=0){ if(typeof ckMem==='function') ckMem(k); if(!(CWD.my&&CWD.my.length)&&typeof cwFetch==='function') cwFetch(true); } }catch(e){} };
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

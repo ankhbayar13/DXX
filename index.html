@@ -1419,7 +1419,7 @@ function mkWild(type,hx,hy){ ents.push({kind:'wild',type,x:hx,y:hy,tx:hx,ty:hy,h
 function drawFx(t){
   const aw=22/(SC*Z);
   ents.forEach(e=>{
-    if((e.kind!=='person'&&!e.friend)||!e.task||e.task.phase!=='go') return;
+    if((e.kind!=='person'&&!e.friend)||!e.task||e.task.phase!=='go'||(e.post&&e.post.sched)) return; /* хуваарийн хөдөлгөөнд ногоон сум үзүүлэхгүй */
     const tk=e.task; let tx,ty;
     if(tk.type==='hunt'&&tk.tg){ tx=tk.tg.x+entW(tk.tg)/2; ty=tk.tg.y+entH(tk.tg)*0.2; }
     else { tx=tk.x+entCx(e); ty=tk.y+entH(e)*0.8; }
@@ -8434,7 +8434,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   const GERS=['ger','ger2','ger3','ger4','ger5'];
   const dayP=()=>(Date.now()%DAY)/DAY;
   /* улирал бүрийн өдрийн хуваарь: dw=үүр цайх, m0-m1=хоолны цаг, ev=оройн эхлэл, sl=унтлагын эхлэл. Зун өдөр урт, өвөл шөнө урт */
-  const SEA={spring:{dw:0.05,m0:0.45,m1:0.55,ev:0.78,sl:0.86},summer:{dw:0.04,m0:0.48,m1:0.56,ev:0.84,sl:0.91},autumn:{dw:0.05,m0:0.45,m1:0.55,ev:0.78,sl:0.86},winter:{dw:0.07,m0:0.42,m1:0.50,ev:0.70,sl:0.78}};
+  const SEA={spring:{dw:0.05,m0:0.45,m1:0.515,ev:0.78,sl:0.86},summer:{dw:0.04,m0:0.48,m1:0.545,ev:0.84,sl:0.91},autumn:{dw:0.05,m0:0.45,m1:0.515,ev:0.78,sl:0.86},winter:{dw:0.07,m0:0.42,m1:0.485,ev:0.70,sl:0.78}};
   const seaP=()=>{ try{ return SEA[seasonK()]||SEA.spring; }catch(e){ return SEA.spring; } };
   const phaseOf=p=>{ const q=seaP(); return p<q.dw?'dawn':p<q.m0?'work':p<q.m1?'meal':p<q.ev?'work':p<q.sl?'evening':'sleep'; };
   const dayStart=()=>Math.floor(Date.now()/DAY)*DAY;
@@ -8458,10 +8458,10 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   function goHome(e,kind,until,ic,say0){
     const gl=gerList(); const k=homeKey(e,gl); if(!k) return false;
     const sp=spotAt(e,k,rankIn(e,k,gl),0); if(!sp) return false; mkPost(e,kind,ic,sp.x,sp.y,until,say0); return true; }
+  /* хоол: хүн бүр өөрийн гэрийнхээ дэргэд (5 гэрт тархана), нэг дор бөөгнөрөхгүй. Хоол ~10 сек */
   function goMeal(e,until){
-    const gl=gerList(); const k=gl[0]; if(!k) return false;
-    const all=persons().sort((a,b)=>(a.idx||0)-(b.idx||0)), rk=all.indexOf(e);
-    const r=brect(k); const sp={x:r.x+r.w/2-entCx(e)+(((rk%6)-2.5)*12), y:r.y+r.sh+20+Math.floor(rk/6)*9-entH(e)};
+    const gl=gerList(); const k=homeKey(e,gl); if(!k) return false;
+    const sp=spotAt(e,k,rankIn(e,k,gl),16); if(!sp) return false;
     mkPost(e,'meal','🍲',sp.x,sp.y,until,'Хоол идье!'); return true; }
 
   window.nbRest=function(){

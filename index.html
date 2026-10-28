@@ -567,7 +567,7 @@ function shopHTML(){
   h+='<h3 style="margin:12px 4px 4px">Алт худалдан авах</h3><div class="pgrid">';
   PACKS.forEach((p,pi)=>{ const first=!S.paid[p.id]; h+='<div class="pk">'+(p.tag?'<div class="tagx">'+p.tag+'</div>':'')+'<div style="height:70px;display:flex;align-items:center;justify-content:center">'+ico('al'+pi,66)+'</div><b>'+p.alt+' Алт</b>'+(first?'<div class="sm" style="color:#9fe08a">Эхний удаа ×2 → '+(p.alt*2)+'</div>':'<div class="sm">'+p.n+'</div>')+'<button class="btn" style="width:100%;margin-top:6px" onclick="buyReal(\''+p.id+'\')">'+fmtMnt(p.mnt)+'</button></div>'; });
   h+='</div><h3 style="margin:12px 4px 4px">Алтаар солих</h3><div class="card">';
-  [[5,600],[20,2800],[50,8000]].forEach(([a,g])=>{ h+='<div class="row" style="margin-bottom:6px"><div>'+ico('ui_gem',22)+' '+a+' Алт → <b>'+f(g)+' 🪙</b></div><button class="btn" '+(S.res.alt<a?'disabled':'')+' onclick="exch('+a+','+g+')">Солих</button></div>'; });
+  [[5,1000],[20,5000],[50,15000]].forEach(([a,g])=>{ h+='<div class="row" style="margin-bottom:6px"><div>'+ico('ui_gem',22)+' '+a+' Алт → <b>'+f(g)+' 🪙</b></div><button class="btn" '+(S.res.alt<a?'disabled':'')+' onclick="exch('+a+','+g+')">Солих</button></div>'; });
   h+='</div><div class="card"><h3>Нөөцийн багц</h3>';
   DEALS.forEach((b,i)=>{ h+='<div class="row" style="margin-top:6px"><div style="display:flex;gap:8px;align-items:center">'+ico(b.ic,32)+'<div>'+b.n+' <span class="sm">+200</span></div></div><button class="btn" '+(S.res.alt<b.alt?'disabled':'')+' onclick="bundle('+i+')">'+b.alt+' Алт</button></div>'; });
   h+='</div><div class="card"><h3>Баатар дуудах (Алтаар)</h3><div class="row" style="margin-top:6px"><button class="btn" '+(S.res.alt<sumAlt(1)?'disabled':'')+' onclick="summon(1)">1 удаа · '+sumAlt(1)+' Алт</button><button class="btn" '+(S.res.alt<sumAlt(5)?'disabled':'')+' onclick="summon(5)">5 удаа · '+sumAlt(5)+' Алт</button></div></div>';
@@ -3660,7 +3660,7 @@ setInterval(nameCheck,7000); setInterval(()=>{ try{ nameSync(); }catch(e){} },20
 
 /* p32/vip.js — 30: Хааны зэрэг (байнгын давуу эрх) ба Хүчний задаргаа */
 function rkS(){ if(!S.rk) S.rk={p:0,d:'',g:''}; return S.rk; }
-function rkTH(){ return [0,50,150,400,900,1800,3500,6500,12000,22000,40000]; }
+function rkTH(){ return [0,50,150,400,800,1300,2000,2900,4000,5400,7500]; }
 function rkNames(){ return ['Нүүдэлчин','Малчин','Түшмэл','Тайж','Нойон','Жанжин','Ван','Хан','Их хан','Хаадын хаан','Тэнгэрийн хаан']; }
 function rkLv(){ const p=(S.rk&&S.rk.p)||0, t=rkTH(); let l=0; for(let i=1;i<t.length;i++) if(p>=t[i]) l=i; return l; }
 function rkProd(){ return 0.02*rkLv(); }
@@ -4607,7 +4607,7 @@ function menuHTML(){
     const items=g.i.map(x=>{
       const bd=x[3]==='m'?mb:x[3]==='q'?qb:x[3]==='r'?rkBadge():0, u=MNI[x[1]];
       if(!u) return '<button class="btn" style="padding:12px 4px;font-size:14px" onclick="'+x[2]+'">'+x[0]+' '+x[1]+'</button>';
-      const lk=((x[1]==='Дэлхий'&&!worldOpen()&&!admOn())||(x[2].indexOf("openM('")===0&&wLocked(x[2].slice(7,-2)))); return '<div class="mnc"'+(lk?(fr?fr.replace('style="','style="opacity:.55;'):' style="opacity:.55"'):fr)+' onclick="'+x[2]+'"><img src="'+u+'" alt="'+x[1]+'">'+(lk?'<em style="background:none;font-size:20px;right:50%;top:25%;margin-right:-10px">🔒</em>':(bd?'<em>'+bd+'</em>':''))+'</div>';
+      const lk=((x[1]==='Дэлхий'&&!worldOpen()&&!admOn())||(x[2].indexOf("openM('")===0&&wLocked(x[2].slice(7,-2)))); return mnWrap(x[1],'<div class="mnc"'+(lk?(fr?fr.replace('style="','style="opacity:.55;'):' style="opacity:.55"'):fr)+' onclick="'+x[2]+'"><img src="'+u+'" alt="'+x[1]+'">'+(lk?'<em style="background:none;font-size:20px;right:50%;top:25%;margin-right:-10px">🔒</em>':(bd?'<em>'+bd+'</em>':''))+'</div>');
     }).join('');
     h+='<div class="mnh">'+nm+'</div><div class="mng">'+items+'</div>';
   });
@@ -5195,7 +5195,7 @@ function musVolOpen(){ let d=document.getElementById('mvol'); if(!d){ d=document
 
 
 /* p32/chat.js — 127: Нийтийн чат (Firestore 'chat') */
-var CHT={on:0,unsub:null,msgs:[],last:0,sel:null,hid:{}};
+var CHT={on:0,unsub:null,msgs:[],last:0,sel:null,hid:{},room:null};
 try{ CHT.hid=JSON.parse(localStorage.getItem('chhid')||'{}')||{}; }catch(e){}
 (function(){ const st=document.createElement('style'); st.textContent=
 '#chat{position:fixed;left:0;top:0;right:0;bottom:0;z-index:310;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center}'+
@@ -5219,10 +5219,12 @@ const d=document.createElement('div'); d.id='chat'; d.onclick=e=>{ if(e.target==
 d.querySelector('#chin').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); chatSend(); } }); })();
 const CH_BAD=['новш','шалз','гичий','хөгшин гичий','сойз','пизд','хуц '];
 function chClean(t){ let s=String(t||'').replace(/[<>&"]/g,'').replace(/\s+/g,' ').trim().slice(0,120); CH_BAD.forEach(w=>{ const re=new RegExp(w.trim(),'ig'); s=s.replace(re,m=>'*'.repeat(m.length)); }); return s; }
-function chatOpen(){ const d=document.getElementById('chat'); d.style.display='flex'; try{ closeM(); }catch(e){} CHT.on=1; chatDraw();
+function chColl(F,db){ return CHT.room==null?F.collection(db,'chat'):F.collection(db,'clanchat','c'+CHT.room,'m'); }
+function chDoc(F,db,id){ return CHT.room==null?F.doc(db,'chat',id):F.doc(db,'clanchat','c'+CHT.room,'m',id); }
+function chatOpen(room){ CHT.room=(typeof room==='number')?room:null; CHT.msgs=[]; CHT.sel=null; const d=document.getElementById('chat'); d.style.display='flex'; try{ closeM(); }catch(e){} try{ const hs=d.querySelector('.kH span'); if(hs) hs.textContent=CHT.room==null?'💬 Нийтийн чат':'💬 '+((typeof CLN!=='undefined'&&CLN[CHT.room])?CLN[CHT.room].n:'Клан')+' кланы чат'; }catch(e){} CHT.on=1; chatDraw();
   if(!CL.ok||!FBM){ chatInfo('Интернет холбогдоогүй байна. Түр хүлээгээд дахин нээнэ үү.'); try{ clInit(); }catch(e){} return; }
   try{ const {F,db}=FBM; if(CHT.unsub){ try{ CHT.unsub(); }catch(e){} }
-    CHT.unsub=F.onSnapshot(F.query(F.collection(db,'chat'),F.orderBy('t','desc'),F.limit(50)),s=>{ CHT.msgs=s.docs.map(x=>Object.assign({id:x.id},x.data())).reverse(); chatDraw(true); },e=>{ chatInfo((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Чат холбогдсонгүй'); }); }catch(e){ chatInfo('Чат холбогдсонгүй'); } }
+    CHT.unsub=F.onSnapshot(F.query(chColl(F,db),F.orderBy('t','desc'),F.limit(50)),s=>{ CHT.msgs=s.docs.map(x=>Object.assign({id:x.id},x.data())).reverse(); chatDraw(true); },e=>{ chatInfo((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Чат холбогдсонгүй'); }); }catch(e){ chatInfo('Чат холбогдсонгүй'); } }
 function chatClose(){ const d=document.getElementById('chat'); if(d) d.style.display='none'; CHT.on=0; if(CHT.unsub){ try{ CHT.unsub(); }catch(e){} CHT.unsub=null; } }
 function chatInfo(t){ const l=document.getElementById('chl2'); if(l) l.innerHTML='<div class="kE">'+t+'</div>'; }
 function chTime(t){ try{ const d=t&&t.toDate?t.toDate():(t?new Date(t):null); if(!d) return ''; return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }catch(e){ return ''; } }
@@ -5234,12 +5236,12 @@ function chatDraw(scroll){ const l=document.getElementById('chl2'); if(!l) retur
   if(scroll===true&&near||scroll===2) l.scrollTop=l.scrollHeight; }
 function chatSel(id){ CHT.sel=CHT.sel===id?null:id; chatDraw(); }
 function chatHide(u){ CHT.hid[u]=1; try{ localStorage.setItem('chhid',JSON.stringify(CHT.hid)); }catch(e){} CHT.sel=null; chatDraw(); try{ say('Энэ хүний зурвасыг нуулаа'); }catch(e){} }
-async function chatDel(id){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'chat',id)); CHT.sel=null; }catch(e){ try{ say('Устгаж чадсангүй'); }catch(_){} } }
+async function chatDel(id){ try{ const {F,db}=FBM; await F.deleteDoc(chDoc(F,db,id)); CHT.sel=null; }catch(e){ try{ say('Устгаж чадсангүй'); }catch(_){} } }
 async function chatSend(){ const i=document.getElementById('chin'); if(!i) return; const now=Date.now();
   if(!CL.ok||!FBM){ try{ say('Интернет холбогдоогүй'); }catch(e){} return; }
   if(now-CHT.last<3000){ try{ say('3 секунд хүлээнэ үү'); }catch(e){} return; }
   const t=chClean(i.value); if(!t) return; CHT.last=now; i.value='';
-  try{ const {F,db}=FBM; await F.addDoc(F.collection(db,'chat'),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:(S.prof.sp&&/^npc\d+$/.test(S.prof.sp))?S.prof.sp:'npc1',m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
+  try{ const {F,db}=FBM; await F.addDoc(chColl(F,db),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:(S.prof.sp&&/^npc\d+$/.test(S.prof.sp))?S.prof.sp:'npc1',m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
   catch(e){ try{ say((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Илгээж чадсангүй'); }catch(_){} } }
 
 
@@ -6591,6 +6593,7 @@ function ckRender(){
     }
     if(isOwner) h+=bt(d.nm?'✏ Нэр солих · 1000 '+ckGem(16):'✏ Кланаа нэрлэх · Үнэгүй','ckNameOpen('+k+')','',CKD.busy);
     if(isOwner) h+=bt('➕ +'+CK.SLP+' слот · '+CK.SLC+' '+ckGem(16),'ckSlots()','',CKD.busy||sl>=CK.MAX);
+    if(S.clan===k||isOwner) h+=bt('💬 Кланы чат','chatOpen('+k+')','background:#2f5a7a');
     if(S.clan!==k&&myK<0) h+=bt('Энэ клан руу нэгдэх','CK_JOINASK('+k+')','background:#3a6d2a',!!(d&&d.ow&&rows.length>=sl));
     if(S.clan!==k&&d&&d.ow&&rows.length>=sl&&myK<0) h+='<div class="sm" style="text-align:center;color:#ffb070">Клан дүүрсэн</div>';
     h+='<div style="margin-top:8px;font-weight:bold">Гишүүд</div>';
@@ -6920,6 +6923,12 @@ wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s
   };
   cwOpen=function(){ _co(); try{ if(typeof ckKickPoll==='function') ckKickPoll(); }catch(e){} };
 })();
+
+
+/* 177: цэсний тайлбар (mnWrap) */
+var MND={'Түүхэн аян':'14 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
+function mnWrap(nm,tile){ return '<div class="mnw">'+tile+'<div class="mnd">'+(MND[nm]||'')+'</div></div>'; }
+(function(){ const st=document.createElement('style'); st.textContent='.mnw{display:flex;flex-direction:column;min-width:0}.mnd{font-size:11px;line-height:1.2;color:#d9c48f;text-align:center;margin:1px 2px 4px;text-shadow:0 1px 0 #000}'; document.head.appendChild(st); })();
 
 
 /* p32/btrot.js — 174: тулааны үед утсыг эргүүлэхэд (босоо ↔ хэвтээ) дүрс сунахаас сэргийлнэ.

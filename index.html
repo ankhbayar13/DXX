@@ -3426,7 +3426,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) Object.ke
 (function(){ const b=document.createElement('button'); b.id='musb'; b.setAttribute('onclick','musToggle()'); $('rcol').appendChild(b); musBtn(); })();
 
 // ---------- эхлүүлэх ----------
-load(); acHook(); offline(); resize(); updateHUD(); setIcons();
+load(); acHook(); resize(); updateHUD(); setIcons();
 if(!S.met) setTimeout(()=>say('Мөнлиг өвгөнийг дарж сонгоод, газар луу чиглүүлээрэй'),600);
 addEventListener('resize',resize);
 setInterval(()=>{ acHook(); tick(1); S.last=Date.now(); updateHUD(); },1000);
@@ -6536,6 +6536,58 @@ function CK_JOINASK(i){ cwJoin(i); setTimeout(()=>{ if(S.clan===i) ckShow(i); },
     _wt(px,py);
   };
 })();
+
+
+/* p32/offsec.js — 166: Нүүдлийн шагналыг цаг хууран мэхлэлтээс хамгаалах.
+   Тоглогч байхгүй байсан хугацааг ТӨХӨӨРӨМЖИЙН цагаар биш СЕРВЕРИЙН цагаар хэмжинэ.
+   S.lsv = сүүлд тоглоом нээлттэй байсан үеийн серверийн цаг (мс). */
+var OFS={busy:0,pend:0,played:0,prev:0,orig:offline};
+function offFetchSrv(){
+  return new Promise(res=>{
+    let done=0; const fin=v=>{ if(!done){ done=1; res(v); } };
+    try{
+      const t0=Date.now(); setTimeout(()=>fin(false),6000);
+      fetch('manifest.json?o='+t0,{cache:'no-store'}).then(r=>{
+        const d=r.headers.get('date'), sv=Date.parse(d||''); if(!d||!isFinite(sv)) return fin(false);
+        const t1=Date.now(); SRV.off=Math.round(sv+(t1-t0)/2-t1); SRV.ok=1; fin(true);
+      }).catch(()=>fin(false));
+    }catch(e){ fin(false); }
+  });
+}
+// тоглоом нээлттэй үед lsv-г жижиг алхмаар (төхөөрөмжийн цаг үсрээгүй үед л) урагшлуулна
+setInterval(()=>{
+  try{
+    const n=Date.now(), p=OFS.prev; OFS.prev=n;
+    if(!S||!S.res||S.lsv==null||!p) return;
+    const d=n-p; if(d<=0||d>=5000) return;      // цаг үсэрсэн / хэт унтсан бол тоохгүй
+    if(OFS.pend) OFS.played+=d; else S.lsv+=d;
+  }catch(e){}
+},1000);
+function offApply(ok,L){
+  let secs;
+  const dev=Math.max(0,(Date.now()-L)/1000);
+  if(S.lsv==null){ secs=Math.min(dev,43200); }                         // хуучин хадгалалт: нэг удаа төхөөрөмжийн цагаар
+  else if(ok){
+    const sv=Math.max(0,(srvNow()-S.lsv-OFS.played)/1000);
+    secs=Math.min(43200,sv);
+    if(dev>sv+600){ try{ say('⚠ Төхөөрөмжийн цаг буруу байна — шагналыг серверийн цагаар бодлоо'); }catch(e){} }
+  } else {                                                              // сервертэй холбогдож чадсангүй → дараа дахин оролдоно
+    OFS.pend=1; setTimeout(()=>offline(),20000); return;
+  }
+  OFS.pend=0; OFS.played=0;
+  // цуглуулсан дээд хэмжээнээс хэтрүүлэхгүй (авалгүй орхисон шагнал дээр нэмэгдэж болохгүй)
+  const have=(S.offp&&S.offp.secs)||0;
+  secs=Math.max(0,Math.min(secs,43200-have));
+  S.last=Date.now()-secs*1000;
+  OFS.orig();
+  S.lsv=srvNow();
+}
+offline=function(){
+  if(OFS.busy||!S||!S.res) return; OFS.busy=1;
+  const L=S.last;                       // 1 секундийн интервал S.last-г дарж бичихээс өмнө барьж авна
+  offFetchSrv().then(ok=>{ OFS.busy=0; try{ offApply(ok,L); }catch(e){} });
+};
+offline();
 
 
 // ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====

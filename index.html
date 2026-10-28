@@ -1779,6 +1779,7 @@ function drawOverlay(t){
   arrowList().forEach(a=>{ if(SPR.arrow) spr('arrow',a.x,a.y-Math.abs(Math.sin(t*4))*0.8,a.w); });
   if(!S.met&&S.tutDone){ const e0=ents.find(e=>e.kind==='person'&&e.idx===0); if(e0){ const k=Math.max(0.12,9.5/(SC*Z)/7)*1.7; ctx.save(); ctx.translate(e0.x+entCx(e0), e0.y-3-Math.abs(Math.sin(t*5))*2.2); ctx.scale(k,k); ctx.font='22px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.shadowColor='#000'; ctx.shadowBlur=3; ctx.fillText('👇',0,0); ctx.restore(); } }
   if(S.met&&S.tutDone&&!((S.st&&S.st.col)>0)){ const bl=bubbleBase(); if(bl.length){ const b0=bl[0], k=Math.max(0.12,9.5/(SC*Z)/7)*1.7; ctx.save(); ctx.translate(b0.x+b0.w/2, b0.y-1-Math.abs(Math.sin(t*5))*2.2); ctx.scale(k,k); ctx.font='22px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.shadowColor='#000'; ctx.shadowBlur=3; ctx.fillText('👇',0,0); ctx.restore(); } }
+  try{ if(window.tgWorld) tgWorld(t); }catch(e){}
 }
 function drawFog(){
   const vw=W/Z, vh=H/Z;
@@ -8200,6 +8201,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   const KEY={1:'hashaa',3:'tarialan',4:'market',5:'horgo',6:'hureo'};
   function how(o){
     const T=TASKS[o].t, k=KEY[o];
+    if(k&&S.sites&&S.sites[k]) return [T,'Ажилчин барьж байна. Хүлээнэ үү.'];
     if(k){ const need=(typeof BREQ!=='undefined'&&BREQ[k])||1;
       if(S.bld.ger<need) return [T,'Эхлээд «Барилга» → «Гол гэр»-ийг сайжруул (Гол гэр '+need+'-р түвшин хэрэгтэй).'];
       return [T,'«Барилга» → «'+(k==='hashaa'?'Малын хашаа':(BUILD[k]&&BUILD[k].n||'…'))+'» → «Барих» → ногоон бол «Тавих».']; }
@@ -8240,6 +8242,69 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
 
   /* ---------- 3) ☰ Цэс → Бусад → «Заавар» ---------- */
   try{ const g=MENU.find(x=>x.t.indexOf('Бусад')>=0); if(g&&!g.i.some(x=>x[1]==='Заавар')) g.i.push(['❓','Заавар',"tutReplay()"]); }catch(e){}
+
+  /* ---------- 4) Цэс доторх заасан карт/товч шар гэрлээр анивчина + баригдаж буй барилга ---------- */
+  const CARD={hashaa:'Малын хашаа',tarialan:'Тариалан',market:'Зах',horgo:'Хорго',hureo:'Цэргийн хүрээ'}, TABK={hureo:'army'};
+  function tgTarget(){
+    if(!S||!S.tutDone||S.coachOff||(S.chap||0)>=2||!S.met) return null;
+    const c=chCur(); if(!c||chDone(c)) return null;
+    const o=c.t.find(i=>!TASKS[i].ok()); if(o==null) return null;
+    const k=KEY[o];
+    if(k){
+      if(S.sites&&S.sites[k]) return {site:k};
+      const need=(typeof BREQ!=='undefined'&&BREQ[k])||1;
+      if(S.bld.ger<need) return {m:'barilga',card:'Гол гэр',tab:'life'};
+      return {m:'barilga',card:CARD[k],tab:TABK[k]||'life'};
+    }
+    if(o===9) return {m:'barilga',card:'Гол гэр',tab:'life'};
+    if(o===2) return {m:'mal',sel:'#mbody button[onclick^="buy(\'honi\'"]'};
+    if(o===7) return {m:'baatar',sel:'#mbody button[onclick="openM(\'summon\')"]'};
+    if(o===8) return {m:'dain',sel:'#mbody button[onclick*="startBattle(0)"]'};
+    return null;
+  }
+  let lastTg='';
+  function tgApply(){
+    try{
+      const mb=document.getElementById('mbody'); if(!mb) return;
+      mb.querySelectorAll('.tglow').forEach(e=>e.classList.remove('tglow'));
+      const tg=tgTarget(); if(!tg||!tg.m||(typeof cur==='undefined')||cur!==tg.m) return;
+      let el=null;
+      if(tg.card){
+        if(typeof bTab!=='undefined'&&bTab!==tg.tab){
+          el=mb.querySelector('.btabs2 i[onclick*="\''+tg.tab+'\'"],.btabs img[onclick*="\''+tg.tab+'\'"]');
+        } else {
+          const cs=Array.from(mb.querySelectorAll('.bcard'));
+          const c=cs.find(x=>{ const n=x.querySelector('.nm'); return n&&n.textContent.trim()===tg.card; });
+          el=c||null;
+        }
+      } else if(tg.sel) el=mb.querySelector(tg.sel);
+      if(!el) return;
+      el.classList.add('tglow');
+      const key=tg.m+'|'+(tg.card||tg.sel)+'|'+(el.classList.contains('tglow')?1:0);
+      if(key!==lastTg){ lastTg=key; try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} }
+    }catch(e){}
+  }
+  (function(){ const s=document.createElement('style');
+    s.textContent='.tglow{outline:3px solid #ffd24a;outline-offset:2px;border-radius:12px;animation:tglow 1s ease-in-out infinite;position:relative;z-index:3}@keyframes tglow{0%,100%{box-shadow:0 0 6px 1px #ffd24a99}50%{box-shadow:0 0 22px 7px #ffd24a}}';
+    document.head.appendChild(s); })();
+  const _fm=fillM; fillM=function(){ const r=_fm.apply(this,arguments); tgApply(); return r; };
+  setInterval(tgApply,900);
+  /* дэлгэц дээр: баригдаж буй барилгын ард шар гэрэл + 👇 */
+  window.tgWorld=function(t){
+    try{
+      if(document.getElementById('tutov')) return;
+      const tg=tgTarget(); if(!tg||!tg.site) return;
+      const k=tg.site, r=brect(k); if(!r) return;
+      const cx=r.x+r.w/2, cy=r.y+r.sh*0.62, rx=r.w*0.62, ry=r.sh*0.34, a=0.45+0.3*Math.sin(t*5);
+      ctx.save();
+      const g=ctx.createRadialGradient(cx,cy,2,cx,cy,rx);
+      g.addColorStop(0,'rgba(255,214,70,'+a+')'); g.addColorStop(1,'rgba(255,214,70,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry*1.5,0,0,6.283); ctx.fill();
+      const kk=Math.max(0.12,9.5/(SC*Z)/7)*1.7;
+      ctx.translate(cx, r.y-2-Math.abs(Math.sin(t*5))*2.2); ctx.scale(kk,kk); ctx.font='22px sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.shadowColor='#000'; ctx.shadowBlur=3; ctx.fillText('👇',0,0);
+      ctx.restore();
+    }catch(e){ try{ ctx.restore(); }catch(_){} }
+  };
 })();
 
 </script><script>(function(){

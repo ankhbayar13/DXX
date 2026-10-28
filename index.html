@@ -2500,7 +2500,7 @@ function bldHTML(k){
   else if(k==='hashaa') extra='<button class="btn" onclick="openM(\'mal\')">Мал</button>';
   else if(k==='modcex') extra='<div class="sm" style="width:100%">Ажилчид мод тайраад энд зөөнө. Модыг ойрхон газар цех тавьбал хурдан. Түвшин бүр +20% мод.</div>';
   else if(k==='mahcex') extra='<div class="sm" style="width:100%">Нядлах мал сонго. Ажилчин хашаанаас авч ирнэ.</div>'+Object.keys(BUT).map(a=>'<button class="btn" '+((S.animals[a]||0)<1?'disabled':'')+' onclick="butcher(\''+a+'\')">'+ANIMALS[a].n+' ('+(S.animals[a]||0)+') → '+Math.round(BUT[a]*(1+0.15*((S.bld.mahcex||1)-1)))+' 🥩</button>').join('');
-  else if(k==='hureo') extra='<button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button><button class="btn" onclick="openM(\'dain\')">Дайн</button><button class="btn" onclick="openM(\'baatar\')">Баатар</button>';
+  else if(k==='hureo') extra='<button class="btn" onclick="openM(\'gear\')">⚒ Зэр зэвсэг</button><button class="btn" onclick="openM(\'dain\')">Дайн</button><button class="btn" onclick="openM(\'baatar\')">Баатар</button><button class="btn" onclick="ckOpen()">⚑ Клан</button>';
   else if(k==='naadamring') extra='<button class="btn" onclick="openM(\'naadam\')">Наадам</button>';
   else if(k==='ger'||/^ger\d$/.test(k)) extra='<button class="btn" onclick="openM(\'barilga\')">Барилга</button><button class="btn" onclick="openM(\'fam\')">👪 Гэр бүл</button>';
   { const T=TR.find(x=>x.b===k); if(T) extra+='<div class="sm" style="width:100%">'+iconHTML(T.k,22)+' '+T.n+': <b>'+f(S.res[T.k]||0)+'</b> · Хүч '+f(trPow(T))+'<br>Цэрэг автоматаар хүчинд нэмэгдэнэ. Түвшин ахихад хүчтэй, шинэ дүртэй болно.</div>'; }
@@ -6328,6 +6328,212 @@ function wmHeroChip(hid,hole,full){
         bt.innerHTML=wmHeroChip(m[1],40,true); bt.style.cssText+=';padding:5px 4px;height:auto;line-height:1.1';
       });
     }catch(e){}
+  };
+})();
+
+
+// ===== Клан эзэмших систем: Хаан, слот, цол, гишүүд =====
+const CK={BUY:3000,SL0:20,SLP:10,SLC:1000,MAX:100};
+const CK_TT=['','Жанжин','Ноён','Тайж','Мэргэн','Бэхи'];
+var CKD={t:0,docs:{},busy:0,mem:{},mt:{},err:'',cf:-1,view:null};
+const ckOn=()=>!!(typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM&&FBM.F);
+function ckOwnerK(){ if(typeof CL!=='undefined'&&CL.uid){ for(const k in CKD.docs){ if(CKD.docs[k]&&CKD.docs[k].ow===CL.uid) return +k; } } return (S.ckOwn!=null&&CKD.t===0)?S.ckOwn:-1; }
+async function ckFetch(force){
+  if(!ckOn()) return false;
+  if(!force&&CKD.t&&Date.now()-CKD.t<45000) return true;
+  try{
+    const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'clans'),F.limit(12))); const d={};
+    s.docs.forEach(x=>{ const m=/^c(\d+)$/.exec(x.id); if(m) d[+m[1]]=x.data(); });
+    CKD.docs=d; CKD.t=Date.now(); CKD.err='';
+    let mine=-1; for(const k in d){ if(d[k]&&d[k].ow===CL.uid) mine=+k; }
+    if(mine>=0) S.ckOwn=mine; else if(S.ckOwn!=null) S.ckOwn=null;
+    return true;
+  }catch(e){ CKD.err=(e&&(e.code||e.message))||'err'; return false; }
+}
+async function ckMem(k,force){
+  if(!ckOn()) return CKD.mem[k]||[];
+  if(!force&&CKD.mem[k]&&Date.now()-(CKD.mt[k]||0)<45000) return CKD.mem[k];
+  try{
+    const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('cl','==',k),F.limit(101)));
+    CKD.mem[k]=s.docs.map(d=>Object.assign({id:d.id},d.data())); CKD.mt[k]=Date.now();
+  }catch(e){}
+  return CKD.mem[k]||[];
+}
+function ckRows(k){
+  const d=CKD.docs[k]||null, a=(CKD.mem[k]||[]).slice();
+  if(typeof CL!=='undefined'&&CL.uid&&S.clan===k&&!a.some(x=>x.id===CL.uid)) a.push({id:CL.uid,n:S.prof.name||'Хаан',p:totalPower(),l:S.pl||1,t:wmNow()});
+  if(d&&d.ow&&!a.some(x=>x.id===d.ow)) a.push({id:d.ow,n:d.on||'Хаан',p:0,l:0,t:0});
+  a.sort((x,y)=>((d&&y.id===d.ow)-(d&&x.id===d.ow))||((y.p||0)-(x.p||0)));
+  return a;
+}
+function ckAgo(t){ if(!t) return ''; const m=Math.max(0,Math.floor((wmNow()-t)/60000)); if(m<15) return 'онлайн'; if(m<60) return m+'мин'; const h=Math.floor(m/60); return h<48?h+'ц':Math.floor(h/24)+'ө'; }
+function ckGem(px){ try{ return ico('ui_gem',px||16); }catch(e){ return '💎'; } }
+
+// ---- худалдан авалт, слот, цол ----
+async function ckBuy(k){
+  if(CKD.busy) return;
+  if(!ckOn()){ say('Интернэтэд холбогдож, нэвтэрсэн үед клан авч болно'); return; }
+  CKD.busy=1; ckRender();
+  try{
+    await ckFetch(true);
+    if(CKD.docs[k]&&CKD.docs[k].ow){ say('Энэ клан аль хэдийн эзэнтэй болсон'); return; }
+    if(ckOwnerK()>=0){ say('Чи аль хэдийн нэг клан эзэмшдэг'); return; }
+    if((S.res.alt||0)<CK.BUY){ say('Алт хүрэхгүй байна ('+CK.BUY+' хэрэгтэй)'); try{ sfx('err'); }catch(e){} return; }
+    const {F,db}=FBM, ref=F.doc(db,'clans','c'+k), nm=String(S.prof.name||'Хаан').slice(0,14), uid=CL.uid;
+    await F.runTransaction(db,async tx=>{
+      const s=await tx.get(ref);
+      if(s.exists()&&s.data()&&s.data().ow) throw new Error('taken');
+      tx.set(ref,{ow:uid,on:nm,sl:CK.SL0,tt:{},t:Date.now(),v:1});
+    });
+    // амжилттай бичигдсэний дараа л алт хасна
+    S.res.alt=Math.max(0,(S.res.alt||0)-CK.BUY); S.ckOwn=k;
+    CKD.docs[k]={ow:uid,on:nm,sl:CK.SL0,tt:{},t:Date.now(),v:1}; CKD.t=Date.now();
+    try{ save(); }catch(e){}
+    say('👑 Та '+CLN[k].n+' кланы Хаан боллоо!'); try{ sfx('ok'); vib([30,20,60]); }catch(e){}
+    if(S.clan!==k){ if(typeof wmSt==='function'&&wmSt().m.length) say('Цуваа буцаж ирсний дараа өөрийн клан руугаа нэгдээрэй'); else CK_JOIN(k); }
+    try{ refresh(); }catch(e){}
+    try{ clPush(true); }catch(e){}
+  }catch(e){
+    const m=e&&e.message; say(m==='taken'?'Энэ клан аль хэдийн эзэнтэй болсон':'Клан авч чадсангүй. Алт хасагдаагүй.');
+    try{ sfx('err'); }catch(x){}
+  }finally{ CKD.busy=0; CKD.cf=-1; ckRender(); }
+}
+function ckBuyAsk(k){
+  if(CKD.cf!==k){ CKD.cf=k; ckRender(); setTimeout(()=>{ if(CKD.cf===k){ CKD.cf=-1; ckRender(); } },4500); return; }
+  ckBuy(k);
+}
+async function ckSlots(){
+  if(CKD.busy) return; if(!ckOn()){ say('Интернэт байхгүй'); return; }
+  CKD.busy=1; ckRender();
+  try{
+    await ckFetch(true);
+    const k=ckOwnerK(); if(k<0){ say('Чи клан эзэмшдэггүй'); return; }
+    const d=CKD.docs[k]; if(!d||d.ow!==CL.uid){ say('Чи энэ кланы Хаан биш'); return; }
+    if((d.sl||CK.SL0)>=CK.MAX){ say('Слот дээд хэмжээндээ хүрсэн ('+CK.MAX+')'); return; }
+    if((S.res.alt||0)<CK.SLC){ say('Алт хүрэхгүй байна ('+CK.SLC+' хэрэгтэй)'); try{ sfx('err'); }catch(e){} return; }
+    const {F,db}=FBM, ref=F.doc(db,'clans','c'+k); let ns=0;
+    await F.runTransaction(db,async tx=>{
+      const s=await tx.get(ref); if(!s.exists()||s.data().ow!==CL.uid) throw new Error('notowner');
+      const cur=s.data().sl||CK.SL0; if(cur>=CK.MAX) throw new Error('max');
+      ns=Math.min(CK.MAX,cur+CK.SLP); tx.update(ref,{sl:ns});
+    });
+    S.res.alt=Math.max(0,(S.res.alt||0)-CK.SLC); d.sl=ns; CKD.t=Date.now();
+    try{ save(); }catch(e){}
+    say('➕ +'+CK.SLP+' слот нэмэгдлээ ('+ns+')'); try{ sfx('ok'); }catch(e){}
+    try{ refresh(); }catch(e){}
+  }catch(e){ say('Слот нэмж чадсангүй. Алт хасагдаагүй.'); try{ sfx('err'); }catch(x){} }
+  finally{ CKD.busy=0; ckRender(); }
+}
+async function ckTitle(k,uid,ti){
+  ti=+ti||0; if(!ckOn()||CKD.busy) return;
+  const d=CKD.docs[k]; if(!d||d.ow!==CL.uid||uid===d.ow) return;
+  CKD.busy=1;
+  try{
+    const {F,db}=FBM, ref=F.doc(db,'clans','c'+k); let tt={};
+    await F.runTransaction(db,async tx=>{ const s=await tx.get(ref); if(!s.exists()||s.data().ow!==CL.uid) throw new Error('notowner'); tt=Object.assign({},s.data().tt||{}); if(ti) tt[uid]=ti; else delete tt[uid]; tx.update(ref,{tt:tt}); });
+    d.tt=tt; say(ti?('🎖 «'+CK_TT[ti]+'» цол өглөө'):'Цол авлаа'); try{ sfx('ok'); }catch(e){}
+  }catch(e){ say('Цол өгч чадсангүй'); }
+  finally{ CKD.busy=0; ckRender(); }
+}
+
+// ---- цонх ----
+function ckOpen(k){
+  if(k==null||k<0){ k=(typeof wmClanId==='function'?wmClanId():-1); }
+  CKD.view=(k==null||k<0)?{list:1}:{k:k};
+  let o=document.getElementById('ckov');
+  if(!o){ o=document.createElement('div'); o.id='ckov'; o.style.cssText='position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center'; o.onclick=e=>{ if(e.target===o) ckClose(); }; document.body.appendChild(o); }
+  ckRender();
+  Promise.all([ckFetch(false),(CKD.view.k!=null?ckMem(CKD.view.k,false):0)]).then(()=>ckRender());
+}
+function ckClose(){ const o=document.getElementById('ckov'); if(o) o.remove(); CKD.view=null; CKD.cf=-1; }
+function ckList(){ CKD.view={list:1}; ckRender(); ckFetch(false).then(()=>ckRender()); }
+function ckShow(k){ CKD.view={k:k}; CKD.cf=-1; ckRender(); Promise.all([ckFetch(false),ckMem(k,false)]).then(()=>ckRender()); }
+function ckRender(){
+  const o=document.getElementById('ckov'); const V=CKD.view; if(!o||!V) return;
+  const me=(typeof CL!=='undefined'&&CL.uid)||'', myK=ckOwnerK(), on=ckOn();
+  const wrap=h=>'<div style="width:min(96vw,420px);max-height:88vh;overflow:auto;background:linear-gradient(#34200f,#24160a);border:2px solid #c9972b;border-radius:14px;color:#ffe9b0;padding:10px 10px 12px;box-shadow:0 8px 30px #000a">'+h+'</div>';
+  const bt=(txt,fn,css,dis)=>'<button class="btn" '+(dis?'disabled ':'')+'onclick="'+fn+'" style="width:100%;margin-top:6px;'+(css||'')+'">'+txt+'</button>';
+  let h='';
+  if(V.list){
+    h='<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:18px">⚑ Кланууд</b><button class="btn" style="padding:2px 10px" onclick="ckClose()">✕</button></div><div class="sm" style="margin:4px 0 6px">Клан эзэмшсэн хүн <b>Хаан</b> болж, гишүүддээ цол өгнө. Эзэнгүй клан: <b>'+CK.BUY+'</b> '+ckGem(14)+'</div>';
+    CLN.forEach((q,i)=>{ const d=CKD.docs[i], n=(CKD.mem[i]||[]).length;
+      h+='<div onclick="ckShow('+i+')" style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-top:1px solid #5b3d1e66;cursor:pointer"><span style="color:'+q.c+';font-size:20px">⚑</span><div style="flex:1"><b>'+q.n+'</b>'+(S.clan===i?' <span class="sm" style="color:#9be07a">· чиний клан</span>':'')+'<div class="sm">'+(d&&d.ow?('👑 '+esc2(String(d.on||'Хаан'))+' · '+(CKD.mem[i]?n+'/':'')+(d.sl||CK.SL0)+' слот'):(on?'Эзэнгүй · '+CK.BUY+' 💎':'Эзэнгүй'))+'</div></div><span style="font-size:20px;opacity:.7">›</span></div>'; });
+  } else {
+    const k=V.k, q=CLN[k], d=CKD.docs[k], rows=ckRows(k), tot=rows.reduce((a,x)=>a+(x.p||0),0), isOwner=!!(d&&d.ow===me), sl=d&&d.ow?(d.sl||CK.SL0):0;
+    h='<div style="display:flex;justify-content:space-between;align-items:center"><button class="btn" style="padding:2px 10px" onclick="ckList()">‹ Бүх клан</button><button class="btn" style="padding:2px 10px" onclick="ckClose()">✕</button></div>'
+     +'<div style="text-align:center;margin:6px 0"><div style="font-size:24px;font-weight:bold;color:'+q.c+'">⚑ '+q.n+' клан</div>'
+     +'<div style="margin-top:2px">'+(d&&d.ow?'👑 Хаан: <b style="color:#ffd770">'+esc2(String(d.on||'Хаан'))+'</b>':'<span style="color:#cfc09a">Эзэнгүй клан</span>')+'</div></div>'
+     +'<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><div class="card" style="padding:3px 10px;text-align:center"><div class="sm">Гишүүд</div><b>'+rows.length+(d&&d.ow?' / '+sl:'')+'</b></div><div class="card" style="padding:3px 10px;text-align:center"><div class="sm">Нийт хүч</div><b>'+cn(tot)+'</b></div>'+(d&&d.ow?'<div class="card" style="padding:3px 10px;text-align:center"><div class="sm">Слот</div><b>'+sl+'/'+CK.MAX+'</b></div>':'')+'</div>';
+    if(!on) h+='<div class="sm" style="text-align:center;color:#ffb070;margin-top:4px">Интернэт/нэвтрэлт байхгүй: мэдээлэл хуучирсан байж болно, клан авах боломжгүй.</div>';
+    else if(CKD.err) h+='<div class="sm" style="text-align:center;color:#ffb070;margin-top:4px">Кланы мэдээлэл ачаалж чадсангүй ('+esc2(CKD.err)+')</div>';
+    // товчууд
+    if(!(d&&d.ow)){
+      if(myK>=0) h+='<div class="sm" style="text-align:center;margin-top:6px">Чи аль хэдийн '+CLN[myK].n+' кланы Хаан тул өөр клан авч болохгүй.</div>';
+      else h+=bt(CKD.cf===k?'⚠ Дахин дар: '+CK.BUY+' '+ckGem(16)+' зарцуулна':'👑 Худалдаж авах · '+CK.BUY+' '+ckGem(16),'ckBuyAsk('+k+')',CKD.cf===k?'background:#a02a1a':'',CKD.busy||!on)+'<div class="sm" style="text-align:center;margin-top:3px">Хаан болж, '+CK.SL0+' слоттой клантай болно. Гишүүддээ цол өгнө. Алт буцаагдахгүй.</div>';
+    }
+    if(isOwner) h+=bt('➕ +'+CK.SLP+' слот · '+CK.SLC+' '+ckGem(16),'ckSlots()','',CKD.busy||sl>=CK.MAX);
+    if(S.clan!==k&&myK<0) h+=bt('Энэ клан руу нэгдэх','CK_JOINASK('+k+')','background:#3a6d2a',!!(d&&d.ow&&rows.length>=sl));
+    if(S.clan!==k&&d&&d.ow&&rows.length>=sl&&myK<0) h+='<div class="sm" style="text-align:center;color:#ffb070">Клан дүүрсэн</div>';
+    h+='<div style="margin-top:8px;font-weight:bold">Гишүүд</div>';
+    if(!rows.length) h+='<div class="sm" style="padding:6px 0">Гишүүн одоогоор алга.</div>';
+    rows.forEach((x,i)=>{
+      const own=!!(d&&x.id===d.ow), ti=(d&&d.tt&&d.tt[x.id])|0, ag=ckAgo(x.t), onl=ag==='онлайн';
+      const tsel=(isOwner&&!own)?'<select onchange="ckTitle('+k+',\''+x.id+'\',this.value)" style="font-size:11px;background:#3b2815;color:#ffe9b0;border:1px solid #c9972b;border-radius:6px;max-width:92px">'+CK_TT.map((t,j)=>'<option value="'+j+'"'+(j===ti?' selected':'')+'>'+(t||'Цолгүй')+'</option>').join('')+'</select>':(own?'<span style="font-size:11px;color:#ffd770;border:1px solid #c9972b;border-radius:6px;padding:0 5px">Хаан</span>':(ti?'<span style="font-size:11px;color:#9be07a;border:1px solid #5a8a4a;border-radius:6px;padding:0 5px">'+CK_TT[ti]+'</span>':''));
+      h+='<div style="display:flex;align-items:center;gap:6px;padding:5px 2px;border-top:1px solid #5b3d1e66'+(x.id===me?';background:rgba(255,215,112,.08)':'')+'"><span style="width:20px;text-align:center;opacity:.7">'+(i+1)+'</span><span style="width:8px;height:8px;border-radius:4px;background:'+(onl?'#5fe06a':'#6b6b6b')+';flex:none"></span>'
+        +'<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(own?'👑 ':'')+'<b>'+esc2(String(x.n||'Тоглогч').slice(0,14))+'</b>'+(x.id===me?' <span class="sm">(чи)</span>':'')+'</div><div class="sm">'+(x.l?'Lv '+x.l+' · ':'')+(ag&&!onl?ag+' өмнө':onl?'онлайн':'')+'</div></div>'
+        +tsel+'<b style="min-width:54px;text-align:right;color:#ffd770">⚔ '+cn(x.p||0)+'</b></div>';
+    });
+  }
+  o.innerHTML=wrap(h);
+}
+// нэгдэх (багтаамж шалгаж)
+var CK_JOIN=cwJoin;
+function CK_JOINASK(i){ cwJoin(i); setTimeout(()=>{ if(S.clan===i) ckShow(i); },900); }
+(function(){
+  const _cj=CK_JOIN;
+  cwJoin=function(i){
+    const mk=ckOwnerK();
+    if(mk>=0&&i!==mk){ say('Хаан өөрийн кланаас өөр клан руу нэгдэж болохгүй'); try{ sfx('err'); }catch(e){} return; }
+    if(!ckOn()||S.clan===i||mk===i){ _cj(i); return; }
+    Promise.all([ckFetch(false),ckMem(i,false)]).then(()=>{
+      const d=CKD.docs[i]; if(d&&d.ow){ const n=(CKD.mem[i]||[]).length, sl=d.sl||CK.SL0; if(n>=sl){ say('Клан дүүрсэн ('+n+'/'+sl+' слот)'); try{ sfx('err'); }catch(e){} return; } }
+      _cj(i);
+    }).catch(()=>_cj(i));
+  };
+  const _cc=cwChange;
+  cwChange=function(){ if(ckOwnerK()>=0&&ckOwnerK()===S.clan){ say('Хаан өөрийн кланаас гарч болохгүй'); return; } _cc(); };
+  // ⚑ самбарт "Клан мэдээлэл" нэмэх
+  const _cr=cwRender;
+  cwRender=function(){
+    _cr();
+    try{
+      const p=$('cwp'); if(!p) return;
+      const rows=p.querySelectorAll('.cwr');
+      const k=wmClanId();
+      if(k<0||CWD.pick){ rows.forEach((r,i)=>{ if(CLN[i]&&r.querySelector('button')&&!r.querySelector('.ckinfo')){ const b=document.createElement('button'); b.className='btn ckinfo'; b.textContent='ℹ'; b.style.cssText='padding:2px 8px;margin-right:4px'; b.onclick=e=>{ e.stopPropagation(); ckOpen(i); }; r.insertBefore(b,r.querySelector('button')); } }); }
+      else if(!p.querySelector('.ckinfo')){ const b=document.createElement('button'); b.className='btn ckinfo'; b.textContent='👑 Клан мэдээлэл · Гишүүд'; b.style.cssText='width:100%;margin-top:6px'; b.onclick=()=>{ ckOpen(k); }; p.appendChild(b); }
+    }catch(e){}
+  };
+  // тосгоны самбарт товч
+  const _ws=wmSheet;
+  wmSheet=function(){
+    _ws();
+    try{ if(WMS==='city'){ const sh=$('wmsheet'); if(sh&&!sh.querySelector('.ckinfo')){ const b=document.createElement('button'); b.className='btn ckinfo'; b.textContent='⚑ Клан'; b.onclick=()=>{ ckOpen(); }; sh.insertBefore(b,sh.firstElementChild?sh.firstElementChild.nextSibling:null); } } }catch(e){}
+  };
+  // газрын зураг дээрх кланы том гэр дээр дарах
+  const _wt=wmTap;
+  wmTap=function(px,py){
+    try{
+      const wx=WMV.x+px/WMV.z, wy=WMV.y+py/WMV.z; let ent=false;
+      wmAll().forEach(e=>{ const r=(e.t==='city'?46:e.t==='kingdom'?40:30)+10/WMV.z; if(Math.hypot(e.x-wx,(e.y-14)-wy)<r) ent=true; });
+      if(!ent){
+        const my=wmClanId(); let hit=-1;
+        CLN.forEach((q,i)=>{ const s=(typeof wmS==='function')?wmS('wm_hq'+i):null, ww=s?0.85*s.iw:150, hh=s?ww*s.ih/s.iw:150, qx=(i===my&&s)?q.x-170:q.x, qy=(i===my&&s)?q.y-110:q.y;
+          if(wx>qx-ww/2&&wx<qx+ww/2&&wy>qy-hh*0.88&&wy<qy+hh*0.12) hit=i; });
+        if(hit>=0){ WMS=null; try{ wmSheet(); }catch(e){} ckOpen(hit); return; }
+      }
+    }catch(e){}
+    _wt(px,py);
   };
 })();
 

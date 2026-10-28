@@ -5137,12 +5137,13 @@ function prodPanel(k){
   h+='<div class="sm" style="text-align:center;margin-top:3px">1 ширхэг: <b>'+fmtT(per)+'</b> · '+stat+'</div>';
   h+='<div style="height:8px;background:#1a0f06;border:1px solid #6b4a1e;border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+pr+'%;background:#d9a431"></div></div>';
   if(b.out.indexOf('t_')===0) h+='<div class="sm" style="text-align:center">Цэрэг: <b>'+Math.floor(S.res[b.out]||0)+'/'+trCap(k)+'</b> · хүчинд автоматаар нэмэгдэнэ'+(Math.floor(S.res[b.out]||0)>=trCap(k)?'<br><span style="color:#ffb070">Дүүрсэн — барилгаа сайжруулж хязгаарыг нэм</span>':'')+'</div></div>'; else h+='<div class="row"><div class="sm">Бэлэн: <b>'+ready+'/'+prodMax(k)+'</b>'+(out.p>0?' · Агуулахад: <b>'+Math.floor(S.res[b.out]||0)+'</b>':'')+'</div><div style="display:flex;gap:6px"><button class="btn" '+(ready<1?'disabled':'')+' onclick="collectProd(\''+k+'\')">Агуулахад ав</button>'+(out.p>0?'<button class="btn" '+((S.res[b.out]||0)<1?'disabled':'')+' onclick="sellItem(\''+b.out+'\')">Зарах</button>':'')+'</div></div></div>';
+  try{ h+=prodMile(k); }catch(e){}
   return h;
 }
 
 
 /* p32/market2.js — 123: цехийн багтаамж, Захын солилцоо (30% алдагдал), Зарах товч = Агуулах */
-function prodMax(k){ return 10+4*(S.bld[k]||1); }
+function prodMax(k){ const L=S.bld[k]||1; return 10+4*L+((typeof ITEMBLD!=='undefined'&&ITEMBLD[k]&&L>=5)?10:0); }
 var BART={f:'meat',t:'wood'}, BRK=['meat','milk','wool','grain','wood'];
 function brLoss(){ return Math.max(0.1,0.3-0.015*((S.bld.market||1)-1)); }
 function brGet(n){ return Math.floor(n*ITEMS[BART.f].p*(1-brLoss())/ITEMS[BART.t].p); }
@@ -6929,6 +6930,80 @@ wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s
 var MND={'Түүхэн аян':'14 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
 function mnWrap(nm,tile){ return '<div class="mnw">'+tile+'<div class="mnd">'+(MND[nm]||'')+'</div></div>'; }
 (function(){ const st=document.createElement('style'); st.textContent='.mnw{display:flex;flex-direction:column;min-width:0}.mnd{font-size:11px;line-height:1.2;color:#d9c48f;text-align:center;margin:1px 2px 4px;text-shadow:0 1px 0 #000}'; document.head.appendChild(st); })();
+
+
+/* 178: цехийн сайжруулалт — (1) зогссон цехийн анхааруулга, (2) «Бүгдийг авах» товч, (3) түвшний шагнал (5/10/15) */
+function prodFood(k){ return !!(typeof ITEMBLD!=='undefined'&&ITEMBLD[k]); }
+// (3) түвшний шагнал: 5 → +10 тавиур (prodMax), 10 → 15% давхар гарц, 15 → 25% түүхий эд хэмнэнэ
+function prodTick(secs){
+  PROD.forEach(k=>{
+    if(!S.bld[k]||S.sites[k]) return;
+    const b=BUILD[k].proc, st=S.proc[k]||(S.proc[k]={t:0,ready:0}), L=S.bld[k]||1, per=b.t/(1+0.25*(L-1)), food=prodFood(k);
+    st.t+=secs;
+    let guard=0;
+    while(st.t>=per&&guard++<2000){
+      if(st.ready>=prodMax(k)||(b.out&&b.out.indexOf('t_')===0&&(S.res[b.out]||0)>=trCap(k))){ st.t=per; break; }
+      if(!canPay(b.in)){ st.t=per; break; }
+      const save=food&&L>=15&&Math.random()<0.25;
+      if(!save) for(const x in b.in) S.res[x]-=b.in[x];
+      if(b.out&&b.out.indexOf('t_')===0){ S.res[b.out]=(S.res[b.out]||0)+1; st.tn=(st.tn||0)+1; }
+      else { st.ready++; if(food&&L>=10&&Math.random()<0.15) st.ready=Math.min(st.ready+1,prodMax(k)); }
+      st.t-=per;
+    }
+    if(b.out&&b.out.indexOf('t_')===0){ if(st.ready>=1){ st.tn=(st.tn||0)+st.ready; S.res[b.out]=(S.res[b.out]||0)+st.ready; st.ready=0; } if(st.tn>0&&secs<20){ try{ if(S.pos[k]){ const r=brect(k); addFloat(r.x+r.w/2,r.y-8,'+'+st.tn+' '+ITEMS[b.out].n,'#ffe9a0'); } }catch(e){} } st.tn=0; }
+  });
+}
+function prodMile(k){
+  if(!prodFood(k)) return '';
+  const L=S.bld[k]||1, M=[[5,'+10 тавиур (хуримтлуулах зай)'],[10,'15% боломжтой давхар гарц'],[15,'25% боломжтой түүхий эд хэмнэнэ']];
+  return '<div class="card"><h3 class="rb">⭐ Түвшний шагнал</h3>'+M.map(m=>'<div class="sm" style="'+(L>=m[0]?'color:#8fe39a':'color:#c9b890')+'">'+(L>=m[0]?'✔':'🔒')+' Түвшин '+m[0]+': '+m[1]+'</div>').join('')+'</div>';
+}
+// (1) анхааруулга: цех зогссон шалтгааныг тэмдэглэнэ
+function prodWarn(k){
+  if(!S.bld[k]||S.sites[k]||!S.pos[k]) return '';
+  const b=BUILD[k].proc, st=S.proc[k]||{ready:0}, nm=BUILD[k].n;
+  if(b.out.indexOf('t_')===0){ if((S.res[b.out]||0)>=trCap(k)) return nm+': цэргийн хязгаар дүүрсэн. Барилгаа сайжруул'; }
+  else if(st.ready>=prodMax(k)) return nm+': дүүрсэн. Бүтээгдэхүүнээ агуулахад ав';
+  if(!canPay(b.in)){ const miss=[]; for(const x in b.in){ if((S.res[x]||0)<b.in[x]) miss.push((x==='gold'?'зоос':(ITEMS[x]?ITEMS[x].n:x))+' '+b.in[x]); } return nm+': материал дутуу ('+miss.join(', ')+')'; }
+  return '';
+}
+ITEMS.__w={n:'',ic:'__none',p:0};
+(function(){
+  const _pb=prodBubbles;
+  prodBubbles=function(){
+    const out=_pb(), s=bsc(), bw=11*s;
+    PROD.forEach(k=>{ const w=prodWarn(k); if(!w) return; const r=brect(k), st=S.proc[k]||{ready:0}; const up=(st.ready>=1)?bw*1.15:0;
+      out.push({k:'__w',prod:k,warn:w,n:0,x:r.x+r.w/2-bw/2,y:r.y-bw*1.1-6-up,w:bw,h:bw*1.1}); });
+    return out;
+  };
+  const _do=drawOverlay;
+  drawOverlay=function(t){
+    _do(t);
+    try{ const bob=Math.sin(t*3)*0.6;
+      prodBubbles().forEach(b=>{ if(!b.warn) return; const cx=b.x+b.w/2, cy=b.y+b.w/2+bob, full=/дүүрсэн/.test(b.warn);
+        ctx.save(); ctx.fillStyle=full?'#e8a820':'#d9443a'; ctx.strokeStyle='#4a1a10'; ctx.lineWidth=0.6; ctx.beginPath(); ctx.arc(cx,cy,b.w/2*0.86,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.font='bold '+(b.w*0.78)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('!',cx,cy+b.w*0.04); ctx.restore(); });
+    }catch(e){}
+  };
+  const _cp=collectProd;
+  collectProd=function(k){ const st=S.proc[k]; if(st&&st.ready>=1) return _cp(k); const w=prodWarn(k); if(w&&typeof say==='function') say(w); };
+})();
+// (2) «Бүгдийг авах» товч
+function colAllCount(){ let n=0; PROD.forEach(k=>{ const st=S.proc[k]; if(S.bld[k]&&!S.sites[k]&&S.pos[k]&&st&&st.ready>=1&&!(BUILD[k].proc.out.indexOf('t_')===0)) n++; });
+  ['meat','milk','wool','gold'].forEach(x=>{ if(Math.floor((S.pend&&S.pend[x])||0)>=1) n++; }); return n; }
+function colAll(){
+  const base=S.pos.hashaa?'hashaa':'ger'; let x=0,y=0; try{ const r=brect(base); x=r.x+r.w/2; y=r.y; }catch(e){}
+  PROD.forEach(k=>{ const st=S.proc[k]; if(S.bld[k]&&!S.sites[k]&&S.pos[k]&&st&&st.ready>=1&&!(BUILD[k].proc.out.indexOf('t_')===0)) collectProd(k); });
+  ['meat','milk','wool','gold'].forEach(q=>{ if(Math.floor((S.pend&&S.pend[q])||0)>=1) collect(q,x,y); });
+  try{ sfx('coin'); }catch(e){}
+  colAllUpd();
+}
+function colAllUpd(){ const b=document.getElementById('colall'); if(!b) return; let n=0; try{ n=(S.tutDone&&S.met)?colAllCount():0; }catch(e){} const busy=(typeof BT!=='undefined'&&BT)||(document.getElementById('modal')&&document.getElementById('modal').style.display==='flex');
+  b.style.display=(n>=2&&!busy)?'flex':'none'; b.querySelector('b').textContent=n; }
+(function(){ const st=document.createElement('style'); st.textContent='#colall{position:fixed;right:10px;bottom:215px;z-index:3;display:none;align-items:center;gap:6px;background:linear-gradient(#f0c24a,#b97d12);border:2px solid #f6e3a0;color:#3b2200;font-weight:900;border-radius:12px;padding:6px 10px;font-size:14px;box-shadow:0 3px 10px #0008}#colall b{background:#d33;color:#fff;border-radius:9px;padding:0 6px;font-size:12px}';
+  document.head.appendChild(st);
+  const b=document.createElement('button'); b.id='colall'; b.innerHTML='🧺 Бүгдийг авах <b>0</b>'; b.onclick=colAll; document.body.appendChild(b);
+  setInterval(colAllUpd,700); })();
 
 
 /* p32/btrot.js — 174: тулааны үед утсыг эргүүлэхэд (босоо ↔ хэвтээ) дүрс сунахаас сэргийлнэ.

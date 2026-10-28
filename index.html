@@ -7722,6 +7722,34 @@ function wmSpread(pts,fixed,cx,cy,ky,DX,DY){
   const _o=wmOpen; wmOpen=function(){ _o(); try{ const k=wmClanId(); if(k>=0){ if(typeof ckMem==='function') ckMem(k); if(!(CWD.my&&CWD.my.length)&&typeof cwFetch==='function') cwFetch(true); } }catch(e){} };
 })();
 
+
+/* 183: бүртгэл албадахгүй — зөөлөн урилга + Алтын бэлэг */
+const REG={bonus:100,after:600,lv:4,every:24*36e5,max:5};
+var REGT0=Date.now();
+// 5 мин/Lv3 болоход бүтэн дэлгэцээр албадаж бүртгүүлэхээ больсон (зөвхөн «нэвтрэх» дарсан үед хаалга гарна)
+gateTrig=function(){ try{ if(localStorage.getItem('dxx_login')){ S.gt=1; S.glogin=1; CL.tab='in'; localStorage.removeItem('dxx_login'); save(); } }catch(e){} };
+setInterval(()=>{ try{ if(CL.ok&&CL.email&&!S.reg){ S.reg=1; }
+  // өмнө нь албадагдаж гацсан бүртгэлгүй тоглогчийг чөлөөлнө
+  if(S.gt&&!S.reg&&!S.glogin&&CL.ok&&!CL.email&&Date.now()-REGT0>20000){ S.gt=0; try{ save(); }catch(e){} const g=document.getElementById('gate'); if(g) g.remove(); } }catch(e){} },1000);
+// зөөлөн урилга
+(function(){ const st=document.createElement('style'); st.textContent=
+'#regi{position:fixed;left:10px;right:10px;bottom:104px;z-index:75;background:linear-gradient(#4a3512,#2b1c0a);border:2px solid #c9972b;border-radius:12px;color:#ffe9b0;padding:10px 12px;box-shadow:0 6px 20px #000b;display:none;font-size:13px;line-height:1.3}'+
+'#regi b{color:#ffd770}#regi .rgb{display:flex;gap:8px;margin-top:8px}#regi .rgb button{flex:1;height:36px;padding:0 8px;font-size:14px;font-weight:800;border-radius:9px;cursor:pointer}#regi .rgb .go{background:linear-gradient(#ffe48a,#e8aa2a 55%,#d28e17);color:#3b2200;border:1px solid #b5790f}#regi .rgb .sk{background:#3a2a16;color:#cdb98a;border:1px solid #6b4a24;border-radius:8px}';
+ document.head.appendChild(st);
+ const d=document.createElement('div'); d.id='regi'; d.innerHTML='<div>☁ <b>Ахицаа хадгалаарай!</b> Бүртгүүлбэл <b>🎁 '+REG.bonus+' Алт</b> бэлэг. Утас солиход ч тоглоом алдагдахгүй.</div><div class="rgb"><button class="go" onclick="regGo()">Бүртгүүлэх</button><button class="sk" onclick="regHide(1)">Дараа</button></div>'; document.body.appendChild(d); })();
+function regGo(){ regHide(0); try{ openM('cloud'); }catch(e){} }
+function regHide(later){ const d=document.getElementById('regi'); if(d) d.style.display='none'; }
+function regTick(){
+  const d=document.getElementById('regi'); if(!d) return;
+  const vis=id=>{ const e=document.getElementById(id); if(!e) return false; const c=getComputedStyle(e); return c.display!=='none'&&c.visibility!=='hidden'; };
+  const busy=(typeof BT!=='undefined'&&BT)||['modal','chat','jamov','hd','boxov','ckov','cwp','tutov','splash','gate'].some(vis);
+  const want=!!(CL.ok&&!CL.email&&!S.gt&&S.tutDone&&S.met&&((S.ptm||0)>=REG.after||(S.pl||1)>=REG.lv)&&(S.regN||0)<REG.max);
+  const due=Date.now()-(S.regT||0)>=REG.every;
+  if(d.style.display==='block'){ if(!want||busy){ d.style.display='none'; } else if(Date.now()-REG.shown>20000){ d.style.display='none'; } return; }
+  if(want&&due&&!busy){ d.style.display='block'; REG.shown=Date.now(); S.regT=Date.now(); S.regN=(S.regN||0)+1; try{ save(); }catch(e){} }
+}
+REG.shown=0; setInterval(regTick,1500);
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

@@ -7121,6 +7121,102 @@ async function ckNameSave(k){
   };
 })();
 
+
+/* 179: Кланы цонхны шинэ дизайн (ckRender-ийг бүтнээр нь орлоно; үйлдлүүд өөрчлөгдөөгүй) */
+(function(){ const st=document.createElement('style'); st.textContent=
+'.ckw{width:min(96vw,420px);max-height:90vh;overflow:auto;background:linear-gradient(180deg,#3d2713,#1f1309);border:2px solid #c9972b;border-radius:16px;color:#ffe9b0;padding:0 0 12px;box-shadow:0 10px 36px #000b,inset 0 0 0 2px #00000055;-webkit-overflow-scrolling:touch}'+
+'.ckh{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:10px 10px 6px}.ckh b{font-size:17px;color:#ffd770;text-shadow:0 1px 0 #000}'+
+'.ckpnw{filter:drop-shadow(0 3px 4px #000a);flex:none;position:relative;display:inline-block;line-height:0}'+
+'.ckpn{width:44px;height:58px;background:linear-gradient(160deg,rgba(255,255,255,.35),rgba(255,255,255,0) 45%),var(--cc);clip-path:polygon(0 0,100% 0,100% 84%,50% 100%,0 84%);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;text-shadow:0 2px 3px #0009}'+
+'.ckpnw:before{content:"";position:absolute;left:-4px;right:-4px;top:-3px;height:5px;border-radius:3px;background:linear-gradient(#ffe27a,#b9801a);z-index:1}'+
+'.ckpn.sm2{width:34px;height:44px;font-size:18px}.ckpnw.sm2:before{left:-3px;right:-3px;height:4px}.ckpn.lg{width:66px;height:86px;font-size:36px}.ckpnw.lg:before{height:7px;left:-6px;right:-6px}'+
+'.ckcard{display:flex;align-items:center;gap:11px;margin:6px 10px;padding:9px 10px;border:1px solid #6b4a24;border-radius:12px;background:linear-gradient(#412b17,#2a1a0d);cursor:pointer;box-shadow:inset 0 1px 0 #ffffff14}.ckcard:active{transform:scale(.985)}'+
+'.ckcard.me{border-color:#7fd06a;box-shadow:0 0 10px #7fd06a55,inset 0 1px 0 #ffffff14}.ckcard .nm{font-size:17px;font-weight:900;color:#fff2c8;text-shadow:0 1px 0 #000}.ckcard .sb{font-size:12px;color:#cdb98a;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+'.ckchip{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;border:1px solid #6b4a24;white-space:nowrap}.ckgold{color:#3b2200;background:linear-gradient(#ffe27a,#e0a52a);border-color:#fff1b0}.ckblue{color:#9fd0ff;border-color:#4a7aa8}.ckred{color:#ffb0a0;border-color:#a8504a}.ckgrn{color:#9be07a;border-color:#5a9a4a}'+
+'.ckbar{height:6px;background:#160d05;border:1px solid #5b3d1e;border-radius:4px;overflow:hidden;margin-top:4px}.ckbar i{display:block;height:100%;background:linear-gradient(#ffe27a,#e8a820)}'+
+'.ckhero{position:relative;text-align:center;padding:6px 12px 8px}.ckhero:before{content:"";position:absolute;left:0;right:0;top:0;bottom:0;background:radial-gradient(ellipse at 50% 20%,var(--cc) 0%,transparent 68%);opacity:.38;pointer-events:none}'+
+'.ckhero>*{position:relative}.ckhero .nm{font-size:26px;font-weight:900;color:#fff2c8;text-shadow:0 2px 0 #000,0 0 14px var(--cc);margin-top:8px;letter-spacing:.5px}'+
+'.ckking{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:3px 12px;border-radius:14px;background:#00000066;border:1px solid #c9972b;font-size:14px}.ckking b{color:#ffd770}'+
+'.ckts{display:flex;gap:7px;margin:8px 10px 0}.ckt{flex:1;background:linear-gradient(#2f1e0f,#22150a);border:1px solid #6b4a24;border-radius:10px;padding:6px 4px;text-align:center}.ckt small{display:block;font-size:11px;color:#cdb98a}.ckt b{font-size:17px;color:#ffd770}'+
+'.ckin{margin:8px 10px 0;text-align:center;font-size:12px}.ckact{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 10px 0}.ckact .btn{width:100%;box-sizing:border-box;min-width:0;margin:0!important;font-size:13px}.ckjoin{filter:hue-rotate(70deg) saturate(1.15)}.ckchat{filter:hue-rotate(150deg) saturate(1.1)}.ckwarn{filter:hue-rotate(-28deg) saturate(1.7)}.ckact .full{grid-column:1/-1}'+
+'.ckmh{display:flex;justify-content:space-between;align-items:center;margin:14px 12px 2px;font-weight:900;color:#ffd770;font-size:15px}'+
+'.ckm{display:flex;align-items:center;gap:8px;margin:5px 10px 0;padding:7px 9px;border-radius:10px;background:linear-gradient(#34200f,#26170a);border:1px solid #4a3318}.ckm.me{border-color:#c9972b;background:linear-gradient(#4a3512,#33230c)}.ckm .rk{width:28px;text-align:center;font-size:18px;font-weight:900;color:#cdb98a;flex:none}'+
+'.ckm .dot{width:9px;height:9px;border-radius:5px;flex:none}.ckm .pw{min-width:56px;text-align:right;color:#ffd770;font-weight:900;font-size:14px}.ckm .pb{height:4px;background:#160d05;border-radius:2px;overflow:hidden;margin-top:3px}.ckm .pb i{display:block;height:100%;background:linear-gradient(90deg,#c97a1a,#ffd24a)}'+
+'.ckrh{display:flex;gap:6px;padding:2px 14px;font-size:11px;color:#cdb98a}';
+ document.head.appendChild(st); })();
+function ckPen(q,cls){ return '<div class="ckpnw '+(cls||'')+'"><div class="ckpn '+(cls||'')+'" style="--cc:'+q.c+'">⚑</div></div>'; }
+ckRender=function(){
+  const o=document.getElementById('ckov'); const V=CKD.view; if(!o||!V) return;
+  const me=(typeof CL!=='undefined'&&CL.uid)||'', myK=ckOwnerK(), on=ckOn();
+  const wrap=h=>'<div class="ckw">'+h+'</div>';
+  const X='<button class="btn" style="padding:2px 12px" onclick="ckClose()">✕</button>';
+  const hdr=(l,t,r)=>'<div class="ckh">'+l+'<b>'+t+'</b>'+r+'</div>';
+  const bt=(txt,fn,css,dis,cls)=>'<button class="btn'+(cls?' '+cls:'')+'" '+(dis?'disabled ':'')+'onclick="'+fn+'"'+(css?' style="'+css+'"':'')+'>'+txt+'</button>';
+  let h='';
+  if(V.rank){
+    h=hdr('<button class="btn" style="padding:2px 10px" onclick="ckList()">‹ Бүх клан</button>','🏆 Зэрэглэл',X)
+     +'<div class="ckin" style="color:#cdb98a">Эрэмбэ: өнгөрсөн долоо хоногийн оноо (шилдэг '+CWTOP+' гишүүн) → энэ долоо хоног → нийт хүч. 1-р байр = <b style="color:#ffd770">🏆 Аварга клан</b></div>';
+    if(!on) h+='<div class="ckin" style="color:#ffb070">Интернэт/нэвтрэлт байхгүй.</div>';
+    else if(CKR.err) h+='<div class="ckin" style="color:#ffb070">Ачаалж чадсангүй ('+esc2(CKR.err)+')</div>';
+    else if(!CKR.rows) h+='<div class="ckin" style="padding:16px 0">Ачаалж байна…</div>';
+    else{
+      h+='<div class="ckrh" style="margin-top:8px"><span style="width:30px">#</span><span style="flex:1">Клан</span><span style="width:62px;text-align:right">Өнгөрсөн</span><span style="width:54px;text-align:right">Энэ 7х</span></div>';
+      CKR.rows.forEach((r,j)=>{ const q=CLN[r.i], d=CKD.docs[r.i], my=(S.clan===r.i), md=['🥇','🥈','🥉'][j]||(j+1);
+        h+='<div class="ckcard'+(my?' me':'')+'" onclick="ckShow('+r.i+')" style="margin:5px 10px;padding:7px 9px;gap:8px"><span style="width:26px;text-align:center;font-size:19px;font-weight:900;flex:none">'+(j===0&&CKR.champ===r.i?'🏆':md)+'</span>'+ckPen(q,'sm2')
+          +'<div style="flex:1;min-width:0"><div class="nm" style="font-size:15px">'+q.n+(my?' <span class="ckchip ckgrn">чинийх</span>':'')+'</div><div class="sb" style="white-space:normal">'+(d&&d.ow?'👑 '+esc2(String(d.on||'Хаан')).slice(0,14)+' · ':'Эзэнгүй · ')+r.n+' гишүүн · ⚔ '+cn(r.pw)+'</div></div>'
+          +'<b style="width:58px;text-align:right;color:#ffd770">'+f(r.last)+'</b><span style="width:48px;text-align:right">'+f(r.cur)+'</span></div>'; });
+    }
+    o.innerHTML=wrap(h); return;
+  }
+  if(V.list){
+    h=hdr('<span style="font-size:20px">⚑</span>','Кланууд',X)
+     +'<div class="ckin" style="color:#cdb98a;margin-top:0">Клан эзэмшсэн хүн <b style="color:#ffd770">Хаан</b> болж, гишүүддээ цол өгнө</div>'
+     +'<div class="ckact" style="margin-top:8px">'+bt('🏆 Кланы зэрэглэл · Аварга','ckRank()','','', 'full')+'</div><div style="height:4px"></div>';
+    CLN.forEach((q,i)=>{ const d=CKD.docs[i], n=ckCnt(i), my=S.clan===i, loaded=!!CKD.mem[i], sl=d&&d.ow?(d.sl||CK.SL0):0, full=!!(d&&d.ow&&loaded&&n>=sl);
+      let chip; if(my) chip='<span class="ckchip ckgrn">Чиний клан</span>'; else if(!(d&&d.ow)) chip=on?'<span class="ckchip ckgold">👑 '+CK.BUY+' '+ckGem(12)+'</span>':'<span class="ckchip">Эзэнгүй</span>'; else if(full) chip='<span class="ckchip ckred">Дүүрсэн</span>'; else chip='<span class="ckchip ckblue">Нээлттэй</span>';
+      h+='<div class="ckcard'+(my?' me':'')+'" onclick="ckShow('+i+')">'+ckPen(q,'sm2')
+        +'<div style="flex:1;min-width:0"><div class="nm">'+q.n+'</div><div class="sb">'+(d&&d.ow?'👑 '+esc2(String(d.on||'Хаан')):'Эзэнгүй клан · Хаан хэрэгтэй')+'</div>'
+        +(d&&d.ow?(loaded?'<div class="ckbar"><i style="width:'+Math.min(100,n/sl*100)+'%"></i></div><div class="sb" style="margin-top:2px">'+n+' / '+sl+' гишүүн</div>':'<div class="sb" style="margin-top:2px">'+sl+' слот</div>'):'')+'</div>'+chip+'</div>';
+    });
+    o.innerHTML=wrap(h); return;
+  }
+  const k=V.k, q=CLN[k], d=CKD.docs[k], rows=ckRows(k), tot=rows.reduce((a,x)=>a+(x.p||0),0), isOwner=!!(d&&d.ow===me), sl=d&&d.ow?(d.sl||CK.SL0):0, mx=Math.max(1,...rows.map(x=>x.p||0));
+  h=hdr('<button class="btn" style="padding:2px 10px" onclick="ckList()">‹ Бүх клан</button>','',X)
+   +'<div class="ckhero" style="--cc:'+q.c+'">'+ckPen(q,'lg')+'<div class="nm">'+q.n+' клан</div>'
+   +(d&&d.ow?'<div class="ckking">👑 Хаан <b>'+esc2(String(d.on||'Хаан'))+'</b></div>':'<div class="ckking" style="color:#cfc09a">Эзэнгүй клан</div>')
+   +(CKR.champ===k?'<div style="margin-top:6px;color:#ffd770;font-weight:900">🏆 Өнгөрсөн долоо хоногийн аварга клан</div>':'')+'</div>'
+   +'<div class="ckts"><div class="ckt"><small>👥 Гишүүд</small><b>'+rows.length+(d&&d.ow?' / '+sl:'')+'</b></div><div class="ckt"><small>⚔ Нийт хүч</small><b>'+cn(tot)+'</b></div>'+(d&&d.ow?'<div class="ckt"><small>📦 Слот</small><b>'+sl+'/'+CK.MAX+'</b></div>':'<div class="ckt"><small>💎 Үнэ</small><b>'+CK.BUY+'</b></div>')+'</div>';
+  if(d&&d.ow) h+='<div style="margin:6px 10px 0"><div class="ckbar"><i style="width:'+Math.min(100,rows.length/sl*100)+'%"></i></div></div>';
+  if(!on) h+='<div class="ckin" style="color:#ffb070">Интернэт/нэвтрэлт байхгүй: мэдээлэл хуучирсан байж болно, клан авах боломжгүй.</div>';
+  else if(CKD.err) h+='<div class="ckin" style="color:#ffb070">Кланы мэдээлэл ачаалж чадсангүй ('+esc2(CKD.err)+')</div>';
+  const left=cwBannerLeft(d);
+  if(left>0) h+='<div class="ckin" style="color:#ffd770;font-weight:800">🚩 Дайны тугнэл мандсан · '+Math.floor(left/3600e3)+'ц үлдсэн · дайны оноо ×1.5</div>';
+  if(d&&d.ow) h+='<div class="ckin" style="color:#cdb98a">Хаан, «Жанжин» цолтой гишүүн: дайны оноо +10%</div>';
+  // товчууд
+  if(!(d&&d.ow)){
+    if(myK>=0) h+='<div class="ckin" style="color:#cdb98a">Чи аль хэдийн '+CLN[myK].n+' кланы Хаан тул өөр клан авч болохгүй.</div>';
+    else h+='<div class="ckact">'+bt(CKD.cf===k?'⚠ Дахин дар: '+CK.BUY+' '+ckGem(16)+' зарцуулна':'👑 Худалдаж авах · '+CK.BUY+' '+ckGem(16),'ckBuyAsk('+k+')','',CKD.busy||!on,'full'+(CKD.cf===k?' ckwarn':''))+'</div><div class="ckin" style="color:#cdb98a">Хаан болж, '+CK.SL0+' слоттой клантай болно. Гишүүддээ цол өгнө. Алт буцаагдахгүй.</div>';
+  }
+  let ac='';
+  if(isOwner) ac+=bt(d.nm?'✏ Нэр солих · 1000 '+ckGem(14):'✏ Нэрлэх · Үнэгүй','ckNameOpen('+k+')','',CKD.busy);
+  if(isOwner) ac+=bt('➕ +'+CK.SLP+' слот · '+CK.SLC+' '+ckGem(14),'ckSlots()','',CKD.busy||sl>=CK.MAX);
+  if(S.clan===k||isOwner) ac+=bt('💬 Кланы чат','chatOpen('+k+')','',0,'ckchat full');
+  if(d&&d.ow&&d.ow===me&&wmClanId()===k&&!left){ const used=d.wb&&d.wb.w===wmWeek(); ac+=bt('🚩 Дайны тугнэл · 24ц ×1.5'+(used?' (энэ 7х ашигласан)':''),'ckBanner()','',used||CKD.busy,'full ckbn'); }
+  if(S.clan!==k&&myK<0) ac+=bt('Энэ клан руу нэгдэх','CK_JOINASK('+k+')','',!!(d&&d.ow&&rows.length>=sl),'full ckjoin');
+  if(ac) h+='<div class="ckact">'+ac+'</div>';
+  if(S.clan!==k&&d&&d.ow&&rows.length>=sl&&myK<0) h+='<div class="ckin" style="color:#ffb070">Клан дүүрсэн</div>';
+  h+='<div class="ckmh"><span>Гишүүд</span><span class="sm">'+rows.length+'</span></div>';
+  if(!rows.length) h+='<div class="ckin" style="color:#cdb98a;padding:8px 0">Гишүүн одоогоор алга.</div>';
+  rows.forEach((x,i)=>{
+    const own=!!(d&&x.id===d.ow), ti=(d&&d.tt&&d.tt[x.id])|0, ag=ckAgo(x.t), onl=ag==='онлайн';
+    const tsel=(isOwner&&!own)?'<select onchange="ckTitle('+k+',\''+x.id+'\',this.value)" style="font-size:11px;background:#3b2815;color:#ffe9b0;border:1px solid #c9972b;border-radius:6px;max-width:84px">'+CK_TT.map((t,j)=>'<option value="'+j+'"'+(j===ti?' selected':'')+'>'+(t||'Цолгүй')+'</option>').join('')+'</select>':(own?'<span class="ckchip ckgold" style="font-size:10px">Хаан</span>':(ti?'<span class="ckchip ckgrn" style="font-size:10px">'+CK_TT[ti]+'</span>':''));
+    h+='<div class="ckm'+(x.id===me?' me':'')+'"><span class="rk">'+(['🥇','🥈','🥉'][i]||(i+1))+'</span><span class="dot" style="background:'+(onl?'#5fe06a':'#6b6b6b')+'"></span>'
+      +'<div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(own?'👑 ':'')+'<b>'+esc2(String(x.n||'Тоглогч').slice(0,14))+'</b>'+(x.id===me?' <span class="sm">(чи)</span>':'')+'</div><div class="sm">'+(x.l?'Lv '+x.l+' · ':'')+(ag&&!onl?ag+' өмнө':onl?'онлайн':'')+'</div><div class="pb"><i style="width:'+Math.max(3,Math.round((x.p||0)/mx*100))+'%"></i></div></div>'
+      +tsel+((isOwner&&!own)?'<button class="btn" onclick="ckKickAsk('+k+',\''+x.id+'\')" style="padding:1px 7px;font-size:11px;'+(CKX.kc===x.id?'color:#ffd0c8;font-weight:900':'')+'">'+(CKX.kc===x.id?'⚠ Хасах?':'✕')+'</button>':'')+'<b class="pw">⚔ '+cn(x.p||0)+'</b></div>';
+  });
+  o.innerHTML=wrap(h);
+};
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

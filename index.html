@@ -810,7 +810,7 @@ function canPay(inn){ for(const k in inn) if((S.res[k]||0)<inn[k]) return false;
 function prodTick(secs){
   PROD.forEach(k=>{
     if(!S.bld[k]||S.sites[k]) return;
-    const b=BUILD[k].proc, st=S.proc[k]||(S.proc[k]={t:0,ready:0}), per=b.t/(1+0.25*(S.bld[k]-1));
+    const b=BUILD[k].proc, st=S.proc[k]||(S.proc[k]={t:0,ready:0}), per=b.t/(1+0.25*(S.bld[k]-1))/(1+rsb('eco_proc'));
     st.t+=secs;
     let guard=0;
     while(st.t>=per&&guard++<2000){
@@ -884,7 +884,7 @@ function tick(secs){
   for(const x in r){
     S.pend[x] = Math.min(150, S.pend[x] + r[x]*secs/60);
   }
-  if(S.farm.stage===1){ const sk=seasonK(); if(sk!=='winter'){ S.farm.t += secs*(sk==='spring'?1.2:1); if(S.farm.t>=GROW){ S.farm.stage=2; } } }
+  if(S.farm.stage===1){ const sk=seasonK(); if(sk!=='winter'){ S.farm.t += secs*(sk==='spring'?1.2:1)*(1+rsb('eco_farm')); if(S.farm.t>=GROW){ S.farm.stage=2; } } }
   if(S.upg) for(const k in S.upg) S.upg[k].p+=secs;
   if(S.rs&&S.rs.cur) S.rs.cur.left-=secs;
   for(const k in S.sites) S.sites[k].p+=secs*0.5;
@@ -1516,7 +1516,7 @@ function workStep(e,dt){
     t.prog=t.t/1.6; e.dir=t.tg.x>e.x?1:-1;
     if(!t.shot&&t.t>0.7){ t.shot=1; shots.push({x0:e.x+3,y0:e.y+4,x1:t.tg.x+entW(t.tg)/2,y1:t.tg.y+entH(t.tg)/2,t:0}); }
     if(t.t>=1.6){
-      const g=HUNT[t.tg.type]; spawnBlood(t.tg.x+entW(t.tg)/2,t.tg.y+entH(t.tg)/2,12);
+      const g=Math.round(HUNT[t.tg.type]*(1+rsb('mil_hunt'))); spawnBlood(t.tg.x+entW(t.tg)/2,t.tg.y+entH(t.tg)/2,12);
       S.res.meat=Math.min(cap(),S.res.meat+g); addFloat(t.tg.x+2,t.tg.y-2,'+'+g+' мах','#ff8a7a');
       huntQ.push({type:t.tg.type,hx:t.tg.hx,hy:t.tg.hy,t:70+Math.random()*40}); addDeath(t.tg); spawnBlood(t.tg.x+4,t.tg.y+3,6); ents.splice(ents.indexOf(t.tg),1); say('Ан олзлоо!'); endTask(e);
     }
@@ -1589,7 +1589,7 @@ function raidStep(dt){
   const defs=ents.filter(e=>e.kind==='wild'&&e.friend&&(e.type==='dog'||e.type==='guard'||e.type==='hunter'));
   defs.forEach(e=>{ if(r.react>0&&Math.hypot(e.x-w.x,e.y-w.y)>24&&!victim) return; if(e.task) e.task=null; e.def=true; e.speed=e.type==='guard'?27:32; e.tx=w.x; e.ty=w.y; e.wait=0; });
   let fighting=false;
-  defs.forEach(e=>{ if(e.def&&Math.hypot(e.x-w.x,e.y-w.y)<11){ fighting=true; w.hp-=(e.type==='guard'?70:e.type==='hunter'?60:45)*dt; } });
+  defs.forEach(e=>{ if(e.def&&Math.hypot(e.x-w.x,e.y-w.y)<11){ fighting=true; w.hp-=(e.type==='guard'?70:e.type==='hunter'?60:45)*(1+rsb('mil_def'))*dt; } });
   if(fighting&&r.bl<=0){ spawnBlood(w.x+4,w.y+3,5); r.bl=0.18; }
   if(w.hp<=0){ addDeath(w); spawnBlood(w.x+4,w.y+3,10); ents.splice(ents.indexOf(w),1); huntQ.push({type:w.type,hx:w.hx,hy:w.hy,t:100+Math.random()*60}); w.dead=1; raidFlee((r.nm||'Чоно')+' алагдлаа!','#8fe39a'); return; }
   if(dd<4){
@@ -1599,9 +1599,9 @@ function raidStep(dt){
       if(!victim.say) victim.say={t:'Аймаар! Туслаарай!',ttl:2,delay:0};
       if(victim.hp<=0){ const nm=NPCS[victim.idx].n; if(Math.random()<0.3&&killNpc(victim)){ raidFlee(nm+' '+(r.nm||'Чоно').toLowerCase()+'д алагдлаа 💀','#ff8a7a'); return; } victim.hp=15; victim.task=null; victim.sel=false; raidFlee(nm+' шархаллаа!','#ff8a7a'); return; }
     } else {
-      r.bite+=dt; r.t.hp=Math.max(0,100*(1-r.bite/r.bt));
+      r.bite+=dt; r.t.hp=Math.max(0,100*(1-r.bite/(r.bt*(1+rsb('mil_def')))));
       if(r.bl<=0){ spawnBlood(r.t.x+4,r.t.y+3,4); r.bl=0.3; }
-      if(r.bite>r.bt){
+      if(r.bite>r.bt*(1+rsb('mil_def'))){
         const ty=r.t.type; if(S.animals[ty]>0 && herdCount()>1){ spawnBlood(r.t.x+4,r.t.y+3,14); S.animals[ty]--; refresh(); raidFlee((raid.nm||'Чоно')+' нэг мал аваад явчихлаа!','#ff8a7a'); }
         else raidFlee((raid&&raid.nm||'Чоно')+' буцлаа.');
       }
@@ -5127,7 +5127,7 @@ function ndPlayCards(){
 /* p32/prodpanel.js — 122: цехийн цонх (юунаас юу гарах, материал, явц, агуулахад ав, зарах) */
 function prodPanel(k){
   var d=BUILD[k], b=d&&d.proc; if(!b) return '';
-  var st=(S.proc&&S.proc[k])||{t:0,ready:0}, L=S.bld[k]||1, per=b.t/(1+0.25*(L-1)), out=ITEMS[b.out]||{n:b.out,p:0}, ok=canPay(b.in), inV=0;
+  var st=(S.proc&&S.proc[k])||{t:0,ready:0}, L=S.bld[k]||1, per=b.t/(1+0.25*(L-1))/(1+rsb('eco_proc')), out=ITEMS[b.out]||{n:b.out,p:0}, ok=canPay(b.in), inV=0;
   var inn=Object.keys(b.in).map(function(x){ var need=b.in[x], have=Math.floor(S.res[x]||0), g=have>=need; inV+=(x==='gold'?need:(ITEMS[x]?ITEMS[x].p:0)*need);
     return '<span style="color:'+(g?'#8fe39a':'#ff9a8a')+'">'+(x==='gold'?'🪙':ITEMS[x].n)+' '+need+' <span class="sm">('+have+')</span></span>'; }).join(' + ');
   var ready=Math.floor(st.ready||0), pr=Math.round(((st.t||0)/per)*100); if(pr>100) pr=100;
@@ -6940,7 +6940,7 @@ function prodFood(k){ return !!(typeof ITEMBLD!=='undefined'&&ITEMBLD[k]); }
 function prodTick(secs){
   PROD.forEach(k=>{
     if(!S.bld[k]||S.sites[k]) return;
-    const b=BUILD[k].proc, st=S.proc[k]||(S.proc[k]={t:0,ready:0}), L=S.bld[k]||1, per=b.t/(1+0.25*(L-1)), food=prodFood(k);
+    const b=BUILD[k].proc, st=S.proc[k]||(S.proc[k]={t:0,ready:0}), L=S.bld[k]||1, per=b.t/(1+0.25*(L-1))/(1+rsb('eco_proc')), food=prodFood(k);
     st.t+=secs;
     let guard=0;
     while(st.t>=per&&guard++<2000){
@@ -7949,6 +7949,165 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     const r=_up.apply(this,arguments);
     act.forEach(e=>{ e.def=false; });
     return r;
+  };
+})();
+
+
+/* p32/rs2.js — 188: Судалгааны цэс: IV үе, нэмэлт судалгаа, 2-р суваг, клангийн тусламж, салбарын шагнал */
+(function(){
+  /* ---------- 1) Шинэ судалгаанууд ---------- */
+  const NEW=[
+    // IV үе (Эзэнт гүрний үе) — салбар бүрд 2
+    {id:'e6',b:'e',n:'Их захиа худалдаа',d:'Зарах үнэ +20%',ef:{eco_sell:0.20},age:3,e:'🏺'},
+    {id:'e7',b:'e',n:'Алтан нүүдэл',d:'Үйлдвэрлэл +20%, нөөцийн багтаамж +300',ef:{eco_prod:0.20,eco_cap:300},age:3,e:'🌟'},
+    {id:'m6',b:'m',n:'Түмэн цэрэг',d:'Цэргийн хүч +15%',ef:{mil_troop:0.15},age:3,e:'🪖'},
+    {id:'m7',b:'m',n:'Тэнгэрийн хараал',d:'Баатрын хүч +10%, цохилт +10%',ef:{mil_all:0.10,mil_atk:0.10},age:3,e:'⚡'},
+    {id:'c6',b:'c',n:'Их Яс',d:'Туршлага +20%',ef:{cul_xp:0.20},age:3,e:'📜'},
+    {id:'c7',b:'c',n:'Мянган жилийн мэргэн',d:'Пасс +25%, скилл 8% хурдан бэлэн болно',ef:{cul_pass:0.25,cul_cd:0.08},age:3,e:'🔮'},
+    // Нэмэлт судалгаа (дарааллаас хамаарахгүй)
+    {id:'x1',b:'e',sp:1,n:'Тариалангийн шинэ арга',d:'Тариа 25% хурдан ургана',ef:{eco_farm:0.25},age:1,e:'🌾',cost:{gold:1500,wood:120},secs:1500},
+    {id:'x2',b:'e',sp:1,n:'Цехийн нууц',d:'Цех 15% хурдан бүтээнэ',ef:{eco_proc:0.15},age:1,e:'🧀',cost:{gold:2500,wood:150},secs:2400},
+    {id:'x3',b:'m',sp:1,n:'Анчдын сургууль',d:'Анчдын авах мах +30%',ef:{mil_hunt:0.30},age:0,e:'🦌',cost:{gold:600,wool:40},secs:600},
+    {id:'x4',b:'m',sp:1,n:'Харуулын цамхаг',d:'Чоно малыг 40% удаан авна, харуул 40% хүчтэй',ef:{mil_def:0.40},age:2,e:'🗼',cost:{gold:6000,wool:100},secs:3600},
+    {id:'x5',b:'c',sp:1,n:'Багш нар',d:'Туршлага +10%, баатрын бие +5%',ef:{cul_xp:0.10,mil_hp:0.05},age:1,e:'🧑‍🏫',cost:{gold:2000,milk:120},secs:1800}
+  ];
+  NEW.forEach(t=>{ if(!TECH.some(x=>x.id===t.id)) TECH.push(t); });
+
+  const rsPrev=t=>t.sp?null:TECH.find(x=>x.b===t.b&&!x.sp&&Number(x.id[1])===Number(t.id[1])-1);
+  const _secs=rsSecs, _cost=rsCost;
+  rsSecs=function(t){ return t.secs||_secs(t); };
+  rsCost=function(t){ return t.cost?Object.assign({},t.cost):_cost(t); };
+
+  /* ---------- 2) Суваг, эхлүүлэх, дуусгах ---------- */
+  const rsFree=()=>{ rsInit(); if(!S.rs.cur) return 'cur'; if(S.rs.s2&&!S.rs.c2) return 'c2'; return null; };
+  const slots=()=>['cur','c2'].filter(s=>S.rs&&S.rs[s]);
+
+  rsStart=function(id){
+    rsInit(); const t=TECH.find(x=>x.id===id); if(!t||S.rs.done[id]) return;
+    if(slots().some(s=>S.rs[s].id===id)) return;
+    const sl=rsFree(); if(!sl){ say('Судалгааны суваг дүүрэн'); return; }
+    const prev=rsPrev(t); if(prev&&!S.rs.done[prev.id]) return;
+    if(ageIdx()<t.age){ say(AGES[t.age].n+'-д нээгдэнэ'); return; }
+    const c=rsCost(t); if(!canPay(c)){ say('Нөөц хүрэхгүй байна'); sfx('err'); return; }
+    for(const k in c) S.res[k]-=c[k];
+    S.rs[sl]={id:id,left:rsSecs(t),tot:rsSecs(t)};
+    sfx('build'); say(t.n+' судалж эхэллээ'); fillM(); refresh();
+  };
+
+  function branchBonus(b){
+    const L=TECH.filter(x=>x.b===b); if(!L.every(x=>S.rs.done[x.id])) return;
+    S.rs.bd=S.rs.bd||{}; if(S.rs.bd[b]) return; S.rs.bd[b]=1;
+    S.res.alt=(S.res.alt||0)+100; try{ mailAdd('Салбар дууслаа',BR[b].n+' салбарын бүх судалгааг дуусгалаа! +100 Алт'); }catch(e){}
+    say(BR[b].e+' '+BR[b].n+' салбар дууслаа! +100 Алт');
+    if(['e','m','c'].every(k=>S.rs.bd[k])&&!S.rs.sage){ S.rs.sage=1; S.title2='Мэргэн Хаан'; try{ mailAdd('Мэргэн Хаан','Гурван салбарыг бүгдийг дуусгалаа. Та «Мэргэн Хаан» цол хүртлээ!'); }catch(e){} say('🎓 «Мэргэн Хаан» цол!'); }
+  }
+  function rsFin(sl){
+    const c=S.rs[sl]; if(!c) return; const t=TECH.find(x=>x.id===c.id);
+    S.rs.done[c.id]=1; S.rs[sl]=null;
+    if(c.rq){ try{ const {F,db}=FBM; if(F.deleteDoc) F.deleteDoc(F.doc(db,'rshelp',CL.uid)).catch(()=>{}); }catch(e){} }
+    passAdd(15); sfx('lvl'); vib([40,30,40]);
+    if(t){ say('Судалгаа дууслаа: '+t.n); mailAdd('Судалгаа дууслаа',t.n); branchBonus(t.b); }
+    if(cur==='res') fillM(); refresh();
+  }
+  rsDone=function(){ if(S.rs&&S.rs.cur) rsFin('cur'); };
+  rsRush=function(sl){
+    rsInit(); sl=(sl==='c2')?'c2':'cur'; const c=S.rs[sl]; if(!c) return;
+    const g=Math.max(1,Math.ceil(Math.max(0,c.left)/300));
+    if((S.res.alt||0)<g){ say('Алт хүрэхгүй байна'); sfx('err'); return; }
+    S.res.alt-=g; rsFin(sl);
+  };
+
+  let S2C=0;
+  window.rsSlot2=function(){
+    rsInit(); if(S.rs.s2) return;
+    if(!S2C){ S2C=1; setTimeout(()=>{ S2C=0; if(cur==='res') fillM(); },4000); if(cur==='res') fillM(); return; }
+    if((S.res.alt||0)<200){ say('Алт хүрэхгүй байна'); sfx('err'); S2C=0; fillM(); return; }
+    S.res.alt-=200; S.rs.s2=1; S2C=0; sfx('win'); vib([60,40,60]); say('2-р судалгааны суваг нээгдлээ!'); fillM(); refresh();
+  };
+
+  const _tick=tick;
+  tick=function(secs){ try{ if(S.rs&&S.rs.c2) S.rs.c2.left-=secs; }catch(e){} return _tick.apply(this,arguments); };
+  setInterval(()=>{ try{ rsInit();
+    const c=S.rs.c2; if(c){ if(c.left<=0) rsFin('c2'); else if(cur==='res'){ const r=document.getElementById('rsrem2'); if(r) r.textContent=fmtT(c.left); const b=document.getElementById('rsbar2'); if(b) b.style.width=Math.min(100,100-c.left/c.tot*100)+'%'; } }
+  }catch(e){} },1000);
+
+  /* ---------- 3) Клангийн тусламж ---------- */
+  const RSH={list:[],t:0,busy:0,key:''};
+  const inClan=()=>typeof S!=='undefined'&&S.clan!=null&&typeof CLN!=='undefined'&&!!CLN[S.clan];
+  const canNet=()=>typeof CL!=='undefined'&&CL.ok&&typeof FBM!=='undefined';
+  async function rsHFetch(force){
+    if(RSH.busy) return; if(!force&&Date.now()-RSH.t<20000) return; if(!canNet()||!inClan()) return;
+    RSH.busy=1;
+    try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'rshelp'),F.where('c','==',S.clan),F.limit(20)));
+      const now=Date.now(), me=CL.uid;
+      RSH.list=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x.id!==me&&now-(x.t||0)<4*3600e3&&!(x.h||[]).includes(me)&&(x.h||[]).length<6).slice(0,6);
+      RSH.t=Date.now(); const k=RSH.list.map(x=>x.id).join(','); if(k!==RSH.key){ RSH.key=k; if(cur==='res') fillM(); } }
+    catch(e){ RSH.t=Date.now(); }
+    RSH.busy=0;
+  }
+  window.rsHReq=async function(sl){
+    rsInit(); const c=S.rs[sl]; if(!c) return;
+    if(!inClan()){ say('Эхлээд клан руу нэгдээрэй'); return; }
+    if(!canNet()){ say('Сүлжээнд холбогдоогүй байна'); return; }
+    if(slots().some(s=>S.rs[s].rq)){ say('Нэг удаад нэг тусламж хүсч болно'); return; }
+    try{ const {F,db}=FBM;
+      await F.setDoc(F.doc(db,'rshelp',CL.uid),{c:S.clan,n:String((S.prof&&S.prof.name)||'Хаан').slice(0,14),id:c.id,t:Date.now(),h:[]});
+      c.rq=1; c.hc=0; sfx('coin'); say('Клан руу тусламж хүслээ'); fillM(); }
+    catch(e){ say('Тусламж хүсэх түр боломжгүй байна'); }
+  };
+  window.rsHelp=async function(id){
+    if(!canNet()) return;
+    try{ const {F,db}=FBM; await F.updateDoc(F.doc(db,'rshelp',id),{h:F.arrayUnion(CL.uid)});
+      RSH.list=RSH.list.filter(x=>x.id!==id); RSH.key=RSH.list.map(x=>x.id).join(',');
+      passAdd(3); sfx('coin'); say('Тусаллаа! +3 Пасс оноо'); if(cur==='res') fillM(); }
+    catch(e){ say('Тусалж чадсангүй'); RSH.list=RSH.list.filter(x=>x.id!==id); if(cur==='res') fillM(); }
+  };
+  async function rsHPoll(){
+    try{ rsInit(); const act=slots().filter(s=>S.rs[s].rq); if(!act.length||!canNet()) return;
+      const {F,db}=FBM; const d=await F.getDoc(F.doc(db,'rshelp',CL.uid)); if(!d.exists()) return; const v=d.data();
+      act.forEach(sl=>{ const c=S.rs[sl]; if(!c||c.id!==v.id) return; const n=Math.min(6,(v.h||[]).length), add=n-(c.hc||0);
+        if(add>0){ c.left-=c.tot*0.04*add; c.hc=n; sfx('coin'); say('🤝 Клан тусаллаа: -'+(add*4)+'% хугацаа'); if(cur==='res') fillM(); } }); }
+    catch(e){}
+  }
+  window.rsHPoll=rsHPoll; setInterval(rsHPoll,25000);
+
+  /* ---------- 4) Шинэ дэлгэц ---------- */
+  resHTML=function(){
+    rsInit(); try{ rsHFetch(); }catch(e){}
+    const a=ageIdx(), A=AGES[a], nx=a<3?TECH.filter(t=>t.age===a+1).length:0;
+    let h='<h2>'+qa('🔬',28)+' Судалгаа'+(S.rs.sage?' <span style="font-size:13px;color:#ffd770">🎓 Мэргэн Хаан</span>':'')+'</h2><div class="card row"><div>'+qa(A.e,30,'age'+a)+' <b>'+A.s+' үе · '+A.n+'</b></div><div class="sm">'+(a<3?'Дараагийн үе: гол гэр '+AGES[a+1].min+'-р түвшин'+(nx?' · '+nx+' шинэ судалгаа':''):'Дээд үе')+'</div></div>';
+    h+='<div style="display:flex;gap:5px;margin-bottom:8px">'+['🔬 Судалгаа','🏯 Хархорум','🏆 Ялалт'].map((x,i)=>'<button class="btn'+(RTAB===i?' red':'')+'" style="flex:1;padding:6px 2px;font-size:12px" onclick="rsTab('+i+')">'+x+'</button>').join('')+'</div>';
+    if(RTAB===1) return h+wonderHTML(); if(RTAB===2) return h+victoryHTML();
+    // идэвхтэй судалгаа
+    slots().forEach(sl=>{ const c=S.rs[sl], t=TECH.find(x=>x.id===c.id); if(!t) return; const left=c.left, g=Math.max(1,Math.ceil(Math.max(0,left)/300)), s2=sl==='c2';
+      h+='<div class="card"><div class="row"><div>'+qa(t.e,26,'rsi_'+t.id)+' <b>'+t.n+'</b><div class="sm">Үлдсэн: <b id="'+(s2?'rsrem2':'rsrem')+'">'+fmtT(left)+'</b></div></div><button class="btn red" onclick="rsRush(\''+sl+'\')">⚡ '+g+' Алт</button></div><div class="bar" style="height:8px;margin-top:6px"><i id="'+(s2?'rsbar2':'rsbar')+'" style="width:'+Math.min(100,100-left/c.tot*100)+'%;background:#ffd24a"></i></div>'
+        +(c.rq?'<div class="sm" style="margin-top:6px">🤝 Клан тусламж: '+(c.hc||0)+'/6 хүн тусалсан (-'+((c.hc||0)*4)+'%)</div>':(inClan()?'<button class="btn" style="width:100%;margin-top:6px" onclick="rsHReq(\''+sl+'\')">🤝 Клантаа тусламж хүсэх</button>':'<div class="sm" style="margin-top:6px">🤝 Клантай бол гишүүд тусалж хугацааг багасгана (6 хүн × 4%)</div>'))+'</div>'; });
+    // 2-р суваг
+    if(!S.rs.s2) h+='<div class="card row"><div style="flex:1"><b>🔓 2-р судалгааны суваг</b><div class="sm">Хоёр судалгааг нэг дор явуулна. Нэг удаа авна.</div></div><button class="btn'+(S2C?' red':'')+'" onclick="rsSlot2()">'+(S2C?'Батлах · 200 Алт':'200 Алт')+'</button></div>';
+    // клангийн хүсэлтүүд
+    if(RSH.list.length){ h+='<div class="card"><h3 style="color:#ffd770">🤝 Клангийн тусламж</h3><div class="sm">Гишүүддээ тусалбал +3 Пасс оноо</div>'+RSH.list.map(x=>{ const tt=TECH.find(y=>y.id===x.id); return '<div class="row" style="margin-top:6px"><div style="flex:1"><b>'+String(x.n||'Хаан').replace(/[<>&]/g,'')+'</b><div class="sm">'+(tt?tt.n:'Судалгаа')+' · '+(x.h||[]).length+'/6</div></div><button class="btn" onclick="rsHelp(\''+x.id+'\')">Тусалах</button></div>'; }).join('')+'</div>'; }
+    // салбарууд
+    const free=rsFree();
+    ['e','m','c'].forEach(b=>{
+      const L=TECH.filter(t=>t.b===b), ch=L.filter(t=>!t.sp), sp=L.filter(t=>t.sp), dn=L.filter(t=>S.rs.done[t.id]).length, got=S.rs.bd&&S.rs.bd[b];
+      h+='<div class="card"><h3 style="color:'+BR[b].c+'">'+BR[b].e+' '+BR[b].n+' <span class="sm" style="font-weight:normal">'+dn+'/'+L.length+(got?' ✓':'')+'</span></h3>'+(got?'':'<div class="sm">Салбарыг бүрэн дуусгавал +100 Алт</div>');
+      const row=t=>{ const done=S.rs.done[t.id], cu=slots().some(s=>S.rs[s].id===t.id), prev=rsPrev(t), blk=prev&&!S.rs.done[prev.id], lockA=a<t.age, cs=rsCost(t);
+        return '<div class="row" style="margin-top:6px;opacity:'+(done?0.6:1)+'"><div style="flex:1">'+qa(t.e,22,'rsi_'+t.id)+' <b>'+t.n+'</b>'+(done?' ✓':'')+'<div class="sm">'+t.d+'</div>'+(done||cu?(cu?'<div class="sm">⏳ Судлагдаж байна</div>':''):'<div class="sm">'+(lockA?'🔒 '+AGES[t.age].n+'-д нээгдэнэ (гол гэр '+AGES[t.age].min+')':blk?'🔒 Өмнөхийг судал':costTxt(cs)+' · '+fmtT(rsSecs(t)))+'</div>')+'</div>'+(done||cu||lockA||blk?'':'<button class="btn" '+(free?'':'disabled')+' onclick="rsStart(\''+t.id+'\')">Судлах</button>')+'</div>'; };
+      ch.forEach(t=>{ h+=row(t); });
+      if(sp.length){ h+='<div class="sm" style="margin-top:10px;color:#ffd770">✨ Нэмэлт судалгаа · дарааллаас хамаарахгүй</div>'; sp.forEach(t=>{ h+=row(t); }); }
+      h+='</div>'; });
+    return h;
+  };
+
+  /* ---------- 5) Ялалтын тоо шинэ судалгаатай таарна ---------- */
+  const _vp=vicProg;
+  vicProg=function(){
+    const a=_vp(), T=k=>TECH.filter(t=>t.b===k&&S.rs.done[t.id]).length, N=k=>TECH.filter(t=>t.b===k).length;
+    a.forEach(x=>{
+      if(x.k==='e'){ x.v=(S.hk||0)+T('e'); x.t=5+N('e'); x.d='Хархорумын 5 шат + эдийн засгийн '+N('e')+' судалгаа'; }
+      if(x.k==='c'){ x.v=T('e')+T('m')+T('c'); x.t=TECH.length; x.d='Бүх '+TECH.length+' судалгаа'; }
+    });
+    return a;
   };
 })();
 

@@ -7004,8 +7004,7 @@ function colAllUpd(){ const b=document.getElementById('colall'); if(!b) return; 
   b.style.display=(n>=2&&!busy)?'flex':'none'; b.querySelector('b').textContent=n; }
 (function(){ const st=document.createElement('style'); st.textContent='#colall{position:fixed;right:10px;bottom:215px;z-index:3;display:none;align-items:center;gap:6px;background:linear-gradient(#f0c24a,#b97d12);border:2px solid #f6e3a0;color:#3b2200;font-weight:900;border-radius:12px;padding:6px 10px;font-size:14px;box-shadow:0 3px 10px #0008}#colall b{background:#d33;color:#fff;border-radius:9px;padding:0 6px;font-size:12px}';
   document.head.appendChild(st);
-  const b=document.createElement('button'); b.id='colall'; b.innerHTML='🧺 Бүгдийг авах <b>0</b>'; b.onclick=colAll; document.body.appendChild(b);
-  setInterval(colAllUpd,700); })();
+  const b=document.createElement('button'); b.id='colall'; b.innerHTML='🧺 Бүгдийг авах <b>0</b>'; b.onclick=colAll; })();
 
 
 /* p32/btrot.js — 174: тулааны үед утсыг эргүүлэхэд (босоо ↔ хэвтээ) дүрс сунахаас сэргийлнэ.

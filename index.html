@@ -6919,6 +6919,33 @@ wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s
   cwOpen=function(){ _co(); try{ if(typeof ckKickPoll==='function') ckKickPoll(); }catch(e){} };
 })();
 
+
+/* p32/btrot.js — 174: тулааны үед утсыг эргүүлэхэд (босоо ↔ хэвтээ) дүрс сунахаас сэргийлнэ.
+   Canvas-ийн дотоод хэмжээг (W,H,dp) шинэ дэлгэцийн харьцаагаар дахин тооцож, нэгжүүдийн байрыг шилжүүлнэ. */
+function btResize(){
+  try{
+    if(typeof BT==='undefined'||!BT||!BT.ctx) return;
+    const el=document.getElementById('btl'), cv=document.getElementById('bc'); if(!el||!cv) return;
+    const BW=el.clientWidth||innerWidth, BH=el.clientHeight||innerHeight; if(!BW||!BH) return;
+    const port=BH>BW, VW=port?380:Math.max(560,Math.min(BW,820)), SC=BW/VW, W2=VW, H2=BH/SC;
+    if(Math.abs(W2-BT.W)<1&&Math.abs(H2-BT.H)<1) return;
+    const fx=W2/BT.W, fy=H2/BT.H, dp=Math.min(3,(devicePixelRatio||1)*SC);
+    const sc=(o,ks,k)=>{ ks.forEach(n=>{ if(typeof o[n]==='number') o[n]*=k; }); };
+    BT.W=W2; BT.H=H2; BT.dp=dp; cv.width=Math.round(W2*dp); cv.height=Math.round(H2*dp); BT.bg=null;
+    if(BT.wait&&!BT.vs&&typeof btLayout==='function'){
+      btLayout(BT.units,W2,H2,BT.e); BT.units.forEach(u=>{ u.hx=u.x; u.hy=u.y; u.sx=u.x; u.sy=u.y; });
+    } else {
+      (BT.units||[]).forEach(u=>{ sc(u,['x','hx','sx','ox'],fx); sc(u,['y','hy','sy','oy'],fy); });
+    }
+    (BT.fx||[]).forEach(o=>{ sc(o,['x0','x1','x'],fx); sc(o,['y0','y1','y'],fy); });
+    (BT.dm||[]).forEach(o=>{ sc(o,['x'],fx); sc(o,['y'],fy); });
+    (BT.pt||[]).forEach(o=>{ if(o&&typeof o==='object'){ sc(o,['x'],fx); sc(o,['y'],fy); } });
+  }catch(e){}
+}
+addEventListener('resize',()=>{ btResize(); setTimeout(btResize,250); });
+addEventListener('orientationchange',()=>{ setTimeout(btResize,120); setTimeout(btResize,500); });
+setInterval(btResize,500);
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

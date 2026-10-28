@@ -437,12 +437,12 @@ function questsHTML(){
   dqInit(); const c=chCur(); let h='<h2>Даалгавар</h2>';
   if(c){ const dn=chDone(c);
     h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico(c.ic,48)+'<div><h3>'+c.n+'</h3><div class="sm">Шагнал: '+c.r.gold+' 🪙 · '+c.r.alt+' Алт</div></div></div></div>'+
-      c.t.map(i=>'<div class="tk" style="margin-top:4px">'+(TASKS[i].ok()?'✅ ':'⬜ ')+TASKS[i].t+'</div>').join('')+
+      c.t.map(i=>TASKS[i].ok()?'<div class="tk" style="margin-top:4px">✅ '+TASKS[i].t+'</div>':'<div class="tk" onclick="taskGo('+i+')" style="margin-top:4px;cursor:pointer;background:#ffffff14;border:1px solid #ffd77066;border-radius:8px;padding:7px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px"><span>⬜ '+TASKS[i].t+'</span><span style="color:#ffd770;font-weight:bold;white-space:nowrap">Очих ›</span></div>').join('')+
       (dn?'<button class="btn" style="margin-top:8px;width:100%" onclick="claimChap()">Шагнал авах</button>':'')+'</div>';
   } else h+='<div class="card">'+ico('q_chestopen',48)+'<div class="sm">Бүх бүлэг дууссан. Удахгүй шинэ бүлэг нэмэгдэнэ.</div></div>';
   h+='<div class="card"><h3>Өдрийн даалгавар</h3><div class="sm">Өдөр бүр шинэчлэгдэнэ</div>';
   for(const q of DQ){ const v=Math.min(q.g,S.dq.c[q.k]||0), ok=v>=q.g, cl=S.dq.cl[q.k];
-    h+='<div class="row" style="margin-top:8px"><div style="display:flex;gap:8px;align-items:center;flex:1">'+'<img src="'+PIC[({col:5,ord:7,up:2,win:0,sell:6})[q.k]||0]+'" style="width:36px;height:36px;flex:none">'+'<div style="flex:1"><div style="font-size:13px">'+q.n+' <span class="sm">'+v+'/'+q.g+'</span></div><div class="hb"><i style="width:'+(v/q.g*100)+'%;background:#6ab0ff"></i></div></div></div>'+
+    h+='<div class="row" style="margin-top:8px"><div style="display:flex;gap:8px;align-items:center;flex:1">'+'<img src="'+PIC[({col:5,ord:7,up:2,win:0,sell:6})[q.k]||0]+'" style="width:36px;height:36px;flex:none">'+'<div style="flex:1"><div style="font-size:13px;cursor:pointer" onclick="dqGo(\''+q.k+'\')">'+q.n+' › <span class="sm">'+v+'/'+q.g+'</span></div><div class="hb"><i style="width:'+(v/q.g*100)+'%;background:#6ab0ff"></i></div></div></div>'+
       (cl?'<span class="sm">✓</span>':'<button class="btn" '+(ok?'':'disabled')+' onclick="dqClaim(\''+q.k+'\')">'+q.r.gold+' 🪙</button>')+'</div>'; }
   const all=DQ.every(q=>S.dq.cl[q.k]);
   h+='<div style="text-align:center;margin-top:10px">'+ico(S.dq.box?'q_chestopen':'q_chest',56)+'<div class="sm">'+(S.dq.box?'Сав нээгдсэн':'5 даалгавар дуусгавал сав нээгдэнэ')+'</div>'+(all&&!S.dq.box?'<button class="btn" onclick="dqBox()">Сав нээх</button>':'')+'</div></div>';
@@ -2026,7 +2026,7 @@ function updateHUD(){
   $('trb').style.display=S.won>0?'block':'none';
   { const c=chCur(); let th, cmpH=false;
     if(!c) th=advHTML();
-    else { const op=c.t.filter(i=>!TASKS[i].ok()).slice(0,3); th='<div class="ph" style="display:flex;align-items:center;gap:4px">'+ico(c.ic,22)+c.n.split(' · ')[0]+'</div>'+(op.length?op.map(i=>'<div class="tk">☐ '+TASKS[i].t+'</div>').join(''):'<div class="tk" style="color:#ffd770">✔ Шагнал авах!</div>'); }
+    else { const op=c.t.filter(i=>!TASKS[i].ok()).slice(0,3); th='<div class="ph" style="display:flex;align-items:center;gap:4px">'+ico(c.ic,22)+c.n.split(' · ')[0]+'</div>'+(op.length?op.map(i=>'<div class="tk" onclick="event.stopPropagation();taskGo('+i+')" style="padding:2px 0">☐ '+TASKS[i].t+'</div>').join(''):'<div class="tk" style="color:#ffd770">✔ Шагнал авах!</div>'); }
     let hi=-1, ht=''; if(c){ const o=c.t.find(i=>!TASKS[i].ok()); if(o!=null){ hi=TH[o]!=null?TH[o]:-1; cmpH=o>=10&&o<=12; if(cmpH) hi=-1; ht=o===0?'👉 Тоглоомын дунд явж буй өвгөнийг дар':cmpH?'👉 Зүүн талын «Түүхэн аян» товчийг дар':o===9?'👉 «Барилга» → «Гол гэр» картыг дар':hi>=0?'👉 Доорх «'+TM[hi]+'» товчийг дар':''; } else { ht='👉 Энд дарж шагнал ав'; } }
     if(ht) th+='<div class="tk" style="color:#ffd770;margin-top:3px">'+ht+'</div>';
     document.querySelectorAll('#menu button').forEach((b,i)=>b.classList.toggle('hint',i===hi||(i===4&&Date.now()<(window.SELLH||0)))); document.querySelectorAll('#lcol button').forEach(b=>b.classList.toggle('hint',cmpH&&/openM\('camp'\)/.test(b.getAttribute('onclick')||'')));
@@ -8226,6 +8226,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     if(o>=10) return [T,'Зүүн талын «Түүхэн аян» товчийг дар.'];
     return [T,''];
   }
+  window.taskHow=how;
   function coachTxt(){
     if(!S.met) return ['Мөнлиг өвгөнийг дар','Тоглоомын дунд явж буй хүн. 👇 заасан байгаа.'];
     const col=(S.st&&S.st.col)||0;
@@ -8260,9 +8261,14 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   /* ---------- 4) Цэс доторх заасан карт/товч шар гэрлээр анивчина + баригдаж буй барилга ---------- */
   const CARD={hashaa:'Малын хашаа',tarialan:'Тариалан',market:'Зах',horgo:'Хорго',hureo:'Цэргийн хүрээ'}, TABK={hureo:'army'};
   function tgTarget(){
-    if(!S||!S.tutDone||S.coachOff||(S.chap||0)>=2||!S.met) return null;
-    const c=chCur(); if(!c||chDone(c)) return null;
-    const o=c.t.find(i=>!TASKS[i].ok()); if(o==null) return null;
+    let o=null;
+    if(window.TGO!=null&&Date.now()<(window.TGT||0)&&TASKS[window.TGO]&&!TASKS[window.TGO].ok()&&S&&S.tutDone&&S.met) o=window.TGO;
+    else {
+      window.TGO=null;
+      if(!S||!S.tutDone||S.coachOff||(S.chap||0)>=2||!S.met) return null;
+      const c=chCur(); if(!c||chDone(c)) return null;
+      o=c.t.find(i=>!TASKS[i].ok()); if(o==null) return null;
+    }
     const k=KEY[o];
     if(k){
       if(S.sites&&S.sites[k]) return {site:k};
@@ -8652,6 +8658,52 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
       const done=()=>{ try{ say('Хаяг хуулагдлаа: talnutgiinhaan.com'); }catch(e){} };
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text+' '+url).then(done,()=>{ try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }); }
       else { try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }
+    }catch(e){}
+  };
+})();
+
+
+/* p32/taskgo.js — 199: даалгавар дээр дарахад хийх газар руу аваачна */
+(function(){
+  const TABK={hureo:'army'}, KEY={1:'hashaa',3:'tarialan',4:'market',5:'horgo',6:'hureo'};
+  function camTo(x,y){ try{ cam.x=x-(W/Z)/2; cam.y=y-(H/Z)/2; clampCam(); }catch(e){} }
+  function msg(i){ try{ const h=window.taskHow&&window.taskHow(i); if(h) say('👉 '+h[0]+(h[1]?' · '+h[1]:'')); }catch(e){} }
+  window.taskGo=function(i){
+    try{
+      if(TASKS[i].ok()){ say('✅ Энэ даалгавар хийгдсэн'); return; }
+      if((i===7||i===8)&&(S.bld.hureo||0)<1) i=6;
+      if(i===8&&!Object.keys(S.heroes||{}).length) i=7;
+      window.TGO=i; window.TGT=Date.now()+120000;
+      try{ closeM(); }catch(e){}
+      const k=KEY[i];
+      if(i===0){
+        const e=(ents||[]).find(x=>x.kind==='person'&&x.idx===0);
+        if(e) camTo(e.x,e.y); say('👉 Мөнлиг өвгөнийг дар');
+        return;
+      }
+      if(k&&S.sites&&S.sites[k]){
+        const r=brect(k); if(r) camTo(r.x+r.w/2,r.y+r.sh/2);
+        say('👉 Ажилчин барьж байна. Хүлээнэ үү.'); return;
+      }
+      if(k||i===9){
+        const need=k?((typeof BREQ!=='undefined'&&BREQ[k])||1):0;
+        try{ bTab=(k&&(S.bld.ger||1)>=need&&TABK[k])||'life'; }catch(e){}
+        openM('barilga'); msg(i); return;
+      }
+      if(i===2){ openM('mal'); msg(i); return; }
+      if(i===7){ openM('baatar'); msg(i); return; }
+      if(i===8){ openM('dain'); msg(i); return; }
+      if(i>=10){ openM('camp'); say('👉 Аймгаа сонгоод тулалд'); return; }
+    }catch(e){}
+  };
+  window.dqGo=function(k){
+    try{
+      closeM();
+      if(k==='col'){ say('👉 Хашаан дээр гарсан бөмбөлгийг дар'); return; }
+      if(k==='ord'){ openM('orders'); return; }
+      if(k==='up'){ openM('barilga'); say('👉 Сайжруулах барилгаа сонго'); return; }
+      if(k==='win'){ openM('dain'); return; }
+      if(k==='sell'){ openM('agh'); return; }
     }catch(e){}
   };
 })();

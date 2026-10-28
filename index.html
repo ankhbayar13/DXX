@@ -8324,6 +8324,105 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   }catch(e){}
 })();
 
+
+/* p32/npcbar.js — 194: хүн дарахад гарах доод цэс: олон ажил (Мод, Ан, Тариалан, Барих, Манаач, Онцлог, Ярих) + тоглоомын гоёмсог хүрээ */
+(function(){
+  /* ---------- 1) Хүрээ: цэсний (modal) гоёмсог хүрээг доод самбарт бас хэрэглэнэ ---------- */
+  function frameInit(){
+    try{
+      const bx=document.querySelector('#modal .box'); if(!bx) return false;
+      const src=getComputedStyle(bx).borderImageSource; if(!src||src==='none') return false;
+      const st=document.createElement('style'); st.id='npcbarcss';
+      st.textContent='#bar{background:none!important;border:15px solid transparent!important;border-image-source:'+src+'!important;border-image-slice:120 fill!important;border-image-width:15px!important;border-image-repeat:stretch!important;border-radius:0!important;box-shadow:none!important;padding:0 3px 3px!important;color:#ffe9b0}'+
+        '#bar.jobs .btn{flex:1 1 calc(25% - 6px)!important;padding:6px 1px!important;font-size:12.5px!important}'+
+        '#bar.jobs .btn{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.1!important;font-size:11.5px!important;overflow:hidden;white-space:nowrap}#bar.jobs .btn .emj{height:22px!important;width:auto!important;margin:0!important}'+
+        '#bar.jobs span{font-size:13px;line-height:1.3}#bar.jobs span b{color:#ffd770;font-size:15px}'+
+        '#chat .kP{background:none!important;border:16px solid transparent!important;border-image-source:'+src+'!important;border-image-slice:120 fill!important;border-image-width:16px!important;border-image-repeat:stretch!important;border-radius:0!important;box-shadow:none!important}'+
+        '#chat .kH{background:none!important;border-bottom:1px solid #c9972b66!important}#chat .kF{border-top:1px solid #c9972b66!important}'+
+        '#tasks.panel{background:none!important;border:14px solid transparent!important;border-image-source:'+src+'!important;border-image-slice:120 fill!important;border-image-width:14px!important;border-image-repeat:stretch!important;border-radius:0!important;box-shadow:none!important;padding:0 2px 2px!important}';
+      document.head.appendChild(st); return true;
+    }catch(e){ return false; }
+  }
+  if(!frameInit()){ let n=0; const iv=setInterval(()=>{ if(frameInit()||++n>20) clearInterval(iv); },700); }
+  const _sb=showBar;
+  showBar=function(msg,btns){ _sb.apply(this,arguments); try{ $('bar').classList.toggle('jobs',!!window.NBJOBS); }catch(e){} window.NBJOBS=0; };
+
+  /* ---------- 2) Ажлууд ---------- */
+  const spotAt=(e,k)=>{ const r=brect(k); if(!r) return null; const jx=((e.idx||0)%5-2)*9; return {x:r.x+r.w/2-entCx(e)+jx,y:r.y+r.sh+4-entH(e)}; };
+  const nearestK=(e,keys)=>{ let b=null,bd=1e9; keys.forEach(k=>{ if(!S.pos||!S.pos[k]||S.sites[k]) return; const r=brect(k), d=Math.hypot(r.x+r.w/2-e.x,r.y+r.sh-e.y); if(d<bd){ bd=d; b=k; } }); return b; };
+  function post(e,x,y,ic,txt,sec){
+    giveTask(e,{type:'move',x:x,y:y,phase:'go',t:0});
+    e.post={ic:ic,until:Date.now()+(sec||60)*1000}; if(txt) e.say={t:txt,ttl:2.6,delay:0};
+  }
+  function jobFarm(e){ const ks=BKEYS.filter(k=>isFarmK(k)&&S.bld[k]>0); const k=nearestK(e,ks); if(!k){ say('Тариалан байхгүй. «Барилга» цэснээс бариарай'); return false; } const sp=spotAt(e,k); giveTask(e,{type:'farm',x:sp.x,y:sp.y,phase:'go',t:0}); return true; }
+  function jobBuild(e){ const ks=Object.keys(S.sites||{}).filter(k=>S.pos[k]); const k=nearestK0(e,ks); if(!k){ say('Баригдаж буй барилга алга'); return false; } const sp=spotAt(e,k); giveTask(e,{type:'build',k:k,x:sp.x,y:sp.y,phase:'go',t:0}); return true; }
+  function nearestK0(e,keys){ let b=null,bd=1e9; keys.forEach(k=>{ const r=brect(k); if(!r) return; const d=Math.hypot(r.x+r.w/2-e.x,r.y+r.sh-e.y); if(d<bd){ bd=d; b=k; } }); return b; }
+  function jobGuard(e){ const k=nearestK(e,['ger','ger2','ger3','ger4','ger5']); if(!k){ say('Гэр байхгүй'); return false; } const sp=spotAt(e,k); post(e,sp.x+14,sp.y+6,'🛡','Харуулд зогслоо!',90); return true; }
+
+  /* дүр бүрийн онцлог ажил */
+  const SPEC={
+    0:{lab:'Зөвлөх',ic:'🧓',k:['ger','ger2','ger3','ger4','ger5'],say:'Ард түмнээ сонсъё.'},
+    1:{lab:'Саах',ic:'🥛',k:['hashaa'],say:'Мал саая!'},
+    2:{lab:'Тариалах',ic:'🌾',kind:'farm'},
+    3:{lab:'Эсгий',ic:'🧶',k:['esgii','mahcex','ger'],say:'Эсгий хийе!'},
+    4:{lab:'Мод',ic:'🪓',kind:'wood'},
+    5:{lab:'Дархлах',ic:'🔥',k:['mahcex','smith','hureo'],say:'Мах, төмөр бэлдье!'},
+    6:{lab:'Эмчлэх',ic:'💊',k:['healer','ger'],say:'Өвчтөн байна уу?'},
+    7:{lab:'Хоол',ic:'🍲',k:['buuz','tos','ger'],say:'Бууз чихье!'},
+    8:{lab:'Хариулах',ic:'🐑',k:['hashaa'],say:'Хонио хариулъя!'},
+    9:{lab:'Цэцэг',ic:'🌸',kind:'meadow',say:'Цэцэг түүе!'},
+    10:{lab:'Наймаа',ic:'💰',k:['market'],say:'Наймаа хийе!'},
+    11:{lab:'Ан',ic:'🏹',kind:'hunt'}
+  };
+  function jobSpec(e){
+    const sp=SPEC[e.idx]; if(!sp){ say('Онцлог ажил алга'); return false; }
+    if(sp.kind==='farm') return jobFarm(e);
+    if(sp.kind==='wood'){ const tr=nearestTree(e); if(!tr){ say('Ойр мод алга. Шинэ газар нээгээрэй.'); return false; } giveTask(e,woodTask(e,tr)); return true; }
+    if(sp.kind==='hunt'){ const pr=nearestPrey(e); if(!pr){ say('Ан амьтан олдсонгүй.'); return false; } giveTask(e,{type:'hunt',tg:pr,x:pr.x,y:pr.y,phase:'go',t:0}); return true; }
+    if(sp.kind==='meadow'){ const g=(S.pos.ger||{x:e.x,y:e.y}); const a=Math.random()*6.283, r=70+Math.random()*60; post(e,Math.max(12,Math.min(WW-20,g.x+Math.cos(a)*r)),Math.max(60,Math.min(WH-20,g.y+Math.sin(a)*r*0.6+40)),sp.ic,sp.say,45); return true; }
+    const k=nearestK(e,sp.k||[]); if(!k){ say('Тохирох барилга алга'); return false; }
+    const s=spotAt(e,k); post(e,s.x,s.y,sp.ic,sp.say,60); return true;
+  }
+  window.nbJob=function(kind){
+    const e=sel; if(!e) return;
+    if(e.type==='dog'){ say('Нохой зөвхөн явна'); return; }
+    let ok=false;
+    try{ ok=kind==='farm'?jobFarm(e):kind==='build'?jobBuild(e):kind==='guard'?jobGuard(e):kind==='spec'?jobSpec(e):false; }catch(x){ ok=false; }
+    if(ok) deselect();
+  };
+
+  /* ---------- 3) Тогтсон хугацаанд байрандаа зогсоно ---------- */
+  const _upp=updPerson;
+  updPerson=function(e,dt){
+    const P=e.post;
+    if(P){
+      const t=e.task;
+      if(e.sel||Date.now()>P.until){ if(e.icon===P.ic) e.icon=null; if(t&&t.type==='hold') e.task=null; e.post=null; }
+      else if(t&&t.type==='hold'){ e.moving=false; e.icon=P.ic; return; }
+      else {
+        const r=_upp.apply(this,arguments);
+        if(!e.task&&e.post&&!e.sel){ e.task={type:'hold',phase:'work',t:0}; e.moving=false; e.icon=P.ic; }
+        return r;
+      }
+    }
+    return _upp.apply(this,arguments);
+  };
+
+  /* ---------- 4) Хүн сонгоход гарах самбар ---------- */
+  const _sel=select;
+  select=function(e){
+    _sel.apply(this,arguments);
+    try{
+      if(!e||e.kind!=='person') return;
+      const N=NPCS[e.idx]||{}, sp=SPEC[e.idx];
+      window.NBJOBS=1;
+      showBar('<b>'+(N.n||'')+'</b> · '+(N.role||'')+'<br><span style="font-size:11px">Ажлаа сонго, эсвэл газар, мод, ан дээр дар</span>',[
+        ['🪓 Мод',"quickTask('wood')"],['🏹 Ан',"quickTask('hunt')"],['🌾 Тариалан',"nbJob('farm')"],['🔨 Барих',"nbJob('build')"],
+        ['🛡 Манаач',"nbJob('guard')"],[sp?(sp.ic+' '+sp.lab):'⭐ Онцлог',"nbJob('spec')"],['💬 Ярих','talkSel()'],['✕','deselect()','red']]);
+    }catch(x){}
+  };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

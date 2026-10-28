@@ -211,6 +211,21 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
  document.addEventListener('visibilitychange',function(){ if(done) return; if(document.hidden) a.pause(); else tp(); });
  window.DXX_SPLSTOP=function(){ if(done) return; done=1; h.style.display='none'; var v=a.volume, n=0, t=setInterval(function(){ n++; a.volume=Math.max(0,v*(1-n/8)); if(n>=8){ clearInterval(t); try{ a.pause(); }catch(e){} } },80); };
 })();</script>
+<script>(function(){ var ua=navigator.userAgent||''; if(!/FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|\bLine\/|MicroMessenger|Snapchat|TikTok/i.test(ua)) return;
+ try{ if(sessionStorage.getItem('dxx_iab')==='1') return; }catch(e){}
+ var android=/Android/i.test(ua), url=location.href.split('#')[0];
+ var d=document.createElement('div'); d.id='dxxiab';
+ d.style.cssText='position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:99997;background:#1b120aee;color:#ffe9b0;border:1px solid #ffd770;border-radius:12px;padding:9px 34px 9px 11px;font:13px/1.4 sans-serif;box-shadow:0 4px 14px #000a';
+ var h='<b style="color:#ffd770">⚠ Энд удаан, гацдаг.</b> '+(android?'Доорх товчоор Chrome-д нээгээрэй.':'Баруун дээд буланд ⋯ цэс → «Safari-д нээх» гэж дарна уу.')+'<div style="margin-top:3px;font-size:12px;opacity:.85">Дараа нь «Нүүр дэлгэцэнд нэмэх» гэж хийвэл апп шиг хурдан нээгдэнэ.</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">';
+ if(android) h+='<a href="intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end" style="background:#2f7d3a;color:#fff;border-radius:8px;padding:6px 11px;font-weight:bold;text-decoration:none">Chrome-д нээх</a>';
+ h+='<button id="dxxiabc" style="background:#3b2a16;color:#ffe9b0;border:1px solid #7a5a18;border-radius:8px;padding:6px 11px;font:bold 13px sans-serif">Линк хуулах</button></div><button id="dxxiabx" aria-label="x" style="position:absolute;right:4px;top:2px;background:none;border:0;color:#ffe9b0;font-size:22px;padding:4px 8px">×</button>';
+ d.innerHTML=h;
+ function add(){ document.body.appendChild(d);
+  document.getElementById('dxxiabx').onclick=function(){ d.remove(); try{ sessionStorage.setItem('dxx_iab','1'); }catch(e){} };
+  document.getElementById('dxxiabc').onclick=function(){ var b=this, ok=function(){ b.textContent='Хуулсан ✓'; };
+   try{ navigator.clipboard.writeText(url).then(ok,function(){ var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); ok(); }catch(e){} t.remove(); }); }catch(e){ var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); ok(); }catch(_){} t.remove(); } }; }
+ if(document.body) add(); else document.addEventListener('DOMContentLoaded',add);
+})();</script>
 <canvas id="cv"></canvas>
 <div id="res"></div>
 <div id="pcard"><div class="av" onclick="openM(&#39;profile&#39;)"><img id="avi"><b id="plv">1</b></div><div class="pi"><div class="pl pn" id="pname">Хаан</div><div class="pl">⚔ <b id="pw">0</b></div><div class="pl">🐑 <b id="pherd">0</b><div class="hb"><i id="pbar"></i></div></div></div></div>
@@ -225,6 +240,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#2b1d12;color:#f3e6c8;
 <div id="modal"><div class="box"><button class="x" onclick="closeM()">✕</button><div id="mbody"></div></div></div>
 <div id="msg" class="msg"></div>
 
+<script>(function(){ var of=window.fetch,q=[],open=0;
+ if(!of) return;
+ window.DXXGATE=function(){ if(open) return; open=1; var a=q.splice(0); a.forEach(function(f){ try{ f(); }catch(e){} }); };
+ window.fetch=function(u,o){ var s=''; try{ s=String(u&&u.url||u); }catch(e){}
+  if(!open&&/(\.bin|\/e\d\.js|^e\d\.js)(\?|$)/.test(s)&&s.indexOf('bld2')<0) return new Promise(function(res,rej){ q.push(function(){ of.call(window,u,o).then(res,rej); }); });
+  return of.apply(this,arguments); };
+ setTimeout(window.DXXGATE,20000);
+})();</script>
 <script src="d1.js?v=85f00b08"></script>
 <script>(function(){ var m=[]; try{ if(typeof SPRDATA==='undefined'||!SPRDATA.b_meat) m.push('d1'); }catch(e){ m.push('d?'); }
  if(!m.length) return; window.DXX_MISSING=m; var d=document.createElement('div'); d.id='dxxmiss'; d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#1b120a;color:#ffe9b0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px sans-serif;text-align:center;padding:24px';
@@ -4849,7 +4872,7 @@ function bldLoad(){
     fetch('bld2.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
       const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
       hd.forEach(x=>{ const u=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})), im=new Image(); im.src=u; SPRDATA[x[0]]=[u,x[3],x[4]]; SPR[x[0]]={img:im,iw:x[3],ih:x[4]}; });
-      bldApply(); BLST=3;
+      bldApply(); BLST=3; try{ window.DXXGATE&&DXXGATE(); }catch(e){}
     }).catch(()=>{ BLST=2; window.BLT=Date.now(); });
   }catch(e){ BLST=2; window.BLT=Date.now(); }
 }
@@ -8169,7 +8192,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
 
 <script>
 (function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');document.getElementById('ld').className='';
-var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100&&window.BLST!==3&&(Date.now()-(window.DXXT0||(window.DXXT0=Date.now())))<45000){p=96;}else if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
+var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100&&window.BLST!==3&&(Date.now()-(window.DXXT0||(window.DXXT0=Date.now())))<30000){p=96;}else if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
 i.style.width=p+'%';x.textContent=t[Math.min(3,p/26|0)];},260);
 document.getElementById('goBtn').onclick=function(){try{window.DXX_SPLSTOP&&DXX_SPLSTOP();}catch(e){}var s=document.getElementById('splash');s.classList.add('off');setTimeout(function(){s.remove()},600);};
 

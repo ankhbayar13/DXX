@@ -5840,7 +5840,7 @@ wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=
   CLN.forEach((q,i)=>{ if(!vis(q.x,q.y,320)) return; const isMy=i===my, isOp=i===op, s=ok?wmS('wm_hq'+i):null, ww=s?(isMy||isOp?0.85:0.78)*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
     items.push({y:1e5+qy,f:()=>{ c.save(); c.globalAlpha=isMy||isOp?0.9:0.6; wmLabel(c,(isMy?'⚑ ':isOp?'⚔ ':'')+q.n+' клан'+(wmTerr()&&wmTerr().z===i?(wmTerr().win?' 🏴 эзэмшил':' ⚠ эзлэгдсэн'):''),qx,qy-(s?hh*0.86:(isMy?78:44)),isMy?'#ffe28a':isOp?'#ff9a8a':'#fff',isMy||isOp?20:17); c.restore(); }});
     items.push({y:qy,f:()=>{ if(s){ c.drawImage(s.img,qx-ww/2,qy-hh*0.88,ww,hh); } else if(!isMy){ c.fillStyle=q.c; c.fillRect(q.x-1.5,q.y-46,3,48); c.beginPath(); c.moveTo(q.x+1.5,q.y-46); c.lineTo(q.x+26,q.y-38); c.lineTo(q.x+1.5,q.y-30); c.fill(); } }}); });
-  const rows=CWD.w===w?CWD.my:[]; rows.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{ const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
+  const rows=CWD.w===w?CWD.my:[]; rows.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{ const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), mp=(typeof WMMP!=='undefined')&&WMMP[x.id], px=mp?mp.x:D.C.x+Math.cos(a)*rad, py=mp?mp.y:D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
     items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmGerIdx(x)):null; if(s){ const ww=0.27*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
   wmCwEnts().forEach(e=>{ if(!vis(e.x,e.y,70)) return; const cd=wmCd(e.id);
     items.push({y:e.y,f:()=>{ const s=ok?wmS('wm_hm'+wmGerIdx(e)):null, imm=e.real&&e.uid&&CWD.rd&&CWD.rd[e.uid]&&now-CWD.rd[e.uid]<WM_HR; c.globalAlpha=cd?0.45:1; let hh=44;
@@ -7680,9 +7680,18 @@ function jamBtnUpd(){
   setInterval(jamBtnUpd,800); })();
 
 
+var WMMP={}, WMMK='';
+// давхцахгүй байрлуулалт: pts=[{id,x,y}] (эхний байрлал), fixed=[{x,y,w,h}] хориотой хэсэг
+function wmSpread(pts,fixed,cx,cy,ky,DX,DY){
+  const placed=[], bad=(x,y)=>placed.some(p=>Math.abs(p.x-x)<DX&&Math.abs(p.y-y)<DY)||fixed.some(f=>Math.abs(f.x-x)<f.w&&Math.abs(f.y-y)<f.h);
+  pts.forEach(p=>{ let x=p.x, y=p.y;
+    if(bad(x,y)){ const a0=Math.atan2((p.y-cy)/ky,p.x-cx), r0=Math.hypot(p.x-cx,(p.y-cy)/ky); let ok=0;
+      for(let k=1;k<=60&&!ok;k++){ const sg=k%2?1:-1, da=Math.ceil(k/2)*0.32*sg, rr=r0+Math.floor((k-1)/6)*45, nx=Math.max(80,Math.min(WM_W-80,cx+Math.cos(a0+da)*rr)), ny=Math.max(120,Math.min(WM_H-80,cy+Math.sin(a0+da)*rr*ky)); if(!bad(nx,ny)){ x=nx; y=ny; ok=1; } } }
+    p.x=x; p.y=y; placed.push({x:x,y:y}); });
+}
 /* 182: газрын зураг дээр кланы гишүүдийн гэр — кланы жагсаалттай нэгтгэж, хассан гишүүнийг нууна */
 (function(){
-  const _ce=wmCwEnts; wmCwEnts=function(){ const r=_ce.apply(this,arguments); try{ const mp={}; (CWD.op||[]).forEach(x=>{ mp[x.id]=x; }); r.forEach(e=>{ if(e.real&&e.uid&&e.gl==null){ const x=mp[e.uid]; e.gl=(x&&x.v&&x.v.b&&x.v.b.ger)||0; } }); }catch(e){} return r; };
+  const _ce=wmCwEnts; wmCwEnts=function(){ const r=_ce.apply(this,arguments); try{ if(r.length&&!r._sp){ r._sp=1; const z=CLN[wmOpp(wmClanId(),wmWeek())]; if(z){ const pts=r.map(e=>({id:e.id,x:e.x,y:e.y,e:e})); wmSpread(pts,[{x:z.x,y:z.y,w:260,h:150}],z.x,z.y,0.8,110,72); pts.forEach(p=>{ p.e.x=p.x; p.e.y=p.y; }); } } }catch(e){} try{ const mp={}; (CWD.op||[]).forEach(x=>{ mp[x.id]=x; }); r.forEach(e=>{ if(e.real&&e.uid&&e.gl==null){ const x=mp[e.uid]; e.gl=(x&&x.v&&x.v.b&&x.v.b.ger)||0; } }); }catch(e){} return r; };
   const _d=wmClanDraw;
   wmClanDraw=function(c,D,z,t,vis,items){
     const k=wmClanId(), sv=CWD.my, sw=CWD.w; let m=null;
@@ -7695,14 +7704,18 @@ function jamBtnUpd(){
         out.sort((a,b)=>(b.p||0)-(a.p||0)); m=out;
       }
     }catch(e){ m=null; }
-    if(m){ CWD.my=m; CWD.w=wmWeek(); }
+    if(m){ CWD.my=m; CWD.w=wmWeek();
+      try{ const me=(typeof CL!=='undefined'&&CL.uid)||'', set=m.filter(x=>x.id!==me).slice(0,14), key=set.map(x=>x.id).sort().join(',')+'|'+Math.round(D.C.x)+','+Math.round(D.C.y)+'|'+k;
+        if(key!==WMMK){ WMMK=key; const pts=set.map(x=>x.id).sort().map(id=>{ const h=hsh(String(id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130); return {id:id,x:D.C.x+Math.cos(a)*rad,y:D.C.y+Math.sin(a)*rad*0.75}; });
+          const fx=[{x:D.C.x,y:D.C.y,w:150,h:95}]; try{ (D.camps||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:90,h:70})); (D.nodes||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:70,h:60})); (D.chests||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:60,h:60})); wmYams().forEach(n=>fx.push({x:n.x,y:n.y,w:80,h:60})); }catch(e){} try{ const q=CLN[k]; if(q) fx.push({x:q.x-170,y:q.y-110,w:230,h:150}); }catch(e){}
+          wmSpread(pts,fx,D.C.x,D.C.y,0.75,100,88); WMMP={}; pts.forEach(p=>{ WMMP[p.id]={x:p.x,y:p.y}; }); } }catch(e){} }
     try{
       const r=_d.apply(this,arguments);
       // гишүүдийн гэрт хамгаалалтын бурхуул (идэвхтэй байдлаар)
       try{ if(m&&WMT.ok){ const now=wmNow(); m.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{
         const act=Math.max(0,(now-(x.t||0))/3600e3); if(act>=24) return;
-        const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
-        items.push({y:py+1,f:()=>{ wmDome(c,px,py,act<12?0:1,t,0.24); if(act<12) wmLabel(c,'🛡 Хамгаалалттай',px,py+35,'#9fd0ff',9); }}); }); } }catch(e){}
+        const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), mp=WMMP[x.id], px=mp?mp.x:D.C.x+Math.cos(a)*rad, py=mp?mp.y:D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
+        items.push({y:py+1,f:()=>{ wmDome(c,px,py,act<12?0:1,t,0.17); if(act<12) wmLabel(c,'🛡 Хамгаалалттай',px,py+35,'#9fd0ff',9); }}); }); } }catch(e){}
       return r;
     } finally{ CWD.my=sv; CWD.w=sw; }
   };

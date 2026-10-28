@@ -4621,7 +4621,7 @@ function mnLoad(cb){
   if(MNST===2&&Date.now()-(window.MNT||0)<15000) return;
   MNST=1;
   try{
-    fetch('menu.bin?v=2').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+    fetch('menu.bin?v=3').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
       const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl, o={};
       hd.forEach(x=>{ o[x[0]]=URL.createObjectURL(new Blob([buf.slice(base+x[1],base+x[1]+x[2])],{type:'image/webp'})); });
       MNI=o; MNST=3;
@@ -6962,7 +6962,7 @@ wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s
 
 
 /* 177: цэсний тайлбар (mnWrap) */
-var MND={'Түүхэн аян':'14 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
+var MND={'Түүхэн аян':'14 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Найзаа урь':'Найзаа дууд, хамт тогл','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
 function mnWrap(nm,tile){ return '<div class="mnw">'+tile+'<div class="mnd">'+(MND[nm]||'')+'</div></div>'; }
 (function(){ const st=document.createElement('style'); st.textContent='.mnw{display:flex;flex-direction:column;min-width:0}.mnd{font-size:11px;line-height:1.2;color:#d9c48f;text-align:center;margin:1px 2px 4px;text-shadow:0 1px 0 #000}'; document.head.appendChild(st); })();
 

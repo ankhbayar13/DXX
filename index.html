@@ -7722,6 +7722,39 @@ function wmSpread(pts,fixed,cx,cy,ky,DX,DY){
   const _o=wmOpen; wmOpen=function(){ _o(); try{ const k=wmClanId(); if(k>=0){ if(typeof ckMem==='function') ckMem(k); if(!(CWD.my&&CWD.my.length)&&typeof cwFetch==='function') cwFetch(true); } }catch(e){} };
 })();
 
+/* 184: «Нутгийн айл» — клангүй тоглогчдыг саарал тугтай тусдаа хэсэгт харуулна (дайрах боломжгүй, зөвхөн харагдана) */
+var WMNF={t:0,busy:0,list:[],pos:{},key:''};
+const NF_C={x:1900,y:2150};
+async function nfFetch(force){
+  if(WMNF.busy) return; if(!force&&Date.now()-WMNF.t<300000) return;
+  if(typeof CL==='undefined'||!CL.ok||typeof FBM==='undefined') return;
+  WMNF.busy=1;
+  try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('cl','==',-1),F.limit(40)));
+    const me=CL.uid, now=wmNow();
+    WMNF.list=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x.id!==me&&x.p>0&&now-(x.t||0)<14*864e5).sort((a,b)=>(b.t||0)-(a.t||0)).slice(0,10);
+    WMNF.t=Date.now(); WMNF.key=''; }catch(e){ WMNF.t=Date.now()-240000; }
+  WMNF.busy=0;
+}
+(function(){
+  const _o=wmOpen; wmOpen=function(){ _o(); try{ nfFetch(); }catch(e){} };
+  const _d=wmClanDraw; wmClanDraw=function(c,D,z,t,vis,items){
+    const r=_d.apply(this,arguments);
+    try{ nfFetch(); }catch(e){}
+    try{ const L=WMNF.list; if(!L.length||!WMT.ok) return r;
+      if(!vis(NF_C.x,NF_C.y,420)) return r;
+      const key=L.map(x=>x.id).join(',');
+      if(key!==WMNF.key){ WMNF.key=key; const pts=L.map(x=>x.id).sort().map(id=>{ const h=hsh(String(id)), a=(h%360)*Math.PI/180, rad=70+((h>>>8)%150); return {id:id,x:NF_C.x+Math.cos(a)*rad,y:NF_C.y+Math.sin(a)*rad*0.75}; });
+        const fx=[]; try{ (D.camps||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:90,h:70})); (D.nodes||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:70,h:60})); (D.chests||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:60,h:60})); wmYams().forEach(n=>fx.push({x:n.x,y:n.y,w:80,h:60})); CLN.forEach(q=>fx.push({x:q.x,y:q.y,w:230,h:150})); (D.decor||[]).forEach(d=>{ if(d.k==='spr'&&Math.abs(d.x-NF_C.x)<500&&Math.abs(d.y-NF_C.y)<400) fx.push({x:d.x,y:d.y,w:85,h:60}); }); (D.ks||[]).forEach(n=>fx.push({x:n.x,y:n.y,w:70,h:60})); fx.push({x:D.C.x,y:D.C.y,w:150,h:95}); }catch(e){}
+        wmSpread(pts,fx,NF_C.x,NF_C.y,0.75,100,88); WMNF.pos={}; pts.forEach(p=>{ WMNF.pos[p.id]={x:p.x,y:p.y}; }); }
+      items.push({y:NF_C.y-400,f:()=>{ c.save(); c.globalAlpha=0.9; wmLabel(c,'🏕 Нутгийн айл',NF_C.x,NF_C.y-195,'#e8e8e8',18); wmLabel(c,'Клангүй тоглогчид',NF_C.x,NF_C.y-177,'#c8c8c8',11); c.restore(); }});
+      L.forEach(x=>{ const q=WMNF.pos[x.id]; if(!q||!vis(q.x,q.y,60)) return;
+        items.push({y:q.y,f:()=>{ const s=wmS('wm_hm'+wmGerIdx(x)); if(s){ const ww=0.25*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,q.x-ww/2,q.y-hh*0.82,ww,hh); } else wmDrawS(c,'ger',q.x,q.y,36);
+          c.fillStyle='#9a9a9a'; c.fillRect(q.x-1,q.y-52,2,16); c.beginPath(); c.moveTo(q.x+1,q.y-52); c.lineTo(q.x+14,q.y-47); c.lineTo(q.x+1,q.y-42); c.fill();
+          wmLabel(c,esc2(String(x.n||'Тоглогч').slice(0,12)),q.x,q.y+13,'#dcdcdc',11); wmLabel(c,'⚔'+f(x.p||0),q.x,q.y+25,'#ffd770',10); }}); });
+    }catch(e){}
+    return r; };
+})();
+
 
 /* 183: бүртгэл албадахгүй — зөөлөн урилга + Алтын бэлэг */
 const REG={bonus:100,after:600,lv:4,every:24*36e5,max:5};
@@ -7742,7 +7775,7 @@ function regHide(later){ const d=document.getElementById('regi'); if(d) d.style.
 function regTick(){
   const d=document.getElementById('regi'); if(!d) return;
   const vis=id=>{ const e=document.getElementById(id); if(!e) return false; const c=getComputedStyle(e); return c.display!=='none'&&c.visibility!=='hidden'; };
-  const busy=(typeof BT!=='undefined'&&BT)||['modal','chat','jamov','hd','boxov','ckov','cwp','tutov','splash','gate'].some(vis);
+  const busy=(typeof BT!=='undefined'&&BT)||['modal','chat','jamov','hd','boxov','ckov','cwp','tutov','splash','gate','wmc'].some(vis);
   const want=!!(CL.ok&&!CL.email&&!S.gt&&S.tutDone&&S.met&&((S.ptm||0)>=REG.after||(S.pl||1)>=REG.lv)&&(S.regN||0)<REG.max);
   const due=Date.now()-(S.regT||0)>=REG.every;
   if(d.style.display==='block'){ if(!want||busy){ d.style.display='none'; } else if(Date.now()-REG.shown>20000){ d.style.display='none'; } return; }

@@ -6590,6 +6590,56 @@ offline=function(){
 offline();
 
 
+/* p32/upd.js — 167: шинэ хувилбар гармагц тоглогчийг 5 минутын дараа автоматаар шинэчилнэ */
+var UPD={every:60000,delay:300000,base:null,seen:null,cnt:0,on:0,go:0,t0:0,el:null};
+function updBusy(){
+  try{
+    return !!((typeof BT!=='undefined'&&BT&&!BT.done)||(typeof RT!=='undefined'&&RT)||(typeof ARC!=='undefined'&&ARC)||(typeof RCE!=='undefined'&&RCE)||(typeof WRS!=='undefined'&&WRS));
+  }catch(e){ return false; }
+}
+function updGo(){
+  if(UPD.go) return; UPD.go=1;
+  try{ if(UPD.el) UPD.el.firstChild.textContent='🔄 Шинэчилж байна…'; }catch(e){}
+  try{ save(); }catch(e){}
+  let p=null; try{ if(typeof clPush==='function'&&CL&&CL.ok) p=clPush(true); }catch(e){}
+  Promise.race([Promise.resolve(p).catch(()=>0),new Promise(r=>setTimeout(r,2500))]).then(()=>{ location.reload(); });
+}
+function updStart(){
+  if(UPD.on) return; UPD.on=1; UPD.t0=performance.now();
+  const d=document.createElement('div'); UPD.el=d; d.id='updbar';
+  d.style.cssText='position:fixed;left:4vw;right:4vw;bottom:calc(env(safe-area-inset-bottom,0px) + 88px);z-index:95;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg,#5a3a14,#2e1b08);border:2px solid #e8b84a;color:#ffe9b0;font:700 14px/1.25 Roboto,Arial,sans-serif;box-shadow:0 4px 14px #000a';
+  d.innerHTML='<span></span><button style="flex:none;padding:6px 10px;border-radius:8px;border:1px solid #ffd77a;background:#c8891e;color:#fff;font:800 13px Roboto,Arial,sans-serif">Одоо шинэчлэх</button>';
+  d.lastChild.onclick=()=>updGo();
+  document.body.appendChild(d);
+  const tick=()=>{
+    if(UPD.go) return;
+    const rem=Math.ceil((UPD.delay-(performance.now()-UPD.t0))/1000);
+    const sp=d.firstChild;
+    if(rem>0){ sp.textContent='🔄 Шинэ хувилбар гарлаа · '+Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0')+' минутын дараа шинэчлэгдэнэ'; }
+    else if(updBusy()){ sp.textContent='🔄 Шинэ хувилбар бэлэн · тулаан дуусмагц шинэчлэгдэнэ'; }
+    else { updGo(); return; }
+    setTimeout(tick,1000);
+  };
+  tick();
+}
+function updCheck(){
+  if(UPD.on) return;
+  try{
+    fetch('index.html',{method:'HEAD',cache:'no-store'}).then(r=>{
+      const v=(r.headers.get('etag')||'')+'|'+(r.headers.get('last-modified')||'');
+      if(!r.ok||v==='|') return;
+      if(UPD.base===null){ UPD.base=v; return; }
+      if(v===UPD.base){ UPD.seen=null; UPD.cnt=0; return; }
+      if(v===UPD.seen) UPD.cnt++; else { UPD.seen=v; UPD.cnt=1; }
+      if(UPD.cnt>=2) updStart();                  // хоёр дараалсан шалгалтаар батлагдвал л (түр зуурын алдаанаас сэргийлнэ)
+    }).catch(()=>{});
+  }catch(e){}
+}
+(function loop(){ setTimeout(()=>{ updCheck(); loop(); },UPD.every); })();
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) updCheck(); });
+setTimeout(updCheck,3000);                        // суурь хувилбарыг ачаалмагц тэмдэглэнэ
+
+
 // ===== Нүүдлийн шагнал v2: ном зураг самбар + бодит утга =====
 (function(){
 const IW=1024, IH=1536, MAIN=['meat','wool','wood'];

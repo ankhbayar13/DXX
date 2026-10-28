@@ -5808,6 +5808,8 @@ function wmPano(c){ const s=wmS('wm_pano'); if(!s) return; const w=1800, h=w*s.i
 // ================= 153: байгууламж, цэрэг, бүрхүүл =================
 const WM_HR=6*3600e3;
 function wmHmIdx(p){ return p<400?0:p<1500?1:p<5000?2:3; }
+// гэрийн Lv-ээр зураг сонгоно (мэдээлэл байхгүй бол хүчээр)
+function wmGerIdx(x){ const g=x&&((x.v&&x.v.b&&x.v.b.ger)||x.gl||0); if(g>0) return g>=10?3:g>=7?2:g>=3?1:0; return wmHmIdx((x&&x.p)||0); }
 function wmDome(c,x,y,kind,t,sc){ const k=kind===2?'wm_sh2':kind===1?'wm_sh1':'wm_sh0', s=wmS(k); if(!s) return; const w=(sc||0.25)*s.iw, h=w*s.ih/s.iw; c.save(); c.globalAlpha=kind===0?(0.62+0.18*Math.sin(t*2)):kind===1?(0.5+0.12*Math.sin(t*3)):(0.7); c.drawImage(s.img,x-w/2,y+9-h,w,h); c.restore(); }
 function wmSmoke(c,x,y,t,w){ const s=wmS('wm_rf2'); if(!s) return; const ww=w||44, hh=ww*s.ih/s.iw; c.save(); c.globalAlpha=0.9; c.drawImage(s.img,x-ww/2,y-hh+4,ww,hh); c.restore(); }
 function wmHomeFx(c,D,t,items){ if(!WMT.ok) return; const raided=S.raidSeen&&(wmNow()-S.raidSeen)<WM_HR;
@@ -5839,9 +5841,9 @@ wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=
     items.push({y:1e5+qy,f:()=>{ c.save(); c.globalAlpha=isMy||isOp?0.9:0.6; wmLabel(c,(isMy?'⚑ ':isOp?'⚔ ':'')+q.n+' клан'+(wmTerr()&&wmTerr().z===i?(wmTerr().win?' 🏴 эзэмшил':' ⚠ эзлэгдсэн'):''),qx,qy-(s?hh*0.86:(isMy?78:44)),isMy?'#ffe28a':isOp?'#ff9a8a':'#fff',isMy||isOp?20:17); c.restore(); }});
     items.push({y:qy,f:()=>{ if(s){ c.drawImage(s.img,qx-ww/2,qy-hh*0.88,ww,hh); } else if(!isMy){ c.fillStyle=q.c; c.fillRect(q.x-1.5,q.y-46,3,48); c.beginPath(); c.moveTo(q.x+1.5,q.y-46); c.lineTo(q.x+26,q.y-38); c.lineTo(q.x+1.5,q.y-30); c.fill(); } }}); });
   const rows=CWD.w===w?CWD.my:[]; rows.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{ const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
-    items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(x.p||0)):null; if(s){ const ww=0.27*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
+    items.push({y:py,f:()=>{ const s=ok?wmS('wm_hm'+wmGerIdx(x)):null; if(s){ const ww=0.27*s.iw, hh=ww*s.ih/s.iw; c.drawImage(s.img,px-ww/2,py-hh*0.82,ww,hh); } else wmDrawS(c,'ger',px,py,34); wmLabel(c,esc2(String(x.n||'').slice(0,12)),px,py+12,'#9fe89a',10); wmLabel(c,'⚔'+f(x.p||0),px,py+24,'#ffd770',9); }}); });
   wmCwEnts().forEach(e=>{ if(!vis(e.x,e.y,70)) return; const cd=wmCd(e.id);
-    items.push({y:e.y,f:()=>{ const s=ok?wmS('wm_hm'+wmHmIdx(e.p)):null, imm=e.real&&e.uid&&CWD.rd&&CWD.rd[e.uid]&&now-CWD.rd[e.uid]<WM_HR; c.globalAlpha=cd?0.45:1; let hh=44;
+    items.push({y:e.y,f:()=>{ const s=ok?wmS('wm_hm'+wmGerIdx(e)):null, imm=e.real&&e.uid&&CWD.rd&&CWD.rd[e.uid]&&now-CWD.rd[e.uid]<WM_HR; c.globalAlpha=cd?0.45:1; let hh=44;
       if(s){ const ww=0.25*s.iw; hh=ww*s.ih/s.iw; c.drawImage(s.img,e.x-ww/2,e.y-hh*0.82,ww,hh); } else wmDrawS(c,'ger2',e.x,e.y,40);
       c.fillStyle=e.c; c.fillRect(e.x-1,e.y-hh-8,2,16); c.beginPath(); c.moveTo(e.x+1,e.y-hh-8); c.lineTo(e.x+14,e.y-hh-3); c.lineTo(e.x+1,e.y-hh+2); c.fill(); c.globalAlpha=1;
       if(e.real&&ok){ if(imm){ wmDome(c,e.x,e.y,2,t,0.24); wmSmoke(c,e.x+30,e.y+2,t,36); } else if(e.act<12) wmDome(c,e.x,e.y,0,t,0.24); else if(e.act<24) wmDome(c,e.x,e.y,1,t,0.24); }
@@ -7680,6 +7682,7 @@ function jamBtnUpd(){
 
 /* 182: газрын зураг дээр кланы гишүүдийн гэр — кланы жагсаалттай нэгтгэж, хассан гишүүнийг нууна */
 (function(){
+  const _ce=wmCwEnts; wmCwEnts=function(){ const r=_ce.apply(this,arguments); try{ const mp={}; (CWD.op||[]).forEach(x=>{ mp[x.id]=x; }); r.forEach(e=>{ if(e.real&&e.uid&&e.gl==null){ const x=mp[e.uid]; e.gl=(x&&x.v&&x.v.b&&x.v.b.ger)||0; } }); }catch(e){} return r; };
   const _d=wmClanDraw;
   wmClanDraw=function(c,D,z,t,vis,items){
     const k=wmClanId(), sv=CWD.my, sw=CWD.w; let m=null;
@@ -7693,7 +7696,15 @@ function jamBtnUpd(){
       }
     }catch(e){ m=null; }
     if(m){ CWD.my=m; CWD.w=wmWeek(); }
-    try{ return _d.apply(this,arguments); } finally{ CWD.my=sv; CWD.w=sw; }
+    try{
+      const r=_d.apply(this,arguments);
+      // гишүүдийн гэрт хамгаалалтын бурхуул (идэвхтэй байдлаар)
+      try{ if(m&&WMT.ok){ const now=wmNow(); m.filter(x=>!(typeof CL!=='undefined'&&x.id===CL.uid)).slice(0,14).forEach(x=>{
+        const act=Math.max(0,(now-(x.t||0))/3600e3); if(act>=24) return;
+        const h=hsh(String(x.id)), a=(h%360)*Math.PI/180, rad=170+((h>>>8)%130), px=D.C.x+Math.cos(a)*rad, py=D.C.y+Math.sin(a)*rad*0.75; if(!vis(px,py,60)) return;
+        items.push({y:py+1,f:()=>{ wmDome(c,px,py,act<12?0:1,t,0.24); if(act<12) wmLabel(c,'🛡 Хамгаалалттай',px,py+35,'#9fd0ff',9); }}); }); } }catch(e){}
+      return r;
+    } finally{ CWD.my=sv; CWD.w=sw; }
   };
   const _o=wmOpen; wmOpen=function(){ _o(); try{ const k=wmClanId(); if(k>=0){ if(typeof ckMem==='function') ckMem(k); if(!(CWD.my&&CWD.my.length)&&typeof cwFetch==='function') cwFetch(true); } }catch(e){} };
 })();

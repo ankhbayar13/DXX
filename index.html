@@ -7705,6 +7705,8 @@ function jamBtnUpd(){
   let show=false; try{ show=!!(S.tutDone&&S.met&&jamVis()); }catch(e){}
   b.style.display=(show&&!busy)?'flex':'none'; if(!show) return;
   b.querySelector('b').textContent=jamShort();
+  try{ const rc=document.getElementById('rcol'); if(rc){ let bt=0, L=0, W=0; [...rc.children].forEach(x=>{ const cs=getComputedStyle(x); if(cs.display==='none') return; const r=x.getBoundingClientRect(); if(r.height>0&&r.bottom>bt){ bt=r.bottom; L=r.left; W=r.width; } });
+    if(bt>0){ b.style.top=Math.round(bt+8)+'px'; b.style.left=Math.round(L+W/2-27)+'px'; } } }catch(e){}
   const J=jamS(), dot=(J.ld!==jamDay())||J.sh>=JAM.need; const i=b.querySelector('i'); i.style.display=dot?'block':'none'; i.textContent='!';
 }
 (function(){ if(document.getElementById('jamb')) return;

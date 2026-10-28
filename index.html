@@ -2366,7 +2366,7 @@ function tap(x,y){
     placing.x=snap(x-d.w/2); placing.y=snap(y-d.h/2);
     return;
   }
-  const hp=ents.filter(e=>{ if(e.kind!=='person'&&!(e.kind==='wild'&&e.friend)) return false; const w=entW(e), h=entH(e); return x>=e.x-6&&x<=e.x+w+6&&y>=e.y-9&&y<=e.y+h+5; }).sort((a,b)=>Math.hypot(x-a.x-entW(a)/2,y-a.y-entH(a)/2)-Math.hypot(x-b.x-entW(b)/2,y-b.y-entH(b)/2))[0];
+  const hp=ents.filter(e=>{ if(e._in||(e.kind!=='person'&&!(e.kind==='wild'&&e.friend))) return false; const w=entW(e), h=entH(e); return x>=e.x-6&&x<=e.x+w+6&&y>=e.y-9&&y<=e.y+h+5; }).sort((a,b)=>Math.hypot(x-a.x-entW(a)/2,y-a.y-entH(a)/2)-Math.hypot(x-b.x-entW(b)/2,y-b.y-entH(b)/2))[0];
   if(hp){ if(sel===hp){ talkSel(); } else select(hp); return; }
   const hw=ents.find(e=>{ if(e.kind!=='wild') return false; const ly=(e.type==='eagle'&&!e.friend)?12:0; return x>=e.x-2&&x<=e.x+entW(e)+2&&y>=e.y-2-ly&&y<=e.y+entH(e)+2; });
   if(hw&&!sel){ const m={wolf:'Чоно! Малаа хашаандаа байлгаарай.',bear:'Баавгай! Холуур байсан нь дээр.',fox:'Үнэг гөлрөн явна.',deer:'Буга нуур зорьж яваа юм.',gazelle:'Зээр! Анчин мах авчирна.',lynx:'Шилүүс! Хурга, ишиг авч явах вий.',dog:'Банхар нохой малаа манаж байна.',guard:'Манаач: Бүгд амар, дарга аа.',hunter:'Анчин: Өнөөдөр буга олжилно.',marmot:'Тарвага өвөлдөө бэлдэж байна.',argali:'Аргаль хад чулуун дээгүүр гүйнэ.',leopard:'Ирвэс! Маш ховор амьтан.',eagle:'Бүргэд тэнгэрт эргэнэ.'}; say(m[hw.type]||'Зэрлэг амьтан'); return; }
@@ -8588,6 +8588,18 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
       return {x:d.x-entCx(e)+(Math.random()*18-9), y:d.y+3-entH(e)+Math.random()*8};
     }catch(x){ return _wp.apply(this,arguments); }
   };
+
+  /* ---------- амарч/унтаж буй хүн гэртээ орж, нуугдана (зураг, нэр, 😴 харагдахгүй) ---------- */
+  const _upIn=updPerson;
+  updPerson=function(e,dt){
+    const r=_upIn.apply(this,arguments);
+    try{ const P=e.post, was=e._in;
+      e._in=!!(e.task&&e.task.type==='hold'&&P&&P.sched&&(P.k==='sleep'||P.k==='rest')&&!e.sel);
+      if(e._in){ e.say=null; e.icon=''; e.moving=false; } else if(was){ e.icon=e.icon||''; }
+    }catch(x){}
+    return r; };
+  const _deIn=drawEnt;
+  drawEnt=function(e,t){ if(e._in) return; return _deIn.apply(this,arguments); };
 
   /* ---------- өдрийн цагийн жижиг тэмдэг ---------- */
   (function(){

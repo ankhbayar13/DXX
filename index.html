@@ -3378,7 +3378,7 @@ const MENU=[
  {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
- {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
+ {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
@@ -3442,7 +3442,7 @@ setInterval(tutCheck,2500);
 const MUSV={a:{},on:true,unl:false,want:'village'};
 try{ MUSV.on=localStorage.getItem('mus')!=='0'; }catch(e){}
 function musGet(k){ if(!MUSV.a[k]){ const a=new Audio(MUS[k]); a.loop=true; a.volume=k==='battle'?0.55:0.4; MUSV.a[k]=a; } return MUSV.a[k]; }
-function musPlay(k){ MUSV.want=k; if(!MUSV.on||!MUSV.unl) return; Object.keys(MUSV.a).forEach(x=>{ if(x!==k) MUSV.a[x].pause(); }); try{ const p=musGet(k).play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+function musPlay(k){ MUSV.want=k; return; /* арын хөгжим бүрмөсөн унтраасан, үйлдлийн дуу үлдсэн */ Object.keys(MUSV.a).forEach(x=>{ if(x!==k) MUSV.a[x].pause(); }); try{ const p=musGet(k).play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
 function musBtn(){ const b=$('musb'); if(b) b.innerHTML='<span style="font-size:22px">'+(MUSV.on?'🎵':'🔇')+'</span>Хөгжим'; }
 function musToggle(){ MUSV.on=!MUSV.on; try{ localStorage.setItem('mus',MUSV.on?'1':'0'); }catch(e){} if(MUSV.on) musPlay(MUSV.want); else Object.keys(MUSV.a).forEach(x=>MUSV.a[x].pause()); musBtn(); }
 ['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{ if(!MUSV.unl){ MUSV.unl=true; musPlay(MUSV.want); } }));

@@ -2181,7 +2181,7 @@ function modalContent(k){
   if(k==='ndlb') return ndLbHTML();
   if(k==='dain'){
     const P=totalPower(), fb=facBonus(), rm=relicMul();
-    let h='<h2>Дайн</h2>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Дурсгал: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
+    let h='<h2>Дайн</h2><div class="sm" style="text-align:center;margin:-4px 0 6px">⚔ Өнөөдрийн дайралт: <b style="color:#ffd770">'+dnLeft()+'/'+DNMAX+'</b> · шөнө 00:00-д шинэчлэгдэнэ</div>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Дурсгал: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
     h+='<div class="card"><h3>Миний баг</h3>'+(squad().length?squad().map(id=>{ const d=HEROES.find(x=>x.id===id); return '<div class="hero"><div><span class="s'+d.s+'">'+d.n+'</span></div><div class="sm">'+TNAME[htype(id)]+' · '+TROW[htype(id)]+' · Хүч '+heroPower(id)+'</div></div>'; }).join(''):'<div class="sm">Баатар дуудаарай</div>')+'<div class="sm" style="margin-top:6px">Нум → хүнд морьт, хүнд морьт → морин, морин → нум дээр хүчтэй.</div></div>';
     STAGEZ.forEach((z,zi)=>{
       h+='<h3 style="margin:10px 4px 2px">'+ico(ZTILE[zi],34)+' '+z.n+'</h3>';
@@ -2189,7 +2189,7 @@ function modalContent(k){
         const lv=ratio>=1.3?'Амархан':ratio>=0.9?'Тэнцүү':ratio>=0.6?'Хэцүү':'Маш хэцүү';
         const nodeK=locked?'mp_lock':(i===S.won?'mp_unlock':['mp_n1','mp_n2','mp_n3','mp_n4'][Math.min(3,i-z.from)]);
         h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico(nodeK,40)+'<div><h3>'+(zi+1)+'-'+(i-z.from+1)+' '+e.n+(done?' ✓':'')+'</h3><div class="sm">Дайсны хүч '+f(e.p)+' · Шагнал '+e.g+'🪙, '+e.m+' мах</div><div class="sm">Хэцүү байдал: '+lv+'</div></div></div>'+
-          '<button class="btn red" '+(locked?'disabled':'')+' onclick="closeM();startBattle('+i+')">'+(locked?'Түгжээтэй':'Дайрах')+'</button></div></div>';
+          '<button class="btn red" '+(locked?'disabled':'')+' onclick="if(dnUse()){closeM();startBattle('+i+')}">'+(locked?'Түгжээтэй':'Дайрах '+dnLeft()+'/'+DNMAX)+'</button></div></div>';
       }
     });
     return h;
@@ -8707,6 +8707,19 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     }catch(e){}
   };
 })();
+
+
+/* p32/dainlim.js — 200: Дайн цонхны «Дайрах» өдөрт 3 удаа (шөнө 00:00-д шинэчлэгдэнэ) */
+var DNMAX=3;
+function dnLeft(){ try{ dqInit(); return Math.max(0,DNMAX-(S.dq.dn||0)); }catch(e){ return DNMAX; } }
+function dnUse(){
+  try{
+    if(!Object.keys(S.heroes||{}).length) return true;
+    if(dnLeft()<=0){ say('⚔ Өнөөдрийн '+DNMAX+' дайралт дууссан. Шөнө 00:00-д шинэчлэгдэнэ'); try{ sfx('err'); }catch(e){} return false; }
+    S.dq.dn=(S.dq.dn||0)+1; try{ save(); }catch(e){}
+    return true;
+  }catch(e){ return true; }
+}
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

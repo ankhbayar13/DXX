@@ -2517,7 +2517,7 @@ function gearHTML(){
 }
 function gearUp(id){ S.gear=S.gear||{}; const l=gearLv(id); if(l>=3) return; if(S.bld.hureo<GREQ[l]){ say('Цэргийн хүрээ '+GREQ[l]+'-р түвшин хэрэгтэй'); return; } const c=Math.round(GCOST[l]*gcm()); if(S.res.gold<c){ noGold(); return; } S.res.gold-=c; S.gear[id]=l+1; say(GEAR.find(g=>g.id===id).n+' сайжирлаа'); refresh(); }
 function startMove(k){
-  closeM(); deselect(); const p=S.pos[k]; placing={k,x:p.x,y:p.y,move:true};
+  closeM(); deselect(); const p=S.pos[k]; if(!p){ say('Энэ барилгыг эхлээд барилгын цэснээс байрлуулна уу'); return; } placing={k,x:p.x,y:p.y,move:true};
   showBar(BUILD[k].n+': шинэ газраа дарна уу',[['✔ Тавих','confirmPlace()'],['✖ Болих','cancelPlace()','red']]);
 }
 function relWorn(id){ relMig(); let n=0; Object.keys(S.heq).forEach(h=>{ if(S.heroes[h]) n+=S.heq[h].filter(x=>x===id).length; }); return n; }

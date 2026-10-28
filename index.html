@@ -8557,6 +8557,22 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     return _mvTo.call(this,e,dt*k);
   };
 
+  /* ---------- зүгээр тэнүүчлэхдээ нэг хаалган дээр бөөгнөрөхгүй: завгүй хаалгыг тойрч, зайтай цэг сонгоно ---------- */
+  const _wp=wpPick;
+  wpPick=function(e){
+    if(window.NOSPREAD) return _wp.apply(this,arguments);
+    try{
+      const ds=doors(); if(!ds.length) return _wp.apply(this,arguments);
+      const others=persons().filter(q=>q!==e);
+      const crowd=d=>others.filter(q=>Math.hypot(q.x+entCx(q)-d.x,q.y+entH(q)-d.y)<30||(q.tx!=null&&Math.hypot(q.tx+entCx(q)-d.x,q.ty+entH(q)-d.y)<30)).length;
+      const pool=ds.slice().sort(()=>Math.random()-0.5);
+      const d=pool.find(x=>crowd(x)<1);
+      if(!d){ const b=pool[0], a=Math.random()*6.283, r=45+Math.random()*70;
+        return {x:Math.max(8,Math.min(WW-24,b.x-entCx(e)+Math.cos(a)*r)), y:Math.max(60,Math.min(WH-24,b.y+10-entH(e)+Math.abs(Math.sin(a))*r*0.6))}; }
+      return {x:d.x-entCx(e)+(Math.random()*18-9), y:d.y+3-entH(e)+Math.random()*8};
+    }catch(x){ return _wp.apply(this,arguments); }
+  };
+
   /* ---------- өдрийн цагийн жижиг тэмдэг ---------- */
   (function(){
     const s=document.createElement('style');

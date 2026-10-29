@@ -9031,26 +9031,22 @@ function mhImg(id){
 })();
 
 
-/* p32/wrtitle.js — 208: Бөхийн цол. 7 хоногийн дотор ДАРААЛЖ ялсан тоогоор (ялагдвал 0). Cloud-д бүртгүүлсэн тоглогч л цол авна.
-   Цол 7 хоног + дараагийн 7 хоногт үлдэнэ. Шагнал: цол бүрийг анх авахад нэг удаа. */
-const WRT=[['Сумын Начин',2],['Сумын Заан',3],['Аймгийн Начин',4],['Аймгийн Харцага',5],['Аймгийн Заан',6],['Аймгийн Арслан',7],['Улсын Начин',9],['Улсын Харцага',10],['Улсын Заан',12],['Улсын Гарьд',14],['Улсын Арслан',16],['Улсын Аварга',18],['Улсын Далай Аварга',20],['Улсын Дархан Аварга',21]];
-const WRT_ALT=[1,1,1,2,2,2,3,3,3,4,5,6,8,10];
-function wsWk(){ return Math.floor((Math.floor((wmNow()+8*36e5)/864e5)+3)/7); }
-function wsIdxOf(b){ b=+b||0; let r=-1; for(let i=0;i<WRT.length;i++){ if(b>=WRT[i][1]) r=i; } return r; }
-function wsSt(){ const w=wsWk(); let s=S.wst;
-  if(!s||typeof s!=='object') s=S.wst={w:w,s:0,b:0,pi:-1};
-  if(s.w!==w){ s.pi=(s.w===w-1)?wsIdxOf(s.b):-1; s.s=0; s.b=0; s.w=w; }
+/* p32/wrtitle.js — 208: Бөхийн цол. Ахиц p = ДАРААЛСАН ялалт. Цолны босго хүрвэл цол НЭГ УДАА авч үлдэнэ (хэзээ ч хасагдахгүй).
+   Ялагдвал ахиц тэглэгдэхгүй, хамгийн сүүлд авсан цолныхоо босго руу буцна (жишээ: 3=Сумын Начин, 5 хүрээд ялагдвал 3). Cloud-д бүртгүүлсэн тоглогч л цол авна. */
+const WRT=[['Сумын Начин',3],['Сумын Заан',9],['Аймгийн Начин',18],['Аймгийн Харцага',30],['Аймгийн Заан',45],['Аймгийн Арслан',65],['Улсын Начин',90],['Улсын Харцага',120],['Улсын Заан',155],['Улсын Гарьд',195],['Улсын Арслан',240],['Улсын Аварга',300],['Улсын Далай Аварга',380],['Улсын Дархан Аварга',480]];
+const WRT_ALT=[0,0,0,0,0,1,0,0,1,0,1,2,3,5];
+function wsIdxOf(p){ p=+p||0; let r=-1; for(let i=0;i<WRT.length;i++){ if(p>=WRT[i][1]) r=i; } return r; }
+function wsSt(){ let s=S.wst; if(!s||typeof s!=='object'||s.p==null){ const o=(s&&s.b)||0; s=S.wst={p:0,b:0}; }
   return s; }
 const wsReg=()=>{ try{ return !!(typeof CL!=='undefined'&&CL.email); }catch(e){ return false; } };
-function wsIdx(){ if(!wsReg()) return -1; const s=wsSt(); return Math.max(wsIdxOf(s.b),s.pi); }
-function wsPush(){ const s=wsSt(); return {wt:wsIdxOf(s.b),wp:s.pi,wk:s.w}; }
-function wsOther(r){ if(!r||r.wk==null) return -1; const cur=wsWk(); if(r.wk===cur) return Math.max(r.wt==null?-1:r.wt,r.wp==null?-1:r.wp); if(r.wk===cur-1) return r.wt==null?-1:r.wt; return -1; }
+function wsIdx(){ if(!wsReg()) return -1; return wsIdxOf(wsSt().p); }
+function wsPush(){ return {wt:wsIdxOf(wsSt().p),wp:-1,wk:0}; }
+function wsOther(r){ return (r&&typeof r.wt==='number')?r.wt:-1; }
 function wtTagI(i){ return i>=0?' <span style="color:#ffd770;font-size:11px;font-weight:bold">🏅 '+WRT[i][0]+'</span>':''; }
 function wtGold(i){ return 1000*(i+1); }
-function wsDaysLeft(){ const d=Math.floor((wmNow()+8*36e5)/864e5); return 7-((d+3)%7); }
-function wtLine(){ const s=wsSt(), i=wsIdx(), nx=WRT[wsIdxOf(s.b)+1];
-  let h='🔥 Дараалсан ялалт: <b style="color:#ffd770">'+s.s+'</b> · 7 хоногийн шилдэг: <b>'+s.b+'</b> <span style="opacity:.7">('+wsDaysLeft()+' хоногийн дараа шинэчлэгдэнэ)</span><br>🏅 Бөхийн цол: <b style="color:#ffd770">'+(i<0?'байхгүй':WRT[i][0])+'</b>';
-  if(nx) h+=' · дараагийнх: '+nx[0]+' ('+s.s+'/'+nx[1]+' дараалан ялах)'; else h+=' · 👑 дээд цол';
+function wtLine(){ const s=wsSt(), ci=wsIdxOf(s.p), nx=WRT[ci+1], i=wsIdx();
+  let h='🔥 Дараалсан ялалт: <b style="color:#ffd770">'+s.p+'</b> <span style="opacity:.7">(ялагдвал '+(ci>=0?WRT[ci][1]:0)+' руу буцна)</span><br>🏅 Бөхийн цол: <b style="color:#ffd770">'+(i<0?'байхгүй':WRT[i][0])+'</b>';
+  if(nx) h+=' · дараагийнх: '+nx[0]+' ('+s.p+'/'+nx[1]+')'; else h+=' · 👑 дээд цол';
   if(!wsReg()) h+='<br><span style="color:#ff9a8a">☁ Цол авахын тулд Cloud цэсэнд бүртгүүлнэ үү</span>';
   return h; }
 (function(){
@@ -9058,18 +9054,18 @@ function wtLine(){ const s=wsSt(), i=wsIdx(), nx=WRT[wsIdxOf(s.b)+1];
   const _p=profHTML; profHTML=function(){ let h=_p.apply(this,arguments); try{ const i=wsIdx(); if(i>=0) h=h.replace(/(<div>Хүч [^<]*<\/div>)(<\/div><\/div>)/,'$1<div style="color:#ffd770;font-size:15px">🏅 '+WRT[i][0]+'</div>$2'); }catch(e){} return h; };
   const _s=socView; socView=function(){ let h=_s.apply(this,arguments); try{ const i=wsOther(CL.sv); if(i>=0) h=h.replace(/(⚔ Хүч <b>[^<]*<\/b><\/div>)/,'$1<div style="margin-top:3px;color:#ffd770">🏅 '+WRT[i][0]+'</div>'); }catch(e){} return h; };
   const _n=ndLbHTML; ndLbHTML=function(){ let h=_n.apply(this,arguments); try{ if(NDTAB==='w'){ let k=0; h=h.replace(/(<span class="sm">Lv [^<]*<\/span>)(<\/div><b style="color:#ffd770">\d+ ялалт<\/b>)/g,(m,a,b)=>a+wtTagI(wsOther((NDLB.w||[])[k++]))+b); } }catch(e){} return h; };
-  function award(){ if(!wsReg()) return null; const s=wsSt(), idx=wsIdxOf(s.b), g=(S.wtg==null?-1:S.wtg); if(idx<=g) return null; let gold=0, alt=0; for(let i=g+1;i<=idx;i++){ gold+=wtGold(i); alt+=WRT_ALT[i]; }
+  function award(){ if(!wsReg()) return null; const s=wsSt(), idx=wsIdxOf(s.p), g=(S.wtg==null?-1:S.wtg); if(idx<=g) return null; let gold=0, alt=0; for(let i=g+1;i<=idx;i++){ gold+=wtGold(i); alt+=WRT_ALT[i]; }
     S.wtg=idx; S.res.gold=(S.res.gold||0)+gold; S.res.alt=(S.res.alt||0)+alt; return {n:WRT[idx][0],gold:gold,alt:alt}; }
   window.wtAward=award;
   const _f=wrestFinish; wrestFinish=function(){ let win=false; try{ win=!!(WRS&&WRS.sc&&WRS.sc[0]>=2); }catch(e){}
     _f.apply(this,arguments);
-    try{ const s=wsSt(); const before=s.s; if(win){ s.s++; if(s.s>s.b) s.b=s.s; } else s.s=0;
-      const a=award(); const r=document.getElementById('archres');
+    try{ const s=wsSt(), before=s.p; if(win){ s.p++; if(s.p>(s.b||0)) s.b=s.p; } else { const ci=wsIdxOf(s.p); s.p=ci>=0?WRT[ci][1]:0; }
+      const a=award(), r=document.getElementById('archres'), ci=wsIdxOf(s.p), nx=WRT[ci+1];
       const add=html=>{ if(!r) return; const d=document.createElement('div'); d.style.cssText='margin:6px 0;padding:8px 10px;border-radius:10px;background:linear-gradient(#5a3b17,#3b2815);border:2px solid '+(a?'#ffd770':'#7a5a22')+';color:#ffe9b0;font-weight:bold'; d.innerHTML=html; const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); };
-      if(a){ try{ sfx('win'); }catch(e){} try{ say('🏅 Шинэ цол: '+a.n+'! +'+f(a.gold)+' 🪙 +'+a.alt+' Алт'); }catch(e){} add('🏅 Шинэ цол!<br><span style="font-size:18px;color:#ffd770">'+a.n+'</span><br><span class="sm">+'+f(a.gold)+' 🪙 · +'+a.alt+' Алт</span>'); }
-      if(win) add('🔥 Дараалсан ялалт: '+s.s+(WRT[wsIdxOf(s.s)+1]&&wsIdxOf(s.s)>=-1?'<br><span class="sm">Дараагийн цол: '+WRT[wsIdxOf(s.b)+1][0]+' ('+s.s+'/'+WRT[wsIdxOf(s.b)+1][1]+')</span>':''));
-      else add('💔 Ялагдлаа — дараалсан ялалт тэглэгдлээ'+(before>0?' ('+before+' байсан)':''));
-      if(!wsReg()&&win&&wsIdxOf(s.b)>=0) add('<span class="sm">☁ Цол авахын тулд Cloud цэсэнд бүртгүүлнэ үү</span>');
+      if(a){ const at=a.alt?' · +'+a.alt+' Алт':''; try{ sfx('win'); }catch(e){} try{ say('🏅 Шинэ цол: '+a.n+'! +'+f(a.gold)+' 🪙'+at); }catch(e){} add('🏅 Шинэ цол!<br><span style="font-size:18px;color:#ffd770">'+a.n+'</span><br><span class="sm">+'+f(a.gold)+' 🪙'+at+'</span>'); }
+      if(win) add('🔥 Дараалсан ялалт: '+s.p+(nx?'<br><span class="sm">Дараагийн цол: '+nx[0]+' ('+s.p+'/'+nx[1]+')</span>':''));
+      else add('💔 Ялагдлаа — ахиц '+before+' → '+s.p+(ci>=0?'<br><span class="sm">Цол үлдлээ: '+WRT[ci][0]+'</span>':''));
+      if(!wsReg()&&ci>=0) add('<span class="sm">☁ Цол авахын тулд Cloud цэсэнд бүртгүүлнэ үү</span>');
       try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} }catch(e){} };
 })();
 

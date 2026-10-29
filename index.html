@@ -9685,6 +9685,28 @@ window.GIMG={"cav:helm": ["data:image/webp;base64,UklGRggbAABXRUJQVlA4WAoAAAAQAA
   const _u=updateHUD; updateHUD=function(){ ap(); return _u.apply(this,arguments); };
 })();
 
+
+/* p32/woolnpc.js — Мал хашаанаас ноосыг автоматаар цуглуулдаг NPC (сүүтэй адил). Хашаанд ноос 8+ болмогц сул NPC очиж хайчилж агуулахад нэмнэ. */
+(function(){
+  TICON.wool='🧶'; TSAY.wool='Ноос авъя!';
+  const MIN=8, WORK=4;
+  function woolTick(){
+    if(!S.pos||!S.pos.hashaa||(S.sites&&S.sites.hashaa)||!(S.bld&&S.bld.hashaa>0)) return;
+    if((S.pend&&S.pend.wool||0)<MIN) return;
+    if(Math.floor(cap()-S.res.wool)<1) return;
+    const ppl=ents.filter(e=>e.kind==='person'&&e.type!=='dog'); if(ppl.some(e=>e.task&&e.task.type==='wool')) return;
+    const idle=ppl.filter(e=>!e.task&&!e.sel&&!(e.wait>0.5&&e.wait<1.4)); if(!idle.length) return;
+    const r=brect('hashaa'); idle.sort((a,b)=>((b.idx===3)-(a.idx===3))||(Math.hypot(a.x-r.x,a.y-r.y)-Math.hypot(b.x-r.x,b.y-r.y)));
+    const e=idle[0]; giveTask(e,{type:'wool',x:r.x+r.w/2-entCx(e)+(Math.random()*24-12),y:r.y+r.sh+3-entH(e),phase:'go',t:0});
+  }
+  const _ij=idleJobs; idleJobs=function(){ try{ woolTick(); }catch(x){} return _ij.apply(this,arguments); };
+  const _ws=workStep; workStep=function(e,dt){ const t=e.task;
+    if(t&&t.type==='wool'){ t.t+=dt; t.prog=Math.min(1,t.t/WORK); e.icon='🧶';
+      if(t.t>=WORK){ try{ const r=brect('hashaa'); collect('wool',r.x+r.w/2,r.y); }catch(x){} e.task=null; e.icon=null; e.wait=2+Math.random()*2; }
+      return; }
+    return _ws.apply(this,arguments); };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

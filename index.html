@@ -9418,26 +9418,34 @@ window.STONEI="data:image/webp;base64,UklGRuQoAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQU
 })();
 
 
-/* p32/aghpart.js — Агуулах: хэсэгчлэн зарах (25% / 50% / 75% / Бүгд). */
+/* p32/aghpart.js — Агуулах: хэсэгчлэн зарах (гулсуур + тоо бичих + 25/50/75/Бүгд). */
 (function(){
-  const AF={}; // сонгосон хувь
-  const fr=k=>AF[k]||1;
-  const units=(k,n)=>Math.max(0,Math.floor(n*fr(k)));
-  window.aghFr=function(k,x){ AF[k]=x; try{ fillM(); }catch(e){} };
+  const AU={}; // зарах тоо (null = бүгд)
+  const cnt=k=>{ const n=Math.floor(S.res[k]||0); const u=AU[k]==null?n:Math.max(0,Math.min(n,Math.floor(AU[k]))); return u; };
+  const val=(k,u)=>Math.floor(u*ITEMS[k].p*sellMult());
+  function upd(k){ const u=cnt(k), v=val(k,u);
+    const sl=document.getElementById('agS_'+k), nb=document.getElementById('agN_'+k), bt=document.getElementById('agB_'+k);
+    if(sl&&+sl.value!==u) sl.value=u; if(nb&&document.activeElement!==nb&&+nb.value!==u) nb.value=u;
+    if(bt){ bt.innerHTML='Зарах '+f(v)+' 🪙'; bt.disabled=(u<1||v<1); }
+    const n=Math.floor(S.res[k]||0); document.querySelectorAll('#mbody .agch_'+k).forEach(c=>{ const x=+c.dataset.x, on=(u===Math.floor(n*x)||(x===1&&u===n)); c.style.borderColor=on?'#ffd770':'#6b4a1f'; c.style.background=on?'#7a5214':'#2c1d0f'; }); }
+  window.aghSet=function(k,x){ x=parseInt(x,10); if(isNaN(x)||x<0) x=0; AU[k]=x; upd(k); };
+  window.aghFr=function(k,x){ const n=Math.floor(S.res[k]||0); AU[k]=(x>=1)?null:Math.max(1,Math.floor(n*x)); try{ fillM(); }catch(e){} };
   sellItem=function(k){
-    const n=Math.floor(S.res[k]||0), u=units(k,n), v=Math.floor(u*ITEMS[k].p*sellMult()); if(u<1||v<1) return;
-    S.res[k]=(S.res[k]||0)-u; S.res.gold+=v; try{ qh('sell',1); }catch(e){} say('+'+f(v)+' зоос'); try{ sfx('coin'); }catch(e){} refresh();
+    const u=cnt(k), v=val(k,u); if(u<1||v<1) return;
+    S.res[k]=(S.res[k]||0)-u; S.res.gold+=v; AU[k]=null; try{ qh('sell',1); }catch(e){} say('+'+f(v)+' зоос'); try{ sfx('coin'); }catch(e){} refresh();
   };
-  const chip=(k,x,t)=>'<span onclick="aghFr(\''+k+'\','+x+')" style="display:inline-block;min-width:44px;text-align:center;padding:5px 10px;margin:0 3px;border-radius:10px;border:2px solid '+(fr(k)===x?'#ffd770':'#6b4a1f')+';background:'+(fr(k)===x?'#7a5214':'#2c1d0f')+';color:#ffe9b0;font-size:13px;font-weight:bold">'+t+'</span>';
+  const chip=(k,x,t,n)=>{ const u=cnt(k), on=(x>=1?u===n:u===Math.floor(n*x)); return '<span class="agch_'+k+'" data-x="'+x+'" onclick="aghFr(\''+k+'\','+x+')" style="display:inline-block;min-width:40px;text-align:center;padding:5px 8px;margin:0 2px;border-radius:10px;border:2px solid '+(on?'#ffd770':'#6b4a1f')+';background:'+(on?'#7a5214':'#2c1d0f')+';color:#ffe9b0;font-size:13px;font-weight:bold">'+t+'</span>'; };
   aghHTML=function(){
     let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>'+f(cap())+'</b> нэг бүрд'+(S.bld.horgo>0?' · Хорго Lv '+S.bld.horgo:' · Хорго барьбал +200')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
     AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n<1) return; any=true;
-      const u=units(k,n), v=Math.floor(u*ITEMS[k].p*sellMult());
-      h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" '+(u<1||v<1?'disabled':'')+' onclick="sellItem(\''+k+'\')">Зарах '+f(v)+' 🪙</button></div>'+
-        '<div style="text-align:center;margin-top:6px">'+chip(k,0.25,'25%')+chip(k,0.5,'50%')+chip(k,0.75,'75%')+chip(k,1,'Бүгд')+'</div>'+(fr(k)<1?'<div class="sm" style="text-align:center;margin-top:3px">'+f(u)+' ширхэг зарна</div>':'')+'</div>'; });
+      const u=cnt(k), v=val(k,u);
+      h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" id="agB_'+k+'" '+(u<1||v<1?'disabled':'')+' onclick="sellItem(\''+k+'\')">Зарах '+f(v)+' 🪙</button></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input type="range" id="agS_'+k+'" min="0" max="'+n+'" step="1" value="'+u+'" oninput="aghSet(\''+k+'\',this.value)" style="flex:1;min-width:0;height:28px;accent-color:#ffd770">'+
+        '<input type="number" id="agN_'+k+'" inputmode="numeric" min="0" max="'+n+'" value="'+u+'" oninput="aghSet(\''+k+'\',this.value)" onchange="aghSet(\''+k+'\',this.value)" style="width:78px;padding:5px;border-radius:8px;border:2px solid #6b4a1f;background:#2c1d0f;color:#ffe9b0;font-size:15px;font-weight:bold;text-align:center"></div>'+
+        '<div style="text-align:center;margin-top:6px">'+chip(k,0.25,'25%',n)+chip(k,0.5,'50%',n)+chip(k,0.75,'75%',n)+chip(k,1,'Бүгд',n)+'</div></div>'; });
     if(!any) return h+'<div class="card"><div class="sm" style="text-align:center;padding:10px 4px">Агуулах хоосон байна.<br>Хашаан дээрх бөмбөлгийг дарж мах, сүү, ноос цуглуулаад дараа нь энд зарна.</div></div>';
     const arm=AGHC&&Date.now()<AGHC;
-    h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Захиалгад хэрэгтэй зүйлээ үлдээж, бусдыг нь хувиар нь эсвэл тус тусад нь зарж болно.</div></div>';
+    h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Гулсуур татаж эсвэл тоо бичээд хэсэгчлэн зарж болно. Захиалгад хэрэгтэй зүйлээ үлдээгээрэй.</div></div>';
     return h; };
 })();
 

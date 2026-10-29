@@ -2986,7 +2986,7 @@ function btFinish(win){
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   $('bres').innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; refresh();
 }
-function btEnd(force){ if(!BT) return; cancelAnimationFrame(BT.raf); const pv=BT; BT=null; musPlay('village'); if(pv.win){ const n=3+Math.min(6,(pv.e&&pv.e.bi)||0); stnGain(n); say('+'+n+' 💎 Ид шидийн чулуу'); } const el=$('btl'); if(el) el.remove(); if(pv.win&&pv.e&&pv.e.cb){ try{ pv.e.cb(); }catch(x){} } else if(!pv.win&&pv.e&&pv.e.cbl){ try{ pv.e.cbl(); }catch(x){} } if(pv.e&&pv.e.back) setTimeout(()=>openM(pv.e.back),60); }
+function btEnd(force){ if(!BT) return; cancelAnimationFrame(BT.raf); const pv=BT; BT=null; musPlay('village'); if(pv.win&&!(pv.e&&pv.e.fr)){ const n=3+Math.min(6,(pv.e&&pv.e.bi)||0); stnGain(n); say('+'+n+' 💎 Ид шидийн чулуу'); } const el=$('btl'); if(el) el.remove(); if(pv.win&&pv.e&&pv.e.cb){ try{ pv.e.cb(); }catch(x){} } else if(!pv.win&&pv.e&&pv.e.cbl){ try{ pv.e.cbl(); }catch(x){} } if(pv.e&&pv.e.back) setTimeout(()=>openM(pv.e.back),60); }
 function fight(i,chance){
   const e=ENEMIES[i];
   if(i>S.won) return;
@@ -8741,36 +8741,159 @@ function dnUse(){
 }
 
 
-/* p32/bgm.js — 201: тоглоомын арын хөгжим (bgm.m4a), нэг дуу давтагдана; дууны хэмжээг Цэс → Бусад → Хөгжим-өөр тохируулна */
-var BGM={url:null,st:0};
+/* p32/bgm.js — 201: тоглоомын арын хөгжим: тосгонд bgm.m4a, тулалдаанд battle.m4a (хоёулаа давтагдана); дууны хэмжээг Цэс → Бусад → Хөгжим-өөр тохируулна */
+var BGM={u:{},st:{},t:{},F:{village:'bgm.m4a?v=1',battle:'battle.m4a?v=1'}};
 try{ if(localStorage.getItem('musv')==null) MUSV.vol=0.05; }catch(e){}
-function bgmLoad(cb){
-  if(BGM.url){ cb&&cb(); return; }
-  if(BGM.st===1) return;
-  if(BGM.st===2&&Date.now()-(BGM.t||0)<20000) return;
-  BGM.st=1;
+function bgmKey(k){ return k==='battle'?'battle':'village'; }
+function bgmLoad(k,cb){
+  k=bgmKey(k);
+  if(BGM.u[k]){ cb&&cb(); return; }
+  if(BGM.st[k]===1) return;
+  if(BGM.st[k]===2&&Date.now()-(BGM.t[k]||0)<20000) return;
+  BGM.st[k]=1;
   try{
-    fetch('bgm.m4a?v=1').then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>{
-      BGM.url=URL.createObjectURL(new Blob([b],{type:'audio/mp4'})); BGM.st=3; cb&&cb();
-    }).catch(()=>{ BGM.st=2; BGM.t=Date.now(); });
-  }catch(e){ BGM.st=2; BGM.t=Date.now(); }
+    fetch(BGM.F[k]).then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>{
+      BGM.u[k]=URL.createObjectURL(new Blob([b],{type:'audio/mp4'})); BGM.st[k]=3; cb&&cb();
+    }).catch(()=>{ BGM.st[k]=2; BGM.t[k]=Date.now(); });
+  }catch(e){ BGM.st[k]=2; BGM.t[k]=Date.now(); }
 }
-musApply=function(){ const a=MUSV.a.village; if(!a) return; if(MUSV.g.village){ a.volume=1; try{ MUSV.g.village.gain.value=MUSV.vol; }catch(e){} } else a.volume=Math.min(1,MUSV.vol); };
-musGet=function(){
-  if(!MUSV.a.village){
-    const a=new Audio(BGM.url); a.loop=true; a.volume=Math.min(1,MUSV.vol); MUSV.a.village=a;
-    try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g.village=g; } }catch(e){}
+musApply=function(){ ['village','battle'].forEach(k=>{ const a=MUSV.a[k]; if(!a) return; if(MUSV.g[k]){ a.volume=1; try{ MUSV.g[k].gain.value=MUSV.vol; }catch(e){} } else a.volume=Math.min(1,MUSV.vol); }); };
+musGet=function(k){
+  k=bgmKey(k);
+  if(!MUSV.a[k]){
+    const a=new Audio(BGM.u[k]); a.loop=true; a.volume=Math.min(1,MUSV.vol); MUSV.a[k]=a;
+    try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g[k]=g; } }catch(e){}
   }
-  return MUSV.a.village;
+  return MUSV.a[k];
 };
 musPlay=function(k){
   MUSV.want=k; if(!MUSV.on||!MUSV.unl) return;
-  bgmLoad(()=>{
-    if(!MUSV.on||!MUSV.unl) return;
-    try{ const a=musGet('village'); if(a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
+  const kk=bgmKey(k);
+  ['village','battle'].forEach(x=>{ if(x!==kk&&MUSV.a[x]) MUSV.a[x].pause(); });
+  bgmLoad(kk,()=>{
+    if(!MUSV.on||!MUSV.unl||bgmKey(MUSV.want)!==kk) return;
+    try{ const a=musGet(kk); if(a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
   });
 };
-setTimeout(()=>{ try{ bgmLoad(); }catch(e){} },5000);
+setTimeout(()=>{ try{ bgmLoad('village'); }catch(e){} },5000);
+setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },25000);
+
+
+/* p32/cwking.js — 202: дэлхийн газрын зураг дээр клан бүрийн ХААН (👑 нэр · хүч) кланы төвийн доор харагдана */
+(function(){
+  const _cd=wmClanDraw;
+  wmClanDraw=function(c,D,z,t,vis,items){
+    _cd.apply(this,arguments);
+    try{
+      const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0');
+      CLN.forEach((q,i)=>{
+        const d=(typeof CKD!=='undefined')&&CKD.docs&&CKD.docs[i]; if(!d||!d.ow) return;
+        const isMy=i===my, s=ok?wmS('wm_hq'+i):null, ww=s?0.85*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
+        if(!vis(qx,qy,320)) return;
+        const row=((CKD.mem&&CKD.mem[i])||[]).find(x=>x.id===d.ow);
+        const nm=esc2(String((row&&row.n)||d.on||'Хаан').slice(0,14)), pw=row&&row.p>0?'  ⚔'+f(row.p):'';
+        const by=qy+(s?hh*0.12:8);
+        items.push({y:1e5+qy+2,f:()=>{ c.save(); wmLabel(c,'👑 '+nm+pw,qx,by+16,'#ffe28a',12); c.restore(); }});
+      });
+    }catch(e){}
+  };
+  const _wo=wmOpen;
+  wmOpen=function(){ const r=_wo.apply(this,arguments); try{ if(typeof ckFetch==='function') ckFetch(); }catch(e){} return r; };
+})();
+
+
+/* p32/wmone.js — 203: дэлхийн газрын зураг дээр дайрахад ЗӨВХӨН НЭГ баатар явна (анхдагч нь хамгийн хүчтэй нь) */
+wmSelEff=function(){
+  const sel=wmSelGet(), A=wmAway(), sq=squad();
+  const ok=id=>S.heroes[id]&&!A.h[id]&&!(typeof SUPP!=='undefined'&&SUPP[id]);
+  const pool=sq.filter(ok); let pick=null;
+  if(sel.h&&sel.h.length===1&&pool.indexOf(sel.h[0])>=0) pick=sel.h[0];
+  if(!pick&&pool.length){ pick=pool.slice().sort((a,b)=>heroPower(b)-heroPower(a))[0]; }
+  if(!pick){ const rest=sq.filter(id=>!A.h[id]); pick=rest[0]||null; }
+  const pc={}; TR.forEach(T=>{ const v=sel.pc[T.ty]==null?1:sel.pc[T.ty]; pc[T.ty]=Math.max(0,Math.min(v,1-(A.pc[T.ty]||0))); });
+  return {hs:pick?[pick]:[],pc:pc};
+};
+wmSelHero=function(hid,id){ const A=wmAway(); if(A.h[hid]) return; wmSelGet().h=[hid]; wmSelSheet(id); };
+(function(){ const _s=wmSelSheet;
+  wmSelSheet=function(id){ _s.apply(this,arguments);
+    try{ const sh=$('wmsheet'); if(!sh) return; const d=[...sh.querySelectorAll('div.sm')].find(x=>x.textContent.trim()==='Баатар:'); if(d) d.textContent='Баатар · нэгийг сонго:'; }catch(e){}
+  };
+})();
+
+
+/* p32/frduel.js — 204: найзын профайл дээр «⚔ 5vs5 тулах» — найзын баатруудтай (бот удирдана) тулна. Шагналгүй, найрсаг тулаан */
+function frPow(id,lv){
+  const had=Object.prototype.hasOwnProperty.call(S.heroes,id), old=S.heroes[id];
+  S.heroes[id]=lv; let p=0; try{ p=heroPower(id); }catch(e){}
+  if(had) S.heroes[id]=old; else delete S.heroes[id];
+  return p;
+}
+window.frDuel=function(){
+  try{
+    const r=CL.sv; if(!r||!r.v||!r.v.h){ say('Найзын баатрын мэдээлэл алга'); return; }
+    if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
+    const L=Object.keys(r.v.h).filter(id=>HEROES.find(x=>x.id===id)).map(id=>({id:id,lv:r.v.h[id],p:frPow(id,r.v.h[id])})).sort((a,b)=>b.p-a.p).slice(0,5);
+    if(!L.length){ say('Найзад баатар алга'); return; }
+    const tot=Math.max(100,L.reduce((a,x)=>a+x.p,0)), nm=String(r.n||'Найз').slice(0,14);
+    try{ closeM(); }catch(e){}
+    startBattle(0,{n:nm+' · 5vs5',fc:1,p:tot,g:0,m:0,bi:0,fr:1,eh:L,pc:{cav:0,archer:0,foot:0},back:'soc',
+      cb:()=>{ try{ say('🏆 '+nm+'-г 5vs5 тулаанд ялав!'); }catch(e){} },cbl:()=>{ try{ say('Ялагдлаа. '+nm+' илүү хүчтэй байна'); }catch(e){} }});
+  }catch(e){ try{ say('Тулаан эхлүүлж чадсангүй'); }catch(x){} }
+};
+(function(){ const _sb=startBattle;
+  startBattle=function(i,E){
+    const r=_sb.apply(this,arguments);
+    try{
+      if(E&&E.fr&&E.eh&&BT&&BT.units){
+        const en=BT.units.filter(u=>u.side===1), L=E.eh, n=en.length||1, ep=E.p/n;
+        en.forEach((u,k)=>{ const h=L[k]; if(!h){ u.hp=0; u.max=0; u.dead=true; return; } const m=Math.max(0.2,Math.min(4,h.p/ep)); u.hp*=m; u.max*=m; u.atk*=m; const he=HEROES.find(x=>x.id===h.id); if(he) u.name=he.n; });
+        BT.units=BT.units.filter(u=>!(u.side===1&&u.dead));
+        BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0);
+      }
+    }catch(e){}
+    return r;
+  };
+  const _sv=socView;
+  socView=function(){
+    let h=_sv.apply(this,arguments);
+    try{
+      const r=CL.sv, me=r&&r.id===CL.uid;
+      if(!me&&r&&r.v&&r.v.h&&Object.keys(r.v.h).length){
+        const i=h.indexOf('Хүч <b>'), j=i<0?-1:h.indexOf('</div>',i);
+        if(j>0) h=h.slice(0,j+6)+'<div style="margin-top:8px"><button class="btn red" style="width:100%" onclick="frDuel()">⚔ 5vs5 тулах</button><div class="sm">Найзын баатруудтай тулна · шагналгүй</div></div>'+h.slice(j+6);
+      }
+    }catch(e){}
+    return h;
+  };
+})();
+
+
+/* p32/marchhero.js — 205: газрын зураг дээр явж буй цуваан дээр удирдаж яваа баатрын зураг (дугуй хүрээтэй) харагдана */
+var MHI={};
+function mhImg(id){
+  if(MHI[id]!==undefined) return MHI[id];
+  const d=(typeof SPRDATA!=='undefined')&&SPRDATA['hp_'+id]; if(!d||!d[0]){ MHI[id]=null; return null; }
+  const im=new Image(); im.src=d[0]; MHI[id]=im; return im;
+}
+(function(){
+  const _ad=wmArmyDraw;
+  wmArmyDraw=function(c,m,mx,my,t,back,e){
+    _ad.apply(this,arguments);
+    try{
+      const hs=(m.hs||[]).filter(id=>HEROES.find(x=>x.id===id)).slice(0,3); if(!hs.length) return;
+      const A=wmArmyInfo(m), s=WMT.ok&&wmS(A.k), h=s?0.46*s.ih:26, bob=Math.sin(t*9+hsh(String(m.id)))*1.3;
+      const r=15, top=my-h*0.88+bob-r-3, gap=r*1.5, x0=mx-(hs.length-1)*gap/2;
+      hs.forEach((id,i)=>{
+        const cx=x0+i*gap, im=mhImg(id); c.save();
+        c.beginPath(); c.arc(cx,top,r,0,6.2832); c.fillStyle='#2b1d12'; c.fill();
+        if(im&&im.complete&&im.naturalWidth){ c.save(); c.beginPath(); c.arc(cx,top,r-1.5,0,6.2832); c.clip(); const q=Math.min(im.naturalWidth,im.naturalHeight); c.drawImage(im,(im.naturalWidth-q)/2,(im.naturalHeight-q)/2,q,q,cx-r,top-r,r*2,r*2); c.restore(); }
+        c.lineWidth=2.5; c.strokeStyle='#f3c85a'; c.beginPath(); c.arc(cx,top,r,0,6.2832); c.stroke();
+        c.lineWidth=1; c.strokeStyle='#000a'; c.beginPath(); c.arc(cx,top,r+1.3,0,6.2832); c.stroke();
+        c.restore();
+      });
+    }catch(x){}
+  };
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

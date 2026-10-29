@@ -2010,7 +2010,7 @@ function updateHUD(){
   const cells=[['meat'],['milk'],['wool'],['grain'],['wood'],['gold'],['alt']];
   $('res').innerHTML=cells.map(([k])=>'<div class="rc"><div class="ri">'+(RICON[k]?'<img src="'+RICON[k]+'">':k==='wood'?'<span class="em">🪵</span>':'<b class="coin'+(k==='alt'?' alt':'')+'">'+(k==='alt'?'А':'🪙')+'</b>')+'</div><div class="rv"><span>'+cn(S.res[k])+'</span>'+(r[k]>0?'<small>+'+(r[k]<10?r[k].toFixed(1):Math.round(r[k]))+'/м</small>':'')+'</div></div>').join('');
   const av=$('avi'), pk=S.prof.img?('u'+S.prof.img.length):(S.prof.sp||'npc1');
-  if(av&&av.dataset.k!==pk){ av.src=S.prof.img||(SPRDATA[S.prof.sp]||SPRDATA.npc1)[0]; av.dataset.k=pk; av.className=S.prof.img?'ph':''; }
+  const _asr=S.prof.img||(SPRDATA[S.prof.sp]||SPRDATA.npc1)[0]; if(av&&(av.dataset.k!==pk||av.src!==_asr)){ av.src=_asr; av.dataset.k=pk; av.className=S.prof.img?'ph':''; }
   try{ const a=av&&av.parentNode, L=S.pl||1, ft=L<5?0:L<10?1:L<20?2:L<30?3:4, fh=(typeof HUDN!=='undefined'&&HUDN)?HUDF:PFH[ft]; if(a&&a.parentNode){ let fi=$('avf'); if(!fi){ fi=document.createElement('img'); fi.id='avf'; fi.style.cssText='position:absolute;pointer-events:none;z-index:3'; a.parentNode.style.position='relative'; a.parentNode.appendChild(fi); }
     const W=44/(2*fh[2])*1.04; a.style.border='0'; a.style.width=a.style.height='44px'; const _hk=(typeof HUDN!=='undefined'&&HUDN)?'n'+ft:String(ft); if(fi.dataset.k!==_hk){ fi.src=(typeof HUDN!=='undefined'&&HUDN)?HUDN.ring:PFR[ft]; fi.dataset.k=_hk; } fi.style.width=W+'px'; fi.style.left=(a.offsetLeft+22-fh[0]*W)+'px'; fi.style.top=(a.offsetTop+22-fh[1]*W*1.0)+'px'; a.style.overflow='hidden'; try{ hudBadge(fi,W); }catch(e){} } }catch(e){}
   $('pname').textContent=S.prof.name||'Хаан';
@@ -2090,7 +2090,7 @@ function profHTML(){
     '<div class="card"><div class="sm" style="margin-bottom:6px">⚔ Миний баатруудаас сонго</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+(HEROES.filter(x=>S.heroes[x.id]&&SPRDATA['hp_'+x.id]).map(x=>'<img src="'+SPRDATA['hp_'+x.id][0]+'" onclick="setSp(\'hp_'+x.id+'\')" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#4a6a2a;border:2px solid '+((!S.prof.img&&S.prof.sp==='hp_'+x.id)?'#ffd770':'#6b4a24')+'">').join('')||'<div class="sm">Баатар дуудаарай</div>')+'</div></div>';
 }
 
-function setSp(k){ S.prof.img=''; S.prof.sp=k; refresh(); }
+function setSp(k){ S.prof.img=''; S.prof.sp=k; try{ const a=$('avi'); if(a) a.dataset.k=''; }catch(e){} refresh(); try{ const a=$('avi'), d=SPRDATA[k]; if(a&&d){ a.src=d[0]; a.dataset.k=k; a.className=''; } say('Хөрөг солигдлоо ✓'); save(); setTimeout(()=>{ try{ clPush(true); }catch(e){} },2500); }catch(e){} }
 function pickImg(inp){
   const fl=inp.files&&inp.files[0]; if(!fl) return;
   const rd=new FileReader();

@@ -7648,7 +7648,7 @@ function jamGet(){
 }
 // ---- Spin (шорон) ----
 const JSW=[{t:'s',n:2,w:22,e:'🗡',c:'#2e8b57'},{t:'a',n:5,w:18,e:'💎',c:'#2a6fb5'},{t:'s',n:5,w:18,e:'🗡',c:'#c9772a'},{t:'a',n:10,w:12,e:'💎',c:'#1f4f94'},{t:'t',n:10,w:10,e:'🔮',c:'#7a3fb0'},{t:'s',n:10,w:12,e:'🗡',c:'#d65a2a'},{t:'s',n:20,w:6,e:'🗡',c:'#b3262e'},{t:'h',n:30,w:2,e:'⭐',c:'#d4a017'}];
-function jamSpinLbl(w){ if(w.t==='h') return jamOwn()?'30':'Жамуха'; return String(w.n); }
+function jamSpinLbl(w){ if(w.t==='h') return jamOwn()?'30':''; return String(w.n); }
 function jamWheelSvg(){ const cx=115,cy=115,r=108,pt=(a,rr)=>{ const t=a*Math.PI/180; return (cx+rr*Math.sin(t)).toFixed(1)+' '+(cy-rr*Math.cos(t)).toFixed(1); };
   const B=window.JWB; let g=B?'<image href="'+B.w+'" x="-.5" y="1.4" width="230" height="230"/>':''; JSW.forEach((w,i)=>{ const a0=i*45-22.5, a1=i*45+22.5; if(!B) g+='<path d="M'+cx+' '+cy+' L'+pt(a0,r)+' A'+r+' '+r+' 0 0 1 '+pt(a1,r)+' Z" fill="'+w.c+'" stroke="#fff3c4" stroke-width="2"/>';
     g+='<g transform="rotate('+(i*45)+' '+cx+' '+cy+')">'+(window.JIC&&JIC[w.t]?'<image href="'+JIC[w.t]+'" x="'+(cx-16)+'" y="'+(cy-92)+'" width="32" height="32" style="filter:drop-shadow(0 1px 1.5px #000d)" preserveAspectRatio="xMidYMid meet"/>':'<text x="'+cx+'" y="'+(cy-70)+'" font-size="25" text-anchor="middle">'+w.e+'</text>')+'<text x="'+cx+'" y="'+(cy-44)+'" font-size="'+(w.t==='h'&&!jamOwn()?12:16)+'" font-weight="900" fill="#fff" stroke="#00000066" stroke-width=".6" text-anchor="middle">'+jamSpinLbl(w)+'</text></g>'; });

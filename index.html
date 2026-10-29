@@ -9521,6 +9521,45 @@ window.CARIMG={"car": ["data:image/webp;base64,UklGRnasAQBXRUJQVlA4WAoAAAAQAAAAz
   };
 })();
 
+
+/* p32/inger.js — (1) гэртээ орсон (home/hide) хүнээс нэр, эмоджи харагдахгүй; (2) амьтан, караван барилгаар дайрч явахгүй. */
+(function(){
+  /* 1) Гэрт орсон хүн */
+  const _u=updPerson;
+  updPerson=function(e,dt){ const r=_u.apply(this,arguments);
+    try{ const P=e.post;
+      if(!e._in&&e.task&&e.task.type==='hold'&&P&&P.sched&&(P.k==='home'||P.k==='hide')&&!e.sel){ e._in=true; e.say=null; e.icon=''; e.moving=false; }
+    }catch(x){}
+    return r; };
+
+  /* 2) Амьтад барилгад орохгүй */
+  const M=1.2;
+  const rects=()=>obList().map(R=>({k:R.k,x0:R.x0-M,y0:R.y0-M,x1:R.x1+M,y1:R.y1+M}));
+  const okPt=(z,L)=>z.x>6&&z.y>44&&z.x<WW-6&&z.y<WH-6&&!L.some(o=>obIn(z,o));
+  function outOf(Q,R,L){ const c=[[Q.y-R.y0,Q.x,R.y0-0.8],[R.y1-Q.y,Q.x,R.y1+0.8],[Q.x-R.x0,R.x0-0.8,Q.y],[R.x1-Q.x,R.x1+0.8,Q.y]].sort((u,v)=>u[0]-v[0]).map(u=>({x:u[1],y:u[2]})); return c.find(z=>okPt(z,L))||c[0]; }
+  function fix(e,Rs){
+    if(e._in||e.hold) return;
+    const skipPen=(e.kind==='animal')||(e.kind==='wild'&&(e.raid||e.friend));
+    const L=skipPen?Rs.filter(R=>R.k!=='hashaa'):Rs; if(!L.length) return;
+    const cx=entCx(e), h=entH(e);
+    const P={x:e.x+cx,y:e.y+h}, R=L.find(r=>obIn(P,r));
+    if(R){ const q=outOf(P,R,L); e.x=q.x-cx; e.y=q.y-h; e.moving=false; }
+    const T={x:e.tx+cx,y:e.ty+h}, RT=L.find(r=>obIn(T,r));
+    if(RT){ const q=outOf(T,RT,L); e.tx=q.x-cx; e.ty=q.y-h; }
+  }
+  const _up=update;
+  update=function(){ const r=_up.apply(this,arguments);
+    try{ const Rs=rects(); if(Rs.length) ents.forEach(e=>{ if(e.kind==='animal'||e.kind==='wild') fix(e,Rs); }); }catch(x){}
+    return r; };
+
+  /* 3) Караван: барилгагүй эгнээгээр орж, гарна */
+  const _cs=carStep;
+  carStep=function(dt){ const was=!!car; const r=_cs.apply(this,arguments);
+    try{ if(car&&!was&&!car._ln){ car._ln=1; const L=obList(), cy0=car.y, clear=fy=>!L.some(R=>R.y1+4>fy&&R.y0-4<fy);
+      if(!clear(cy0+14)){ for(let d=8;d<=700;d+=8){ let f=0; for(const s of [1,-1]){ const y=cy0+s*d; if(y>70&&y<WH-40&&clear(y+14)){ car.y=y; f=1; break; } } if(f) break; } } } }catch(x){}
+    return r; };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

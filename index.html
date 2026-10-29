@@ -9483,6 +9483,17 @@ window.STONEI="data:image/webp;base64,UklGRuQoAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQU
   setInterval(()=>{ try{ const a=document.querySelector('#chst .chnv'), b=document.querySelector('#chst .chnt'); if(!a) return; const n=chNrgShort(); if(a.textContent!=='⚡ '+n.v) a.textContent='⚡ '+n.v; if(b.textContent!==n.t) b.textContent=n.t; }catch(e){} },1000);
 })();
 
+
+/* p32/awaymute.js — Түүхэн аян / Дэлхий / Тулалдаан дотор байхад хотын дэлгэцийн мэдэгдэл (чоно, караван, улирал) гарахгүй. */
+(function(){
+  const OV=['chs','wmap','btl','raceov'];
+  const away=()=>OV.some(i=>document.getElementById(i));
+  const RE=/ирлээ|дайрлаа|Чонын сүрэг|буцлаа|аваад явчихлаа|алагдлаа|Зугт/;
+  let inUpd=0;
+  const _s=say; say=function(m){ try{ if(inUpd&&typeof m==='string'&&RE.test(m)&&away()) return; }catch(e){} return _s.apply(this,arguments); };
+  const _u=update; update=function(){ inUpd++; try{ return _u.apply(this,arguments); } finally{ inUpd--; } };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

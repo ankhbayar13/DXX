@@ -1425,7 +1425,7 @@ function mkWild(type,hx,hy){ ents.push({kind:'wild',type,x:hx,y:hy,tx:hx,ty:hy,h
 function drawFx(t){
   const aw=22/(SC*Z);
   ents.forEach(e=>{
-    if((e.kind!=='person'&&!e.friend)||!e.task||e.task.phase!=='go'||(e.post&&e.post.sched)) return; /* хуваарийн хөдөлгөөнд ногоон сум үзүүлэхгүй */
+    if((e.kind!=='person'&&!e.friend)||!e.task||e.task.phase!=='go'||!e.task._pl||(e.post&&e.post.sched)) return; /* хуваарийн хөдөлгөөнд ногоон сум үзүүлэхгүй */
     const tk=e.task; let tx,ty;
     if(tk.type==='hunt'&&tk.tg){ tx=tk.tg.x+entW(tk.tg)/2; ty=tk.tg.y+entH(tk.tg)*0.2; }
     else { tx=tk.x+entCx(e); ty=tk.y+entH(e)*0.8; }
@@ -8589,6 +8589,10 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
       return {x:d.x-entCx(e)+(Math.random()*18-9), y:d.y+3-entH(e)+Math.random()*8};
     }catch(x){ return _wp.apply(this,arguments); }
   };
+
+  /* ---------- ногоон сум: зөвхөн тоглогчийн өгсөн даалгаварт (NPC-ийн өөрийн тэнүүчлэлд харуулахгүй) ---------- */
+  const _cmdA=command;
+  command=function(){ const e=sel; const r=_cmdA.apply(this,arguments); try{ if(e&&e.task) e.task._pl=1; }catch(x){} return r; };
 
   /* ---------- амарч/унтаж буй хүн гэртээ орж, нуугдана (зураг, нэр, 😴 харагдахгүй) ---------- */
   const _upIn=updPerson;

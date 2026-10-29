@@ -9052,7 +9052,7 @@ const wsReg=()=>{ try{ return !!(typeof CL!=='undefined'&&CL.email); }catch(e){ 
 function wsTop(){ const o=wsSt().own; let m=-1; for(const k in o){ if(o[k]&&+k>m) m=+k; } return m; }
 function wsIdx(){ return wsReg()?wsTop():-1; }
 function wsPush(){ return {wt:wsTop(),wp:-1,wk:0}; }
-function wsOther(r){ return (r&&typeof r.wt==='number')?r.wt:-1; }
+function wsOther(r){ try{ if(r&&r.id&&typeof CL!=='undefined'&&CL.uid&&r.id===CL.uid) return wsIdx(); }catch(e){} return (r&&typeof r.wt==='number')?r.wt:-1; }
 const wtCol=i=>i<=1?'#7fe08a':i<=7?'#7ec8ff':'#ffd770';
 function wtImg(i,h,st){ try{ const u=window.WRB&&WRB[i]; return u?'<img src="'+u+'" style="height:'+h+'px;vertical-align:middle;'+(st||'')+'">':''; }catch(e){ return ''; } }
 function wtTagI(i){ return i>=0?' <span style="color:'+wtCol(i)+';font-size:11px;font-weight:bold">'+(wtImg(i,22)||'🏅')+' '+WRT[i][0]+'</span>':''; }
@@ -9128,7 +9128,7 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
         if(sm) sm.textContent=over?'🏟 '+WKN[run.k]+' дууслаа':'🏟 '+WKN[run.k]+' үргэлжилж байна';
         if(!over){ let b=ag; if(!b){ b=document.createElement('button'); b.className='btn'; b.id='archagain'; const row=r.querySelector('.row2'); if(row) row.insertBefore(b,row.firstChild); } b.textContent='▶ Дараагийн тулаан'; b.onclick=()=>{ cancelAnimationFrame(R.raf); const o=R.o; WRS=null; o.remove(); wevBout(); }; }
         else if(ag) ag.remove(); }
-      try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} }catch(e){} };
+      try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} if(newT.length) setTimeout(()=>{ try{ clPush(true); }catch(e){} },4000); }catch(e){} };
 })();
 (function(){ function chk(){ try{ if(!wsReg()) return; const s=wsSt(), t=wevT(); s.nt=s.nt||{}; ['s','a','u'].forEach(k=>{ if(!wevGoal(k)) return; const w=wevWin(k,t); if(w&&w.open&&s.last[k]!==w.d&&s.nt[k]!==w.d){ s.nt[k]=w.d; try{ say('🏟 '+WKN[k]+' нээгдлээ! Наадам цэсээс оролц ('+wtTm(w.en-t)+' үлдсэн)'); }catch(e){} } }); }catch(e){} }
   setTimeout(chk,8000); setInterval(chk,60000); })();

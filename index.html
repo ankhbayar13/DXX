@@ -2723,7 +2723,7 @@ function ntTrain(k){ const t=NTRAIN.find(x=>x.k===k); S.ntT=S.ntT||{}; if(!t||(S
   S.nt[k]=ntL(k)+1; S.ntT[k]=Date.now()+t.sec*1000*(1+ntL(k)*0.3)/(1+0.15*(S.bld.naadamring||0)); say(t.n+': '+S.nt[k]+'-р түвшин!'); refresh(); }
 function naadamHTML(){
   const now=Date.now(); S.ntT=S.ntT||{};
-  let h='<h2>'+ico('nd_khadag',34)+' Наадам</h2><div class="card"><div class="sm">Тэмцээн бүрд өөрөө оролцоно. Өдөрт 3 оролдлого. Бэлтгэлээр түвшингээ өсгөвөл амар болно. Түрүүлсэн: '+ico('nd_cup',22)+' '+S.ndw+'</div></div>';
+  let h='<h2>'+ico('nd_khadag',34)+' Наадам</h2><div class="card"><div class="sm">Тэмцээн бүрд өөрөө оролцоно. Өдөрт 3 оролдлого. Бэлтгэлээр түвшингээ өсгөвөл амар болно. Түрүүлсэн: '+ico('nd_cup',22)+' '+((S.ndw||0)+((S.wrs&&S.wrs.tw)||0))+'</div></div>';
   h+='<button class="btn" style="width:100%;margin:6px 0 2px" onclick="openM(\'ndlb\')">🏆 Наадмын жагсаалт</button>'+ndPlayCards();
   h+='<h3 style="margin:8px 0 4px">Бэлтгэл</h3>';
   NTRAIN.forEach(t=>{ const l=ntL(t.k), c=ntCost(t), left=Math.max(0,Math.ceil(((S.ntT[t.k]||0)-now)/1000)), full=l>=10, ok=Object.keys(c).every(r=>(S.res[r]||0)>=c[r]);
@@ -8975,6 +8975,85 @@ function mhImg(id){
 (function(){
   const _t=wmTrip, K=0.8;
   wmTrip=function(e){ const r=_t(e); if(e&&(e.t==='kingdom'||e.t==='clan'||e.t==='camp')) return typeof r==='number'?Math.max(1,r*K):r; return r; };
+})();
+
+
+/* p32/chat3.js — 207: Чат 3 цонхтой: 🌐 Нийтийн · ⚑ Клан · 👥 Найз (Firestore dm/{хос}/m) */
+(function(){
+  const c=document.getElementById('chat'); if(!c) return; const P=c.querySelector('.kP'), kl=P.querySelector('.kL'), kf=P.querySelector('.kF'), kh=P.querySelector('.kH span');
+  const st=document.createElement('style'); st.textContent='#chtabs{display:flex;gap:6px;padding:6px 8px;background:#33230f;border-bottom:1px solid #c9972b66;flex:none}#chtabs button{flex:1;padding:7px 2px;border-radius:9px;border:2px solid #7a5a22;background:#2b1d12;color:#e8d3a0;font-weight:900;font-size:13px}#chtabs button.on{background:linear-gradient(#f0c24a,#b97d12);border-color:#f6e3a0;color:#3b2200}#chdm{display:none;align-items:center;gap:8px;padding:5px 10px;background:#2f2110;color:#ffe9b0;font-size:13px;flex:none}#chdm button{background:#5a3b17;border:1px solid #c9972b;color:#ffe9b0;border-radius:7px;padding:3px 9px;font-size:12px}#chfr .fr{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;background:#3f2d1a;margin-bottom:6px;color:#fff}#chfr .fr b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#chfr .fr span{font-size:11px;color:#c9b890}';
+  document.head.appendChild(st);
+  const tb=document.createElement('div'); tb.id='chtabs'; tb.innerHTML='<button data-t="pub">🌐 Нийтийн</button><button data-t="clan">⚑ Клан</button><button data-t="fr">👥 Найз</button>';
+  const dm=document.createElement('div'); dm.id='chdm';
+  P.insertBefore(tb,kl); P.insertBefore(dm,kl);
+  tb.querySelectorAll('button').forEach(b=>{ b.onclick=()=>chTab(b.getAttribute('data-t')); });
+  CHT.tab='pub'; CHT.dm=null;
+  const myClan=()=>{ try{ if(S.clan!=null&&S.clan>=0) return S.clan; if(S.ckOwn!=null&&S.ckOwn>=0) return S.ckOwn; }catch(e){} return null; };
+  const isDm=()=>typeof CHT.room==='string'&&CHT.room.indexOf('dm:')===0;
+  function mark(){ tb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.getAttribute('data-t')===CHT.tab)); }
+  function stop(){ if(CHT.unsub){ try{ CHT.unsub(); }catch(e){} CHT.unsub=null; } const p=document.getElementById('chpin'); if(p) p.remove(); }
+  function showDm(on,name){ dm.style.display=on?'flex':'none'; if(on) dm.innerHTML='<button onclick="chTab(\'fr\')">‹ Жагсаалт</button><span>👤 <b>'+esc2(String(name||'Найз'))+'</b></span>'; }
+  // ---- коллекцийн зам ----
+  const _cc=chColl, _cd=chDoc;
+  chColl=function(F,db){ if(isDm()) return F.collection(db,'dm',CHT.room.slice(3),'m'); return _cc(F,db); };
+  chDoc=function(F,db,id){ if(isDm()) return F.doc(db,'dm',CHT.room.slice(3),'m',id); return _cd(F,db,id); };
+  // ---- нээх ----
+  const _co=chatOpen;
+  chatOpen=function(room){
+    showDm(false);
+    if(typeof room==='number'){ CHT.tab='clan'; mark(); kf.style.display='flex'; return _co(room); }
+    if(typeof room==='string'&&room.indexOf('dm:')===0){ return dmOpen(room.slice(3)); }
+    CHT.tab='pub'; mark(); kf.style.display='flex'; return _co();
+  };
+  window.chTab=function(t){
+    CHT.tab=t; mark(); showDm(false);
+    if(t==='pub'){ kf.style.display='flex'; _co(); return; }
+    if(t==='clan'){ const k=myClan(); if(k==null){ stop(); CHT.room=null; CHT.msgs=[]; kf.style.display='none'; kh.textContent='💬 Кланы чат'; chatInfo('Та одоогоор клангүй байна.<br>Кланд элсээд эсвэл өөрөө клан үүсгээд кланаараа чатлаарай.'); return; }
+      kf.style.display='flex'; _co(k); return; }
+    // найз
+    stop(); CHT.room=null; CHT.msgs=[]; CHT.sel=null; CHT.on=1; kf.style.display='none'; kh.textContent='💬 Найзтайгаа чатлах'; frList();
+    try{ if(typeof socFetchFr==='function') Promise.resolve(socFetchFr()).then(()=>{ if(CHT.tab==='fr'&&!CHT.dm) frList(); }).catch(()=>{}); }catch(e){}
+  };
+  function frList(){ const l=document.getElementById('chl2'); if(!l) return; const F=(S.friends||[]);
+    if(!F.length){ l.innerHTML='<div class="kE">Найз алга байна.<br>«Найзаа урь» цэснээс найз нэмээд чатлаарай.</div>'; return; }
+    const L=F.map(x=>Object.assign({id:x.id,n:x.n,l:x.l,p:x.p},(CL.fd&&CL.fd[x.id])||{},{id:x.id})).sort((a,b)=>(b.t||0)-(a.t||0));
+    l.innerHTML='<div id="chfr">'+L.map(x=>{ let ago=''; try{ if(x.t&&typeof ckAgo==='function') ago=ckAgo(x.t); }catch(e){}
+      return '<div class="fr" onclick="chDm(\''+x.id+'\')"><b>'+esc2(String(x.n||'Найз').slice(0,16))+'</b><span>'+(x.l?'Lv '+x.l+' · ':'')+(ago||'')+'</span><span style="font-size:18px">›</span></div>'; }).join('')+'</div>'; }
+  window.chDm=function(id){ if(!id) return; dmOpen([CL.uid,id].sort().join('_'),id); };
+  function dmOpen(key,fid){ if(!fid){ fid=key.split('_').filter(x=>x!==CL.uid)[0]; }
+    CHT.tab='fr'; mark(); CHT.dm=fid; CHT.room='dm:'+key; CHT.msgs=[]; CHT.sel=null; CHT.on=1; stop();
+    const fr=(S.friends||[]).find(x=>x.id===fid), nm=(fr&&fr.n)||((CL.fd&&CL.fd[fid]&&CL.fd[fid].n)||'Найз'); kh.textContent='💬 '+String(nm).slice(0,14); showDm(true,nm); kf.style.display='flex'; chatDraw();
+    if(!CL.ok||!FBM){ chatInfo('Интернет холбогдоогүй байна.'); return; }
+    try{ const {F,db}=FBM; CHT.unsub=F.onSnapshot(F.query(chColl(F,db),F.orderBy('t','desc'),F.limit(50)),s=>{ if(CHT.room!=='dm:'+key) return; CHT.msgs=s.docs.map(x=>Object.assign({id:x.id},x.data())).reverse(); chatDraw(true); },e=>{ chatInfo((e&&e.code==='permission-denied')?'Найзын чат хараахан идэвхжээгүй байна':'Чат холбогдсонгүй'); }); }catch(e){ chatInfo('Чат холбогдсонгүй'); } }
+  // найзын жагсаалт руу буцахад CHT.dm цэвэрлэх
+  const _tab=window.chTab; window.chTab=function(t){ if(t==='fr') CHT.dm=null; return _tab(t); };
+  tb.querySelectorAll('button').forEach(b=>{ b.onclick=()=>window.chTab(b.getAttribute('data-t')); });
+})();
+
+
+/* p32/wrtitle.js — 208: Бөхийн цол (нийт ялалтаар). Сумын Начинаас Улсын Дархан Аварга хүртэл 14 цол; анх авахад шагнал */
+const WRT=[['Сумын Начин',3],['Сумын Заан',9],['Аймгийн Начин',18],['Аймгийн Харцага',30],['Аймгийн Заан',45],['Аймгийн Арслан',65],['Улсын Начин',90],['Улсын Харцага',120],['Улсын Заан',155],['Улсын Гарьд',195],['Улсын Арслан',240],['Улсын Аварга',300],['Улсын Далай Аварга',380],['Улсын Дархан Аварга',480]];
+const WRT_ALT=[1,1,1,2,2,2,3,3,3,4,5,6,8,10];
+function wtIdx(w){ w=+w||0; let r=-1; for(let i=0;i<WRT.length;i++){ if(w>=WRT[i][1]) r=i; } return r; }
+function wtName(w){ const i=wtIdx(w); return i<0?'':WRT[i][0]; }
+function wtTag(w){ const n=wtName(w); return n?' <span style="color:#ffd770;font-size:11px;font-weight:bold">🏅 '+n+'</span>':''; }
+function wtGold(i){ return 1000*(i+1); }
+function wtLine(w){ w=+w||0; const i=wtIdx(w), nx=WRT[i+1];
+  return '🏅 Бөхийн цол: <b style="color:#ffd770">'+(i<0?'байхгүй':WRT[i][0])+'</b>'+(nx?' · дараагийнх: '+nx[0]+' ('+w+'/'+nx[1]+')':' · 👑 дээд цол'); }
+(function(){
+  const tw=()=>((S.wrs&&S.wrs.tw)||0);
+  const _c=wrestCardHTML; wrestCardHTML=function(){ let h=_c.apply(this,arguments); try{ h=h.replace('<div class="row" style="margin-top:6px">','<div class="sm" style="text-align:center;margin-top:6px">'+wtLine(tw())+'</div><div class="row" style="margin-top:6px">'); }catch(e){} return h; };
+  const _p=profHTML; profHTML=function(){ let h=_p.apply(this,arguments); try{ const i=wtIdx(tw()); if(i>=0) h=h.replace(/(<div>Хүч [^<]*<\/div>)(<\/div><\/div>)/,'$1<div style="color:#ffd770;font-size:15px">🏅 '+WRT[i][0]+'</div>$2'); }catch(e){} return h; };
+  const _s=socView; socView=function(){ let h=_s.apply(this,arguments); try{ const r=CL.sv, t=wtName(r&&r.nw); if(t) h=h.replace(/(⚔ Хүч <b>[^<]*<\/b><\/div>)/,'$1<div style="margin-top:3px;color:#ffd770">🏅 '+t+'</div>'); }catch(e){} return h; };
+  const _n=ndLbHTML; ndLbHTML=function(){ let h=_n.apply(this,arguments); try{ if(NDTAB==='w') h=h.replace(/(<span class="sm">Lv [^<]*<\/span>)(<\/div><b style="color:#ffd770">(\d+) ялалт<\/b>)/g,(m,a,b,w)=>a+wtTag(+w)+b); }catch(e){} return h; };
+  // шагнал
+  function award(){ const w=tw(), idx=wtIdx(w), g=(S.wtg==null?-1:S.wtg); if(idx<=g) return null; let gold=0, alt=0; for(let i=g+1;i<=idx;i++){ gold+=wtGold(i); alt+=WRT_ALT[i]; }
+    S.wtg=idx; S.res.gold=(S.res.gold||0)+gold; S.res.alt=(S.res.alt||0)+alt; return {n:WRT[idx][0],gold:gold,alt:alt,k:idx-g}; }
+  window.wtAward=award;
+  const _f=wrestFinish; wrestFinish=function(){ _f.apply(this,arguments); try{ const a=award(); if(!a) return;
+    try{ sfx('win'); }catch(e){} try{ say('🏅 Шинэ цол: '+a.n+'! +'+f(a.gold)+' 🪙 +'+a.alt+' Алт'); }catch(e){}
+    const r=document.getElementById('archres'); if(r){ const d=document.createElement('div'); d.style.cssText='margin:6px 0;padding:8px 10px;border-radius:10px;background:linear-gradient(#5a3b17,#3b2815);border:2px solid #ffd770;color:#ffe9b0;font-weight:bold'; d.innerHTML='🏅 Шинэ цол!<br><span style="font-size:18px;color:#ffd770">'+a.n+'</span><br><span class="sm">+'+f(a.gold)+' 🪙 · +'+a.alt+' Алт</span>'; const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); }
+    try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} }catch(e){} };
 })();
 
 </script><script>(function(){

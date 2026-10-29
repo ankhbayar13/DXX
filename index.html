@@ -7576,7 +7576,7 @@ Object.assign(BHN,{"jamukha":{"idle":4,"win":2,"run":5,"walk":3,"atk":6,"hit":2,
 
 /* 181: Жамуха — 45 өдрийн онцгой баатар (цэс, хэлтэрхий, худалдан авалт, «Анд андгай» чадвар) */
 const JAM={id:'jamukha',start:Date.UTC(2026,9,28,16,0,0),days:45,need:120,price:2000,dsh:15,min:200,login:1,win:2,week:5,box:200,boxN:10,boxMax:3};
-JAM.end=JAM.start+JAM.days*864e5;
+JAM.end=JAM.start+JAM.days*864e5; JAM.spPrice=100; JAM.spMax=5;
 HEROES.push({id:'jamukha',n:'Жамуха',s:4,lim:1});
 HSK.jamukha=['anda','Анд андгай','Чингис хаан багт байвал хоёулаа +40% цохилт (8с), 12% эдгээнэ, бусад +10%. Ганцаараа бол бүх цэрэгт +20% (8с)',14,1];
 SKI.anda=['🤝','Анд андгай']; try{ SKIC.anda='🤝'; }catch(e){}
@@ -7604,7 +7604,7 @@ const jamCanStar=()=>jamOwn()&&starOf(JAM.id)<STMAX&&shN(JAM.id)>=STC[starOf(JAM
 const jamPrice=()=>Math.max(JAM.min,JAM.price-jamS().sh*JAM.dsh);
 function jamLeftTxt(){ const l=JAM.end-wmNow(); if(l<=0) return 'дууссан'; const d=Math.floor(l/864e5), h=Math.floor(l%864e5/36e5), m=Math.floor(l%36e5/6e4); return d>0?d+' өдөр '+h+' цаг':(h>0?h+' цаг '+m+' мин':m+' мин'); }
 function jamShort(){ const l=JAM.end-wmNow(); const d=Math.floor(l/864e5); return d>=1?d+'ө':Math.max(1,Math.floor(l/36e5))+'ц'; }
-function jamAdd(n,why){ const J=jamS(); let g; if(jamOwn()){ S.sh=S.sh||{}; g=Math.max(0,Math.min(n,jamNeed())); S.sh[JAM.id]=shN(JAM.id)+g; } else { const b=J.sh; J.sh=Math.min(JAM.need,J.sh+n); g=J.sh-b; } if(g>0){ try{ say('🗡 Жамухагийн хэлтэрхий +'+g+(why?' ('+why+')':'')); }catch(e){} try{ save(); }catch(e){} } try{ if(document.getElementById('jamov')) jamRender(); }catch(e){} return g; }
+function jamAdd(n,why,quiet){ const J=jamS(); let g; if(jamOwn()){ S.sh=S.sh||{}; g=Math.max(0,Math.min(n,jamNeed())); S.sh[JAM.id]=shN(JAM.id)+g; } else { const b=J.sh; J.sh=Math.min(JAM.need,J.sh+n); g=J.sh-b; } if(g>0){ if(!quiet){ try{ say('🗡 Жамухагийн хэлтэрхий +'+g+(why?' ('+why+')':'')); }catch(e){} } try{ save(); }catch(e){} } try{ if(document.getElementById('jamov')) jamRender(); }catch(e){} return g; }
 function jamLogin(){ if(!jamVis()) return; const J=jamS(), d=jamDay(); if(J.ld===d){ say('Өнөөдрийн шагналыг авсан'); return; } J.ld=d; jamAdd(JAM.login,'өдрийн шагнал'); try{ sfx('ok'); }catch(e){} jamRender(); }
 function jamWin(){ if(!jamVis()) return; const J=jamS(), d=jamDay(); if(J.qd===d) return; J.qd=d; jamAdd(JAM.win,'өнөөдрийн ялалт'); }
 function jamWeek(why){ if(!jamVis()) return; const J=jamS(), w=wmWeek(); if(J.wk===w) return; J.wk=w; jamAdd(JAM.week,why); }
@@ -7646,6 +7646,39 @@ function jamGet(){
   JAMX.busy=1; giveHero(JAM.id); jamS().got=1; try{ save(); }catch(e){} JAMX.busy=0;
   jamClose(); try{ refresh(); }catch(e){} jamReveal(); try{ jamBtnUpd(); }catch(e){}
 }
+// ---- Spin (шорон) ----
+const JSW=[{t:'s',n:2,w:22,e:'🗡',c:'#2e8b57'},{t:'a',n:5,w:18,e:'💎',c:'#2a6fb5'},{t:'s',n:5,w:18,e:'🗡',c:'#c9772a'},{t:'a',n:10,w:12,e:'💎',c:'#1f4f94'},{t:'t',n:10,w:10,e:'🔮',c:'#7a3fb0'},{t:'s',n:10,w:12,e:'🗡',c:'#d65a2a'},{t:'s',n:20,w:6,e:'🗡',c:'#b3262e'},{t:'h',n:30,w:2,e:'⭐',c:'#d4a017'}];
+function jamSpinLbl(w){ if(w.t==='h') return jamOwn()?'30':'Жамуха'; return String(w.n); }
+function jamWheelSvg(){ const cx=115,cy=115,r=108,pt=(a,rr)=>{ const t=a*Math.PI/180; return (cx+rr*Math.sin(t)).toFixed(1)+' '+(cy-rr*Math.cos(t)).toFixed(1); };
+  let g=''; JSW.forEach((w,i)=>{ const a0=i*45-22.5, a1=i*45+22.5; g+='<path d="M'+cx+' '+cy+' L'+pt(a0,r)+' A'+r+' '+r+' 0 0 1 '+pt(a1,r)+' Z" fill="'+w.c+'" stroke="#fff3c4" stroke-width="2"/>'
+    +'<g transform="rotate('+(i*45)+' '+cx+' '+cy+')"><text x="'+cx+'" y="'+(cy-70)+'" font-size="25" text-anchor="middle">'+w.e+'</text><text x="'+cx+'" y="'+(cy-44)+'" font-size="'+(w.t==='h'&&!jamOwn()?12:16)+'" font-weight="900" fill="#fff" stroke="#00000066" stroke-width=".6" text-anchor="middle">'+jamSpinLbl(w)+'</text></g>'; });
+  return '<svg id="jwr" viewBox="0 0 230 230" width="230" height="230" style="transform:rotate('+(JAMX.rot||0)+'deg)">'+g+'<circle cx="115" cy="115" r="108" fill="none" stroke="#f1c24a" stroke-width="5"/><circle cx="115" cy="115" r="14" fill="#f6e3a0" stroke="#8a5a10" stroke-width="3"/></svg>'; }
+function jamSpinInfo(){ const J=jamS(), d=jamDay(), n=J.sd===d?(J.sn||0):0; return {n:n,free:n===0,left:Math.max(0,JAM.spMax-n)}; }
+function jamWheelHTML(){ const o=jamSpinInfo(); let b;
+  if(!o.left) b='<button class="btn" style="filter:grayscale(.7) brightness(.8)">Өнөөдөр дууссан · маргааш</button>';
+  else if(o.free) b='<button class="btn" onclick="jamSpin()">🎡 Эргүүлэх · Үнэгүй</button>';
+  else if(JAMX.cs) b='<button class="btn warn" onclick="jamSpin()">⚠ Дахин дар · '+JAM.spPrice+' 💎</button>';
+  else b='<button class="btn" onclick="jamSpin()">🎡 Эргүүлэх · '+JAM.spPrice+' 💎</button>';
+  return '<div class="jh">🎡 ӨДРИЙН ШОРОН</div><div class="jwh"><div class="jpt"></div>'+jamWheelSvg()+'</div><div style="text-align:center;margin-top:6px">'+b+'</div>'
+   +'<div class="jft" style="padding:3px 12px 0">Өдөрт '+JAM.spMax+' хүртэл (эхнийх нь үнэгүй) · Жамуха унах боломж 2%'+(jamOwn()?' (Жамуха чамд байгаа тул 30 хэлтэрхий өгнө)':'')+'</div>'; }
+function jamPickSpin(){ let r=Math.random()*100, a=0; for(let i=0;i<JSW.length;i++){ a+=JSW[i].w; if(r<a) return i; } return 0; }
+function jamSpin(){
+  if(JAMX.sp||!jamVis()) return; const J=jamS(), d=jamDay(); if(J.sd!==d){ J.sd=d; J.sn=0; }
+  if(J.sn>=JAM.spMax){ say('Өнөөдрийн эргүүлэлт дууссан'); return; }
+  if(J.sn>0){ if(!JAMX.cs){ JAMX.cs=1; jamRender(); setTimeout(()=>{ if(JAMX.cs){ JAMX.cs=0; try{ jamRender(); }catch(e){} } },4500); return; }
+    JAMX.cs=0; if((S.res.alt||0)<JAM.spPrice){ say('Алт хүрэхгүй байна ('+JAM.spPrice+' хэрэгтэй)'); try{ sfx('err'); }catch(e){} jamRender(); return; } S.res.alt-=JAM.spPrice; }
+  J.sn++; const k=jamPickSpin(), w=JSW[k]; let msg='', hero=false;
+  if(w.t==='s') jamAdd(w.n,'шорон',true);
+  else if(w.t==='a'){ S.res.alt=(S.res.alt||0)+w.n; }
+  else if(w.t==='t'){ try{ stnGain(w.n); }catch(e){} }
+  else if(w.t==='h'){ if(jamOwn()) jamAdd(w.n,'шорон',true); else { giveHero(JAM.id); J.got=1; hero=true; } }
+  msg=w.t==='s'?'🗡 Жамухын хэлтэрхий +'+w.n:w.t==='a'?'💎 +'+w.n+' Алт':w.t==='t'?'🔮 +'+w.n+' Ид шидийн чулуу':(hero?'⭐ Жамуха баатар чинийх боллоо!':'🗡 Жамухын хэлтэрхий +'+w.n);
+  try{ save(); }catch(e){} try{ refresh(); }catch(e){}
+  JAMX.sp=1; const el=document.getElementById('jwr'); const cur=JAMX.rot||0; const need=((-k*45+(Math.random()*24-12))-cur)%360; const tgt=cur+360*5+((need+360)%360); JAMX.rot=tgt;
+  if(el){ el.style.transition='transform 4.2s cubic-bezier(.12,.62,.1,1)'; void el.getBoundingClientRect(); el.style.transform='rotate('+tgt+'deg)'; }
+  try{ sfx('ok'); }catch(e){}
+  setTimeout(()=>{ JAMX.sp=0; try{ sfx('lvl'); }catch(e){} try{ say(msg); }catch(e){} try{ if(hero){ jamClose(); jamReveal(); jamBtnUpd(); } else jamRender(); }catch(e){} try{ jamBtnUpd(); }catch(e){} },el?4400:100);
+}
 function jamStar(){ const id=JAM.id; if(!S.heroes[id]) return; const st=starOf(id); if(st>=STMAX){ say('Дээд од хүрсэн'); return; } const c=STC[st]; if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
   S.sh[id]-=c; S.heroes[id]=st+2; try{ sfx('lvl'); }catch(e){} say('Жамуха '+(st+1)+' одтой боллоо!'); try{ save(); refresh(); }catch(e){} setTimeout(()=>{ try{ clPush(true); }catch(e){} },3000); try{ jamBtnUpd(); }catch(e){} jamRender(); }
 function jamInfo(){ try{ heroInfo(JAM.id); const h=document.getElementById('hd'); if(h) h.style.zIndex=80; }catch(e){} }
@@ -7665,6 +7698,7 @@ function jamInfo(){ try{ heroInfo(JAM.id); const h=document.getElementById('hd')
 '.jr{display:flex;align-items:center;gap:8px;margin:4px 10px 0;padding:5px 8px;border:1px solid #6b4a24;border-radius:9px;background:linear-gradient(#34200f,#26170a);font-size:11.5px;line-height:1.25}.jr .t{flex:1}.jr .t small{display:block;color:#cdb98a;font-size:10px}.jr .p{color:#ffd770;font-weight:900;white-space:nowrap}.jr .ok{color:#9be07a;font-weight:900}'+
 '.jr .btn{padding:3px 10px;font-size:11px}.jr.bx{border-color:#c9972b;background:linear-gradient(#4a3512,#33230c)}.jr .ic{font-size:17px}.jr.bx .btn.warn{filter:hue-rotate(-35deg) saturate(1.6)}.jh{margin:8px 12px 0;font-size:10.5px;font-weight:900;color:#ffd770;letter-spacing:.3px}'+
 '.jsk{margin:8px 10px 0;padding:6px 9px;border:1px solid #6b4a24;border-radius:9px;background:#26170a;font-size:11.5px;line-height:1.3}.jsk b{color:#ffd770}.jsk small{display:block;color:#cdb98a;margin-top:3px}'+
+'.jwh{position:relative;width:230px;height:230px;margin:8px auto 0}.jwh svg{display:block;filter:drop-shadow(0 4px 8px #000a)}.jpt{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:20px solid #ff4a3a;z-index:2;filter:drop-shadow(0 2px 2px #000a)}'+
 '.jft{padding:6px 12px 10px;font-size:10px;line-height:1.35;color:#a89570;text-align:center}'+
 '#jamb{position:fixed;left:9px;top:238px;z-index:3;display:none;flex-direction:column;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}'+
 '#jamb .jr2{width:54px;height:54px;border-radius:50%;background-size:cover;background-position:center;box-shadow:0 0 0 2px #f6e3a0,0 0 12px 3px #ff9a2e99,0 3px 8px #000a;animation:jamgl 2s ease-in-out infinite}'+
@@ -7679,7 +7713,7 @@ function jamOpen(){
 }
 function jamClose(){ const o=document.getElementById('jamov'); if(o) o.remove(); clearInterval(JAMX.iv); JAMX.cf=0; try{ jamBtnUpd(); }catch(e){} }
 function jamRender(){
-  const o=document.getElementById('jamov'); if(!o) return;
+  const o=document.getElementById('jamov'); if(!o||JAMX.sp) return;
   const J=jamS(), d=jamDay(), W=wmWeek(), own=jamOwn(), on=jamOn(), full=J.sh>=JAM.need, g=ico('ui_gem',16), p=jamPrice(), more=!own||jamNeed()>0;
   let bt;
   if(own) bt='<div class="jbuy dis"><b>✔</b><span>Чамд байгаа</span></div>';
@@ -7697,6 +7731,7 @@ function jamRender(){
      +'<div style="margin:6px 12px 0"><button class="btn'+(jamCanStar()?'':' dis')+'" style="width:100%'+(jamCanStar()?'':';filter:grayscale(.7) brightness(.8)')+'" onclick="jamStar()">⭐ Од нэмэх ('+c+' хэлтэрхий)</button></div>'
      +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхийг доорх үүргүүд болон хайрцгаар цуглуулна · Нийт '+jamNeed()+' хэлтэрхий дутуу</div>');
     if(on&&more){
+      h+=jamWheelHTML();
       const bl=jamBoxLeft();
       h+='<div class="jh">🎁 ХАЙРЦАГ</div><div class="jr bx"><span class="ic">🎁</span><div class="t">Жамухагийн хайрцаг<small>+'+JAM.boxN+' хэлтэрхий · өнөөдөр '+(JAM.boxMax-bl)+'/'+JAM.boxMax+'</small></div>'
        +(bl?'<button class="btn'+(JAMX.cb?' warn':'')+'" onclick="jamBox()">'+(JAMX.cb?'Дахин дар':JAM.box+' 💎')+'</button>':'<span class="ok" style="color:#cdb98a">маргааш</span>')+'</div>';
@@ -7710,6 +7745,7 @@ function jamRender(){
     h+='<div class="jsh"><span>🗡 Жамухагийн хэлтэрхий</span><b style="color:#ffd770">'+J.sh+' / '+JAM.need+'</b></div><div class="jbar"><i style="width:'+Math.min(100,J.sh/JAM.need*100)+'%"></i></div>'
      +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхий бүр үнийг '+JAM.dsh+' 💎-ээр хямдруулна · '+JAM.need+' болбол үнэгүй</div>';
     if(on&&!full){
+      h+=jamWheelHTML();
       const bl=jamBoxLeft();
       h+='<div class="jh">🎁 ХАЙРЦАГ</div><div class="jr bx"><span class="ic">🎁</span><div class="t">Жамухагийн хайрцаг<small>+'+JAM.boxN+' хэлтэрхий · өнөөдөр '+(JAM.boxMax-bl)+'/'+JAM.boxMax+'</small></div>'
        +(bl?'<button class="btn'+(JAMX.cb?' warn':'')+'" onclick="jamBox()">'+(JAMX.cb?'Дахин дар':JAM.box+' 💎')+'</button>':'<span class="ok" style="color:#cdb98a">маргааш</span>')+'</div>';

@@ -1470,7 +1470,7 @@ function drawEnt(e,t){
 
 // ---- амьтан, хүн ----
 function animalZone(k){
-  if(S.bld.hashaa>0){ { const _g=(typeof penGeom==='function')?penGeom(brect('hashaa')):null; if(_g){ if(k) return penCell(_g,Math.max(0,STALL.indexOf(k))); return {x:_g.X+_g.W*0.05,y:_g.Y+_g.H*0.15,w:_g.W*0.9,h:_g.H*0.6}; } } const r=brect('hashaa'), i=Math.max(0,STALL.indexOf(k)), W3=(r.w-6)/3, H2=(r.h-6)/2; if(k) return {x:r.x+3+(i%3)*W3+1,y:r.y+3+Math.floor(i/3)*H2+1,w:W3-2,h:H2-2}; return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
+  if(S.bld.hashaa>0&&S.pos.hashaa){ { const _g=(typeof penGeom==='function')?penGeom(brect('hashaa')):null; if(_g){ if(k) return penCell(_g,Math.max(0,STALL.indexOf(k))); return {x:_g.X+_g.W*0.05,y:_g.Y+_g.H*0.15,w:_g.W*0.9,h:_g.H*0.6}; } } const r=brect('hashaa'), i=Math.max(0,STALL.indexOf(k)), W3=(r.w-6)/3, H2=(r.h-6)/2; if(k) return {x:r.x+3+(i%3)*W3+1,y:r.y+3+Math.floor(i/3)*H2+1,w:W3-2,h:H2-2}; return {x:r.x+3,y:r.y+3,w:r.w-6,h:r.h-6}; }
   const g=brect('ger'); return {x:g.x-14,y:g.y+g.sh+8,w:g.w+28,h:26};
 }
 function syncEnts(mode){
@@ -2279,6 +2279,7 @@ function barilgaHTML(){
 }
 function rush(k){ const s=S.sites[k]; if(!s) return; const c=Math.max(1,Math.ceil((s.need-s.p)/30)); if(S.res.alt<c){ say('Алт хүрэхгүй байна'); return; } S.res.alt-=c; s.p=s.need; completeSite(k); say(BUILD[k].n+' баригдлаа!'); refresh(); }
 function startPlace(k){
+  if(S.sites[k]||(S.bld[k]||0)>0){ say('Энэ барилга аль хэдийн байна'); return; }
   if(S.bld.ger<(BREQ[k]||1)){ say('Гол гэр '+BREQ[k]+'-р түвшинд нээгдэнэ'); return; }
   (S.seenB=S.seenB||{})[k]=1;
   const c=BUILD[k].cost;
@@ -2291,6 +2292,7 @@ function startPlace(k){
 function confirmPlace(){
   if(!placing) return;
   const k=placing.k;
+  if(!placing.move&&!placing.pen&&(S.sites[k]||(S.bld[k]||0)>0)){ cancelPlace(); say('Энэ барилга аль хэдийн байна'); return; }
   if(!freeSpot(k,placing.x,placing.y)){ say('Энд тавих боломжгүй. Барилгууд хоорондоо зай авна'); return; }
   if(placing.move){ S.pos[k]={x:placing.x,y:placing.y}; placing=null; hideBar(); buildBg(); syncEnts(true); refresh(); say('Зөөлөө'); return; }
   const c=placing.pen?PEN[placing.pen].cost:BUILD[k].cost;
@@ -4906,7 +4908,7 @@ function bldApply(){
 
 /* farm + pen (pixel art) */
 const PENC={x0:.05,x1:.96,y0:.1,y1:.8};
-function penGeom(r){ const s=SPR.pn3; if(!s||!s.img.complete||!s.img.naturalWidth) return null; const W=r.w, H=W*s.ih/s.iw; return {s,W,H,X:r.x,Y:r.y+r.h-H}; }
+function penGeom(r){ const s=SPR.pn3; if(!r||!s||!s.img.complete||!s.img.naturalWidth) return null; const W=r.w, H=W*s.ih/s.iw; return {s,W,H,X:r.x,Y:r.y+r.h-H}; }
 function penCell(g,i){ const c=PENC, cw=(c.x1-c.x0)/3, ch=(c.y1-c.y0)/2; return {x:g.X+(c.x0+(i%3)*cw)*g.W,y:g.Y+(c.y0+Math.floor(i/3)*ch)*g.H,w:cw*g.W,h:ch*g.H}; }
 function fmDraw(p,stage,np){
   const L=SPR.fm_locked, T=SPR[['fm_plow','fm_sprout','fm_ripe'][stage]||'fm_plow'];

@@ -9170,6 +9170,20 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
       .replace('Харваач бэлтгэл хийж сураа нэм',MSG).replace('Морио товшиж давхиул. Хурд, тэсвэр бэлтгэлээр нэмэгдэнэ',MSG); }catch(e){} return h; };
 })();
 
+
+/* p32/ndwev.js — 213: Наадмын цэс (ndPlayCards) дээр бөхийн цол, Сум/Аймаг/Улсын наадмын самбар гаргах; жагсаалтад өөрийн цол */
+(function(){
+  const D='<div class="card"><img';
+  const _p=ndPlayCards; ndPlayCards=function(){ let h=_p.apply(this,arguments);
+    try{ const parts=h.split(D); let out=parts[0];
+      for(let i=1;i<parts.length;i++){ let c=parts[i], w=c.indexOf('wrestOpen()')>=0;
+        if(w){ const fe=(typeof nfeeOf==='function')?nfeeOf('wrest'):0; c=c.replace(/onclick="wrestOpen\(\)">[^<]*</,'onclick="WCH=0;wrestOpen()">Дадлага'+(fe?' · '+f(fe)+' 🪙':'')+'<');
+          out+='<div class="card" style="border-color:#ffd770"><h3 class="rb">🏟 Бөхийн наадам</h3><div class="sm" style="text-align:center">'+wtLine()+'</div><div style="text-align:center;margin-top:4px"><button class="btn" style="background:#5b3d1e" onclick="wtShowRewards()">📜 Цол, шагнал</button></div>'+wtEvents()+'<div class="sm" style="text-align:center;margin-top:6px;opacity:.8">Доорх «Дадлага» цолд нөлөөлөхгүй, зөвхөн алт өгнө.</div></div>'; }
+        out+=D+c; }
+      h=out; }catch(e){} return h; };
+  const _n=ndLbHTML; ndLbHTML=function(){ let h=_n.apply(this,arguments); try{ if(NDTAB==='w'){ const i=wsIdx(); if(i>=0) h=h.replace('<div class="sm">Таны шилдэг:</div>','<div class="sm">Таны шилдэг:'+wtTagI(i)+'</div>'); } }catch(e){} return h; };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

@@ -9071,7 +9071,12 @@ function wtLine(){ const s=wsSt(), i=wsTop(), now=wmNow();
   return h; }
 function wtEvents(){ const s=wsSt(), t=wevT(), fe=(typeof nfeeOf==='function')?nfeeOf('wrest'):0; let h='';
   if(s.run){ const r=s.run; h+='<div class="card" style="margin:6px 0;border-color:#ffd770"><b>🏟 '+WKN[r.k]+' үргэлжилж байна</b><div class="sm">'+(r.ch?'Тулаан: '+WRT[r.ch-1][0]+'-тай':'Дараалсан ялалт: '+r.p)+'</div><button class="btn" onclick="wevBout()">▶ Үргэлжлүүлэх</button></div>'; return h; }
-  ['s','a','u'].forEach(k=>{ const g=wevGoal(k); if(!g) return; const w0=wevWin(k,t); if(!w0) return; const joined=!!(s.last[k]===w0.d), w=joined&&w0.open?wevWin(k,t,w0.d):w0, op=w0.open&&!joined;
+  const o=s.own, LOCK={s:null,a:o[1]?null:'Сумын наадмыг дуусгаж «Сумын Заан» болно',u:o[5]?null:'«Аймгийн Арслан» болно'}, DONE={s:!!o[1],a:!!o[7],u:!!o[15]};
+  ['s','a','u'].forEach(k=>{ const g=wevGoal(k);
+    if(!g){ const w=wevWin(k,t), when=w?wevDay(w,t)+' 19:00 · '+wtTm(w.st-t)+'-ийн дараа':'';
+      h+='<div class="card" style="margin:6px 0;opacity:'+(DONE[k]?'.8':'.7')+'"><b>🏟 '+WKN[k]+'</b> <span class="sm">· '+(k==='s'?'өдөр бүр':k==='a'?'3 хоног тутам':'ням гараг бүр')+' · 19:00–23:00</span>'
+        +(DONE[k]?'<div class="sm" style="color:#9fe08a">✅ Бүх цолыг авсан</div>':'<div class="sm" style="color:#ffb27a">🔒 Нээгдэх нөхцөл: '+LOCK[k]+'</div>'+(when?'<div class="sm">⏰ Дараагийн наадам: '+when+'</div>':'')+'<button class="btn" disabled>🔒 Түгжээтэй</button>')+'</div>'; return; }
+    const w0=wevWin(k,t); if(!w0) return; const joined=!!(s.last[k]===w0.d), w=joined&&w0.open?wevWin(k,t,w0.d):w0, op=w0.open&&!joined;
     h+='<div class="card" style="margin:6px 0'+(op?';border-color:#7fe08a':'')+'"><b>🏟 '+WKN[k]+'</b> <span class="sm">· '+(k==='s'?'өдөр бүр':k==='a'?'3 хоног тутам':'ням гараг бүр')+' · 19:00–23:00</span><div class="sm">'+wevGoalTxt(g)+'</div>'
       +(op?'<div class="sm" style="color:#8fe39a"><b>🔥 Нээлттэй!</b> Хаагдахад '+wtTm(w0.en-t)+' үлдсэн</div>':joined?'<div class="sm" style="color:#9fe08a">✓ Энэ удаад оролцсон</div><div class="sm">⏰ Дараагийнх: '+wevDay(w,t)+' 19:00 · '+wtTm(w.st-t)+'-ийн дараа</div>':'<div class="sm" style="color:#ffd770">⏰ Эхлэхэд: <b>'+wtTm(w0.st-t)+'</b> ('+wevDay(w0,t)+' 19:00)</div>')
       +'<div class="sm" style="opacity:.8">Ялагдвал наадам дуусна, авсан цол хэвээр.</div>'

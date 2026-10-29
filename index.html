@@ -7647,7 +7647,7 @@ function jamGet(){
   jamClose(); try{ refresh(); }catch(e){} jamReveal(); try{ jamBtnUpd(); }catch(e){}
 }
 // ---- Spin (шорон) ----
-const JSW=[{t:'s',n:2,w:22,e:'🗡',c:'#2e8b57'},{t:'a',n:50,w:18,e:'💎',c:'#2a6fb5'},{t:'s',n:5,w:18,e:'🗡',c:'#c9772a'},{t:'a',n:100,w:12,e:'💎',c:'#1f4f94'},{t:'t',n:10,w:10,e:'🔮',c:'#7a3fb0'},{t:'s',n:10,w:12,e:'🗡',c:'#d65a2a'},{t:'s',n:20,w:6,e:'🗡',c:'#b3262e'},{t:'h',n:50,w:2,e:'⭐',c:'#d4a017'}];
+const JSW=[{t:'s',n:2,w:22,e:'🗡',c:'#2e8b57'},{t:'a',n:10,w:18,e:'💎',c:'#2a6fb5'},{t:'s',n:5,w:18,e:'🗡',c:'#c9772a'},{t:'a',n:30,w:12,e:'💎',c:'#1f4f94'},{t:'t',n:10,w:10,e:'🔮',c:'#7a3fb0'},{t:'s',n:10,w:12,e:'🗡',c:'#d65a2a'},{t:'s',n:20,w:6,e:'🗡',c:'#b3262e'},{t:'h',n:50,w:2,e:'⭐',c:'#d4a017'}];
 function jamSpinLbl(w){ if(w.t==='h') return jamOwn()?String(w.n):''; return String(w.n); }
 function jamNumSvg(str,cy2,DH){ const D=window.JDG; if(!D) return '<text x="0" y="'+(cy2+DH/2-2)+'" font-size="'+DH+'" font-weight="900" fill="#fff" stroke="#000a" stroke-width=".8" text-anchor="middle">'+str+'</text>';
   const ds=String(str).split(''), ws=ds.map(c=>D.a[+c]*DH-1.2); const tot=ws.reduce((a,b)=>a+b,0); let x=-tot/2, o=''; ds.forEach((c,k)=>{ o+='<image href="'+D.d[+c]+'" x="'+x.toFixed(2)+'" y="'+(cy2-DH/2)+'" width="'+(ws[k]+1.2).toFixed(2)+'" height="'+DH+'"/>'; x+=ws[k]; }); return o; }

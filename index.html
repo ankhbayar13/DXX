@@ -9073,6 +9073,28 @@ function wtLine(){ const s=wsSt(), i=wsIdx(), nx=WRT[wsIdxOf(s.b)+1];
       try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} }catch(e){} };
 })();
 
+
+/* p32/entryfee.js — 209: Наадмын 3 тэмцээнд оролцооны төлбөр (алт). Бөхөд цолоос хамаарна, ялвал буцаана */
+(function(){
+  const BASE=100;
+  const fee=k=>k==='wrest'?BASE+30*((typeof wsIdx==='function'?wsIdx():-1)+1):BASE;
+  window.nfeeOf=fee;
+  function gate(k,info){ const a=info(); if(a.n>=3) return true; const c=fee(k);
+    if((S.res.gold||0)<c){ try{ say('Оролцооны төлбөр '+f(c)+' 🪙 хүрэхгүй байна'); sfx('err'); }catch(e){} return false; }
+    S.res.gold-=c; S.nfee=S.nfee||{}; S.nfee[k]=c; try{ refresh(); }catch(e){} return true; }
+  const _a=archOpen; archOpen=function(){ if(!gate('arch',archInfo)) return; return _a.apply(this,arguments); };
+  const _r=raceOpen; raceOpen=function(){ if(!gate('race',raceInfo)) return; return _r.apply(this,arguments); };
+  const _w=wrestOpen; wrestOpen=function(){ if(!gate('wrest',wrestInfo)) return; return _w.apply(this,arguments); };
+  const lab=(fn,from,k)=>{ const o=window[fn]; };
+  const _ac=archCardHTML; archCardHTML=function(){ return _ac.apply(this,arguments).replace('>Тоглох<','>Тоглох · '+f(fee('arch'))+' 🪙<'); };
+  const _rc=raceCardHTML; raceCardHTML=function(){ return _rc.apply(this,arguments).replace('>Уралдах<','>Уралдах · '+f(fee('race'))+' 🪙<'); };
+  const _wc=wrestCardHTML; wrestCardHTML=function(){ return _wc.apply(this,arguments).replace('>Барилдах<','>Барилдах · '+f(fee('wrest'))+' 🪙<'); };
+  const _nh=naadamHTML; naadamHTML=function(){ return _nh.apply(this,arguments).replace('Өдөрт 3 оролдлого.','Өдөрт 3 оролдлого. Оролцооны төлбөр: тэмцээн бүр '+f(BASE)+' 🪙 (бөх: цолоос хамаарна, ялбал төлбөр буцна).'); };
+  const _wf=wrestFinish; wrestFinish=function(){ let win=false; try{ win=!!(WRS&&WRS.sc&&WRS.sc[0]>=2); }catch(e){}
+    _wf.apply(this,arguments);
+    try{ const c=S.nfee&&S.nfee.wrest; if(c){ S.nfee.wrest=0; if(win){ S.res.gold=(S.res.gold||0)+c; const r=document.getElementById('archres'); if(r){ const d=document.createElement('div'); d.className='sm'; d.style.cssText='margin:4px 0;color:#9fe89a'; d.textContent='💰 Төлбөр буцаагдлаа +'+f(c)+' 🪙'; const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } try{ save(); }catch(e){} } } }catch(e){} };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

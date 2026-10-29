@@ -8741,36 +8741,65 @@ function dnUse(){
 }
 
 
-/* p32/bgm.js — 201: тоглоомын арын хөгжим (bgm.m4a), нэг дуу давтагдана; дууны хэмжээг Цэс → Бусад → Хөгжим-өөр тохируулна */
-var BGM={url:null,st:0};
+/* p32/bgm.js — 201: тоглоомын арын хөгжим: тосгонд bgm.m4a, тулалдаанд battle.m4a (хоёулаа давтагдана); дууны хэмжээг Цэс → Бусад → Хөгжим-өөр тохируулна */
+var BGM={u:{},st:{},t:{},F:{village:'bgm.m4a?v=1',battle:'battle.m4a?v=1'}};
 try{ if(localStorage.getItem('musv')==null) MUSV.vol=0.05; }catch(e){}
-function bgmLoad(cb){
-  if(BGM.url){ cb&&cb(); return; }
-  if(BGM.st===1) return;
-  if(BGM.st===2&&Date.now()-(BGM.t||0)<20000) return;
-  BGM.st=1;
+function bgmKey(k){ return k==='battle'?'battle':'village'; }
+function bgmLoad(k,cb){
+  k=bgmKey(k);
+  if(BGM.u[k]){ cb&&cb(); return; }
+  if(BGM.st[k]===1) return;
+  if(BGM.st[k]===2&&Date.now()-(BGM.t[k]||0)<20000) return;
+  BGM.st[k]=1;
   try{
-    fetch('bgm.m4a?v=1').then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>{
-      BGM.url=URL.createObjectURL(new Blob([b],{type:'audio/mp4'})); BGM.st=3; cb&&cb();
-    }).catch(()=>{ BGM.st=2; BGM.t=Date.now(); });
-  }catch(e){ BGM.st=2; BGM.t=Date.now(); }
+    fetch(BGM.F[k]).then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>{
+      BGM.u[k]=URL.createObjectURL(new Blob([b],{type:'audio/mp4'})); BGM.st[k]=3; cb&&cb();
+    }).catch(()=>{ BGM.st[k]=2; BGM.t[k]=Date.now(); });
+  }catch(e){ BGM.st[k]=2; BGM.t[k]=Date.now(); }
 }
-musApply=function(){ const a=MUSV.a.village; if(!a) return; if(MUSV.g.village){ a.volume=1; try{ MUSV.g.village.gain.value=MUSV.vol; }catch(e){} } else a.volume=Math.min(1,MUSV.vol); };
-musGet=function(){
-  if(!MUSV.a.village){
-    const a=new Audio(BGM.url); a.loop=true; a.volume=Math.min(1,MUSV.vol); MUSV.a.village=a;
-    try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g.village=g; } }catch(e){}
+musApply=function(){ ['village','battle'].forEach(k=>{ const a=MUSV.a[k]; if(!a) return; if(MUSV.g[k]){ a.volume=1; try{ MUSV.g[k].gain.value=MUSV.vol; }catch(e){} } else a.volume=Math.min(1,MUSV.vol); }); };
+musGet=function(k){
+  k=bgmKey(k);
+  if(!MUSV.a[k]){
+    const a=new Audio(BGM.u[k]); a.loop=true; a.volume=Math.min(1,MUSV.vol); MUSV.a[k]=a;
+    try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g[k]=g; } }catch(e){}
   }
-  return MUSV.a.village;
+  return MUSV.a[k];
 };
 musPlay=function(k){
   MUSV.want=k; if(!MUSV.on||!MUSV.unl) return;
-  bgmLoad(()=>{
-    if(!MUSV.on||!MUSV.unl) return;
-    try{ const a=musGet('village'); if(a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
+  const kk=bgmKey(k);
+  ['village','battle'].forEach(x=>{ if(x!==kk&&MUSV.a[x]) MUSV.a[x].pause(); });
+  bgmLoad(kk,()=>{
+    if(!MUSV.on||!MUSV.unl||bgmKey(MUSV.want)!==kk) return;
+    try{ const a=musGet(kk); if(a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
   });
 };
-setTimeout(()=>{ try{ bgmLoad(); }catch(e){} },5000);
+setTimeout(()=>{ try{ bgmLoad('village'); }catch(e){} },5000);
+setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },25000);
+
+
+/* p32/cwking.js — 202: дэлхийн газрын зураг дээр клан бүрийн ХААН (👑 нэр · хүч) кланы төвийн доор харагдана */
+(function(){
+  const _cd=wmClanDraw;
+  wmClanDraw=function(c,D,z,t,vis,items){
+    _cd.apply(this,arguments);
+    try{
+      const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0');
+      CLN.forEach((q,i)=>{
+        const d=(typeof CKD!=='undefined')&&CKD.docs&&CKD.docs[i]; if(!d||!d.ow) return;
+        const isMy=i===my, s=ok?wmS('wm_hq'+i):null, ww=s?0.85*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
+        if(!vis(qx,qy,320)) return;
+        const row=((CKD.mem&&CKD.mem[i])||[]).find(x=>x.id===d.ow);
+        const nm=esc2(String((row&&row.n)||d.on||'Хаан').slice(0,14)), pw=row&&row.p>0?'  ⚔'+f(row.p):'';
+        const by=qy+(s?hh*0.12:8);
+        items.push({y:1e5+qy+2,f:()=>{ c.save(); wmLabel(c,'👑 '+nm+pw,qx,by+16,'#ffe28a',12); c.restore(); }});
+      });
+    }catch(e){}
+  };
+  const _wo=wmOpen;
+  wmOpen=function(){ const r=_wo.apply(this,arguments); try{ if(typeof ckFetch==='function') ckFetch(); }catch(e){} return r; };
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

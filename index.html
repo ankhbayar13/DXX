@@ -3074,10 +3074,10 @@ function wmBind(c){
   c.onpointerdown=e=>{ c.setPointerCapture(e.pointerId); P.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; sx=e.clientX; sy=e.clientY; if(P.size===2){ const a=[...P.values()]; pd=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); } };
   c.onpointermove=e=>{ const p=P.get(e.pointerId); if(!p) return; const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX; p.y=e.clientY; moved+=Math.abs(dx)+Math.abs(dy);
     if(P.size===1){ WMV.x-=dx/WMV.z; WMV.y-=dy/WMV.z; wmClamp(); }
-    else if(P.size===2){ const a=[...P.values()], d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pd>0){ const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2, wx=WMV.x+mx/WMV.z, wy=WMV.y+my/WMV.z; WMV.z=Math.max(0.28,Math.min(1.5,WMV.z*d/pd)); WMV.x=wx-mx/WMV.z; WMV.y=wy-my/WMV.z; wmClamp(); } pd=d; } };
+    else if(P.size===2){ const a=[...P.values()], d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pd>0){ const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2, wx=WMV.x+mx/WMV.z, wy=WMV.y+my/WMV.z; WMV.z=Math.max(wmZmin(),Math.min(WMZMAX,WMV.z*d/pd)); WMV.x=wx-mx/WMV.z; WMV.y=wy-my/WMV.z; wmClamp(); } pd=d; } };
   c.onpointerup=e=>{ P.delete(e.pointerId); if(P.size===0&&moved<10){ wmTap(e.clientX,e.clientY); } };
   c.onpointercancel=e=>{ P.delete(e.pointerId); };
-  c.onwheel=e=>{ e.preventDefault(); const wx=WMV.x+e.clientX/WMV.z, wy=WMV.y+e.clientY/WMV.z; WMV.z=Math.max(0.28,Math.min(1.5,WMV.z*(e.deltaY<0?1.12:0.89))); WMV.x=wx-e.clientX/WMV.z; WMV.y=wy-e.clientY/WMV.z; wmClamp(); };
+  c.onwheel=e=>{ e.preventDefault(); const wx=WMV.x+e.clientX/WMV.z, wy=WMV.y+e.clientY/WMV.z; WMV.z=Math.max(wmZmin(),Math.min(WMZMAX,WMV.z*(e.deltaY<0?1.12:0.89))); WMV.x=wx-e.clientX/WMV.z; WMV.y=wy-e.clientY/WMV.z; wmClamp(); };
 }
 function wmAll(){ const D=wmGen(); return [{id:'city',t:'city',x:D.C.x,y:D.C.y}].concat(D.ks,D.nodes,D.camps,D.chests.filter(wmChestOn),wmCwEnts(),wmYams()); }
 function wmTap(px,py){
@@ -3103,7 +3103,7 @@ function wmDrawS(c,k,x,y,w){ const s=SPR[k]; if(!s||!s.img||!s.img.complete||!s.
 function wmLabel(c,t,x,y,col,sz){ c.font='bold '+(sz||12)+'px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000'; c.strokeText(t,x,y); c.fillStyle=col||'#fff'; c.fillText(t,x,y); }
 function wmLoop(){
   if(!WMV||!WMV.on||!$('wmc')) return; const cv=$('wmc'), c=cv.getContext('2d'), D=wmGen(), dp=WMV.dp||1, z=WMV.z, t=performance.now()/1000;
-  c.setTransform(dp*z,0,0,dp*z,-WMV.x*z*dp,-WMV.y*z*dp); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(D.bg,0,0,WM_W,WM_H);
+  c.setTransform(1,0,0,1,0,0); c.fillStyle='#b9985f'; c.fillRect(0,0,cv.width,cv.height); c.setTransform(dp*z,0,0,dp*z,-WMV.x*z*dp,-WMV.y*z*dp); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; c.drawImage(D.bg,0,0,WM_W,WM_H); try{ wmHistUnder(c,D,z,t); }catch(e){}
   const vw=cv.clientWidth/z, vh=cv.clientHeight/z, vis=(x,y,m)=>x>WMV.x-m&&x<WMV.x+vw+m&&y>WMV.y-m&&y<WMV.y+vh+m;
   // fog border
   c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14; c.strokeRect(0,0,WM_W,WM_H);
@@ -3124,7 +3124,7 @@ function wmLoop(){
   try{ wmHomeFx(c,D,t,items); }catch(e){}
   try{ wmClanDraw(c,D,z,t,vis,items); }catch(e){}
   try{ wmYamDraw(c,t,vis,items); }catch(e){}
-  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
+  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f()); try{ wmHistOver(c,D,z,t,dp); }catch(e){}
   // minimap
   const mm=$('wmmini'); if(mm){ const m=mm.getContext('2d'), sx=mm.width/WM_W, sy=mm.height/WM_H; try{ wmMini(m,D,mm); }catch(e){ m.fillStyle='#35602a'; m.fillRect(0,0,mm.width,mm.height); } D.ks.forEach(k=>{ m.fillStyle=k.c; m.fillRect(k.x*sx-2,k.y*sy-2,4,4); }); D.camps.forEach(k=>{ m.fillStyle='#222'; m.fillRect(k.x*sx-1,k.y*sy-1,2,2); }); CLN.forEach(q=>{ m.strokeStyle=q.c; m.lineWidth=1; m.strokeRect(q.x*sx-3,q.y*sy-3,6,6); }); m.fillStyle='#8fff8f'; m.fillRect(D.C.x*sx-3,D.C.y*sy-3,6,6); m.strokeStyle='#fff'; m.lineWidth=1; m.strokeRect(WMV.x*sx,WMV.y*sy,vw*sx,vh*sy); }
   requestAnimationFrame(wmLoop); }
@@ -5585,7 +5585,7 @@ function wmBg(D){ const BW=800, BH=1100, sc=WM_W/BW, cv=document.createElement('
       let zi=0, zd=1e12; for(let q=0;q<10;q++){ const dx=wx-CLN[q].x, dy=wy-CLN[q].y, dd=dx*dx+dy*dy; if(dd<zd){ zd=dd; zi=q; } }
       zone[j*BW+i]=zi; const cc=rgb[zi], ta=(zi===my)?0.20:(zi===op)?0.18:0.09; r+=(cc[0]-r)*ta; g+=(cc[1]-g)*ta; b+=(cc[2]-b)*ta;
       const o=(j*BW+i)*4; d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255; } }
-  for(let j=0;j<BH-1;j++) for(let i=0;i<BW-1;i++){ const z0=zone[j*BW+i], z1=zone[j*BW+i+1], z2=zone[(j+1)*BW+i]; if(z0!==z1||z0!==z2){ const o=(j*BW+i)*4, a=(z0===my||z1===my||z2===my)?0.75:0.45; d[o]+=(255-d[o])*a; d[o+1]+=(225-d[o+1])*a; d[o+2]+=(140-d[o+2])*a; } }
+  for(let j=0;j<BH-1;j++) for(let i=0;i<BW-1;i++){ const z0=zone[j*BW+i], z1=zone[j*BW+i+1], z2=zone[(j+1)*BW+i]; if(false&&(z0!==z1||z0!==z2)){ const o=(j*BW+i)*4, a=(z0===my||z1===my||z2===my)?0.75:0.45; d[o]+=(255-d[o])*a; d[o+1]+=(225-d[o+1])*a; d[o+2]+=(140-d[o+2])*a; } }
   x.putImageData(im,0,0);
   const br2=wmRng(77); for(let i=0;i<5200;i++){ const px=br2()*BW, py=br2()*BH, wy=py*sc, gob=wy>3400; x.fillStyle=br2()<0.5?(gob?'rgba(150,120,70,.22)':'rgba(60,110,30,.25)'):(gob?'rgba(235,215,160,.2)':'rgba(190,230,110,.22)'); x.fillRect(px,py,1+br2()*4,1+br2()*1.6); }
   return cv; }
@@ -5765,7 +5765,7 @@ function wmTexBake(pc){ const K=0.625, W2=Math.round(WM_W*K), H2=Math.round(WM_H
 // клан бүсийн хил: хамгийн ойрын клан төвөөр хуваана, өөрийн ба дайсан бүс нь тод
 function wmZoneLines(x,W2,H2){ const BW=800, BH=1100, sc=WM_W/BW, my=wmClanId(), op=my>=0?wmOpp(my,wmWeek()):-1, zone=new Uint8Array(BW*BH), c2=document.createElement('canvas'); c2.width=BW; c2.height=BH; const t=c2.getContext('2d'), im=t.createImageData(BW,BH), d=im.data;
   for(let j=0;j<BH;j++){ const wy=j*sc; for(let i=0;i<BW;i++){ const wx=i*sc; let zi=0, zd=1e12; for(let q=0;q<10;q++){ const dx=wx-CLN[q].x, dy=wy-CLN[q].y, dd=dx*dx+dy*dy; if(dd<zd){ zd=dd; zi=q; } } zone[j*BW+i]=zi; } }
-  for(let j=0;j<BH-1;j++) for(let i=0;i<BW-1;i++){ const z0=zone[j*BW+i], z1=zone[j*BW+i+1], z2=zone[(j+1)*BW+i]; if(z0!==z1||z0!==z2){ const o=(j*BW+i)*4, mine=(z0===my||z1===my||z2===my), en=(z0===op||z1===op||z2===op); d[o]=255; d[o+1]=mine?235:en?150:220; d[o+2]=mine?150:en?120:150; d[o+3]=mine?230:en?200:120; } }
+  for(let j=0;j<BH-1;j++) for(let i=0;i<BW-1;i++){ const z0=zone[j*BW+i], z1=zone[j*BW+i+1], z2=zone[(j+1)*BW+i]; if(false&&(z0!==z1||z0!==z2)){ const o=(j*BW+i)*4, mine=(z0===my||z1===my||z2===my), en=(z0===op||z1===op||z2===op); d[o]=255; d[o+1]=mine?235:en?150:220; d[o+2]=mine?150:en?120:150; d[o+3]=mine?230:en?200:120; } }
   t.putImageData(im,0,0); x.imageSmoothingEnabled=true; x.drawImage(c2,0,0,W2,H2); }
 function wmMini(m,D,mm){ if(D.miniSrc!==D.bg){ D.miniSrc=D.bg; const c=document.createElement('canvas'); c.width=mm.width; c.height=mm.height; c.getContext('2d').drawImage(D.bg,0,0,mm.width,mm.height); D.mini=c; } m.drawImage(D.mini,0,0); }
 
@@ -9756,6 +9756,78 @@ window.GIMG={"cav:helm": ["data:image/webp;base64,UklGRggbAABXRUJQVlA4WAoAAAAQAA
   const _co=chatOpen; chatOpen=function(room){
     if(typeof room==='number'&&room!==mine()){ try{ say('Кланы чатад зөвхөн тухайн кланы гишүүд орно'); }catch(e){} return; }
     return _co.apply(this,arguments); };
+})();
+
+
+/* p32/wmhist.js — Дэлхийн газрын зураг: түүхэн (хуучин цаасан) газрын зургийн хэв маяг + хол/ойр томруулалт */
+(function(){
+window.WMZMAX=1.8;
+window.wmZmin=function(){ const c=document.getElementById('wmc'); if(!c||!c.clientWidth) return 0.12; return Math.max(0.08,Math.min(c.clientWidth/WM_W,c.clientHeight/WM_H)*0.98); };
+let zid=0;
+window.wmZoomTo=function(z2,cx,cy){ const c=document.getElementById('wmc'); if(!c||!WMV) return; z2=Math.max(wmZmin(),Math.min(WMZMAX,z2)); if(cx===undefined){ cx=c.clientWidth/2; cy=c.clientHeight/2; }
+  const z0=WMV.z, wx=WMV.x+cx/z0, wy=WMV.y+cy/z0, t0=performance.now(), id=++zid;
+  (function st(){ if(id!==zid||!WMV||!WMV.on) return; let k=Math.min(1,(performance.now()-t0)/240); k=1-(1-k)*(1-k); const z=z0*Math.pow(z2/z0,k); WMV.z=z; WMV.x=wx-cx/z; WMV.y=wy-cy/z; wmClamp(); if(k<1) requestAnimationFrame(st); })(); };
+// ---------- цаас: суурь зургийг хуучин пергамент болгоно ----------
+let TILE=null;
+function paperTile(){ if(TILE) return TILE; const S=512, c=document.createElement('canvas'); c.width=c.height=S; const x=c.getContext('2d'), im=x.createImageData(S,S), d=im.data;
+  for(let j=0;j<S;j++) for(let i=0;i<S;i++){ const n=wmNoise(i/90,j/90)*0.5+wmNoise(i/24,j/24)*0.3+wmNoise(i/5,j/5)*0.2, v=215+n*40, o=(j*S+i)*4; d[o]=v; d[o+1]=v*0.96; d[o+2]=v*0.88; d[o+3]=255; }
+  x.putImageData(im,0,0); let s=991; const r=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
+  for(let i=0;i<900;i++){ x.strokeStyle=r()<0.5?'rgba(110,75,35,.10)':'rgba(255,245,215,.16)'; x.lineWidth=0.6+r(); const a=r()*7, l=3+r()*14, px=r()*S, py=r()*S; x.beginPath(); x.moveTo(px,py); x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l); x.stroke(); }
+  return TILE=c; }
+function bake(pc){ const W=pc.width, H=pc.height, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d'); x.drawImage(pc,0,0);
+  x.globalCompositeOperation='saturation'; x.fillStyle='rgba(128,128,128,0.62)'; x.fillRect(0,0,W,H);
+  x.globalCompositeOperation='screen'; x.fillStyle='rgba(170,138,84,0.8)'; x.fillRect(0,0,W,H);
+  x.globalCompositeOperation='multiply'; x.fillStyle='rgba(244,226,180,0.95)'; x.fillRect(0,0,W,H);
+  x.globalCompositeOperation='multiply'; x.globalAlpha=0.55; x.fillStyle=x.createPattern(paperTile(),'repeat'); x.fillRect(0,0,W,H); x.globalAlpha=1;
+  // хуучирсан толбо
+  let s=4417; const r=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
+  x.globalCompositeOperation='multiply';
+  for(let i=0;i<22;i++){ const px=r()*W, py=r()*H, rr=(0.04+r()*0.1)*W, g=x.createRadialGradient(px,py,0,px,py,rr); g.addColorStop(0,'rgba(150,100,45,'+(0.10+r()*0.12)+')'); g.addColorStop(1,'rgba(150,100,45,0)'); x.fillStyle=g; x.fillRect(px-rr,py-rr,rr*2,rr*2); }
+  // ирмэгийн түлэгдэлт
+  const e=Math.min(W,H)*0.07;
+  [[0,0,W,e,0,0,0,e],[0,H-e,W,e,0,H,0,H-e],[0,0,e,H,0,0,e,0],[W-e,0,e,H,W,0,W-e,0]].forEach(a=>{ const g=x.createLinearGradient(a[4],a[5],a[6],a[7]); g.addColorStop(0,'rgba(90,50,18,.75)'); g.addColorStop(1,'rgba(90,50,18,0)'); x.fillStyle=g; x.fillRect(a[0],a[1],a[2],a[3]); });
+  x.globalCompositeOperation='source-over';
+  // гаднах хүрээ (шугам)
+  const k=W/WM_W; x.strokeStyle='rgba(70,35,12,.9)'; x.lineWidth=7*k; x.strokeRect(14*k,14*k,W-28*k,H-28*k); x.lineWidth=2.5*k; x.strokeRect(30*k,30*k,W-60*k,H-60*k);
+  return cv; }
+const _b=wmBg; wmBg=function(D){ const pc=_b(D); try{ return bake(pc); }catch(e){ return pc; } };
+// ---------- хилийн шугам (Вороной) ----------
+function clip(poly,a,b,c){ const out=[]; for(let i=0;i<poly.length;i++){ const p=poly[i], q=poly[(i+1)%poly.length], fp=a*p[0]+b*p[1]-c, fq=a*q[0]+b*q[1]-c; if(fp<=0) out.push(p); if((fp<0&&fq>0)||(fp>0&&fq<0)){ const t=fp/(fp-fq); out.push([p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t]); } } return out; }
+let CELLS=null;
+function cells(){ if(CELLS) return CELLS; CELLS=CLN.map((a,i)=>{ let poly=[[0,0],[WM_W,0],[WM_W,WM_H],[0,WM_H]]; CLN.forEach((b,j)=>{ if(i===j) return; poly=clip(poly,2*(b.x-a.x),2*(b.y-a.y),b.x*b.x+b.y*b.y-a.x*a.x-a.y*a.y); }); return poly; }); return CELLS; }
+function hexA(h,a){ return 'rgba('+parseInt(h.slice(1,3),16)+','+parseInt(h.slice(3,5),16)+','+parseInt(h.slice(5,7),16)+','+a+')'; }
+const INK='#4a2a10', INKH='rgba(244,230,190,.92)';
+function spaced(c,t,x,y,sp){ const w=[...t].map(ch=>c.measureText(ch).width), tot=w.reduce((a,b)=>a+b,0)+sp*(t.length-1); let px=x-tot/2; [...t].forEach((ch,i)=>{ c.strokeText(ch,px+w[i]/2,y); c.fillText(ch,px+w[i]/2,y); px+=w[i]+sp; }); }
+window.wmHistUnder=function(c,D,z,t){
+  const my=wmClanId(), op=my>=0?wmOpp(my,wmWeek()):-1, cs=cells();
+  c.save(); c.lineJoin='round'; c.setLineDash([14/z*0.9+4,8/z*0.9+3]);
+  cs.forEach((p,i)=>{ if(p.length<3) return; const mine=i===my, opp=i===op; c.beginPath(); p.forEach((q,k)=>k?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1])); c.closePath();
+    c.strokeStyle=mine?hexA(CLN[i].c,.95):opp?'rgba(170,40,25,.9)':'rgba(88,48,20,.62)'; c.lineWidth=(mine||opp?3.4:2.2)/Math.max(z,0.25); c.stroke(); });
+  c.setLineDash([]); c.restore();
+  // нутгийн нэрс (хол харахад л)
+  const fa=Math.max(0,Math.min(1,(1.0-z)/0.55)); if(fa<=0) return;
+  c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round'; c.globalAlpha=0.42*fa;
+  CLN.forEach((q,i)=>{ const sz=Math.max(26,(i===my?22:19)/z*0.85); c.font='italic bold '+sz+'px Georgia,"Times New Roman",serif'; c.lineWidth=sz*0.18; c.strokeStyle=INKH; c.fillStyle=INK; c.save(); c.translate(q.x,q.y+62/z); c.rotate(((i*37)%9-4)*0.018); spaced(c,q.n.toUpperCase(),0,0,sz*0.45); c.restore(); });
+  c.font='italic bold '+Math.max(24,17/z*0.85)+'px Georgia,serif'; c.lineWidth=5; spaced(c,'ХОЙД ТАЙГА',1650,1050,24); spaced(c,'ГОВИЙН ХУМХ',1650,3560,24);
+  c.restore(); };
+window.wmHistOver=function(c,D,z,t,dp){
+  const cv=c.canvas, w=cv.width, h=cv.height; c.save(); c.setTransform(1,0,0,1,0,0);
+  // хуучин цаасны өнгөлөг (хол харах тусам илүү)
+  const lo=Math.max(0,Math.min(1,(0.55-z)/0.4)); c.globalCompositeOperation='multiply'; c.fillStyle='rgba(242,218,165,'+(0.14+0.18*lo)+')'; c.fillRect(0,0,w,h); c.globalCompositeOperation='source-over';
+  const vg=c.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.hypot(w,h)*0.62); vg.addColorStop(0,'rgba(60,32,8,0)'); vg.addColorStop(1,'rgba(60,32,8,.42)'); c.fillStyle=vg; c.fillRect(0,0,w,h);
+  // нэрс — хол харахад
+  if(z<0.45){ const s=dp, X=v=>(v-WMV.x)*z*dp, Y=v=>(v-WMV.y)*z*dp; c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round'; const fs=(z<0.3?15:13)*dp; c.font='italic bold '+fs+'px Georgia,"Times New Roman",serif'; c.lineWidth=4*dp; c.strokeStyle=INKH; c.fillStyle=INK;
+    D.ks.forEach(k=>{ const px=X(k.x), py=Y(k.y)+(18+8*Math.min(1,(0.45-z)/0.3))*dp; if(px<-80||px>w+80||py<-40||py>h+40) return; c.strokeText(k.n,px,py); c.fillText(k.n,px,py); });
+    const px=X(D.C.x), py=Y(D.C.y)+22*dp; c.fillStyle='#1d5a16'; c.strokeText('Таны тосгон',px,py); c.fillText('Таны тосгон',px,py); }
+  // луужин (зүүн доор)
+  const R=34*dp, cx=52*dp, cy=h-120*dp; c.translate(cx,cy); c.globalAlpha=0.9; c.lineJoin='round';
+  c.fillStyle='rgba(244,230,190,.75)'; c.strokeStyle='rgba(74,42,16,.95)'; c.lineWidth=2*dp; c.beginPath(); c.arc(0,0,R*0.95,0,7); c.fill(); c.stroke(); c.beginPath(); c.arc(0,0,R*0.7,0,7); c.lineWidth=1*dp; c.stroke();
+  for(let i=0;i<8;i++){ const a=i*Math.PI/4-Math.PI/2, L=i%2?R*0.62:R*1.12, W2=R*0.16; c.save(); c.rotate(a+Math.PI/2); c.fillStyle=i%2?'rgba(120,80,40,.9)':(i===0?'#a3281c':'#4a2a10'); c.beginPath(); c.moveTo(0,-L); c.lineTo(W2,-R*0.1); c.lineTo(0,0); c.lineTo(-W2,-R*0.1); c.closePath(); c.fill(); c.restore(); }
+  c.fillStyle='#4a2a10'; c.font='bold '+(11*dp)+'px Georgia,serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText('Х',0,-R*1.3); c.fillText('У',0,R*1.3); c.fillText('З',R*1.3,0); c.fillText('Б',-R*1.3,0);
+  c.restore(); };
+// ---------- шинэ товчнууд ----------
+(function(){ const st=document.createElement('style'); st.textContent='#wmap{background:#b9985f!important}.wmz{position:absolute;right:10px;width:44px;height:44px;border-radius:22px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font-size:24px;font-weight:bold;line-height:1;padding:0}.wmz.s{font-size:11px}'; document.head.appendChild(st); })();
+const _o=wmOpen; wmOpen=function(){ _o(); try{ const el=document.getElementById('wmap'); if(!el) return; [['+',150,()=>wmZoomTo(WMV.z*1.7),''],['−',200,()=>wmZoomTo(WMV.z/1.7),''],['Бүх',250,()=>wmZoomTo(0.01),'s']].forEach(([tx,top,fn,cl])=>{ const b=document.createElement('button'); b.className='wmz '+cl; b.textContent=tx; b.style.top=top+'px'; b.onclick=fn; el.appendChild(b); }); }catch(e){} };
 })();
 
 </script><script>(function(){

@@ -3384,7 +3384,7 @@ const MENU=[
  {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
- {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
+ {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
@@ -8739,6 +8739,38 @@ function dnUse(){
     return true;
   }catch(e){ return true; }
 }
+
+
+/* p32/bgm.js — 201: тоглоомын арын хөгжим (bgm.m4a), нэг дуу давтагдана; дууны хэмжээг Цэс → Бусад → Хөгжим-өөр тохируулна */
+var BGM={url:null,st:0};
+try{ if(localStorage.getItem('musv')==null) MUSV.vol=0.35; }catch(e){}
+function bgmLoad(cb){
+  if(BGM.url){ cb&&cb(); return; }
+  if(BGM.st===1) return;
+  if(BGM.st===2&&Date.now()-(BGM.t||0)<20000) return;
+  BGM.st=1;
+  try{
+    fetch('bgm.m4a?v=1').then(r=>{ if(!r.ok) throw 0; return r.blob(); }).then(b=>{
+      BGM.url=URL.createObjectURL(new Blob([b],{type:'audio/mp4'})); BGM.st=3; cb&&cb();
+    }).catch(()=>{ BGM.st=2; BGM.t=Date.now(); });
+  }catch(e){ BGM.st=2; BGM.t=Date.now(); }
+}
+musApply=function(){ const a=MUSV.a.village; if(!a) return; if(MUSV.g.village){ a.volume=1; try{ MUSV.g.village.gain.value=MUSV.vol; }catch(e){} } else a.volume=Math.min(1,MUSV.vol); };
+musGet=function(){
+  if(!MUSV.a.village){
+    const a=new Audio(BGM.url); a.loop=true; a.volume=Math.min(1,MUSV.vol); MUSV.a.village=a;
+    try{ const c=sfxCtx(); if(c&&c.state==='running'&&c.createMediaElementSource&&/^blob:/.test(a.src)){ const sr=c.createMediaElementSource(a), g=c.createGain(); g.gain.value=MUSV.vol; sr.connect(g); g.connect(c.destination); a.volume=1; MUSV.g.village=g; } }catch(e){}
+  }
+  return MUSV.a.village;
+};
+musPlay=function(k){
+  MUSV.want=k; if(!MUSV.on||!MUSV.unl) return;
+  bgmLoad(()=>{
+    if(!MUSV.on||!MUSV.unl) return;
+    try{ const a=musGet('village'); if(a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } }catch(e){}
+  });
+};
+setTimeout(()=>{ try{ bgmLoad(); }catch(e){} },5000);
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

@@ -2566,7 +2566,7 @@ function relBoxOpen(n){ const cost=n===5?Math.round(RBOXC*4.5):RBOXC; if(S.res.a
 function rboxHTML(){ let h='<h2>Дурсгалын хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div></div><div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<RBOXC?'disabled':'')+' onclick="relBoxOpen(1)">1 удаа · '+RBOXC+' Алт</button><button class="btn" '+(S.res.alt<Math.round(RBOXC*4.5)?'disabled':'')+' onclick="relBoxOpen(5)">5 удаа · '+(Math.round(RBOXC*4.5))+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div><div class="card sm">★ 40% · ★★ 30% · ★★★ 20% · ★★★★ 8% · ★★★★★ 2%<br>Нэг дурсгал олон удаа унавал өөр өөр баатарт өмсүүлж болно.</div>';
   return h+relicsHTML(); }
 // ================= БААТАР: жагсаалт + баатрын дэлгэц (од, хэлтэрхий) =================
-const DUPSH=3, STC=[3,4,6,8,10,14], SKB=[0,7,18,32,51,72,98], STMAX=6;
+const DUPSH=3, STC=[3,4,6,8,10,14], stcOf=(id,s)=>id==='jamukha'?50:STC[s], SKB=[0,7,18,32,51,72,98], STMAX=6;
 const RAR={5:{n:'Домогт',g:'#f8c24b,#b5680f'},4:{n:'Эрхэм',g:'#b887f5,#6a3aa8'},3:{n:'Ховор',g:'#62aef5,#2b5fa8'},2:{n:'Сайн',g:'#74d37f,#2f7a3a'},1:{n:'Энгийн',g:'#bcc3cc,#6b727c'}};
 const CLSI={heavy:'🛡',cav:'🐎',archer:'🏹'};
 const SKI={rally:['📯','Дайчлах'],charge:['🐎','Давшилт'],guard:['🛡','Хамгаалалт'],volley:['🏹','Сумны мөндөр'],heal:['✚','Эдгээх']};
@@ -2575,9 +2575,9 @@ function heroMig(){ S.sh=S.sh||{}; for(const id in S.heroes){ const h=S.heroes[i
 const shN=id=>(S.sh&&S.sh[id])||0;
 const starOf=id=>Math.min(STMAX,Math.max(0,(S.heroes[id]||1)-1));
 let LASTUP=0;
-function giveHero(id){ S.sh=S.sh||{}; LASTUP=0; if(!S.heroes[id]){ S.heroes[id]=1; return true; } S.sh[id]=(S.sh[id]||0)+DUPSH; while(canStar(id)){ const s=starOf(id); S.sh[id]-=STC[s]; S.heroes[id]=s+2; LASTUP++; } return false; }
-function canStar(id){ const s=starOf(id); return !!S.heroes[id]&&s<STMAX&&shN(id)>=STC[s]; }
-function starUp(id){ if(!S.heroes[id]) return; const s=starOf(id); if(s>=STMAX){ say('Дээд од хүрсэн'); return; } const c=STC[s]; if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); sfx('err'); return; }
+function giveHero(id){ S.sh=S.sh||{}; LASTUP=0; if(!S.heroes[id]){ S.heroes[id]=1; return true; } S.sh[id]=(S.sh[id]||0)+DUPSH; while(canStar(id)){ const s=starOf(id); S.sh[id]-=stcOf(id,s); S.heroes[id]=s+2; LASTUP++; } return false; }
+function canStar(id){ const s=starOf(id); return !!S.heroes[id]&&s<STMAX&&shN(id)>=stcOf(id,s); }
+function starUp(id){ if(!S.heroes[id]) return; const s=starOf(id); if(s>=STMAX){ say('Дээд од хүрсэн'); return; } const c=stcOf(id,s); if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); sfx('err'); return; }
   S.sh[id]-=c; S.heroes[id]=s+2; sfx('lvl'); say(HEROES.find(x=>x.id===id).n+' '+(s+1)+' одтой боллоо!'); refresh(); heroInfo(id,0,'star'); }
 function stRow(n,sz){ let h=''; for(let i=0;i<STMAX;i++) h+='<span'+(i<n?' class="on"':'')+'>★</span>'; return '<span class="hstr" style="font-size:'+sz+'px">'+h+'</span>'; }
 function heroOrder(){ return HEROES.filter(x=>S.heroes[x.id]).sort((a,b)=>b.s-a.s||heroPower(b.id)-heroPower(a.id)).map(x=>x.id); }
@@ -2630,7 +2630,7 @@ function hdSkillHTML(id,ow){
     '<div class="hd-sb">'+SKB.slice(1).map((v,i)=>'<div class="'+(s>i?'ok':'')+'"><span>Ур чадварын хүч +'+v+'%</span><em>'+(s>i?'✓':'('+(i+1)+' од нээгдэнэ)')+'</em></div>').join('')+'</div>'+
     (ow&&s<STMAX?'<button class="btn" onclick="hdTab(\'star\')">★ Од нэмэх</button>':''); }
 function hdStarHTML(id){
-  const s=starOf(id), mx=s>=STMAX, c=mx?0:STC[s], have=shN(id), pw=heroPowerEff(id), nx=mx?pw:Math.floor(pw*(1+0.25*(s+1))/(1+0.25*s));
+  const s=starOf(id), mx=s>=STMAX, c=mx?0:stcOf(id,s), have=shN(id), pw=heroPowerEff(id), nx=mx?pw:Math.floor(pw*(1+0.25*(s+1))/(1+0.25*s));
   return '<div style="text-align:center;margin-bottom:6px">'+stRow(s,34)+'</div>'+
     '<div class="hd-kv"><span>Хүч</span><b>'+f(pw)+(mx?'':' → <u>'+f(nx)+'</u>')+'</b></div>'+
     '<div class="hd-kv"><span>Ур чадварын хүч</span><b>+'+SKB[s]+'%'+(mx?'':' → <u>+'+SKB[s+1]+'%</u>')+'</b></div>'+
@@ -3552,7 +3552,7 @@ function rlRun(o,winId,done){
   if(Array.isArray(winId)&&winId.length>1) return rlMulti(o,winId,done);
   if(Array.isArray(winId)) winId=winId[0];
   const tc=h=>SKT[h.s>=5?3:h.s===4?2:h.s===3?1:0].col, N=44, WI=36; let cells='';
-  for(let i=0;i<N;i++){ const h=i===WI?HEROES.find(x=>x.id===winId):HEROES[Math.floor(Math.random()*HEROES.length)]; cells+='<div class="rlc" style="border-color:'+tc(h)+'">'+hpi(h.id,50,1)+'</div>'; }
+  for(let i=0;i<N;i++){ const h=i===WI?HEROES.find(x=>x.id===winId):(hl=>hl[Math.floor(Math.random()*hl.length)])(HEROES.filter(x=>!x.lim)); cells+='<div class="rlc" style="border-color:'+tc(h)+'">'+hpi(h.id,50,1)+'</div>'; }
   let fin=false, tm=0, tk=0, t1=0;
   const end=()=>{ if(fin) return; fin=true; clearTimeout(tm); clearTimeout(t1); clearInterval(tk); if(!o.parentNode) return; try{ done(); }catch(e){} };
   o.innerHTML='<div class="bxs rlw"><div class="bxbox" id="rlch"><img src="'+SPRDATA.chest0[0]+'" style="width:150px"></div><div class="bxt">Баатар дуудаж байна...</div><button class="btn" id="rlk0" style="margin-top:8px">Алгасах</button></div>';
@@ -4401,7 +4401,7 @@ function rlMulti(o,ids,done){
   tm=setTimeout(()=>{ if(fin||!o.parentNode) return; const c=document.getElementById('rlch'); if(c) c.firstChild.src=SPRDATA.chest2[0];
     setTimeout(()=>{ if(fin||!o.parentNode) return;
       let strips='';
-      for(let k=0;k<n;k++){ let cells=''; for(let i=0;i<N;i++){ const h=i===WI?HEROES.find(x=>x.id===ids[k]):HEROES[Math.floor(Math.random()*HEROES.length)]; cells+='<div class="rlc" style="border-color:'+tc(h)+'">'+hpi(h.id,44,1)+'</div>'; }
+      for(let k=0;k<n;k++){ let cells=''; for(let i=0;i<N;i++){ const h=i===WI?HEROES.find(x=>x.id===ids[k]):(hl=>hl[Math.floor(Math.random()*hl.length)])(HEROES.filter(x=>!x.lim)); cells+='<div class="rlc" style="border-color:'+tc(h)+'">'+hpi(h.id,44,1)+'</div>'; }
         strips+='<div class="rms"><div class="rmt">'+cells+'</div><div class="rml"></div></div>'; }
       o.innerHTML='<div class="bxs rlw"><div class="bxt">Баатар дуудаж байна...</div><div class="rlf" style="'+rlfStyle('round')+'"><div class="rmw">'+strips+'</div></div><button class="btn" id="rlk" style="margin-top:8px">Алгасах</button></div>';
       const ts=[...o.querySelectorAll('.rmt')], bw=o.querySelector('.rms').clientWidth;
@@ -7576,7 +7576,7 @@ Object.assign(BHN,{"jamukha":{"idle":4,"win":2,"run":5,"walk":3,"atk":6,"hit":2,
 
 /* 181: Жамуха — 45 өдрийн онцгой баатар (цэс, хэлтэрхий, худалдан авалт, «Анд андгай» чадвар) */
 const JAM={id:'jamukha',start:Date.UTC(2026,9,28,16,0,0),days:45,need:120,price:2000,dsh:15,min:200,login:1,win:2,week:5,box:200,boxN:10,boxMax:3};
-JAM.end=JAM.start+JAM.days*864e5; JAM.spPrice=100; JAM.spMax=5;
+JAM.end=JAM.start+JAM.days*864e5; JAM.spPrice=200; JAM.spMax=Infinity;
 HEROES.push({id:'jamukha',n:'Жамуха',s:4,lim:1});
 HSK.jamukha=['anda','Анд андгай','Чингис хаан багт байвал хоёулаа +40% цохилт (8с), 12% эдгээнэ, бусад +10%. Ганцаараа бол бүх цэрэгт +20% (8с)',14,1];
 SKI.anda=['🤝','Анд андгай']; try{ SKIC.anda='🤝'; }catch(e){}
@@ -7598,10 +7598,10 @@ function jamS(){ if(!S.jam) S.jam={sh:0,ld:-1,qd:-1,wk:-1}; return S.jam; }
 const jamDay=()=>Math.floor((wmNow()+8*36e5)/864e5);
 const jamOn=()=>{ const n=wmNow(); return n>=JAM.start&&n<JAM.end; };
 const jamOwn=()=>!!S.heroes[JAM.id];
-const jamNeed=()=>{ if(!jamOwn()) return 0; let t=0; for(let i=starOf(JAM.id);i<STMAX;i++) t+=STC[i]; return Math.max(0,t-shN(JAM.id)); };
+const jamNeed=()=>{ if(!jamOwn()) return 0; let t=0; for(let i=starOf(JAM.id);i<STMAX;i++) t+=stcOf(JAM.id,i); return Math.max(0,t-shN(JAM.id)); };
 const jamVis=()=>jamOn()&&(!jamOwn()||jamNeed()>0);
-const jamCanStar=()=>jamOwn()&&starOf(JAM.id)<STMAX&&shN(JAM.id)>=STC[starOf(JAM.id)];
-const jamPrice=()=>Math.max(JAM.min,JAM.price-jamS().sh*JAM.dsh);
+const jamCanStar=()=>jamOwn()&&starOf(JAM.id)<STMAX&&shN(JAM.id)>=stcOf(JAM.id,starOf(JAM.id));
+const jamPrice=()=>JAM.price;
 function jamLeftTxt(){ const l=JAM.end-wmNow(); if(l<=0) return 'дууссан'; const d=Math.floor(l/864e5), h=Math.floor(l%864e5/36e5), m=Math.floor(l%36e5/6e4); return d>0?d+' өдөр '+h+' цаг':(h>0?h+' цаг '+m+' мин':m+' мин'); }
 function jamShort(){ const l=JAM.end-wmNow(); const d=Math.floor(l/864e5); return d>=1?d+'ө':Math.max(1,Math.floor(l/36e5))+'ц'; }
 function jamAdd(n,why,quiet){ const J=jamS(); let g; if(jamOwn()){ S.sh=S.sh||{}; g=Math.max(0,Math.min(n,jamNeed())); S.sh[JAM.id]=shN(JAM.id)+g; } else { const b=J.sh; J.sh=Math.min(JAM.need,J.sh+n); g=J.sh-b; } if(g>0){ if(!quiet){ try{ say('🗡 Жамухагийн хэлтэрхий +'+g+(why?' ('+why+')':'')); }catch(e){} } try{ save(); }catch(e){} } try{ if(document.getElementById('jamov')) jamRender(); }catch(e){} return g; }
@@ -7665,7 +7665,7 @@ function jamWheelHTML(){ const o=jamSpinInfo(); let b;
   else if(JAMX.cs) b='<button class="btn warn" onclick="jamSpin()">⚠ Дахин дар · '+JAM.spPrice+' 💎</button>';
   else b='<button class="btn" onclick="jamSpin()">🎡 Эргүүлэх · '+JAM.spPrice+' 💎</button>';
   return '<div class="jh">🎡 ӨДРИЙН ШОРОН</div><div class="jwh"><div class="jpt"'+(window.JWB?' style="background:url('+JWB.p+') center/contain no-repeat;width:26px;height:46px;border:0;top:-14px;filter:drop-shadow(0 2px 3px #000a)"':'')+'></div>'+jamWheelSvg()+'</div><div style="text-align:center;margin-top:6px">'+b+'</div>'
-   +'<div class="jft" style="padding:3px 12px 0">Өдөрт '+JAM.spMax+' хүртэл (эхнийх нь үнэгүй) · Жамуха унах боломж 2%'+(jamOwn()?' (Жамуха чамд байгаа тул 30 хэлтэрхий өгнө)':'')+'</div>'; }
+   +'<div class="jft" style="padding:3px 12px 0">Өдөрт эхний эргүүлэлт үнэгүй, дараагийнх '+JAM.spPrice+' · хязгааргүй · Жамуха унах боломж 2%'+(jamOwn()?' (Жамуха чамд байгаа тул 30 хэлтэрхий өгнө)':'')+'</div>'; }
 function jamPickSpin(){ let r=Math.random()*100, a=0; for(let i=0;i<JSW.length;i++){ a+=JSW[i].w; if(r<a) return i; } return 0; }
 function jamSpin(){
   if(JAMX.sp||!jamVis()) return; const J=jamS(), d=jamDay(); if(J.sd!==d){ J.sd=d; J.sn=0; }
@@ -7684,7 +7684,7 @@ function jamSpin(){
   try{ sfx('ok'); }catch(e){}
   setTimeout(()=>{ JAMX.sp=0; try{ sfx('lvl'); }catch(e){} try{ say(msg); }catch(e){} try{ if(hero){ jamClose(); jamReveal(); jamBtnUpd(); } else jamRender(); }catch(e){} try{ jamBtnUpd(); }catch(e){} },el?4400:100);
 }
-function jamStar(){ const id=JAM.id; if(!S.heroes[id]) return; const st=starOf(id); if(st>=STMAX){ say('Дээд од хүрсэн'); return; } const c=STC[st]; if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
+function jamStar(){ const id=JAM.id; if(!S.heroes[id]) return; const st=starOf(id); if(st>=STMAX){ say('Дээд од хүрсэн'); return; } const c=stcOf(id,st); if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
   S.sh[id]-=c; S.heroes[id]=st+2; try{ sfx('lvl'); }catch(e){} say('Жамуха '+(st+1)+' одтой боллоо!'); try{ save(); refresh(); }catch(e){} setTimeout(()=>{ try{ clPush(true); }catch(e){} },3000); try{ jamBtnUpd(); }catch(e){} jamRender(); }
 function jamInfo(){ try{ heroInfo(JAM.id); const h=document.getElementById('hd'); if(h) h.style.zIndex=80; }catch(e){} }
 
@@ -7730,16 +7730,13 @@ function jamRender(){
   let h='<div class="jw"><div class="jbx"><img src="'+JAMBAN+'" alt=""><div class="jmag" onclick="jamInfo()"></div>'+bt+'<button class="jx" onclick="jamClose()">✕</button></div>'
    +'<div class="jtm"><span>⏳ Үлдсэн: <b>'+(on?jamLeftTxt():'—')+'</b></span><small>'+JAM.days+' өдрийн санал</small></div>';
   if(own){
-    const st=starOf(JAM.id), mx=st>=STMAX, c=mx?0:STC[st], hv=shN(JAM.id);
+    const st=starOf(JAM.id), mx=st>=STMAX, c=mx?0:stcOf(JAM.id,st), hv=shN(JAM.id);
     h+='<div class="jsh"><span>⭐ Жамухагийн од</span><b style="color:#ffd770">'+st+' / '+STMAX+'</b></div>'
      +(mx?'':'<div class="jsh" style="padding-top:2px"><span>🗡 Хэлтэрхий (дараагийн од)</span><b style="color:#ffd770">'+Math.min(hv,c)+' / '+c+'</b></div><div class="jbar"><i style="width:'+Math.min(100,hv/c*100)+'%"></i></div>'
      +'<div style="margin:6px 12px 0"><button class="btn'+(jamCanStar()?'':' dis')+'" style="width:100%'+(jamCanStar()?'':';filter:grayscale(.7) brightness(.8)')+'" onclick="jamStar()">⭐ Од нэмэх ('+c+' хэлтэрхий)</button></div>'
-     +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхийг доорх үүргүүд болон хайрцгаар цуглуулна · Нийт '+jamNeed()+' хэлтэрхий дутуу</div>');
+     +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхийг доорх үүрэг болон шороноор цуглуулна · Нийт '+jamNeed()+' хэлтэрхий дутуу</div>');
     if(on&&more){
       h+=jamWheelHTML();
-      const bl=jamBoxLeft();
-      h+='<div class="jh">🎁 ХАЙРЦАГ</div><div class="jr bx"><span class="ic">🎁</span><div class="t">Жамухагийн хайрцаг<small>+'+JAM.boxN+' хэлтэрхий · өнөөдөр '+(JAM.boxMax-bl)+'/'+JAM.boxMax+'</small></div>'
-       +(bl?'<button class="btn'+(JAMX.cb?' warn':'')+'" onclick="jamBox()">'+(JAMX.cb?'Дахин дар':JAM.box+' 💎')+'</button>':'<span class="ok" style="color:#cdb98a">маргааш</span>')+'</div>';
       h+='<div class="jh">📋 ӨДРИЙН ҮҮРЭГ</div>'
        +row('📅','Өдөр бүр нэвтрэх','Өдөр бүр 1 удаа',JAM.login,J.ld===d,'<button class="btn" onclick="jamLogin()">Авах</button>')
        +row('⚔','Өнөөдөр нэг тулаанд ялах','Аливаа тулаан',JAM.win,J.qd===d)
@@ -7748,12 +7745,9 @@ function jamRender(){
   }
   if(!own){
     h+='<div class="jsh"><span>🗡 Жамухагийн хэлтэрхий</span><b style="color:#ffd770">'+J.sh+' / '+JAM.need+'</b></div><div class="jbar"><i style="width:'+Math.min(100,J.sh/JAM.need*100)+'%"></i></div>'
-     +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхий бүр үнийг '+JAM.dsh+' 💎-ээр хямдруулна · '+JAM.need+' болбол үнэгүй</div>';
+     +'<div class="jft" style="padding:3px 12px 0">Үнэ '+JAM.price.toLocaleString('en-US')+' хэвээр · '+JAM.need+' хэлтэрхий цуглуулбал үнэгүй авна</div>';
     if(on&&!full){
       h+=jamWheelHTML();
-      const bl=jamBoxLeft();
-      h+='<div class="jh">🎁 ХАЙРЦАГ</div><div class="jr bx"><span class="ic">🎁</span><div class="t">Жамухагийн хайрцаг<small>+'+JAM.boxN+' хэлтэрхий · өнөөдөр '+(JAM.boxMax-bl)+'/'+JAM.boxMax+'</small></div>'
-       +(bl?'<button class="btn'+(JAMX.cb?' warn':'')+'" onclick="jamBox()">'+(JAMX.cb?'Дахин дар':JAM.box+' 💎')+'</button>':'<span class="ok" style="color:#cdb98a">маргааш</span>')+'</div>';
     }
     if(on){
       h+='<div class="jh">📋 ӨДРИЙН ҮҮРЭГ</div>'

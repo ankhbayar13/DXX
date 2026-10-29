@@ -9031,15 +9031,23 @@ function mhImg(id){
 })();
 
 
-/* p32/wrtitle.js — 211: Бөхийн цол v5 (наадам = хугацаатай тэмцээн: Сум 24ц, Аймаг 3 өдөр, Улс 7 хоног; ялагдвал наадам дуусна, цол хэвээр). Сум → Аймаг → Улс. Шат бүрт ДАРААЛСАН ялалтаар цол авна, сүүлийн цолоо авмагц наадам дуусаж дараагийн шат 0-ээс эхэлнэ.
+/* p32/wrtitle.js — 211: Бөхийн цол v5 (наадам = хуваарьтай тэмцээн: Сум өдөр бүр, Аймаг 3 хоног тутам, Улс ням бүр, 19:00–23:00 УБ; ялагдвал наадам дуусна, цол хэвээр). Сум → Аймаг → Улс. Шат бүрт ДАРААЛСАН ялалтаар цол авна, сүүлийн цолоо авмагц наадам дуусаж дараагийн шат 0-ээс эхэлнэ.
    Хурц/Бадрангуй/Аварга/Далай/Дархан = өмнөх цолтой бөхийг ганц удаа ялна. Ялагдвал тухайн шатанд авсан сүүлийн цолныхоо босго руу буцна. Цол хэзээ ч хасагдахгүй. Cloud-д бүртгүүлсэн тоглогч л цол авна. */
 const WRT=[['Сумын Начин',0],['Сумын Заан',0],['Аймгийн Начин',0],['Аймгийн Харцага',0],['Аймгийн Заан',0],['Аймгийн Арслан',0],['Аймгийн Хурц Арслан',0],['Аймгийн Хурц Бадрангуй Арслан',0],['Улсын Начин',0],['Улсын Харцага',0],['Улсын Заан',0],['Улсын Гарьд',0],['Улсын Арслан',0],['Улсын Аварга',0],['Улсын Далай Аварга',0],['Улсын Дархан Аварга',0]];
 const WRT_ALT=[0,0,0,0,0,50,60,70,0,0,0,100,120,130,140,150];
 const WRSTG=[{n:'Сумын наадам',t:[[0,5],[1,6]]},{n:'Аймгийн наадам',t:[[2,5],[3,6],[4,7],[5,8]]},{n:'Улсын наадам',t:[[8,5],[9,6],[10,7],[11,8],[12,9]]}];
 
-const WCD={s:24*3600e3,a:3*86400e3,u:7*86400e3}, WKN={s:'Сумын наадам',a:'Аймгийн наадам',u:'Улсын наадам'}, WKI={s:0,a:1,u:2};
+const WKN={s:'Сумын наадам',a:'Аймгийн наадам',u:'Улсын наадам'}, WKI={s:0,a:1,u:2};
+
+// Хуваарь (Улаанбаатарын цаг, UTC+8): Сум өдөр бүр, Аймаг 3 хоног тутам, Улс ням гараг бүр. Нээлттэй цонх 19:00–23:00.
+const WDAY=864e5, WUB=8*3600e3, WST0=19*3600e3, WLEN=4*3600e3;
+const wevT=()=>window.WEVT||wmNow();
+function wevElig(k,d){ if(k==='s') return true; if(k==='a') return d%3===0; return (d+4)%7===0; }
+function wevWin(k,t,skipD){ const d0=Math.floor((t+WUB)/WDAY); for(let i=0;i<10;i++){ const d=d0+i; if(!wevElig(k,d)||d===skipD) continue; const st=d*WDAY-WUB+WST0, en=st+WLEN; if(en<=t) continue; return {d:d,st:st,en:en,open:t>=st}; } return null; }
+function wevDay(w,t){ const d0=Math.floor((t+WUB)/WDAY), n=w.d-d0; return n<=0?'өнөөдөр':n===1?'маргааш':n+' хоногийн дараа'; }
+function wevNextTxt(k){ const t=wevT(), s=wsSt(), w0=wevWin(k,t), w=(w0&&s.last&&s.last[k]===w0.d)?wevWin(k,t,w0.d):w0; return w?wevDay(w,t)+' 19:00 · '+wtTm(w.st-t)+'-ийн дараа':''; }
 window.WEVB=0;
-function wsSt(){ let s=S.wst; if(!s||typeof s!=='object'||s.own==null){ s=S.wst={own:{},cd:{},run:null}; } if(!s.cd) s.cd={}; if(s.run===undefined) s.run=null; return s; }
+function wsSt(){ let s=S.wst; if(!s||typeof s!=='object'||s.own==null){ s=S.wst={own:{},last:{},run:null}; } if(!s.last) s.last={}; if(s.run===undefined) s.run=null; return s; }
 const wsReg=()=>{ try{ return !!(typeof CL!=='undefined'&&CL.email); }catch(e){ return false; } };
 function wsTop(){ const o=wsSt().own; let m=-1; for(const k in o){ if(o[k]&&+k>m) m=+k; } return m; }
 function wsIdx(){ return wsReg()?wsTop():-1; }
@@ -9059,28 +9067,31 @@ function wtLine(){ const s=wsSt(), i=wsTop(), now=wmNow();
   let h='🏅 Бөхийн цол: <b style="color:#ffd770">'+(i<0?'байхгүй':WRT[i][0])+'</b>';
   if(!wsReg()) h+='<br><span style="color:#ff9a8a">☁ Наадамд орох, цол авахын тулд Cloud цэсэнд бүртгүүлнэ үү</span>';
   return h; }
-function wtEvents(){ const s=wsSt(), now=wmNow(), fe=(typeof nfeeOf==='function')?nfeeOf('wrest'):0; let h='';
+function wtEvents(){ const s=wsSt(), t=wevT(), fe=(typeof nfeeOf==='function')?nfeeOf('wrest'):0; let h='';
   if(s.run){ const r=s.run; h+='<div class="card" style="margin:6px 0;border-color:#ffd770"><b>🏟 '+WKN[r.k]+' үргэлжилж байна</b><div class="sm">'+(r.ch?'Тулаан: '+WRT[r.ch-1][0]+'-тай':'Дараалсан ялалт: '+r.p)+'</div><button class="btn" onclick="wevBout()">▶ Үргэлжлүүлэх</button></div>'; return h; }
-  ['s','a','u'].forEach(k=>{ const g=wevGoal(k); if(!g) return; const cd=s.cd[k]||0, w=cd>now;
-    h+='<div class="card" style="margin:6px 0"><b>🏟 '+WKN[k]+'</b> <span class="sm">· '+(k==='s'?'24 цагт 1':k==='a'?'3 хоногт 1':'7 хоногт 1')+'</span><div class="sm">'+wevGoalTxt(g)+'</div><div class="sm" style="opacity:.8">Ялагдвал наадам дуусна, авсан цол хэвээр.</div>'
-      +'<button class="btn" '+(w?'disabled':'')+' onclick="wevStart(\''+k+'\')">'+(w?'⏳ '+wtTm(cd-now):'▶ Эхлэх'+(fe?' · '+f(fe)+' 🪙':''))+'</button></div>'; });
+  ['s','a','u'].forEach(k=>{ const g=wevGoal(k); if(!g) return; const w0=wevWin(k,t); if(!w0) return; const joined=!!(s.last[k]===w0.d), w=joined&&w0.open?wevWin(k,t,w0.d):w0, op=w0.open&&!joined;
+    h+='<div class="card" style="margin:6px 0'+(op?';border-color:#7fe08a':'')+'"><b>🏟 '+WKN[k]+'</b> <span class="sm">· '+(k==='s'?'өдөр бүр':k==='a'?'3 хоног тутам':'ням гараг бүр')+' · 19:00–23:00</span><div class="sm">'+wevGoalTxt(g)+'</div>'
+      +(op?'<div class="sm" style="color:#8fe39a"><b>🔥 Нээлттэй!</b> Хаагдахад '+wtTm(w0.en-t)+' үлдсэн</div>':joined?'<div class="sm" style="color:#9fe08a">✓ Энэ удаад оролцсон</div><div class="sm">⏰ Дараагийнх: '+wevDay(w,t)+' 19:00 · '+wtTm(w.st-t)+'-ийн дараа</div>':'<div class="sm" style="color:#ffd770">⏰ Эхлэхэд: <b>'+wtTm(w0.st-t)+'</b> ('+wevDay(w0,t)+' 19:00)</div>')
+      +'<div class="sm" style="opacity:.8">Ялагдвал наадам дуусна, авсан цол хэвээр.</div>'
+      +'<button class="btn" '+(op?'':'disabled')+' onclick="wevStart(\''+k+'\')">'+(op?'▶ Эхлэх'+(fe?' · '+f(fe)+' 🪙':''):'⏳ Хүлээнэ үү')+'</button></div>'; });
   if(!h) h='<div class="sm" style="text-align:center;margin-top:6px">👑 Бүх наадмыг даван туулсан</div>';
   return h; }
 function wtRewards(){ let h='<div style="max-height:62vh;overflow:auto;text-align:left;font-size:13px;line-height:1.35">'; const o=wsSt().own;
   const grp=(t,n,rows)=>{ h+='<div style="margin:8px 0 3px;color:#ffd770"><b>'+t+'</b> <span style="opacity:.75">· '+n+'</span></div>'; rows.forEach(x=>{ const i=x[0]; h+='<div style="padding:3px 0;border-bottom:1px solid #5d4224"><b>'+(o[i]?'✅ ':'🔒 ')+WRT[i][0]+'</b><br><span style="opacity:.85">'+x[1]+'</span><br><span style="color:#ffe9b0">🎁 +'+f(wtGold(i))+' 🪙'+(WRT_ALT[i]?' · +'+WRT_ALT[i]+' Алт':'')+'</span></div>'; }); };
   const st=(si)=>WRSTG[si].t.map(x=>[x[0],x[1]+' дараалж ял']);
-  grp('Сумын наадам','24 цагт 1 удаа',st(0));
-  grp('Аймгийн наадам','3 хоногт 1 удаа (Сум дууссаны дараа)',st(1).concat([[6,'Аймгийн Арслантай барилдаж ял'],[7,'Аймгийн Хурц Арслантай барилдаж ял']]));
-  grp('Улсын наадам','7 хоногт 1 удаа (Аймгийн Арслан болсны дараа)',st(2).concat([[13,'Улсын Арслантай барилдаж ял'],[14,'Улсын Аваргатай барилдаж ял'],[15,'Улсын Далай Аваргатай барилдаж ял']]));
+  grp('Сумын наадам','өдөр бүр 19:00–23:00',st(0));
+  grp('Аймгийн наадам','3 хоног тутам 19:00–23:00 (Сум дууссаны дараа)',st(1).concat([[6,'Аймгийн Арслантай барилдаж ял'],[7,'Аймгийн Хурц Арслантай барилдаж ял']]));
+  grp('Улсын наадам','ням гараг бүр 19:00–23:00 (Аймгийн Арслан болсны дараа)',st(2).concat([[13,'Улсын Арслантай барилдаж ял'],[14,'Улсын Аваргатай барилдаж ял'],[15,'Улсын Далай Аваргатай барилдаж ял']]));
   h+='<div style="margin-top:8px;opacity:.85">Цол бүрийн шагнал нэг удаа өгөгдөнө. Ялагдвал наадам дуусна, авсан цол хэзээ ч хасагдахгүй. Оролцооны төлбөр наадам амжилттай дуусвал буцна.</div></div>';
   return h; }
 function wtShowRewards(){ pop('🏅 Бөхийн цол, шагнал',wtRewards()); }
-function wevStart(k){ const s=wsSt(), now=wmNow(); if(s.run){ wevBout(); return; }
+function wevStart(k){ const s=wsSt(), t=wevT(); if(s.run){ wevBout(); return; }
   if(!wsReg()){ say('Наадамд орохын тулд Cloud цэсэнд бүртгүүлнэ үү'); return; }
   const g=wevGoal(k); if(!g){ say('Энэ наадам одоогоор нээгдээгүй'); return; }
-  if((s.cd[k]||0)>now){ say('Дараагийн наадам: '+wtTm(s.cd[k]-now)); return; }
+  const w=wevWin(k,t); if(!w||!w.open){ say(w?'Наадам эхлэхэд '+wtTm(w.st-t)+' үлдсэн':'Наадам одоогоор алга'); return; }
+  if(s.last[k]===w.d){ say('Энэ удаагийн наадамд оролцсон. Дараагийнх: '+wevNextTxt(k)); return; }
   const fe=(typeof nfeeOf==='function')?nfeeOf('wrest'):0; if((S.res.gold||0)<fe){ say('Оролцооны төлбөр '+f(fe)+' 🪙 хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
-  S.res.gold-=fe; s.cd[k]=now+WCD[k]; s.run={k:k,p:0,ch:g.ch||0,fee:fe}; try{ save(); refresh(); }catch(e){}
+  S.res.gold-=fe; s.last[k]=w.d; s.run={k:k,p:0,ch:g.ch||0,fee:fe}; try{ save(); refresh(); }catch(e){}
   wevBout(); }
 function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrestOpen(); } finally{ window.WEVB=0; } }
 (function(){
@@ -9100,22 +9111,24 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
   const _f=wrestFinish; wrestFinish=function(){ const R=WRS; let win=false; try{ win=!!(R&&R.sc&&R.sc[0]>=2); }catch(e){}
     _f.apply(this,arguments);
     try{ if(!R||!R.ev){ try{ refresh(); save(); }catch(e){} return; } R.fin=1;
-      const s=wsSt(), run=s.run; if(!run) return; const now=wmNow(), newT=[]; let over=false, done=false;
+      const s=wsSt(), run=s.run; if(!run) return; const newT=[]; let over=false, done=false;
       if(run.ch){ if(win){ s.own[run.ch]=1; newT.push(run.ch); done=true; } over=true; }
       else { const g=WRSTG[WKI[run.k]]; if(win){ run.p++; g.t.forEach(x=>{ if(run.p>=x[1]&&!s.own[x[0]]){ s.own[x[0]]=1; newT.push(x[0]); } }); if(s.own[g.t[g.t.length-1][0]]){ done=true; over=true; } } else over=true; }
-      const fee=run.fee||0, cd=s.cd[run.k]||0, p=run.p; if(over){ if(done&&fee) S.res.gold=(S.res.gold||0)+fee; s.run=null; }
+      const fee=run.fee||0, p=run.p, nxt=wevNextTxt(run.k); if(over){ if(done&&fee) S.res.gold=(S.res.gold||0)+fee; s.run=null; }
       const a=pay(newT), r=document.getElementById('archres');
       const add=html=>{ if(!r) return; const d=document.createElement('div'); d.style.cssText='margin:6px 0;padding:8px 10px;border-radius:10px;background:linear-gradient(#5a3b17,#3b2815);border:2px solid '+(a.got.length?'#ffd770':'#7a5a22')+';color:#ffe9b0;font-weight:bold'; d.innerHTML=html; const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); };
       newT.forEach(i=>{ const first=a.got.indexOf(i)>=0; try{ sfx('win'); }catch(e){} try{ say('🏅 Шинэ цол: '+WRT[i][0]+'!'); }catch(e){} add('🏅 Шинэ цол!<br><span style="font-size:18px;color:#ffd770">'+WRT[i][0]+'</span>'+(first?'<br><span class="sm">+'+f(wtGold(i))+' 🪙'+(WRT_ALT[i]?' · +'+WRT_ALT[i]+' Алт':'')+'</span>':'')); });
       if(!over){ const g=WRSTG[WKI[run.k]], nx=g.t.find(x=>!s.own[x[0]]); add('🔥 Дараалсан ялалт: '+p+(nx?'<br><span class="sm">Дараагийн цол: '+WRT[nx[0]][0]+' ('+p+'/'+nx[1]+')</span>':'')); }
-      else if(done) add('🏁 '+WKN[run.k]+' амжилттай дууслаа!'+(fee?'<br><span class="sm">Төлбөр буцлаа +'+f(fee)+' 🪙</span>':'')+'<br><span class="sm">Дараагийн наадам: '+wtTm(cd-now)+'</span>');
-      else add('💔 Ялагдлаа — '+WKN[run.k]+' дууслаа'+(wsTop()>=0?'<br><span class="sm">Цол хэвээр: '+WRT[wsTop()][0]+'</span>':'')+'<br><span class="sm">Дараагийн наадам: '+wtTm(cd-now)+'</span>');
+      else if(done) add('🏁 '+WKN[run.k]+' амжилттай дууслаа!'+(fee?'<br><span class="sm">Төлбөр буцлаа +'+f(fee)+' 🪙</span>':'')+'<br><span class="sm">Дараагийн наадам: '+nxt+'</span>');
+      else add('💔 Ялагдлаа — '+WKN[run.k]+' дууслаа'+(wsTop()>=0?'<br><span class="sm">Цол хэвээр: '+WRT[wsTop()][0]+'</span>':'')+'<br><span class="sm">Дараагийн наадам: '+nxt+'</span>');
       if(r){ const ag=r.querySelector('#archagain'), sm=[].slice.call(r.querySelectorAll('.sm')).find(e=>/Өнөөдөр/.test(e.textContent));
         if(sm) sm.textContent=over?'🏟 '+WKN[run.k]+' дууслаа':'🏟 '+WKN[run.k]+' үргэлжилж байна';
         if(!over){ let b=ag; if(!b){ b=document.createElement('button'); b.className='btn'; b.id='archagain'; const row=r.querySelector('.row2'); if(row) row.insertBefore(b,row.firstChild); } b.textContent='▶ Дараагийн тулаан'; b.onclick=()=>{ cancelAnimationFrame(R.raf); const o=R.o; WRS=null; o.remove(); wevBout(); }; }
         else if(ag) ag.remove(); }
       try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} }catch(e){} };
 })();
+(function(){ function chk(){ try{ if(!wsReg()) return; const s=wsSt(), t=wevT(); s.nt=s.nt||{}; ['s','a','u'].forEach(k=>{ if(!wevGoal(k)) return; const w=wevWin(k,t); if(w&&w.open&&s.last[k]!==w.d&&s.nt[k]!==w.d){ s.nt[k]=w.d; try{ say('🏟 '+WKN[k]+' нээгдлээ! Наадам цэсээс оролц ('+wtTm(w.en-t)+' үлдсэн)'); }catch(e){} } }); }catch(e){} }
+  setTimeout(chk,8000); setInterval(chk,60000); })();
 
 
 /* p32/entryfee.js — 209: Наадмын 3 тэмцээнд оролцооны төлбөр (алт). Бөхөд цолоос хамаарна, ялвал буцаана */

@@ -3300,7 +3300,7 @@ setInterval(lOrder,800); setInterval(dqBar,1500); setTimeout(()=>{ if(S.offp) of
 
 
 // ================= ER: Тэнхээ + Шуудан =================
-const STM_MAX=50, STM_COST=5, STM_REG=90;
+const STM_MAX=75, STM_COST=15, STM_REG=90;
 function stmGet(){ if(!S.stm) S.stm={v:STM_MAX,t:Date.now(),fr:0}; const q=S.stm, now=Date.now(); if(q.v<STM_MAX){ const n=Math.floor((now-q.t)/1000/STM_REG); if(n>0){ q.v=Math.min(STM_MAX,q.v+n); q.t+= n*STM_REG*1000; } } if(q.v>=STM_MAX) q.t=now; return q; }
 function stmSpend(){ if(admOn()) return true; const q=stmGet(); if(q.v<STM_COST){ say('⚡ Тэнхээ дууссан. Нөөц нэмэх цонхноос сэргээ'); sfx('err'); openM('sup'); return false; } q.v-=STM_COST; return true; }
 function stmFree(){ const q=stmGet(), now=Date.now(); if(q.fr>now){ say('Дараа нь авна'); return; } q.v=Math.min(STM_MAX+25,q.v+25); q.fr=now+4*3600*1000; say('+25 ⚡'); refresh(); }
@@ -9447,6 +9447,26 @@ window.STONEI="data:image/webp;base64,UklGRuQoAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQU
     const arm=AGHC&&Date.now()<AGHC;
     h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Гулсуур татаж эсвэл тоо бичээд хэсэгчлэн зарж болно. Захиалгад хэрэгтэй зүйлээ үлдээгээрэй.</div></div>';
     return h; };
+})();
+
+
+/* p32/chsnrg.js — ⚡ Тэнхээ: Түүхэн аян дээр харагдана, нөхөгдөх хугацаа (минут) үзүүлнэ. */
+(function(){
+  const fmt=s=>{ s=Math.max(0,Math.ceil(s)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), c=s%60; return h?h+'ц '+m+'м':m?m+'м '+(c<10?'0':'')+c+'с':c+'с'; };
+  function info(){ const q=stmGet(), now=Date.now(); const nx=q.v<STM_MAX?Math.max(1,Math.ceil(STM_REG-(now-q.t)/1000)):0;
+    const need=Math.max(0,STM_COST-q.v), full=Math.max(0,STM_MAX-q.v);
+    const toFight=need>0?nx+STM_REG*(need-1):0, toFull=full>0?nx+STM_REG*(full-1):0;
+    return {q,nx,toFight,toFull,fights:Math.floor(q.v/STM_COST)}; }
+  function txt(){ const i=info();
+    return (i.fights>0?'🗡 '+i.fights+' тулаан хийж болно':'🗡 Дараагийн тулаан: '+fmt(i.toFight)+'-н дараа')+'<br>'+(i.toFull>0?'Дүүрэх: '+fmt(i.toFull)+' · +1 тутамд '+fmt(i.nx):'Тэнхээ дүүрэн'); }
+  const _d=chsDraw;
+  chsDraw=function(){ _d.apply(this,arguments); try{ const p=document.getElementById('chp'); if(p){ p.innerHTML+='<br><span onclick="$(\'chs\').remove();openM(\'sup\')" style="cursor:pointer">⚡ <b class="stmv">'+stmGet().v+'/'+STM_MAX+'</b><br><span class="stmt" style="font-weight:normal;font-size:11px">'+txt()+'</span></span>'; } }catch(e){} };
+  const _c=cmapHTML;
+  cmapHTML=function(ci){ const h=_c.apply(this,arguments); try{ return '<div class="card" style="padding:6px 10px"><div class="row"><div><b>⚡ Тэнхээ <span class="stmv">'+stmGet().v+'/'+STM_MAX+'</span></b> · тулаан бүр '+STM_COST+'<div class="sm stmt">'+txt()+'</div></div><button class="btn" style="padding:4px 10px" onclick="openM(\'sup\')">+ Нэмэх</button></div></div>'+h; }catch(e){ return h; } };
+  const _s=stmHTML;
+  stmHTML=function(){ const h=_s.apply(this,arguments); try{ return h.replace('</h3>','</h3><div class="sm stmt" style="color:#ffd770">'+txt()+'</div>').replace('<b class="stmv">','<b>'); }catch(e){ return h; } };
+  setInterval(()=>{ try{ if(!document.querySelector('.stmt')) return; const t=txt(), v=stmGet().v+'/'+STM_MAX;
+    document.querySelectorAll('.stmt').forEach(e=>{ if(e.innerHTML!==t) e.innerHTML=t; }); document.querySelectorAll('.stmv').forEach(e=>{ if(e.textContent!==v) e.textContent=v; }); }catch(e){} },1000);
 })();
 
 </script><script>(function(){

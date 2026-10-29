@@ -8946,6 +8946,30 @@ function mhImg(id){
   ['sheep','goat','cow','horse','camel','bird','wolf','eagle'].forEach(k=>{ const f0=SNDS[k]; if(!f0) return; SNDS[k]=function(){ SND.k=K; try{ return f0.apply(this,arguments); } finally{ SND.k=1; } }; });
 })();
 
+
+/* p32/lootrule.js — 205: дээрмийн шинэ дүрэм (бүх тоглогч, хаан).
+   Бурхуултай (24ц-ийн дотор тоглосон) = 5%, дайрч болно. Бурхуулгүй = хүчнээс хамаарч 10/20/30%. 6ц дахин дээрэмдэхгүй дүрэм хэвээр. */
+(function(){
+  const _nw=nfWhy;
+  nfWhy=function(e){ const w=_nw(e); if(w&&w.indexOf('🛡 Хамгаалалттай')===0) return ''; return w; };
+  const HR=6*3600e3;
+  function imm(e){ return Math.max((CWD.rd&&CWD.rd[e.uid])||0,e.imm||0); }
+  wmLootPct=function(e){
+    if(!e||!e.real||!e.uid) return 0;
+    const now=wmNow(), im=imm(e); if(im&&now-im<HR) return 0;
+    if(e.nf&&nfWhy(e)) return 0;
+    if(e.act<24) return 5;
+    const r=(e.p||0)/Math.max(1,totalPower());
+    return r>=0.8?30:r>=0.5?20:10;
+  };
+  wmShieldTxt=function(e){
+    if(!e||!e.real) return '';
+    if(e.nf){ const w=nfWhy(e); if(w) return w; }
+    const now=wmNow(), im=imm(e); if(im&&now-im<HR) return '⏳ '+Math.ceil((HR-(now-im))/3600e3)+'ц дахин дээрэмдэхгүй';
+    return (e.act<24?'🛡 Хамгаалалттай · ':'⚠ ')+'Дээрэмдвэл '+wmLootPct(e)+'%';
+  };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

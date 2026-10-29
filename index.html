@@ -9417,6 +9417,30 @@ window.STONEI="data:image/webp;base64,UklGRuQoAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQU
   ['tarx','modx'].forEach(x=>{ const i=L.indexOf(x); if(i>=0) L.splice(i,1); });
 })();
 
+
+/* p32/aghpart.js — Агуулах: хэсэгчлэн зарах (25% / 50% / 75% / Бүгд). */
+(function(){
+  const AF={}; // сонгосон хувь
+  const fr=k=>AF[k]||1;
+  const units=(k,n)=>Math.max(0,Math.floor(n*fr(k)));
+  window.aghFr=function(k,x){ AF[k]=x; try{ fillM(); }catch(e){} };
+  sellItem=function(k){
+    const n=Math.floor(S.res[k]||0), u=units(k,n), v=Math.floor(u*ITEMS[k].p*sellMult()); if(u<1||v<1) return;
+    S.res[k]=(S.res[k]||0)-u; S.res.gold+=v; try{ qh('sell',1); }catch(e){} say('+'+f(v)+' зоос'); try{ sfx('coin'); }catch(e){} refresh();
+  };
+  const chip=(k,x,t)=>'<span onclick="aghFr(\''+k+'\','+x+')" style="display:inline-block;min-width:44px;text-align:center;padding:5px 10px;margin:0 3px;border-radius:10px;border:2px solid '+(fr(k)===x?'#ffd770':'#6b4a1f')+';background:'+(fr(k)===x?'#7a5214':'#2c1d0f')+';color:#ffe9b0;font-size:13px;font-weight:bold">'+t+'</span>';
+  aghHTML=function(){
+    let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>'+f(cap())+'</b> нэг бүрд'+(S.bld.horgo>0?' · Хорго Lv '+S.bld.horgo:' · Хорго барьбал +200')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
+    AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n<1) return; any=true;
+      const u=units(k,n), v=Math.floor(u*ITEMS[k].p*sellMult());
+      h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" '+(u<1||v<1?'disabled':'')+' onclick="sellItem(\''+k+'\')">Зарах '+f(v)+' 🪙</button></div>'+
+        '<div style="text-align:center;margin-top:6px">'+chip(k,0.25,'25%')+chip(k,0.5,'50%')+chip(k,0.75,'75%')+chip(k,1,'Бүгд')+'</div>'+(fr(k)<1?'<div class="sm" style="text-align:center;margin-top:3px">'+f(u)+' ширхэг зарна</div>':'')+'</div>'; });
+    if(!any) return h+'<div class="card"><div class="sm" style="text-align:center;padding:10px 4px">Агуулах хоосон байна.<br>Хашаан дээрх бөмбөлгийг дарж мах, сүү, ноос цуглуулаад дараа нь энд зарна.</div></div>';
+    const arm=AGHC&&Date.now()<AGHC;
+    h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Захиалгад хэрэгтэй зүйлээ үлдээж, бусдыг нь хувиар нь эсвэл тус тусад нь зарж болно.</div></div>';
+    return h; };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

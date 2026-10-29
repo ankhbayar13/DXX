@@ -5265,9 +5265,16 @@ function chTime(t){ try{ const d=t&&t.toDate?t.toDate():(t?new Date(t):null); if
 function chatDraw(scroll){ const l=document.getElementById('chl2'); if(!l) return; const me=CL.uid, ms=CHT.msgs.filter(m=>!CHT.hid[m.uid]);
   if(!ms.length){ l.innerHTML='<div class="kE">Одоогоор зурвас алга. Эхний зурвасыг та бичээрэй!</div>'; return; }
   const near=l.scrollHeight-l.scrollTop-l.clientHeight<80;
-  l.innerHTML=ms.map(m=>{ const av=(typeof SPRDATA!=='undefined'&&SPRDATA[m.sp||'npc1'])?SPRDATA[m.sp||'npc1'][0]:'';
+  l.innerHTML=ms.map(m=>{ const av=chAv(m);
     return '<div class="kM'+(m.uid===me?' me':'')+'"><img src="'+av+'"><div class="kB" onclick="chatSel(\''+m.id+'\')"><div class="kN">'+esc2(m.n||'Хаан')+'<i>Lv '+(m.lv||1)+'</i><s>'+chTime(m.t)+'</s></div>'+esc2(m.m)+(CHT.sel===m.id?'<div class="kA">'+(m.uid!==me?'<button onclick="event.stopPropagation();chatHide(\''+m.uid+'\')">🚫 Нуух</button>':'')+(isAdm()?'<button onclick="event.stopPropagation();chatDel(\''+m.id+'\')">🗑 Устгах</button>':'')+'</div>':'')+'</div></div>'; }).join('');
   if(scroll===true&&near||scroll===2) l.scrollTop=l.scrollHeight; }
+
+/* профайл зураг чатад: зургаа 48px жижиг болгож хавсаргана */
+function chSp(){ const k=S.prof&&S.prof.sp; return (k&&/^(npc\d+|hp_[A-Za-z0-9_]+)$/.test(k)&&typeof SPRDATA!=='undefined'&&SPRDATA[k])?k:'npc1'; }
+function chAv(m){ if(m.im&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(m.im)&&m.im.length<9000) return m.im; const k=(typeof SPRDATA!=='undefined'&&SPRDATA[m.sp||'npc1'])?(m.sp||'npc1'):'npc1'; return (typeof SPRDATA!=='undefined'&&SPRDATA[k])?SPRDATA[k][0]:''; }
+const CHTH={src:'',v:''};
+function chThumb(){ return new Promise(res=>{ const u=S.prof&&S.prof.img; if(!u){ res(''); return; } if(CHTH.src===u){ res(CHTH.v); return; }
+  const im=new Image(); im.onload=()=>{ try{ const c=document.createElement('canvas'); c.width=c.height=48; const x=c.getContext('2d'), w=im.naturalWidth||48, h=im.naturalHeight||48, q=Math.min(w,h); x.drawImage(im,(w-q)/2,(h-q)/2,q,q,0,0,48,48); let v=c.toDataURL('image/jpeg',0.7); if(v.length>8500) v=c.toDataURL('image/jpeg',0.4); if(v.length>8500) v=''; CHTH.src=u; CHTH.v=v; res(v); }catch(e){ res(''); } }; im.onerror=()=>res(''); im.src=u; setTimeout(()=>res(''),2500); }); }
 function chatSel(id){ CHT.sel=CHT.sel===id?null:id; chatDraw(); }
 function chatHide(u){ CHT.hid[u]=1; try{ localStorage.setItem('chhid',JSON.stringify(CHT.hid)); }catch(e){} CHT.sel=null; chatDraw(); try{ say('Энэ хүний зурвасыг нуулаа'); }catch(e){} }
 async function chatDel(id){ try{ const {F,db}=FBM; await F.deleteDoc(chDoc(F,db,id)); CHT.sel=null; }catch(e){ try{ say('Устгаж чадсангүй'); }catch(_){} } }
@@ -5275,7 +5282,8 @@ async function chatSend(){ const i=document.getElementById('chin'); if(!i) retur
   if(!CL.ok||!FBM){ try{ say('Интернет холбогдоогүй'); }catch(e){} return; }
   if(now-CHT.last<3000){ try{ say('3 секунд хүлээнэ үү'); }catch(e){} return; }
   const t=chClean(i.value); if(!t) return; CHT.last=now; i.value='';
-  try{ const {F,db}=FBM; await F.addDoc(chColl(F,db),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:(S.prof.sp&&/^npc\d+$/.test(S.prof.sp))?S.prof.sp:'npc1',m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
+  let im=''; try{ im=await chThumb(); }catch(e){}
+  try{ const {F,db}=FBM; await F.addDoc(chColl(F,db),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:chSp(),im:im,m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
   catch(e){ try{ say((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Илгээж чадсангүй'); }catch(_){} } }
 
 

@@ -305,7 +305,7 @@ function relicMul(hid){ relMig(); let a=0,h=0; (hid&&S.heq[hid]||[]).forEach(id=
 const ZTILE=['mp_grass','mp_forest','mp_desert','mp_snow'];
 const STAGEZ=[{n:'Ногоон тал',e:'🌿',from:0,to:1},{n:'Хангайн ой',e:'🌲',from:2,to:3},{n:'Говийн цөл',e:'🏜️',from:4,to:5},{n:'Алтайн нуруу',e:'🏔️',from:6,to:6}];
 const RATES = [[5,2],[4,6],[3,14],[2,28],[1,50]];
-const SUMMON_COST = 100;
+const SUMMON_COST = 200;
 const sumAlt=n=>n===5?Math.round(SUMMON_COST*4.5):SUMMON_COST*n;
 const ENEMIES = [
  {n:'Татар отог', p:120, g:60, m:20},
@@ -639,10 +639,10 @@ function campStart(ci,s){
 }
 function campWin(ci,s){
   cpInit(); if(S.camp.done[ci+':'+s]) return; S.camp.done[ci+':'+s]=1; addXP(15+s*5);
-  if(s===3){ const t=CAMP[ci]; S.camp.join[ci]=1; const g=1000*(ci+1), a=3+ci; S.res.gold+=g; S.res.alt+=a; giveHero(t.hero); addXP(80);
+  if(s===3){ const t=CAMP[ci]; S.camp.join[ci]=1; const g=1000*(ci+1), a=3+ci; S.res.gold+=g; S.res.alt+=a; if(t.hero) giveHero(t.hero); addXP(80);
     const hn=(HEROES.find(x=>x.id===t.hero)||{}).n||'';
     let ex=''; if(joinedN()===8) ex='<div style="margin-top:8px;color:#ffd770"><b>8 аймаг нэгдлээ! Их Монгол Улс байгуулагдлаа.</b><br>Одоо том аймгууд гарч ирлээ.</div>'; if(joinedN()===14) ex='<div style="margin-top:8px;color:#ffd770"><b>Бүх аймаг нэгдлээ!</b><br>Дэлхийн ертөнцийн рейтинг нээгдлээ.</div>';
-    pop(t.n+' нэгдлээ!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+'<div style="margin-top:6px">'+t.en+'</div><div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>Үйлдвэрлэл +3%</div>'+ex);
+    pop(t.n+' нэгдлээ!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+'<div style="margin-top:6px">'+t.en+'</div><div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+(t.hero?ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>':'')+'Үйлдвэрлэл +3%</div>'+ex);
   }
   refresh();
 }
@@ -692,7 +692,7 @@ function cmapHTML(ci){
   for(let s=0;s<4;s++){ const p=stepP(ci,s), P=totalPower(), done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), ratio=P/p, lv=ratio>=1.3?'Амархан':ratio>=0.9?'Тэнцүү':ratio>=0.6?'Хэцүү':'Маш хэцүү';
     h+='<div class="row" style="margin-bottom:6px"><div><b>'+(s+1)+'. '+(s===3?t.who:CSTEP[s])+(done?' ✓':'')+'</b><div class="sm">Дайсны хүч '+f(p)+' · '+lv+(ratio<0.9?' <b style="color:#ff8a7a">⚠ Хүч дутуу</b>':'')+' · +'+f(Math.round(p*0.45))+' 🪙</div></div><button class="btn red" '+(open?'':'disabled')+' onclick="campStart('+ci+','+s+')">'+(done?'Дахин':open?'Дайрах':'🔒')+'</button></div>'; }
   { const _nx=[0,1,2,3].find(s=>!S.camp.done[ci+':'+s]&&stOpen(ci,s)); if(_nx!=null){ const _w=weakBox(totalPower(),stepP(ci,_nx)*0.9); if(_w) h+=_w; } }
-  h+='<div class="sm">Тэргүүнийг ялбал аймаг нэгдэнэ: +'+f(1000*(ci+1))+' 🪙, +'+(3+ci)+' Алт, баатар '+((HEROES.find(x=>x.id===t.hero)||{}).n||'')+'.</div></div>';
+  h+='<div class="sm">Тэргүүнийг ялбал аймаг нэгдэнэ: +'+f(1000*(ci+1))+' 🪙, +'+(3+ci)+' Алт'+(t.hero?', баатар '+((HEROES.find(x=>x.id===t.hero)||{}).n||''):'')+'.</div></div>';
   if(!op) h+='<div class="card sm">Энэ мап одоохондоо хаалттай. Өмнөх аймгийг нэгтгэ.</div>';
   return h;
 }
@@ -2600,7 +2600,7 @@ function heroListHTML(){
 function summonHTML(){
   return '<h2>Баатар дуудах</h2><button class="btn" onclick="openM(\'baatar\')">‹ Баатар</button><div class="card" style="margin-top:8px"><h3>Баатар дуудах</h3>'+
     '<div class="sm">Домогт 2% · Эрхэм 6% · Ховор 14% · Сайн 28% · Энгийн 50%. Давхцсан баатар од нэмнэ (хэлтэрхий хүрмэгц автоматаар).</div><div class="sm" style="color:#ffd35a">Баталгаат Домогт: '+sumPity()+' дуудлагад</div>'+
-    (S.fsum>0?'<div class="card" style="border-color:#7fe08a"><div class="row"><div><b>🎁 Үнэгүй дуудлага: '+S.fsum+' үлдсэн</b><div class="sm">Бэлэг. Нэг дарахад 1 баатар гарна.</div></div><button class="btn" style="background:#3aa83a" onclick="summon(1,1)">Үнэгүй дуудах</button></div></div>':'')+
+    (S.fsum>0?'<div class="card" style="border-color:#7fe08a"><div class="row"><div><b>🎁 Үнэгүй дуудлага: '+S.fsum+' үлдсэн</b><div class="sm">Бэлэг. 1-р дуудлага: 2★ баатар. 2-р дуудлага: Сүбээдэй, Хубилай, Хасар, Мухулай-ийн нэг.</div></div><button class="btn" style="background:#3aa83a" onclick="summon(1,1)">Үнэгүй дуудах</button></div></div>':'')+
     '<div style="margin-top:8px" class="row"><button class="btn" '+(S.res.alt<sumAlt(1)?'disabled':'')+' onclick="summon(1)">1 удаа · '+sumAlt(1)+' '+ico('ui_gem',20)+'</button><button class="btn" '+(S.res.alt<sumAlt(5)?'disabled':'')+' onclick="summon(5)">5 удаа · '+sumAlt(5)+' '+ico('ui_gem',20)+'</button></div></div>'; }
 // ---- баатрын дэлгэц ----
 function hdClose(){ const o=document.getElementById('hd'); if(o) o.remove(); HDS.id=null; if(cur) fillM(); }
@@ -9089,6 +9089,26 @@ function wtLine(){ const s=wsSt(), ci=wsIdxOf(s.p), nx=WRT[ci+1], i=wsIdx();
   const _wf=wrestFinish; wrestFinish=function(){ let win=false; try{ win=!!(WRS&&WRS.sc&&WRS.sc[0]>=2); }catch(e){}
     _wf.apply(this,arguments);
     try{ const c=S.nfee&&S.nfee.wrest; if(c){ S.nfee.wrest=0; if(win){ S.res.gold=(S.res.gold||0)+c; const r=document.getElementById('archres'); if(r){ const d=document.createElement('div'); d.className='sm'; d.style.cssText='margin:4px 0;color:#9fe89a'; d.textContent='💰 Төлбөр буцаагдлаа +'+f(c)+' 🪙'; const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } try{ save(); }catch(e){} } } }catch(e){} };
+})();
+
+
+/* p32/freehero.js — үнэгүй баатар: аймаг 3/7/10/14 → Хөхчү/Жочи/Өгөдэй/Мухулай. Үнэгүй 2 дуудлага: 1-р = 2★ санамсаргүй, 2-р = Сүбээдэй/Хубилай/Хасар/Мухулай-ийн нэг. */
+(function(){
+  const CH={2:'khukhchu',6:'jochi',9:'ogodei',13:'mukhulai'};
+  CAMP.forEach((c,i)=>{ c.hero=CH[i]||''; });
+  const FOUR=['subeedei','khubilai','khasar','mukhulai'];
+  let FR=0;
+  const _roll=roll, _sum=summon;
+  roll=function(){
+    const pick=a=>a[Math.floor(Math.random()*a.length)];
+    if(FR>=2) return pick(HEROES.filter(h=>h.s===2));
+    if(FR===1){ const id=pick(FOUR); return HEROES.find(h=>h.id===id); }
+    return _roll();
+  };
+  summon=function(n,fr){
+    FR=(fr&&(S.fsum||0)>=1)?Math.min(2,S.fsum):0;
+    try{ return _sum.apply(this,arguments); } finally{ FR=0; }
+  };
 })();
 
 </script><script>(function(){

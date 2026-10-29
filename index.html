@@ -9226,6 +9226,24 @@ window.WRB=["data:image/webp;base64,UklGRiRQAABXRUJQVlA4WAoAAAAQAAAA4AAADgEAQUxQ
     return _ws.apply(this,arguments); };
 })();
 
+
+/* p32/guards.js — 216: Барилга бүрт нэг харуул (төв гэрт бөөгнөрөхгүй). Харуул бүр өөрийн барилгын хажууд эргүүлнэ. Дээд тал нь 12. */
+(function(){
+  let SIG='';
+  function blds(){ const g=S.pos&&S.pos.ger, out=[];
+    for(const k of Object.keys(S.pos||{})){ if(!BUILD[k]||!(S.bld[k]>0)||(S.sites&&S.sites[k])) continue; let r=null; try{ r=brect(k); }catch(e){} if(!r) continue; out.push({k:k,x:r.x+r.w+7,y:r.y+r.sh+2,d:g?Math.hypot(r.x-g.x,r.y-g.y):0}); }
+    out.sort((a,b)=>(a.k==='ger'?-1:b.k==='ger'?1:0)||a.d-b.d); return out.slice(0,12); }
+  const _eg=ensureGuards; ensureGuards=function(){ _eg.apply(this,arguments);
+    try{ const B=blds(); if(!B.length) return;
+      const have=()=>ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard');
+      const GN=['Тулга','Цогт','Дорж','Баяр','Бат','Мөнх','Гэрэл','Сүх','Болд','Ганаа','Тэмүүлэн','Билэг'];
+      let G=have(); const g0=S.pos.ger;
+      while(G.length<B.length){ const i=G.length, hx=(g0?g0.x:B[0].x)+20, hy=(g0?g0.y:B[0].y)+30; ents.push({kind:'wild',friend:1,name:GN[i%GN.length],role:'Харуул',type:'guard',x:hx,y:hy,tx:hx,ty:hy,hx:hx,hy:hy,r:16,dir:1,wait:Math.random()*3,moving:false,speed:5}); G=have(); }
+      const sig=B.map(b=>b.k).join(',')+'|'+G.length; if(sig===SIG) return; SIG=sig;
+      G.forEach((e,i)=>{ const b=B[i%B.length]; const first=e.gb===undefined; e.hx=b.x; e.hy=b.y; e.r=16; e.tx=b.x; e.ty=b.y; e.wait=0; e.gb=b.k; e.speed=Math.max(e.speed||5,10); if(first){ e.x=b.x; e.y=b.y; } });
+    }catch(x){} };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

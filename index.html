@@ -8970,6 +8970,13 @@ function mhImg(id){
   };
 })();
 
+
+/* p32/fastmarch.js — 206: дайралтын цуваа 20% хурдан (дайрах бааз/улс/клан) */
+(function(){
+  const _t=wmTrip, K=0.8;
+  wmTrip=function(e){ const r=_t(e); if(e&&(e.t==='kingdom'||e.t==='clan'||e.t==='camp')) return typeof r==='number'?Math.max(1,r*K):r; return r; };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

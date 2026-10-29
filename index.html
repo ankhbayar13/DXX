@@ -9159,6 +9159,17 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
   };
 })();
 
+
+/* p32/ndclose.js — 212: Сур харвалт, Морин уралдааг түр хаав (Тун удахгүй). Бөх л нээлттэй. */
+(function(){
+  const MSG='🔒 Түр хаалттай · Тун удахгүй нээгдэнэ';
+  const _a=archOpen; archOpen=function(){ try{ say('Сур харвалт түр хаалттай. Тун удахгүй!'); }catch(e){} };
+  const _r=raceOpen; raceOpen=function(){ try{ say('Морин уралдаан түр хаалттай. Тун удахгүй!'); }catch(e){} };
+  const _p=ndPlayCards; ndPlayCards=function(){ let h=_p.apply(this,arguments);
+    try{ h=h.replace(/<button class="btn"[^>]*onclick="(archOpen|raceOpen)\(\)">[^<]*<\/button>/g,'<button class="btn" disabled>🔒 Тун удахгүй</button>')
+      .replace('Харваач бэлтгэл хийж сураа нэм',MSG).replace('Морио товшиж давхиул. Хурд, тэсвэр бэлтгэлээр нэмэгдэнэ',MSG); }catch(e){} return h; };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

@@ -8787,7 +8787,7 @@ setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },25000);
     try{
       const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0');
       CLN.forEach((q,i)=>{
-        const d=(typeof CKD!=='undefined')&&CKD.docs&&CKD.docs[i]; if(!d||!d.ow) return;
+        const d=(typeof CKD!=='undefined')&&CKD.docs&&CKD.docs[i]; if(!d||!d.ow) return; if(window.KG&&KG.ents.some(e=>e.cl===i&&e.kg)) return;
         const isMy=i===my, s=ok?wmS('wm_hq'+i):null, ww=s?0.85*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
         if(!vis(qx,qy,320)) return;
         const row=((CKD.mem&&CKD.mem[i])||[]).find(x=>x.id===d.ow);
@@ -8893,6 +8893,57 @@ function mhImg(id){
       });
     }catch(x){}
   };
+})();
+
+
+/* p32/kgking.js — 203: бусад кланы ХААН дэлхийн газрын зураг дээр гэр + бурхуултай; дайрч болно (Нутгийн айлын дүрмээр) */
+(function(){
+  const KG={rows:{},t:0,busy:0,ents:[],key:''};
+  window.KG=KG;
+  const TY=['heavy','cav','archer'];
+  function build(){
+    let my=-1, op=-1, me='';
+    try{ my=wmClanId(); op=my>=0?wmOpp(my,wmWeek()):-1; me=(typeof CL!=='undefined'&&CL.uid)||''; }catch(e){ return; }
+    const docs=(typeof CKD!=='undefined'&&CKD.docs)||{}; const L=[];
+    for(let i=0;i<10;i++){ if(i===my) continue; const d=docs[i]; if(!d||!d.ow||d.ow===me) continue; const r=KG.rows[d.ow]; if(!r||!(r.p>0)) continue; L.push({i:i,uid:d.ow,r:r,d:d}); }
+    const key=L.map(x=>x.i+':'+x.uid+':'+Math.round(x.r.p)+':'+(x.r.t||0)).join(',')+'|'+op+'|'+(WMT.ok?1:0);
+    if(key===KG.key) return; KG.key=key;
+    KG.ents=L.map(x=>{ const q=CLN[x.i], s=WMT.ok?wmS('wm_hq'+x.i):null, ww=s?0.85*s.iw:150, hh=s?ww*s.ih/s.iw:150;
+      const px=Math.max(70,Math.min(WM_W-70,q.x)), py=Math.min(WM_H-60,q.y+hh*0.12+76), t0=x.r.t||0;
+      const nm=esc2(String(x.r.n||x.d.on||'Хаан').slice(0,12));
+      const e={id:'kg'+x.uid,t:'clan',x:px,y:py,n:'👑 '+nm,p:Math.round(x.r.p),real:1,kg:1,nf:(x.i===op?0:1),cl:x.i,c:q.c,ty:TY[hsh(String(x.uid))%3],uid:x.uid,rs:x.r.rs||null,dh:(x.r.v&&x.r.v.h)||null,v:x.r.v,gl:(x.r.v&&x.r.v.b&&x.r.v.b.ger)||0};
+      Object.defineProperty(e,'act',{get:()=>Math.max(0,(wmNow()-t0)/3600e3)}); return e; });
+  }
+  async function fetchK(force){
+    if(KG.busy) return; if(!force&&Date.now()-KG.t<300000) return;
+    if(typeof CL==='undefined'||!CL.ok||typeof FBM==='undefined'||!FBM) return;
+    const docs=(typeof CKD!=='undefined'&&CKD.docs)||{}; const ids=[]; Object.keys(docs).forEach(k=>{ const d=docs[k]; if(d&&d.ow&&d.ow!==CL.uid&&ids.indexOf(d.ow)<0) ids.push(d.ow); });
+    if(!ids.length) return; KG.busy=1;
+    try{ const {F,db}=FBM; await Promise.all(ids.map(async u=>{ try{ const s=await F.getDoc(F.doc(db,'lb',u)); if(s.exists()) KG.rows[u]=s.data(); }catch(e){} })); KG.t=Date.now(); }catch(e){ KG.t=Date.now()-240000; }
+    KG.busy=0; build();
+  }
+  window.kgFetch=fetchK;
+  const _ce=wmCwEnts; wmCwEnts=function(){ const r=_ce.apply(this,arguments); try{ build(); if(KG.ents.length){ const have={}; r.forEach(e=>{ if(e.uid) have[e.uid]=1; }); const add=KG.ents.filter(e=>!have[e.uid]); if(add.length) return r.concat(add); } }catch(e){} return r; };
+  const _o=wmOpen; wmOpen=function(){ _o.apply(this,arguments); try{ Promise.resolve(ckFetch()).then(()=>fetchK()).catch(()=>{}); }catch(e){} };
+  const _d=wmClanDraw; wmClanDraw=function(){ try{ if(!KG.t&&!KG.busy&&typeof CKD!=='undefined'&&CKD.docs&&Object.keys(CKD.docs).length) fetchK(); }catch(e){} return _d.apply(this,arguments); };
+})();
+
+
+/* p32/sndlow.js — 204: амьтны дуу + тулааны цохилтын дуу = одоогийн дууны 5% */
+(function(){
+  const K=0.05;
+  SFX.k=1; SND.k=1;
+  // тулааны цохилт: зөвхөн тулаан (BT) / клан дайн (RT) явагдаж байхад
+  const _t=sTone, _n=sNoise;
+  sTone=function(f,d,ty,v,sl,dl){ return _t(f,d,ty,(v||0.15)*(SFX.k||1),sl,dl); };
+  sNoise=function(d,v,fc,dl){ return _n(d,(v||0.2)*(SFX.k||1),fc,dl); };
+  const _s=sfx, HIT={hit:1,slash:1,bow:1,big:1};
+  sfx=function(n,th){ let low=false; try{ low=!!HIT[n]&&!!(BT||RT); }catch(e){} if(!low) return _s.apply(this,arguments); SFX.k=K; try{ return _s.apply(this,arguments); } finally{ SFX.k=1; } };
+  // амьтны дуу
+  const _v=snV, _N=snN;
+  snV=function(o){ if(SND.k!==1&&o) o=Object.assign({},o,{v:o.v*SND.k}); return _v(o); };
+  snN=function(o){ if(SND.k!==1&&o) o=Object.assign({},o,{v:o.v*SND.k}); return _N(o); };
+  ['sheep','goat','cow','horse','camel','bird','wolf','eagle'].forEach(k=>{ const f0=SNDS[k]; if(!f0) return; SNDS[k]=function(){ SND.k=K; try{ return f0.apply(this,arguments); } finally{ SND.k=1; } }; });
 })();
 
 </script><script>(function(){

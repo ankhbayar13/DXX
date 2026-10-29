@@ -9747,6 +9747,17 @@ window.GIMG={"cav:helm": ["data:image/webp;base64,UklGRggbAABXRUJQVlA4WAoAAAAQAA
     try{ const bob=Math.sin(t*3)*0.6; _bl().forEach(b=>{ if(b.prod&&SPR['b_'+b.k]&&b.n>1) nameTag(b.x+b.w,b.y+b.w+bob,''+b.n,true); }); }catch(e){} };
 })();
 
+
+/* p32/aitag.js — AI тоглогчдыг ил тод тэмдэглэх (Тэмцээний «Тэргүүлэгчид», Дэлхийн AI овгууд) + кланы чатад зөвхөн гишүүд орно */
+(function(){
+  const _ab=arBoard; arBoard=function(){ return _ab.apply(this,arguments).map(x=>x.me?x:Object.assign({},x,{n:x.n+' · AI'})); };
+  try{ AICL.forEach(c=>{ if(c[0].indexOf(' (AI)')<0) c[0]=c[0]+' (AI)'; }); }catch(e){}
+  const mine=()=>{ try{ if(S.clan!=null&&S.clan>=0) return S.clan; if(S.ckOwn!=null&&S.ckOwn>=0) return S.ckOwn; }catch(e){} return null; };
+  const _co=chatOpen; chatOpen=function(room){
+    if(typeof room==='number'&&room!==mine()){ try{ say('Кланы чатад зөвхөн тухайн кланы гишүүд орно'); }catch(e){} return; }
+    return _co.apply(this,arguments); };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

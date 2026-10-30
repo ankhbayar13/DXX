@@ -431,7 +431,7 @@ function chCur(){ return CHAP[S.chap||0]||null; }
 function chDone(c){ return c.t.every(i=>TASKS[i].ok()); }
 function claimChap(){ const c=chCur(); if(!c||!chDone(c)) return; for(const k in c.r) S.res[k]+=c.r[k]; S.chap=(S.chap||0)+1; addXP(60); say('Бүлэг дууслаа! +'+c.r.gold+' 🪙 +'+c.r.alt+' Алт'); refresh(); }
 function dqClaim(k){ dqInit(); const q=DQ.find(x=>x.k===k); if(!q||S.dq.cl[k]||(S.dq.c[k]||0)<q.g) return; S.dq.cl[k]=1; for(const x in q.r) S.res[x]+=q.r[x]; addXP(10); refresh(); }
-function dqBox(){ dqInit(); if(S.dq.box||!DQ.every(q=>S.dq.cl[q.k])) return; S.dq.box=1; try{ rkAdd(5,'Өдрийн даалгавар'); }catch(e){} S.res.gold+=300; S.res.alt+=5; stnGain(10); addXP(40); say('Сав нээгдлээ! +300 🪙 +5 Алт +10 🔮'); refresh(); }
+function dqBox(){ dqInit(); if(S.dq.box||!DQ.every(q=>S.dq.cl[q.k])) return; S.dq.box=1; try{ rkAdd(5,'Өдрийн даалгавар'); }catch(e){} S.res.gold+=300; S.res.alt+=5; stnGain(10); addXP(40); { const rlx=dayRelic(); say('Сав нээгдлээ! +300 🪙 +5 Алт +10 🔮'+(rlx?' + '+rlx.n+' '+stars(rlx.s):'')); } refresh(); }
 function qBadge(){ dqInit(); let n=DQ.filter(q=>!S.dq.cl[q.k]&&(S.dq.c[q.k]||0)>=q.g).length; const c=chCur(); if(c&&chDone(c)) n++; if(!S.dq.box&&DQ.every(q=>S.dq.cl[q.k])) n++; return n; }
 function questsHTML(){
   dqInit(); const c=chCur(); let h='<h2>Даалгавар</h2>';
@@ -639,10 +639,10 @@ function campStart(ci,s){
 }
 function campWin(ci,s){
   cpInit(); if(S.camp.done[ci+':'+s]) return; S.camp.done[ci+':'+s]=1; addXP(15+s*5);
-  if(s===3){ const t=CAMP[ci]; S.camp.join[ci]=1; const g=1000*(ci+1), a=3+ci; S.res.gold+=g; S.res.alt+=a; if(t.hero) giveHero(t.hero); addXP(80);
+  if(s===3){ const t=CAMP[ci]; S.camp.join[ci]=1; const g=1000*(ci+1), a=3+ci; S.res.gold+=g; S.res.alt+=a; if(t.hero) giveHero(t.hero); addXP(80); const rlx=campRelic(ci);
     const hn=(HEROES.find(x=>x.id===t.hero)||{}).n||'';
     let ex=''; if(joinedN()===8) ex='<div style="margin-top:8px;color:#ffd770"><b>8 аймаг нэгдлээ! Их Монгол Улс байгуулагдлаа.</b><br>Одоо том аймгууд гарч ирлээ.</div>'; if(joinedN()===CAMP.length) ex='<div style="margin-top:8px;color:#ffd770"><b>Бүх аймаг нэгдлээ!</b><br>Дэлхийн ертөнцийн рейтинг нээгдлээ.</div>';
-    pop(t.n+' нэгдлээ!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+'<div style="margin-top:6px">'+t.en+'</div><div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+(t.hero?ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>':'')+'Үйлдвэрлэл +3%</div>'+ex);
+    pop(t.n+' нэгдлээ!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+'<div style="margin-top:6px">'+t.en+'</div><div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+(t.hero?ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>':'')+'Үйлдвэрлэл +3%'+(rlx?'<br>'+ico(rlx.ic,28)+' '+rlx.n+' '+stars(rlx.s):'')+'</div>'+ex);
   }
   refresh();
 }
@@ -2423,10 +2423,10 @@ cv.addEventListener('wheel',e=>{ e.preventDefault(); setZoom(Z*(e.deltaY<0?1.12:
 function daily(){ evoShow(0); }
 function passAdd(n){ if(!S.pass) S.pass={p:0,c:0}; S.pass.p+=Math.round(n*evBonus().p*(1+rsb('cul_pass'))); }
 const PASSN=20, PASSP=50;
-function passRew(i){ const n=i+1; if(n===PASSN) return {alt:60,relic:4}; if(n===10) return {alt:30,relic:3}; if(n%5===0) return {alt:20}; return {alt:n%2?5:8}; }
+function passRew(i){ const n=i+1; if(n===PASSN) return {alt:60,relic:3}; if(n===10) return {alt:30,relic:3}; if(n%5===0) return {alt:20}; return {alt:n%2?5:8}; }
 const LOGR=[{alt:5},{alt:8},{alt:10},{alt:12},{alt:15},{alt:20},{alt:50,relic:3}];
 function rewT(r){ return ico('ui_gem',16)+' <b>'+r.alt+'</b>'+(r.relic?'<br><small>+ '+'★'.repeat(r.relic)+' дурсгал</small>':''); }
-function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s>=r.relic); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' дурсгал олдлоо!'); } }
+function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s>=r.relic&&(r.relic>=5||x.s<=3)); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' дурсгал олдлоо!'); } }
 function logDay(){ return Math.floor((srvNow()+8*3600e3)/864e5); }
 function logState(){ if(!S.login) S.login={d:-9,n:0}; const t=logDay(), L=S.login; const claimed=L.d===t; const next=claimed?L.n:(L.d===t-1?L.n:0); return {t,claimed,idx:claimed?(L.n+6)%7:next%7}; }
 function logClaim(){ if(!SRV.ok){ say('Серверийн цаг шалгаж байна. Интернэтээ шалгаад дахин дарна уу'); srvSync(); return; } const st=logState(); if(st.claimed){ say('Өнөөдрийн бэлэг авсан'); return; } givR(LOGR[st.idx]); sfx('coin'); vib(30); S.login={d:st.t,n:st.idx+1}; S.daily=nowD().toDateString(); passAdd(20); say('Бэлэг авлаа: +'+LOGR[st.idx].alt+' Алт'); refresh(); evoShow(); }
@@ -2985,7 +2985,7 @@ function btDraw(t){
 const E_isCamp=e=>!!e.cb;
 function btFinish(win){
   BT.done=true; BT.win=win; sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(1-(win?0.15:0.25)*((e.pc&&e.pc[T.ty]!=null)?e.pc[T.ty]:1))); if(n>keep) lossTxt+=T.n+' -'+(n-keep)+'  '; S.res[T.k]=keep; });
-  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+(rp?'<div class="sm">Өмнө нь ялсан тул шагнал 20%</div>':'')+lootAnimals(Math.min(3,1+Math.floor((e.bi||0)/2)),rp)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   $('bres').innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; refresh();
@@ -3049,7 +3049,7 @@ function wmProcess(){
   { const D=wmGen(); st.tr=st.tr||{}; st.m.forEach(m=>{ const e=wmEnt(m.tid); if(!e) return; const el=(now-m.t0)/1000; let p; if(m.ty==='gather'&&el>m.d+20) p=1-Math.min(1,(el-m.d-20)/m.d); else p=Math.min(1,el/m.d); const mx=D.C.x+(e.x-D.C.x)*p, my=D.C.y+(e.y-D.C.y)*p; D.chests.forEach(ch=>{ if(!st.tr[ch.id]&&Math.hypot(ch.x-mx,ch.y-my)<260){ st.tr[ch.id]=1; say('💎 Нуугдсан эрдэнэс олдлоо! Газрын зургаас хар.'); } }); }); }
   st.m=st.m.filter(m=>{ const e=wmEnt(m.tid)||m.tg; if(!e) return false; const el=(now-m.t0)/1000;
     if(m.ty==='visit'){ if(el>=m.d){ S.wm.yam=S.wm.yam||{}; if(!S.wm.yam[e.id]){ S.wm.yam[e.id]=1; const gg=150+Math.round(Math.min(2000,totalPower()*0.05)); S.res.gold+=gg; addXP(10); say('🐎 Ям цэг нээгдлээ! Ойролцоох зам -12% · +'+gg+' 🪙'); refresh(); } return false; } return true; }
-    if(m.ty==='gather'&&e.t==='chest'){ if(el>=2*m.d+10){ const g=Math.round(250*e.v*(1+Math.min(2,totalPower()/1500))), al=1+Math.floor(Math.random()*2*e.v); S.res.gold+=g; S.res.alt+=al; let rt2=''; if(Math.random()<0.35){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; rt2=' + '+r.n; } (st.tk=st.tk||{})[e.id]=1; say('💎 Эрдэнэс: +'+g+' 🪙, +'+al+' Алт'+rt2); addXP(20); refresh(); return false; } return true; }
+    if(m.ty==='gather'&&e.t==='chest'){ if(el>=2*m.d+10){ const g=Math.round(250*e.v*(1+Math.min(2,totalPower()/1500))), al=1+Math.floor(Math.random()*2*e.v); S.res.gold+=g; S.res.alt+=al; let rt2=''; if(Math.random()<0.35){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; rt2=' + '+r.n; } (st.tk=st.tk||{})[e.id]=1; say('💎 Эрдэнэс: +'+g+' 🪙, +'+al+' Алт'+rt2); addXP(20); refresh(); return false; } return true; }
     if(m.ty==='gather'){ if(el>=2*m.d+20){ const rt=WM_RT[e.rt], pw=totalPower(), g=Math.round(rt.g*e.lv*(1+Math.min(2,pw/1500))*wmTerrMul(e)); S.res[rt.k]=Math.min(rt.k==='gold'?1e12:cap(),(S.res[rt.k]||0)+g); st.st[m.tid]=now+240000; say(rt.n+': +'+g+' '+(rt.k==='gold'?'🪙':{wood:'мод',meat:'мах',grain:'тариа'}[rt.k])); addXP(8); refresh(); return false; } return true; }
     if(el>=m.d){ if(BT||RT) return true; wmBattle(e,m.tc,m); return false; } return true; });
   wmRefreshBar(); }
@@ -5537,7 +5537,7 @@ function wmTacSheet(id){ const e=wmEnt(id), sh=$('wmsheet'); if(!e||!sh) return;
 (function(){ const _s=wmSend; wmSend=function(id,tc){ const e=wmEnt(id); if(e&&(e.t==='kingdom'||e.t==='camp'||e.t==='clan')&&tc==null){ wmSelSheet(id); return; } window.WM_TC=tc||0; window.WM_SEL=wmSelEff(); try{ _s(id); }finally{ window.WM_TC=0; } }; })();
 (function(){ const _o=wmOpen; wmOpen=function(){ if(WMD&&(WMD.wk!==wmWeek()||WMD.cl!==wmClanId())) WMD=null; _o(); try{ cwFetch(); if(S.clan==null&&!S.clanAsk){ S.clanAsk=1; setTimeout(cwOpen,500); } }catch(e){} }; })();
 function wmCwPts(e,tm){ const ratio=e.p/Math.max(150,totalPower()); let b=ratio<0.8?10:ratio<1.1?15:25; if(e.real) b=Math.round(b*1.5); return b+(tm&&tm.ok?2:0); }
-function wmRelicGrant(){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; return r.n; }
+function wmRelicGrant(){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; return r.n; }
 function wmBattle(e,tc,mm){
   const k=e.t==='kingdom', cn=e.t==='clan', st=wmSt(), kid=e.id, tm=wmTacMul(e,tc), p0=k?wmPw(e):e.p, p=Math.max(30,Math.round(p0*tm.p)), first=k&&!(st.st['w'+kid]); let dn=0;
   (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Бандит Lv'+e.lv),fc:k?(e.i%5):cn?(hsh(String(e.id))%5):'b',p:p,g:Math.round(p*(k?0.6:cn?0.3:0.5)*tm.r),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(e.i/2):cn?3:e.lv),back:'wmap',hs:mm&&mm.hs,pc:mm&&mm.pc,
@@ -6135,7 +6135,7 @@ function rtsStep(dt){
 function rtsFinish(win,timeout){ const R=RT; if(R.done) return; R.done=true; R.win=win; R.endT=0; R.timeout=!!timeout; try{ sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); }catch(e){} }
 function rtsResult(){ const R=RT, E=R.E, win=R.win; let lossTxt='', h='';
   R.G.filter(g=>!g.side&&g.kind==='troop').forEach(g=>{ const mx=g.us.reduce((a,u)=>a+u.max,0), hp=g.us.reduce((a,u)=>a+Math.max(0,u.hp),0), fr=mx?hp/mx:0, lf=Math.max(0.03,(1-fr)*(win?0.5:0.7)), n=Math.floor(S.res[g.T.k]||0), l=Math.min(n,Math.floor(g.n*lf)); S.res[g.T.k]=n-l; if(l>0) lossTxt+=g.T.n+' -'+l+'  '; });
-  if(win){ qh('win',1); passAdd(10); const G=Math.round(E.g*evBonus().g), M=E.m; S.res.gold+=G; S.res.meat+=M; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>Math.random()<(r.s>=4?0.25:r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+  if(win){ qh('win',1); passAdd(10); const G=Math.round(E.g*evBonus().g), M=E.m; S.res.gold+=G; S.res.meat+=M; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Штаб устгагдлаа!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+lootAnimals(Math.min(3,1+Math.floor((E.bi||0)/2)),false)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>'+(R.timeout?'Цаг дууслаа':'Ялагдлаа')+'</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   const el=$('rres'); if(el){ el.innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="rtsEnd()">Үргэлжлүүлэх</button>'; el.style.display='block'; } refresh(); }
@@ -10338,6 +10338,15 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
     rbRun(o,win,()=>{ if(!o.parentNode) return;
       o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tierOf(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tierOf(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; });
   };
+})();
+
+
+/* p32/relsrc.js — 210: 4★/5★ дурсгал зөвхөн хайрцгаас. Бүлэг нэгдэх, өдрийн саванд 2–3★ дурсгал */
+(function(){
+  const give=x=>{ if(!x) return null; S.relics[x.id]=(S.relics[x.id]||0)+1; return x; };
+  const pick=st=>{ const p=RELICS.filter(x=>x.s===st); return p[Math.floor(Math.random()*p.length)]; };
+  window.campRelic=function(ci){ return give(pick(ci<6?2:3)); };
+  window.dayRelic=function(){ return give(pick(Math.random()<0.7?2:3)); };
 })();
 
 </script><script>(function(){

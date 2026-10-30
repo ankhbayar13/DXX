@@ -10193,7 +10193,8 @@ function duBegin(au,bu){
   const el=document.createElement('div'); el.id='btl';
   el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bres"></div></div><div id="dubn"></div><button id="dugu" onclick="duGiveUp()">🏳 Бууж өгөх</button>';
   document.body.appendChild(el);
-  { const sc=Math.min(innerWidth/DW,innerHeight/DH); $('bti').style.cssText='position:absolute;left:'+Math.round((innerWidth-DW*sc)/2)+'px;top:'+Math.round((innerHeight-DH*sc)/2)+'px;width:'+DW+'px;height:'+DH+'px;transform-origin:0 0;transform:scale('+sc+');overflow:hidden'; }
+  DU.lay=function(){ const b=$('bti'); if(!b) return; const sc=Math.min(innerWidth/DW,innerHeight/DH); b.style.cssText='position:absolute;left:'+Math.round((innerWidth-DW*sc)/2)+'px;top:'+Math.round((innerHeight-DH*sc)/2)+'px;width:'+DW+'px;height:'+DH+'px;transform-origin:0 0;transform:scale('+sc+');overflow:hidden'; };
+  DU.lay(); window.addEventListener('resize',DU.lay); window.addEventListener('orientationchange',()=>setTimeout(DU.lay,250));
   const cv2=$('bc'), dp=Math.min(2,devicePixelRatio||1); cv2.width=DW*dp; cv2.height=DH*dp; cv2.style.cssText='width:100%;height:100%;display:block';
   const p0=view.filter(u=>!u.side).reduce((a,u)=>a+u.max,0), e0=view.filter(u=>u.side).reduce((a,u)=>a+u.max,0);
   const MP=[0,1,4,3,5,7,8,9,6,2];
@@ -10288,7 +10289,7 @@ function duGiveUp(silent){
   duFinish(DU.role==='a'?'b':'a','Та бууж өглөө');
 }
 function duEnd(){
-  const B=BT; if(!B) return; cancelAnimationFrame(B.raf); BT=null; stopTimers(); unsub();
+  const B=BT; if(!B) return; cancelAnimationFrame(B.raf); BT=null; stopTimers(); unsub(); if(DU.lay) window.removeEventListener('resize',DU.lay);
   if(!DU.bot&&DU.ref&&DU.role==='a'&&CL.ok){ try{ FBM.F.deleteDoc(DU.ref).catch(()=>{}); }catch(e){} }
   DU.st='idle'; DU.ref=null; const el=$('btl'); if(el) el.remove(); const bn=$('dubn'); if(bn) bn.remove(); const g=$('dugu'); if(g) g.remove();
   musPlay('village'); setTimeout(()=>openM('arena'),60);

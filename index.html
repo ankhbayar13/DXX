@@ -10365,6 +10365,21 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
   }catch(e){} },3000);
 })();
 
+
+/* p32/mtclear.js — Тоглогчдын гэр уулан дор гарахгүй болгох:
+   1) «Нутгийн айл»-ын төвд (NF_C) уул байхгүй болгоно (цэвэр талбай)
+   2) Бусад тоглогч/кланы гишүүдийн гэрийг байрлуулахад уулыг хориотой хэсэгт нэмнэ */
+(function(){
+  const _g=wmGen;
+  wmGen=function(){ const D=_g.apply(this,arguments);
+    try{ if(D&&D.decor&&!D._mtc){ D._mtc=1; const cs=[NF_C]; D.decor=D.decor.filter(d=>{ if(d.k!=='mt') return true; return !cs.some(c=>Math.abs(d.x-c.x)<260&&Math.abs(d.y-c.y)<200); }); } }catch(e){}
+    return D; };
+  const _sp=wmSpread;
+  wmSpread=function(pts,fixed){ const a=Array.prototype.slice.call(arguments);
+    try{ const D=wmGen(), ex=[]; (D.decor||[]).forEach(d=>{ if(d.k==='mt'){ const s=d.s||1; ex.push({x:d.x,y:d.y-44*s+15,w:62*s*1.3+45,h:44*s+28}); } }); a[1]=(fixed||[]).concat(ex); }catch(e){}
+    return _sp.apply(this,a); };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

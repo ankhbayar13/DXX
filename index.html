@@ -10516,6 +10516,31 @@ function actHTML(){
   setInterval(()=>{ try{ if(!document.hidden&&cur==='cloud'&&isAdm()) actFetch(true); }catch(e){} },60000);
 })();
 
+
+/* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
+   өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
+   Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
+var UPDB='a58eb82485';
+(function(){
+  const K='updTry';
+  const _go=updGo;
+  updGo=function(){ try{ if(!UPD.go){ let tr=null; try{ tr=JSON.parse(sessionStorage.getItem(K)||'null'); }catch(e){} const t=UPD.seen||'?'; const n=(tr&&tr.t===t&&Date.now()-tr.at<15*60000)?tr.n+1:1; try{ sessionStorage.setItem(K,JSON.stringify({t:t,at:tr&&tr.t===t&&Date.now()-tr.at<15*60000?tr.at:Date.now(),n:n})); }catch(e){} } }catch(e){} return _go.apply(this,arguments); };
+  updCheck=function(){
+    if(UPD.on) return;
+    try{
+      fetch('ver.txt?'+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{
+        t=String(t||'').trim(); if(!/^[0-9a-f]{8,}$/.test(t)) return;
+        if(t===UPDB){ UPD.seen=null; UPD.cnt=0; return; }
+        if(t===UPD.seen) UPD.cnt++; else { UPD.seen=t; UPD.cnt=1; }
+        if(UPD.cnt<2) return;
+        let tr=null; try{ tr=JSON.parse(sessionStorage.getItem(K)||'null'); }catch(e){}
+        if(tr&&tr.t===t&&Date.now()-tr.at<15*60000&&tr.n>=2) return;   // 2 удаа шинэчилсэн ч хуучин хэвээр байвал (CDN хоцорч байна) дахин гаргахгүй
+        updStart();
+      }).catch(()=>{});
+    }catch(e){}
+  };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

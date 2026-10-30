@@ -10013,6 +10013,300 @@ wmClamp=function(){ const c=document.getElementById('wmc'); if(!c) return; const
 const _tap=wmTap; wmTap=function(px2,py2){ try{ const wx=WMV.x+px2/WMV.z, wy=WMV.y+py2/WMV.z; if(wx<-40||wx>WM_W+40||wy<-40||wy>WM_H+40){ let best=null,bd=1e12; window.WMLANDS.forEach(a=>{ const d=Math.hypot(a.x-wx,a.y-wy); if(d<bd){ bd=d; best=a; } }); WMS=null; wmSheet(); if(best&&bd<Math.max(600,40/WMV.z)) say('🔒 '+best.n+' — түгжээтэй. Дараа нээгдэнэ.'); else say('🔒 Энэ нутаг түгжээтэй'); return; } }catch(e){} _tap(px2,py2); };
 })();
 
+
+/* p32/duel.js — 208: ШУУД 1vs1 (Тэмцээн → «Шууд 1vs1»).
+   Хоёр утас ижил тулааныг тус тусдаа тооцоолно (тогтмол алхам 1/30с + seed-тэй санамсаргүй тоо, зөвхөн + - * / sqrt).
+   Firestore: duel/{id}  — бүрэлдэхүүн, бэлэн дохио, үр дүн, бууж өгөх дохиог л солилцоно. */
+(function(){
+const FIX=1/30, DW=640, DH=420, TMAX=75;
+const DU=window.DU={st:'idle',stat:null};
+
+/* ---------- seed-тэй санамсаргүй тоо (mulberry32) ---------- */
+function mkRng(seed){ let a=seed>>>0; return function(){ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+
+/* ---------- CSS ---------- */
+(function(){ const st=document.createElement('style'); st.textContent=
+'#duov{position:fixed;inset:0;z-index:190;background:linear-gradient(#2a1c0e,#0d0905);color:#f3e4bd;overflow:auto;padding:14px;display:flex;flex-direction:column;align-items:center}'
++'.duw{width:100%;max-width:440px}.duw h2{text-align:center;color:#ffd770;margin:6px 0}'
++'.duc{background:#3b2815;border:2px solid #c9972b;border-radius:12px;padding:12px;margin-top:10px}'
++'.duvs{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:bold}.duvs span{font-size:22px;color:#ff7a5a}'
++'.duhs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}'
++'.duh{width:78px;text-align:center;font-size:11px;padding:6px 2px;border:2px solid #6b5230;border-radius:10px;background:#2b1d12}'
++'.duh.on{border-color:#6fd04a;background:#34471f;box-shadow:0 0 8px #6fd04a88}'
++'.dutm{font:bold 26px serif;color:#ffd770;text-align:center}'
++'.dusp{display:inline-block;width:22px;height:22px;border:3px solid #c9972b;border-top-color:transparent;border-radius:50%;animation:dusp 1s linear infinite;vertical-align:middle}@keyframes dusp{to{transform:rotate(360deg)}}'
++'#dugu{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:53;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font-weight:bold;font-size:14px;padding:8px 16px}'
++'#dubn{position:fixed;left:0;right:0;top:46px;text-align:center;z-index:51;color:#ffe9b0;font:bold 12px sans-serif;text-shadow:0 1px 2px #000}';
+document.head.appendChild(st); })();
+
+/* ---------- туслах ---------- */
+const stats=()=>{ arInit(); const A=S.ar; if(A.dr==null){ A.dr=1000; A.dw=0; A.dl=0; } return A; };
+const myName=()=>String((S.prof&&S.prof.name)||'Хаан').slice(0,14);
+const hasHero=id=>!!HEROES.find(x=>x.id===id);
+function duPow(id,lv){ const had=Object.prototype.hasOwnProperty.call(S.heroes,id), old=S.heroes[id]; S.heroes[id]=lv; let p=0; try{ p=heroPower(id); }catch(e){} if(had) S.heroes[id]=old; else delete S.heroes[id]; return p; }
+function ovl(html){ let o=document.getElementById('duov'); if(!o){ o=document.createElement('div'); o.id='duov'; document.body.appendChild(o); } o.innerHTML='<div class="duw">'+html+'</div>'; return o; }
+function ovlClose(){ const o=document.getElementById('duov'); if(o) o.remove(); }
+function stopTimers(){ clearInterval(DU.tm); clearInterval(DU.hb); clearInterval(DU.scan); clearTimeout(DU.to); DU.tm=DU.hb=DU.scan=DU.to=0; }
+function unsub(){ try{ if(DU.unsub) DU.unsub(); }catch(e){} DU.unsub=null; }
+
+/* ---------- өөрийн бүрэлдэхүүнийг ЦЭГ тоо болгох ---------- */
+function duPack(ids){
+  let fbm=1; FACS.forEach(Fc=>{ const c=ids.filter(id=>Fc.ids.includes(id)).length, m=c>=4?1.35:c>=3?1.2:c>=2?1.08:1; if(m>fbm) fbm=m; });
+  const cdm=Math.round((1-Math.min(0.5,rsb('cul_cd')))*100)/100;
+  return ids.map(id=>{ const t=htype(id), d=BTDEF[t], p=hpL(id)*fbm, rm=relicMul(id);
+    return {id:id,t:t,lv:S.heroes[id]||1,n:String(HEROES.find(x=>x.id===id).n).slice(0,16),hp:Math.round(p*14*d.hp*rm.h),atk:Math.round(p*0.5*d.atk*rm.a*10)/10,cdm:cdm}; });
+}
+function duClean(L){
+  if(!Array.isArray(L)||!L.length||L.length>5) return null; const out=[];
+  for(const o of L){ if(!o||typeof o.id!=='string'||!hasHero(o.id)||!BTDEF[o.t]) return null;
+    const hp=+o.hp, atk=+o.atk, lv=Math.max(1,Math.min(300,Math.floor(+o.lv||1))), cdm=Math.max(0.5,Math.min(1,+o.cdm||1));
+    if(!(hp>=1&&hp<1e12)||!(atk>=0&&atk<1e11)) return null;
+    out.push({id:o.id,t:o.t,lv:lv,n:String(o.n||'').slice(0,16),hp:hp,atk:atk,cdm:cdm}); }
+  return out;
+}
+const sumHp=L=>L.reduce((a,o)=>a+o.hp,0);
+
+/* ---------- бот (дасгал) ---------- */
+function duBot(P){
+  const pool=HEROES.filter(h=>!SUPP[h.id]).map(h=>h.id), n=Math.min(5,Math.max(3,heroSlots())), L=[];
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+  const tg=P/n;
+  pool.slice(0,n).forEach(id=>{ let best=1,bd=1e18; for(let lv=1;lv<=80;lv++){ const dd=Math.abs(duPow(id,lv)-tg); if(dd<bd){ bd=dd; best=lv; } }
+    const t=htype(id), d=BTDEF[t], p=duPow(id,best); L.push({id:id,t:t,lv:best,n:String(HEROES.find(x=>x.id===id).n).slice(0,16),hp:Math.round(p*14*d.hp),atk:Math.round(p*0.5*d.atk*10)/10,cdm:1}); });
+  return L;
+}
+
+/* ================= ХАЙЛТ / Firestore ================= */
+function duStart(bot){
+  if(DU.st!=='idle'&&DU.st!=='over') return;
+  if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
+  if(!bot&&!CL.ok){ say('Интернет холбогдоогүй'); return; }
+  try{ closeM(); }catch(e){}
+  const A=stats(), P=Math.max(150,Math.floor(totalPower()));
+  Object.assign(DU,{st:'find',bot:!!bot,role:'a',ref:null,id:null,doc:null,sel:null,mine:null,wrote:false,fin:false,P:P,opName:'',opP:0,opR:1000,myR:A.dr,seed:0,mineSent:false});
+  if(bot){ DU.opName='Дасгалын бот'; DU.opP=P; DU.opR=A.dr; DU.seed=(Math.random()*4e9)>>>0; duLineup(); return; }
+  duFindUI(0);
+  duFind().catch(e=>{ duAbort('Холбогдож чадсангүй'); });
+}
+function duFindUI(sec){
+  ovl('<h2>⚔ Шууд 1vs1</h2><div class="duc" style="text-align:center"><span class="dusp"></span> <b>Өрсөлдөгч хайж байна…</b><div class="sm" style="margin-top:6px">Өөртэй ойролцоо хүчтэй тоглогчийг хайна. '+sec+'с</div></div>'
+    +(sec>=15?'<div class="duc" style="text-align:center"><div class="sm">Одоогоор онлайн тоглогч цөөн байж болно.</div><button class="btn" style="margin-top:8px" onclick="duStartBot()">🤖 Дасгалын тулаан (бот)</button></div>':'')
+    +'<button class="btn red" style="width:100%;margin-top:12px" onclick="duCancel()">Болих</button>');
+}
+async function duFind(){
+  const {F,db}=FBM, uid=CL.uid, A=stats(), P=DU.P, now=()=>Date.now();
+  const mkCand=async()=>{ const s=await F.getDocs(F.query(F.collection(db,'duel'),F.where('s','==',0),F.limit(25)));
+    return s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x.a&&x.a!==uid&&now()-(x.ta||0)<20000).sort((a,b)=>Math.abs(a.ap-P)-Math.abs(b.ap-P)); };
+  const tryJoin=async c=>{ const ref=F.doc(db,'duel',c.id);
+    try{ await F.runTransaction(db,async tx=>{ const r=await tx.get(ref); if(!r.exists()||r.data().s!==0) throw new Error('taken'); tx.update(ref,{s:1,b:uid,bn:myName(),bp:P,bd:A.dr,tb:now()}); });
+      return true; }catch(e){ return false; } };
+  // 1) нээлттэй өрөөнд орох
+  const cs=await mkCand();
+  if(DU.st!=='find') return;
+  for(const c of cs){ if(await tryJoin(c)){ if(DU.st!=='find') return; DU.role='b'; DU.id=c.id; DU.ref=F.doc(db,'duel',c.id); DU.opName=String(c.an||'Тоглогч').slice(0,14); DU.opP=+c.ap||0; DU.opR=+c.ad||1000; DU.seed=(+c.seed>>>0)||1; duWatch(); duLineup(); return; } }
+  // 2) өөрөө өрөө нээх
+  const ref=F.doc(F.collection(db,'duel')); DU.id=ref.id; DU.ref=ref; DU.role='a'; DU.seed=(Math.random()*4e9)>>>0;
+  await F.setDoc(ref,{s:0,a:uid,an:myName(),ap:P,ad:A.dr,ta:now(),seed:DU.seed,t:now()});
+  duWatch();
+  let sec=0;
+  DU.hb=setInterval(()=>{ try{ F.updateDoc(ref,{ta:Date.now()}).catch(()=>{}); }catch(e){} },6000);
+  DU.tm=setInterval(()=>{ sec++; if(DU.st==='find') duFindUI(sec); if(sec>=90&&DU.st==='find'){ duAbort('Өрсөлдөгч олдсонгүй'); } },1000);
+  // өөр өрөөтэй зэрэг үүссэн бол id нь жижиг рүү нэгдэнэ
+  DU.scan=setInterval(async()=>{ if(DU.st!=='find'||DU.scanBusy) return; DU.scanBusy=1; try{ const cs2=(await mkCand()).filter(c=>c.id<DU.id);
+      if(DU.st==='find'&&cs2.length){ const c=cs2[0]; if(await tryJoin(c)){ const old=DU.ref; unsub(); clearInterval(DU.hb); clearInterval(DU.scan); try{ F.deleteDoc(old); }catch(e){} DU.role='b'; DU.id=c.id; DU.ref=F.doc(db,'duel',c.id); DU.opName=String(c.an||'Тоглогч').slice(0,14); DU.opP=+c.ap||0; DU.opR=+c.ad||1000; DU.seed=(+c.seed>>>0)||1; duWatch(); duLineup(); } } }catch(e){} DU.scanBusy=0; },4000);
+}
+function duWatch(){
+  const {F}=FBM; unsub();
+  DU.unsub=F.onSnapshot(DU.ref,s=>{ duOnDoc(s.exists()?s.data():null); },e=>{ if(DU.st!=='over'&&DU.st!=='idle') duAbort('Холболт тасарлаа'); });
+}
+function duOnDoc(d){
+  if(DU.st==='idle'||DU.st==='over') return;
+  if(!d){ if(DU.st==='find'||DU.st==='lineup'||DU.st==='wait') duAbort('Өрсөлдөгч гарлаа'); return; }
+  DU.doc=d; const me=DU.role, op=me==='a'?'b':'a';
+  if(d.ff&&d.ff===op){ if(DU.st==='fight'){ if(BT&&BT.duel&&!BT.done) duFinish(me,'Өрсөлдөгч бууж өглөө'); } else if(DU.st!=='over'){ duAbort('Өрсөлдөгч гарлаа'); } return; }
+  if(me==='a'&&d.s===1&&DU.st==='find'){ clearInterval(DU.hb); clearInterval(DU.scan); clearInterval(DU.tm); DU.opName=String(d.bn||'Тоглогч').slice(0,14); DU.opP=+d.bp||0; DU.opR=+d.bd||1000; duLineup(); return; }
+  if(DU.st==='lineup'||DU.st==='wait'){
+    const opR=!!d['r'+op], meR=!!d['r'+me]; const el=document.getElementById('duopst'); if(el) el.textContent=opR?'✅ Өрсөлдөгч бэлэн':'⏳ Өрсөлдөгч сонгож байна…';
+    if(meR&&opR&&!DU.mineSent&&DU.mine){ DU.mineSent=true; FBM.F.updateDoc(DU.ref,{[me+'u']:DU.mine}).catch(()=>{}); }
+    if(d.au&&d.bu&&DU.st!=='fight'&&DU.st!=='over'){ duBegin(d.au,d.bu); }
+  }
+}
+
+/* ================= БҮРЭЛДЭХҮҮН СОНГОХ ================= */
+function duLineup(){
+  DU.st='lineup'; stopTimersKeep();
+  const own=Object.keys(S.heroes).filter(id=>!SUPP[id]&&hasHero(id)).sort((a,b)=>heroPower(b)-heroPower(a));
+  DU.sel=own.slice(0,Math.min(5,heroSlots())); DU.left=DU.bot?45:30;
+  duLineupUI();
+  DU.tm=setInterval(()=>{ DU.left--; const t=document.getElementById('dutm'); if(t) t.textContent=Math.max(0,DU.left)+'с'; if(DU.left<=0){ clearInterval(DU.tm); if(DU.st==='lineup') duReady(); } },1000);
+}
+function stopTimersKeep(){ clearInterval(DU.tm); clearInterval(DU.hb); clearInterval(DU.scan); DU.tm=DU.hb=DU.scan=0; }
+function duLineupUI(){
+  const own=Object.keys(S.heroes).filter(id=>!SUPP[id]&&hasHero(id)).sort((a,b)=>heroPower(b)-heroPower(a)), mx=Math.min(5,heroSlots());
+  let pw=0; DU.sel.forEach(id=>{ pw+=heroPower(id); });
+  ovl('<h2>⚔ Шууд 1vs1</h2>'
+    +'<div class="duc"><div class="duvs"><div>'+esc2(myName())+'<div class="sm">Хүч '+f(DU.P)+' · Зэрэг '+DU.myR+'</div></div><span>VS</span><div style="text-align:right">'+esc2(DU.opName)+'<div class="sm">Хүч '+f(DU.opP)+' · Зэрэг '+DU.opR+'</div></div></div></div>'
+    +'<div class="duc"><div class="dutm" id="dutm">'+Math.max(0,DU.left)+'с</div><div class="sm" style="text-align:center">Бүрэлдэхүүнээ сонго ('+DU.sel.length+'/'+mx+'). Хоёулаа бэлэн болтол нууц.</div>'
+    +'<div class="sm" style="text-align:center;margin-top:4px">🏹 Нумтан → 🛡 Хүнд морьт → 🐎 Морин цэрэг → 🏹 Нумтан (давуу)</div>'
+    +'<div class="duhs">'+own.map(id=>{ const h=HEROES.find(x=>x.id===id), t=htype(id); return '<div class="duh'+(DU.sel.includes(id)?' on':'')+'" onclick="duPick(\''+id+'\')">'+hpi(id,36)+'<br>'+String(h.n).split(' ')[0]+'<br><span class="sm">'+((typeof TNAME!=='undefined'&&TNAME[t])||t)+'</span><br>⚔'+f(heroPower(id))+'</div>'; }).join('')+'</div></div>'
+    +'<div class="duc" style="text-align:center"><div id="duopst" class="sm">'+(DU.bot?'Бот бэлэн':'⏳ Өрсөлдөгч сонгож байна…')+'</div><button class="btn red" style="width:100%;margin-top:8px" onclick="duReady()">✅ Бэлэн</button></div>'
+    +'<button class="btn" style="width:100%;margin-top:10px" onclick="duCancel()">Гарах</button>');
+}
+function duPick(id){ if(DU.st!=='lineup') return; const i=DU.sel.indexOf(id), mx=Math.min(5,heroSlots());
+  if(i>=0){ if(DU.sel.length<=1){ say('Дор хаяж 1 баатар'); return; } DU.sel.splice(i,1); } else { if(DU.sel.length>=mx){ say('Хамгийн ихдээ '+mx+' баатар'); return; } DU.sel.push(id); }
+  duLineupUI(); }
+function duReady(){
+  if(DU.st!=='lineup') return; if(!DU.sel.length){ say('Баатар сонго'); return; }
+  DU.st='wait'; clearInterval(DU.tm); DU.mine=duPack(DU.sel);
+  if(DU.bot){ const bl=duBot(DU.P); const a=DU.mine, b=bl; ovl('<h2>⚔ Шууд 1vs1</h2><div class="duc" style="text-align:center"><b>Эхэлж байна…</b></div>'); setTimeout(()=>duBegin(a,b),400); return; }
+  ovl('<h2>⚔ Шууд 1vs1</h2><div class="duc" style="text-align:center"><span class="dusp"></span> <b>Өрсөлдөгчийг хүлээж байна…</b><div class="sm" id="duopst" style="margin-top:6px">⏳ Өрсөлдөгч сонгож байна…</div></div><button class="btn" style="width:100%;margin-top:10px" onclick="duCancel()">Гарах</button>');
+  FBM.F.updateDoc(DU.ref,{['r'+DU.role]:true}).then(()=>{ if(DU.doc) duOnDoc(DU.doc); }).catch(()=>{ duAbort('Холболт тасарлаа'); });
+  // өрсөлдөгч хэт удвал
+  DU.to=setTimeout(()=>{ if(DU.st==='wait') duAbort('Өрсөлдөгч хариу өгсөнгүй'); },45000);
+}
+function duCancel(){
+  const st=DU.st; stopTimers(); unsub();
+  if(!DU.bot&&DU.ref&&CL.ok){ try{ const {F}=FBM; if(st==='lineup'||st==='wait') F.updateDoc(DU.ref,{ff:DU.role}).catch(()=>{}); if(DU.role==='a') F.deleteDoc(DU.ref).catch(()=>{}); }catch(e){} }
+  DU.st='idle'; ovlClose(); setTimeout(()=>openM('arena'),60);
+}
+function duAbort(msg){
+  if(DU.st==='idle'||DU.st==='over') return; const bl=document.getElementById('btl'); if(bl) return;
+  stopTimers(); unsub(); if(!DU.bot&&DU.ref&&DU.role==='a'&&CL.ok){ try{ FBM.F.deleteDoc(DU.ref).catch(()=>{}); }catch(e){} }
+  DU.st='idle'; ovlClose(); try{ say(msg||'Тулаан болсонгүй'); }catch(e){} setTimeout(()=>openM('arena'),60);
+}
+function duStartBot(){ if(DU.st==='find'){ stopTimers(); unsub(); if(DU.ref&&DU.role==='a'&&CL.ok){ try{ FBM.F.deleteDoc(DU.ref).catch(()=>{}); }catch(e){} } DU.st='idle'; duStart(true); } }
+
+/* ================= ТУЛААН (тогтмол алхам, тодорхой) ================= */
+function duBegin(au,bu){
+  if(DU.st==='fight'||DU.st==='over') return;
+  const A=duClean(au), Bu=duClean(bu); if(!A||!Bu){ duAbort('Өгөгдөл буруу'); return; }
+  stopTimers(); DU.st='fight'; ovlClose();
+  const seed=DU.seed||1, flip=DU.role==='b', rng=mkRng(seed), yLo=DH*0.22, yHi=DH-16;
+  const rows0={archer:0.88,cav:0.80,heavy:0.72,foot:0.76}, su=[], cnt=[{},{}];
+  [A,Bu].forEach((L,s)=>{ L.forEach(o=>{ const t=o.t, d=BTDEF[t], ci=cnt[s][t]||0; cnt[s][t]=ci+1;
+    const x=DW*(0.2+0.2*(ci%4))+(t==='cav'?DW*0.05:0), y0=rows0[t]*DH-Math.floor(ci/4)*DH*0.05, y=s?yLo+yHi-y0:y0, sk=HSK[o.id]||null;
+    su.push({s:s,id:o.id,type:t,d:d,x:x,y:y,hp:o.hp,max:o.hp,atk:o.atk,cd:rng()*d.cd,tc:0,lv:o.lv,sk:sk,skc:sk?3+rng()*3:0,cdm:o.cdm,dead:null,nm:o.n,mv:false,fdir:s?-1:1,face:s?-1:1,hit:0,atkT:0,hurt:0,shT:0,bAtk:null}); }); });
+  const cm={0:{},1:{}}, view=su.map((u,k)=>{ const mine=(u.s===0)===(!flip), vs=mine?0:1, ci=cm[vs][u.type]=(cm[vs][u.type]||0)+1;
+    const key=vs===0?(u.id==='chinggis'?'u_general':BTV[u.type][(u.id.length+ci)%BTV[u.type].length]):enKey({fc:seed%5},0,u.type,k);
+    return {side:vs,id:u.id,name:u.nm,type:u.type,d:u.d,key:key,x:u.x,y:flip?yLo+yHi-u.y:u.y,hx:u.x,hy:u.y,hp:u.hp,max:u.max,dead:null,mv:false,fdir:vs?-1:1,face:vs?-1:1,hit:0,atkT:0,hurt:0,sim:u}; });
+  // дэлгэц
+  const el=document.createElement('div'); el.id='btl';
+  el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bres"></div></div><div id="dubn"></div><button id="dugu" onclick="duGiveUp()">🏳 Бууж өгөх</button>';
+  document.body.appendChild(el);
+  { const sc=Math.min(innerWidth/DW,innerHeight/DH); $('bti').style.cssText='position:absolute;left:'+Math.round((innerWidth-DW*sc)/2)+'px;top:'+Math.round((innerHeight-DH*sc)/2)+'px;width:'+DW+'px;height:'+DH+'px;transform-origin:0 0;transform:scale('+sc+');overflow:hidden'; }
+  const cv2=$('bc'), dp=Math.min(2,devicePixelRatio||1); cv2.width=DW*dp; cv2.height=DH*dp; cv2.style.cssText='width:100%;height:100%;display:block';
+  const p0=view.filter(u=>!u.side).reduce((a,u)=>a+u.max,0), e0=view.filter(u=>u.side).reduce((a,u)=>a+u.max,0);
+  const MP=[0,1,4,3,5,7,8,9,6,2];
+  BT={duel:1,i:-1,e:{map:MP[seed%10],back:'arena',n:'Шууд 1vs1'},units:view,su:su,fx:[],dm:[],pt:[],t:0,sp:1,done:false,W:DW,H:DH,dp:dp,ctx:cv2.getContext('2d'),raf:0,last:performance.now(),p0:p0,e0:e0,ip:1,wait:true,vs:1,shake:0,sel:[],tr:[],acc:0,rng:rng,flip:flip,yLo:yLo,yHi:yHi,fall:[],ban:null,req:null};
+  $('btop').innerHTML='';
+  const bn=$('dubn'); if(bn) bn.textContent='Та  vs  '+DU.opName;
+  musPlay('battle'); sfx('horn'); vib(40);
+  const v=document.createElement('div'); v.id='bvs'; v.textContent='VS'; $('bti').appendChild(v);
+  setTimeout(()=>{ if(v.parentNode) v.remove(); if(BT&&BT.duel) BT.wait=false; },1100);
+  BT.raf=requestAnimationFrame(btLoop);
+}
+
+function duCast(B,u){
+  const d=u.sk, su=B.su, al=su.filter(x=>x.s===u.s&&x.hp>0), en=su.filter(x=>x.s!==u.s&&x.hp>0); if(!en.length) return false;
+  const k=(1+0.12*(Math.max(1,u.lv)-1))*(d[4]||1), t=B.t, Y=y=>B.flip?B.yLo+B.yHi-y:y, vside=(u.s===0)===(!B.flip)?0:1;
+  const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=B.t; B.dm.push({x:e.x,y:Y(e.y)-30,t:0,v:dm,big:true,side:vside}); };
+  if(d[0]==='rally'){ al.forEach(a=>{ a.bAtk={m:1+0.3*k,t:t+8}; a.hp=Math.min(a.max,a.hp+a.max*0.1*k); }); }
+  else if(d[0]==='guard'){ al.forEach(a=>{ a.shT=t+6*Math.min(1.5,k); }); }
+  else if(d[0]==='heal'){ al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+a.max*0.18*k); }); }
+  else if(d[0]==='volley'){ const c=en.slice(); for(let i=c.length-1;i>0;i--){ const j=Math.floor(B.rng()*(i+1)); const x=c[i]; c[i]=c[j]; c[j]=x; }
+    c.slice(0,3).forEach(e=>{ hitE(e,3); B.fx.push({k:'arrow',x0:u.x,y0:Y(u.y)-18,x1:e.x,y1:Y(e.y)-18,t:0}); }); }
+  else if(d[0]==='charge'){ const tg=en.reduce((a,b)=>b.hp>a.hp?b:a); hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; B.shake=Math.min(1,(B.shake||0)+0.6); B.fx.push({k:'slash',x0:u.x,y0:Y(u.y)-18,x1:tg.x,y1:Y(tg.y)-18,t:0}); }
+  B.ban={txt:d[1],n:u.nm||'',t:0}; sfx('skill'); vib(20); B.shake=Math.min(1,(B.shake||0)+0.3);
+  for(let q=0;q<10;q++) B.pt.push({x:u.x+(Math.random()-0.5)*30,y:Y(u.y)-10-Math.random()*30,vx:(Math.random()-0.5)*30,vy:-20-Math.random()*30,t:0,l:0.8,c:'spark'});
+  return true;
+}
+
+function duTick(){
+  const B=BT, h=FIX, U=B.su, Y=y=>B.flip?B.yLo+B.yHi-y:y; B.t+=h; B.shake=Math.max(0,(B.shake||0)-h*3);
+  U.forEach(u=>{ u.tc=0; });
+  for(let i=0;i<U.length;i++){ const u=U[i]; if(u.hp<=0) continue; u.cd-=h;
+    if(u.sk){ u.skc-=h; if(u.skc<=0){ u.skc=duCast(B,u)?u.sk[3]*u.cdm:1; } }
+    let tg=null,bd=1e9,bs=1e9;
+    for(let j=0;j<U.length;j++){ const o=U[j]; if(o.s!==u.s&&o.hp>0){ const dx=o.x-u.x, dy=o.y-u.y, dd=Math.sqrt(dx*dx+dy*dy), sc=dd+o.tc*45; if(sc<bs){ bs=sc; bd=dd; tg=o; } } }
+    if(!tg) continue; tg.tc++;
+    u.face=tg.x>=u.x?1:-1; if(Math.abs(tg.x-u.x)>12) u.fdir=u.face;
+    if(bd>u.d.rng){ const dx=tg.x-u.x, dy=tg.y-u.y, L=Math.sqrt(dx*dx+dy*dy)||1; u.x+=dx/L*u.d.spd*h*1.3; u.y+=dy/L*u.d.spd*h*1.3; u.mv=true; }
+    else { u.mv=false;
+      if(u.cd<=0){ u.cd=u.d.cd; let dmg=u.atk*(0.9+B.rng()*0.2); if(u.bAtk&&u.bAtk.t>B.t) dmg*=u.bAtk.m; if(tg.shT>B.t) dmg*=0.5; const big=BTBEAT[u.type]===tg.type; if(big) dmg*=1.5;
+        tg.hp-=dmg; u.hit=0.25; u.atkT=0.5; tg.hurt=0.3; if(tg.hp<=0&&!tg.dead) tg.dead=B.t;
+        sfx(big?'big':u.type==='archer'?'bow':u.type==='heavy'?'slash':'hit',70); if(big){ vib(10); B.shake=Math.min(1,B.shake+0.35); }
+        const vs=(u.s===0)===(!B.flip)?0:1;
+        for(let q=0;q<(u.type==='archer'?3:5);q++) B.pt.push({x:tg.x,y:Y(tg.y)-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:vs?'spark':'blood'});
+        B.dm.push({x:tg.x,y:Y(tg.y)-30,t:0,v:Math.round(dmg),big:big,side:vs});
+        B.fx.push({k:u.type==='archer'?'arrow':(u.type==='heavy'?'slash':'clash'),x0:u.x,y0:Y(u.y)-18,x1:tg.x,y1:Y(tg.y)-18,t:0}); } }
+  }
+  // нэг талын цэргүүд бие биеэ түлхэнэ
+  for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; for(let b=a+1;b<U.length;b++){ const Bq=U[b]; if(Bq.hp<=0||Bq.s!==A.s) continue; const dx=Bq.x-A.x, dy=Bq.y-A.y, d=Math.sqrt(dx*dx+dy*dy); if(d<52&&d>0.01){ const p=(52-d)/2*Math.min(1,h*9), ux=dx/d, uy=dy/d; A.x-=ux*p; A.y-=uy*p; Bq.x+=ux*p; Bq.y+=uy*p; } } }
+  U.forEach(u=>{ u.x=Math.max(22,Math.min(B.W-22,u.x)); u.y=Math.max(B.H*0.22,Math.min(B.H-16,u.y)); });
+  // харагдах хэсэг (дэлгэцийн хувилбар)
+  B.units.forEach(v=>{ const u=v.sim; v.x=u.x; v.y=Y(u.y); v.hp=u.hp; v.max=u.max; v.dead=u.dead; v.mv=u.mv; v.fdir=u.fdir; v.face=u.face; v.hit=u.hit; v.atkT=u.atkT; v.hurt=u.hurt; v.shT=u.shT; v.bAtk=u.bAtk;
+    if(u.mv&&u.hp>0&&u.type!=='archer'&&Math.random()<h*3) B.pt.push({x:v.x,y:v.y,vx:(Math.random()-0.5)*8,vy:-4,t:0,l:0.5,c:'dust'}); });
+  if(B.ban){ B.ban.t+=h; if(B.ban.t>1.9) B.ban=null; }
+  B.pt.forEach(p=>{ p.t+=h; p.x+=p.vx*h; p.y+=p.vy*h; p.vy+=60*h; }); B.pt=B.pt.filter(p=>p.t<p.l);
+  B.fx.forEach(f=>f.t+=h*4); B.fx=B.fx.filter(f=>f.t<1); B.dm.forEach(d=>d.t+=h); B.dm=B.dm.filter(d=>d.t<1.4);
+  U.forEach(u=>{ if(u.hit>0) u.hit-=h; if(u.atkT>0) u.atkT-=h; if(u.hurt>0) u.hurt-=h; });
+  const aa=U.filter(u=>u.s===0&&u.hp>0), bb=U.filter(u=>u.s===1&&u.hp>0);
+  if(!aa.length||!bb.length||B.t>TMAX){
+    let w; if(!bb.length) w='a'; else if(!aa.length) w='b'; else { const sa=U.filter(u=>u.s===0), sb=U.filter(u=>u.s===1); w=(aa.reduce((x,u)=>x+u.hp,0)/sa.reduce((x,u)=>x+u.max,0)>=bb.reduce((x,u)=>x+u.hp,0)/sb.reduce((x,u)=>x+u.max,0))?'a':'b'; }
+    B.winner=w; B.final=U.map(u=>Math.round(u.hp)).join(','); duFinish(w);
+  }
+}
+(function(){ const _bs=btStep; btStep=function(dt){
+    if(BT&&BT.duel){ BT.acc+=dt; let n=0; while(BT.acc>=FIX&&n<6&&!BT.done){ duTick(); BT.acc-=FIX; n++; } if(BT.acc>FIX*6) BT.acc=0; return; }
+    return _bs.apply(this,arguments); };
+  const _bf=btFinish; btFinish=function(win){ if(BT&&BT.duel) return; return _bf.apply(this,arguments); };
+  const _be=btEnd; btEnd=function(force){ if(BT&&BT.duel){ if(!BT.done) duGiveUp(true); duEnd(); return; } return _be.apply(this,arguments); };
+  const _bsp=btSpeed; btSpeed=function(){ if(BT&&BT.duel) return; return _bsp.apply(this,arguments); };
+})();
+
+/* ================= ҮР ДҮН ================= */
+function elo(r,o,sc){ return Math.round(32*(sc-1/(1+Math.pow(10,(o-r)/400)))); }
+function duFinish(w,note){
+  const B=BT; if(!B||!B.duel||B.done) return; B.done=true; DU.fin=true;
+  const win=(w===DU.role), A=stats(), P=DU.P; let html='', dr=0;
+  sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]);
+  if(DU.bot){ html='<div>'+ico(win?'fx16':'fx17',72)+'</div><h2>'+(win?'Ялалт!':'Ялагдлаа')+'</h2><div class="sm">Дасгалын тулаан · зэрэг өөрчлөгдөхгүй</div>'; }
+  else {
+    dr=elo(A.dr,DU.opR,win?1:0); A.dr=Math.max(0,A.dr+dr); if(win) A.dw++; else A.dl++;
+    let rw=''; if(win){ if(A.dd!==dayKey()){ A.dd=dayKey(); A.dc=0; } if(A.dc<10){ A.dc++; const g=Math.round(Math.min(DU.opP||P,P*1.5)*0.1); S.res.gold+=g; S.res.alt+=1; passAdd(5); rw='<div>+'+g+' 🪙 · +1 Алт</div>'; } else rw='<div class="sm">Өнөөдрийн шагнал дууссан (10/10)</div>'; }
+    html='<div>'+ico(win?'fx16':'fx17',72)+'</div><h2>'+(win?'Ялалт!':'Ялагдлаа')+'</h2>'+(note?'<div class="sm">'+note+'</div>':'')+'<div>Зэрэг: <b>'+A.dr+'</b> ('+(dr>=0?'+':'')+dr+')</div>'+rw;
+    if(DU.ref&&CL.ok){ try{ FBM.F.updateDoc(DU.ref,{['w'+DU.role]:w}).catch(()=>{}); }catch(e){} }
+  }
+  if(note&&DU.bot) html+='<div class="sm">'+note+'</div>';
+  const bg=$('dugu'); if(bg) bg.remove();
+  $('bres').innerHTML=html+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; try{ refresh(); }catch(e){}
+}
+function duGiveUp(silent){
+  const B=BT; if(!B||!B.duel||B.done){ return; }
+  if(!silent){ const b=$('dugu'); if(b&&!DU.gu){ DU.gu=1; b.textContent='Дахин дарвал бууж өгнө'; setTimeout(()=>{ DU.gu=0; const b2=$('dugu'); if(b2) b2.textContent='🏳 Бууж өгөх'; },2500); return; } }
+  DU.gu=0; if(!DU.bot&&DU.ref&&CL.ok){ try{ FBM.F.updateDoc(DU.ref,{ff:DU.role}).catch(()=>{}); }catch(e){} }
+  duFinish(DU.role==='a'?'b':'a','Та бууж өглөө');
+}
+function duEnd(){
+  const B=BT; if(!B) return; cancelAnimationFrame(B.raf); BT=null; stopTimers(); unsub();
+  if(!DU.bot&&DU.ref&&DU.role==='a'&&CL.ok){ try{ FBM.F.deleteDoc(DU.ref).catch(()=>{}); }catch(e){} }
+  DU.st='idle'; DU.ref=null; const el=$('btl'); if(el) el.remove(); const bn=$('dubn'); if(bn) bn.remove(); const g=$('dugu'); if(g) g.remove();
+  musPlay('village'); setTimeout(()=>openM('arena'),60);
+}
+
+/* ================= ТЭМЦЭЭН ЦЭС ================= */
+(function(){ const _a=arenaHTML; arenaHTML=function(){
+  let h=_a.apply(this,arguments);
+  try{ const A=stats(), card='<div class="card" style="border:2px solid #c9972b"><h3>⚔ Шууд 1vs1</h3><div class="sm">Жинхэнэ тоглогчтой шууд тулна. Бүрэлдэхүүнээ нууцаар сонгоно, тулаан хоёр утсан дээр нэг зэрэг явна.</div>'
+      +'<div class="row" style="margin-top:6px"><div>Зэрэг <b>'+A.dr+'</b><div class="sm">Ялалт '+A.dw+' · Ялагдал '+A.dl+'</div></div><button class="btn red" onclick="duStart()">🔍 Өрсөлдөгч хайх</button></div>'
+      +'<button class="btn" style="width:100%;margin-top:6px" onclick="duStart(1)">🤖 Дасгалын тулаан (бот)</button></div>';
+    const i=h.indexOf('</h2>'); h=i<0?h+card:h.slice(0,i+5)+card+h.slice(i+5);
+  }catch(e){}
+  return h; };
+})();
+window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; window.duPick=duPick; window.duReady=duReady; window.duGiveUp=duGiveUp;
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

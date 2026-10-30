@@ -10476,6 +10476,31 @@ cn=function(n){ n=Math.floor(n||0); if(n>=999950000) return (n/1e9).toFixed(1)+'
   window.addEventListener('resize',()=>{ sig=''; try{ fit(); }catch(e){} });
 })();
 
+
+/* p32/admact.js — Админ: идэвхтэй (онлайн) тоглогчдыг харах. lb/{uid}.t = сүүлд cloud руу хадгалсан цаг (90 сек тутам, харагдаж байхад) */
+var ACT={busy:0,t:0};
+function actAgo(t){ const m=Math.floor(Math.max(0,wmNow()-(t||0))/60000); if(m<1) return 'дөнгөж сая'; if(m<60) return m+' мин'; const h=Math.floor(m/60); if(h<24) return h+' цаг'; return Math.floor(h/24)+' өдөр'; }
+async function actFetch(force){
+  if(!isAdm()||!CL.ok||ACT.busy) return; if(!force&&Date.now()-ACT.t<20000) return; ACT.busy=1;
+  try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.orderBy('t','desc'),F.limit(100)));
+    CL.act=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>(b.t||0)-(a.t||0)); ACT.t=Date.now(); }
+  catch(e){ CL.actErr=(e&&(e.code||e.message))||'алдаа'; }
+  ACT.busy=0; try{ if(cur==='cloud') fillM(); }catch(e){} }
+function actHTML(){
+  const L=CL.act, now=wmNow(), dot=t=>{ const m=(now-(t||0))/60000; return m<=5?'🟢':m<=60?'🟡':'⚪'; };
+  let h='<div class="card" style="margin:8px 0;border-color:#6fd04a"><h3 style="margin:0 0 4px">🟢 Идэвхтэй тоглогчид</h3>';
+  if(!L){ h+=(CL.actErr?'<div class="sm" style="color:#ffb08a">Ачаалж чадсангүй: '+esc2(CL.actErr)+'</div>':'<div class="sm">Ачааллаж байна…</div>')+'<button class="btn" style="margin-top:6px" onclick="actFetch(true)">Дахин ачаалах</button></div>'; return h; }
+  const c=m=>L.filter(x=>(now-(x.t||0))<=m*60000).length;
+  h+='<div class="row" style="padding:2px 0"><span class="sm">🟢 Одоо онлайн (5 мин)</span><b>'+c(5)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">🟡 Сүүлийн 1 цаг</span><b>'+c(60)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">Сүүлийн 24 цаг</span><b>'+c(1440)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">Сүүлийн 7 хоног</span><b>'+c(10080)+'</b></div>';
+  const shown=L.filter(x=>(now-(x.t||0))<=1440*60000).slice(0,40);
+  h+='<div style="margin-top:6px;max-height:260px;overflow-y:auto">'+(shown.length?shown.map(x=>{ const p=x.pid||pidOf(x.id); return '<div class="row" style="padding:3px 0;gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere">'+dot(x.t)+' <b style="color:#ffd770">#'+p+'</b> '+esc2(x.n)+(x.id===CL.uid?' (та)':'')+' · Lv '+(x.l||1)+' · ⚔'+f(x.p||0)+' '+(x.r?'✉':'👤')+'</span><span class="sm" style="opacity:.85;white-space:nowrap">'+actAgo(x.t)+'</span></div>'; }).join(''):'<div class="sm">Сүүлийн 24 цагт идэвхтэй тоглогч алга</div>')+'</div>';
+  h+='<div class="sm" style="opacity:.7;margin-top:4px">Сүүлийн 100 тоглогчоос. Тоглоом нээлттэй байхад ~1.5 мин тутам шинэчлэгдэнэ.</div><button class="btn" style="margin-top:6px" onclick="actFetch(true)">🔄 Шинэчлэх</button></div>';
+  return h; }
+(function(){
+  const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ if(!CL.act&&!ACT.busy) setTimeout(()=>actFetch(true),0); h=h.replace('<h3>🛠 Админ</h3>','<h3>🛠 Админ</h3>'+actHTML()); }catch(e){} return h; };
+  setInterval(()=>{ try{ if(!document.hidden&&cur==='cloud'&&isAdm()) actFetch(true); }catch(e){} },60000);
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

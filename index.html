@@ -10429,6 +10429,33 @@ setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },6000);
 (function(){ const _mp=musPlay; musPlay=function(k){ const r=_mp.apply(this,arguments); try{ if(k==='battle'){ setTimeout(()=>{ try{ const a=MUSV.a.battle; if(MUSV.on&&MUSV.unl&&MUSV.want==='battle'&&a&&a.paused){ BGMP.retry=1; } }catch(e){} },1500); } }catch(e){} return r; };
   document.addEventListener('pointerdown',()=>{ try{ if(BGMP.retry&&MUSV.on&&MUSV.unl&&MUSV.want==='battle'){ BGMP.retry=0; const a=MUSV.a.battle; if(a&&a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } } }catch(e){} }); })();
 
+
+/* p32/rtszoom.js — ШТАБ-ын тулаан (RTS): + / − товчоор томруулах, томруулсан үед армийг дагана, хуруугаар чирч хөдөлгөнө */
+function rzCen(R){ let sx=0,sy=0,n=0; (R.U||[]).forEach(u=>{ if(u.hp>0&&!u.side){ sx+=RIX0+u.x*rtsP(u.y); sy+=rtsYi(u.y); n++; } }); return n?{x:sx/n,y:sy/n}:null; }
+function rzApply(R){
+  const z=R.zm||1, sc=(R.sc0||R.sc)*z; R.sc=sc;
+  if(z<=1.001){ R.zm=1; R.sc=R.sc0||R.sc; R.ox=R.ox0||0; R.oy=0; return; }
+  const cx=R.cxi==null?RIW/2:R.cxi, cy=R.cyi==null?RIH*0.6:R.cyi;
+  R.ox=Math.max(0,Math.min(Math.max(0,RIW*sc-R.cw),cx*sc-R.cw/2));
+  R.oy=Math.max(0,Math.min(Math.max(0,RIH*sc-R.ch),cy*sc-R.ch*0.55)); }
+function rzStep(d){ const R=RT; if(!R) return; const z0=R.zm||1; let z=d>0?z0*1.3:z0/1.3; z=Math.max(1,Math.min(2.4,z)); if(z<1.08) z=1; R.zm=Math.round(z*100)/100;
+  if(z0<=1&&R.zm>1){ const c=rzCen(R); R.cxi=c?c.x:RIW/2; R.cyi=c?c.y:RIH*0.6; }
+  rzApply(R); rzBtns(); try{ sfx('click'); }catch(e){} }
+function rzBtns(){ const R=RT, bx=$('rbt'); if(!bx||!R) return;
+  if(!$('rzin')){ const mk=(id,t,d)=>{ const b=document.createElement('button'); b.id=id; b.textContent=t; b.onclick=()=>rzStep(d); bx.appendChild(b); }; mk('rzin','＋',1); mk('rzout','－',-1); }
+  const zi=$('rzin'), zo=$('rzout'); if(zi) zi.style.opacity=(R.zm||1)>=2.39?'.4':'1'; if(zo) zo.style.opacity=(R.zm||1)<=1?'.4':'1';
+  if(!R.rzl){ const cv=$('rcv'); if(cv){ R.rzl=1; let dn=null;
+    cv.addEventListener('pointerdown',e=>{ dn={x:e.clientX,y:e.clientY,cx:R.cxi,cy:R.cyi}; });
+    cv.addEventListener('pointermove',e=>{ if(!dn||(R.zm||1)<=1) return; const dx=e.clientX-dn.x, dy=e.clientY-dn.y; if(Math.hypot(dx,dy)<14&&!R.rzd) return; R.rzd=1; R.cxi=dn.cx-dx/R.sc; R.cyi=dn.cy-dy/R.sc; R.dragUntil=performance.now()+3500; rzApply(R); });
+    const up=()=>{ dn=null; setTimeout(()=>{ R.rzd=0; },60); }; cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up); } } }
+(function(){
+  const _lay=rtsLayout;
+  rtsLayout=function(){ _lay.apply(this,arguments); const R=RT; if(!R) return; try{ R.sc0=R.sc; R.ox0=R.ox; if(R.zm==null) R.zm=1; rzApply(R); rzBtns(); }catch(e){} };
+  const _dr=rtsDraw;
+  rtsDraw=function(now){ const R=RT; try{ if(R&&(R.zm||1)>1&&!R.done&&performance.now()>(R.dragUntil||0)){ const c=rzCen(R); if(c){ R.cxi=(R.cxi==null?c.x:R.cxi+(c.x-R.cxi)*0.06); R.cyi=(R.cyi==null?c.y:R.cyi+(c.y-R.cyi)*0.06); rzApply(R); } } }catch(e){}
+    return _dr.apply(this,arguments); };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

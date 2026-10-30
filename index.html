@@ -10380,6 +10380,31 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
     return _sp.apply(this,a); };
 })();
 
+
+/* p32/gerhint.js — Гол гэр сайжруулахад дутуу барилгуудыг нэрээр нь харуулж, шууд очдог болгох */
+function gerMiss(){ const L=S.bld.ger||1; return gerLow().map(x=>({k:x,n:BUILD[x].n,lv:S.bld[x],up:!!(S.upg&&S.upg[x])})).sort((a,b)=>(a.up-b.up)||(a.lv-b.lv)); }
+function gerGo(){ const m=gerMiss(); if(!m.length){ openM('bld:ger'); return; } const t=m.find(x=>!x.up)||m[0]; if(t.up) say('⏳ '+t.n+' сайжирч байна — дуустал хүлээ'); openM('bld:'+t.k); }
+(function(){
+  const _rq=gerReqHTML;
+  gerReqHTML=function(){ const L=S.bld.ger||1, m=gerMiss(); let h=_rq.apply(this,arguments);
+    try{ const a=h.indexOf('onclick="openM(\'bld:'); if(a<0&&!m.length) return h;
+      // хуучин жагсаалтыг (≤6) бүтнээр нь солино
+      const s0=h.indexOf('<div class="row" style="padding:3px 6px;margin-top:3px'); const base=s0<0?h.replace(/<\/div>$/,''):h.slice(0,s0);
+      const list=m.map(x=>'<div class="row" style="padding:5px 8px;margin-top:4px;background:#ffffff14;border-radius:8px" onclick="openM(\'bld:'+x.k+'\')"><span class="sm"><b>'+x.n+'</b> · Lv '+x.lv+' → '+L+(x.up?' <span style="color:#9fd0ff">⏳ сайжирч байна</span>':'')+'</span><span style="color:#ffd770;font-weight:bold">Очих ›</span></div>').join('');
+      return base+list+'</div>'; }catch(e){ return h; } };
+  const _uc=upCard;
+  upCard=function(k,sh){ let h=_uc.apply(this,arguments);
+    try{ if(k==='ger'&&!(S.upg&&S.upg.ger)&&gerMiss().length) h=h.replace(/<button class="btn" disabled onclick="upgrade\('ger'\)">[\s\S]*?<\/button>/,'<button class="btn" onclick="gerGo()">Дутуу<br>барилга ›</button>'); }catch(e){}
+    return h; };
+  const _gm=gmainCard;
+  gmainCard=function(){ let h=_gm.apply(this,arguments);
+    try{ const L=S.bld.ger||1; if(L<MAXB&&!(S.upg&&S.upg.ger)){ const n=gerMiss().length; if(n){ h=h.replace(/⬆ Lv \d+/,'🔒 '+n+' дутуу'); h=h.replace('Гэр дээр дарж сайжруул','<span style="color:#ffb08a">🔒 '+n+' барилга дутуу · дарж үз</span>'); } } }catch(e){}
+    return h; };
+  const _up=upgrade;
+  upgrade=function(k){ try{ if(k==='ger'){ const m=gerMiss(); if(m.length&&!(S.upg&&S.upg.ger)){ say('Эхлээд Lv '+(S.bld.ger||1)+' болго: '+m.slice(0,3).map(x=>x.n).join(', ')+(m.length>3?' … +'+(m.length-3):'')); sfx('err'); return; } } }catch(e){}
+    return _up.apply(this,arguments); };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

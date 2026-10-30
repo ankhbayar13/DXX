@@ -10308,6 +10308,38 @@ function duEnd(){
 window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; window.duPick=duPick; window.duReady=duReady; window.duGiveUp=duGiveUp;
 })();
 
+
+/* p32/rbreel.js — 209: Дурсгалын хайрцаг баатар дуудах шиг: хайрцаг нээгдэнэ → дурсгал гүйдэг тууз → онилсон дурсгал → картууд */
+(function(){
+  const tierOf=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0;
+  function rbRun(o,winR,done){
+    const N=44, WI=36; let cells='';
+    for(let i=0;i<N;i++){ const r=i===WI?winR:relPick(); cells+='<div class="rlc" style="border-color:'+SKT[tierOf(r)].col+'">'+ico(r.ic,38)+'</div>'; }
+    let fin=false, tm=0, tk=0, t1=0;
+    const end=()=>{ if(fin) return; fin=true; clearTimeout(tm); clearTimeout(t1); clearInterval(tk); if(!o.parentNode) return; try{ done(); }catch(e){} };
+    o.innerHTML='<div class="bxs rlw"><div class="bxbox" id="rlch"><img src="'+SPRDATA.chest0[0]+'" style="width:150px"></div><div class="bxt">Дурсгал нээгдэж байна...</div><button class="btn" id="rlk0" style="margin-top:8px">Алгасах</button></div>';
+    document.getElementById('rlk0').onclick=end;
+    t1=setTimeout(()=>{ const c=document.getElementById('rlch'); if(c) c.firstChild.src=SPRDATA.chest1[0]; },500);
+    tm=setTimeout(()=>{ if(fin||!o.parentNode) return; const c=document.getElementById('rlch'); if(c) c.firstChild.src=SPRDATA.chest2[0];
+      setTimeout(()=>{ if(fin||!o.parentNode) return;
+        o.innerHTML='<div class="bxs rlw"><div class="bxt">Дурсгал нээгдэж байна...</div><div class="rlf" style="border-image-source:url('+SPRDATA.rl_fr[0]+')"><div class="rlv"><div class="rlt" id="rlt">'+cells+'</div><div class="rlm"></div><div class="rll"></div></div></div><img src="'+SPRDATA.rl_mk[0]+'" class="rlk"><br><button class="btn" id="rlk">Алгасах</button></div>';
+        const rt=document.getElementById('rlt'), box=o.querySelector('.rlv'), cw=54;
+        const tx=-(WI*cw+cw/2-box.clientWidth/2+(Math.random()-0.5)*cw*0.6);
+        rt.style.transform='translateX(0)'; void rt.offsetWidth; rt.style.transition='transform 4.6s cubic-bezier(.08,.6,.12,1)'; rt.style.transform='translateX('+tx+'px)';
+        let n=0; tk=setInterval(()=>{ if(fin||!o.parentNode||++n>40){ clearInterval(tk); return; } try{ sfx('tick'); }catch(e){} },110);
+        tm=setTimeout(()=>setTimeout(end,500),4600);
+        document.getElementById('rlk').onclick=end; },700); },1000);
+  }
+  relBoxOpen=function(n){
+    const cost=n===5?Math.round(RBOXC*4.5):RBOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна.'); return; } S.res.alt-=cost;
+    const res=[]; for(let i=0;i<n;i++){ const r=relPick(); S.relics[r.id]=(S.relics[r.id]||0)+1; res.push(r); } passAdd(5*n); refresh();
+    const best=Math.max(...res.map(tierOf)), win=res.reduce((a,b)=>b.s>a.s?b:a);
+    let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); document.body.appendChild(o);
+    rbRun(o,win,()=>{ if(!o.parentNode) return;
+      o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tierOf(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tierOf(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; });
+  };
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

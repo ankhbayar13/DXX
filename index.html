@@ -10405,6 +10405,30 @@ function gerGo(){ const m=gerMiss(); if(!m.length){ openM('bld:ger'); return; } 
     return _up.apply(this,arguments); };
 })();
 
+
+/* p32/bgmfix.js — iPhone дээр тулааны дуу (battle) эхлэхгүй байх асуудал:
+   Safari нь хэрэглэгчийн товшилтоос ГАДНА (await/ачаалсны дараа) анх удаа play() хийвэл хаадаг.
+   ШТАБ, Тэмцээн зэрэг тулаан ачаалсны дараа дуугаа эхлүүлдэг тул тулааны дууг товшилтын үед
+   нэг удаа "сэрээж" (дуугүй тоглуулаад шууд зогсооно) дараа нь чөлөөтэй эхлүүлнэ. */
+var BGMP={done:0,busy:0};
+function bgmPrime(){
+  if(BGMP.done||BGMP.busy) return; if(!MUSV.unl) return;
+  if(!BGM.u.battle){ try{ bgmLoad('battle',()=>{}); }catch(e){} return; }
+  BGMP.busy=1;
+  try{
+    const a=musGet('battle'); if(!a){ BGMP.busy=0; return; }
+    const was=!a.paused; if(was){ BGMP.done=1; BGMP.busy=0; return; }
+    a.muted=true; const p=a.play();
+    const fin=()=>{ try{ a.pause(); a.currentTime=0; a.muted=false; }catch(e){} BGMP.busy=0; };
+    if(p&&p.then) p.then(()=>{ BGMP.done=1; fin(); }).catch(()=>{ try{ a.muted=false; }catch(e){} BGMP.busy=0; }); else { BGMP.done=1; fin(); }
+  }catch(e){ BGMP.busy=0; }
+}
+['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{ setTimeout(bgmPrime,30); }));
+setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },6000);
+// хэрэв тулаан эхлэх үед дуу тоглоогүй бол (хаагдсан) дараагийн товшилт дээр дахин оролдоно
+(function(){ const _mp=musPlay; musPlay=function(k){ const r=_mp.apply(this,arguments); try{ if(k==='battle'){ setTimeout(()=>{ try{ const a=MUSV.a.battle; if(MUSV.on&&MUSV.unl&&MUSV.want==='battle'&&a&&a.paused){ BGMP.retry=1; } }catch(e){} },1500); } }catch(e){} return r; };
+  document.addEventListener('pointerdown',()=>{ try{ if(BGMP.retry&&MUSV.on&&MUSV.unl&&MUSV.want==='battle'){ BGMP.retry=0; const a=MUSV.a.battle; if(a&&a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } } }catch(e){} }); })();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

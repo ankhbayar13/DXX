@@ -10427,10 +10427,12 @@ function bgmPrime(){
   BGMP.busy=1;
   try{
     const a=musGet('battle'); if(!a){ BGMP.busy=0; return; }
-    const was=!a.paused; if(was){ BGMP.done=1; BGMP.busy=0; return; }
-    a.muted=true; const p=a.play();
-    const fin=()=>{ try{ a.pause(); a.currentTime=0; a.muted=false; }catch(e){} BGMP.busy=0; };
-    if(p&&p.then) p.then(()=>{ BGMP.done=1; fin(); }).catch(()=>{ try{ a.muted=false; }catch(e){} BGMP.busy=0; }); else { BGMP.done=1; fin(); }
+    if(!a.paused){ BGMP.done=1; BGMP.busy=0; return; }
+    const g=MUSV.g&&MUSV.g.battle; try{ if(g) g.gain.value=0; }catch(e){}
+    a.muted=true; let ended=0;
+    const fin=()=>{ if(ended) return; ended=1; try{ if(bgmKey(MUSV.want)!=='battle'||MUSV.a.battle!==a){ a.pause(); a.currentTime=0; } }catch(e){} try{ a.muted=false; }catch(e){} try{ musApply(); }catch(e){} BGMP.busy=0; };
+    const p=a.play(); setTimeout(fin,1800);
+    if(p&&p.then) p.then(()=>{ BGMP.done=1; fin(); }).catch(()=>{ fin(); }); else { BGMP.done=1; fin(); }
   }catch(e){ BGMP.busy=0; }
 }
 ['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{ setTimeout(bgmPrime,30); }));
@@ -10438,6 +10440,9 @@ setTimeout(()=>{ try{ bgmLoad('battle'); }catch(e){} },6000);
 // хэрэв тулаан эхлэх үед дуу тоглоогүй бол (хаагдсан) дараагийн товшилт дээр дахин оролдоно
 (function(){ const _mp=musPlay; musPlay=function(k){ const r=_mp.apply(this,arguments); try{ if(k==='battle'){ setTimeout(()=>{ try{ const a=MUSV.a.battle; if(MUSV.on&&MUSV.unl&&MUSV.want==='battle'&&a&&a.paused){ BGMP.retry=1; } }catch(e){} },1500); } }catch(e){} return r; };
   document.addEventListener('pointerdown',()=>{ try{ if(BGMP.retry&&MUSV.on&&MUSV.unl&&MUSV.want==='battle'){ BGMP.retry=0; const a=MUSV.a.battle; if(a&&a.paused){ const p=a.play(); if(p&&p.catch) p.catch(()=>{}); } } }catch(e){} }); })();
+
+// хамгаалалт: хот (village) дотор тулааны дуу үлдсэн бол зогсооно
+setInterval(()=>{ try{ const a=MUSV.a&&MUSV.a.battle; if(a&&!a.paused&&!BGMP.busy&&bgmKey(MUSV.want)!=='battle'&&!BT&&!RT) a.pause(); }catch(e){} },1500);
 
 
 /* p32/rtszoom.js — ШТАБ-ын тулаан (RTS): + / − товчоор томруулах, томруулсан үед армийг дагана, хуруугаар чирч хөдөлгөнө */

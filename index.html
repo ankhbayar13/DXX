@@ -3,6 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<script>(function(){try{
+if(window.top!==window)return;
+if(/[?&]nofr\b/.test(location.search))return;
+var w=innerWidth,h=innerHeight;if(w<900||h<600)return;
+window.stop();
+var u=location.href.split('#')[0],hs=location.hash||'';u+=(u.indexOf('?')<0?'?':'&')+'fr=1'+hs;
+document.documentElement.innerHTML='<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Тал Нутгийн Хаан</title><meta name="theme-color" content="#0f2a5c"><link rel="manifest" href="manifest.json"><style>html,body{margin:0;height:100%;overflow:hidden;background:#070b16 radial-gradient(ellipse at 50% 30%,#14234a 0,#070b16 70%)}iframe{position:fixed;left:50%;top:0;height:100vh;width:min(540px,max(390px,56vh));transform:translateX(-50%);border:0;background:#000;box-shadow:0 0 60px #000c,0 0 0 2px #c9972b66}</style></head><body><iframe id="gfr" src="'+u.replace(/"/g,'&quot;')+'" allow="autoplay; fullscreen; clipboard-write; clipboard-read" allowfullscreen></iframe></body>';
+var f=function(){try{var x=document.getElementById('gfr');if(x&&x.contentWindow)x.contentWindow.focus();}catch(e){}};setTimeout(f,800);document.addEventListener('visibilitychange',function(){if(!document.hidden)f();});
+}catch(e){}})();
+</script>
 <title>Тал Нутгийн Хаан</title>
 <meta name="theme-color" content="#0f2a5c">
 <meta name="mobile-web-app-capable" content="yes">

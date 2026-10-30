@@ -10349,6 +10349,22 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
   window.dayRelic=function(){ return give(pick(Math.random()<0.7?2:3)); };
 })();
 
+
+/* p32/relreset.js — 211: дурсгалын нэг удаагийн шинэчлэл. Админаас бусад бүх тоглогчийн дурсгал 0 болно (нөхөн олговоргүй).
+   Эхлээд Firebase нэвтрэлт дуустал хүлээнэ (isAdm зөв гарахын тулд). S.rlReset1 тугаар нэг л удаа ажиллана. */
+(function(){
+  setInterval(()=>{ try{
+    if(typeof S==='undefined'||!S||!S.heroes||typeof CL==='undefined'||!CL.ok||S.rlReset1) return;
+    const em=String(CL.email||'').toLowerCase();
+    if(isAdm()||em==='ankhbayarbatzorig13@gmail.com'||em==='ankhbayarbatzorig@gmail.com'){ S.rlReset1=1; return; }
+    let n=0; Object.keys(S.relics||{}).forEach(k=>{ n+=S.relics[k]||0; });
+    S.relics={}; S.heq={}; S.equip=[]; S.rlReset1=1;
+    if(n>0){ try{ mailAdd('Дурсгал шинэчлэгдлээ','Дурсгалын шинэ дүрмийн дагуу бүх дурсгал 0 болсон ('+n+' ширхэг). 4★ ба 5★ дурсгал одоо зөвхөн хайрцгаас олдоно. Тулаанд ялах, аймаг нэгдэх, өдрийн даалгавраар 1–3★ дурсгал авна.'); }catch(e){} }
+    try{ refresh(); }catch(e){}
+    try{ clPush(true); }catch(e){}
+  }catch(e){} },3000);
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

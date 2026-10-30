@@ -2562,7 +2562,7 @@ function relicsHTML(){
   own.forEach(r=>{ const w=relWorn(r.id); h+='<div class="row" style="margin-top:6px"><div>'+ico(r.ic,40)+' <b>'+r.n+'</b> ×'+S.relics[r.id]+' <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'% · өмссөн '+w+'</div></div></div>'; });
   return h+'<button class="btn" style="margin-top:8px" onclick="openM(\'rbox\')">🏺 Дурсгалын хайрцаг</button></div>';
 }
-const RBOXC=300, RW={1:40,2:30,3:20,4:8,5:2};
+const RBOXC=100, RW={1:40,2:30,3:20,4:8,5:2};
 function relPick(){ let r=Math.random()*100, st=1; for(let q=1;q<=5;q++){ if(r<RW[q]){ st=q; break; } r-=RW[q]; } const pool=RELICS.filter(x=>x.s===st); return pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; }
 function relBoxOpen(n){ const cost=n===5?Math.round(RBOXC*4.5):RBOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна.'); return; } S.res.alt-=cost; const res=[]; for(let i=0;i<n;i++){ const r=relPick(); S.relics[r.id]=(S.relics[r.id]||0)+1; res.push(r); } passAdd(5*n); refresh();
   const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Дурсгал нээгдэж байна...</div></div>'; document.body.appendChild(o);

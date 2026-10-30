@@ -10456,6 +10456,26 @@ function rzBtns(){ const R=RT, bx=$('rbt'); if(!bx||!R) return;
     return _dr.apply(this,arguments); };
 })();
 
+
+/* p32/resfit.js — Дээд талын нөөцийн мөр: тоонууд хоорондоо/дүрстэй давхцахгүй, утсанд багтдаг болгох */
+cn=function(n){ n=Math.floor(n||0); if(n>=999950000) return (n/1e9).toFixed(1)+'B'; if(n>=999950) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(n>=99950?0:1)+'K'; return n.toLocaleString('en-US'); };
+(function(){
+  const st=document.createElement('style'); st.id='cssResFit';
+  st.textContent='#res{--k:1}#res .rc{flex:0 1 auto!important;min-width:0!important;gap:calc(2px*var(--k))!important}'
+    +'#res .ri{width:calc(18px*var(--k))!important;height:calc(18px*var(--k))!important;flex:0 0 auto!important}#res .ri img{width:100%!important;height:100%!important}'
+    +'#res .ri .em,#res .ri .coin{font-size:calc(14px*var(--k))!important}'
+    +'#res .rv{min-width:0}#res .rv span{font-size:calc(10.5px*var(--k))!important;white-space:nowrap}#res .rv small{font-size:calc(7.5px*var(--k))!important;white-space:nowrap}';
+  document.head.appendChild(st);
+  let sig='', w0=0;
+  function fit(){ const bar=document.getElementById('res'); if(!bar) return; const cs=getComputedStyle(bar), avail=bar.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight); if(avail<=0) return;
+    const cells=[...bar.querySelectorAll('.rc')]; if(!cells.length) return;
+    const s=cells.map(c=>c.textContent).join('|')+'|'+Math.round(avail); if(s===sig) return; sig=s;
+    let k=1; bar.style.setProperty('--k','1');
+    for(let i=0;i<4;i++){ const tot=cells.reduce((a,c)=>a+c.getBoundingClientRect().width,0)+(cells.length-1)*2; if(tot<=avail+0.5) break; k=Math.max(0.62,k*avail/tot*0.98); bar.style.setProperty('--k',k.toFixed(3)); } }
+  const _u=updateHUD; updateHUD=function(){ const r=_u.apply(this,arguments); try{ fit(); }catch(e){} return r; };
+  window.addEventListener('resize',()=>{ sig=''; try{ fit(); }catch(e){} });
+})();
+
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

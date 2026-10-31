@@ -10025,7 +10025,7 @@ function bandDraw(i){ const cv=BCV, x=cv.getContext('2d'); x.save(); x.scale(BK,
   // ирмэгийн хүрээ
   x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(60,30,10,.95)'; x.lineWidth=8; x.strokeRect(6,6,W-12,H-12); x.lineWidth=2.5; x.strokeRect(18,18,W-36,H-36);
   x.restore(); }
-function bakeStart(){ if(BCV) return BCV; try{ BK=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)?0.6:1; }catch(e){ BK=1; } BCV=document.createElement('canvas'); BCV.width=Math.round(W*BK); BCV.height=Math.round(H*BK); BCV.getContext('2d').fillStyle='#b3c8b8'; BCV.getContext('2d').fillRect(0,0,BCV.width,BCV.height);
+function bakeStart(){ if(BCV) return BCV; try{ const m=navigator.deviceMemory||4; BK=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)?(m>=8?0.6:m>=4?0.5:0.38):1; }catch(e){ BK=1; } BCV=document.createElement('canvas'); BCV.width=Math.round(W*BK); BCV.height=Math.round(H*BK); BCV.getContext('2d').fillStyle='#b3c8b8'; BCV.getContext('2d').fillRect(0,0,BCV.width,BCV.height);
   let lb=document.createElement('div'); lb.style.cssText='position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:9;background:#3b2815ee;border:2px solid #c9972b;border-radius:10px;color:#ffe9b0;font:bold 13px sans-serif;padding:5px 12px;pointer-events:none'; document.body.appendChild(lb);
   let i=0; (function step(){ try{ bandDraw(i); }catch(e){} i++; lb.textContent='🌍 Дэлхий бэлдэж байна… '+Math.round(i*100/BN)+'%'; if(i<BN) setTimeout(step,30); else { BDONE=true; lb.remove(); } })(); return BCV; }
 function bake(){ if(BDONE) return BCV; if(!BCV){ BK=1; BCV=document.createElement('canvas'); BCV.width=W; BCV.height=H; } for(let i=0;i<BN;i++){ try{ bandDraw(i); }catch(e){} } BDONE=true; return BCV; }
@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='817f7f4e78';
+var UPDB='a73770d314';
 (function(){
   const K='updTry';
   const _go=updGo;

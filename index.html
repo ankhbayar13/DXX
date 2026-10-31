@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='129c25f9cd';
+var UPDB='dad16cb412';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11665,6 +11665,64 @@ bcard=function(k){
     }catch(e){}
   }
   sweep(); setInterval(sweep,500);
+})();
+
+
+/* p32/pathfix.js — Ажилчин, баатар барилгад гацахгүй: шулуун зам хаагдсан үед бүх барилгыг тойрсон A* зам хайж, тэр дагуу явна. */
+(function(){
+  const CELL=3, M=3.0, MAXN=9000;
+  const _prev=moveTo;
+  const exp=(R,m)=>({x0:R.x0-m,y0:R.y0-m,x1:R.x1+m,y1:R.y1+m});
+  const clear=(P,T,L,m)=>{ for(const R of L){ const E=exp(R,m); if(obHit(P,T,{x0:E.x0+0.2,y0:E.y0+0.2,x1:E.x1-0.2,y1:E.y1-0.2})>=0) return false; } return true; };
+  function search(P,T,L,m,pad){
+    const x0=Math.max(6,Math.min(P.x,T.x)-pad), y0=Math.max(44,Math.min(P.y,T.y)-pad), x1=Math.min(WW-6,Math.max(P.x,T.x)+pad), y1=Math.min(WH-6,Math.max(P.y,T.y)+pad);
+    const gw=Math.max(2,Math.ceil((x1-x0)/CELL)), gh=Math.max(2,Math.ceil((y1-y0)/CELL)); if(gw*gh>60000) return null;
+    const bl=new Uint8Array(gw*gh);
+    for(const R of L){ const E=exp(R,m); const a=Math.max(0,Math.floor((E.x0-x0)/CELL)), b=Math.min(gw-1,Math.floor((E.x1-x0)/CELL)), c=Math.max(0,Math.floor((E.y0-y0)/CELL)), d=Math.min(gh-1,Math.floor((E.y1-y0)/CELL));
+      for(let j=c;j<=d;j++) for(let i=a;i<=b;i++) bl[j*gw+i]=1; }
+    const cell=(p)=>({i:Math.max(0,Math.min(gw-1,Math.floor((p.x-x0)/CELL))),j:Math.max(0,Math.min(gh-1,Math.floor((p.y-y0)/CELL)))});
+    const free=(c)=>{ if(!bl[c.j*gw+c.i]) return c; for(let r=1;r<24;r++){ for(let dj=-r;dj<=r;dj++) for(let di=-r;di<=r;di++){ if(Math.max(Math.abs(di),Math.abs(dj))!==r) continue; const i=c.i+di, j=c.j+dj; if(i<0||j<0||i>=gw||j>=gh) continue; if(!bl[j*gw+i]) return {i,j}; } } return null; };
+    const s=free(cell(P)), g=free(cell(T)); if(!s||!g) return null;
+    const N=gw*gh, gS=new Float32Array(N).fill(1e9), par=new Int32Array(N).fill(-1), closed=new Uint8Array(N);
+    const heap=[]; const push=(f,n)=>{ heap.push([f,n]); let k=heap.length-1; while(k>0){ const p=(k-1)>>1; if(heap[p][0]<=heap[k][0]) break; [heap[p],heap[k]]=[heap[k],heap[p]]; k=p; } };
+    const pop=()=>{ const t=heap[0], l=heap.pop(); if(heap.length){ heap[0]=l; let k=0; for(;;){ let a=2*k+1,b=a+1,m2=k; if(a<heap.length&&heap[a][0]<heap[m2][0]) m2=a; if(b<heap.length&&heap[b][0]<heap[m2][0]) m2=b; if(m2===k) break; [heap[m2],heap[k]]=[heap[k],heap[m2]]; k=m2; } } return t; };
+    const h=(i,j)=>{ const dx=Math.abs(i-g.i), dy=Math.abs(j-g.j); return (dx+dy)+(1.4142-2)*Math.min(dx,dy); };
+    const sN=s.j*gw+s.i, gN=g.j*gw+g.i; gS[sN]=0; push(h(s.i,s.j),sN); let cnt=0, found=false;
+    while(heap.length&&cnt++<MAXN){ const [,n]=pop(); if(closed[n]) continue; closed[n]=1; if(n===gN){ found=true; break; }
+      const ci=n%gw, cj=(n/gw)|0;
+      for(let dj=-1;dj<=1;dj++) for(let di=-1;di<=1;di++){ if(!di&&!dj) continue; const i=ci+di, j=cj+dj; if(i<0||j<0||i>=gw||j>=gh) continue; const m3=j*gw+i; if(bl[m3]||closed[m3]) continue;
+        if(di&&dj&&(bl[cj*gw+i]||bl[j*gw+ci])) continue; const ng=gS[n]+((di&&dj)?1.4142:1); if(ng<gS[m3]){ gS[m3]=ng; par[m3]=n; push(ng+h(i,j),m3); } } }
+    if(!found) return null;
+    const pts=[]; for(let n=gN;n>=0;n=par[n]){ pts.push({x:x0+((n%gw)+0.5)*CELL,y:y0+(((n/gw)|0)+0.5)*CELL}); if(n===sN) break; }
+    pts.reverse(); pts[0]={x:P.x,y:P.y};
+    // шулуун болгох (барилга огтлохгүй газар богино зам)
+    const out=[pts[0]]; let a=0; while(a<pts.length-1){ let b=pts.length-1; while(b>a+1&&!clear(pts[a],pts[b],L,m-0.4)) b--; out.push(pts[b]); a=b; }
+    out.shift(); return out;
+  }
+  function pfMove(e,dt){
+    if(!(e.kind==='person'||(e.kind==='wild'&&e.friend))) return;
+    const now=performance.now(); if(e._pfOff&&now<e._pfOff) return;
+    const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h}, T={x:e.tx+cx,y:e.ty+h};
+    if(Math.hypot(T.x-P.x,T.y-P.y)<4){ e._pf=null; return; }
+    const L=obList(); if(!L.length){ e._pf=null; return; }
+    let f=e._pf;
+    if(f&&(Math.hypot(f.tx-T.x,f.ty-T.y)>3)) f=e._pf=null;
+    if(!f){
+      if(clear(P,T,L,1.6)) return;   // замд барилга байхгүй: хуучин логик
+      let path=search(P,T,L,M,50)||search(P,T,L,M,160)||search(P,T,L,1.8,160);
+      if(!path||!path.length){ e._pfOff=now+4000; return; }
+      f=e._pf={tx:T.x,ty:T.y,path,i:0,pp:{x:P.x,y:P.y,t:now},fails:0};
+    }
+    // гацсан эсэх
+    if(now-f.pp.t>1800){ if(Math.hypot(P.x-f.pp.x,P.y-f.pp.y)<2){ f.fails++; e._pf=null; if(f.fails>=2){ e._pfOff=now+5000; } return; } f.pp={x:P.x,y:P.y,t:now}; }
+    const wp=f.path[f.i]; if(!wp){ e._pf=null; return; }
+    const sx=e.tx, sy=e.ty; e.tx=wp.x-cx; e.ty=wp.y-h;
+    const r=_prev.call(this,e,dt);
+    e.tx=sx; e.ty=sy;
+    if(r||Math.hypot(wp.x-(e.x+cx),wp.y-(e.y+h))<1.2){ f.i++; if(f.i>=f.path.length){ e._pf=null; } }
+    return false;
+  }
+  moveTo=function(e,dt){ try{ const r=pfMove.call(this,e,dt); if(r!==undefined) return r; }catch(x){ e._pf=null; } return _prev.call(this,e,dt); };
 })();
 
 </script><script>(function(){

@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='115b1d9ded';
+var UPDB='72876cf1c3';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10906,6 +10906,15 @@ bcard=function(k){
   const d=decS(), n=decCnt(d.t)+decCnt(d.e)+decCnt(d.o)+d.s.length;
   return '<div class="bcard"><div class="in"><div class="nm">Чимэглэл</div><div class="pic" onclick="decOpen()"><div style="display:flex;gap:2px;align-items:flex-end;justify-content:center;height:100%"><img class="bi" style="max-height:70%" src="'+DEC_D.tiles[10].u+'"><img class="bi" style="max-height:80%" src="'+DEC_D.props[DEC_LIST.prop[2]||0].u+'"></div></div><div class="bs ds">Хавтан, хашаа, дэнлүү, цэцэг, суварга. Зөвхөн гоёл, хүч нэмэхгүй</div><button class="btn" onclick="decOpen()">Чимэглэх · '+n+'</button></div><img class="fr" src="'+SPRDATA.bf1[0]+'"></div>';
 };
+
+
+/* p32/herdtap.js — Малын самбар дээр дарвал баатрын хүч биш, шууд Малын цэс нээгдэнэ */
+(function(){ const pc=document.getElementById('pcard'); if(!pc) return;
+  pc.addEventListener('click',function(e){
+    try{ const t=e.target&&e.target.closest?e.target.closest('.pl'):null;
+      if(t&&t.querySelector&&t.querySelector('#pherd')){ e.stopPropagation(); e.preventDefault(); openM('mal'); }
+    }catch(x){}
+  },true); })();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

@@ -4447,9 +4447,9 @@ function pinDraw(){ const d=$('clpd'); if(!d) return; const v=(CL.pv||'').replac
   d.innerHTML=[0,1,2,3,4,5].map(i=>'<span style="width:38px;height:46px;border:2px solid '+(i===v.length?'#ffd770':'#c9972b')+';border-radius:9px;background:#2b1d12;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#ffe9b0">'+(i<v.length?(sh?v[i]:'●'):'')+'</span>').join(''); }
 function pwMode(t){ CL.pv=($('clpw')||{}).value||CL.pv||''; CL.ev=($('clem')||{}).value||CL.ev||''; CL.textpw=t; CL.msg=''; if(window.GATE&&$('gate')) gateRender(1); else fillM(); }
 function pwBlock(reg){ const kb=['1','2','3','4','5','6','7','8','9','','0','x'];
-  if(CL.textpw) return '<div class="sm" style="margin-top:8px">Нууц үг'+(reg?' (6+ тэмдэгт)':'')+'</div><div style="position:relative"><input id="clpw" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" placeholder="••••••" value="'+esc2(CL.pv||'')+'" style="'+_inp+';padding-right:44px"><span onclick="clEye()" style="position:absolute;right:6px;top:12px;font-size:20px;cursor:pointer;padding:0 6px">👁</span></div><div style="margin-top:8px;text-align:center"><a href="javascript:pwMode(0)" style="color:#ffd770;font-size:13px">← 6 оронтой тоо руу буцах</a></div>';
+  if(CL.textpw) return '<div class="sm" style="margin-top:8px">Нууц үг'+(reg?' (4+ тэмдэгт)':'')+'</div><div style="position:relative"><input id="clpw" oninput="CL.pv=this.value" type="password" autocomplete="'+(reg?'new-password':'current-password')+'" placeholder="••••••" value="'+esc2(CL.pv||'')+'" style="'+_inp+';padding-right:44px"><span onclick="clEye()" style="position:absolute;right:6px;top:12px;font-size:20px;cursor:pointer;padding:0 6px">👁</span></div><div style="margin-top:8px;text-align:center"><a href="javascript:pwMode(0)" style="color:#ffd770;font-size:13px">← 6 оронтой тоо руу буцах</a></div>';
   const v=(CL.pv||'').replace(/\D/g,'');
-  return '<div class="sm" style="margin-top:10px">'+(reg?'Нууц код (6 оронтой тоо сонго)':'Нууц код (6 оронтой тоо)')+' <span onclick="clEye()" style="font-size:18px;cursor:pointer;padding:0 6px">👁</span></div>'+
+  return '<div class="sm" style="margin-top:10px">'+(reg?'Нууц код (4–6 оронтой тоо сонго)':'Нууц код (4–6 оронтой тоо)')+' <span onclick="clEye()" style="font-size:18px;cursor:pointer;padding:0 6px">👁</span></div>'+
     '<input id="clpw" type="hidden" value="'+v+'"><div id="clpd" style="display:flex;gap:6px;justify-content:center;margin:6px 0"></div>'+
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:6px auto">'+kb.map(k=>k===''?'<div></div>':'<div onclick="pinKey(\''+k+'\')" style="height:40px;display:flex;align-items:center;justify-content:center;font-size:'+(k==='x'?'22':'24')+'px;font-weight:bold;color:#ffe9b0;background:linear-gradient(#4a3418,#2b1d12);border:2px solid #c9972b;border-radius:10px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation">'+(k==='x'?'⌫':k)+'</div>').join('')+'</div>'+
     '<div class="sm" style="text-align:center;font-size:12px;line-height:1.4">🔒 Энэ нь зөвхөн тоглоомын код. Имэйлийнхээ нууц үгийг бүү бич.</div>'+
@@ -4458,8 +4458,8 @@ function clChk(){ const e=(($('clem')||{}).value||'').trim(), p=($('clpw')||{}).
   if(!e){ clMsg('Имэйлээ бичнэ үү'); return null; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ clMsg('Имэйл буруу байна. Жишээ: bat@gmail.com'); return null; }
   if(!p){ clMsg('Нууц үгээ бичнэ үү'); return null; }
-  if(!CL.textpw&&!/^\d{6}$/.test(p)){ clMsg('Нууц код 6 оронтой тоо байх ёстой'); return null; }
-  if(CL.tab!=='in'&&p.length<6){ clMsg('Нууц үг 6-аас дээш тэмдэгттэй байх ёстой'); return null; }
+  if(!CL.textpw&&!/^\d{4,6}$/.test(p)){ clMsg('Нууц код 4–6 оронтой тоо байх ёстой'); return null; }
+  if(CL.tab!=='in'&&p.length<4){ clMsg('Нууц үг 4-өөс дээш тэмдэгттэй байх ёстой'); return null; }
   return [e,p]; }
 async function clGo(){ if(CL.go) return; const v=clChk(); if(!v) return; CL.go=1; const b=$('clgo'); if(b){ b.disabled=true; b.style.opacity=.6; }
   clMsg('Түр хүлээнэ үү…',1);
@@ -4471,8 +4471,8 @@ function clAuthCard(){ const tab=CL.tab==='in'?'in':'reg', reg=tab==='reg';
   return '<div class="card" style="padding:0;overflow:hidden"><div style="display:flex;gap:2px;background:#1a0f06">'+tb('reg','✍ Бүртгүүлэх')+tb('in','🔑 Нэвтрэх')+'</div><div style="padding:12px">'+
     (reg?'<div style="background:#3a2a10;border:1px solid #c9972b;border-radius:9px;padding:6px 8px;margin-bottom:6px;font-size:13px;line-height:1.4">🎁 <b style="color:#ffd770">+100 Алт</b> бэлэг (нэг удаа)<br>☁ Өөр утсан дээр тоглоомоо үргэлжлүүлнэ<br>🏆 Тэргүүлэгчдийн жагсаалтад орно<br>🆔 Өөрийн ID дугаартай болно</div>'
       :'<div class="sm" style="margin-bottom:8px">Өмнө бүртгүүлсэн бол имэйл, нууц үгээрээ нэвтэр. Хадгалсан тоглоом автоматаар ачаалагдана.</div>')+
-    (reg?'<div class="sm">Нэр (бусад тоглогч харна)</div><input id="clnm" maxlength="14" autocomplete="off" value="'+esc2(CL.nv!=null?CL.nv:(S.prof.name||''))+'" style="'+_inp+';margin-bottom:8px">':'')+
-    '<div class="sm">Имэйл</div><input id="clem" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="bat@gmail.com" value="'+esc2(CL.ev||'')+'" style="'+_inp+'">'+
+    (reg?'<div class="sm">Нэр (бусад тоглогч харна)</div><input id="clnm" oninput="CL.nv=this.value" maxlength="14" autocomplete="off" value="'+esc2(CL.nv!=null?CL.nv:(S.prof.name||''))+'" style="'+_inp+';margin-bottom:8px">':'')+
+    '<div class="sm">Имэйл</div><input id="clem" oninput="CL.ev=this.value" type="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="bat@gmail.com" value="'+esc2(CL.ev||'')+'" style="'+_inp+'">'+
     pwBlock(reg)+
     '<div id="clmsg" style="margin-top:8px;font-size:14px;min-height:0;display:'+(CL.msg?'block':'none')+';color:'+(CL.msgOk?'#9be37a':'#ff9a8a')+'">'+esc2(CL.msg||'')+'</div>'+
     '<button class="btn" id="clgo" style="width:100%;margin-top:10px;padding:11px;font-size:17px" onclick="clGo()">'+(reg?'Бүртгүүлэх':'Нэвтрэх')+'</button>'+
@@ -4512,6 +4512,11 @@ function clErr2(c){ c=String(c||'');
 const RNW=['Баатар','Мөнх','Тэнгэр','Бөх','Хүчит','Мэргэн','Арслан','Бүргэд','Шонхор','Хулан','Хөдөөч','Адуучин'];
 function randName(){ return RNW[Math.floor(Math.random()*RNW.length)]+(1000+Math.floor(Math.random()*9000)); }
 setTimeout(()=>{ try{ if(S.prof&&(!S.prof.name||S.prof.name==='Хаан')&&!S.prof.nameKey){ S.prof.name=randName(); S.prof.auto=1; try{ updateHUD(); }catch(e){} save(); } }catch(e){} },1500);
+
+// 4–5 оронтой код/нууц үг: Firebase 6+ тэмдэгт шаарддаг тул дотооддоо нөхөж илгээнэ (6+ нь хэвээр)
+function pwEnc(p){ p=String(p||''); return (p.length>=4&&p.length<6)?p+'#dxx':p; }
+(function(){ ['clReg','clLogin'].forEach(n=>{ const f=window[n]; if(typeof f!=='function') return;
+  window[n]=function(){ const el=$('clpw'), o=el?el.value:''; try{ if(el) el.value=pwEnc(o); const r=f.apply(this,arguments); return r; }finally{ if(el) el.value=o; } }; }); })();
 
 
 // ---- Заавал бүртгэл/нэвтрэх хаалга: бүртгэлгүй, интернетгүй бол тоглохгүй ----
@@ -10527,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='932fb95366';
+var UPDB='115b1d9ded';
 (function(){
   const K='updTry';
   const _go=updGo;

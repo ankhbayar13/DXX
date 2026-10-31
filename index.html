@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a73770d314';
+var UPDB='b1f0fc7e97';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11448,6 +11448,98 @@ bcard=function(k){
   window.seaOpen=open;
   function bind(){ const el=document.getElementById('season'); if(!el||el._sl) return; el._sl=1; el.addEventListener('click',ev=>{ ev.stopPropagation(); open(); },true); }
   bind(); setInterval(bind,2000);
+})();
+
+
+/* p32/playmode.js — Google Play-ийн хувилбар (TWA) + бүртгэл устгах.
+   1) Play-ээс нээгдсэн үед (src=play эсвэл referrer=android-app://<манай багц>) мөнгөөр худалдан авах бүх хэсгийг нууж, QPay-г идэвхгүй болгоно.
+      Вэбсайт (talnutgiinhaan.com) дээр өмнөхөөрөө ажиллана.
+   2) ☁ Cloud цонхонд «Бүртгэл устгах» (Google Play дансны өгөгдөл устгах шаардлага). */
+(function(){
+  const PKG='com.talnutgiinhaan.game';
+  let play=false;
+  try{
+    const q=location.search, ref=document.referrer||'';
+    if(/[?&]src=play\b/.test(q)||ref.indexOf('android-app://'+PKG)===0) sessionStorage.setItem('dxx_play','1');
+    play=sessionStorage.getItem('dxx_play')==='1';
+  }catch(e){ play=/[?&]src=play\b/.test(location.search); }
+  window.PLAYM=play;
+  window.PLAY_PKG=PKG;
+
+  // ---------- 1) Play-ийн хувилбарт мөнгөн худалдан авалтыг нуух ----------
+  if(play){
+    try{ PAY.ready=false; }catch(e){}
+    try{ buyReal=function(){}; }catch(e){}
+    try{ openPayInfo=function(){}; }catch(e){}
+    try{ payStart=async function(){}; }catch(e){}
+    const st=document.createElement('style'); st.textContent='.pgrid{display:none!important}'; document.head.appendChild(st);
+    const hide=el=>{ if(el&&el.style&&el.style.display!=='none'){ el.style.display='none'; el.setAttribute('data-pm','1'); } };
+    function sweep(){
+      try{
+        document.querySelectorAll('[onclick*="buyReal("],[onclick*="payStart("],[onclick*="openPayInfo("]').forEach(el=>{
+          const tg=el.closest('.card,.pk,.e7h')||el; hide(tg);
+          // урамшууллын пассын зураг дээр үнэ шууд зурагдсан тул тухайн хэсгийг үнэгүй шошгоор таглана
+          if(tg.classList.contains('e7h')&&tg.parentElement&&!tg.nextElementSibling||tg.classList.contains('e7h')&&!(tg.nextElementSibling&&tg.nextElementSibling.classList.contains('e7pm'))){
+            const c=document.createElement('div'); c.className='e7pm'; c.style.cssText=tg.getAttribute('style')+';position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;border:2px solid #d4a24a;border-radius:12px;background:linear-gradient(#8f1c1f,#5a0c10);color:#ffe9b0;font:bold 15px sans-serif;box-sizing:border-box;box-shadow:0 0 0 3px #2a0b0d';
+            c.textContent='✦ Хүндэт шат'; tg.parentElement.insertBefore(c,tg.nextSibling);
+          }
+        });
+        const roots=[document.getElementById('modal'),...document.querySelectorAll('#evp,.evp,#e7,.e7')].filter(Boolean);
+        roots.forEach(r=>{
+          r.querySelectorAll('h3').forEach(h=>{ if(/худалдан авах/i.test(h.textContent||'')) hide(h); });
+          r.querySelectorAll('.card').forEach(c=>{ const h=c.querySelector('h3'); if(h&&/Хааны зэрэг/.test(h.textContent||'')&&/Алт авах/.test(c.textContent||'')) hide(c); }); /* худалдан авалтаар өсдөг зэрэг */
+          r.querySelectorAll('button,.row,.sm,.card,.pk').forEach(el=>{ const t=el.textContent||''; if(t.length<320&&(t.indexOf('₮')>=0||/Монгол зоосоор|QPay/.test(t))) hide(el); });
+        });
+      }catch(e){}
+    }
+    sweep(); setInterval(sweep,400);
+  }
+
+  // ---------- 2) Бүртгэл устгах ----------
+  function ask(msg,yes,cb){ try{ dxAsk(msg,yes,cb); }catch(e){ if(confirm(msg)) cb(); } }
+  function pwBox(cb){
+    const o=document.createElement('div'); o.id='pwdel'; o.style.cssText='position:fixed;inset:0;z-index:99991;background:#000b;display:flex;align-items:center;justify-content:center';
+    o.innerHTML='<div style="width:min(320px,92vw);background:#3b2815;border:2px solid #c9972b;border-radius:14px;padding:12px;color:#ffe9b0"><div style="font-weight:bold;margin-bottom:8px">Баталгаажуулахын тулд нууц үгээ оруулна уу</div><input id="pwdelv" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:10px;font-size:16px;border-radius:8px;border:1px solid #7a5a22;background:#1d1308;color:#ffe9b0"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="pwdeln" style="flex:1">Болих</button><button class="btn red" id="pwdely" style="flex:1">Устгах</button></div></div>';
+    document.body.appendChild(o);
+    o.querySelector('#pwdeln').onclick=()=>o.remove();
+    o.querySelector('#pwdely').onclick=()=>{ const v=o.querySelector('#pwdelv').value; o.remove(); cb(v); };
+  }
+  async function wipe(){
+    const {Au,F,auth,db}=FBM, u=auth.currentUser, uid=u.uid;
+    const del=async(path)=>{ try{ await F.deleteDoc(F.doc(db,...path)); }catch(e){} };
+    await del(['saves',uid]); await del(['lb',uid]); await del(['raid',uid]); await del(['rshelp',uid]);
+    try{ const nk=S.prof&&S.prof.nameKey; if(nk&&nk!=='local') await del(['names',nk]); }catch(e){}
+    try{ for(const f of ['from','to']){ const s=await F.getDocs(F.query(F.collection(db,'freq'),F.where(f,'==',uid))); for(const d of s.docs){ try{ await F.deleteDoc(d.ref); }catch(e){} } } }catch(e){}
+    try{ const s=await F.getDocs(F.query(F.collection(db,'chat'),F.where('uid','==',uid),F.limit(200))); for(const d of s.docs){ try{ await F.deleteDoc(d.ref); }catch(e){} } }catch(e){}
+    await Au.deleteUser(u);
+    try{ localStorage.clear(); }catch(e){}
+    try{ sessionStorage.clear(); }catch(e){}
+    try{ const ks=await caches.keys(); } catch(e){}
+  }
+  async function run(pw){
+    try{
+      const {Au,auth}=FBM; const u=auth.currentUser; if(!u){ say('Нэвтэрсэн бүртгэл олдсонгүй'); return; }
+      say('Бүртгэлийг устгаж байна…');
+      if(!u.isAnonymous&&u.email){ if(!pw){ pwBox(v=>run(v)); return; } await Au.reauthenticateWithCredential(u,Au.EmailAuthProvider.credential(u.email,pw)); }
+      window._clR=1;
+      await wipe();
+      say('Бүртгэл болон өгөгдөл устгагдлаа. Шинэ тоглоом эхэлнэ…'); setTimeout(()=>location.reload(),900);
+    }catch(e){
+      window._clR=0;
+      const c=(e&&e.code)||'';
+      say(/wrong-password|invalid-credential|invalid-login/.test(c)?'Нууц үг буруу байна':/network/.test(c)?'Интернет холбогдсонгүй, дахин оролдоно уу':'Устгаж чадсангүй. Дахин оролдоно уу');
+    }
+  }
+  window.acctDelete=function(){
+    if(typeof CL==='undefined'||!CL.ok){ say('Интернет холбогдоогүй байна'); return; }
+    ask('Бүртгэл болон cloud дахь бүх өгөгдлийг (тоглоом, тэргүүлэгчдийн жагсаалт, нэр, найзын хүсэлт) БҮРМӨСӨН устгана. Буцаах боломжгүй. Үргэлжлүүлэх үү?','Устгах',()=>run(null));
+  };
+  const _ch=cloudHTML;
+  cloudHTML=function(){
+    let h=_ch.apply(this,arguments);
+    try{ if(CL.ok) h+='<div class="card"><h3>Бүртгэл устгах</h3><div class="sm">Бүртгэл болон cloud дахь бүх өгөгдлөө бүрмөсөн устгана. Буцаах боломжгүй.</div><button class="btn red" style="margin-top:8px;width:100%" onclick="acctDelete()">🗑 Бүртгэлээ устгах</button></div>'; }catch(e){}
+    return h;
+  };
 })();
 
 </script><script>(function(){

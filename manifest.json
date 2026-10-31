@@ -26,5 +26,10 @@
    "type": "image/png",
    "purpose": "maskable"
   }
- ]
+ ],
+ "description": "Монгол нүүдэлчний тосгоноо өсгөж, баатруудаа цуглуулж, Их Монгол Улсыг байгуулах стратегийн тоглоом.",
+ "categories": [
+  "games"
+ ],
+ "prefer_related_applications": false
 }

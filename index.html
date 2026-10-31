@@ -2210,7 +2210,7 @@ function modalContent(k){
     return h;
   }
   if(k==='fam'){ const al=ents.filter(x=>x.kind==='person').map(x=>x.idx), dd=S.dead||[];
-    return '<h2>Гэр бүл '+al.length+'/'+popCap()+'</h2><div class="sm" style="margin-bottom:8px">Хүн бүгд гэрт амьдарна. Нэг гэр: 1-2 түвшин 2, 3-р 3, 4-р 4, 5-р 5 хүн. Гол гэр 3 түвшин ахих бүрт +1 хүн. Олон гэр барьж болно.</div>'+al.map(i=>'<div class="card"><b>'+NPCS[i].n+'</b> · '+NPCS[i].role+'</div>').join('')+dd.map(i=>'<div class="card" style="opacity:.6">💀 '+NPCS[i].n+' · нас барсан (удахгүй шинэ хүн ирнэ)</div>').join('')+'<div class="card sm">Чоно, зуд хүн малыг хорогдуулдаг. Хашаа, өндөр түвшний гэр хамгаална.</div>'; }
+    const gF=ents.find(x=>x.kind==='wild'&&x.friend&&x.type==='guard'); return '<h2>Гэр бүл '+(al.length+(gF?1:0))+'/'+(popCap()+(gF?1:0))+'</h2><div class="sm" style="margin-bottom:8px">Хүн бүгд гэрт амьдарна. Нэг гэр: 1-2 түвшин 2, 3-р 3, 4-р 4, 5-р 5 хүн. Гол гэр 3 түвшин ахих бүрт +1 хүн. Олон гэр барьж болно.</div>'+al.map(i=>'<div class="card"><b>'+NPCS[i].n+'</b> · '+NPCS[i].role+'</div>').join('')+(gF?'<div class="card"><b>'+esc2(gF.name||'Харуул')+'</b> · Харуул-анчин (гэрт амьдарна)</div>':'')+dd.map(i=>'<div class="card" style="opacity:.6">💀 '+NPCS[i].n+' · нас барсан (удахгүй шинэ хүн ирнэ)</div>').join('')+'<div class="card sm">Чоно, зуд хүн малыг хорогдуулдаг. Хашаа, өндөр түвшний гэр хамгаална.</div>'; }
   if(k==='npc'){
     const n=NPCS[npcIdx];
     return '<h2>'+n.n+'</h2><div class="sm" style="margin-bottom:8px">'+n.role+'</div><div class="card">'+npcText(npcIdx)+'</div>'+
@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9b84de001f';
+var UPDB='606a241cf6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11321,7 +11321,7 @@ bcard=function(k){
   let tm=0;
   const _up=update;
   update=function(dt){
-    try{ tm+=dt; if(row&&tm>1){ tm=0; const n=ents.filter(e=>e.kind==='person').length, g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, s='<b id="pwk">'+n+'/'+Math.min(popCap(),NPCS.length)+'</b>';
+    try{ tm+=dt; if(row&&tm>1){ tm=0; const gK=ents.some(e=>e.kind==='wild'&&e.friend&&e.type==='guard')?1:0, n=ents.filter(e=>e.kind==='person').length+gK, g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, s='<b id="pwk">'+n+'/'+(Math.min(popCap(),NPCS.length)+gK)+'</b>';
       if(s!==last){ last=s; row.innerHTML='👥 '+s; } } }catch(x){}
     return _up.apply(this,arguments);
   };

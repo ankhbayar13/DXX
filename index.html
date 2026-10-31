@@ -10523,7 +10523,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a8f38c2d1a';
+var UPDB='336ce56f27';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10555,6 +10555,7 @@ SPRDATA['shop_guide']=['data:image/webp;base64,UklGRmDoAABXRUJQVlA4WAoAAAAQAAAAf
 
 /* p32/regrow.js — Тайрсан мод дахин ургана (12 мин). Хуучин тайрсан модод санамсаргүй хугацаа өгнө. */
 const RG_MS=12*60000, RG_GROW=5000;
+function rgDec(k){ try{ const d=S.dec; if(!d||d.v!==2||typeof decCell!=='function') return false; const p=k.split('_'), c=decCell(+p[0]+SZ.tree/2,+p[1]+sprH('tree')), q=c.i+'_'+c.j; return d.t[q]!=null||d.o[q]!=null; }catch(e){ return false; } }
 function treeRegrow(){
   try{
     if(typeof S==='undefined'||!S||!L||!L.trees||!L.allTrees||!S.chopped) return;
@@ -10568,7 +10569,7 @@ function treeRegrow(){
     const left=[];
     const nt=(S.dec&&S.dec.nt)||{};
     for(const k of S.chopped){
-      if(nt[k]||now-S.chopAt[k]<RG_MS){ left.push(k); continue; }
+      if(nt[k]||now-S.chopAt[k]<RG_MS||rgDec(k)){ left.push(k); continue; }
       const tr=L.allTrees.find(t=>t.x+'_'+t.y===k);
       if(!tr||have.has(k)){ delete S.chopAt[k]; continue; }
       const rc={x:tr.x,y:tr.y,w:SZ.tree,h:th};

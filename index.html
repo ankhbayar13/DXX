@@ -374,9 +374,11 @@ const ITEMS={meat:{n:'Мах',e:'🥩',p:2},milk:{n:'Сүү',e:'🥛',p:1},wool:
  t_cav:{n:'Морьт цэрэг',ic:'ic_tcav',p:0},t_arc:{n:'Харваач',ic:'ic_tarc',p:0},t_spr:{n:'Явган цэрэг',ic:'ic_tspr',p:0}};
 const ITEMBLD={airag:'airag',aaruul:'aaruul',tos:'tos',esgii:'esgii',buuz:'buuz'};
 const SEAS=[{k:'spring',n:'Хавар',e:'🌸'},{k:'summer',n:'Зун',e:'☀️'},{k:'autumn',n:'Намар',e:'🍂'},{k:'winter',n:'Өвөл',e:'❄️'}];
-const SLEN=8*60*1000; let SOV=null;
-const seasonIdx=()=>SOV!=null?SOV:Math.floor(Date.now()/SLEN)%4;
+const SLEN=30*60*1000; let SOV=null;
+const realIdx=()=>Math.floor(Date.now()/SLEN)%4;
+const seasonIdx=()=>{ if(SOV!=null) return SOV; try{ const l=S.seaLock; if(l!=null&&l>=0&&l<4) return l|0; }catch(e){} return realIdx(); };
 const seasonK=()=>SEAS[seasonIdx()].k;
+const gSeasonK=()=>SEAS[SOV!=null?SOV:realIdx()].k;
 const BKEYS = ['ger','ger2','ger3','ger4','ger5','hashaa','modcex','mahcex','horgo','market','hureo','tarialan','airag','aaruul','tos','esgii','buuz','hushuu','ovoo','naadamring','suvarga','stable','range','yard','well','smith','school','healer','tower','temple'];
 const GROW = 45;
 
@@ -793,7 +795,7 @@ function load(){
       S = Object.assign(d, o);
       S.res = Object.assign(d.res, o.res); S.animals = Object.assign(fresh().animals, o.animals);
       S.bld = Object.assign(fresh().bld, o.bld);
-      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.gxp=o.gxp||{}; S.hm=o.hm||null; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
+      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.gxp=o.gxp||{}; S.hm=o.hm||null; S.seaLock=(o.seaLock==null?null:+o.seaLock); S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
       heroMig(); ecoMig();
       return;
     }
@@ -826,7 +828,7 @@ function rate(){
   const r = {meat:0, milk:0, wool:0, gold:0};
   for(const k in ANIMALS){ const a=ANIMALS[k], c=S.animals[k]; for(const x in r) r[x]+=a[x]*c; }
   for(const x in r) r[x]*=prodMul();
-  const sk=seasonK();
+  const sk=gSeasonK();
   if(sk==='winter'){ const m=S.bld.hashaa?0.75:0.5; r.meat*=m; r.milk*=m; r.wool*=m; }
   else if(sk==='summer') r.milk*=1.3;
   else if(sk==='autumn'){ r.meat*=1.25; r.wool*=1.1; }
@@ -908,7 +910,7 @@ function tradeHTML(){
 }
 function tradeSell(k){ if(!car) return; const n=Math.floor(S.res[k]||0), v=Math.floor(n*tradePrice(k)); if(v<1) return; S.res[k]=0; S.res.gold+=v; let m='+'+v+' зоос';  say(m); refresh(); }
 function seasonTick(){
-  const si=seasonIdx();
+  const si=realIdx();
   if(S.lastSeason===null||S.lastSeason===undefined){ S.lastSeason=si; return; }
   if(S.lastSeason===si) return;
   S.lastSeason=si;
@@ -923,7 +925,7 @@ function tick(secs){
   for(const x in r){
     S.pend[x] = Math.min(150, S.pend[x] + r[x]*secs/60);
   }
-  if(S.farm.stage===1){ const sk=seasonK(); if(sk!=='winter'){ S.farm.t += secs*(sk==='spring'?1.2:1)*(1+rsb('eco_farm')); if(S.farm.t>=GROW){ S.farm.stage=2; } } }
+  if(S.farm.stage===1){ const sk=gSeasonK(); if(sk!=='winter'){ S.farm.t += secs*(sk==='spring'?1.2:1)*(1+rsb('eco_farm')); if(S.farm.t>=GROW){ S.farm.stage=2; } } }
   if(S.upg) for(const k in S.upg) S.upg[k].p+=secs;
   if(S.rs&&S.rs.cur) S.rs.cur.left-=secs;
   for(const k in S.sites) S.sites[k].p+=secs*0.5;
@@ -1568,7 +1570,7 @@ function workStep(e,dt){
     else if(fm.stage===2){
       t.prog=t.t/2.5;
       if(t.t>=2.5){
-        const gain=Math.round(10*farmTot()*(seasonK()==='autumn'?1.5:1)); fm.stage=0; fm.t=0;
+        const gain=Math.round(10*farmTot()*(gSeasonK()==='autumn'?1.5:1)); fm.stage=0; fm.t=0;
         if(depotOk('horgo')){ haulTo(e,'horgo','grain',gain); } else { S.res.grain=Math.min(cap(),S.res.grain+gain); const r=brect('tarialan'); addFloat(r.x+14,r.y,'+'+gain+' тариа','#f6dc70'); endTask(e); }
       }
     } else { say('Тариа ургаж байна...'); endTask(e); }
@@ -1616,7 +1618,7 @@ function raidFlee(msg,col){
   const w=raid.w; w.raid=false; w.biting=false; w.hp=null; w.speed=14; w.tx=w.hx; w.ty=w.hy; w.wait=0;
   (raid.ex||[]).forEach(x=>{ x.raid=false; x.speed=14; x.tx=x.hx; x.ty=x.hy; x.wait=0; });
   ents.forEach(e=>{ if(e.def){ e.def=false; e.speed=5; e.tx=e.hx; e.ty=e.hy; e.wait=1; } if(e.kind==='animal') e.hp=null; });
-  say(msg); addFloat(w.x,w.y-4,col==='#8fe39a'?(w.dead?'Алагдлаа!':'Зугтлаа!'):'Ам!',col||'#ffd770'); raid=null; raidT=0; raidNext=(50+Math.random()*50)*(seasonK()==='winter'?0.6:1)*(1+0.15*(S.bld.suvarga||0))*(1+0.12*(S.bld.tower||0));
+  say(msg); addFloat(w.x,w.y-4,col==='#8fe39a'?(w.dead?'Алагдлаа!':'Зугтлаа!'):'Ам!',col||'#ffd770'); raid=null; raidT=0; raidNext=(50+Math.random()*50)*(gSeasonK()==='winter'?0.6:1)*(1+0.15*(S.bld.suvarga||0))*(1+0.12*(S.bld.tower||0));
 }
 function raidStep(dt){
   const r=raid, w=r.w; r.age+=dt; r.bl=(r.bl||0)-dt;
@@ -2033,7 +2035,7 @@ function updateHUD(){
   const can=S.daily!==nowD().toDateString();
   $('evb').style.display=can?'block':'none';
   const orr=ordReady(); $('orb').textContent=orr; $('orb').style.display=orr?'block':'none';
-  const sI=seasonIdx(), rem=Math.ceil((SLEN-Date.now()%SLEN)/1000); $('season').innerHTML=(SPRDATA['se_bd_'+SEAS[sI].k]?'<img src="'+SPRDATA['se_bd_'+SEAS[sI].k][0]+'" style="height:18px;vertical-align:middle;margin-right:4px">':SEAS[sI].e+' ')+SEAS[sI].n+' · '+Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0');
+  const sI=seasonIdx(), rem=Math.ceil((SLEN-Date.now()%SLEN)/1000); $('season').innerHTML=(SPRDATA['se_bd_'+SEAS[sI].k]?'<img src="'+SPRDATA['se_bd_'+SEAS[sI].k][0]+'" style="height:18px;vertical-align:middle;margin-right:4px">':SEAS[sI].e+' ')+SEAS[sI].n+(S.seaLock!=null?' 🔒':' · '+Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0'));
   $('trb').textContent=S.won>0?S.won:'';
   $('trb').style.display=S.won>0?'block':'none';
   { const c=chCur(); let th, cmpH=false;
@@ -8537,7 +8539,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
 
 /* p32/npclife2.js — 196: тосгоны хүмүүсийн өдрийн хуваарь (өглөө ажил, үдэд хоол, орой гэр, шөнө унтлага), ядаргаа, уулзаж ярилцах, аюул ирэхэд эмэгтэйчүүд, хүүхдүүд гэртээ нуугдах */
 (function(){
-  const DAY=160000;                       // 1 өдөр = 2 мин 40 сек, нэг улирал (8 мин) = яг 3 өдөр
+  const DAY=150000;                       // 1 өдөр = 2 мин 30 сек, нэг улирал (30 мин) = яг 12 өдөр
   const CIV=new Set([1,3,6,7,8,9]);       // Чотан, Сочигэл, Хоахчин эмээ, Чимбай, Күчү, Тэмүлүн
   const GERS=['ger','ger2','ger3','ger4','ger5'];
   const dayP=()=>(Date.now()%DAY)/DAY;
@@ -10548,7 +10550,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5c18efb4d6';
+var UPDB='8caddb7712';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11398,6 +11400,46 @@ bcard=function(k){
     if(!window.FPS_FULL&&busy()){ const n=performance.now(); if(n-ld<125) return; ld=n; }
     return _dr.apply(this,arguments);
   };
+})();
+
+
+/* p32/sealock.js — Улирлын шошго дээр дарвал «Улирал түгжих» цэс. Түгжвэл зөвхөн харагдах байдал (зураг, өнгө, цас, өдрийн урт) тогтвортой;
+   мал, тариа, дээрэмийн нөлөө жинхэнэ улирлаар (gSeasonK) явна. */
+(function(){
+  const NAMES=['Хавар','Зун','Намар','Өвөл'], EM=['🌸','☀️','🍂','❄️'];
+  const css=document.createElement('style');
+  css.textContent='#season{pointer-events:auto!important;cursor:pointer}'+
+   '#sealk{position:fixed;inset:0;z-index:99990;background:#000a;display:flex;align-items:center;justify-content:center}'+
+   '#sealk .bx{width:min(320px,92vw);background:#3b2815;border:2px solid #c9972b;border-radius:14px;padding:12px;color:#ffe9b0;box-shadow:0 4px 0 #1a0f06;font-family:inherit}'+
+   '#sealk h3{margin:0 0 6px;font-size:16px;text-align:center}'+
+   '#sealk p{margin:6px 0 10px;font-size:12px;line-height:1.35;color:#e8d3a0}'+
+   '#sealk button{display:block;width:100%;margin:5px 0;padding:10px 8px;font-size:15px;font-weight:bold;border-radius:10px;border:2px solid #7a5a22;background:#5a3f1c;color:#ffe9b0}'+
+   '#sealk button.on{border-color:#ffd770;background:#8a5f1c;box-shadow:0 0 8px #ffd77088}'+
+   '#sealk button.cl{background:#2a1c0d;font-size:13px;font-weight:normal}';
+  document.head.appendChild(css);
+  function close(){ const d=document.getElementById('sealk'); if(d) d.remove(); }
+  function refreshAll(){ try{ RC=null; }catch(e){} try{ if(typeof gCache==='object') for(const k in gCache) delete gCache[k]; }catch(e){} try{ refresh(); }catch(e){} }
+  window.seaPick=function(v){
+    S.seaLock=(v==null?null:v);
+    try{ save(); }catch(e){}
+    refreshAll(); close();
+    try{ say(v==null?'Улирал өөрөө солигдоно.':'Улирал түгжигдлээ: '+NAMES[v]+'.'); }catch(e){}
+  };
+  function open(){
+    close();
+    const cur=(S.seaLock==null)?-1:S.seaLock|0, real=(typeof realIdx==='function')?realIdx():0;
+    const d=document.createElement('div'); d.id='sealk';
+    d.innerHTML='<div class="bx"><h3>🍃 Улирал</h3>'+
+      '<p>Түгжвэл зөвхөн зураг, өнгө, цас хэвээр үлдэнэ. Мал, тариа, дээрэмийн нөлөө жинхэнэ улирлаар явна (одоо: '+EM[real]+' '+NAMES[real]+').</p>'+
+      '<button class="'+(cur<0?'on':'')+'" onclick="seaPick(null)">🔄 Автомат (30 мин тутамд)</button>'+
+      [0,1,2,3].map(i=>'<button class="'+(cur===i?'on':'')+'" onclick="seaPick('+i+')">'+EM[i]+' '+NAMES[i]+(cur===i?' 🔒':'')+'</button>').join('')+
+      '<button class="cl" onclick="document.getElementById(\'sealk\').remove()">Хаах</button></div>';
+    d.addEventListener('click',ev=>{ if(ev.target===d) close(); });
+    document.body.appendChild(d);
+  }
+  window.seaOpen=open;
+  function bind(){ const el=document.getElementById('season'); if(!el||el._sl) return; el._sl=1; el.addEventListener('click',ev=>{ ev.stopPropagation(); open(); },true); }
+  bind(); setInterval(bind,2000);
 })();
 
 </script><script>(function(){

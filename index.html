@@ -793,7 +793,7 @@ function load(){
       S = Object.assign(d, o);
       S.res = Object.assign(d.res, o.res); S.animals = Object.assign(fresh().animals, o.animals);
       S.bld = Object.assign(fresh().bld, o.bld);
-      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
+      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.gxp=o.gxp||{}; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
       heroMig(); ecoMig();
       return;
     }
@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='83dc43d651';
+var UPDB='88cf9316c7';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10936,6 +10936,7 @@ bcard=function(k){
     ents.forEach(a=>{ if(a.kind!=='wild'||a.friend||!HUNT[a.type]||busy.has(a)||!zoneOpenAt(a.x,a.y)) return; const d=Math.hypot(a.x-p.x,a.y-p.y); if(d<340) c.push({a,d}); });
     c.sort((a,b)=>a.d-b.d); if(!c.length) return null; return c[Math.floor(Math.random()*Math.min(3,c.length))].a;
   }
+  window.wcPick={tree:pickTree,prey:pickPrey,post:post};
   /* модоо өөрийн цехдээ зөөнө (+20%/түвшин) */
   const _ht=haulTo;
   haulTo=function(e,k,res,amt){
@@ -10987,7 +10988,7 @@ bcard=function(k){
     let h=_bh.apply(this,arguments);
     try{ if(isWC(k)&&dOk0(k)){
       const e=wcOf(k), w=e&&e._wc, tot=w?(w.tw+w.th):0, pc=tot>20?Math.round(100*w.tw/tot):60;
-      const card='<div class="card"><div class="row" style="gap:8px;align-items:center"><span style="font-size:22px">🪓</span><div><b>Модчин: '+(e?e.name:'...')+'</b><br><span class="sm" style="color:#e8d9a8">'+stText(e)+'</span></div></div>'
+      const card='<div class="card"><div class="row" style="gap:8px;align-items:center"><span style="font-size:22px">🪓</span><div><b>Модчин: '+(e?e.name:'...')+(window.gjLv&&e?' · Лв '+gjLv(e):'')+'</b><br><span class="sm" style="color:#e8d9a8">'+stText(e)+'</span></div></div>'
         +'<div class="sm" style="margin-top:6px">Модчин цагийнхаа ~60%-д мод тайраад энэ цехэд зөөнө, ~40%-д ойр хавьд ан хийнэ. Мод, мах нөөцөд автоматаар орно. Цех түвшинтэй байх тусам мод +20%. Тайрсан мод 12 минутын дараа дахин ургана.</div></div>';
       h=h.replace('</h2>','</h2>'+card);
       h=h.replace('Ажилчид мод тайраад энд зөөнө.','Модчин мод тайраад энд зөөнө.');
@@ -11080,6 +11081,76 @@ bcard=function(k){
   }
   const _nw=window.nightWorld;
   window.nightWorld=function(t){ if(_nw) _nw.apply(this,arguments); glow(t); };
+})();
+
+
+/* p32/gjob.js — Харуулын туршлага/түвшин, ховор ан, мах цех, тариалангийн харуулын ажил. */
+(function(){
+  const base=k=>String(k).replace(/\d$/,'');
+  const gxp=()=>(S.gxp=S.gxp||{});
+  const lvOf=x=>Math.min(10,1+Math.floor(Math.sqrt((x||0)/4)));
+  const need=l=>l>=10?null:4*l*l;
+  window.gjLv=e=>lvOf(gxp()[e.gb]||0);
+  const RARE=[['Цагаан буга',40],['Хулан',32],['Хавирган хонь',26],['Элбэнх',22]];
+  function addXp(e,n){
+    const k=e.gb, was=lvOf(gxp()[k]||0); gxp()[k]=(gxp()[k]||0)+n; const now=lvOf(gxp()[k]);
+    if(now>was){ e.say={t:'Түвшин ахилаа! Лв '+now,ttl:3,delay:0}; try{ addFloat(e.x,e.y-8,'⬆ Лв '+now,'#ffd770'); sfx&&sfx('ok'); }catch(x){} }
+  }
+  function onDone(e,t){
+    const lv=gjLv(e); let xp=0, extra=0;
+    if(t.type==='haul'&&t.t>=0.7){ xp=1; if(t.res==='wood'){ extra=Math.round((t.amt||0)*0.05*(lv-1)); if(extra>0){ S.res.wood=(S.res.wood||0)+extra; } } }
+    else if(t.type==='hunt'&&t.t>=1.6&&t.tg&&!ents.includes(t.tg)){
+      xp=2; const g=Math.round((HUNT[t.tg.type]||0)*(1+rsb('mil_hunt')));
+      const b=0.05*(lv-1)+(base(e.gb)==='mahcex'?0.15*((S.bld[e.gb]||1)-1):0); extra=Math.round(g*b);
+      if(extra>0) S.res.meat=Math.min(cap(),(S.res.meat||0)+extra);
+      if(Math.random()<0.03+0.01*lv){ const r=RARE[Math.floor(Math.random()*RARE.length)], m=r[1]+Math.round(lv*2); S.res.meat=Math.min(cap(),(S.res.meat||0)+m); xp+=3;
+        try{ addFloat(e.x,e.y-14,'🦌 Ховор ан: '+r[0]+'! +'+m+' мах','#ffd770'); say('Ховор ан олзлоо: '+r[0]+'! +'+m+' мах'); }catch(x){} }
+    }
+    else if(t.type==='farm'&&t.t>=2.5){ xp=2; }
+    if(xp) addXp(e,xp);
+    if(extra>0) try{ addFloat(e.x,e.y-8,'+'+extra+' бонус','#ffd770'); }catch(x){}
+  }
+  const _et=endTask;
+  endTask=function(e){ try{ if(e&&e.friend&&e.type==='guard'&&e.gb&&e.task) onDone(e,e.task); }catch(x){} return _et.apply(this,arguments); };
+
+  /* мах цех, тариалангийн харуулын ажил */
+  const WC=k=>base(k)==='modcex';
+  function assign(e,dt){
+    const k=e.gb, b=base(k); if(WC(k)||!dOk0(k)) return;
+    const w=e._gj||(e._gj={rest:4+Math.random()*5});
+    const p=window.wcPick&&wcPick.post(k); if(!p) return;
+    if(e.task||e.sel||e.def||e.raid||e.hp!=null||(typeof raid!=='undefined'&&raid)) return;
+    e.hx=p.x; e.hy=p.y;                       // гэрийн цэг = барилгын хажуу
+    if(b!=='mahcex'&&b!=='tarialan') return;
+    e.at=0; w.rest-=dt; if(w.rest>0||(e.wait||0)>0) return;
+    if(b==='mahcex'){ const pr=wcPick.prey(e,p); if(pr){ giveTask(e,{type:'hunt',tg:pr,x:pr.x,y:pr.y,phase:'go',t:0}); w.rest=3+Math.random()*3; } else w.rest=20; }
+    else { const fm=S.farm; if(fm&&(fm.stage===0||fm.stage===2)&&!ents.some(q=>q.task&&q.task.type==='farm')){ const r=brect(k); giveTask(e,{type:'farm',x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e),phase:'go',t:0}); w.rest=6; } else w.rest=8; }
+  }
+  const _up=update;
+  update=function(dt){
+    try{ ents.forEach(e=>{ if(e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb) assign(e,dt); }); }catch(x){}
+    return _up.apply(this,arguments);
+  };
+
+  /* барилгын картад харуулын мэдээлэл (модны цехээс бусад; модны цех өөрийн картаа харуулна) */
+  const JOB={mahcex:'Ан хийж, махыг нөөцөд оруулна. Цехийн түвшин бүр мах +15%.',tarialan:'Тариа тарих, хураахад тусална.'};
+  function stText(e){ const t=e.task; if(e.def||e.raid) return 'малаа хамгаалж байна'; if(!t) return 'эргүүлж байна';
+    return t.type==='hunt'?'ан хийж байна':t.type==='farm'?'тариалангийн ажил хийж байна':t.type==='haul'?'зөөж байна':t.type==='wood'?'мод тайрч байна':'ажиллаж байна'; }
+  const _bh=bldHTML;
+  bldHTML=function(k){
+    let h=_bh.apply(this,arguments);
+    try{
+      if(!WC(k)&&BUILD[k]&&S.bld[k]>0&&!(S.sites&&S.sites[k])){
+        const e=ents.find(q=>q.kind==='wild'&&q.friend&&q.type==='guard'&&q.gb===k);
+        if(e){ const xp=gxp()[k]||0, lv=lvOf(xp), nx=need(lv);
+          const card='<div class="card"><div class="row" style="gap:8px;align-items:center"><span style="font-size:22px">🛡</span><div><b>Харуул: '+e.name+' · Лв '+lv+'</b><br><span class="sm" style="color:#e8d9a8">'+stText(e)+'</span></div></div>'
+            +'<div class="sm" style="margin-top:6px">'+(JOB[base(k)]||'Барилгаа эргүүлж, чоно, дээрэмчнээс хамгаална.')+' Ажил хийх тусам туршлага авч түвшин ахина (түвшин бүр +5% олз, ховор ан таарах магадлал нэмэгдэнэ).</div>'
+            +'<div class="sm">Туршлага: '+xp+(nx?' / '+nx:' · дээд түвшин')+'</div></div>';
+          h=h.replace('</h2>','</h2>'+card); }
+      }
+    }catch(x){}
+    return h;
+  };
 })();
 
 </script><script>(function(){

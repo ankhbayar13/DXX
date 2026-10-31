@@ -10527,7 +10527,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='14753d2190';
+var UPDB='932fb95366';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10626,10 +10626,22 @@ function decS(){
   if(!d.t) d.t={}; if(!d.e) d.e={}; if(!d.o) d.o={}; if(!d.nt) d.nt={}; if(!d.s) d.s=[];
   return d;
 }
-function decImg(kind,i){
+function decImgB(kind,i){
   const k=kind+i; let m=DEC.img[k];
   if(!m){ m=new Image(); m.src=DEC_D[kind==='t'?'tiles':kind==='f'?'fences':'props'][i].u; DEC.img[k]=m; }
   return m;
+}
+/* улирал: өвөл цас хуримтлагдана (цайрна), намар/хавар өнгө нь тоглоомын газартай таарна */
+function decSnow(kind,i){
+  if(kind==='t') return 0.62; if(kind==='f') return 0.42;
+  const id=DEC_D.props[i].id; if(id[0]==='l') return 0.16; return DEC_PLANT.indexOf(id)>=0?0.5:0.38;
+}
+function decImg(kind,i){
+  const base=decImgB(kind,i); let sk='summer'; try{ sk=seasonK(); }catch(e){}
+  if(sk==='summer'||!(base.complete&&base.naturalWidth)) return base;
+  const k=kind+i+'_'+sk; let c=DEC.img[k];
+  if(!c){ try{ c=tintCanvas(base,base.naturalWidth,base.naturalHeight,sk,sk==='winter'?decSnow(kind,i):0.3); }catch(e){ c=base; } DEC.img[k]=c; }
+  return c;
 }
 const decCX=(i,j)=>(i-j)*DEC_TW/2, decCY=(i,j)=>(i+j)*DEC_TH/2;
 function decG(x,y){ return {u:(x/(DEC_TW/2)+y/(DEC_TH/2))/2, v:(y/(DEC_TH/2)-x/(DEC_TW/2))/2}; }
@@ -10816,7 +10828,7 @@ function decGhost(){
 }
 const _decRoad=roadDraw;
 roadDraw=function(){ _decRoad.apply(this,arguments); decTilesDraw(); decGhost(); };
-function decStupaDraw(p){ const c=decCat2(p), w=DEC_SP[c].w; shadow(p[0]+w/2,p[1]+decSh(c)-0.5,w*0.8); spr(DEC_SP[c].key,p[0],p[1],w); }
+function decStupaDraw(p){ const c=decCat2(p), w=DEC_SP[c].w; shadow(p[0]+w/2,p[1]+decSh(c)-0.5,w*0.8); spr(propKey(DEC_SP[c].key),p[0],p[1],w); }
 const _decFL=fenceList;
 fenceList=function(list,vis){
   _decFL.apply(this,arguments);

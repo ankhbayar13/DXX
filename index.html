@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b17e027774';
+var UPDB='9b84de001f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10690,7 +10690,9 @@ function decOkAt(mx,my,hw,hh,noB){
   for(const q of (L.peaks||[])) if(ovl(rc,q,0)) return false;
   return true;
 }
+function decSpPt(x,y){ const c=decCell(x,y); return {x:decCX(c.i,c.j), y:decCY(c.i,c.j)+DEC_TH/4, i:c.i, j:c.j}; }
 function decOk(cat,x,y){
+  if(cat==='stupa'||cat==='tower'){ const q=decSpPt(x,y); x=q.x; y=q.y; }
   if(cat==='tile'||cat==='prop'||cat==='plant'){ const c=decCell(x,y); return decOkAt(decCX(c.i,c.j),decCY(c.i,c.j),6,3,cat==='tile'); }
   if(cat==='fence'){ const e=decEdge(x,y); return decOkAt(e.mx,e.my,3,1.5); }
   if(x<4||x>WW-4||y<50||y>WH-8) return false;
@@ -10753,6 +10755,7 @@ function decStep(x,y,first){
   }
   if(cat==='tile'&&DEC.stamp){ if(first) decPlaza(x,y); return; }
   if(!decOk(cat,x,y)){ if(first) say('Энд тавих боломжгүй'); return; }
+  if(cat==='stupa'||cat==='tower'){ const q=decSpPt(x,y), w0=DEC_SP[cat].w, h0=decSh(cat), px=Math.round(q.x-w0/2), py=Math.round(q.y-h0); if(d.s.some(a=>decCat2(a)===cat&&a[0]===px&&a[1]===py)){ if(first) say('Энд аль хэдийн байна'); return; } }
   const c=decPrice(cat);
   if(cat==='tile'){
     const q=decCell(x,y), k=q.i+'_'+q.j; if(d.t[k]===DEC.item) return;
@@ -10770,8 +10773,8 @@ function decStep(x,y,first){
   } else if(first){
     if(decN(cat)>=DEC_MAX[cat]){ say('Дээд хэмжээнд хүрлээ'); return; }
     if(S.res.gold<c){ noGold(); return; }
-    const h=decSh(cat), w=DEC_SP[cat].w;
-    S.res.gold-=c; const it=[Math.round(x-w/2),Math.round(y-h),DEC_SP[cat].k]; d.s.push(it); decRec(['sp',it]); decDirty();
+    const h=decSh(cat), w=DEC_SP[cat].w, q=decSpPt(x,y);
+    S.res.gold-=c; const it=[Math.round(q.x-w/2),Math.round(q.y-h),DEC_SP[cat].k]; d.s.push(it); decRec(['sp',it]); decDirty();
   }
 }
 function decLine(a,b){
@@ -10844,7 +10847,7 @@ function decGhost(){
   try{
     const h=DEC.hover, cat=DEC.cat, ok=DEC.erase||(DEC.stamp&&cat==='tile'?true:decOk(cat,h.x,h.y));
     ctx.save(); ctx.lineWidth=0.7; ctx.strokeStyle=DEC.erase?'#ffb347':(ok?'#8fe39a':'#ff6b6b'); ctx.fillStyle=DEC.erase?'rgba(255,179,71,.22)':(ok?'rgba(143,227,154,.22)':'rgba(255,107,107,.26)');
-    if(cat==='stupa'||cat==='tower'){ const w=DEC_SP[cat].w, x=h.x-w/2, y=h.y-8; ctx.fillRect(x,y,w,8); ctx.strokeRect(x,y,w,8); }
+    if(cat==='stupa'||cat==='tower'){ const q=decSpPt(h.x,h.y), w=DEC_SP[cat].w; if(!DEC.erase){ const sp=SPR[DEC_SP[cat].key]; if(sp&&sp.img&&sp.img.complete&&sp.img.naturalWidth){ ctx.globalAlpha=0.6; ctx.drawImage(sp.img,sp.sx||0,sp.sy||0,sp.iw,sp.ih,q.x-w/2,q.y-decSh(cat),w,decSh(cat)); ctx.globalAlpha=1; } } decDia(decCX(q.i,q.j),decCY(q.i,q.j),DEC_TW/2,DEC_TH/2); ctx.fill(); ctx.stroke(); }
     else if(cat==='fence'){ const e=decEdge(h.x,h.y); if(!DEC.erase) decFenceImg(e.t,e.mx,e.my,DEC.fence,0.65);
       const dx=DEC_TW/4*(e.t==='A'?1:-1)*1, dy=DEC_TH/4; ctx.beginPath(); ctx.moveTo(e.mx-dx,e.my-dy); ctx.lineTo(e.mx+dx,e.my+dy); ctx.lineWidth=1.4; ctx.stroke(); }
     else if(cat==='tile'&&DEC.stamp&&!DEC.erase){ const P=decPlazaPlan(h.x,h.y); for(const [i,j,idx] of P.t) decTileImg(idx,decCX(i,j),decCY(i,j),0.55);
@@ -10873,19 +10876,37 @@ fenceList=function(list,vis){
 const _decTap=tap;
 tap=function(x,y){ if(DEC.on) return; return _decTap.apply(this,arguments); };
 function decW(e){ return toWorld(e.clientX,e.clientY); }
+DEC.pp=new Map(); DEC.pinch=null; DEC.wait=false; DEC.lastMid=null;
+const decHide=v=>document.body.classList.toggle('decDrag',!!v);
 cv.addEventListener('pointerdown',e=>{
-  if(!DEC.on||!DEC.draw) return;
+  if(!DEC.on) return;
+  DEC.pp.set(e.pointerId,{x:e.clientX,y:e.clientY}); decHide(true);
+  if(!DEC.draw) return;
   e.stopImmediatePropagation(); e.preventDefault();
-  if(DEC.drag===false&&DEC._p==null){ DEC._p=e.pointerId; try{ cv.setPointerCapture(e.pointerId); }catch(x){} DEC.drag=true; const w=decW(e); DEC.hover=w; DEC.last=null; decBeginBatch(); decLine(null,w); DEC.last=w; }
+  try{ cv.setPointerCapture(e.pointerId); }catch(x){}
+  if(DEC.pp.size>=2){
+    // хоёр хуруу: зурахыг зогсоож, томруулна
+    if(DEC.drag){ DEC.drag=false; DEC._p=null; DEC.last=null; decEndBatch(); if(DEC.dirty){ DEC.dirty=false; try{ save(); }catch(x){} try{ refresh(); }catch(x){} decBarUpd(); } }
+    const [p1,p2]=[...DEC.pp.values()]; DEC.pinch={d:Math.hypot(p1.x-p2.x,p1.y-p2.y)||1,z:Z}; DEC.lastMid={x:(p1.x+p2.x)/2,y:(p1.y+p2.y)/2}; DEC.wait=true; return;
+  }
+  if(DEC.wait) return;
+  if(DEC.drag===false&&DEC._p==null){ DEC._p=e.pointerId; DEC.drag=true; const w=decW(e); DEC.hover=w; DEC.last=null; decBeginBatch(); decLine(null,w); DEC.last=w; }
   else { DEC.drag=false; }
 },true);
 cv.addEventListener('pointermove',e=>{
   if(!DEC.on) return;
+  if(DEC.pp.has(e.pointerId)) DEC.pp.set(e.pointerId,{x:e.clientX,y:e.clientY});
   const w=decW(e);
-  if(DEC.draw){ DEC.hover=w; if(DEC.drag&&e.pointerId===DEC._p){ e.stopImmediatePropagation(); decLine(DEC.last,w); DEC.last=w; } else if(DEC._p!=null&&e.pointerId!==DEC._p) e.stopImmediatePropagation(); }
+  if(DEC.draw){
+    if(DEC.pinch&&DEC.pp.size>=2){ e.stopImmediatePropagation(); const [p1,p2]=[...DEC.pp.values()], d=Math.hypot(p1.x-p2.x,p1.y-p2.y)||1, mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+      if(DEC.lastMid){ cam.x-=(mx-DEC.lastMid.x)/(SC*Z); cam.y-=(my-DEC.lastMid.y)/(SC*Z); clampCam(); } DEC.lastMid={x:mx,y:my};
+      setZoom(DEC.pinch.z*d/DEC.pinch.d,mx,my); return; }
+    DEC.hover=w; if(DEC.drag&&e.pointerId===DEC._p){ e.stopImmediatePropagation(); decLine(DEC.last,w); DEC.last=w; } else if(DEC._p!=null&&e.pointerId!==DEC._p) e.stopImmediatePropagation(); }
 },true);
 function decUp(e){
-  if(!DEC.on||!DEC.draw) return;
+  if(!DEC.on) return;
+  DEC.pp.delete(e.pointerId); if(DEC.pp.size<2){ DEC.pinch=null; DEC.lastMid=null; } if(DEC.pp.size===0){ DEC.wait=false; decHide(false); }
+  if(!DEC.draw) return;
   if(e.pointerId===DEC._p||DEC._p==null){ e.stopImmediatePropagation(); DEC.drag=false; DEC._p=null; DEC.last=null; decEndBatch(); if(DEC.dirty){ DEC.dirty=false; try{ save(); }catch(x){} try{ refresh(); }catch(x){} decBarUpd(); } }
 }
 cv.addEventListener('pointerup',decUp,true); cv.addEventListener('pointercancel',decUp,true);
@@ -10896,12 +10917,17 @@ cv.addEventListener('pointerup',decUp,true); cv.addEventListener('pointercancel'
    +'#decbar button{flex:none;border:1.5px solid #8a6a38;background:#4a3118;color:#f6e7c6;border-radius:8px;padding:7px 9px;font:700 12px sans-serif}'
    +'#decbar button.on{background:#c98a1c;border-color:#ffd770;color:#fff}#decbar button.red{background:#7a2a20;border-color:#d96a5a}#decbar button.dis{opacity:.45}#decbar button.ok{background:#2f6b34;border-color:#8fe39a}'
    +'#decbar .it{flex:none;min-width:46px;height:42px;display:flex;align-items:center;justify-content:center;border:2px solid #6a5030;border-radius:6px;background:#3a2713;padding:1px 3px}#decbar .it img{max-height:36px;max-width:64px}#decbar .it.on{border-color:#ffd770;box-shadow:0 0 6px #ffd770}'
-   +'#decbar .info{opacity:.85;font-weight:500;font-size:11px}body.decOn #tasks{display:none!important}';
+   +'#decbar .info{opacity:.85;font-weight:500;font-size:11px}body.decOn #tasks{display:none!important}'
+   +'#decbar{transition:opacity .12s}body.decDrag #decbar,body.decDrag #res,body.decDrag #season,body.decDrag #rcol,body.decDrag #menu,body.decDrag #zb,body.decDrag #jamb,body.decDrag #dayph,body.decDrag #coach{opacity:0!important;pointer-events:none!important}#res,#season,#rcol,#menu,#zb,#jamb,#dayph,#coach{transition:opacity .12s}#decbar.er{border-color:#ff7a5a;box-shadow:0 0 0 2px #ff7a5a,0 4px 16px rgba(0,0,0,.5)}'
+   +'#decmode{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:61;display:none;background:#b03a22;color:#fff;border:2px solid #ffd2c0;border-radius:20px;padding:6px 14px;font:800 13px sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.5);pointer-events:none;white-space:nowrap}body.decDrag #decmode{opacity:.0}'
+   +'#decbar button.zm{font-size:16px;padding:5px 13px}#decbar .dr.w{flex-wrap:wrap;overflow:visible}#decbar .ban{background:#b03a22;color:#fff;border-radius:8px;padding:5px 8px;text-align:center;font:800 13px sans-serif;border:1.5px solid #ffd2c0}';
   document.head.appendChild(st);
   const b=document.createElement('div'); b.id='decbar'; document.body.appendChild(b);
+  const m=document.createElement('div'); m.id='decmode'; document.body.appendChild(m);
 })();
 function decBarUpd(){
-  const b=$('decbar'); if(!b||!DEC.on) return; const d=decS(), cat=DEC.cat, c=decPrice(cat);
+  const b=$('decbar'); if(!b||!DEC.on) return;
+  b.classList.toggle('er',!!DEC.erase); const d=decS(), cat=DEC.cat, c=decPrice(cat);
   const cnt=cat==='tile'?decCnt(d.t):cat==='fence'?decCnt(d.e):(cat==='prop'||cat==='plant')?decCnt(d.o):decN(cat);
   let items='';
   const th=(arr,sel,fn)=>arr.map((x,i)=>'<div class="it'+(!DEC.erase&&sel(i)?' on':'')+'" onclick="'+fn+'('+i+')"><img src="'+x.u+'"></div>').join('');
@@ -10910,13 +10936,13 @@ function decBarUpd(){
   else if(cat==='prop'||cat==='plant') items=DEC_LIST[cat].map(i=>'<div class="it'+(!DEC.erase&&DEC[cat]===i?' on':'')+'" onclick="decPick('+i+')"><img src="'+DEC_D.props[i].u+'"></div>').join('');
   else { const kk=DEC_SP[cat].key; items='<div class="it on" style="gap:6px;padding:2px 8px">'+(SPRDATA[kk]?'<img src="'+SPRDATA[kk][0]+'" style="height:34px;image-rendering:pixelated">':'')+DEC_SP[cat].n+' (чимэг)</div>'; }
   const cb=(k,t)=>'<button class="'+(cat===k?'on':'')+'" onclick="decCat(\''+k+'\')">'+t+'</button>';
-  const price=DEC.erase?'Арилгах: үнийн 50% буцаана':(cat==='tile'&&DEC.stamp?'Талбай: 5×5, ~205 🪙':'Үнэ: '+f(c)+' 🪙');
-  b.innerHTML='<div class="dr">'+cb('tile','🧱 Хавтан')+cb('fence','🪵 Хашаа')+cb('prop','🏮 Эдлэл')+cb('plant','🌼 Ургамал')+cb('stupa','⚪ Суварга')+cb('tower','🗼 Цамхаг')+'<button class="'+(DEC.erase?'red on':'red')+'" onclick="decErase()">🧽 Арилгах</button></div>'
+  const price=DEC.erase?'50% буцаана':(cat==='tile'&&DEC.stamp?'Талбай: 5×5, ~205 🪙':'Үнэ: '+f(c)+' 🪙');
+  b.innerHTML=(DEC.erase?'<div class="ban">🧽 АРИЛГАХ ИДЭВХТЭЙ · арилгах зүйлээ товш</div>':'')+'<div class="dr">'+cb('tile','🧱 Хавтан')+cb('fence','🪵 Хашаа')+cb('prop','🏮 Эдлэл')+cb('plant','🌼 Ургамал')+cb('stupa','⚪ Суварга')+cb('tower','🗼 Цамхаг')+'<button class="'+(DEC.erase?'red on':'red')+'" onclick="decErase()">🧽 Арилгах'+(DEC.erase?' ✓ ИДЭВХТЭЙ':'')+'</button></div>'
     +'<div class="dr">'+items+'</div>'
-    +'<div class="dr"><button class="'+(DEC.draw?'on':'')+'" onclick="decDraw(true)">✏ Зурах</button><button class="'+(!DEC.draw?'on':'')+'" onclick="decDraw(false)">✋ Зөөх/томруулах</button><span class="info">'+price+' · '+cnt+' ширхэг</span><button class="'+(DEC.undo.length?'':'dis')+'" onclick="decUndo()">↩ Буцаах'+(DEC.undo.length?' ('+DEC.undo.length+')':'')+'</button><button class="ok" onclick="decClose()" style="margin-left:auto">✔ Дуусгах</button></div>';
+    +'<div class="dr w"><button class="'+(DEC.draw?'on':'')+'" onclick="decDraw(true)">✏ Зурах</button><button class="'+(!DEC.draw?'on':'')+'" onclick="decDraw(false)">✋ Зөөх</button><button class="zm" onclick="zoomBy(1.3)">＋</button><button class="zm" onclick="zoomBy(0.77)">－</button><button class="'+(DEC.undo.length?'':'dis')+'" onclick="decUndo()">↩ Буцаах'+(DEC.undo.length?' ('+DEC.undo.length+')':'')+'</button><span class="info" style="white-space:nowrap">'+price+' · '+cnt+' ш</span><button class="ok" onclick="decClose()" style="margin-left:auto">✔ Дуусгах</button></div>';
 }
 function decOpen(){ DEC.undo=[]; DEC.cur=null; try{ closeM(); deselect(); cancelPlace(); }catch(e){} DEC.on=true; document.body.classList.add('decOn'); DEC.draw=true; DEC.erase=false; DEC.drag=false; DEC._p=null; decS(); $('decbar').style.display='flex'; decBarUpd(); say(DEC.mig?('Хуучин хавтан, хашааг буцаалаа: +'+DEC.mig+' 🪙. Шинэ ромбо хавтан тавина'):'Чимэглэх горим. Хуруугаараа зурна'); DEC.mig=0; }
-function decClose(){ DEC.undo=[]; DEC.cur=null; DEC.on=false; document.body.classList.remove('decOn'); DEC.hover=null; DEC.drag=false; DEC._p=null; $('decbar').style.display='none'; try{ save(); refresh(); }catch(e){} }
+function decClose(){ try{ const m=$('decmode'); if(m) m.style.display='none'; document.body.classList.remove('decDrag'); DEC.pp.clear(); DEC.pinch=null; DEC.wait=false; }catch(e){} DEC.undo=[]; DEC.cur=null; DEC.on=false; document.body.classList.remove('decOn'); DEC.hover=null; DEC.drag=false; DEC._p=null; $('decbar').style.display='none'; try{ save(); refresh(); }catch(e){} }
 function decCat(c){ DEC.cat=c; DEC.erase=false; DEC.stamp=false; decBarUpd(); }
 function decErase(){ DEC.erase=!DEC.erase; decBarUpd(); }
 function decDraw(v){ DEC.draw=v; DEC.drag=false; DEC._p=null; decBarUpd(); }

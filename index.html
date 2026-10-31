@@ -9924,7 +9924,7 @@ function paperTile(){ if(TILE) return TILE; const S=256, c=document.createElemen
   x.putImageData(im,0,0); let s=991; const r=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
   for(let i=0;i<450;i++){ x.strokeStyle=r()<0.5?'rgba(110,75,35,.10)':'rgba(255,245,215,.16)'; x.lineWidth=0.6+r(); const a=r()*7, l=3+r()*14, px=r()*S, py=r()*S; x.beginPath(); x.moveTo(px,py); x.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l); x.stroke(); }
   return TILE=c; }
-function bake(pc){ const W=pc.width, H=pc.height, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d'); x.drawImage(pc,0,0);
+function bake(pc){ const W=pc.width, H=pc.height, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const x=cv.getContext('2d'); x.fillStyle='#98a35a'; x.fillRect(0,0,W,H); x.drawImage(pc,0,0);
   x.globalCompositeOperation='saturation'; x.fillStyle='rgba(128,128,128,0.62)'; x.fillRect(0,0,W,H);
   x.globalCompositeOperation='screen'; x.fillStyle='rgba(170,138,84,0.8)'; x.fillRect(0,0,W,H);
   x.globalCompositeOperation='multiply'; x.fillStyle='rgba(244,226,180,0.95)'; x.fillRect(0,0,W,H);
@@ -10038,7 +10038,7 @@ function padlock(c,x,y,s){ c.save(); c.translate(x,y); c.lineWidth=s*0.16; c.str
 function spaced(c,t,x,y,sp){ const w=[...t].map(ch=>c.measureText(ch).width), tot=w.reduce((a,b)=>a+b,0)+sp*(t.length-1); let p0=x-tot/2; [...t].forEach((ch,i)=>{ c.strokeText(ch,p0+w[i]/2,y); c.fillText(ch,p0+w[i]/2,y); p0+=w[i]+sp; }); }
 window.wmWorldDraw=function(c,D,z,t){
   const cv=BDONE?BCV:bakeStart(); c.drawImage(cv,EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0);
-  c.save(); c.shadowColor='rgba(30,15,3,.75)'; c.shadowBlur=26; c.fillStyle='#000'; c.fillRect(0,0,WM_W,WM_H); c.restore();
+  c.save(); c.shadowColor='rgba(30,15,3,.75)'; c.shadowBlur=26; c.fillStyle='#98a35a'; c.fillRect(0,0,WM_W,WM_H); c.restore();
   c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
   const fs=(z<0.03?10:15)/z, vx0=WMV.x-fs*10, vx1=WMV.x+c.canvas.clientWidth/z+fs*10, vy0=WMV.y-fs*3, vy1=WMV.y+c.canvas.clientHeight/z+fs*3;
   if(z<0.5){ c.font='italic '+fs*0.82+'px Georgia,"Times New Roman",serif'; c.lineWidth=fs*0.16; c.strokeStyle='rgba(235,242,232,.7)'; c.fillStyle='rgba(40,70,85,.85)';
@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b1f0fc7e97';
+var UPDB='c3679b76ee';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -1627,7 +1627,7 @@ function raidStep(dt){
   (r.ex||[]).forEach((x,i)=>{ x.tx=w.x+(i?-8:8); x.ty=w.y+5; x.speed=14; moveTo(x,dt); });
   const dd=Math.hypot(w.x-tgt.x,w.y-tgt.y); w.biting=dd<4;
   r.react-=dt;
-  const defs=ents.filter(e=>e.kind==='wild'&&e.friend&&(e.type==='dog'||e.type==='guard'||e.type==='hunter'));
+  const defs=ents.filter(e=>e.kind==='wild'&&e.friend&&(e.type==='dog'||e.type==='guard'||e.type==='hunter')&&!(e.gb&&/^modcex\d?$/.test(e.gb))); /* модны цехийн модчин-анчин цехдээ үлдэнэ, хамгаалалтад явахгүй */
   defs.forEach(e=>{ if(r.react>0&&Math.hypot(e.x-w.x,e.y-w.y)>24&&!victim) return; if(e.task) e.task=null; e.def=true; e.speed=e.type==='guard'?27:32; e.tx=w.x; e.ty=w.y; e.wait=0; });
   let fighting=false;
   defs.forEach(e=>{ if(e.def&&Math.hypot(e.x-w.x,e.y-w.y)<11){ fighting=true; w.hp-=(e.type==='guard'?70:e.type==='hunter'?60:45)*(1+rsb('mil_def'))*dt; } });
@@ -9318,21 +9318,36 @@ window.WRB=["data:image/webp;base64,UklGRiRQAABXRUJQVlA4WAoAAAAQAAAA4AAADgEAQUxQ
 })();
 
 
-/* p32/guards.js — 216: Барилга бүрт нэг харуул (төв гэрт бөөгнөрөхгүй). Харуул бүр өөрийн барилгын хажууд эргүүлнэ. Дээд тал нь 20 (гэр, модны цех, мах цех, тариалан эхэлж). */
+/* p32/guards.js — 12 харуул: модны цех бүрт 1 модчин-анчин (дээд 5, цехдээ үлдэнэ), үлдсэн нь (дээд 7) хотод мал, сүргээ хамгаална.
+   Малын харуулын тоо: 1 + гол гэрийн 3 түвшин тутамд +1 (дээд 7). */
 (function(){
   let SIG='';
-  function blds(){ const g=S.pos&&S.pos.ger, out=[];
-    for(const k of Object.keys(S.pos||{})){ if(!BUILD[k]||!(S.bld[k]>0)||(S.sites&&S.sites[k])) continue; let r=null; try{ r=brect(k); }catch(e){} if(!r) continue; out.push({k:k,x:r.x+r.w+7,y:r.y+r.sh+2,d:g?Math.hypot(r.x-g.x,r.y-g.y):0}); }
-    const pr=k=>k==='ger'?0:/^modcex/.test(k)?1:/^mahcex/.test(k)?2:/^tarialan/.test(k)?3:4; /* модны цех, мах цех, тариалан гэр хол байсан ч заавал харуултай */
-    out.sort((a,b)=>pr(a.k)-pr(b.k)||a.d-b.d); return out.slice(0,20); }
+  window.GPOST=window.GPOST||{};
+  const WK=['modcex','modcex2','modcex3','modcex4','modcex5'];
+  function blds(){
+    const out=[], g=S.pos&&S.pos.ger;
+    const herd=Math.max(1,Math.min(7,1+Math.floor((S.bld.ger||1)/3)));
+    let c=null;
+    try{ const pk=(S.bld.hashaa>0&&S.pos.hashaa&&!(S.sites&&S.sites.hashaa))?'hashaa':'ger'; const r=brect(pk); c={x:r.x+r.w/2,y:r.y+r.sh*0.6}; }catch(e){}
+    if(!c&&g) c={x:g.x+20,y:g.y+30}; if(!c) return out;
+    for(let i=0;i<herd;i++){ const a=i*6.2832/herd+0.5; out.push({k:'mal'+(i+1),x:c.x+Math.cos(a)*50,y:c.y+Math.sin(a)*30,herd:1}); }
+    WK.forEach(k=>{ if(!BUILD[k]||!(S.bld[k]>0)||!(S.pos||{})[k]||(S.sites&&S.sites[k])) return; let r=null; try{ r=brect(k); }catch(e){} if(!r) return; out.push({k:k,x:r.x+r.w+7,y:r.y+r.sh+2}); });
+    return out; }
   const _eg=ensureGuards; ensureGuards=function(){ _eg.apply(this,arguments);
     try{ const B=blds(); if(!B.length) return;
+      const keys=new Set(B.map(b=>b.k)); B.forEach(b=>{ window.GPOST[b.k]={x:b.x,y:b.y}; });
       const have=()=>ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard');
-      const GN=['Тулга','Цогт','Дорж','Баяр','Бат','Мөнх','Гэрэл','Сүх','Болд','Ганаа','Тэмүүлэн','Билэг','Алтан','Гантулга','Отгон','Нямаа','Эрдэнэ','Золбоо','Баттулга','Чулуун'];
+      const GN=['Тулга','Цогт','Дорж','Баяр','Бат','Мөнх','Гэрэл','Сүх','Болд','Ганаа','Тэмүүлэн','Билэг'];
       let G=have(); const g0=S.pos.ger;
+      // давхардсан, хэрэггүй харуулыг хасна
+      const seen=new Set(); G.forEach(e=>{ if(e.gb!==undefined&&(!keys.has(e.gb)||seen.has(e.gb))) e.gb=undefined; else if(e.gb!==undefined) seen.add(e.gb); });
+      while(G.length>B.length){ const i=G.findIndex(e=>e.gb===undefined); const e=i>=0?G[i]:G[G.length-1]; ents.splice(ents.indexOf(e),1); G=have(); }
       while(G.length<B.length){ const i=G.length, hx=(g0?g0.x:B[0].x)+20, hy=(g0?g0.y:B[0].y)+30; ents.push({kind:'wild',friend:1,name:GN[i%GN.length],role:'Харуул-анчин',type:'guard',x:hx,y:hy,tx:hx,ty:hy,hx:hx,hy:hy,r:16,dir:1,wait:Math.random()*3,moving:false,speed:5}); G=have(); }
-      const sig=B.map(b=>b.k).join(',')+'|'+G.length; if(sig===SIG) return; SIG=sig;
-      G.forEach((e,i)=>{ const b=B[i%B.length]; const first=e.gb===undefined; e.hx=b.x; e.hy=b.y; e.r=16; e.tx=b.x; e.ty=b.y; e.wait=0; e.gb=b.k; e.speed=Math.max(e.speed||5,10); if(first){ e.x=b.x; e.y=b.y; } });
+      const sig=B.map(b=>b.k+Math.round(b.x)+','+Math.round(b.y)).join(';')+'|'+G.length; if(sig===SIG) return; SIG=sig;
+      const free=B.filter(b=>!seen.has(b.k));
+      G.forEach(e=>{ if(e.gb===undefined){ const b=free.shift(); if(!b) return; e.gb=b.k; e._gnew=1; } });
+      G.forEach(e=>{ const b=B.find(q=>q.k===e.gb); if(!b) return; const first=!!e._gnew; e._gnew=0; e.hx=b.x; e.hy=b.y; e.r=b.herd?26:16; e.tx=b.x; e.ty=b.y; e.wait=0; e.speed=Math.max(e.speed||5,10); if(first){ e.x=b.x; e.y=b.y; }
+        e.role=b.herd?'Мал хамгаалагч':'Модчин-анчин'; });
     }catch(x){} };
 })();
 
@@ -10533,7 +10548,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='37cada3649';
+var UPDB='6bf12428cb';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11014,7 +11029,7 @@ bcard=function(k){
     const L=S.bld[k]||1, dead=(S.dead||[]).length, left=cap-items.length;
     const rows=items.map(it=>it.t==='p'
       ?'<div class="row" style="padding:3px 0"><span>🧑 <b>'+NPCS[it.e.idx].n+'</b></span><span class="sm">'+NPCS[it.e.idx].role+'</span></div>'
-      :'<div class="row" style="padding:3px 0"><span>🛡 <b>'+it.e.name+'</b></span><span class="sm">Харуул · '+((BUILD[it.e.gb]||{}).n||'')+'</span></div>').join('');
+      :'<div class="row" style="padding:3px 0"><span>🛡 <b>'+it.e.name+'</b></span><span class="sm">Харуул · '+(/^mal\d$/.test(it.e.gb)?'Мал хамгаалагч':((BUILD[it.e.gb]||{}).n||''))+'</span></div>').join('');
     let empt=''; for(let j=0;j<left;j++) empt+='<div class="row" style="padding:3px 0;opacity:.6"><span>➕ Хоосон суудал</span><span class="sm">'+(j<dead?'шинэ хүн ирнэ':'хүн суурьшина')+'</span></div>';
     const full=left<=0;
     let tip='';
@@ -11114,7 +11129,9 @@ bcard=function(k){
   /* мах цех, тариалангийн харуулын ажил */
   const WC=k=>base(k)==='modcex';
   function assign(e,dt){
-    const k=e.gb, b=base(k); if(WC(k)||!dOk0(k)) return;
+    const k=e.gb, b=base(k);
+    if(/^mal\d$/.test(k)){ if(!(e.task||e.sel||e.def||e.raid||e.hp!=null)){ const pp=window.GPOST&&GPOST[k]; if(pp){ e.hx=pp.x; e.hy=pp.y; } } return; } /* малын харуул: байрандаа буцна */
+    if(WC(k)||!dOk0(k)) return;
     const w=e._gj||(e._gj={rest:4+Math.random()*5});
     const p=window.wcPick&&wcPick.post(k); if(!p) return;
     if(e.task||e.sel||e.def||e.raid||e.hp!=null||(typeof raid!=='undefined'&&raid)) return;
@@ -11200,7 +11217,7 @@ bcard=function(k){
 (function(){
   const GERS=['ger','ger2','ger3','ger4','ger5'];
   const built=k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]);
-  const hn=k=>(BUILD[k]||{}).n||k;
+  const hn=k=>/^mal\d$/.test(k)?'Мал хамгаалагч':((BUILD[k]||{}).n||k);
   const POST={sleep:'унтаж байна',rest:'амарч байна',meal:'хоол идэж байна',chat:'ярилцаж байна',hide:'нуугдаж байна',home:'гэртээ байна'};
   function stP(e){
     const t=e.task, P=e.post;

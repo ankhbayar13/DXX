@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c3679b76ee';
+var UPDB='b17e027774';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11539,6 +11539,69 @@ bcard=function(k){
     let h=_ch.apply(this,arguments);
     try{ if(CL.ok) h+='<div class="card"><h3>Бүртгэл устгах</h3><div class="sm">Бүртгэл болон cloud дахь бүх өгөгдлөө бүрмөсөн устгана. Буцаах боломжгүй.</div><button class="btn red" style="margin-top:8px;width:100%" onclick="acctDelete()">🗑 Бүртгэлээ устгах</button></div>'; }catch(e){}
     return h;
+  };
+})();
+
+
+/* p32/frview.js — Найзын тосгоныг харах (зөвхөн харах). Тоглогчийн барилгын байрлалыг socSnap-д хадгалж, профайлаас «Тосгон харах» цонх нээнэ. */
+(function(){
+  // 1) Хадгалах мэдээлэлд барилгын байрлал нэмэх (жижиг: {түлхүүр:[x,y]})
+  const _ss=socSnap;
+  socSnap=function(){
+    const o=_ss.apply(this,arguments);
+    try{ const p={}; Object.keys(S.pos||{}).forEach(k=>{ if(S.bld&&S.bld[k]>0&&BUILD[k]&&!(S.sites&&S.sites[k])&&S.pos[k]) p[k]=[Math.round(S.pos[k].x),Math.round(S.pos[k].y)]; }); o.p=p; }catch(e){}
+    return o;
+  };
+  // 2) Профайл дээр товч
+  const _sv=socView;
+  socView=function(){
+    let h=_sv.apply(this,arguments);
+    try{
+      const r=CL.sv, v=r&&r.v;
+      if(v){
+        const has=v.p&&Object.keys(v.p).length;
+        const btn=has?'<button class="btn" style="width:100%;margin-top:8px" onclick="vilOpen()">🏕 Тосгон харах</button>':'<div class="sm" style="margin-top:6px">Тосгоны зураг: найз шинэ хувилбараар тоглоомдоо орсны дараа харагдана.</div>';
+        const k=h.lastIndexOf('</div></div>'); // сүүлийн картын төгсгөл
+        h=k>0?h.slice(0,k)+'</div>'+btn+'</div>'+h.slice(k+12):h+btn;
+      }
+    }catch(e){}
+    return h;
+  };
+  // 3) Цонх
+  const css=document.createElement('style');
+  css.textContent='#vil{position:fixed;inset:0;z-index:99980;background:#1d2a12;display:flex;flex-direction:column}#vil canvas{flex:1;width:100%;min-height:0;touch-action:none}#vilx{position:absolute;top:10px;left:10px;width:44px;height:44px;border-radius:50%;border:2px solid #c9972b;background:#3b2815;color:#ffe9b0;font-size:20px}#vilt{position:absolute;top:10px;left:64px;right:10px;min-height:44px;box-sizing:border-box;border:2px solid #c9972b;border-radius:12px;background:#3b2815ee;color:#ffe9b0;padding:6px 10px;font-size:14px;display:flex;flex-direction:column;justify-content:center}#vilt .s{font-size:11px;color:#e8d3a0}';
+  document.head.appendChild(css);
+  let raf=0, items=[], view=null;
+  function close(){ clearTimeout(raf); raf=0; const d=document.getElementById('vil'); if(d) d.remove(); items=[]; }
+  function farm(c,x,y,w,h){ c.fillStyle='#7a5a2e'; c.fillRect(x,y,w,h); c.strokeStyle='#4f8a2a'; c.lineWidth=Math.max(1,w/40); for(let i=1;i<6;i++){ c.beginPath(); c.moveTo(x+w*i/6,y+h*0.05); c.lineTo(x+w*i/6,y+h*0.95); c.stroke(); } c.strokeStyle='#4b3519'; c.lineWidth=Math.max(1,w/60); c.strokeRect(x,y,w,h); }
+  function paint(cv,v){
+    const dp=cv.width/cv.clientWidth, c=cv.getContext('2d'), W=cv.width, H=cv.height;
+    const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#86ad52'); g.addColorStop(1,'#6f9a45'); c.fillStyle=g; c.fillRect(0,0,W,H);
+    if(!items.length) return;
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; items.forEach(q=>{ x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x+q.w); y1=Math.max(y1,q.y+q.h); });
+    const top=86*dp, bw=Math.max(40,x1-x0), bh=Math.max(40,y1-y0), pad=14*dp;
+    const s=Math.min((W-2*pad)/bw,(H-top-pad)/bh,2.6*dp), ox=(W-bw*s)/2-x0*s, oy=top+(H-top-pad-bh*s)/2-y0*s;
+    view={s,ox,oy,dp};
+    items.slice().sort((a,b)=>(a.y+a.h)-(b.y+b.h)).forEach(q=>{
+      const X=ox+q.x*s, Y=oy+q.y*s, w=q.w*s, h=q.h*s;
+      c.fillStyle='rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(X+w/2,Y+h*0.95,w*0.46,h*0.08,0,0,6.3); c.fill();
+      if(q.farm){ farm(c,X,Y,w,h); return; }
+      const o=SPR[q.spr]; if(!o||!o.img||!o.img.complete||!o.img.naturalWidth){ c.fillStyle='#8a6a3a'; c.fillRect(X,Y,w,h); return; }
+      if(o.sx!==undefined) c.drawImage(o.img,o.sx,o.sy,o.iw,o.ih,X,Y,w,h); else c.drawImage(o.img,X,Y,w,h);
+    });
+  }
+  window.vilOpen=function(){
+    const r=CL&&CL.sv, v=r&&r.v; if(!v||!v.p) return; close(); view=null;
+    items=[]; const b=v.b||{};
+    Object.keys(v.p).forEach(k=>{ if(!BUILD[k]) return; const lvl=Math.max(1,b[k]||1); let d; try{ d=bdims(k,lvl); }catch(e){ return; } if(!d||!(d.w>0)) return; items.push({k,x:v.p[k][0],y:v.p[k][1],w:d.w,h:d.h,spr:d.spr,lvl,farm:isFarmK(k)}); });
+    const el=document.createElement('div'); el.id='vil';
+    el.innerHTML='<canvas></canvas><button id="vilx">✕</button><div id="vilt"><b>🏕 '+esc2(r.n)+'</b><span class="s">Түвшин '+(r.l||1)+' · ⚔ '+f(r.p||0)+' · Барилга: '+items.length+' · Товшвол нэр, түвшин харагдана</span></div>';
+    document.body.appendChild(el);
+    const cv=el.querySelector('canvas'); el.querySelector('#vilx').onclick=close;
+    function fit(){ const dp=Math.min(2,window.devicePixelRatio||1); cv.width=Math.max(2,Math.round(cv.clientWidth*dp)); cv.height=Math.max(2,Math.round(cv.clientHeight*dp)); }
+    fit(); window.addEventListener('resize',fit,{once:false});
+    cv.addEventListener('click',ev=>{ try{ if(!view) return; const rc=cv.getBoundingClientRect(), px=(ev.clientX-rc.left)*cv.width/rc.width, py=(ev.clientY-rc.top)*cv.height/rc.height; const wx=(px-view.ox)/view.s, wy=(py-view.oy)/view.s; const hit=items.slice().sort((a,b)=>(b.y+b.h)-(a.y+a.h)).find(q=>wx>=q.x&&wx<=q.x+q.w&&wy>=q.y&&wy<=q.y+q.h); if(hit) say(BUILD[hit.k].n+' · Lv '+hit.lvl); }catch(e){} });
+    (function loop(){ if(!document.getElementById('vil')) return; try{ if(!cv.width||cv.width<4) fit(); paint(cv,v); }catch(e){} raf=setTimeout(loop,250); })();
   };
 })();
 

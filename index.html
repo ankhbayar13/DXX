@@ -10548,7 +10548,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='559fff9755';
+var UPDB='5c18efb4d6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11375,6 +11375,28 @@ bcard=function(k){
       }
     }catch(x){}
     return h;
+  };
+})();
+
+
+/* p32/fps30.js — Цэнэг хэмнэх: хотын дүр зургийг секундэд ~30 удаа зурна; цэс, цонх, тулаан нээлттэй үед ард нь ~8 удаа л зурна. Тоглоомын тооцоонд нөлөөгүй. */
+(function(){
+  let last=0, ld=0, mEl=null;
+  const _fr=frame, _dr=draw;
+  function busy(){
+    try{
+      if(document.hidden||BT||RT||(typeof ARC!=='undefined'&&ARC)||(typeof RCE!=='undefined'&&RCE)||(typeof WMV!=='undefined'&&WMV&&WMV.on)) return true;
+      if(document.getElementById('wrsov')) return true;
+      mEl=mEl||document.getElementById('modal'); return !!(mEl&&mEl.style.display==='flex');
+    }catch(e){ return false; }
+  }
+  frame=function(now){
+    if(!window.FPS_FULL&&now-last<29){ requestAnimationFrame(frame); return; }
+    last=now; return _fr.apply(this,arguments);
+  };
+  draw=function(t){
+    if(!window.FPS_FULL&&busy()){ const n=performance.now(); if(n-ld<125) return; ld=n; }
+    return _dr.apply(this,arguments);
   };
 })();
 

@@ -793,7 +793,7 @@ function load(){
       S = Object.assign(d, o);
       S.res = Object.assign(d.res, o.res); S.animals = Object.assign(fresh().animals, o.animals);
       S.bld = Object.assign(fresh().bld, o.bld);
-      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.gxp=o.gxp||{}; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
+      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.gxp=o.gxp||{}; S.hm=o.hm||null; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
       heroMig(); ecoMig();
       return;
     }
@@ -8552,7 +8552,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
 
   const persons=()=>ents.filter(e=>e.kind==='person');
   const gerList=()=>GERS.filter(k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]));
-  function homeKey(e,gl){ gl=gl||gerList(); return gl.length?gl[(e.idx||0)%gl.length]:null; }
+  function homeKey(e,gl){ gl=gl||gerList(); try{ if(window.hmOf){ const k=hmOf(e); if(k&&gl.includes(k)) return k; } }catch(x){} return gl.length?gl[(e.idx||0)%gl.length]:null; }
   function rankIn(e,k,gl){ return persons().filter(q=>homeKey(q,gl)===k).sort((a,b)=>(a.idx||0)-(b.idx||0)).indexOf(e); }
   function spotAt(e,k,rank,lower){ const r=brect(k); if(!r) return null; const n=Math.max(0,rank);
     return {x:r.x+r.w/2-entCx(e)+((n%4)-1.5)*13, y:r.y+r.sh+5+(lower||0)+Math.floor(n/4)*9-entH(e)}; }
@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='88cf9316c7';
+var UPDB='dfa498577c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11007,20 +11007,16 @@ bcard=function(k){
   function baseAt(L){ return POPCAP[Math.min(POPCAP.length,L)-1]||2; }
   function capAt(k,L){ let c=baseAt(L); if(k==='ger') c+=Math.floor(L/3); return c; }
   function capOf(k){ let c=capAt(k,S.bld[k]||1); if(k==='ger') c+=Math.floor(rsb('cul_pop')||0); return c; }
-  function layout(){
-    const alive=ents.filter(e=>e.kind==='person').map(e=>e.idx).sort((a,b)=>a-b);
-    const out={}; let i=0;
-    GERS.filter(built).forEach(k=>{ const c=capOf(k); out[k]={cap:c,ppl:alive.slice(i,i+c)}; i+=c; });
-    return out;
-  }
   function card(k){
-    const Lay=layout(), me=Lay[k]; if(!me) return '';
-    const L=S.bld[k]||1, dead=(S.dead||[]).length, left=me.cap-me.ppl.length;
-    const rows=me.ppl.map(i=>'<div class="row" style="padding:3px 0"><span>🧑 <b>'+NPCS[i].n+'</b></span><span class="sm">'+NPCS[i].role+'</span></div>').join('');
+    const Lay=window.hmLayout?hmLayout():null; if(!Lay||!Lay.occ[k]) return '';
+    const items=Lay.occ[k], cap=Lay.cap[k];
+    const L=S.bld[k]||1, dead=(S.dead||[]).length, left=cap-items.length;
+    const rows=items.map(it=>it.t==='p'
+      ?'<div class="row" style="padding:3px 0"><span>🧑 <b>'+NPCS[it.e.idx].n+'</b></span><span class="sm">'+NPCS[it.e.idx].role+'</span></div>'
+      :'<div class="row" style="padding:3px 0"><span>🛡 <b>'+it.e.name+'</b></span><span class="sm">Харуул · '+((BUILD[it.e.gb]||{}).n||'')+'</span></div>').join('');
     let empt=''; for(let j=0;j<left;j++) empt+='<div class="row" style="padding:3px 0;opacity:.6"><span>➕ Хоосон суудал</span><span class="sm">'+(j<dead?'шинэ хүн ирнэ':'хүн суурьшина')+'</span></div>';
     const full=left<=0;
     let tip='';
-    // дараагийн түвшинд хүн нэмэгдэх уу
     const MX=(typeof MAXB!=='undefined')?MAXB:10; const ups=[]; let prev=baseAt(L);
     for(let lv=L+1;lv<=Math.min(MX,L+9);lv++){ const c=baseAt(lv); if(c>prev){ ups.push(lv+'-р түвшинд '+c+' хүн'); prev=c; } if(ups.length>=3) break; }
     if(L<MX&&ups.length) tip+='<div class="sm" style="margin-top:6px">💡 Гэрээ сайжруулбал шинэ хүн нэмэгдэнэ: '+ups.join(', ')+'.</div>';
@@ -11028,9 +11024,10 @@ bcard=function(k){
     if(k==='ger'){ const nxt=(Math.floor(L/3)+1)*3; tip+='<div class="sm" style="margin-top:4px">💡 Гол гэрт нэмэлтээр 3 түвшин тутамд +1 хүн. Дараагийн +1 хүн '+nxt+'-р түвшинд.</div>'; }
     const nx=GERS.find(q=>!built(q)&&!(S.sites&&S.sites[q]));
     if(full){ tip+='<div class="sm" style="margin-top:4px">🏠 Энэ гэр дүүрсэн.'+(nx?' Өөр гэр барьж болно.':' Бүх 5 гэр баригдсан.')+'</div>'; }
+    if(Lay.homeless.length) tip+='<div class="sm" style="margin-top:4px;color:#ffb347">⚠ Гэргүй: '+Lay.homeless.map(it=>it.t==='p'?NPCS[it.e.idx].n:it.e.name).join(', ')+'. Шинэ гэр барь эсвэл гэрээ сайжруул.</div>';
     const tot=popCap(), nm=NPCS.length;
     if(tot>=nm) tip+='<div class="sm" style="margin-top:4px">ℹ️ Нэртэй хүн хамгийн ихдээ '+nm+'.</div>';
-    return '<div class="card"><div class="row"><b>👪 Энэ гэрт амьдарч байгаа: '+me.ppl.length+'/'+me.cap+' хүн</b></div><div style="margin-top:6px">'+(rows||'<div class="sm">Одоогоор хүн алга.</div>')+empt+'</div>'+tip+'</div>';
+    return '<div class="card"><div class="row"><b>👪 Энэ гэрт амьдарч байгаа: '+items.length+'/'+cap+' хүн</b></div><div style="margin-top:6px">'+(rows||'<div class="sm">Одоогоор хүн алга.</div>')+empt+'</div>'+tip+'</div>';
   }
   window.gerResCard=card;
   const _bh=bldHTML;
@@ -11150,6 +11147,131 @@ bcard=function(k){
       }
     }catch(x){}
     return h;
+  };
+})();
+
+
+/* p32/home.js — Хүн бүр өөрийн гэртэй: суудал (гэрийн түвшнээс), хүн эхэлж, харуул дараа нь. Өөрийн гэрийнхээ хаалган дээр төрж, хавьд нь тэнүүчилнэ. */
+(function(){
+  const GERS=['ger','ger2','ger3','ger4','ger5'];
+  const built=k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]);
+  function baseAt(L){ return POPCAP[Math.min(POPCAP.length,L)-1]||2; }
+  function capAt(k,L){ let c=baseAt(L); if(k==='ger') c+=Math.floor(L/3); return c; }
+  function capOf(k){ let c=capAt(k,S.bld[k]||1); if(k==='ger') c+=Math.floor(rsb('cul_pop')||0); return c; }
+  const H=()=>{ if(!S.hm||S.hm.v!==1) S.hm={v:1,p:{},g:{}}; return S.hm; };
+  function layout(){
+    const h=H(), gl=GERS.filter(built), cap={}, occ={}, out={gers:gl,cap:cap,occ:occ,homeless:[]};
+    gl.forEach(k=>{ cap[k]=capOf(k); occ[k]=[]; });
+    if(!gl.length) return out;
+    const vill=ents.filter(e=>e.kind==='person').sort((a,b)=>a.idx-b.idx);
+    const guards=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb);
+    const un=[];
+    vill.forEach(e=>{ const k=h.p[e.idx]; if(k&&occ[k]&&occ[k].length<cap[k]) occ[k].push({t:'p',e:e}); else un.push(e); });
+    un.forEach(e=>{ const k=gl.find(q=>occ[q].length<cap[q]); if(k){ h.p[e.idx]=k; occ[k].push({t:'p',e:e}); } else { delete h.p[e.idx]; out.homeless.push({t:'p',e:e}); } });
+    const ug=[];
+    guards.forEach(e=>{ const k=h.g[e.gb]; if(k&&occ[k]&&occ[k].length<cap[k]) occ[k].push({t:'g',e:e}); else ug.push(e); });
+    ug.forEach(e=>{ const k=gl.find(q=>occ[q].length<cap[q]); if(k){ h.g[e.gb]=k; occ[k].push({t:'g',e:e}); } else { delete h.g[e.gb]; out.homeless.push({t:'g',e:e}); } });
+    return out;
+  }
+  window.hmLayout=layout; window.hmCap=capOf; window.hmCapAt=capAt; window.hmBaseAt=baseAt;
+  window.hmOf=function(e){ if(e.kind==='person') return (H().p||{})[e.idx]||null; if(e.gb) return (H().g||{})[e.gb]||null; return null; };
+
+  /* өөрийн гэрийн хаалган дээр төрнө, хавьд нь тэнүүчилнэ */
+  const _wp=wpPick;
+  wpPick=function(e){
+    try{ if(e.kind==='person'&&Math.random()<0.8){ const k=hmOf(e); if(k&&built(k)){ const r=brect(k), a=Math.random()*6.283, rr=14+Math.random()*26;
+      return {x:Math.max(8,Math.min(WW-24,r.x+r.w/2-entCx(e)+Math.cos(a)*rr)), y:Math.max(60,Math.min(WH-24,r.y+r.sh+4-entH(e)+Math.abs(Math.sin(a))*rr*0.6))}; } } }catch(x){}
+    return _wp.apply(this,arguments);
+  };
+  let tm=0;
+  const _up=update;
+  update=function(dt){
+    try{ tm+=dt; if(tm>1){ tm=0; layout();
+      ents.forEach(e=>{ if(e.kind!=='person'||e._hmI) return; const k=hmOf(e); if(!k||!built(k)) return; e._hmI=1;
+        const r=brect(k); e.x=r.x+r.w/2-entCx(e)+(Math.random()*18-9); e.y=r.y+r.sh+4-entH(e); e.tx=e.x; e.ty=e.y; e.wait=Math.random()*3; e.moving=false; });
+    } }catch(x){}
+    return _up.apply(this,arguments);
+  };
+})();
+
+
+/* p32/wkpanel.js — Самбар дээр «👥 Ажилчид» мөр; дарвал бүх ажилчин, харуулын жагсаалт, одоо юу хийж байгаа, дараагийн хүн хэзээ нэмэгдэх. Мөр дээр дарвал тэр хүн рүү очино. */
+(function(){
+  const GERS=['ger','ger2','ger3','ger4','ger5'];
+  const built=k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]);
+  const hn=k=>(BUILD[k]||{}).n||k;
+  const POST={sleep:'унтаж байна',rest:'амарч байна',meal:'хоол идэж байна',chat:'ярилцаж байна',hide:'нуугдаж байна',home:'гэртээ байна'};
+  function stP(e){
+    const t=e.task, P=e.post;
+    if(t&&t.type==='hold'&&P) return POST[P.k]||'амарч байна';
+    if(!t) return e._in?'гэртээ байна':'тэнүүчилж байна';
+    if(t.type==='wood') return t.phase==='work'?'мод тайрч байна':'мод руу явж байна';
+    if(t.type==='hunt') return 'ан хийж байна';
+    if(t.type==='farm') return 'тариалангийн ажил хийж байна';
+    if(t.type==='build') return 'барилга барьж байна';
+    if(t.type==='haul') return ({wood:'мод',meat:'мах',grain:'тариа'}[t.res]||'нөөц')+' зөөж байна';
+    if(t.type==='butchgo') return 'нядалж байна';
+    if(t.type==='move') return 'явж байна';
+    return 'ажиллаж байна';
+  }
+  function stG(e){
+    const t=e.task; if(e.def||e.raid) return 'малаа хамгаалж байна'; if(!t) return 'эргүүлж байна';
+    if(t.type==='wood') return t.phase==='work'?'мод тайрч байна':'мод руу явж байна';
+    if(t.type==='haul') return 'мод зөөж байна'; if(t.type==='hunt') return 'ан хийж байна'; if(t.type==='farm') return 'тариалангийн ажил хийж байна'; return 'ажиллаж байна';
+  }
+  function nextHint(Lay){
+    const free=Lay.gers.reduce((a,k)=>a+Lay.cap[k]-Lay.occ[k].length,0), nm=NPCS.length, nv=ents.filter(e=>e.kind==='person').length+(S.dead||[]).length;
+    const out=[];
+    if(nv>=nm) out.push('Нэртэй хүн хамгийн ихдээ '+nm+'.');
+    if(free>0) out.push('🏠 Гэрт '+free+' хоосон суудал байна.');
+    else {
+      const MX=(typeof MAXB!=='undefined')?MAXB:20; let best=null;
+      Lay.gers.forEach(k=>{ const L=S.bld[k]||1, cur=hmCapAt(k,L); for(let lv=L+1;lv<=MX;lv++){ if(hmCapAt(k,lv)>cur){ if(!best||lv-L<best.d) best={k:k,lv:lv,L:L,d:lv-L}; break; } } });
+      if(best) out.push('💡 Хамгийн ойр: '+hn(best.k)+' '+best.lv+'-р түвшинд +1 хүн (одоо '+best.L+'-р түвшин, '+best.d+' түвшин дутуу).');
+      const nx=GERS.find(q=>!built(q)&&!(S.sites&&S.sites[q]));
+      if(nx){ const req=(typeof BREQ!=='undefined'&&BREQ[nx])||0; out.push(S.bld.ger>=req?'💡 Шинэ гэр барьж болно ('+hn(nx)+').':'💡 Гол гэр '+req+'-р түвшинд шинэ гэр нээгдэнэ (одоо '+(S.bld.ger||1)+').'); }
+    }
+    if(Lay.homeless.length) out.push('⚠ Гэргүй: '+Lay.homeless.length+'. Шинэ гэр барь эсвэл гэрээ сайжруул.');
+    return out;
+  }
+  function html(){
+    const Lay=hmLayout(), P=ents.filter(e=>e.kind==='person').sort((a,b)=>a.idx-b.idx), G=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb);
+    const maxP=Math.min(popCap(),NPCS.length);
+    const home=e=>{ const k=hmOf(e); return k?hn(k):'гэргүй'; };
+    let h='<h2>Ажилчид</h2><div class="card"><b>👥 Ажилчин: '+P.length+'/'+maxP+' · 🛡 Харуул: '+G.length+'</b>'+nextHint(Lay).map(t=>'<div class="sm" style="margin-top:5px">'+t+'</div>').join('')+'<div class="sm" style="margin-top:5px;opacity:.8">Мөр дээр дарвал тэр хүн рүү очно.</div></div>';
+    h+='<h3 style="margin:10px 4px 4px">Ажилчид</h3>';
+    h+=P.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'p\','+e.idx+')"><div class="row"><div><b>🧑 '+NPCS[e.idx].n+'</b><div class="sm">'+NPCS[e.idx].role+' · '+home(e)+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stP(e)+' ›</div></div></div>').join('')||'<div class="card sm">Ажилчин алга.</div>';
+    if(G.length){
+      h+='<h3 style="margin:10px 4px 4px">Харуул-анчин</h3>';
+      h+=G.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'g\',\''+e.gb+'\')"><div class="row"><div><b>🛡 '+e.name+(window.gjLv?' · Лв '+gjLv(e):'')+'</b><div class="sm">'+hn(e.gb)+' · '+home(e)+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stG(e)+' ›</div></div></div>').join('');
+    }
+    return h;
+  }
+  window.wkGo=function(kind,key){
+    try{
+      const e=kind==='p'?ents.find(q=>q.kind==='person'&&q.idx===+key):ents.find(q=>q.kind==='wild'&&q.friend&&q.type==='guard'&&q.gb===key);
+      if(!e){ return; }
+      closeM();
+      cam.x=e.x+entCx(e)-(W/Z)/2; cam.y=e.y+entH(e)/2-(H/Z)/2; clampCam();
+      e.say={t:'Би энд байна!',ttl:2.6,delay:0}; try{ addFloat(e.x,e.y-8,'👆','#ffd770'); }catch(x){}
+    }catch(x){}
+  };
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='wk'){ try{ return html(); }catch(x){ return '<h2>Ажилчид</h2><div class="card sm">Алдаа гарлаа.</div>'; } } return _mc.apply(this,arguments); };
+
+  /* самбар дээрх мөр */
+  const pi=document.querySelector('#pcard .pi');
+  let row=null, last='';
+  if(pi){ row=document.createElement('div'); row.className='pl'; row.id='pwkrow'; row.style.cssText='font-size:12px;margin-top:2px;cursor:pointer'; row.innerHTML='👥 <b id="pwk">0</b>'; pi.appendChild(row);
+    const pc=document.getElementById('pcard');
+    pc.addEventListener('click',function(e){ try{ const t=e.target&&e.target.closest?e.target.closest('#pwkrow'):null; if(t){ e.stopPropagation(); e.preventDefault(); openM('wk'); } }catch(x){} },true);
+  }
+  let tm=0;
+  const _up=update;
+  update=function(dt){
+    try{ tm+=dt; if(row&&tm>1){ tm=0; const n=ents.filter(e=>e.kind==='person').length, g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, s='<b id="pwk">'+n+'/'+Math.min(popCap(),NPCS.length)+'</b>';
+      if(s!==last){ last=s; row.innerHTML='👥 '+s; } } }catch(x){}
+    return _up.apply(this,arguments);
   };
 })();
 

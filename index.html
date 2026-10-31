@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e1b2af22c2';
+var UPDB='855ada2f71';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10995,6 +10995,49 @@ bcard=function(k){
     return h;
   };
   try{ ['modcex'].concat(MG.modcex||[]).forEach(k=>{ if(BUILD[k]) BUILD[k].desc='Модчин-анчин мод тайраад энд зөөнө. Түвшин бүр +20% мод'; }); }catch(x){}
+})();
+
+
+/* p32/gerres.js — Гэр дээр дарахад: ямар хүмүүс амьдарч байгаа (N/M), хоосон суудал, хэрхэн нэмэх вэ. */
+(function(){
+  const GERS=['ger','ger2','ger3','ger4','ger5'];
+  const isG=k=>GERS.includes(k);
+  const built=k=>S.bld[k]>0&&!(S.sites&&S.sites[k]);
+  function baseAt(L){ return POPCAP[Math.min(POPCAP.length,L)-1]||2; }
+  function capAt(k,L){ let c=baseAt(L); if(k==='ger') c+=Math.floor(L/3); return c; }
+  function capOf(k){ let c=capAt(k,S.bld[k]||1); if(k==='ger') c+=Math.floor(rsb('cul_pop')||0); return c; }
+  function layout(){
+    const alive=ents.filter(e=>e.kind==='person').map(e=>e.idx).sort((a,b)=>a-b);
+    const out={}; let i=0;
+    GERS.filter(built).forEach(k=>{ const c=capOf(k); out[k]={cap:c,ppl:alive.slice(i,i+c)}; i+=c; });
+    return out;
+  }
+  function card(k){
+    const Lay=layout(), me=Lay[k]; if(!me) return '';
+    const L=S.bld[k]||1, dead=(S.dead||[]).length, left=me.cap-me.ppl.length;
+    const rows=me.ppl.map(i=>'<div class="row" style="padding:3px 0"><span>🧑 <b>'+NPCS[i].n+'</b></span><span class="sm">'+NPCS[i].role+'</span></div>').join('');
+    let empt=''; for(let j=0;j<left;j++) empt+='<div class="row" style="padding:3px 0;opacity:.6"><span>➕ Хоосон суудал</span><span class="sm">'+(j<dead?'шинэ хүн ирнэ':'хүн суурьшина')+'</span></div>';
+    const full=left<=0;
+    let tip='';
+    // дараагийн түвшинд хүн нэмэгдэх уу
+    const MX=(typeof MAXB!=='undefined')?MAXB:10; const ups=[]; let prev=baseAt(L);
+    for(let lv=L+1;lv<=Math.min(MX,L+9);lv++){ const c=baseAt(lv); if(c>prev){ ups.push(lv+'-р түвшинд '+c+' хүн'); prev=c; } if(ups.length>=3) break; }
+    if(L<MX&&ups.length) tip+='<div class="sm" style="margin-top:6px">💡 Гэрээ сайжруулбал шинэ хүн нэмэгдэнэ: '+ups.join(', ')+'.</div>';
+    else if(L>=MX) tip+='<div class="sm" style="margin-top:6px">💡 Энэ гэр дээд түвшинд хүрсэн.</div>';
+    if(k==='ger'){ const nxt=(Math.floor(L/3)+1)*3; tip+='<div class="sm" style="margin-top:4px">💡 Гол гэрт нэмэлтээр 3 түвшин тутамд +1 хүн. Дараагийн +1 хүн '+nxt+'-р түвшинд.</div>'; }
+    const nx=GERS.find(q=>!built(q)&&!(S.sites&&S.sites[q]));
+    if(full){ tip+='<div class="sm" style="margin-top:4px">🏠 Энэ гэр дүүрсэн.'+(nx?' Өөр гэр барьж болно.':' Бүх 5 гэр баригдсан.')+'</div>'; }
+    const tot=popCap(), nm=NPCS.length;
+    if(tot>=nm) tip+='<div class="sm" style="margin-top:4px">ℹ️ Нэртэй хүн хамгийн ихдээ '+nm+'.</div>';
+    return '<div class="card"><div class="row"><b>👪 Энэ гэрт амьдарч байгаа: '+me.ppl.length+'/'+me.cap+' хүн</b></div><div style="margin-top:6px">'+(rows||'<div class="sm">Одоогоор хүн алга.</div>')+empt+'</div>'+tip+'</div>';
+  }
+  window.gerResCard=card;
+  const _bh=bldHTML;
+  bldHTML=function(k){
+    let h=_bh.apply(this,arguments);
+    try{ if(isG(k)&&built(k)) h=h.replace('</h2>','</h2>'+card(k)); }catch(x){}
+    return h;
+  };
 })();
 
 </script><script>(function(){

@@ -9994,33 +9994,35 @@ const W=Math.round((EX.x1-EX.x0)/WD.S), H=Math.round((EX.y1-EX.y0)/WD.S);
 // Утсан дээр нэг дор бэлдэхэд 6+ секунд гацдаг тул: (1) хөнгөн утсанд нягтралыг буулгаж, (2) зургийг хэд хэдэн зурваст хувааж, зурвас бүрийг тусдаа кадр дээр зурна.
 let BCV=null, BDONE=false, BK=1;
 const BN=16;
-function bandDraw(i){ const cv=BCV, x=cv.getContext('2d'); x.save(); x.scale(BK,BK); x.beginPath(); x.rect(0,Math.floor(H*i/BN)-1,W,Math.ceil(H/BN)+3); x.clip();
+let PB=null;
+function pbInit(){ PB=WD.r.map(r=>{ let a=r[0],b=r[1],x0=a,x1=a,y0=b,y1=b; const d=r[2]; for(let i=0;i<d.length;i+=2){ a+=d[i]/2; b+=d[i+1]/2; if(a<x0)x0=a; if(a>x1)x1=a; if(b<y0)y0=b; if(b>y1)y1=b; } return {r,y0,y1}; }); }
+function bandDraw(i){ if(!PB) pbInit(); const cv=BCV, x=cv.getContext('2d'), by0=Math.floor(H*i/BN)-1, bh=Math.ceil(H/BN)+3, by1=by0+bh; x.save(); x.scale(BK,BK); x.beginPath(); x.rect(0,by0,W,bh); x.clip();
   // тэнгис
-  const sg=x.createLinearGradient(0,0,0,H); sg.addColorStop(0,'#a3bcb4'); sg.addColorStop(1,'#b3c8b8'); x.fillStyle=sg; x.fillRect(0,0,W,H);
-  const path=()=>{ x.beginPath(); WD.r.forEach(r=>{ let a=r[0],b=r[1]; x.moveTo(a,b); const d=r[2]; for(let i=0;i<d.length;i+=2){ a+=d[i]/2; b+=d[i+1]/2; x.lineTo(a,b); } x.closePath(); }); };
+  const sg=x.createLinearGradient(0,0,0,H); sg.addColorStop(0,'#a3bcb4'); sg.addColorStop(1,'#b3c8b8'); x.fillStyle=sg; x.fillRect(0,by0,W,bh);
+  const path=(mg)=>{ mg=mg||0; x.beginPath(); PB.forEach(q=>{ if(q.y1+mg<by0||q.y0-mg>by1) return; const r=q.r; let a=r[0],b=r[1]; x.moveTo(a,b); const d=r[2]; for(let i=0;i<d.length;i+=2){ a+=d[i]/2; b+=d[i+1]/2; x.lineTo(a,b); } x.closePath(); }); };
   x.lineJoin='round'; x.lineCap='round';
   // эргийн усны гэрэлтэлт
-  path(); [[46,.12],[30,.14],[17,.18],[8,.22]].forEach(([w,al])=>{ x.lineWidth=w; x.strokeStyle='rgba(238,246,236,'+al+')'; x.stroke(); });
+  path(24); [[46,.12],[30,.14],[17,.18],[8,.22]].forEach(([w,al])=>{ x.lineWidth=w; x.strokeStyle='rgba(238,246,236,'+al+')'; x.stroke(); });
   // тэнгисийн долгион (тасархай шугам)
   x.save(); x.strokeStyle='rgba(70,100,100,.16)'; x.lineWidth=1; let s=77; const r=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
-  for(let i=0;i<700;i++){ const a=r()*W, b=r()*H, l=10+r()*22; x.beginPath(); x.moveTo(a,b); x.quadraticCurveTo(a+l/2,b-4,a+l,b); x.stroke(); } x.restore();
+  for(let i=0;i<700;i++){ const a=r()*W, b=r()*H, l=10+r()*22; if(b<by0-6||b>by1+6) continue; x.beginPath(); x.moveTo(a,b); x.quadraticCurveTo(a+l/2,b-4,a+l,b); x.stroke(); } x.restore();
   // газар
-  path(); x.fillStyle='#e8d5a3'; x.fill('evenodd');
-  x.save(); path(); x.clip('evenodd'); x.strokeStyle='rgba(150,100,45,.28)'; x.lineWidth=26; path(); x.stroke(); x.strokeStyle='rgba(150,100,45,.2)'; x.lineWidth=12; x.stroke();
+  path(0); x.fillStyle='#e8d5a3'; x.fill('evenodd');
+  x.save(); path(14); x.clip('evenodd'); x.strokeStyle='rgba(150,100,45,.28)'; x.lineWidth=26; path(14); x.stroke(); x.strokeStyle='rgba(150,100,45,.2)'; x.lineWidth=12; x.stroke();
   // газрын нүүр (хөнгөн толбо)
-  for(let i=0;i<120;i++){ const a=r()*W, b=r()*H, rr=30+r()*110, g=x.createRadialGradient(a,b,0,a,b,rr); g.addColorStop(0,'rgba(170,125,60,'+(0.05+r()*0.09)+')'); g.addColorStop(1,'rgba(170,125,60,0)'); x.fillStyle=g; x.fillRect(a-rr,b-rr,rr*2,rr*2); }
+  for(let i=0;i<120;i++){ const a=r()*W, b=r()*H, rr=30+r()*110, al=0.05+r()*0.09; if(b+rr<by0||b-rr>by1) continue; const g=x.createRadialGradient(a,b,0,a,b,rr); g.addColorStop(0,'rgba(170,125,60,'+al+')'); g.addColorStop(1,'rgba(170,125,60,0)'); x.fillStyle=g; x.fillRect(a-rr,b-rr,rr*2,rr*2); }
   x.restore();
   // градус сүлжээ
   x.strokeStyle='rgba(74,42,16,.2)'; x.lineWidth=1; for(let l=-10;l<=150;l+=10){ x.beginPath(); x.moveTo(px(l),0); x.lineTo(px(l),H); x.stroke(); } for(let p=10;p<=70;p+=10){ x.beginPath(); x.moveTo(0,py(p)); x.lineTo(W,py(p)); x.stroke(); }
   // эргийн шугам
-  path(); x.strokeStyle='rgba(74,38,14,.92)'; x.lineWidth=1.6; x.stroke();
+  path(2); x.strokeStyle='rgba(74,38,14,.92)'; x.lineWidth=1.6; x.stroke();
   // цаасны жигд байдал
-  x.globalCompositeOperation='multiply'; x.globalAlpha=0.5; x.fillStyle=x.createPattern(window.wmPaper(),'repeat'); x.fillRect(0,0,W,H); x.globalAlpha=1;
+  x.globalCompositeOperation='multiply'; x.globalAlpha=0.5; x.fillStyle=x.createPattern(window.wmPaper(),'repeat'); x.fillRect(0,by0,W,bh); x.globalAlpha=1;
   // тоглох хэсгээс бусад нь — "түгжээтэй": бараан + налуу сүлжээ
   const gx0=(0-EX.x0)/WD.S, gy0=(0-EX.y0)/WD.S, gw=3200/WD.S, gh=4400/WD.S;
   x.save(); x.beginPath(); x.rect(0,0,W,H); x.rect(gx0,gy0,gw,gh); x.clip('evenodd');
-  x.globalCompositeOperation='multiply'; x.fillStyle='rgba(120,100,80,.30)'; x.fillRect(0,0,W,H);
-  x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(60,35,12,.10)'; x.lineWidth=1; for(let i=-H;i<W;i+=9){ x.beginPath(); x.moveTo(i,0); x.lineTo(i+H,H); x.stroke(); }
+  x.globalCompositeOperation='multiply'; x.fillStyle='rgba(120,100,80,.30)'; x.fillRect(0,by0,W,bh);
+  x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(60,35,12,.10)'; x.lineWidth=1; for(let i=-H;i<W;i+=9){ if(i+by1<0||i+by0>W) continue; x.beginPath(); x.moveTo(i,0); x.lineTo(i+H,H); x.stroke(); }
   x.restore();
   // ирмэгийн хүрээ
   x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(60,30,10,.95)'; x.lineWidth=8; x.strokeRect(6,6,W-12,H-12); x.lineWidth=2.5; x.strokeRect(18,18,W-36,H-36);
@@ -10556,7 +10558,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='dad16cb412';
+var UPDB='11f14e5c32';
 (function(){
   const K='updTry';
   const _go=updGo;

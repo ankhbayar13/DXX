@@ -733,7 +733,7 @@ function raidPrompt(name,p,tag){ p=Math.round(p/defMul());
 function raidDef(){ const r=window._rp; $('rpop').style.display='none'; startBattle(0,{n:r.name,fc:(r.tag==='bandit'?'b':(r.name.length%5)),p:r.p,g:Math.round(r.p*0.5),m:Math.round(r.p*0.1),bi:5,cb:()=>{ addXP(30); say('Хамгаалалт амжилттай!'); if(r.tag==='clan'){ S.rp=(S.rp||0)+5; } refresh(); }}); }
 function raidPay(){ $('rpop').style.display='none'; const l=Math.floor(S.res.gold*0.15/defMul()); S.res.gold-=l; say(l+' 🪙 алдлаа'); refresh(); }
 function raidTick(dt){
-  S.bt1=(S.bt1||0)+dt; if(S.bt1>900&&raidOK()){ S.bt1=0; raidPrompt('Дээрэмчид',Math.max(60,Math.round(totalPower()*0.6)),'bandit'); }
+  S.bt1=(S.bt1||0)+dt; { const _d=new Date(), _k=_d.getFullYear()+'-'+(_d.getMonth()+1)+'-'+_d.getDate(); if(!S.bd||S.bd.d!==_k) S.bd={d:_k,n:0}; if(S.bd.n>=3) S.bt1=Math.min(S.bt1,1700); else if(S.bt1>1800&&raidOK()){ S.bt1=0; S.bd.n++; raidPrompt('Дээрэмчид',Math.max(60,Math.round(totalPower()*0.6)),'bandit'); } }
   if(worldOpen()){ S.bt2=(S.bt2||0)+dt; if(S.bt2>1500&&raidOK()){ S.bt2=0; const i=Math.floor(Math.random()*AICL.length); raidPrompt(AICL[i][0]+' овог',Math.round(aiPower(i)*0.55),'clan'); } }
 }
 
@@ -793,7 +793,7 @@ function load(){
       S = Object.assign(d, o);
       S.res = Object.assign(d.res, o.res); S.animals = Object.assign(fresh().animals, o.animals);
       S.bld = Object.assign(fresh().bld, o.bld);
-      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
+      S.zones = o.zones || null; S.proc=o.proc||{}; S.orders=o.orders||[]; S.ordT=o.ordT||0; S.lastSeason=(o.lastSeason==null?null:o.lastSeason); S.chopped=o.chopped||[]; S.chopAt=o.chopAt||{}; S.dec=o.dec||null; S.bd=o.bd||null; S.bt1=o.bt1||0; S.relics=o.relics||{}; S.equip=o.equip||[]; S.nd=o.nd||{}; S.ndw=o.ndw||0; S.prof = Object.assign({name:'Хаан',img:'',sp:'npc1'}, o.prof||{}); S.pend = Object.assign({meat:0,milk:0,wool:0,gold:0}, o.pend||{}); S.pos = o.pos || {}; S.sites = o.sites || {}; S.farm = o.farm || {stage:0,t:0};
       heroMig(); ecoMig();
       return;
     }
@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='32989a2151';
+var UPDB='e1b2af22c2';
 (function(){
   const K='updTry';
   const _go=updGo;

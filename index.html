@@ -8633,7 +8633,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   update=function(dt){ try{ schedule(dt); }catch(e){} return _up.apply(this,arguments); };
 
   /* ---------- шөнийн харанхуй + гэрийн гэрэл (зөвхөн дэлгэц дээр, тоглоомын тооцоонд нөлөөгүй) ---------- */
-  const nightA=()=>{ const p=dayP(), q=seaP(), d0=q.ev-0.04, d1=q.sl+0.02; return p<q.dw+0.01?Math.max(0,1-p/(q.dw+0.01)):p<d0?0:p<d1?(p-d0)/(d1-d0):1; };
+  const nightA=()=>{ const p=dayP(), q=seaP(), d0=q.ev-0.04, d1=q.sl+0.02; return p<q.dw+0.01?Math.max(0,1-p/(q.dw+0.01)):p<d0?0:p<d1?(p-d0)/(d1-d0):1; }; window.nightA=nightA;
   window.nightWorld=function(t){
     try{
       if(S&&S.nightOff) return; const a=nightA(); if(a<=0.01) return;
@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='855ada2f71';
+var UPDB='83dc43d651';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11038,6 +11038,48 @@ bcard=function(k){
     try{ if(isG(k)&&built(k)) h=h.replace('</h2>','</h2>'+card(k)); }catch(x){}
     return h;
   };
+})();
+
+
+/* p32/nightglow.js — Шөнө дэнлүү, гал, түүдэг (хатагт эдлэлүүд) гэрэлтэнэ. Зөвхөн дэлгэц дээр, тооцоонд нөлөөгүй. */
+(function(){
+  /* id → [flame x frac, flame y frac, радиус, өнгө(r,g,b), хүч] */
+  const GL={
+    pTorch:[0.5,0.17,13,[255,150,50],1], pBT:[0.55,0.62,13,[255,150,50],1],
+    lLamp1:[0.68,0.42,12,[255,190,90],0.85], lLamp2:[0.69,0.45,12,[255,190,90],0.85],
+    lBowl:[0.5,0.28,14,[255,150,50],1], lBrazier:[0.5,0.28,16,[255,140,45],1.05],
+    lCamp:[0.5,0.45,22,[255,135,40],1.15], lTrident:[0.5,0.2,14,[255,150,50],1]
+  };
+  function glow(t){
+    try{
+      if(S&&S.nightOff) return; if(!window.nightA) return; const a=nightA(); if(a<=0.01) return;
+      const d=S.dec; if(!d||d.v!==2||!d.o||!window.decList||typeof DEC_D==='undefined') return;
+      const C=decList(), vw=W/Z, vh=H/Z, x0=cam.x-50, x1=cam.x+vw+50, y0=cam.y-50, y1=cam.y+vh+50;
+      ctx.save(); ctx.globalCompositeOperation='lighter';
+      for(const o of C.o){
+        if(o.x<x0||o.x>x1||o.y<y0||o.y>y1) continue;
+        const m=DEC_D.props[o.idx]; if(!m) continue; const g=GL[m.id]; if(!g) continue;
+        const sx=o.x-m.ax*DEC_K, sy=o.y+(m.k==='tile'?0:1)-m.ay*DEC_K;
+        const cx=sx+g[0]*m.w*DEC_K, cy=sy+g[1]*m.h*DEC_K, R=g[2], c=g[3];
+        const fl=1+0.09*Math.sin(t*9+o.x*1.7)+0.05*Math.sin(t*14.3+o.y), I=a*g[4];
+        // ойр гэрэл
+        let gr=ctx.createRadialGradient(cx,cy,1,cx,cy,R*fl);
+        gr.addColorStop(0,'rgba('+c[0]+','+c[1]+','+c[2]+','+(0.44*I)+')');
+        gr.addColorStop(0.45,'rgba('+c[0]+','+(c[1]-20)+','+(c[2]-10)+','+(0.09*I)+')');
+        gr.addColorStop(1,'rgba('+c[0]+','+(c[1]-30)+',30,0)');
+        ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(cx,cy,R*fl,0,6.283); ctx.fill();
+        // газар дээрх зөөлөн толбо (хавтгай зууван)
+        const gy2=o.y+1, RR=R*1.1*fl;
+        ctx.save(); ctx.translate(o.x,gy2); ctx.scale(1,0.5);
+        gr=ctx.createRadialGradient(0,0,1,0,0,RR);
+        gr.addColorStop(0,'rgba('+c[0]+','+(c[1]-10)+','+(c[2]-10)+','+(0.15*I)+')'); gr.addColorStop(1,'rgba('+c[0]+','+(c[1]-30)+',30,0)');
+        ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(0,0,RR,0,6.283); ctx.fill(); ctx.restore();
+      }
+      ctx.restore();
+    }catch(e){ try{ ctx.restore(); }catch(_){} }
+  }
+  const _nw=window.nightWorld;
+  window.nightWorld=function(t){ if(_nw) _nw.apply(this,arguments); glow(t); };
 })();
 
 </script><script>(function(){

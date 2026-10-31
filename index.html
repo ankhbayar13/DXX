@@ -10532,7 +10532,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='72876cf1c3';
+var UPDB='32989a2151';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -10915,6 +10915,87 @@ bcard=function(k){
       if(t&&t.querySelector&&t.querySelector('#pherd')){ e.stopPropagation(); e.preventDefault(); openM('mal'); }
     }catch(x){}
   },true); })();
+
+
+/* p32/wcut.js — Модны цех бүрт нэг модчин-анчин (тухайн барилгын харуул-анчин).
+   Цагийн ~60% мод тайрч цехдээ зөөнө, ~40% ойр хавьд ан хийнэ. Мод/мах нөөцөд автоматаар орно. */
+(function(){
+  const isWC=k=>k==='modcex'||/^modcex\d$/.test(k);
+  const MODE_T={wood:0,hunt:0};
+  function post(k){ try{ const r=brect(k); return {x:r.x+r.w+7,y:r.y+r.sh+2}; }catch(e){ return null; } }
+  function wcOf(k){ return ents.find(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb===k); }
+  function wcAll(){ return ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb&&isWC(e.gb)&&dOk0(e.gb)); }
+  function taken(fn){ const s=new Set(); ents.forEach(e=>{ if(e.friend&&e.task&&e.task.type!=='haul'){ const v=fn(e.task); if(v) s.add(v); } }); return s; }
+  function pickTree(e,p){
+    const busy=taken(t=>t.tr), th=(typeof sprH==='function')?sprH('tree'):20, c=[];
+    (L.trees||[]).forEach(t=>{ if(busy.has(t)) return; const d=Math.hypot(t.x-p.x,t.y-p.y); if(d<280&&zoneOpenAt(t.x+SZ.tree/2,t.y+th)) c.push({t,d}); });
+    c.sort((a,b)=>a.d-b.d); if(!c.length) return null; return c[Math.floor(Math.random()*Math.min(3,c.length))].t;
+  }
+  function pickPrey(e,p){
+    const busy=taken(t=>t.tg), c=[];
+    ents.forEach(a=>{ if(a.kind!=='wild'||a.friend||!HUNT[a.type]||busy.has(a)||!zoneOpenAt(a.x,a.y)) return; const d=Math.hypot(a.x-p.x,a.y-p.y); if(d<340) c.push({a,d}); });
+    c.sort((a,b)=>a.d-b.d); if(!c.length) return null; return c[Math.floor(Math.random()*Math.min(3,c.length))].a;
+  }
+  /* модоо өөрийн цехдээ зөөнө (+20%/түвшин) */
+  const _ht=haulTo;
+  haulTo=function(e,k,res,amt){
+    if(e&&e.friend&&e.gb&&isWC(e.gb)&&res==='wood'&&dOk0(e.gb)){
+      try{ const n=depotKey('modcex',e)||e.gb, ln=S.bld[n]||1, lk=S.bld[e.gb]||1; amt=Math.round(amt/(1+0.2*(ln-1))*(1+0.2*(lk-1)));
+        const r=brect(e.gb); giveTask(e,{type:'haul',res:'wood',amt:amt,x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e),phase:'go',t:0}); e.say={t:'Модоо зөөе',ttl:2,delay:0}; return true; }catch(x){}
+    }
+    return _ht.apply(this,arguments);
+  };
+  function assign(e,k,dt){
+    const w=e._wc||(e._wc={mode:null,rest:3+Math.random()*4,tw:0,th:0});
+    const p=post(k); if(!p) return;
+    if(e.role!=='Модчин-анчин') e.role='Модчин-анчин';
+    e.at=0;                                   // хуучин санамсаргүй ан хийх логикийг унтраана
+    if(e.task||e.sel){ // ажиллаж байна
+      if(e.task&&w.mode) w[w.mode==='wood'?'tw':'th']+=dt;
+      return; }
+    w.mode=null;
+    if(e.def||e.raid||e.hp!=null||(typeof raid!=='undefined'&&raid)) return;
+    if(!e.task){ e.hx=p.x; e.hy=p.y; }        // гэрийн цэг = цехийн хажуу (endTask зөөчихдөг)
+    w.rest-=dt; if(w.rest>0||(e.wait||0)>0) return;
+    const tot=w.tw+w.th, wantWood=tot<20||w.tw/tot<0.6;
+    let tr=null, pr=null, mode=wantWood?'wood':'hunt';
+    if(mode==='wood'){ tr=pickTree(e,p); if(!tr){ pr=pickPrey(e,p); mode='hunt'; } }
+    else { pr=pickPrey(e,p); if(!pr){ tr=pickTree(e,p); mode='wood'; } }
+    if(mode==='wood'&&tr){ giveTask(e,woodTask(e,tr)); w.mode='wood'; w.rest=2+Math.random()*3; }
+    else if(mode==='hunt'&&pr){ giveTask(e,{type:'hunt',tg:pr,x:pr.x,y:pr.y,phase:'go',t:0}); w.mode='hunt'; w.rest=2+Math.random()*3; }
+    else w.rest=15+Math.random()*10;
+  }
+  const _up=update;
+  update=function(dt){
+    try{ wcAll().forEach(e=>assign(e,e.gb,dt)); }catch(x){}
+    return _up.apply(this,arguments);
+  };
+  /* карт дээр төлөв харуулна */
+  function stText(e){
+    if(!e) return 'Модчин ирж байна...';
+    const t=e.task;
+    if(e.def||e.raid) return 'малаа хамгаалж байна';
+    if(!t) return 'амарч байна';
+    if(t.type==='wood') return t.phase==='work'?'мод тайрч байна':'мод руу явж байна';
+    if(t.type==='haul') return 'мод зөөж байна';
+    if(t.type==='hunt') return 'ан хийж байна';
+    return 'ажиллаж байна';
+  }
+  window.wcStatus=function(k){ const e=wcOf(k); return stText(e); };
+  const _bh=bldHTML;
+  bldHTML=function(k){
+    let h=_bh.apply(this,arguments);
+    try{ if(isWC(k)&&dOk0(k)){
+      const e=wcOf(k), w=e&&e._wc, tot=w?(w.tw+w.th):0, pc=tot>20?Math.round(100*w.tw/tot):60;
+      const card='<div class="card"><div class="row" style="gap:8px;align-items:center"><span style="font-size:22px">🪓</span><div><b>Модчин: '+(e?e.name:'...')+'</b><br><span class="sm" style="color:#e8d9a8">'+stText(e)+'</span></div></div>'
+        +'<div class="sm" style="margin-top:6px">Модчин цагийнхаа ~60%-д мод тайраад энэ цехэд зөөнө, ~40%-д ойр хавьд ан хийнэ. Мод, мах нөөцөд автоматаар орно. Цех түвшинтэй байх тусам мод +20%. Тайрсан мод 12 минутын дараа дахин ургана.</div></div>';
+      h=h.replace('</h2>','</h2>'+card);
+      h=h.replace('Ажилчид мод тайраад энд зөөнө.','Модчин мод тайраад энд зөөнө.');
+    } }catch(x){}
+    return h;
+  };
+  try{ ['modcex'].concat(MG.modcex||[]).forEach(k=>{ if(BUILD[k]) BUILD[k].desc='Модчин-анчин мод тайраад энд зөөнө. Түвшин бүр +20% мод'; }); }catch(x){}
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

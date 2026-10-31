@@ -10431,7 +10431,11 @@ function bgmPrime(){
   try{
     const a=musGet('battle'); if(!a){ BGMP.busy=0; return; }
     if(!a.paused){ BGMP.done=1; BGMP.busy=0; return; }
-    const g=MUSV.g&&MUSV.g.battle; try{ if(g) g.gain.value=0; }catch(e){}
+    const g=MUSV.g&&MUSV.g.battle;
+    // дуу алдагдахгүйн тулд: gain-ээр бүрэн дарагдсан үед л "сэрээнэ" (gain байхгүй бол дараагийн товшилтод дахин оролдоно)
+    if(!g){ BGMP.busy=0; return; }
+    try{ g.gain.value=0; }catch(e){ BGMP.busy=0; return; }
+    try{ a.volume=0; }catch(e){}
     a.muted=true; let ended=0;
     const fin=()=>{ if(ended) return; ended=1; try{ if(bgmKey(MUSV.want)!=='battle'||MUSV.a.battle!==a){ a.pause(); a.currentTime=0; } }catch(e){} try{ a.muted=false; }catch(e){} try{ musApply(); }catch(e){} BGMP.busy=0; };
     const p=a.play(); setTimeout(fin,1800);
@@ -10523,7 +10527,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='871a48f7d5';
+var UPDB='14753d2190';
 (function(){
   const K='updTry';
   const _go=updGo;

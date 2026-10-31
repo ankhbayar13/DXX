@@ -2485,7 +2485,7 @@ function autoWork(dt){
   for(const k of tg){
     if(busy.has(k)||!S.pos[k]) continue;
     const idle=ppl.filter(e=>!e.task&&!e.sel); if(!idle.length) break;
-    const r=brect(k); idle.sort((a,b)=>Math.hypot(a.x-r.x,a.y-r.y)-Math.hypot(b.x-r.x,b.y-r.y));
+    const r=brect(k); idle.sort((a,b)=>(Math.hypot(a.x-r.x,a.y-r.y)-(a.idx===4?150:0))-(Math.hypot(b.x-r.x,b.y-r.y)-(b.idx===4?150:0)));
     const e=idle[0], spot={x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e)};
     giveTask(e,{type:'build',k,x:spot.x,y:spot.y,phase:'go',t:0}); busy.add(k);
   }
@@ -2507,7 +2507,7 @@ function idleJobs(){
     if(S.bld.tarialan>0&&S.pos.tarialan&&!S.sites.tarialan&&fm&&(fm.stage===0||fm.stage===2)&&!farmers&&(!fpref||e===fpref)&&!ents.some(q=>q.task&&q.task.type==='farm')){
       const r=brect('tarialan'), spot={x:r.x+r.w/2-entCx(e),y:r.y+r.sh+3-entH(e)};
       giveTask(e,{type:'farm',x:spot.x,y:spot.y,phase:'go',t:0}); continue; }
-    if(rr<(NPCCH[e.idx]===3?0.6:0.35)&&L.trees.length>6){ const tr=nearestTree(e); if(tr){ giveTask(e,woodTask(e,tr)); continue; } }
+    if(rr<(NPCCH[e.idx]===3?0.6:0.35)&&!S.bld.modcex&&L.trees.length>6){ const tr=nearestTree(e); if(tr){ giveTask(e,woodTask(e,tr)); continue; } }
     if(rr<0.75&&e.amb) continue;
     if(rr<0.75&&ambStart(e)) continue;
     if(rr<0.75){ e.say={t:['Амарлаа','Ус уулаа','Нэг амьсгаа авъя'][Math.floor(Math.random()*3)],ttl:2.2,delay:0}; e.wait=4+Math.random()*5; e.moving=false; continue; }
@@ -10548,7 +10548,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='6bf12428cb';
+var UPDB='559fff9755';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11222,7 +11222,7 @@ bcard=function(k){
   function stP(e){
     const t=e.task, P=e.post;
     if(t&&t.type==='hold'&&P) return POST[P.k]||'амарч байна';
-    if(!t) return e._in?'гэртээ байна':'тэнүүчилж байна';
+    if(!t) return e._in?'гэртээ байна':((window.wjSt&&wjSt(e))||'тэнүүчилж байна');
     if(t.type==='wood') return t.phase==='work'?'мод тайрч байна':'мод руу явж байна';
     if(t.type==='hunt') return 'ан хийж байна';
     if(t.type==='farm') return 'тариалангийн ажил хийж байна';
@@ -11258,7 +11258,7 @@ bcard=function(k){
     const home=e=>{ const k=hmOf(e); return k?hn(k):'гэргүй'; };
     let h='<h2>Ажилчид</h2><div class="card"><b>👥 Ажилчин: '+P.length+'/'+maxP+' · 🛡 Харуул: '+G.length+'</b>'+nextHint(Lay).map(t=>'<div class="sm" style="margin-top:5px">'+t+'</div>').join('')+'<div class="sm" style="margin-top:5px;opacity:.8">Мөр дээр дарвал тэр хүн рүү очно.</div></div>';
     h+='<h3 style="margin:10px 4px 4px">Ажилчид</h3>';
-    h+=P.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'p\','+e.idx+')"><div class="row"><div><b>🧑 '+NPCS[e.idx].n+'</b><div class="sm">'+NPCS[e.idx].role+' · '+home(e)+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stP(e)+' ›</div></div></div>').join('')||'<div class="card sm">Ажилчин алга.</div>';
+    h+=P.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'p\','+e.idx+')"><div class="row"><div><b>🧑 '+NPCS[e.idx].n+'</b><div class="sm">'+NPCS[e.idx].role+' · '+home(e)+((window.wjPlace&&wjPlace(e))?' · 🛠 '+wjPlace(e):'')+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stP(e)+' ›</div></div></div>').join('')||'<div class="card sm">Ажилчин алга.</div>';
     if(G.length){
       h+='<h3 style="margin:10px 4px 4px">Харуул-анчин</h3>';
       h+=G.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'g\',\''+e.gb+'\')"><div class="row"><div><b>🛡 '+e.name+(window.gjLv?' · Лв '+gjLv(e):'')+'</b><div class="sm">'+hn(e.gb)+' · '+home(e)+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stG(e)+' ›</div></div></div>').join('');
@@ -11290,6 +11290,91 @@ bcard=function(k){
     try{ tm+=dt; if(row&&tm>1){ tm=0; const n=ents.filter(e=>e.kind==='person').length, g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, s='<b id="pwk">'+n+'/'+Math.min(popCap(),NPCS.length)+'</b>';
       if(s!==last){ last=s; row.innerHTML='👥 '+s; } } }catch(x){}
     return _up.apply(this,arguments);
+  };
+})();
+
+
+/* p32/wjob.js — 12 ажилчин бүр өөрийн мэргэжлийн барилга дээр ажиллана (өдрийн ажлын цагт). Ажиллаж байхад тэр барилгын ашиг ~+10%.
+   Мод, ан модчин-анчин харуулуудад. */
+(function(){
+  /* idx → ажлын газар */
+  const JOB={
+    0:{k:'ger',ic:'🧓',t:'Нутгийн ахмад'},
+    1:{k:'hashaa',ic:'🥛',t:'мал саана',b:'Сүү +10%'},
+    2:{k:'tarialan',ic:'🌾',t:'тариалан'},
+    3:{k:'esgii',ic:'🧶',t:'эсгий хийнэ',b:'Эсгийн цех +10%'},
+    4:{k:'ger',ic:'🔨',t:'барилгын ажил'},
+    5:{k:'mahcex',ic:'🔪',t:'мах бэлтгэнэ',b:'Мах +10%'},
+    6:{k:'healer',ic:'💊',t:'эмчилнэ',b:'Шархадсан хүн хурдан эдгэрнэ'},
+    7:{k:'buuz',ic:'🥟',t:'хоол хийнэ',b:'Бууз цех +10%'},
+    8:{k:'hashaa',ic:'🐑',t:'мал хариулна',b:'Малын ашиг +5%'},
+    9:{field:1,ic:'🌼',t:'цэцэг түүнэ',b:'Алт +3/мин'},
+    10:{k:'market',ic:'⚖',t:'наймаа хийнэ',b:'Алт +10%'},
+    11:{k:'hureo',ic:'🏹',t:'хамгаална'}
+  };
+  const built=k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]);
+  const ppl=()=>ents.filter(e=>e.kind==='person');
+  const byIdx=i=>ents.find(e=>e.kind==='person'&&e.idx===i);
+  /* ажлын цэг: барилгын хаалга, эсвэл хээр (Тэмүлүн) */
+  function spot(e,J){
+    try{
+      if(J.field){ const g=S.pos&&S.pos.ger; if(!g) return null; const a=Math.random()*6.283, r=70+Math.random()*60; return {x:Math.max(8,Math.min(WW-24,g.x+Math.cos(a)*r-entCx(e))), y:Math.max(60,Math.min(WH-24,g.y+60+Math.abs(Math.sin(a))*r*0.7-entH(e)))}; }
+      const k=J.k; if(!built(k)) return null; const r=brect(k);
+      return {x:r.x+r.w/2-entCx(e)+(Math.random()*r.w*0.7-r.w*0.35), y:r.y+r.sh+3+Math.random()*9-entH(e)};
+    }catch(x){ return null; }
+  }
+  function center(J){ try{ if(J.field){ const g=S.pos.ger; return {x:g.x+30,y:g.y+90,R:130}; } if(!built(J.k)) return null; const r=brect(J.k); return {x:r.x+r.w/2,y:r.y+r.sh,R:60}; }catch(x){ return null; } }
+  window.wjJob=e=>JOB[e.idx]||null;
+  window.wjPlace=e=>{ const J=JOB[e.idx]; if(!J) return ''; if(J.field) return 'тал'; return ((BUILD[J.k]||{}).n)||''; };
+  window.wjSt=e=>{ const J=JOB[e.idx]; if(!J) return ''; return (e._wp||0)>0.5?J.t+' (ажиллаж байна)':''; };
+
+  const _wp=wpPick;
+  wpPick=function(e){
+    try{ if(e.kind==='person'&&JOB[e.idx]&&(typeof dayPhase==='function')&&dayPhase()==='work'&&Math.random()<0.85){ const s=spot(e,JOB[e.idx]); if(s) return s; } }catch(x){}
+    return _wp.apply(this,arguments);
+  };
+
+  /* ажлын цагт ажлын газрынхаа ойролцоо байвал «ажиллаж байна» */
+  let tm=0;
+  const _up=update;
+  update=function(dt){
+    try{ tm+=dt; if(tm>=1){ const step=tm; tm=0; const work=(typeof dayPhase==='function')&&dayPhase()==='work';
+      ppl().forEach(e=>{ const J=JOB[e.idx]; if(!J) return; const c=center(J);
+        const near=!!(work&&c&&!e._in&&!e.task&&!e.post&&Math.hypot(e.x+entCx(e)-c.x,e.y+entH(e)-c.y)<c.R);
+        e._wp=(e._wp||0)+((near?1:0)-(e._wp||0))*0.25*step;
+        if(near&&e._wp>0.6&&!e.icon&&!e.sel){ e.icon=J.ic; e._wji=J.ic; } else if(e._wji&&(e.icon===e._wji)&&(!near||e.task||e._wp<0.3)){ e.icon=''; e._wji=null; }
+      });
+      /* эмч эмээ: шархадсан хүнийг хурдан эмчилнэ */
+      const h=byIdx(6); if(h&&(h._wp||0)>0.5) ppl().forEach(q=>{ if(q!==h&&q.hp!=null) q.hp=Math.min(100,q.hp+2*step); });
+    } }catch(x){}
+    return _up.apply(this,arguments);
+  };
+  /* ашиг */
+  const pw=i=>{ const e=byIdx(i); return e?(e._wp||0):0; };
+  const _rate=rate;
+  rate=function(){
+    const r=_rate.apply(this,arguments);
+    try{ r.milk*=1+0.10*pw(1); r.meat*=1+0.10*pw(5); r.gold*=1+0.10*pw(10); const a=1+0.05*pw(8); r.meat*=a; r.milk*=a; r.wool*=a; r.gold*=a; r.gold+=3*pw(9); }catch(x){}
+    return r;
+  };
+  const _pt=prodTick;
+  prodTick=function(secs){
+    try{ [['esgii',3],['buuz',7]].forEach(a=>{ const k=a[0]; if(S.bld[k]&&!(S.sites&&S.sites[k])&&S.proc&&S.proc[k]){ S.proc[k].t+=secs*0.10*pw(a[1]); } }); }catch(x){}
+    return _pt.apply(this,arguments);
+  };
+
+  /* барилгын картад ажилчин */
+  const _bh=bldHTML;
+  bldHTML=function(k){
+    let h=_bh.apply(this,arguments);
+    try{
+      const W=ppl().filter(e=>{ const J=JOB[e.idx]; return J&&J.k===k&&(J.k!=='ger'); });
+      if(W.length&&built(k)){
+        const card='<div class="card">'+W.map(e=>{ const J=JOB[e.idx]; return '<div class="row" style="gap:8px;align-items:center"><span style="font-size:20px">'+J.ic+'</span><div><b>Ажилчин: '+NPCS[e.idx].n+'</b><br><span class="sm" style="color:#e8d9a8">'+((e._wp||0)>0.5?J.t+' · ажиллаж байна':'одоо өөр газар байна')+'</span>'+(J.b?'<br><span class="sm">'+J.b+' (ажиллаж байхад)</span>':'')+'</div></div>'; }).join('')+'</div>';
+        h=h.replace('</h2>','</h2>'+card);
+      }
+    }catch(x){}
+    return h;
   };
 })();
 

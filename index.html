@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='117629c844';
+var UPDB='129c25f9cd';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11636,31 +11636,31 @@ bcard=function(k){
    Түвшин ЭСВЭЛ бүлэг хангагдсан бол нээгдэнэ → хуучин тоглогчид юу ч алдахгүй. Нуусан үед бүрмөсөн алга болно (түгжээ биш). */
 (function(){
   const RULES=[
-    {m:"openM('soc')",   n:'Найз',      pl:3, ch:2},
     {m:"openM('shop')",  n:'Дэлгүүр',   pl:3, ch:2},
-    {m:"daily()",        n:'Үйл явдал', pl:4, ch:3},
-    {m:"chatOpen()",     n:'Чат',       pl:4, ch:3}
+    {m:"openM('soc')",   n:'Найз',      pl:4, ch:3},
+    {m:"daily()",        n:'Үйл явдал', pl:5, ch:4},
+    {m:"chatOpen()",     n:'Чат',       pl:5, ch:4}
   ];
   const KEY='dxx_mg';
   let seen={}; try{ seen=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){}
   function put(){ try{ localStorage.setItem(KEY,JSON.stringify(seen)); }catch(e){} }
   const isOpen=r=>(window.FPS_ALLMENU)||((S.pl||1)>=r.pl)||((S.chap||0)>=r.ch);
-  let first=true;
+  let first=true, lastCss='';
+  const st=document.createElement('style'); st.id='mgcss'; document.head.appendChild(st);
   function sweep(){
     try{
       if(typeof S==='undefined'||!S||!S.bld) return;
+      const hide=[];
       RULES.forEach(r=>{
         const open=isOpen(r);
-        document.querySelectorAll('[onclick="'+r.m+'"]').forEach(el=>{
-          if(!el.closest('#rcol,#modal,#menu')) return;
-          if(open){ if(el.getAttribute('data-mg')){ el.style.removeProperty('display'); el.removeAttribute('data-mg'); } }
-          else{ if(el.style.getPropertyValue('display')!=='none'||el.style.getPropertyPriority('display')!=='important') el.style.setProperty('display','none','important'); el.setAttribute('data-mg','1'); }
-        });
+        if(!open) hide.push('#rcol [onclick="'+r.m+'"],#modal [onclick="'+r.m+'"],#menu [onclick="'+r.m+'"]');
         if(open&&!seen[r.n]){
           seen[r.n]=1; put();
           if(!first){ try{ say('🔓 Шинэ цэс нээгдлээ: '+r.n); }catch(e){} }
         }
       });
+      const css=hide.length?hide.join(',')+'{display:none!important}':'';
+      if(css!==lastCss){ lastCss=css; st.textContent=css; }   // CSS-ээр нуух: тоглоомын код style.display-г дахин тохируулсан ч харагдахгүй
       first=false;
     }catch(e){}
   }

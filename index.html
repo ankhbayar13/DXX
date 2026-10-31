@@ -10556,7 +10556,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='606a241cf6';
+var UPDB='117629c844';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11629,6 +11629,42 @@ bcard=function(k){
     cv.addEventListener('click',ev=>{ try{ if(!view) return; const rc=cv.getBoundingClientRect(), px=(ev.clientX-rc.left)*cv.width/rc.width, py=(ev.clientY-rc.top)*cv.height/rc.height; const wx=(px-view.ox)/view.s, wy=(py-view.oy)/view.s; const hit=items.slice().sort((a,b)=>(b.y+b.h)-(a.y+a.h)).find(q=>wx>=q.x&&wx<=q.x+q.w&&wy>=q.y&&wy<=q.y+q.h); if(hit) say(BUILD[hit.k].n+' · Lv '+hit.lvl); }catch(e){} });
     (function loop(){ if(!document.getElementById('vil')) return; try{ if(!cv.width||cv.width<4) fit(); paint(cv,v); }catch(e){} raf=setTimeout(loop,250); })();
   };
+})();
+
+
+/* p32/menugate.js — Шинэ тоглогчид баруун талын цэсүүдийг (Найз, Дэлгүүр, Үйл явдал, Чат) түвшин/бүлгээр аажмаар нээнэ.
+   Түвшин ЭСВЭЛ бүлэг хангагдсан бол нээгдэнэ → хуучин тоглогчид юу ч алдахгүй. Нуусан үед бүрмөсөн алга болно (түгжээ биш). */
+(function(){
+  const RULES=[
+    {m:"openM('soc')",   n:'Найз',      pl:3, ch:2},
+    {m:"openM('shop')",  n:'Дэлгүүр',   pl:3, ch:2},
+    {m:"daily()",        n:'Үйл явдал', pl:4, ch:3},
+    {m:"chatOpen()",     n:'Чат',       pl:4, ch:3}
+  ];
+  const KEY='dxx_mg';
+  let seen={}; try{ seen=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){}
+  function put(){ try{ localStorage.setItem(KEY,JSON.stringify(seen)); }catch(e){} }
+  const isOpen=r=>(window.FPS_ALLMENU)||((S.pl||1)>=r.pl)||((S.chap||0)>=r.ch);
+  let first=true;
+  function sweep(){
+    try{
+      if(typeof S==='undefined'||!S||!S.bld) return;
+      RULES.forEach(r=>{
+        const open=isOpen(r);
+        document.querySelectorAll('[onclick="'+r.m+'"]').forEach(el=>{
+          if(!el.closest('#rcol,#modal,#menu')) return;
+          if(open){ if(el.getAttribute('data-mg')){ el.style.removeProperty('display'); el.removeAttribute('data-mg'); } }
+          else{ if(el.style.getPropertyValue('display')!=='none'||el.style.getPropertyPriority('display')!=='important') el.style.setProperty('display','none','important'); el.setAttribute('data-mg','1'); }
+        });
+        if(open&&!seen[r.n]){
+          seen[r.n]=1; put();
+          if(!first){ try{ say('🔓 Шинэ цэс нээгдлээ: '+r.n); }catch(e){} }
+        }
+      });
+      first=false;
+    }catch(e){}
+  }
+  sweep(); setInterval(sweep,500);
 })();
 
 </script><script>(function(){

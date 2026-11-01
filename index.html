@@ -635,26 +635,36 @@ const CAMP=[
  {n:'Хорезм',ic:'f_hawk',who:'Шах Мухамед',req:'subeedei',bio:'desert',river:'Амударья',hero:'khubilai',st:'Баруун зүгийн Хорезм. Дундад Азийн том улс. Энэ бол хамгийн хүнд тулаан. (Хубилай нойон: Дөрвөн нохойн нэг.)',en:'Хорезмыг ялав (1219-1221). Шах Мухамед Каспийн арал дээр нас барсан.'}
 ];
 const CSTEP=['Харуулын отог','Бэлчээрийн отог','Цайзын отог','Тэргүүний цэрэг'];
+const CSN=ci=>{ const t=CAMP[ci]; return (t&&t.ns)||5; };
+const STN=['Харуулын отог','Бэлчээрийн отог','Цайзын отог','Хилийн цайз','Хотын хаалга','Гол хамгаалалт','Дотоод шугам','Ордны харуул','Элит харуул','Хааны хамгаалагч','Эцсийн хамгаалалт'];
+const stName=(ci,s)=>{ const n=CSN(ci); return s===n-1?'БОСС':s===n-2?'Тэргүүний цэрэг':STN[Math.min(s,STN.length-1)]; };
 function cpInit(){ if(!S.camp) S.camp={done:{},join:{}}; }
 function joinedN(){ return S.camp?Object.keys(S.camp.join).length:0; }
-function stepP(ci,s){ const idx=ci*4+s; return ci<8?Math.round(120*Math.pow(1.11,idx)):Math.round(3386*Math.pow(1.09,(ci-8)*4+s)); }
+function stepP0(ci,s){ const idx=ci*4+s; return ci<8?Math.round(120*Math.pow(1.11,idx)):Math.round(3386*Math.pow(1.09,(ci-8)*4+s)); }
+const CPOFF=ci=>{ let o=0; for(let k=13;k<ci;k++) o+=CSN(k); return o; };
+function stepP(ci,s){
+  const n=CSN(ci);
+  if(ci<13) return s<4?stepP0(ci,s):Math.round(stepP0(ci,3)*1.5);          /* 5-р тулаан = босс (×1.5) */
+  const b=Math.round(30000*Math.pow(1.0229,CPOFF(ci)+s));                   /* 14+ бүлэг: 30 мянгаас ~1.6 сая хүртэл жигд өснө */
+  return s===n-1?Math.round(b*1.5):b;
+}
 function chOpen(ci){ cpInit(); if(admOn()) return true; if(ci===0||ci===8) return ci===0||Object.keys(S.camp.join).filter(k=>k<8).length>=8; return !!S.camp.join[ci-1]; }
 function stOpen(ci,s){ cpInit(); if(admOn()) return true; return chOpen(ci)&&(s===0||!!S.camp.done[ci+':'+(s-1)]); }
-function chDoneN(ci){ cpInit(); let n=0; for(let s=0;s<4;s++) if(S.camp.done[ci+':'+s]) n++; return n; }
-function worldOpen(){ return joinedN()>=CAMP.length; }
+function chDoneN(ci){ cpInit(); let n=0; for(let s=0;s<CSN(ci);s++) if(S.camp.done[ci+':'+s]) n++; return n; }
+function worldOpen(){ return joinedN()>=13; }
 function pop(t,h){ let e=$('pop'); if(!e){ e=document.createElement('div'); e.id='pop'; e.onclick=()=>e.style.display='none'; document.body.appendChild(e); } e.innerHTML='<div class="pib"><h3>'+t+'</h3>'+h+'<div class="sm" style="margin-top:10px">Дарж хаа</div></div>'; e.style.display='flex'; }
 function campStart(ci,s){
   if(!stOpen(ci,s)){ say('Эхлээд өмнөх алхмыг дуусга'); return; }
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   const t=CAMP[ci], p=stepP(ci,s); closeM();
-  startBattle(0,{n:t.n+': '+CSTEP[s],fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+s)/4)),cb:()=>campWin(ci,s),back:'cmap:'+ci});
+  startBattle(0,{n:t.n+': '+(s===CSN(ci)-1?'БОСС · '+t.who:stName(ci,s)),fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+Math.min(s,3))/4)),cb:()=>campWin(ci,s),back:'cmap:'+ci});
 }
 function campWin(ci,s){
   cpInit(); if(S.camp.done[ci+':'+s]) return; S.camp.done[ci+':'+s]=1; addXP(15+s*5);
-  if(s===3){ const t=CAMP[ci]; S.camp.join[ci]=1; const g=1000*(ci+1), a=3+ci; S.res.gold+=g; S.res.alt+=a; if(t.hero) giveHero(t.hero); addXP(80); const rlx=campRelic(ci);
+  if(s===CSN(ci)-1){ const t=CAMP[ci], first=!S.camp.join[ci]; S.camp.join[ci]=1; const g=Math.round(1000*(ci+1)*(first?1:0.5)), a=Math.round((3+ci)*(first?1:0.5)); S.res.gold+=g; S.res.alt+=a; if(t.hero&&first) giveHero(t.hero); addXP(first?80:40); const rlx=first?campRelic(ci):null;
     const hn=(HEROES.find(x=>x.id===t.hero)||{}).n||'';
-    let ex=''; if(joinedN()===8) ex='<div style="margin-top:8px;color:#ffd770"><b>8 аймаг нэгдлээ! Их Монгол Улс байгуулагдлаа.</b><br>Одоо том аймгууд гарч ирлээ.</div>'; if(joinedN()===CAMP.length) ex='<div style="margin-top:8px;color:#ffd770"><b>Бүх аймаг нэгдлээ!</b><br>Дэлхийн ертөнцийн рейтинг нээгдлээ.</div>';
-    pop(t.n+' нэгдлээ!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+'<div style="margin-top:6px">'+t.en+'</div><div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+(t.hero?ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>':'')+'Үйлдвэрлэл +3%'+(rlx?'<br>'+ico(rlx.ic,28)+' '+rlx.n+' '+stars(rlx.s):'')+'</div>'+ex);
+    let ex=''; if(first&&joinedN()===8) ex='<div style="margin-top:8px;color:#ffd770"><b>8 аймаг нэгдлээ! Их Монгол Улс байгуулагдлаа.</b><br>Одоо том аймгууд гарч ирлээ.</div>'; if(first&&joinedN()===13) ex='<div style="margin-top:8px;color:#ffd770"><b>Бүх аймаг нэгдлээ!</b><br>Дэлхийн ертөнцийн рейтинг нээгдлээ.</div>';
+    pop(first?t.n+' нэгдлээ!':'👑 '+t.n+': босс ялагдлаа!',storyImg(ci)+ico(t.ic,56)+ico(t.ld,56)+(first?'<div style="margin-top:6px">'+t.en+'</div>':'')+'<div style="margin-top:8px">+'+f(g)+' 🪙 · +'+a+' Алт<br>'+(t.hero&&first?ico('hp_'+t.hero,40)+' '+hn+' нэгдлээ<br>':'')+(first?'Үйлдвэрлэл +3%':'')+(rlx?'<br>'+ico(rlx.ic,28)+' '+rlx.n+' '+stars(rlx.s):'')+'</div>'+ex);
   }
   refresh();
 }
@@ -678,8 +688,8 @@ function cmapImg(ci){
     else if(t.bio==='desert'){ px(x,y,[180,150,85]); px(x+1,y,[180,150,85]); } else { px(x,y,[100,150,60]); } }
   if(t.bio==='mountain'){ for(let k=0;k<7;k++){ const mx=6+rn()*48, my=10+rn()*60, h=3+Math.floor(rn()*4); for(let j=0;j<h;j++){ for(let q=-j;q<=j;q++) px(mx+q,my+j-h,j<2?[245,245,250]:[105,100,112]); } } }
   // зам ба цэгүүд
-  const nodes=[]; for(let k=0;k<4;k++){ const yy=68-k*18-rn()*3, xx=(k%2?44:16)+(rn()-0.5)*8; nodes.push([xx,yy]); }
-  for(let k=0;k<3;k++){ const [a,b]=nodes[k],[c,e]=nodes[k+1]; for(let q=0;q<=40;q++){ const u=q/40, x=a+(c-a)*u+Math.sin(u*3.14)*(k%2?-5:5), y=b+(e-b)*u; if(q%2===0){ px(x,y,[120,88,48]); px(x+1,y,[120,88,48]); } } }
+  const NN=CSN(ci), dyy=NN>1?54/(NN-1):18; const nodes=[]; for(let k=0;k<NN;k++){ const yy=68-k*dyy-rn()*3, xx=(k%2?44:16)+(rn()-0.5)*8; nodes.push([xx,yy]); }
+  for(let k=0;k<NN-1;k++){ const [a,b]=nodes[k],[c,e]=nodes[k+1]; for(let q=0;q<=40;q++){ const u=q/40, x=a+(c-a)*u+Math.sin(u*3.14)*(k%2?-5:5), y=b+(e-b)*u; if(q%2===0){ px(x,y,[120,88,48]); px(x+1,y,[120,88,48]); } } }
   g.putImageData(id,0,0);
   const big=document.createElement('canvas'); big.width=PW*6; big.height=PH*6; const bg=big.getContext('2d'); bg.imageSmoothingEnabled=false; bg.drawImage(cv,0,0,PW*6,PH*6);
   return cmapImg.c[ci]={url:big.toDataURL('image/png'),nodes:nodes};
@@ -696,14 +706,14 @@ function campHTML(){
 }
 function cmapHTML(ci){
   cpInit(); const t=CAMP[ci], m=cmapImg(ci), op=chOpen(ci); let nb='';
-  m.nodes.forEach((p,s)=>{ const done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), k=done?'mp_unlock':open?['mp_n1','mp_n2','mp_n3','mp_tent'][s]:'mp_lock';
-    nb+='<button class="cn" style="left:'+(p[0]/60*100).toFixed(1)+'%;top:'+(p[1]/80*100).toFixed(1)+'%" onclick="campStart('+ci+','+s+')">'+ico(k,s===3?44:36)+'<small>'+(s===3?t.who.split(' ')[0]:(s+1))+'</small></button>'; });
+  m.nodes.forEach((p,s)=>{ const done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), k=done?'mp_unlock':open?(s===CSN(ci)-1?'mp_tent':['mp_n1','mp_n2','mp_n3'][s%3]):'mp_lock';
+    nb+='<button class="cn" style="left:'+(p[0]/60*100).toFixed(1)+'%;top:'+(p[1]/80*100).toFixed(1)+'%" onclick="campStart('+ci+','+s+')">'+ico(k,s===CSN(ci)-1?44:36)+'<small>'+(s===CSN(ci)-1?t.who.split(' ')[0]:(s+1))+'</small></button>'; });
   let h='<h2>'+t.n+' · '+t.river+'</h2><div class="card sm" style="font-size:13px"><div style="display:flex;gap:8px;align-items:center">'+ico(t.ic,40)+ico(t.ld,40)+'<div>'+t.st+'</div></div></div><div class="card sm" style="font-size:13px"><b>Яагаад дайн болов?</b><br>'+CHST[ci].why+'<br><b style="color:#ffd770">Түүхэн хүн:</b> '+CHST[ci].bio+'</div>'+storyImg(ci)+
    '<div class="mapw" style="aspect-ratio:3/4"><img src="'+m.url+'" class="mapi" style="inset:0;width:100%;height:100%">'+nb+'</div>';
   h+='<div class="card">';
-  for(let s=0;s<4;s++){ const p=stepP(ci,s), P=totalPower(), done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), ratio=P/p, lv=ratio>=1.3?'Амархан':ratio>=0.9?'Тэнцүү':ratio>=0.6?'Хэцүү':'Маш хэцүү';
-    h+='<div class="row" style="margin-bottom:6px"><div><b>'+(s+1)+'. '+(s===3?t.who:CSTEP[s])+(done?' ✓':'')+'</b><div class="sm">Дайсны хүч '+f(p)+' · '+lv+(ratio<0.9?' <b style="color:#ff8a7a">⚠ Хүч дутуу</b>':'')+' · +'+f(Math.round(p*0.45))+' 🪙</div></div><button class="btn red" '+(open?'':'disabled')+' onclick="campStart('+ci+','+s+')">'+(done?'Дахин':open?'Дайрах':'🔒')+'</button></div>'; }
-  { const _nx=[0,1,2,3].find(s=>!S.camp.done[ci+':'+s]&&stOpen(ci,s)); if(_nx!=null){ const _w=weakBox(totalPower(),stepP(ci,_nx)*0.9); if(_w) h+=_w; } }
+  for(let s=0;s<CSN(ci);s++){ const p=stepP(ci,s), P=totalPower(), done=!!S.camp.done[ci+':'+s], open=stOpen(ci,s), ratio=P/p, lv=ratio>=1.3?'Амархан':ratio>=0.9?'Тэнцүү':ratio>=0.6?'Хэцүү':'Маш хэцүү';
+    h+='<div class="row" style="margin-bottom:6px"><div><b>'+(s+1)+'. '+(s===CSN(ci)-1?'👑 БОСС · '+t.who:stName(ci,s))+(done?' ✓':'')+'</b><div class="sm">Дайсны хүч '+f(p)+' · '+lv+(ratio<0.9?' <b style="color:#ff8a7a">⚠ Хүч дутуу</b>':'')+' · +'+f(Math.round(p*0.45))+' 🪙</div></div><button class="btn red" '+(open?'':'disabled')+' onclick="campStart('+ci+','+s+')">'+(done?'Дахин':open?'Дайрах':'🔒')+'</button></div>'; }
+  { const _nx=Array.from({length:CSN(ci)},(_,q)=>q).find(s=>!S.camp.done[ci+':'+s]&&stOpen(ci,s)); if(_nx!=null){ const _w=weakBox(totalPower(),stepP(ci,_nx)*0.9); if(_w) h+=_w; } }
   h+='<div class="sm">Тэргүүнийг ялбал аймаг нэгдэнэ: +'+f(1000*(ci+1))+' 🪙, +'+(3+ci)+' Алт'+(t.hero?', баатар '+((HEROES.find(x=>x.id===t.hero)||{}).n||''):'')+'.</div></div>';
   if(!op) h+='<div class="card sm">Энэ мап одоохондоо хаалттай. Өмнөх аймгийг нэгтгэ.</div>';
   return h;
@@ -3172,9 +3182,9 @@ function stTxt(ci,s){ const t=CAMP[ci], k=CHST[ci];
    t.who+' өөрөө цэргээ дагуулан тулалдаанд гарлаа. Энэ бол энэ бүлгийн эцсийн тулаан.'][s]; }
 function scard(ci,s,go){
   let e=$('scard'); if(e) e.remove(); const t=CAMP[ci], k=CHST[ci]; e=document.createElement('div'); e.id='scard';
-  e.innerHTML='<div class="sci"><div class="sch">'+ico(t.ic,36)+'<div><b>'+(ci+1)+'-р бүлэг · '+t.n+'</b><div class="sm">'+(s+1)+'/4 · '+(s===3?t.who:CSTEP[s])+'</div></div></div>'+
+  e.innerHTML='<div class="sci"><div class="sch">'+ico(t.ic,36)+'<div><b>'+(ci+1)+'-р бүлэг · '+t.n+'</b><div class="sm">'+(s+1)+'/'+CSN(ci)+' · '+(s===CSN(ci)-1?t.who:stName(ci,s))+'</div></div></div>'+
    (s===0?'<div class="sct"><b>Яагаад дайн болов?</b><br>'+k.why+'</div>':'')+
-   '<div class="sct">'+stTxt(ci,s)+'</div>'+(s===3?'<div class="sct" style="color:#ffd770"><b>Түүхэн хүн:</b><br>'+k.bio+'</div>':'')+
+   '<div class="sct">'+stTxt(ci,s)+'</div>'+(s===CSN(ci)-1?'<div class="sct" style="color:#ffd770"><b>Түүхэн хүн:</b><br>'+k.bio+'</div>':'')+
    '<div class="sct" style="color:#9fe08a"><b>📜 Түүхэн баатар:</b> '+((HEROES.find(x=>x.id===t.req)||{}).n||'')+' энэ тулаанд зайлшгүй оролцоно'+(S.heroes[t.req]?'':' (өөрийн баатар биш ч тус болно)')+'</div><div class="sm" style="margin:6px 0">Түүхээс сэдэвлэсэн өгүүллэг</div><button class="btn red" id="scgo">Тулалдах</button> <button class="btn" style="background:#5b3d1e" id="scno">Буцах</button></div>';
   document.body.appendChild(e); $('scgo').onclick=()=>{ e.remove(); go(); }; $('scno').onclick=()=>e.remove(); }
 function campStart(ci,s,skip){
@@ -3183,7 +3193,7 @@ function campStart(ci,s,skip){
   if(!skip){ scard(ci,s,()=>campStart(ci,s,1)); return; }
   if(!stmSpend()) return;
   const t=CAMP[ci], p=stepP(ci,s); closeM();
-  startBattle(0,{n:t.n+': '+CSTEP[s],fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+s)/4)),req:t.req,hb:cpHb(ci),rep:!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]),cb:()=>campWin(ci,s),back:'cmap:'+ci,map:ci===13?9:ci===5?5:BIOMAP[t.bio]});
+  startBattle(0,{n:t.n+': '+(s===CSN(ci)-1?'БОСС · '+t.who:stName(ci,s)),fc:t.fc,p:p,g:Math.round(p*0.45),m:Math.round(p*0.12),bi:Math.min(6,Math.floor((ci*4+Math.min(s,3))/4)),req:t.req,hb:cpHb(ci),rep:!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]),cb:()=>campWin(ci,s),back:'cmap:'+ci,map:ci===5?5:BIOMAP[t.bio]});
 }
 function btLayout(U,W,H,e){
   const cols=s=>s?{heavy:0.62,foot:0.62,cav:0.73,archer:0.85}:{heavy:0.38,foot:0.38,cav:0.27,archer:0.15};
@@ -3210,7 +3220,7 @@ function chsIsl(ci,big){ const t=CAMP[ci], op=chOpen(ci), jn=!!S.camp.join[ci], 
   return '<div class="isl'+(big?' big':'')+'" '+(op?'':'style="filter:grayscale(.8) brightness(.6)"')+' onclick="'+(big?'chsEnter()':'chsGo('+(ci-CHI)+')')+'"><div class="ip"><div class="ig">'+ico(t.ic,sz)+'</div>'+(big?'<div class="il">'+ico(t.ld,70)+'</div>':'')+'</div>'+(op?'':'<div class="lk">🔒</div>')+(jn?'<div class="lk" style="color:#9fe08a">✓</div>':'')+'</div>'; }
 function chsDraw(){ const t=CAMP[CHI], op=chOpen(CHI), n=chDoneN(CHI), jn=!!S.camp.join[CHI];
   $('chm').innerHTML=(CHI>0?'<div class="sd" style="left:0">'+chsIsl(CHI-1,0)+'</div>':'')+(CHI<CAMP.length-1?'<div class="sd" style="right:0">'+chsIsl(CHI+1,0)+'</div>':'')+'<div class="cc"><div class="ct">'+(CHI+1)+'-р бүлэг</div><div class="cn2">'+t.n+' · '+t.river+'</div>'+chsIsl(CHI,1)+'<div class="cw">'+t.who+'</div></div>';
-  $('chp').innerHTML='Нэгдсэн: <b>'+joinedN()+'/'+CAMP.length+'</b><br>Энэ бүлэг: '+n+'/4';
+  $('chp').innerHTML='Нэгдсэн: <b>'+joinedN()+'/'+CAMP.length+'</b><br>Энэ бүлэг: '+n+'/'+CSN(CHI);
   $('chmsg').innerHTML=op?'<button class="btn" onclick="chsEnter()">'+(jn?'↻ Дахин':'⚔ Орох')+'</button>'+(jn?'<div class="chst" style="color:#9fe08a">Ялсан ✓</div>':''):'<div class="chst" style="margin-bottom:58px">🔒 Өмнөх бүлгийг ялж нээ</div>'; $('chl').style.visibility=CHI>0?'visible':'hidden'; $('chr').style.visibility=CHI<13?'visible':'hidden'; }
 function chsEnter(){ if(!chOpen(CHI)){ say('Өмнөх бүлгийг ялснаар нээгдэнэ'); return; } $('chs').remove(); openM('cmap:'+CHI); }
 (function(){ const st=document.createElement('style'); st.textContent='#chs{position:fixed;inset:0;z-index:7;background:#111;color:#fff;overflow:hidden}#chbg{position:absolute;inset:-10px;background-size:cover;background-position:center;filter:blur(5px) brightness(.45)}#chx{position:absolute;left:10px;top:10px;width:42px;height:42px;border-radius:21px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font-size:20px;font-weight:bold}#cht{position:absolute;left:62px;top:14px;font-size:24px;font-weight:bold;text-shadow:0 2px 4px #000}#chp{position:absolute;left:14px;top:66px;background:#c9972b;color:#2a1a08;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:bold;line-height:1.5}#chm{position:absolute;inset:0}.cc{position:absolute;left:0;right:0;top:50%;transform:translateY(-52%);text-align:center}.ct{font-size:30px;font-weight:bold;color:#bfe9ff;text-shadow:0 2px 6px #000}.cn2{font-size:14px;color:#ffe9b0;text-shadow:0 2px 4px #000;margin-bottom:6px}.cw{font-size:15px;font-weight:bold;margin-top:8px;text-shadow:0 2px 4px #000}.sd{position:absolute;top:50%;transform:translateY(-50%);opacity:.75}.isl{position:relative;display:inline-block}.isl .ip{position:relative;padding:12px 14px 26px;background:radial-gradient(ellipse at 50% 85%,#6aa84a 0,#4d7d33 55%,#6b4a26 56%,#3d2a14 100%);border-radius:50%/42% 42% 58% 58%;box-shadow:0 14px 18px #0008}.isl.big .ip{padding:20px 30px 44px}.il{position:absolute;right:-14px;bottom:2px}.lk{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:34px;text-shadow:0 2px 6px #000;font-weight:bold}.chn{position:absolute;bottom:64px;width:54px;height:46px;background:#0007;color:#ffd770;font-size:26px;border:0;border-radius:10px;z-index:2}#chl{left:calc(50% - 64px)}#chr{left:calc(50% + 10px)}#chmsg{position:absolute;left:0;right:0;bottom:20px;text-align:center;font-size:15px;font-weight:bold;text-shadow:0 2px 4px #000}#chh,#chw{position:absolute;bottom:60px;background:#3b2815ee;border:2px solid #c9972b;border-radius:12px;color:#ffe9b0;font-size:11px;padding:6px 8px}#chh{left:10px}#chw{right:10px}'; document.head.appendChild(st); })();
@@ -3269,7 +3279,7 @@ function wonderHTML(){ const w=S.hk||0; const ok=S.bld.ger>=9; let h='<div class
   return h; }
 function wdBuild(){ rsInit(); const i=S.hk||0, x=WSTG[i]; if(!x||S.bld.ger<9) return; if(!canPay(x.c)){ say('Нөөц хүрэхгүй байна'); sfx('err'); return; } for(const k in x.c) S.res[k]-=x.c[k]; S.hk=i+1; sfx('win'); vib([60,40,60,40,120]); say('Хархорум: '+x.n+' барилаа!'); passAdd(25); if(S.hk>=5){ S.res.alt+=500; S.title='Их Хаан'; say('Хархорум дууслаа! «Их Хаан» цол +500 Алт'); } fillM(); refresh(); }
 function vicProg(){ rsInit(); const T=k=>TECH.filter(t=>t.b===k&&S.rs.done[t.id]).length; let cd=0; try{ cpInit(); cd=Object.keys(S.camp.done).length; }catch(e){}
-  return [{k:'m',n:'Дэлхийн байлдан дагуулагч',d:'Аян дайны 56 тулалдаан',v:cd,t:56,r:300},{k:'e',n:'Их эдийн засагч',d:'Хархорумын 5 шат + эдийн засгийн 5 судалгаа',v:(S.hk||0)+T('e'),t:10,r:300},{k:'c',n:'Мэргэн хаан',d:'Бүх 15 судалгаа',v:T('e')+T('m')+T('c'),t:15,r:300}]; }
+  return [{k:'m',n:'Дэлхийн байлдан дагуулагч',d:'Аян дайны '+CAMP.reduce((a,_,i)=>a+CSN(i),0)+' тулалдаан',v:cd,t:CAMP.reduce((a,_,i)=>a+CSN(i),0),r:300},{k:'e',n:'Их эдийн засагч',d:'Хархорумын 5 шат + эдийн засгийн 5 судалгаа',v:(S.hk||0)+T('e'),t:10,r:300},{k:'c',n:'Мэргэн хаан',d:'Бүх 15 судалгаа',v:T('e')+T('m')+T('c'),t:15,r:300}]; }
 function victoryHTML(){ let h='<div class="card sm">Гурван замаар дэлхийг эзэл. Бүрийг дуусгахад цол болон 300 Алт.</div>'; vicProg().forEach(x=>{ const ok=x.v>=x.t, got=S.vic[x.k]; h+='<div class="card"><div class="row"><div style="flex:1">'+qa('🏆',24)+' <b>'+x.n+'</b><div class="sm">'+x.d+'</div><div class="bar" style="height:8px;margin-top:5px"><i style="width:'+Math.min(100,x.v/x.t*100)+'%;background:#ffd24a"></i></div><div class="sm">'+Math.min(x.v,x.t)+' / '+x.t+'</div></div>'+(got?'<span style="color:#9fe08a">✓</span>':'<button class="btn" '+(ok?'':'disabled')+' onclick="vicClaim(\''+x.k+'\')">+'+x.r+' Алт</button>')+'</div></div>'; }); return h; }
 function vicClaim(k){ const x=vicProg().find(y=>y.k===k); if(!x||x.v<x.t||S.vic[k]) return; S.vic[k]=1; S.res.alt+=x.r; sfx('win'); vib([60,40,60]); say('Цол: '+x.n+' · +'+x.r+' Алт'); fillM(); refresh(); }
 setInterval(()=>{ try{ rsInit(); if(S.rs.cur){ const left=S.rs.cur.left; if(left<=0) rsDone(); else if(cur==='res'){ const r=document.getElementById('rsrem'); if(r) r.textContent=fmtT(left); const b=document.getElementById('rsbar'); if(b) b.style.width=Math.min(100,100-left/S.rs.cur.tot*100)+'%'; } } ageCheck(); }catch(e){} },1000);
@@ -4384,7 +4394,7 @@ function chpicBuild(i){
   const pt=(k,txt,col)=>'<div class="chpt" style="left:'+(c[k][0]-2.9)+'%;top:'+(c[k][1]-2.1)+'%;width:7%;height:4.2%;background:'+col+'"><b>'+txt+'</b></div>';
   let h='<img class="chim" src="'+CHIM[i].src+'">';
   h+=pt('c14',jt+'/14','transparent');
-  h+=pt('c4',n+'/4','transparent');
+  h+=pt('c4',n+'/'+CSN(i),'transparent');
   h+=hs('X',14,6.5,"$('chs').remove()")+hs('bat',22,8.5,"$('chs').remove();openM('baatar')")+hs('rat',22,8.5,"$('chs').remove();openM('world')");
   h+=hs('la',16,7,'chsGo(-1)')+hs('ra',16,7,'chsGo(1)');
   h+=c.ent?'<div class="hs" style="left:'+(c.ent[0]-(i===0?15:25))+'%;top:'+(c.ent[1]-(i===0?8.5:3.4))+'%;width:'+(i===0?30:50)+'%;height:'+(i===0?17:6.8)+'%" onclick="chsEnter()"></div>':'';
@@ -6282,7 +6292,7 @@ async function rtsStart(i,E){
 }
 
 
-function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mountain','steppe','lake','forest','lake','mountain','steppe','mountain','desert','desert','farm','arab'][ci];
+function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mountain','steppe','lake','forest','lake','mountain','steppe','mountain','desert','desert','farm','arab'][ci]||(CAMP[ci]&&CAMP[ci].bio)||'steppe';
   if(t==='steppe') return w?'steppe_wi':'steppe_su'; if(t==='forest') return w?'cliff_wi':'forest_camp'; if(t==='mountain') return w?'cliff_wi':'cliff_green'; if(t==='lake') return ci%2?'forest_wf':'lake_peaks';
   if(t==='desert') return 'cliff_desert'; if(t==='farm') return 'china'; return 'arab'; }
 
@@ -8424,7 +8434,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     campWin=function(ci,s){
       const was=!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]);
       const r=_cw.apply(this,arguments);
-      if(s===3&&!was){ window.CPNEXT=ci+1; setTimeout(()=>{ window.CPNEXT=null; },4000); }
+      if(s===CSN(ci)-1&&!was){ window.CPNEXT=ci+1; setTimeout(()=>{ window.CPNEXT=null; },4000); }
       return r;
     };
     const _om=openM;
@@ -10398,7 +10408,7 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
 (function(){
   const give=x=>{ if(!x) return null; S.relics[x.id]=(S.relics[x.id]||0)+1; return x; };
   const pick=st=>{ const p=RELICS.filter(x=>x.s===st); return p[Math.floor(Math.random()*p.length)]; };
-  window.campRelic=function(ci){ return give(pick(ci<6?2:3)); };
+  window.campRelic=function(ci){ if(ci>=13&&![13,17,21,25].includes(ci)) return null; return give(pick(ci<6?2:3)); };
   window.dayRelic=function(){ return give(pick(Math.random()<0.7?2:3)); };
 })();
 
@@ -10567,7 +10577,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fda2c689b8';
+var UPDB='16eeddfa82';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12529,6 +12539,109 @@ bcard=function(k){
     catch(e){ noPush=false; console.log('mBk',e); }
   };
   mBack=function(){ return (MH.length&&cur)?'<button id="mback" class="btn" style="position:absolute;left:10px;top:10px;z-index:3;padding:5px 11px;font-size:14px" onclick="mBk()">‹ Буцах</button>':''; };
+})();
+
+
+/* p32/camp30.js — Түүхэн аян 30 бүлэг хүртэл (1-р багц: 14-17). 1-13-р бүлэгт 5-р тулаан (босс) нэмэгдсэн.
+   Бүлгийн алхмын тоо: CAMP[ci].ns (1-13: 5, 14-20: 7, 21-25: 10, 26-30: 12; сүүлийнх нь босс).
+   Дайсны хүч (stepP) patch31.py-д. Шагнал: дурсгал 14/18/22/26-р бүлэгт, баатар сонгох 16/20/25-д. */
+(function(){
+  const KEYS=k=>!!SPRDATA[k];
+  const pick=(a,b,c)=>KEYS(a)?a:KEYS(b)?b:c;
+  const NEW=[
+   {n:'Солонгос',who:'Чой У (Корёгийн захирагч)',req:'ogodei',bio:'mountain',river:'Ялу гол орчим',ns:7,e:12,
+    st:'Солонгос (Корё улс). 1231 онд Өгөдэй хаан Саритай жанжныг илгээж довтолсон. Корёгийн цэргийн захирагч Чой У 1232 онд нийслэлээ Каньхва арал руу нүүлгэн тэсвэрлэсэн. Дайн 1259 он хүртэл үргэлжилсэн.',
+    en:'Корё улс олон жилийн тэмцлийн эцэст 1259 онд Монголд дагаар орлоо.',
+    why:'Монголын элч Чухуюй 1225 онд Корёгоос буцах замдаа алагдсан нь дайны шалтгаан болсон гэж үздэг. 1231 онд Өгөдэй хаан Саритай жанжныг илгээж Корёг довтлуулсан. Корёгийн цэрэг хүчтэй цайзуудад суун тэсвэрлэв.',
+    bio2:'Чой У. Корёгийн цэргийн захирагч. 1232 онд хаанаа Каньхва арал руу нүүлгэж, Монголд удаан эсэргүүцсэн.'},
+   {n:'Дали',who:'Дуань Шинчжи (Дали улсын хаан)',req:'khubilai',bio:'mountain',river:'Цзиньша мөрөн',ns:7,e:12,
+    st:'Юньнань дахь Дали улс. 1253 онд Мөнх хааны тушаалаар Хубилай нойон аян хийв. Цзиньша мөрнийг гатлан Дали хотыг эзэлсэн. Дараа нь жанжин Урианхадай (Сүбээдэйн хүү) үлдсэн хүчийг дарсан.',
+    en:'Дали улс Монголд нэгдлээ (1253-1254 он). Энэ нь Сүн улсыг өмнөд талаас нь хүрээлэх алхам болсон.',
+    why:'Мөнх хаан Сүн улсыг өмнөд талаас нь тойрч довтлохын тулд Дали улсыг эзлэхээр шийдсэн. 1253 онд Хубилай нойон цэрэг дагуулан Цзиньша мөрнийг гатлав. Дали хаан нүүж, хот эзлэгдэв.',
+    bio2:'Дуань Шинчжи. Дали улсын сүүлчийн хаадын нэг. Монголд дагаар орсны дараа нутгаа захирах эрхээ хадгалсан.'},
+   {n:'Аламут ба Багдад',who:'Аль-Мустасим (Багдадын халиф)',req:'tolui',bio:'desert',river:'Тигр мөрөн',ns:7,e:13,
+    st:'Хүлэгү (Толуйн хүү) 1256 онд Аламутын цайзыг, 1258 онд Багдадыг эзэлсэн. Багдад 1258 оны 2-р сард унаж, Аббасидын халифат мөхсөн.',
+    en:'Багдад эзлэгдлээ (1258 он). Аббасидын халифат мөхөв. Монголын засаглал баруун Азид тогтлоо.',
+    why:'Мөнх хаан дүү Хүлэгүд баруун зүгт аян хийхийг даалгасан. Хүлэгү эхлээд Аламутын цайзыг авч, дараа нь Багдад руу довтлов. Халиф аль-Мустасим дагаар орохоос татгалзсан.',
+    bio2:'Аль-Мустасим. Багдадын сүүлчийн Аббасид халиф. 1258 онд Багдад эзлэгдэхэд олзлогдсон.'},
+   {n:'Сүн улс',who:'Вэнь Тяньсян (Сүн улсын канцлер)',req:'khubilai',bio:'farm',river:'Янцзы мөрөн',ns:7,e:12,
+    st:'Өмнөд Сүн улс. Хубилай хаан 1268-1273 онд Сянъяныг бүсэлж, жанжин Баян 1276 онд нийслэл Линьаныг (Ханьчжоу) авсан. 1279 онд Яйшаны тэнгисийн тулалдаанаар Сүн улс мөхсөн.',
+    en:'Сүн улс мөхлөө (1279 он). Хубилай хаан бүх Хятадыг нэгтгэж Юань улсыг байгуулсан.',
+    why:'Хубилай хаан 1271 онд Юань улсыг зарласан ч өмнөд Сүн улс эсэргүүцсээр байв. Сянъяны цайз 5 жил тэсвэрлэсэн ч 1273 онд унав. Дараа нь жанжин Баян Янцзыгаар доош давшив.',
+    bio2:'Вэнь Тяньсян. Сүн улсын канцлер, жанжин. 1278 онд олзлогдсон ч Юань улсад үйлчлэхээс татгалзаж, 1283 онд цаазлуулсан.'}
+  ];
+  NEW.forEach((x,k)=>{ const i=CAMP.length;
+    CAMP.push({n:x.n,ic:pick('em'+x.e,'em12','em1'),who:x.who,req:x.req,bio:x.bio,river:x.river,hero:'',st:x.st,en:x.en,ns:x.ns});
+    const t=CAMP[i]; t.ld=pick('ld'+x.e,'ld12','ld1'); t.fc=[2,3,4,3][k]; if(typeof CHST!=='undefined') CHST[i]={why:x.why,bio:x.bio2};
+  });
+  try{ delete CSTORY[13]; }catch(e){}   // хуучин Хорезмын түүхэн зураг шинэ бүлэгт давхцахгүй
+
+  /* шинэ бүлгүүдэд бэлэн зураг байхгүй: хуучин (Хорезм) зургийг харуулахгүй, ердийн арал-дэлгэц гарна */
+  const _pl=chpicLoad;
+  chpicLoad=function(i,cb){ if(i>=13){ try{ CHOK[i]=0; }catch(e){} cb&&cb(0); return; } return _pl.apply(this,arguments); };
+
+  /* бүлэг бүрийн тулааны тайлбар (5+ алхамд) */
+  const _st=stTxt;
+  stTxt=function(ci,s){
+    try{
+      const t=CAMP[ci], n=CSN(ci);
+      if(s===n-1) return '👑 БОСС: '+t.who+' өөрийн цэргийг дагуулан тулалдаанд гарлаа. Энэ бол энэ бүлгийн эцсийн тулаан.';
+      if(ci<13){ if(s===3) return t.n+' аймгийн тэргүүн цэрэг, '+t.who+'-н хамгаалалт. Ялбал босс гарна.'; return _st.apply(this,arguments); }
+      if(s===n-2) return t.n+' улсын тэргүүний цэрэг. Ялбал босс гарна.';
+      return [t.river+' орчимд '+t.n+'-н харуул байна. Тэднийг чимээгүй цохиж, замыг нээнэ.',
+              t.n+'-н бэлчээр, малыг хамгаалж буй отог. Хүчээ нэгтгэж давшаарай.',
+              t.n+'-н цайз, хамгаалалт хүчтэй газар. Эндээс гол хот руу ойртоно.',
+              t.n+'-н хилийн цайз. Замыг хаасан хүчтэй хамгаалалт.',
+              t.n+'-н хотын хаалга. Дайсан бүх хүчээ цуглуулжээ.'][s]||(t.n+'-н хамгаалалт хүчтэй болж байна.');
+    }catch(e){ return _st.apply(this,arguments); }
+  };
+
+  /* баатар сонгох: 16, 20, 25-р бүлэг (ci 15, 19, 24) */
+  const HPICK=[15,19,24];
+  function ownable(){ return HEROES.filter(h=>!S.heroes[h.id]&&h.id!=='jamukha'&&!(typeof SUPP!=='undefined'&&SUPP[h.id])); }
+  function hpOpen(){
+    try{
+      const P=S.hpick; if(!P||document.getElementById('hpk')) return;
+      const opts=(P.o||[]).map(id=>HEROES.find(h=>h.id===id)).filter(Boolean).filter(h=>!S.heroes[h.id]);
+      if(!opts.length){ S.hpick=null; S.res.alt=(S.res.alt||0)+30; say('Бүх баатар танд байна. +30 Алт'); return; }
+      const o=document.createElement('div'); o.id='hpk';
+      o.style.cssText='position:fixed;inset:0;z-index:60;background:#000d;display:flex;align-items:center;justify-content:center;padding:12px';
+      o.innerHTML='<div style="background:#2b1d12;border:3px solid #c9972b;border-radius:14px;padding:12px;max-width:420px;width:100%;color:#fff;text-align:center"><h3 style="margin:0 0 6px;color:#ffd770">🎖 Шинэ баатар сонго</h3><div class="sm" style="margin-bottom:8px">'+(P.ci+1)+'-р бүлгийн шагнал. Нэг баатрыг сонго, үлдсэн нь танд ирэхгүй.</div><div style="display:flex;gap:8px;justify-content:center">'+
+        opts.map(h=>'<div class="card" style="flex:1;min-width:0;padding:6px;cursor:pointer" onclick="hpPick(\''+h.id+'\')">'+hpi(h.id,64)+'<div style="font-weight:bold;font-size:13px;margin-top:4px">'+h.n+'</div><div class="sm">'+'⭐'.repeat(h.s)+'</div></div>').join('')+'</div></div>';
+      document.body.appendChild(o);
+    }catch(e){ console.log('hpOpen',e); }
+  }
+  window.hpPick=function(id){
+    try{
+      const P=S.hpick; if(!P||!(P.o||[]).includes(id)) return;
+      S.hpick=null; const h=HEROES.find(x=>x.id===id); giveHero(id);
+      const o=document.getElementById('hpk'); if(o) o.remove();
+      say('🎖 '+(h?h.n:'Баатар')+' танд нэгдлээ!'); try{ sfx('win'); }catch(e){}
+      refresh(); save();
+    }catch(e){ console.log('hpPick',e); }
+  };
+  setInterval(()=>{ try{
+    if(typeof S==='undefined'||!S||!S.hpick||BT) return;
+    const pp=document.getElementById('pop'); if(pp&&pp.style.display==='flex') return;
+    if(document.getElementById('tutov')||document.getElementById('scard')) return;
+    hpOpen();
+  }catch(e){} },1500);
+
+  /* шагнал: баатар сонгох + энгийн босс ялалт */
+  const _cw=campWin;
+  campWin=function(ci,s){
+    const first=!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]), fin=(s===CSN(ci)-1);
+    const r=_cw.apply(this,arguments);
+    try{
+      if(first&&fin&&HPICK.includes(ci)&&!S.hpick){
+        const pool=ownable().sort((a,b)=>(b.s-a.s)+(Math.random()-0.5)*3).slice(0,3).map(h=>h.id);
+        S.hpick={ci:ci,o:pool}; setTimeout(hpOpen,1200);
+      }
+    }catch(e){ console.log('campWin30',e); }
+    return r;
+  };
+  /* хуучин нэг дор нэгдсэн (4-р тулаан ялсан) тоглогчийн бүлэг: босс нь нэмэлт шагнал */
+  window.campTotal=()=>CAMP.reduce((a,_,i)=>a+CSN(i),0);
 })();
 
 </script><script>(function(){

@@ -10564,7 +10564,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='8018f14b20';
+var UPDB='faab101db2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11809,6 +11809,127 @@ bcard=function(k){
   window.addEventListener('resize',()=>{ clearTimeout(window._tfRz); window._tfRz=setTimeout(()=>scan(document.body,900),300); });
   setTimeout(()=>scan(document.body,900),2500);
   window.textFitScan=()=>scan(document.body,1200);
+})();
+
+
+/* p32/story.js — №4: Ажилчин бүрийн 3 алхамтай өөрийн түүх. Ярих цонхонд гарна. Гүйцээсэн бол байнгын ашигтай (perk) */
+(function(){
+  const B=k=>(S.bld&&S.bld[k])||0, A=k=>(S.animals&&S.animals[k])||0, RS=k=>(S.res&&S.res[k])||0, LV=()=>S.pl||1;
+  const herd=()=>A('honi')+A('yamaa')+A('uher')+A('aduu')+A('temee');
+  /* алхам: s=ярьсан үг, d=юу хэрэгтэй, c=нөхцөл, pay=өгөх нөөц, g=алт, xp=туршлага */
+  const ST={
+    0:{p:'Ахмадын ерөөл: туршлага +5%',steps:[
+      {s:'Нүүдэлчин минь, эртний домог ярья. Эхлээд гэрээ өргөтгө, олон хүн багтаг.',d:'Гол гэр 2-р түвшин',c:()=>B('ger')>=2,g:100,xp:20},
+      {s:'Залуусдаа аж төрөх ёсыг заая. Ахмадуудад хоол өгөөч.',d:'60 мах өгөх',pay:{meat:60},g:200,xp:40},
+      {s:'Чи жинхэнэ дарга болж байна. Тал нутагт нэр алдар үлдээ.',d:'Таны түвшин 10',c:()=>LV()>=10,g:400,xp:80}]},
+    1:{p:'Айрагт сүү: сүү +10%',steps:[
+      {s:'Сүү саах хашаа хэрэгтэй, дарга аа. Мал хашаа барьж өгөөч.',d:'Хашаа барих',c:()=>B('hashaa')>=1,g:100,xp:20},
+      {s:'Малаа олшруулбал сүү их болно. Тав хүрэх мал байвал сайн.',d:'5 мал',c:()=>herd()>=5,g:200,xp:40},
+      {s:'Сүүгээр айраг исгэе. Надад сүү өгөөч.',d:'100 сүү өгөх',pay:{milk:100},g:400,xp:80}]},
+    2:{p:'Арвин ургац: мах +6%',steps:[
+      {s:'Тариа тарих газар л байвал би ажлаа хийнэ.',d:'Тариалан барих',c:()=>B('tarialan')>=1,g:100,xp:20},
+      {s:'Үр тариа дутаж байна. Жаахан тариа өгөөч.',d:'40 тариа өгөх',pay:{grain:40},g:200,xp:40},
+      {s:'Талбайгаа томруулбал арвин болно.',d:'Тариалан 2-р түвшин',c:()=>B('tarialan')>=2,g:400,xp:80}]},
+    3:{p:'Зөөлөн эсгий: ноос +10%',steps:[
+      {s:'Эсгий хийх талбай байвал гэр бүхэн дулаан болно.',d:'Эсгийн талбай барих',c:()=>B('esgii')>=1,g:100,xp:20},
+      {s:'Ноос өгвөл би гоё эсгий дэвсгэр хийе.',d:'60 ноос өгөх',pay:{wool:60},g:200,xp:40},
+      {s:'Эсгийн талбайг томруул, өвөл дулаан байна.',d:'Эсгийн талбай 2-р түвшин',c:()=>B('esgii')>=2,g:400,xp:80}]},
+    4:{p:'Модны наймаа: алт +4%',steps:[
+      {s:'Мод хангалттай байх ёстой. Жаахан мод өгөөч, багаж хийе.',d:'40 мод өгөх',pay:{wood:40},g:100,xp:20},
+      {s:'Модны цех байвал мод хурдан бэлдэнэ.',d:'Модны цех барих',c:()=>B('modcex')>=1,g:200,xp:40},
+      {s:'Том барилгад мод их орно. Хангалттай мод өгөөч.',d:'150 мод өгөх',pay:{wood:150},g:400,xp:80}]},
+    5:{p:'Сайн мах: мах +10%',steps:[
+      {s:'Мах бэлтгэх цех л байвал болно.',d:'Махны цех барих',c:()=>B('mahcex')>=1,g:100,xp:20},
+      {s:'Төмрөө хурцлах хэрэгтэй. Дарханы газар барьж өгөөч.',d:'Дарханы газар барих',c:()=>B('smith')>=1,g:200,xp:40},
+      {s:'Цэргүүдэд мах хэрэгтэй. Жаахан мах өгөөч.',d:'100 мах өгөх',pay:{meat:100},g:400,xp:80}]},
+    6:{p:'Ургамлын эм: бүх ашиг +3%',steps:[
+      {s:'Өвчтэй хүнийг эмчлэх газар хэрэгтэй. Эмчийн гэр барь.',d:'Эмчийн гэр барих',c:()=>B('healer')>=1,g:100,xp:20},
+      {s:'Эм хийхэд тос хэрэгтэй. Надад тос өгөөч.',d:'20 тос өгөх',pay:{tos:20},g:200,xp:40},
+      {s:'Бэлэн эмтэй байвал аливаа зовлон даван гарна.',d:'Таны түвшин 12',c:()=>LV()>=12,g:400,xp:80}]},
+    7:{p:'Амттай хоол: мах, сүү +5%',steps:[
+      {s:'Бууз, хуушуур хийх газар байвал би баяртай.',d:'Бууз цех барих',c:()=>B('buuz')>=1,g:100,xp:20},
+      {s:'Хоолонд мах, сүү хэрэгтэй. Жаахан мах өгөөч.',d:'50 мах өгөх',pay:{meat:50},g:200,xp:40},
+      {s:'Хүн бүхэн хоолтой байвал сэтгэл амар.',d:'Айрагийн цех барих',c:()=>B('airag')>=1,g:400,xp:80}]},
+    8:{p:'Залуу баатар: бүх ашиг +4%',steps:[
+      {s:'Би ч гэсэн баатар болмоор байна! Цэргийн хүрээ барьж өгөөч.',d:'Цэргийн хүрээ барих',c:()=>B('hureo')>=1,g:100,xp:20},
+      {s:'Би хонио сайн хариулж чадна. Тавиас дээш мал байвал заавал.',d:'8 мал',c:()=>herd()>=8,g:200,xp:40},
+      {s:'Би хэзээ нэгэн цагт хамгаалагч болно. Надад жаахан мах өгөөч, хүч оруулья.',d:'80 мах өгөх',pay:{meat:80},g:400,xp:80}]},
+    9:{p:'Цэцгийн зах: алт +6%',steps:[
+      {s:'Тал дээр сайхан цэцэг байна. Захад зарах газар л хэрэгтэй.',d:'Зах барих',c:()=>B('market')>=1,g:100,xp:20},
+      {s:'Цэцгээр гоё чимэг хийе. Ноос өгөөч.',d:'30 ноос өгөх',pay:{wool:30},g:200,xp:40},
+      {s:'Цэцгийн амтат ундаа хийе. Айраг өгөөч.',d:'20 айраг өгөх',pay:{airag:20},g:400,xp:80}]},
+    10:{p:'Сайн наймаа: алт +8%',steps:[
+      {s:'Захаа томруулбал арилжаа сайн явна.',d:'Зах 2-р түвшин',c:()=>B('market')>=2,g:100,xp:20},
+      {s:'Алс орноос бараа авчирья. Эхлээд ноос өгөөч.',d:'80 ноос өгөх',pay:{wool:80},g:200,xp:40},
+      {s:'Манай нэр хол дуурсаж байна. Тэмээ авбал наймаа цэцэглэнэ.',d:'1 тэмээ',c:()=>A('temee')>=1,g:400,xp:80}]},
+    11:{p:'Анчны нүд: мах +8%',steps:[
+      {s:'Ан хийхэд сумтай байх ёстой. Цэргийн хүрээ барь.',d:'Цэргийн хүрээ барих',c:()=>B('hureo')>=1,g:100,xp:20},
+      {s:'Харвааны талбай байвал сум хурц болно.',d:'Харвааны талбай барих',c:()=>B('range')>=1,g:200,xp:40},
+      {s:'Ангаас мах авчирлаа. Зарим нь хурдан хөөе.',d:'Таны түвшин 14',c:()=>LV()>=14,g:400,xp:80}]}
+  };
+  const step=i=>{ S.nst=S.nst||{}; return S.nst[i]||0; };
+  const stOk=(i)=>{ const T=ST[i]; if(!T) return null; const k=step(i); if(k>=3) return null; const s=T.steps[k];
+    let ok=true; if(s.c) ok=!!s.c(); if(ok&&s.pay) ok=Object.keys(s.pay).every(r=>RS(r)>=s.pay[r]); return ok; };
+  const fmtPay=p=>Object.keys(p).map(k=>p[k]+' '+({meat:'мах',milk:'сүү',wool:'ноос',grain:'тариа',wood:'мод',tos:'тос',airag:'айраг'}[k]||k)).join(', ');
+  function renameDone(){ try{ if((step(8)>=3)&&NPCS[8]) NPCS[8].role='Залуу баатар'; }catch(e){} }
+
+  window.stDo=function(i){
+    try{
+      const T=ST[i]; if(!T) return; const k=step(i); if(k>=3) return; const s=T.steps[k];
+      if(!stOk(i)){ say('Нөхцөл биелээгүй байна'); try{ sfx('err'); }catch(e){} return; }
+      if(s.pay) Object.keys(s.pay).forEach(r=>{ S.res[r]=Math.max(0,RS(r)-s.pay[r]); });
+      S.res.gold=(S.res.gold||0)+s.g; addXP(s.xp);
+      S.nst[i]=k+1;
+      let m=NPCS[i].n+': '+(k+1===3?'түүх дууслаа! Байнгын ашиг: '+T.p:'алхам '+(k+1)+'/3 биеллээ')+' +'+s.g+'🪙';
+      if(k+1===3){ S.res.alt=(S.res.alt||0)+1; m+=' +1 Алт'; renameDone(); }
+      say(m); try{ sfx('ok'); }catch(e){}
+      refresh(); fillM();
+    }catch(e){}
+  };
+
+  function card(i){
+    const T=ST[i]; if(!T) return '';
+    const k=step(i), done=k>=3;
+    let h='<div class="card" style="border:1px solid #c9972b"><b>📜 Түүх · '+NPCS[i].n+'</b> <span class="sm">('+Math.min(k,3)+'/3)</span>';
+    if(done) return h+'<div class="sm" style="margin-top:6px">✅ Түүх дууссан. <b>'+T.p+'</b></div></div>';
+    const s=T.steps[k], ok=stOk(i);
+    h+='<div style="margin:6px 0;font-style:italic">«'+s.s+'»</div>'+
+       '<div class="sm">Хэрэгтэй: '+s.d+(s.pay?' ('+fmtPay(s.pay)+')':'')+' · Шагнал: '+s.g+'🪙, '+s.xp+' туршлага'+(k===2?', +1 Алт, '+T.p:'')+'</div>'+
+       '<button class="btn" style="margin-top:6px" '+(ok?'':'disabled')+' onclick="stDo('+i+')">'+(ok?(s.pay?'Өгөх':'Биелүүлэх'):'Одоохондоо биш')+'</button></div>';
+    return h;
+  }
+
+  const _mc=modalContent;
+  modalContent=function(k){
+    const h=_mc.apply(this,arguments);
+    if(k==='npc'){ try{ return h+card(npcIdx); }catch(e){} }
+    return h;
+  };
+
+  /* байнгын ашиг */
+  const P={ // idx -> {туршлага X, ашиг: {meat,milk,wool,gold}}
+    0:{x:0.05}, 1:{r:{milk:0.10}}, 2:{r:{meat:0.06}}, 3:{r:{wool:0.10}}, 4:{r:{gold:0.04}}, 5:{r:{meat:0.10}},
+    6:{r:{meat:0.03,milk:0.03,wool:0.03,gold:0.03}}, 7:{r:{meat:0.05,milk:0.05}}, 8:{r:{meat:0.04,milk:0.04,wool:0.04,gold:0.04}},
+    9:{r:{gold:0.06}}, 10:{r:{gold:0.08}}, 11:{r:{meat:0.08}}
+  };
+  const _rate=rate;
+  rate=function(){
+    const r=_rate.apply(this,arguments);
+    try{ Object.keys(P).forEach(i=>{ if(step(+i)>=3&&P[i].r) Object.keys(P[i].r).forEach(x=>{ if(r[x]!=null) r[x]*=1+P[i].r[x]; }); }); }catch(e){}
+    return r;
+  };
+  const _ax=addXP;
+  addXP=function(n){
+    try{ if(n>0&&step(0)>=3) n=n*(1+P[0].x); }catch(e){}
+    return _ax.call(this,n);
+  };
+
+  /* биелэх боломжтой болмогц нэг удаа мэдэгдэнэ */
+  const told={};
+  setInterval(()=>{ try{ if(!(S&&S.res)||document.getElementById('modal').style.display==='flex') return;
+    for(const i in ST){ const k=step(+i); if(k>=3) continue; const key=i+'_'+k; if(!told[key]&&stOk(+i)){ told[key]=1; say('📜 '+NPCS[i].n+': түүхийн даалгавар биелэх боломжтой. Ярилцаж үзээрэй'); break; } } }catch(e){} },9000);
+
+  renameDone(); setInterval(renameDone,20000);
 })();
 
 </script><script>(function(){

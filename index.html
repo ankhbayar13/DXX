@@ -10566,7 +10566,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c424f37d1f';
+var UPDB='939b2d75c7';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12437,6 +12437,68 @@ bcard=function(k){
   }
   const _qh2=questsHTML;
   questsHTML=function(){ const h=_qh2.apply(this,arguments); try{ return h+cards(); }catch(e){ console.log('q2cards',e); return h; } };
+})();
+
+
+/* p32/nutag.js — №3: Шинэ нутаг (дахин эхлэх). Гол гэр 25 түвшинд хүрч, бүх бүлгийг дуусгасан тоглогч шинэ нутагт нүүнэ.
+   Устах: барилга, мал, нөөц, тариалан. Үлдэх: баатрууд, дурсгал, судалгаа, аймгийн аян, Алт, тамга, найз, түвшин. Нэмэгдэх: орлого +5% (Шинэ нутаг бүрт, дээд 20), эхлэх зоос. */
+(function(){
+  const NMAX=20, BON=0.05, NEED_GER=25;
+  const nn=()=>Math.max(0,Math.min(NMAX,(S&&S.nn)||0));
+  const eligible=()=>(S.bld.ger||1)>=NEED_GER&&(S.chap||0)>=CHAP.length;
+  window.nnInfo=()=>({nn:(S&&S.nn)||0,ok:eligible(),bonus:1+BON*nn()});
+
+  /* байнгын бонус: орлого */
+  const _rate=rate;
+  rate=function(){ const r=_rate.apply(this,arguments); try{ const m=1+BON*nn(); if(m>1) for(const x in r) r[x]*=m; }catch(e){} return r; };
+
+  const RESET=['zones','chopped','chopAt','proc','orders','ordT','lastSeason','animals','bld','pos','sites','upg','farm','dead','rev','pend','pens','penM','penU','bt1','bd','hm','dec','otor','otorLog','zudPrep','zudDone','zudFc','zudWarn','zudLog','dx'];
+  window.nnDo=function(){
+    try{
+      if(!eligible()){ say('Шинэ нутагт нүүхэд Гол гэр '+NEED_GER+'-р түвшин, бүх бүлэг дууссан байх ёстой'); return; }
+      const KEY=(typeof SAVE_KEY!=='undefined'?SAVE_KEY:'dxx_save')+'_nn';
+      try{ localStorage.setItem(KEY,acPack(JSON.stringify(S))); }catch(e){}           // хуучин тоглоомын нөөц хуулбар
+      const F=fresh(), old=S.res||{}, n=(S.nn||0)+1;
+      RESET.forEach(k=>{ if(F[k]===undefined) delete S[k]; else S[k]=JSON.parse(JSON.stringify(F[k])); });
+      const r=Object.assign({},F.res); r.alt=(old.alt||0); r.gold=Math.max(F.res.gold||0,0)+2000*n+500;
+      ['hushuu','ovoo','naadamring','suvarga'].forEach(k=>{ if(old[k]) r[k]=old[k]; });
+      S.res=r; S.nn=n; S.last=Date.now(); S.chap=CHAP.length; S.met=1; S.tutDone=1;
+      try{ save(); }catch(e){}
+      setTimeout(()=>{ try{ location.reload(); }catch(e){} },400);
+      say('🌅 Шинэ нутагт нүүж байна…');
+    }catch(e){ console.log('nnDo',e); }
+  };
+  window.nnAsk=function(){
+    try{
+      if(!eligible()){ say('Нөхцөл биелээгүй байна'); return; }
+      closeM && closeM();
+      dxAsk('🌅 <b>Шинэ нутаг '+((S.nn||0)+1)+'</b><br>Бүх барилга, мал, нөөц, тариалан <b>устаж</b>, шинээр эхэлнэ.<br>Үлдэх: баатар, дурсгал, судалгаа, аймгийн аян, Алт, тамга.<br>Шагнал: орлого +5% (байнга), эхлэх зоос.','Үргэлжлүүлэх',()=>{
+        setTimeout(()=>dxAsk('⚠ Сүүлчийн асуулт. Үнэхээр шинэ нутагт нүүх үү? Буцаах боломжгүй.','Тийм, нүүе',()=>nnDo(),'Үгүй'),200);
+      },'Болих');
+    }catch(e){ console.log('nnAsk',e); }
+  };
+
+  /* «Даалгавар» цэсэнд карт */
+  function card(){
+    const g=S.bld.ger||1, ch=(S.chap||0), ok=eligible(), n=(S.nn||0);
+    let h='<div class="card" style="border:1px solid #9b6bd6"><h3>🌅 Шинэ нутаг'+(n?' · '+n+'-р':'')+'</h3>'+
+      '<div class="sm">Бүгдийг дуусгасан хаан шинэ нутагт нүүж, эхнээс нь эхэлнэ. Баатар, дурсгал, судалгаа, аймгийн аян, Алт үлдэнэ. Шинэ нутаг бүрт орлого <b>+5%</b> (одоо +'+Math.round(BON*nn()*100)+'%).</div>'+
+      '<div class="sm" style="margin-top:6px">'+(g>=NEED_GER?'✅':'⬜')+' Гол гэр '+g+'/'+NEED_GER+' · '+(ch>=CHAP.length?'✅':'⬜')+' Бүлэг '+Math.min(ch,CHAP.length)+'/'+CHAP.length+'</div>'+
+      '<button class="btn" style="margin-top:8px" '+(ok?'':'disabled')+' onclick="nnAsk()">🌅 Шинэ нутагт нүүх</button></div>';
+    return h;
+  }
+  const _qh=questsHTML;
+  questsHTML=function(){ const h=_qh.apply(this,arguments); try{ return h+card(); }catch(e){ console.log('nn card',e); return h; } };
+
+  /* найзууд харах: тоо */
+  const _ss=socSnap;
+  socSnap=function(){ const o=_ss.apply(this,arguments); try{ if(S.nn) o.nn=S.nn; }catch(e){} return o; };
+  const _sv=socView;
+  socView=function(){
+    let h=_sv.apply(this,arguments);
+    try{ const r=CL.sv, me=r&&r.id===CL.uid, v=me?S.nn:(r&&r.v&&r.v.nn); if(v) h+='<div class="card" style="text-align:center"><div style="font-size:15px">🌅 Шинэ нутаг ×<b>'+(+v|0)+'</b></div></div>'; }catch(e){}
+    return h;
+  };
 })();
 
 </script><script>(function(){

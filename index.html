@@ -10566,7 +10566,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4c03d6846b';
+var UPDB='c424f37d1f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12332,6 +12332,111 @@ bcard=function(k){
         '<button class="btn" style="margin-top:8px" onclick="tgOpen()">'+(s?'✏ Засах':'🎨 Тамга зурах')+'</button></div>'; }catch(e){} }
     return h;
   };
+})();
+
+
+/* p32/quest2.js — уйдахгүй байлгах: (1) 5–9-р бүлэг (гол түүх), (2) өдрийн 3 нэмэлт даалгавар, (3) 7 хоногийн даалгавар + сав,
+   (4) Овоо, Суварга, Хөшөө, Сүм хийд өндөр түвшинд нээгдэнэ. Бүгд хуучин qh() тоологч дээр суурилна. */
+(function(){
+  /* ---------- 4) Нээгдэх түвшин (Гол гэрийн түвшин) ---------- */
+  try{ BREQ.hushuu=10; BREQ.ovoo=10; BREQ.suvarga=11; BREQ.temple=12; }catch(e){}
+
+  /* ---------- 1) Нэмэлт бүлгүүд ---------- */
+  const hc=()=>Object.keys(S.heroes||{}).length, gL=()=>S.bld.ger||1;
+  const T=[];
+  const add=(t,ok,go)=>{ TASKS.push({t:t,ok:ok,go:go}); return TASKS.length-1; };
+  const gB=()=>{ try{ bTab='life'; }catch(e){} openM('barilga'); say('👉 Гэрээ сайжруул. Бусад барилга гэрийн түвшингөөс доош байж болохгүй'); };
+  const goB=(n)=>()=>{ try{ bTab='life'; }catch(e){} openM('barilga'); say('👉 '+n+' бариул'); };
+  const t5a=add('Гэрээ 6-р түвшинд хүргэ',()=>gL()>=6,gB), t5b=add('Баатар 4 болго',()=>hc()>=4,()=>openM('baatar')), t5c=add('Малаа 30 болго',()=>herdCount()>=30,()=>openM('mal'));
+  const t6a=add('Гэрээ 10-р түвшинд хүргэ',()=>gL()>=10,gB), t6b=add('Овоо бариул',()=>S.bld.ovoo>0,goB('Овоо')), t6c=add('Чингис хааны хөшөө бариул',()=>S.bld.hushuu>0,goB('Хөшөө')), t6d=add('10 аймгийг нэгтгэ (Түүхэн аян)',()=>joinedN()>=10,()=>openM('camp'));
+  const t7a=add('Гэрээ 13-р түвшинд хүргэ',()=>gL()>=13,gB), t7b=add('Цагаан суварга бариул',()=>S.bld.suvarga>0,goB('Цагаан суварга')), t7c=add('Сүм хийд бариул',()=>S.bld.temple>0,goB('Сүм хийд')), t7d=add('Бүх аймгийг нэгтгэ (Түүхэн аян)',()=>joinedN()>=CAMP.length,()=>openM('camp'));
+  const t8a=add('Гэрээ 18-р түвшинд хүргэ',()=>gL()>=18,gB), t8b=add('Баатар 10 болго',()=>hc()>=10,()=>openM('baatar')), t8c=add('Хааны зэрэг 20 болго',()=>(S.pl||1)>=20,()=>say('👉 Тулаан, даалгавар, барилгаар туршлага цуглуул'));
+  const t9a=add('Гэрээ 25-р түвшинд хүргэ',()=>gL()>=25,gB), t9b=add('Баатар 15 болго',()=>hc()>=15,()=>openM('baatar'));
+  CHAP.push(
+    {n:'5-р бүлэг · Хүчирхэг тосгон',ic:'q_ch1',t:[t5a,t5b,t5c],r:{gold:20000,alt:60}},
+    {n:'6-р бүлэг · Тэнгэрийн ивээл',ic:'q_ch2',t:[t6a,t6b,t6c,t6d],r:{gold:60000,alt:100}},
+    {n:'7-р бүлэг · Хаадын зам',ic:'q_ch3',t:[t7a,t7b,t7c,t7d],r:{gold:200000,alt:150}},
+    {n:'8-р бүлэг · Их хаан',ic:'q_ch2',t:[t8a,t8b,t8c],r:{gold:600000,alt:250}},
+    {n:'9-р бүлэг · Мянган жилийн нутаг',ic:'q_ch3',t:[t9a,t9b],r:{gold:2000000,alt:500}}
+  );
+  const _tg=window.taskGo;
+  window.taskGo=function(i){
+    try{ const T0=TASKS[i]; if(T0&&T0.go){ if(T0.ok()){ say('✅ Энэ даалгавар хийгдсэн'); return; } try{ closeM(); }catch(e){} T0.go(); return; } }catch(e){}
+    return _tg.apply(this,arguments);
+  };
+
+  /* ---------- 2),3) Өдөр / 7 хоногийн даалгавар ---------- */
+  const POOL=[
+    {k:'col',n:g=>g+' нөөц цуглуул',g:200},{k:'ord',n:g=>g+' захиалга хүргэ',g:3},{k:'up',n:g=>g+' барилга сайжруул',g:2},
+    {k:'win',n:g=>g+' тулалдаанд ял',g:3},{k:'sell',n:g=>'Бараа '+g+' удаа зар',g:3},{k:'nd',n:g=>g+' наадмын тоглоом тогло',g:2}
+  ];
+  const WK=[
+    {k:'col',n:g=>g+' нөөц цуглуул',g:1500},{k:'ord',n:g=>g+' захиалга хүргэ',g:12},{k:'up',n:g=>g+' барилга сайжруул',g:8},
+    {k:'win',n:g=>g+' тулалдаанд ял',g:12},{k:'nd',n:g=>g+' наадмын тоглоом тогло',g:8}
+  ];
+  const hash=s=>{ let a=7; for(let i=0;i<s.length;i++) a=(a*31+s.charCodeAt(i))|0; return Math.abs(a); };
+  const pl=()=>Math.max(1,S.pl||1);
+  const dKey=()=>nowD().toDateString();
+  const wKey=()=>{ const d=nowD(), w=new Date(d.getFullYear(),d.getMonth(),d.getDate()); return new Date(w.getTime()-((w.getDay()+6)%7)*864e5).toDateString(); };
+  const wLeft=()=>{ const d=nowD(), w=new Date(d.getFullYear(),d.getMonth(),d.getDate()), nx=w.getTime()+(8-((w.getDay()+6)%7+1))*864e5+0; const ms=nx-d.getTime(); const dd=Math.floor(ms/864e5), hh=Math.floor(ms%864e5/36e5); return dd+' өдөр '+hh+' цаг'; };
+  function dInit(){ dqInit(); const k=dKey(); if(!S.dx||S.dx.d!==k){ const pk=POOL.slice().sort((a,b)=>(hash(k+a.k)%97)-(hash(k+b.k)%97)).slice(0,3).map(q=>q.k); S.dx={d:k,pk:pk,cl:{},box:0}; } }
+  function wInit(){ const k=wKey(); if(!S.wk||S.wk.w!==k) S.wk={w:k,c:{},cl:{},box:0}; }
+  const dQ=()=>{ dInit(); return S.dx.pk.map(k=>POOL.find(q=>q.k===k)).filter(Boolean); };
+  const dRew=q=>({gold:Math.round(60*pl()+200*(q.g>=100?1:1))});
+  const wRew=q=>({gold:Math.round(500*pl()+1000),alt:2});
+  const val=(t,k)=>{ if(t==='d'){ dInit(); return (S.dq.c[k]||0); } wInit(); return (S.wk.c[k]||0); };
+
+  /* 7 хоногийн тоологч: хуучин qh-г ороож нэмнэ */
+  const _qh=qh;
+  qh=function(t,n){ _qh.apply(this,arguments); try{ wInit(); S.wk.c[t]=(S.wk.c[t]||0)+n; }catch(e){} };
+
+  window.x2Claim=function(t,k){
+    try{
+      const L=t==='d'?dQ():WK, q=L.find(x=>x.k===k); if(!q) return;
+      const st=t==='d'?(dInit(),S.dx):(wInit(),S.wk);
+      if(st.cl[k]||val(t,k)<q.g) return; st.cl[k]=1;
+      const r=t==='d'?dRew(q):wRew(q); for(const x in r) S.res[x]=(S.res[x]||0)+r[x]; addXP(t==='d'?8:25);
+      say('✅ +'+f(r.gold)+' 🪙'+(r.alt?' +'+r.alt+' Алт':'')); try{ sfx('ok'); }catch(e){}
+      try{ save(); }catch(e){} refresh(); fillM();
+    }catch(e){ console.log('x2Claim',e); }
+  };
+  window.x2Box=function(t){
+    try{
+      const L=t==='d'?dQ():WK, st=t==='d'?(dInit(),S.dx):(wInit(),S.wk);
+      if(st.box||!L.every(q=>st.cl[q.k])) return; st.box=1;
+      if(t==='d'){ S.res.alt=(S.res.alt||0)+2; S.res.gold=(S.res.gold||0)+Math.round(250*pl()); addXP(40); try{ stnGain(10); }catch(e){} say('🎁 Өдрийн нэмэлт сав: +2 Алт +'+f(250*pl())+' 🪙 +10 🔮'); }
+      else { const g=Math.round(3000*pl()), a=20; S.res.alt=(S.res.alt||0)+a; S.res.gold=(S.res.gold||0)+g; addXP(150); try{ stnGain(40); }catch(e){} try{ rkAdd(10,'7 хоногийн даалгавар'); }catch(e){} say('🏆 7 хоногийн сав: +'+a+' Алт +'+f(g)+' 🪙 +40 🔮'); }
+      try{ sfx('win'); }catch(e){}
+      try{ save(); }catch(e){} refresh(); fillM();
+    }catch(e){ console.log('x2Box',e); }
+  };
+  const nClaim=()=>{ let n=0; try{
+    dInit(); wInit();
+    dQ().forEach(q=>{ if(!S.dx.cl[q.k]&&val('d',q.k)>=q.g) n++; }); if(!S.dx.box&&dQ().every(q=>S.dx.cl[q.k])) n++;
+    WK.forEach(q=>{ if(!S.wk.cl[q.k]&&val('w',q.k)>=q.g) n++; }); if(!S.wk.box&&WK.every(q=>S.wk.cl[q.k])) n++;
+  }catch(e){} return n; };
+  const _qb=qBadge; qBadge=function(){ return _qb.apply(this,arguments)+nClaim(); };
+
+  function row(t,q,st,r){
+    const v=Math.min(q.g,val(t,q.k)), ok=v>=q.g, cl=st.cl[q.k];
+    return '<div class="row" style="margin-top:8px"><div style="flex:1;min-width:0"><div style="font-size:13px;cursor:pointer" onclick="dqGo(\''+q.k+'\')">'+q.n(q.g)+' › <span class="sm">'+f(v)+'/'+f(q.g)+'</span></div>'+
+      '<div style="height:6px;border-radius:3px;background:#0008;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+Math.round(100*v/q.g)+'%;background:linear-gradient(90deg,#c9972b,#ffd770)"></div></div></div>'+
+      (cl?'<span class="sm">✓</span>':'<button class="btn" '+(ok?'':'disabled')+' onclick="x2Claim(\''+t+'\',\''+q.k+'\')">'+f(r.gold)+' 🪙'+(r.alt?' +'+r.alt+'💎':'')+'</button>')+'</div>';
+  }
+  function cards(){
+    dInit(); wInit();
+    let h='<div class="card"><h3>✨ Өдрийн нэмэлт даалгавар</h3><div class="sm">Өдөр бүр өөр 3 даалгавар. Бүгдийг хийвэл сав.</div>';
+    dQ().forEach(q=>{ h+=row('d',q,S.dx,dRew(q)); });
+    const da=dQ().every(q=>S.dx.cl[q.k]);
+    h+='<div style="text-align:center;margin-top:10px">'+(S.dx.box?'<div class="sm">Сав нээгдсэн ✓</div>':'<button class="btn" '+(da?'':'disabled')+' onclick="x2Box(\'d\')">🎁 Сав нээх</button>')+'</div></div>';
+    h+='<div class="card" style="border:1px solid #c9972b"><h3>🏆 7 хоногийн даалгавар</h3><div class="sm">Шинэчлэгдэхэд: '+wLeft()+'. Бүгдийг хийвэл том сав: 20 Алт.</div>';
+    WK.forEach(q=>{ h+=row('w',q,S.wk,wRew(q)); });
+    const wa=WK.every(q=>S.wk.cl[q.k]);
+    h+='<div style="text-align:center;margin-top:10px">'+(S.wk.box?'<div class="sm">7 хоногийн сав нээгдсэн ✓</div>':'<button class="btn" '+(wa?'':'disabled')+' onclick="x2Box(\'w\')">🏆 Том сав нээх</button>')+'</div></div>';
+    return h;
+  }
+  const _qh2=questsHTML;
+  questsHTML=function(){ const h=_qh2.apply(this,arguments); try{ return h+cards(); }catch(e){ console.log('q2cards',e); return h; } };
 })();
 
 </script><script>(function(){

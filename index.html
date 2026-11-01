@@ -10564,7 +10564,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='faab101db2';
+var UPDB='0e77b893b2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11749,7 +11749,7 @@ bcard=function(k){
 (function(){
   /* .rb нэр хоёр зүйлд давхцсан: прогресс мөр (өндөр 18px, overflow:hidden) болон улаан туузан гарчиг h3.rb. Гарчгийн текст доош шахагдаж хайчлагдаж байсныг засна */
   try{ const st=document.createElement('style'); st.id='tf1'; st.textContent='.card h3.rb{height:auto!important;min-height:0!important;overflow:visible!important;flex:none!important;background:none!important;border-radius:0!important;box-shadow:none!important}'+
-      '[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(2,1fr)"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(4,minmax(0,1fr))!important}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.bgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.card{min-width:0}'; document.head.appendChild(st); }catch(x){}
+      '[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(2,1fr)"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(4,minmax(0,1fr))!important}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.bgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.card{min-width:0}.card h3{overflow-wrap:break-word!important;word-break:normal!important}'; document.head.appendChild(st); }catch(x){}
   const MIN=7;
   const SKIP={SCRIPT:1,STYLE:1,INPUT:1,TEXTAREA:1,SELECT:1,CANVAS:1,IMG:1,SVG:1,HTML:1,BODY:1,HEAD:1,OPTION:1,BR:1};
   function hasOwn(e){ const c=e.childNodes; for(let i=0;i<c.length;i++){ if(c[i].nodeType===3&&c[i].nodeValue.trim()) return true; } return false; }
@@ -11930,6 +11930,126 @@ bcard=function(k){
     for(const i in ST){ const k=step(+i); if(k>=3) continue; const key=i+'_'+k; if(!told[key]&&stOk(+i)){ told[key]=1; say('📜 '+NPCS[i].n+': түүхийн даалгавар биелэх боломжтой. Ярилцаж үзээрэй'); break; } } }catch(e){} },9000);
 
   renameDone(); setInterval(renameDone,20000);
+})();
+
+
+/* p32/otor.js — №2: Отор. Малынхаа нэг хэсгийг нэг ажилчинтай алс бэлчээр (отор) 2/8/24 цагаар явуулна. Тоглоомоос гарсан үед ч үргэлжилнэ (Date.now).
+   Эргэж ирэхдээ нэмэлт мах, сүү, ноос, төл авчирна. Заримдаа чоно дайрч мал алдана, заримдаа сайхан бэлчээр таарна. Явж байхад ажилчин тосгонд байхгүй. */
+(function(){
+  const HR={2:7200000,8:28800000,24:86400000};
+  const GR={2:0.10,8:0.25,24:0.5};        // төл (явуулсан малын %)
+  const XPR={2:15,8:40,24:90};
+  const KEYS=['honi','yamaa','uher','aduu','temee'];
+  const tot=o=>Object.keys(o).reduce((a,k)=>a+o[k],0);
+  const nm=i=>(NPCS[i]&&NPCS[i].n)||'Ажилчин';
+  const fmtT=ms=>{ ms=Math.max(0,ms); const s=Math.ceil(ms/1000), h=Math.floor(s/3600), m=Math.floor(s%3600/60), q=s%60; return h+':'+String(m).padStart(2,'0')+':'+String(q).padStart(2,'0'); };
+
+  /* явж байгаа ажилчныг тосгоноос түр нууна (нас барсан гэж тооцоолохгүй, зөвхөн syncEnts-ийн хугацаанд) */
+  const _se=syncEnts;
+  syncEnts=function(){
+    let w=-1, pushed=false;
+    try{ if(S&&S.otor&&S.otor.who>=0){ w=S.otor.who; S.dead=S.dead||[]; if(!S.dead.includes(w)){ S.dead.push(w); pushed=true; } } }catch(e){}
+    try{ return _se.apply(this,arguments); }
+    finally{ if(pushed){ const i=S.dead.lastIndexOf(w); if(i>=0) S.dead.splice(i,1); } }
+  };
+
+  const persons=()=>ents.filter(e=>e.kind==='person');
+  window.otPick=function(i){ window._otW=i; try{ fillM(); }catch(e){} };
+
+  window.otStart=function(h){
+    try{
+      if(S.otor){ say('Отор явж байна'); return; }
+      if(!HR[h]) return;
+      if(!(S.bld.hashaa>0)){ say('Эхлээд мал хашаа бариарай'); return; }
+      if(herdCount()<3){ say('Отор явуулахад хамгийн багадаа 3 мал хэрэгтэй'); return; }
+      const p=persons(); if(p.length<2){ say('Тосгонд ядаж 2 хүн үлдэх ёстой'); return; }
+      const w=window._otW;
+      const e=p.find(x=>x.idx===w)||p.find(x=>x.idx===8)||p.find(x=>x.idx===1)||p[0];
+      const sent={}; KEYS.forEach(k=>{ const a=S.animals[k]||0; if(a>0) sent[k]=Math.max(1,Math.round(a*0.4)); });
+      if(tot(sent)<2){ const k=KEYS.reduce((b,x)=>((S.animals[x]||0)>(S.animals[b]||0)?x:b),KEYS[0]); sent[k]=Math.min(S.animals[k],(sent[k]||0)+1); }
+      try{ if(sel===e) deselect(); }catch(x){}
+      e.task=null; e.post=null; e.sel=false;
+      S.otor={t0:Date.now(),t1:Date.now()+HR[h],h:h,who:e.idx,sent:sent};
+      syncEnts(false);
+      say('🐎 '+nm(e.idx)+' '+tot(sent)+' малтай отор явлаа ('+h+' цаг)');
+      try{ sfx('ok'); }catch(x){}
+      refresh(); fillM();
+    }catch(x){ console.log('otStart',x); }
+  };
+
+  function finish(){
+    const O=S.otor; if(!O) return;
+    const n=tot(O.sent), hrs=O.h;
+    const guard=(S.bld.hureo>0)||ents.some(e=>e.kind==='wild'&&e.friend&&e.type==='guard');
+    const r=Math.random(), pW=guard?0.08:0.18, pG=0.22;
+    const kind=r<pW?'wolf':r<pW+pG?'great':'ok';
+    const mul=(typeof prodMul==='function')?prodMul():1;
+    const pm={meat:0,milk:0,wool:0,gold:0};
+    KEYS.forEach(k=>{ const c=O.sent[k]||0; if(!c) return; for(const x in pm) pm[x]+=(ANIMALS[k][x]||0)*c*mul; });
+    const f=kind==='wolf'?0.10:kind==='great'?0.40:0.25, mins=hrs*60, lim=Math.round((4*cap()+600)*(kind==='wolf'?0.4:kind==='great'?1:0.7));   // агуулахын багтаамжаар хязгаарлана (тоглоомын ердийн орлогыг эвдэхгүй)
+    const gain={}; for(const x in pm) gain[x]=Math.min(lim,Math.round(pm[x]*mins*f));
+    for(const x in gain) S.res[x]=(S.res[x]||0)+gain[x];
+    /* төл */
+    let g=kind==='wolf'?0:Math.floor(n*GR[hrs])+(kind==='great'?1:0), born=0;
+    while(g>0){ const k=KEYS.filter(x=>(O.sent[x]||0)>0||(S.animals[x]||0)>0).find(x=>(S.animals[x]||0)<penCap(x)&&herdCount()<herdMax()); if(!k) break; S.animals[k]++; born++; g--; }
+    /* чонын хохирол */
+    let lost=0;
+    if(kind==='wolf'){ let L=Math.max(1,Math.round(n*0.15)); while(L>0){ const k=KEYS.find(x=>(S.animals[x]||0)>0&&(O.sent[x]||0)>0)||KEYS.find(x=>(S.animals[x]||0)>0); if(!k) break; S.animals[k]--; O.sent[k]=Math.max(0,(O.sent[k]||0)-1); lost++; L--; } }
+    try{ addXP(XPR[hrs]); }catch(x){}
+    S.otorLog={t:Date.now(),w:O.who,kind:kind,gain:gain,born:born,lost:lost,h:hrs};
+    S.otor=null;
+    syncEnts(false);
+    const nn=nm(O.who), parts=[]; if(gain.meat) parts.push('+'+gain.meat+' мах'); if(gain.milk) parts.push('+'+gain.milk+' сүү'); if(gain.wool) parts.push('+'+gain.wool+' ноос'); if(gain.gold) parts.push('+'+gain.gold+'🪙'); if(born) parts.push(born+' төл');
+    say(kind==='wolf'?('🐺 '+nn+': Чоно дайрлаа! '+lost+' мал алдлаа. '+parts.join(', ')):kind==='great'?('🌿 '+nn+': Сайхан бэлчээр таарлаа! '+parts.join(', ')):('🐎 '+nn+' отороос эргэж ирлээ: '+parts.join(', ')));
+    try{ sfx('ok'); }catch(x){}
+    try{ refresh(); if(document.getElementById('modal').style.display==='flex') fillM(); }catch(x){}
+  }
+  window.otFinish=finish;
+
+  window.otRush=function(){
+    const O=S.otor; if(!O) return;
+    const cost=Math.max(1,Math.ceil((O.t1-Date.now())/3600000))*2;
+    if((S.res.alt||0)<cost){ say('Алт хүрэлцэхгүй (хэрэгтэй '+cost+')'); try{ sfx('err'); }catch(x){} return; }
+    S.res.alt-=cost; O.t1=Date.now(); finish();
+  };
+
+  /* хугацаа дуусахыг шалгана (тоглоом хаагдсан байсан ч дараагийн нээлтэд эргэнэ) */
+  setInterval(()=>{
+    try{
+      if(typeof S==='undefined'||!S||!S.res) return;
+      if(S.otor&&Date.now()>=S.otor.t1) finish();
+      const el=document.getElementById('otl'); if(el&&S.otor) el.textContent=fmtT(S.otor.t1-Date.now());
+    }catch(x){}
+  },1000);
+
+  /* «Мал» цэс дотор карт */
+  function card(){
+    let h='<div class="card" style="border:1px solid #c9972b"><b>🐎 Отор</b>';
+    const O=S.otor;
+    if(O){
+      h+='<div class="sm" style="margin:6px 0">'+nm(O.who)+' '+tot(O.sent)+' малтай алс бэлчээрт явж байна. Эргэж ирэхэд нэмэлт мах, сүү, ноос, төл авчирна.</div>'+
+         '<div style="font-size:20px;font-weight:bold;text-align:center;margin:6px 0">⏳ <span id="otl">'+fmtT(O.t1-Date.now())+'</span></div>'+
+         '<button class="btn" onclick="otRush()">⚡ Түргэсгэх · '+(Math.max(1,Math.ceil((O.t1-Date.now())/3600000))*2)+' Алт</button>';
+    } else {
+      const p=persons();
+      const w=window._otW, def=(p.find(x=>x.idx===w)||p.find(x=>x.idx===8)||p.find(x=>x.idx===1)||p[0]||{}).idx;
+      h+='<div class="sm" style="margin:6px 0">Малынхаа 40%-ийг нэг ажилчинтай алс бэлчээр явуулна. Явж байхад тэр ажилчин тосгонд байхгүй. Чоно дайрах эрсдэлтэй (хамгаалагчтай бол бага).</div>';
+      h+='<div class="sm">Хэнийг явуулах:</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px">'+
+         p.map(e=>'<button class="btn" style="padding:3px 8px;font-size:12px;'+(e.idx===def?'outline:2px solid #ffd770':'opacity:.8')+'" onclick="otPick('+e.idx+')">'+nm(e.idx)+'</button>').join('')+'</div>';
+      const ok=S.bld.hashaa>0&&herdCount()>=3&&p.length>=2;
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap">'+[2,8,24].map(x=>'<button class="btn" '+(ok?'':'disabled')+' onclick="otStart('+x+')">'+x+' цаг<br><span class="sm">төл +'+Math.round(GR[x]*100)+'%</span></button>').join('')+'</div>';
+      if(!ok) h+='<div class="sm" style="margin-top:6px;color:#ffb347">'+(!(S.bld.hashaa>0)?'Мал хашаа хэрэгтэй. ':'')+(herdCount()<3?'Хамгийн багадаа 3 мал хэрэгтэй. ':'')+(p.length<2?'Тосгонд 2 хүн байх ёстой.':'')+'</div>';
+    }
+    const L=S.otorLog;
+    if(L&&!O){ const g=L.gain||{}; h+='<div class="sm" style="margin-top:8px;opacity:.9">Сүүлийн отор: '+nm(L.w)+' · '+(L.kind==='wolf'?'🐺 чоно дайрсан, '+L.lost+' мал алдсан':L.kind==='great'?'🌿 сайхан бэлчээр':'🐎 хэвийн')+' · +'+(g.meat||0)+' мах, +'+(g.milk||0)+' сүү, +'+(g.wool||0)+' ноос'+(L.born?', '+L.born+' төл':'')+'</div>'; }
+    return h+'</div>';
+  }
+  const _mc=modalContent;
+  modalContent=function(k){
+    const h=_mc.apply(this,arguments);
+    if(k==='mal'){ try{ return h+card(); }catch(e){} }
+    return h;
+  };
 })();
 
 </script><script>(function(){

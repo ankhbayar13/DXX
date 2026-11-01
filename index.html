@@ -10567,7 +10567,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4f677b3bea';
+var UPDB='fda2c689b8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11299,9 +11299,9 @@ bcard=function(k){
   }
   function html(){
     const Lay=hmLayout(), P=ents.filter(e=>e.kind==='person').sort((a,b)=>a.idx-b.idx), G=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb);
-    const maxP=Math.min(popCap(),NPCS.length);
+    const maxP=Math.min(popCap(),NPCS.length), maxG=Math.max(G.length,Object.keys(window.GPOST||{}).length);
     const home=e=>{ const k=hmOf(e); return k?hn(k):'гэргүй'; };
-    let h='<h2>Ажилчид</h2><div class="card"><b>👥 Ажилчин: '+P.length+'/'+maxP+' · 🛡 Харуул: '+G.length+'</b>'+nextHint(Lay).map(t=>'<div class="sm" style="margin-top:5px">'+t+'</div>').join('')+'<div class="sm" style="margin-top:5px;opacity:.8">Мөр дээр дарвал тэр хүн рүү очно.</div></div>';
+    let h='<h2>Ажилчид</h2><div class="card"><b>👥 Нийт хүн: '+(P.length+G.length)+'/'+(maxP+maxG)+'</b><div class="sm">🧑 Ажилчин '+P.length+'/'+maxP+' · 🛡 Харуул-анчин-модчин '+G.length+'/'+maxG+'</div>'+nextHint(Lay).map(t=>'<div class="sm" style="margin-top:5px">'+t+'</div>').join('')+'<div class="sm" style="margin-top:5px;opacity:.8">Мөр дээр дарвал тэр хүн рүү очиж, командын цэс нь гарна.</div></div>';
     h+='<h3 style="margin:10px 4px 4px">Ажилчид</h3>';
     h+=P.map(e=>'<div class="card" style="cursor:pointer" onclick="wkGo(\'p\','+e.idx+')"><div class="row"><div><b>🧑 '+NPCS[e.idx].n+'</b><div class="sm">'+NPCS[e.idx].role+' · '+home(e)+((window.wjPlace&&wjPlace(e))?' · 🛠 '+wjPlace(e):'')+'</div></div><div class="sm" style="text-align:right;max-width:46%">'+stP(e)+' ›</div></div></div>').join('')||'<div class="card sm">Ажилчин алга.</div>';
     if(G.length){
@@ -11316,7 +11316,8 @@ bcard=function(k){
       if(!e){ return; }
       closeM();
       cam.x=e.x+entCx(e)-(W/Z)/2; cam.y=e.y+entH(e)/2-(H/Z)/2; clampCam();
-      e.say={t:'Би энд байна!',ttl:2.6,delay:0}; try{ addFloat(e.x,e.y-8,'👆','#ffd770'); }catch(x){}
+      try{ select(e); }catch(x){ console.log('wkGo select',x); }
+      try{ addFloat(e.x,e.y-8,'👆','#ffd770'); }catch(x){}
     }catch(x){}
   };
   const _mc=modalContent;
@@ -11332,7 +11333,7 @@ bcard=function(k){
   let tm=0;
   const _up=update;
   update=function(dt){
-    try{ tm+=dt; if(row&&tm>1){ tm=0; const gK=ents.some(e=>e.kind==='wild'&&e.friend&&e.type==='guard')?1:0, n=ents.filter(e=>e.kind==='person').length+gK, g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, s='<b id="pwk">'+n+'/'+(Math.min(popCap(),NPCS.length)+gK)+'</b>';
+    try{ tm+=dt; if(row&&tm>1){ tm=0; const g=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb).length, n=ents.filter(e=>e.kind==='person').length+g, s='<b id="pwk">'+n+'/'+(Math.min(popCap(),NPCS.length)+Math.max(g,Object.keys(window.GPOST||{}).length))+'</b>';
       if(s!==last){ last=s; row.innerHTML='👥 '+s; } } }catch(x){}
     return _up.apply(this,arguments);
   };

@@ -10567,7 +10567,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='067f51828f';
+var UPDB='4f677b3bea';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12500,6 +12500,34 @@ bcard=function(k){
     try{ const r=CL.sv, me=r&&r.id===CL.uid, v=me?S.nn:(r&&r.v&&r.v.nn); if(v) h+='<div class="card" style="text-align:center"><div style="font-size:15px">🌅 Шинэ нутаг ×<b>'+(+v|0)+'</b></div></div>'; }catch(e){}
     return h;
   };
+})();
+
+
+/* p32/mback.js — «Буцах» товч: цэснээс цэс рүү орсон бол өмнөх цэс рүүгээ буцна (түүхийн жагсаалт). ✕ хаах товч хэвээр. */
+(function(){
+  window.MH=[];
+  let noPush=false;
+  const _o=openM;
+  openM=function(k){
+    let pushed=false;
+    try{
+      const was=cur, open=!!(was&&$('modal').style.display==='flex');
+      let inside=false; try{ const ev=window.event; inside=!!(ev&&ev.target&&ev.target.closest&&ev.target.closest('#modal')); }catch(e){}
+      if(noPush){ /* буцаж байна */ }
+      else if(k==='menu'||!open||!inside){ MH.length=0; }
+      else if(was!==k){ if(MH[MH.length-1]!==was) MH.push(was); pushed=true; }
+    }catch(e){ console.log('mback',e); }
+    const r=_o.apply(this,arguments);
+    try{ if(pushed&&cur!==k) MH.pop(); if(!cur) MH.length=0; }catch(e){}
+    return r;
+  };
+  const _c=closeM;
+  closeM=function(){ MH.length=0; return _c.apply(this,arguments); };
+  window.mBk=function(){
+    try{ const p=MH.pop(); if(!p) return; noPush=true; try{ openM(p); } finally{ noPush=false; } }
+    catch(e){ noPush=false; console.log('mBk',e); }
+  };
+  mBack=function(){ return (MH.length&&cur)?'<button id="mback" class="btn" style="position:absolute;left:10px;top:10px;z-index:3;padding:5px 11px;font-size:14px" onclick="mBk()">‹ Буцах</button>':''; };
 })();
 
 </script><script>(function(){

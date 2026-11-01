@@ -10564,7 +10564,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='71f571695d';
+var UPDB='8018f14b20';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11741,6 +11741,74 @@ bcard=function(k){
     return false;
   }
   moveTo=function(e,dt){ try{ const r=pfMove.call(this,e,dt); if(r!==undefined) return r; }catch(x){ e._pf=null; } return _prev.call(this,e,dt); };
+})();
+
+
+/* p32/textfit.js — Хайрцагтаа багтаагүй (дүүрсэн, хэтэрсэн, 2 мөр болж дээш доош халсан) бүх HTML текстийг фонтыг нь багасгаж автоматаар багтаана.
+   Цэс, товч, самбар, HUD бүх газарт. Canvas доторх нэрийн шошго энд орохгүй. */
+(function(){
+  /* .rb нэр хоёр зүйлд давхцсан: прогресс мөр (өндөр 18px, overflow:hidden) болон улаан туузан гарчиг h3.rb. Гарчгийн текст доош шахагдаж хайчлагдаж байсныг засна */
+  try{ const st=document.createElement('style'); st.id='tf1'; st.textContent='.card h3.rb{height:auto!important;min-height:0!important;overflow:visible!important;flex:none!important;background:none!important;border-radius:0!important;box-shadow:none!important}'+
+      '[style*="grid-template-columns:repeat(3,1fr)"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(2,1fr)"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(4,minmax(0,1fr))!important}[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.bgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.card{min-width:0}'; document.head.appendChild(st); }catch(x){}
+  const MIN=7;
+  const SKIP={SCRIPT:1,STYLE:1,INPUT:1,TEXTAREA:1,SELECT:1,CANVAS:1,IMG:1,SVG:1,HTML:1,BODY:1,HEAD:1,OPTION:1,BR:1};
+  function hasOwn(e){ const c=e.childNodes; for(let i=0;i<c.length;i++){ if(c[i].nodeType===3&&c[i].nodeValue.trim()) return true; } return false; }
+  function over(e){
+    const cs=getComputedStyle(e);
+    if(cs.display==='none'||cs.display==='contents') return false;
+    const cw=e.clientWidth, ch=e.clientHeight; if(!cw||!ch) return false;
+    if(cs.overflowX==='auto'||cs.overflowX==='scroll') return false;
+    const clipX=cs.overflowX!=='visible'||cs.whiteSpace==='nowrap'||cs.textOverflow==='ellipsis';
+    if(clipX&&e.scrollWidth>cw+1) return true;
+    if(!clipX&&e.scrollWidth>cw+2&&cs.display!=='inline') return true;     // хайрцгаас гадагш цацарсан урт тоо, үг
+    if(cs.overflowY!=='visible'&&cs.overflowY!=='auto'&&cs.overflowY!=='scroll'&&e.scrollHeight>ch+2) return true;
+    return false;
+  }
+  const PR=['font-size','letter-spacing','white-space'];
+  function save(e){ e._tfO={}; PR.forEach(p=>{ e._tfO[p]=[e.style.getPropertyValue(p),e.style.getPropertyPriority(p)]; }); }
+  function restore(e){ if(!e._tfO) return; PR.forEach(p=>{ const o=e._tfO[p]; if(o[0]) e.style.setProperty(p,o[0],o[1]); else e.style.removeProperty(p); }); e._tfOn=0; }
+  function fit(e){
+    if(SKIP[e.tagName]||e.classList.contains('nofit')||!hasOwn(e)) return;
+    const txt=e.textContent;
+    if(e._tfT!==undefined&&e._tfT!==txt&&e._tfOn) restore(e);        // текст солигдсон бол анхны хэмжээнээс дахин эхэлнэ
+    if(e._tfO===undefined) save(e);
+    e._tfT=txt;
+    if(!over(e)) return;
+    if(e._tfBad===txt) return;
+    let fs=parseFloat(getComputedStyle(e).fontSize)||12, n=0;
+    while(over(e)&&fs>MIN&&n<16){ fs=Math.max(MIN,fs-(fs>12?1:0.5)); e.style.setProperty('font-size',fs+'px','important'); e._tfOn=1; n++; }
+    if(over(e)){ e.style.setProperty('letter-spacing','-0.3px','important'); e._tfOn=1; }                                   // 2-р шат: үсгийн завсар
+    if(over(e)){ e.style.setProperty('white-space','normal','important'); e.style.setProperty('overflow-wrap','anywhere','important'); e._tfOn=1; }   // 3-р шат: 2 мөр болгох
+    if(over(e)){ restore(e); e.style.removeProperty('overflow-wrap'); e._tfBad=txt; }   // багтсангүй, шалтгаан нь фонт биш: дэмий жижигрүүлэхгүй
+  }
+  function scan(root,cap){
+    try{
+      if(!root||root.nodeType!==1) return;
+      fit(root);
+      const L=root.querySelectorAll('*'); const n=Math.min(L.length,cap||700);
+      for(let i=0;i<n;i++){ const e=L[i]; if(e.offsetParent===null&&getComputedStyle(e).position!=='fixed') continue; fit(e); }
+    }catch(x){}
+  }
+  /* өөрчлөлтийг цуглуулж, нэг удаа боловсруулна */
+  let pend=new Set(), tmr=0;
+  window._tfS={n:0,ms:0,max:0};
+  function flush(){ tmr=0; const t0=performance.now(); const ps=Array.from(pend); pend=new Set(); ps.forEach(r=>{ if(r.isConnected) scan(r,500); }); const d=performance.now()-t0; const S0=window._tfS; S0.n++; S0.ms+=d; if(d>S0.max) S0.max=d; }
+  function queue(r){ if(!r) return; pend.add(r); if(!tmr) tmr=setTimeout(()=>requestAnimationFrame(flush),120); }
+  try{
+    new MutationObserver(ms=>{
+      for(const m of ms){
+        if(m.type==='childList'){ m.addedNodes.forEach(n=>{ if(n.nodeType===1) queue(n); else if(n.nodeType===3&&n.parentElement) queue(n.parentElement); }); }
+        else if(m.type==='characterData'&&m.target.parentElement) queue(m.target.parentElement);
+      }
+    }).observe(document.body,{childList:true,characterData:true,subtree:true});
+  }catch(x){}
+  /* цонх нээгдэхэд (display солигдоход) цэсийг бүхэлд нь */
+  try{ const md=document.getElementById('modal'); if(md) new MutationObserver(()=>{ queue(md); setTimeout(()=>queue(md),500); }).observe(md,{attributes:true,attributeFilter:['style','class']}); }catch(x){}
+  /* аюулгүйн тор: фонт, зураг хожуу ачаалагдвал дахин шалгана */
+  setInterval(()=>{ try{ const md=document.getElementById('modal'); if(md&&md.style.display!=='none') scan(md,500); scan(document.getElementById('hud')||document.body,300); }catch(x){} },3000);
+  window.addEventListener('resize',()=>{ clearTimeout(window._tfRz); window._tfRz=setTimeout(()=>scan(document.body,900),300); });
+  setTimeout(()=>scan(document.body,900),2500);
+  window.textFitScan=()=>scan(document.body,1200);
 })();
 
 </script><script>(function(){

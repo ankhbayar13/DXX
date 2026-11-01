@@ -837,6 +837,7 @@ function rate(){
 const MAXB=25;
 const lvK=L=>{ L=Math.min(L,MAXB); return Math.pow(1.6,Math.min(L,20)-1)*Math.pow(1.3,Math.max(0,L-20)); };
 const gerTier=l=>l<=5?1:l<=10?2:l<=15?3:l<=20?4:5;
+const lvMark=l=>l>=25?'👑':l>=20?'⭐⭐⭐':l>=15?'⭐⭐':l>=10?'⭐':'';
 function upCost(k){ return Math.floor(BUILD[k].up * lvK(S.bld[k])); }
 function heroPower(id){
   const h = S.heroes[id]; if(!h) return 0;
@@ -1062,7 +1063,7 @@ function bdims0(k,lvl){
   const t=tierOf(lvl), isG=/^ger\d?$/.test(k);
   if(isG&&SPR.gerT1){ const gt=k==='ger'?gerTier(lvl):1, gn='gerT'+gt, gw=(k==='ger'&&TW2.ger)?TW2.ger[gt-1]:b.w*SPR[gn].iw/SPR.gerT1.iw; return {w:gw,h:gw*SPR[gn].ih/SPR[gn].iw,spr:gn}; }
   const TS=TSET[k]; let nm;
-  if(TS&&SPR[TS[0]]){ const n=TS.length, i=n===5?t-1:(lvl<=3?0:lvl<=6?1:Math.min(n-1,2)); nm=SPR[TS[Math.min(i,n-1)]]?TS[Math.min(i,n-1)]:TS[0]; const w0=(TW2[k]&&TW2[k][Math.min(i,TW2[k].length-1)])||b.w*Math.pow(SPR[nm].iw/SPR[TS[0]].iw,0.8); return {w:w0,h:w0*SPR[nm].ih/SPR[nm].iw,spr:nm}; }
+  if(TS&&SPR[TS[0]]){ const n=TS.length, i=n===5?t-1:(lvl<=7?0:lvl<=14?1:Math.min(n-1,2)); nm=SPR[TS[Math.min(i,n-1)]]?TS[Math.min(i,n-1)]:TS[0]; const w0=(TW2[k]&&TW2[k][Math.min(i,TW2[k].length-1)])||b.w*Math.pow(SPR[nm].iw/SPR[TS[0]].iw,0.8); return {w:w0,h:w0*SPR[nm].ih/SPR[nm].iw,spr:nm}; }
   nm=(!isG&&t>1&&SPR[b.spr+t])?b.spr+t:b.spr;
   const w=/^ger\d?$/.test(k)?b.w*SPR[nm].iw/SPR[b.spr].iw:b.w*(nm===b.spr?1:1+0.1*(t-1));
   return {w,h:w*SPR[nm].ih/SPR[nm].iw,spr:nm};
@@ -1994,7 +1995,7 @@ function draw(t){
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
   drawFog();
   if(S.sites.hashaa) drawBuilding('hashaa');
-  BKEYS.forEach(k=>{ if(!S.pos[k]||S.sites[k]||k===RADK) return; const r=brect(k); const u=S.upg&&S.upg[k]; nameTag(r.x+r.w/2,r.y-(k==='hashaa'?4:0.5),(Z>=1.1||u?BUILD[k].n+' ':'Lv ')+S.bld[k]+(u?' ⏳'+fmtT(u.need-u.p):''),!!u); if(S.bld[k]>=2&&Z>=1.8) nameTag(r.x+r.w/2,r.y-(k==='hashaa'?4:0.5)-3.2,'★'.repeat(Math.min(6,S.bld[k]-1)),false); });
+  BKEYS.forEach(k=>{ if(!S.pos[k]||S.sites[k]||k===RADK) return; const r=brect(k); const u=S.upg&&S.upg[k]; nameTag(r.x+r.w/2,r.y-(k==='hashaa'?4:0.5),(Z>=1.1||u?BUILD[k].n+' ':'Lv ')+S.bld[k]+(u?' ⏳'+fmtT(u.need-u.p):''),!!u); { const L_=S.bld[k], mk=lvMark(L_); if(mk&&Z>=1.1) nameTag(r.x+r.w/2,r.y-(k==='hashaa'?4:0.5)-3.2,mk,false); else if(L_>=2&&L_<10&&Z>=1.8) nameTag(r.x+r.w/2,r.y-(k==='hashaa'?4:0.5)-3.2,'★'.repeat(Math.min(6,L_-1)),false); } });
   drawOverlay(t); drawFx(t); drawSpeech(); drawWeather(t);
   floats.forEach(fl=>{ ctx.globalAlpha=Math.max(0,1-fl.t/1.8); ctx.font='bold 6px monospace'; ctx.textAlign='center'; ctx.fillStyle='#000'; ctx.fillText(fl.txt,fl.x+0.5,fl.y+0.5); ctx.fillStyle=fl.col; ctx.fillText(fl.txt,fl.x,fl.y); });
   ctx.globalAlpha=1;
@@ -10566,7 +10567,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='939b2d75c7';
+var UPDB='067f51828f';
 (function(){
   const K='updTry';
   const _go=updGo;

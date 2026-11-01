@@ -8597,7 +8597,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   /* ---------- хуваарь, ярилцлага, аюул ---------- */
   let chatT=6, hdT=0, tiredSay=0;
   const LINES=['Сайн уу?','Малын үнэ яасан бэ?','Өнөөдөр салхи хүчтэй байна.','Хонь сайн бэлчиж байна.','Чоно ойрхон ирлээ гэсэн.','Мах хүрэлцэх байх даа.','Шинэ барилга баригдах юм байна.','Дарга маань сайн хүн.','Өнөөдөр сайхан өдөр.','Хүйтэн болох нь ээ.'];
-  const idleP=e=>e.kind==='person'&&!e.task&&!e.sel&&!e.post&&!e.raid;
+  const idleP=e=>e.kind==='person'&&!e.task&&!e.sel&&!e.post&&!e.raid&&!((e._wp||0)>0.5&&!(e._wdB>Date.now()));   // ажил дээрээ байгаа хүнийг ярилцахаар дуудахгүй
 
   function schedule(dt){
     const now=Date.now(), ph=phaseOf(dayP());
@@ -8621,7 +8621,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     });
     /* ажлын цагт хоёр хүн уулзаж ярилцана */
     chatT-=dt;
-    if(chatT<=0){ chatT=5+Math.random()*7;
+    if(chatT<=0){ chatT=14+Math.random()*16;
       if(ph==='work'||ph==='dawn'){
         const ip=persons().filter(idleP);
         if(ip.length>=2){ const A=ip[Math.floor(Math.random()*ip.length)];
@@ -10564,7 +10564,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fbe68c479e';
+var UPDB='71f571695d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11354,6 +11354,7 @@ bcard=function(k){
     10:{k:'market',ic:'⚖',t:'наймаа хийнэ',b:'Алт +10%'},
     11:{k:'hureo',ic:'🏹',t:'хамгаална'}
   };
+  const NODUTY={2:1,4:1,9:1,11:1};   /* тариачин, мод бэлтгэгч, цэцэг түүгч, анчин: өөрийн ажлаа (тариа, мод, хээр, ан) хэвээр хийнэ */
   const built=k=>S.bld&&S.bld[k]>0&&S.pos&&S.pos[k]&&!(S.sites&&S.sites[k]);
   const ppl=()=>ents.filter(e=>e.kind==='person');
   const byIdx=i=>ents.find(e=>e.kind==='person'&&e.idx===i);
@@ -11365,7 +11366,7 @@ bcard=function(k){
       return {x:r.x+r.w/2-entCx(e)+(Math.random()*r.w*0.7-r.w*0.35), y:r.y+r.sh+3+Math.random()*9-entH(e)};
     }catch(x){ return null; }
   }
-  function center(J){ try{ if(J.field){ const g=S.pos.ger; return {x:g.x+30,y:g.y+90,R:130}; } if(!built(J.k)) return null; const r=brect(J.k); return {x:r.x+r.w/2,y:r.y+r.sh,R:60}; }catch(x){ return null; } }
+  function center(J){ try{ if(J.field){ const g=S.pos.ger; return {x:g.x+30,y:g.y+90,R:130}; } if(!built(J.k)) return null; const r=brect(J.k); return {x:r.x+r.w/2,y:r.y+r.sh,R:Math.max(60,r.w*0.45+25)}; }catch(x){ return null; } }
   window.wjJob=e=>JOB[e.idx]||null;
   window.wjPlace=e=>{ const J=JOB[e.idx]; if(!J) return ''; if(J.field) return 'тал'; return ((BUILD[J.k]||{}).n)||''; };
   window.wjSt=e=>{ const J=JOB[e.idx]; if(!J) return ''; return (e._wp||0)>0.5?J.t+' (ажиллаж байна)':''; };
@@ -11384,6 +11385,15 @@ bcard=function(k){
       ppl().forEach(e=>{ const J=JOB[e.idx]; if(!J) return; const c=center(J);
         const near=!!(work&&c&&!e._in&&!e.task&&!e.post&&Math.hypot(e.x+entCx(e)-c.x,e.y+entH(e)-c.y)<c.R);
         e._wp=(e._wp||0)+((near?1:0)-(e._wp||0))*0.25*step;
+        /* ажлын цагт өөрийн цех/хашаандаа очиж ажиллана: хол байвал явна, ойрхон бол ажлын хөдөлгөөн хийнэ. Хааяа 10-20 сек завсарлана */
+        try{ if(work&&c&&!NODUTY[e.idx]&&!e.sel&&!e._in&&!e.task&&!e.post&&!e.raid&&!e.def){
+          const dd=Math.hypot(e.x+entCx(e)-c.x,e.y+entH(e)-c.y), nw=Date.now();
+          if(dd<c.R){
+            if(!e._wdN) e._wdN=nw+(50+Math.random()*50)*1000;
+            if(nw>e._wdN){ e._wdB=nw+(10+Math.random()*10)*1000; e._wdN=0; }
+            if(!(e._wdB>nw)){ e.idl=-5; if(!e.amb&&!(e.wait>0)&&typeof ambStart==='function') ambStart(e); }
+          } else if(!(e._wdB>nw)){ const sp=spot(e,J); if(sp) giveTask(e,{type:'move',x:sp.x,y:sp.y,phase:'go',t:0}); }
+        } }catch(x){}
         if(near&&e._wp>0.6&&!e.icon&&!e.sel){ e.icon=J.ic; e._wji=J.ic; } else if(e._wji&&(e.icon===e._wji)&&(!near||e.task||e._wp<0.3)){ e.icon=''; e._wji=null; }
       });
       /* эмч эмээ: шархадсан хүнийг хурдан эмчилнэ */

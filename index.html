@@ -10564,7 +10564,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='0e77b893b2';
+var UPDB='5ee631eeaf';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12048,6 +12048,110 @@ bcard=function(k){
   modalContent=function(k){
     const h=_mc.apply(this,arguments);
     if(k==='mal'){ try{ return h+card(); }catch(e){} }
+    return h;
+  };
+})();
+
+
+/* p32/zud.js — №1: Зуд. Өвлийн хүнд байдал жил бүр бүх тоглогчид ИЖИЛ (Date.now-оос тооцно, сервер шаардахгүй).
+   Намар таамаглал гарч, өвлөөс 3 хоногийн өмнө (7.5 мин) сануулна. Тоглогч тариа, ноос, эсгий өгч «өвөлжилтийн бэлтгэл» хийвэл мал хорогдох нь багасна.
+   Хуучин санамсаргүй зудыг (45%) орлоно. */
+(function(){
+  const Y=4*SLEN, WARN=450000;               // 1 жил = 4 улирал = 2 цаг; сануулга: өвлөөс 7.5 мин (3 өдөр) өмнө
+  const NAMES=['Хэвийн өвөл','Хөнгөн зуд','Дунд зуд','Хар зуд (хүнд)'];
+  const ICONS=['❄️','🌨️','🥶','☠️'];
+  const BASE={1:0.12,2:0.25,3:0.40};          // мал хорогдох суурь хувь
+  const yrOf=()=>Math.floor(Date.now()/Y);
+  const sevOf=yr=>{ const h=Math.sin((yr+7)*12.9898)*43758.5453, r=h-Math.floor(h); return r<0.25?0:r<0.60?1:r<0.88?2:3; };
+  const idx=()=>Math.floor(Date.now()/SLEN)%4;
+  const winStart=yr=>(yr*4+3)*SLEN;
+  function phase(){ const i=idx(); if(i===3) return 'winter'; if(i===2){ return (winStart(yrOf())-Date.now()<=WARN)?'warn':'autumn'; } return 'far'; }
+  const herd=()=>herdCount();
+  const need=sev=>Math.max(30,sev*(40+4*herd()));
+  const pts=()=>{ const P=S.zudPrep; return (P&&P.yr===yrOf())?P.pts:0; };
+  const fmtT=ms=>{ ms=Math.max(0,ms); const s=Math.ceil(ms/1000), m=Math.floor(s/60), q=s%60; return m+':'+String(q).padStart(2,'0'); };
+  window.zdInfo=()=>({yr:yrOf(),sev:sevOf(yrOf()),ph:phase(),pts:pts(),need:need(sevOf(yrOf()))});
+
+  /* бэлтгэл өгөх */
+  const GIVE={grain:{n:20,p:20,l:'🌾 Тариа'},wool:{n:20,p:12,l:'🧶 Ноос'},esgii:{n:5,p:20,l:'🧱 Эсгий'}};
+  window.zdGive=function(k){
+    try{
+      const G=GIVE[k]; if(!G) return;
+      const yr=yrOf(), sev=sevOf(yr), ph=phase();
+      if(sev<1||(ph!=='autumn'&&ph!=='warn')){ say('Одоо бэлтгэл өгөх цаг биш'); return; }
+      const nd=need(sev); if(pts()>=nd){ say('Бэлтгэл хангалттай боллоо'); return; }
+      if((S.res[k]||0)<G.n){ say('Нөөц хүрэлцэхгүй ('+G.n+' '+(ITEMS[k]?ITEMS[k].n:k)+' хэрэгтэй)'); try{ sfx('err'); }catch(e){} return; }
+      S.res[k]-=G.n;
+      if(!S.zudPrep||S.zudPrep.yr!==yr) S.zudPrep={yr:yr,pts:0};
+      S.zudPrep.pts=Math.min(nd,S.zudPrep.pts+G.p);
+      say('❄ Өвөлжилтийн бэлтгэл +'+G.p+' ('+Math.round(100*S.zudPrep.pts/nd)+'%)'); try{ sfx('ok'); }catch(e){}
+      refresh(); fillM();
+    }catch(e){ console.log('zdGive',e); }
+  };
+
+  /* өвөл эхлэхэд: хуучин zud()-ийг орлоно */
+  zud=function(){
+    try{
+      const yr=yrOf(); if(S.zudDone===yr) return; S.zudDone=yr;
+      const sev=sevOf(yr);
+      if(sev<1){ S.zudLog={yr:yr,sev:0,lost:0,saved:0,ratio:0}; say('❄ Хэвийн өвөл. Энэ жил зуд болохгүй.'); return; }
+      const nd=need(sev), ratio=Math.min(1,pts()/nd);
+      const base=BASE[sev]*(S.bld.hashaa>0?0.6:1);
+      const pr=base*(1-0.85*ratio);
+      let lost=0, would=0;
+      for(const k in S.animals){ const a=S.animals[k]||0; const l=Math.floor(a*pr); S.animals[k]=a-l; lost+=l; would+=Math.floor(a*base); }
+      const saved=Math.max(0,would-lost);
+      let t=ICONS[sev]+' '+NAMES[sev]+'! '+lost+' мал хорогдлоо.'+(saved>0?' Бэлтгэлээр '+saved+' мал аврагдлаа.':'');
+      const dieP=(sev>=2?(S.bld.ger>=3?0.15:0.35):0.0)*(1-ratio);
+      if(Math.random()<dieP){ const pp=ents.filter(x=>x.kind==='person'); if(pp.length>1){ const e=pp[pp.length-1], nm=NPCS[e.idx].n; if(killNpc(e)) t+=' '+nm+' даарч нас барлаа.'; } }
+      if(ratio>=1){ try{ addXP(60); S.res.alt=(S.res.alt||0)+1; t+=' 🏆 Алдарт өвөлжилт! +60 туршлага, +1 Алт'; }catch(e){} }
+      S.zudLog={yr:yr,sev:sev,lost:lost,saved:saved,ratio:Math.round(ratio*100)};
+      syncEnts(false); say(t); refresh();
+    }catch(e){ console.log('zud',e); }
+  };
+
+  /* сануулга */
+  setInterval(()=>{
+    try{
+      if(typeof S==='undefined'||!S||!S.res) return;
+      const yr=yrOf(), sev=sevOf(yr), ph=phase();
+      if(ph==='autumn'&&S.zudFc!==yr){ S.zudFc=yr; say(ICONS[sev]+' Цаг уурын мэдээ: ирэх өвөл «'+NAMES[sev]+'»'+(sev?'. Мал цэсэнд бэлтгэл хий.':'.')); }
+      if(ph==='warn'&&sev>0&&S.zudWarn!==yr){ S.zudWarn=yr; say('⚠ '+NAMES[sev]+' ойртлоо! Өвөлжилтийн бэлтгэлээ хий (Мал цэс)'); try{ sfx('err'); }catch(e){} }
+      const el=document.getElementById('zdl'); if(el) el.textContent=fmtT(winStart(yr)-Date.now());
+    }catch(e){}
+  },5000);
+
+  /* «Мал» цэсэнд карт */
+  function card(){
+    const yr=yrOf(), sev=sevOf(yr), ph=phase();
+    let h='<div class="card" style="border:1px solid '+(ph==='warn'?'#e0503a':'#7fb4d8')+'"><b>❄ Өвөлжилт · Зуд</b>';
+    if(ph==='far'){
+      h+='<div class="sm" style="margin-top:6px">Намар ирэхэд ирэх өвлийн цаг уурын таамаглал гарна. Зуд ирэхээс өмнө тариа, ноос, эсгийгээр бэлтгэл хийвэл мал аврагдана. Бүх тоглогчид жил бүр адилхан өвөл тулна.</div>';
+    } else if(ph==='winter'){
+      h+='<div class="sm" style="margin-top:6px">Одоо өвөл: '+ICONS[sev]+' <b>'+NAMES[sev]+'</b>. Хашаа байвал мал бага хорогдоно.</div>';
+    } else {
+      const nd=need(sev), p=pts(), pc=sev?Math.round(100*Math.min(1,p/nd)):100;
+      h+='<div style="margin:6px 0">'+ICONS[sev]+' Ирэх өвөл: <b>'+NAMES[sev]+'</b></div>';
+      if(sev<1) h+='<div class="sm">Энэ жил зуд болохгүй. Бэлтгэл хийх шаардлагагүй.</div>';
+      else {
+        h+='<div class="sm">Өвөл эхлэхэд: <b id="zdl">'+fmtT(winStart(yr)-Date.now())+'</b> · Бэлтгэл: <b>'+pc+'%</b> (мал '+Math.round(base0(sev)*100)+'%-иас '+Math.round(base0(sev)*100*(1-0.85*pc/100))+'% хүртэл хорогдоно)</div>'+
+           '<div style="height:10px;border-radius:5px;background:#000a;border:1px solid #000;margin:6px 0;overflow:hidden"><div style="height:100%;width:'+pc+'%;background:linear-gradient(90deg,#4ea0d8,#9fe0ff)"></div></div>'+
+           '<div style="display:flex;gap:6px;flex-wrap:wrap">'+Object.keys(GIVE).map(k=>'<button class="btn" style="padding:4px 8px;font-size:12px" onclick="zdGive(\''+k+'\')" '+(pc>=100?'disabled':'')+'>'+GIVE[k].l+' '+GIVE[k].n+'<br><span class="sm">+'+GIVE[k].p+' бэлтгэл</span></button>').join('')+'</div>'+
+           '<div class="sm" style="margin-top:6px">Хашаа барьсан бол хорогдол 40% бага. Бэлтгэл 100% болбол «Алдарт өвөлжилт» шагнал.</div>';
+      }
+    }
+    const L=S.zudLog;
+    if(L) h+='<div class="sm" style="margin-top:8px;opacity:.9">Сүүлийн өвөл: '+NAMES[L.sev]+' · '+L.lost+' мал хорогдсон'+(L.saved?', '+L.saved+' аврагдсан':'')+' (бэлтгэл '+L.ratio+'%)</div>';
+    return h+'</div>';
+  }
+  const base0=sev=>BASE[sev]*(S.bld.hashaa>0?0.6:1);
+  const _mc=modalContent;
+  modalContent=function(k){
+    const h=_mc.apply(this,arguments);
+    if(k==='mal'){ try{
+      const c=card(), ph=phase(), top=(ph==='warn'||ph==='autumn')&&sevOf(yrOf())>0;     // зуд ойрхон үед картыг дээр нь тавина
+      if(top){ const i=h.indexOf('</h2>'); if(i>=0) return h.slice(0,i+5)+c+h.slice(i+5); return c+h; }
+      return h+c; }catch(e){} }
     return h;
   };
 })();

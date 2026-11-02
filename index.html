@@ -1150,6 +1150,7 @@ function layout(){
     for(const q of L.ponds) if(ovl(rc,q,2)) return;
     for(const q of L.peaks) if(ovl(rc,q,0)) return;
     if(ovl(rc,gx,0)) return;
+    if(ovl(rc,{x:g.x-175,y:g.y-140,w:350,h:390},0)) return; /* кент: тосгоны дотор мод байхгүй */
     for(let i=0;i<2;i++) if(Math.abs(x+tw/2-riverX(i,y+th))<11) return;
     for(const k of BKEYS){ if(S.pos[k] && ovl(rc,brect(k),1)) return; }
     L.trees.push({x:Math.round(x),y:Math.round(y)});
@@ -10581,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4760b35fe5';
+var UPDB='7088af6c77';
 (function(){
   const K='updTry';
   const _go=updGo;

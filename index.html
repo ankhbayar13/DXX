@@ -2867,7 +2867,7 @@ function startBattle(i,E){
   const bi=E?E.bi:i, n=Math.min(5,Math.max(3,sq.length)), mixes=[['heavy','archer','cav'],['cav','foot','archer'],['foot','heavy','cav','archer']], mix=mixes[bi%3];
   const ep=e.p/n; for(let k=0;k<n;k++){ const t=mix[k%mix.length], d=BTDEF[t], row=t==='heavy'?0.30:t==='cav'?0.22:t==='foot'?0.27:0.12; const mx=ep*14*d.hp*0.95;
     units.push({side:1,key:enKey(e,i,t,k),type:t,name:ENM[t],x:W2*(0.2+0.2*(k%4))+(k%2)*8,y:H2*row+Math.floor(k/4)*H2*0.05+(k%2)*6,hp:mx,max:mx,atk:ep*0.5*d.atk*0.95,cd:Math.random()*d.cd,d}); }
-  const trU=[]; TR.forEach(T=>{ const pc=(E&&E.pc&&E.pc[T.ty]!=null)?E.pc[T.ty]:1, n=Math.floor((S.res[T.k]||0)*pc); if(n<1) return; trU.push(T); let hs=units.filter(u=>!u.side&&(u.type===T.ty||(T.ty==='foot'&&u.type==='heavy'))&&u.id); const _nl=!hs.length; if(_nl) hs=units.filter(u=>!u.side&&u.id); if(!hs.length) return; const per=n/hs.length, p=trPow(T)*pc*(_nl?0.85:1.1)/hs.length; hs.forEach(u=>{ const _tr=relicMul(null,T.ty), mx=p*14*u.d.hp*_tr.h; u.hp+=mx; u.max+=mx; u.atk+=p*0.5*u.d.atk*_tr.a; (u.sq=u.sq||[]).push({T,n:per}); }); });
+  const trU=[]; TR.forEach(T=>{ const pc=(E&&E.pc&&E.pc[T.ty]!=null)?E.pc[T.ty]:1, n=Math.floor((S.res[T.k]||0)*pc); if(n<1) return; trU.push(T); let hs=units.filter(u=>!u.side&&u.type===T.ty&&u.id); if(!hs.length) hs=units.filter(u=>!u.side&&u.id); if(!hs.length) return; const per=n/hs.length, p=trPow(T)*pc/hs.length; hs.forEach(u=>{ const _tr=relicMul(null,T.ty), mx=p*14*u.d.hp*_tr.h; u.hp+=mx; u.max+=mx; u.atk+=p*0.5*u.d.atk*_tr.a; (u.sq=u.sq||[]).push({T,n:per}); }); });
   btLayout(units,W2,H2,e);
   BT={tr:trU,i:E?-1:i,e,units,fx:[],dm:[],t:0,sp:1,done:false,W:W2,H:H2,dp,ctx:cv2.getContext('2d'),raf:0,last:performance.now(),p0:units.filter(u=>!u.side).reduce((a,u)=>a+u.max,0),e0:units.filter(u=>u.side).reduce((a,u)=>a+u.max,0)};
   units.forEach((u,i)=>{ u.hx=u.x; u.hy=u.y; const fl=(u.type==='cav')?(i%2?-1:1):0;
@@ -2884,7 +2884,7 @@ function btRedeploy(){
   const fighters=B.sel.filter(id=>!SUPP[id]), sup=B.sel.find(id=>SUPP[id]);
   fighters.forEach((id,si)=>{ const t=htype(id), d=BTDEF[t], p=hpL(id)*fb; cnt[t]++; const mx=p*14*d.hp*relicMul(id).h;
     U.push({side:0,slot:si,key:id==='chinggis'?'u_general':BTV[t][(id.length+cnt[t])%BTV[t].length],type:t,id,name:HEROES.find(x=>x.id===id).n,x:0,y:0,hp:mx,max:mx,atk:p*0.5*d.atk*relicMul(id).a,cd:Math.random()*d.cd,d}); });
-  TR.forEach(T=>{ const pc=(B.e&&B.e.pc&&B.e.pc[T.ty]!=null)?B.e.pc[T.ty]:1, n=Math.floor((S.res[T.k]||0)*pc); if(n<1) return; let hs=U.filter(u=>!u.side&&!u.sup&&(u.type===T.ty||(T.ty==='foot'&&u.type==='heavy'))&&u.id); const _nl=!hs.length; if(_nl) hs=U.filter(u=>!u.side&&!u.sup&&u.id); if(!hs.length) return; const per=n/hs.length, p=trPow(T)*pc*(_nl?0.85:1.1)/hs.length; hs.forEach(u=>{ const _tr=relicMul(null,T.ty), mx=p*14*u.d.hp*_tr.h; u.hp+=mx; u.max+=mx; u.atk+=p*0.5*u.d.atk*_tr.a; (u.sq=u.sq||[]).push({T,n:per}); }); });
+  TR.forEach(T=>{ const pc=(B.e&&B.e.pc&&B.e.pc[T.ty]!=null)?B.e.pc[T.ty]:1, n=Math.floor((S.res[T.k]||0)*pc); if(n<1) return; let hs=U.filter(u=>!u.side&&!u.sup&&u.type===T.ty&&u.id); if(!hs.length) hs=U.filter(u=>!u.side&&!u.sup&&u.id); if(!hs.length) return; const per=n/hs.length, p=trPow(T)*pc/hs.length; hs.forEach(u=>{ const _tr=relicMul(null,T.ty), mx=p*14*u.d.hp*_tr.h; u.hp+=mx; u.max+=mx; u.atk+=p*0.5*u.d.atk*_tr.a; (u.sq=u.sq||[]).push({T,n:per}); }); });
   if(sup==='borte') U.forEach(u=>{ if(!u.side){ u.hp*=1.12; u.max*=1.12; u.atk*=1.12; } });
   if(sup){ U.push({side:0,slot:5,sup:true,id:sup,key:BTV.archer[0],type:'archer',name:HEROES.find(x=>x.id===sup).n,x:0,y:0,hp:1,max:1,atk:0,cd:9,d:BTDEF.archer}); }
   btLayout(U,B.W,B.H,B.e); U.forEach(u=>{ u.hx=u.x; u.hy=u.y; u.sx=u.x; u.sy=u.y; u.mv=false; u.fdir=u.side?-1:1; });
@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='343f75a411';
+var UPDB='7cdc1e3184';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12684,36 +12684,6 @@ bcard=function(k){
       }).catch(()=>{});
     }catch(e){}
   };
-})();
-
-
-/* p32/squad3.js — Цэргийн 3 баг (харваач / морьт / явган): баг бүрийг тухайн төрлийн баатар жанжин болж удирдана.
-   Жанжинтай баг +10% хүчтэй, жанжингүй баг −15%. Тулаан эхлэхээс өмнө баг бүрийн жанжинг харуулна. */
-(function(){
-  const IC={cav:'🐎',archer:'🏹',foot:'🗡'};
-  window.sqLead=function(ty,ids){
-    const ok=id=>{ const t=htype(id); return t===ty||(ty==='foot'&&t==='heavy'); };
-    const a=(ids||[]).filter(id=>!SUPP[id]&&ok(id)).sort((x,y)=>heroPower(y)-heroPower(x));
-    return a[0]||null;
-  };
-  const _bt=btTray;
-  btTray=function(){
-    _bt.apply(this,arguments);
-    try{
-      if(!BT||!BT.wait) return;
-      const pan=$('btpan'); if(!pan) return;
-      let el=$('bsq'); if(!el){ el=document.createElement('div'); el.id='bsq'; const hd=$('bthd'); if(hd&&hd.nextSibling) pan.insertBefore(el,hd.nextSibling); else pan.appendChild(el); }
-      el.innerHTML=TR.map(T=>{
-        const pc=(BT.e&&BT.e.pc&&BT.e.pc[T.ty]!=null)?BT.e.pc[T.ty]:1, n=Math.floor((S.res[T.k]||0)*pc); if(n<1) return '';
-        const ld=sqLead(T.ty,BT.sel);
-        return '<span class="'+(ld?'ok':'no')+'">'+IC[T.ty]+' '+f(n)+' · '+(ld?'жанжин '+(HEROES.find(x=>x.id===ld).n.split(' ')[0])+' <i>+10%</i>':'жанжингүй <i>−15%</i>')+'</span>';
-      }).join('');
-      el.style.display=el.innerHTML?'flex':'none';
-    }catch(e){}
-  };
-  const st=document.createElement('style');
-  st.textContent='#bsq{display:flex;flex-wrap:wrap;gap:4px 6px;font-size:11px;font-weight:700;color:#ffe9b0}#bsq span{flex:0 0 auto;background:#3b2815;border:1px solid #7a5a2a;border-radius:8px;padding:2px 7px;white-space:nowrap}#bsq span.ok i{color:#b8ff9a;font-style:normal}#bsq span.no{border-color:#a8442c}#bsq span.no i{color:#ff9a8a;font-style:normal}@media (max-height:480px){#bsq{font-size:10px;flex-wrap:nowrap;overflow-x:auto}#bsq span{padding:1px 5px}}';
-  document.head.appendChild(st);
 })();
 
 </script><script>(function(){

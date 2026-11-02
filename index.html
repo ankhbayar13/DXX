@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7088af6c77';
+var UPDB='7cdc1e3184';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12658,6 +12658,32 @@ bcard=function(k){
   const st=document.createElement('style');
   st.textContent='@media(min-width:900px){#menu{left:50%!important;right:auto!important;width:640px!important;margin-left:-320px!important}}';
   document.head.appendChild(st);
+})();
+
+
+/* p32/updquiet.js — «Шинэ хувилбар гарлаа» цонхыг болиулав.
+   Шинэ хувилбар гарахад тоглогчийг тасалдуулахгүй: апп-аа хаагаад (эсвэл өөр апп руу орж) буцаж ирэхэд ≥1 минут болсон бол
+   тулаан/ажиллагаа явагдаахгүй үед өөрөө чимээгүй шинэчилнэ. ver.txt-ийн 2 дахь үг "force" бол өмнөх шиг цонх гаргана. */
+(function(){
+  let hid=0;
+  const K='updTry';
+  function tried(t){ let tr=null; try{ tr=JSON.parse(sessionStorage.getItem(K)||'null'); }catch(e){} return !!(tr&&tr.t===t&&Date.now()-tr.at<15*60000&&tr.n>=2); }
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) hid=Date.now(); });
+  updCheck=function(){
+    if(UPD.on||UPD.go) return;
+    const wasHid=(!document.hidden&&hid&&Date.now()-hid>=60000); if(!document.hidden) { /* буцаж ирсэн мөчид л хэрэглэнэ */ }
+    try{
+      fetch('ver.txt?'+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(txt=>{
+        const ls=String(txt||'').trim().split(/\s+/), v=ls[0];
+        if(!/^[0-9a-f]{8,}$/.test(v)) return;
+        if(v===UPDB){ UPD.seen=null; UPD.cnt=0; return; }
+        if(tried(v)) return;
+        if(ls[1]==='force'){ if(v===UPD.seen) UPD.cnt++; else { UPD.seen=v; UPD.cnt=1; } if(UPD.cnt>=2) updStart(); return; }
+        UPD.seen=v;
+        if(wasHid&&!document.hidden&&!updBusy()){ hid=0; updGo(); }
+      }).catch(()=>{});
+    }catch(e){}
+  };
 })();
 
 </script><script>(function(){

@@ -10577,7 +10577,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='16eeddfa82';
+var UPDB='b0f1e5e961';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12539,6 +12539,9 @@ bcard=function(k){
     catch(e){ noPush=false; console.log('mBk',e); }
   };
   mBack=function(){ return (MH.length&&cur)?'<button id="mback" class="btn" style="position:absolute;left:10px;top:10px;z-index:3;padding:5px 11px;font-size:14px" onclick="mBk()">‹ Буцах</button>':''; };
+  /* цэсэн дотор аль хэдийн «‹ Баатар», «‹ Барилга» гэх мэт буцах товч байвал давхардуулж харуулахгүй */
+  const _f=fillM;
+  fillM=function(){ const r=_f.apply(this,arguments); try{ const mb=document.getElementById('mback'); if(mb){ const o=[...document.querySelectorAll('#mbody button')].some(b=>b!==mb&&/^\s*‹/.test(b.textContent)); if(o) mb.remove(); } }catch(e){} return r; };
 })();
 
 

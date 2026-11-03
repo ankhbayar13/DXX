@@ -338,7 +338,7 @@ const BUILD = {
   ger4:    {n:'Жижиг гэр', spr:'gerT1', w:30, cost:1500, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   ger5:    {n:'Жижиг гэр', spr:'gerT1', w:30, cost:3000, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   hashaa:  {n:'Хашаа', w:70, h:44, cost:40, up:80, desc:'Бүх хашааны хэсгийн дэд бүтэц. Түвшин бүр +2 мал/хэсэг'},
-  horgo:   {n:'Хорго', spr:'hay1', w:27, cost:150, up:60, desc:'Агуулах +200'},
+  horgo:   {n:'Хорго', spr:'hay1', w:27, cost:150, up:60, desc:'Агуулах +300'},
   market:  {n:'Зах', spr:'mk1', w:22, cost:200, up:120, desc:'Зарах үнэ +25%'},
   modcex:  {n:'Модны цех', spr:'mod1', w:26, cost:250, up:150, desc:'Ажилчид мод тайраад энд зөөнө. Түвшин бүр +20% мод'},
   mahcex:  {n:'Махны цех', spr:'mah1', w:26, cost:500, up:250, desc:'Хашаанаас мал аваад энд нядалж мах гаргана'},
@@ -794,7 +794,7 @@ function fresh(){
   return {
     paid:{},shopT:0,pig:0,vip:null,testPay:false,camp:{done:{},join:{}},rp:0,
     xp:0,pl:1,st:{},dq:null,chap:0,
-    res:{meat:0, milk:0, wool:0, grain:0, wood:0, gold:50, alt:10, airag:0, aaruul:0, tos:0, esgii:0, buuz:0, hushuu:0, ovoo:0, naadamring:0, suvarga:0, t_cav:0, t_arc:0, t_spr:0}, zones:null, chopped:[], proc:{}, orders:[], ordT:0, lastSeason:null, relics:{}, equip:[], nd:{}, ndw:0,
+    res:{meat:150, milk:150, wool:150, grain:150, wood:150, gold:600, alt:20, airag:0, aaruul:0, tos:0, esgii:0, buuz:0, hushuu:0, ovoo:0, naadamring:0, suvarga:0, t_cav:0, t_arc:0, t_spr:0}, zones:null, chopped:[], proc:{}, orders:[], ordT:0, lastSeason:null, relics:{}, equip:[], nd:{}, ndw:0,
     animals:{honi:3, yamaa:0, uher:0, aduu:0, temee:0},
     bld:{ger:1, modcex:0, mahcex:0, hashaa:0, horgo:0, market:0, hureo:0, tarialan:0, airag:0, aaruul:0, tos:0, esgii:0, buuz:0, well:0, smith:0, school:0, healer:0, tower:0, temple:0},
     pos:{}, sites:{}, upg:{}, farm:{stage:0,t:0}, dead:[], rev:0,
@@ -819,7 +819,7 @@ function load(){
 function save(){ acHook(); acWrite(); }
 
 // ---------- тооцоо ----------
-const cap = () => 100 + 200 * S.bld.horgo + rsb('eco_cap');
+const cap = () => 300 + 300 * S.bld.horgo + rsb('eco_cap');
 const herdMax = () => Object.keys(PEN).reduce((a,t)=>a+Math.max(penCap(t),S.animals[t]||0),0) + rsb('eco_herd');
 const POPCAP=[2,2,3,4,5];
 const popCap=()=>['ger','ger2','ger3','ger4','ger5'].reduce((a,k)=>a+((S.bld[k]>0&&!(S.sites&&S.sites[k]))?POPCAP[Math.min(POPCAP.length,S.bld[k])-1]:0),0)+Math.floor(rsb('cul_pop'))+Math.floor((S.bld.ger||0)/3)||2;
@@ -2473,7 +2473,7 @@ function evoShow(tab){ let o=document.getElementById('hbio'); if(o) o.remove(); 
 
 const UPQ=()=>1+(S.bld.ger>=3?1:0)+(S.bld.ger>=5?1:0)+(rkLv()>=5?1:0);
 const upNeed=k=>Math.round(30*lvK(S.bld[k]));
-const rushC=u=>{ const r=u.need-u.p; return r<=180+60*rkLv()?0:Math.ceil(r/180); };
+const rushC=u=>{ const r=u.need-u.p; return r<=300+60*rkLv()?0:Math.ceil(r/180); };
 function ecoMig(){ try{ for(const k in S.bld){ if(typeof S.bld[k]==='number'&&S.bld[k]>MAXB) S.bld[k]=MAXB; } if(S.upg) for(const k in S.upg){ const u=S.upg[k]; if(!u) continue; if((S.bld[k]||0)>=MAXB){ delete S.upg[k]; continue; } const n=upNeed(k); if(u.need>n) u.need=n; if(u.p>u.need) u.p=u.need; } }catch(e){} }
 function fmtT(s){ s=Math.max(0,Math.ceil(s)); if(s>=86400) return Math.floor(s/86400)+' өдөр '+Math.floor(s%86400/3600)+'ц'; if(s>=3600) return Math.floor(s/3600)+'ц '+Math.floor(s%3600/60)+'м'; return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 function upgrade(k){
@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='804a323fda';
+var UPDB='2a2d5a8eab';
 (function(){
   const K='updTry';
   const _go=updGo;

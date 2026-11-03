@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='80a47e2cfa';
+var UPDB='804a323fda';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12696,6 +12696,25 @@ bcard=function(k){
    +'}';
   document.head.appendChild(st);
 })();
+
+
+/* p32/herofilt.js — Баатруудын жагсаалт: төрлөөр (Харваач/Морьт/Хуягт/Явган) шүүх + эрэмбэ (Од / Хүч / Түвшин) */
+var HTF='', HSO='star';
+heroListHTML=function(){
+  heroMig();
+  if(!S.fsGot){ S.fsGot=1; S.fsum=(S.fsum||0)+2; mailAdd('Тавтай морилно уу','2 удаа үнэгүй баатар дуудах эрх өглөө!'); }
+  const lv=id=>{ const v=S.heroes[id]; return typeof v==='number'?v:(v&&v.lv)||0; };
+  const cmp={ star:(a,b)=>b.s-a.s||heroPower(b.id)-heroPower(a.id), pow:(a,b)=>heroPower(b.id)-heroPower(a.id), lvl:(a,b)=>lv(b.id)-lv(a.id)||heroPower(b.id)-heroPower(a.id) }[HSO]||null;
+  const all=HEROES.slice().sort((a,b)=>(!!S.heroes[b.id]-!!S.heroes[a.id])||cmp(a,b));
+  let list=all; if(HLF) list=list.filter(x=>x.s===HLF); if(HTF) list=list.filter(x=>htype(x.id)===HTF);
+  const own=HEROES.filter(x=>S.heroes[x.id]).length;
+  let h='<h2>Баатар</h2><div class="card"><div class="row"><div><b>Цуглуулга '+own+'/'+HEROES.length+'</b><div class="sm">Хамгийн хүчтэй '+heroSlots()+' баатар тулалдаанд оролцоно</div></div><button class="btn" onclick="openM(\'summon\')">🎴 Дуудах</button></div></div>';
+  h+='<div class="hl-chs">'+[0,5,4,3,2,1].map(r=>'<button class="hl-ch'+(HLF===r?' on':'')+'" onclick="HLF='+r+';fillM()">'+(r?RAR[r].n:'Бүгд')+'</button>').join('')+'</div>';
+  h+='<div class="hl-chs">'+[['','Бүх төрөл'],['archer','🏹 Харваач'],['cav','🐎 Морьт'],['heavy','🛡 Хуягт'],['foot','🗡 Явган']].map(([k,n])=>'<button class="hl-ch'+(HTF===k?' on':'')+'" onclick="HTF=\''+k+'\';fillM()">'+n+'</button>').join('')+'</div>';
+  h+='<div class="hl-chs hl-so"><span style="color:#c9b58a;font:bold 12px sans-serif;align-self:center">Эрэмбэ:</span>'+[['star','Од'],['pow','Хүч'],['lvl','Түвшин']].map(([k,n])=>'<button class="hl-ch'+(HSO===k?' on':'')+'" onclick="HSO=\''+k+'\';fillM()">'+n+'</button>').join('')+'</div>';
+  h+=list.length?'<div class="hl-grid">'+list.map(hCard).join('')+'</div>':'<div class="card"><div class="sm">Энэ төрөлд баатар алга.</div></div>';
+  h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Дурсгал</button></div>';
+  return h; };
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

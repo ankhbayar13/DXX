@@ -10038,7 +10038,8 @@ function bandDraw(i){ if(!PB) pbInit(); const cv=BCV, x=cv.getContext('2d'), by0
   x.globalCompositeOperation='multiply'; x.globalAlpha=0.5; x.fillStyle=x.createPattern(window.wmPaper(),'repeat'); x.fillRect(0,by0,W,bh); x.globalAlpha=1;
   // тоглох хэсгээс бусад нь — "түгжээтэй": бараан + налуу сүлжээ
   const gx0=(0-EX.x0)/WD.S, gy0=(0-EX.y0)/WD.S, gw=3200/WD.S, gh=4400/WD.S;
-  x.save(); x.beginPath(); x.rect(0,0,W,H); x.rect(gx0,gy0,gw,gh); x.clip('evenodd');
+  const SU=window.WMSUNG||{x0:0,y0:0,x1:0,y1:0}, sx0=(SU.x0-EX.x0)/WD.S, sy0=(SU.y0-EX.y0)/WD.S, sw=(SU.x1-SU.x0)/WD.S, sh=(SU.y1-SU.y0)/WD.S;
+  x.save(); x.beginPath(); x.rect(0,0,W,H); x.rect(gx0,gy0,gw,gh); x.rect(sx0,sy0,sw,sh); x.clip('evenodd');
   x.globalCompositeOperation='multiply'; x.fillStyle='rgba(120,100,80,.30)'; x.fillRect(0,by0,W,bh);
   x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(60,35,12,.10)'; x.lineWidth=1; for(let i=-H;i<W;i+=9){ if(i+by1<0||i+by0>W) continue; x.beginPath(); x.moveTo(i,0); x.lineTo(i+H,H); x.stroke(); }
   x.restore();
@@ -10078,7 +10079,7 @@ window.wmZmin=function(){ const c=document.getElementById('wmc'); if(!c||!c.clie
 wmClamp=function(){ const c=document.getElementById('wmc'); if(!c) return; const vw=c.clientWidth/WMV.z, vh=c.clientHeight/WMV.z, EW=EX.x1-EX.x0, EH=EX.y1-EX.y0;
   WMV.x=Math.max(EX.x0,Math.min(EX.x1-vw,WMV.x)); WMV.y=Math.max(EX.y0,Math.min(EX.y1-vh,WMV.y)); if(vw>EW) WMV.x=EX.x0+(EW-vw)/2; if(vh>EH) WMV.y=EX.y0+(EH-vh)/2; };
 // ---- түгжээтэй нутагт товшихуу ----
-const _tap=wmTap; wmTap=function(px2,py2){ try{ const wx=WMV.x+px2/WMV.z, wy=WMV.y+py2/WMV.z; if(wx<-40||wx>WM_W+40||wy<-40||wy>WM_H+40){ let best=null,bd=1e12; window.WMLANDS.forEach(a=>{ const d=Math.hypot(a.x-wx,a.y-wy); if(d<bd){ bd=d; best=a; } }); WMS=null; wmSheet(); if(best&&bd<Math.max(600,40/WMV.z)) say('🔒 '+best.n+' — түгжээтэй. Дараа нээгдэнэ.'); else say('🔒 Энэ нутаг түгжээтэй'); return; } }catch(e){} _tap(px2,py2); };
+const _tap=wmTap; wmTap=function(px2,py2){ try{ const wx=WMV.x+px2/WMV.z, wy=WMV.y+py2/WMV.z; if((wx<-40||wx>WM_W+40||wy<-40||wy>WM_H+40)&&!(window.wmSungIn&&wmSungIn(wx,wy)&&wmSungOpen())){ let best=null,bd=1e12; window.WMLANDS.forEach(a=>{ const d=Math.hypot(a.x-wx,a.y-wy); if(d<bd){ bd=d; best=a; } }); WMS=null; wmSheet(); if(best&&bd<Math.max(600,40/WMV.z)) say('🔒 '+best.n+' — түгжээтэй. Дараа нээгдэнэ.'); else say('🔒 Энэ нутаг түгжээтэй'); return; } }catch(e){} _tap(px2,py2); };
 })();
 
 
@@ -10582,7 +10583,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c04a16121d';
+var UPDB='ad892a428d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12778,6 +12779,43 @@ heroListHTML=function(){
     }catch(e){}
   },4000);
   try{ MENU[2].i.push(['🎡','Өдрийн эргүүл',"openM('patrol')",'p']); }catch(e){}
+})();
+
+
+/* p32/wmsung.js — Сүн (Өмнөд Хятад) нутаг: Алтан улсыг ялсны дараа тоглох боломжтой болно.
+   Одоогийн тоглох хэсгийн (3200×4400) яг урд талд, y=4440..5420. */
+(function(){
+  const R={x0:700,y0:4440,x1:3000,y1:5420}; window.WMSUNG=R;
+  const inR=(x,y)=>x>=R.x0&&x<=R.x1&&y>=R.y0&&y<=R.y1;
+  window.wmSungIn=inR;
+  window.wmSungOpen=function(){ try{ return ((wmSt().st||{}).wk10||0)>=1; }catch(e){ return false; } };
+  const KS={id:'k11',t:'kingdom',x:2306,y:4880,n:'Сүн',p:9500,c:'#c0392b',i:11};
+  const CP=[[2033,5053],[1362,4962],[2684,5014],[1764,4531],[1000,5004],[2942,4876],[1719,5037],[1931,4694],[1037,5311]];
+  const ND=[[1097,4829],[1201,5128],[1978,4859],[2559,4638],[2851,4632],[1430,5162],[2733,4758],[2022,4527],[866,4618],[1213,5319]];
+  const CH=[[1500,4720],[2250,4600],[1650,5250]];
+  const RT=['gold','grain','wood','meat','gold','grain','wood','meat','gold','grain'];
+  try{ const L=window.WMLANDS, k=L.findIndex(a=>/Сүн/.test(a.n)); if(k>=0) L.splice(k,1); }catch(e){}
+  const _g=wmGen;
+  wmGen=function(){ const D=_g.apply(this,arguments);
+    try{ if(!D.sung&&wmSungOpen()){ D.sung=1;
+      D.ks.push(Object.assign({},KS));
+      CP.forEach((p,i)=>D.camps.push({id:'cs'+i,t:'camp',x:p[0],y:p[1],lv:5,p:2200+((i*397)%900)}));
+      ND.forEach((p,i)=>D.nodes.push({id:'ns'+i,t:'node',x:p[0],y:p[1],rt:RT[i],lv:5}));
+      CH.forEach((p,i)=>D.chests.push({id:'ts'+i,t:'chest',n:'Эрдэнэс',x:p[0],y:p[1],v:5}));
+      const st=wmSt(); if(!st.sungSeen){ st.sungSeen=1; setTimeout(()=>{ try{ say('🏯 Сүн нутаг нээгдлээ!'); }catch(e){} },600); }
+    } }catch(e){ try{ console.error('wmsung',e); }catch(x){} }
+    return D; };
+  const _tp=wmTap;
+  wmTap=function(px,py){ try{ const wx=WMV.x+px/WMV.z, wy=WMV.y+py/WMV.z; if(inR(wx,wy)&&!wmSungOpen()){ WMS=null; wmSheet(); say('🔒 Сүн — Алтан улсыг ялбал нээгдэнэ'); return; } }catch(e){} return _tp.apply(this,arguments); };
+  const _wd=window.wmWorldDraw;
+  window.wmWorldDraw=function(c,D,z,t){ _wd.apply(this,arguments);
+    try{ const op=wmSungOpen(), fs=(z<0.03?10:15)/z;
+      c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
+      if(!op){ c.fillStyle='rgba(40,25,10,.40)'; c.fillRect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); c.setLineDash([fs*0.9,fs*0.6]); c.strokeStyle='rgba(60,30,10,.9)'; c.lineWidth=Math.max(3,2.2/z); c.strokeRect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); c.setLineDash([]);
+        if(z<0.5){ const cx=(R.x0+R.x1)/2, cy=(R.y0+R.y1)/2; c.font='italic bold '+fs*1.3+'px Georgia,serif'; c.lineWidth=fs*0.25; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#4a2a10'; c.strokeText('🔒 СҮН УЛС',cx,cy-fs*1.2); c.fillText('🔒 СҮН УЛС',cx,cy-fs*1.2); c.font='italic '+fs*0.95+'px Georgia,serif'; c.strokeText('Алтан улсыг ялбал нээгдэнэ',cx,cy+fs*0.6); c.fillText('Алтан улсыг ялбал нээгдэнэ',cx,cy+fs*0.6); } }
+      else { c.setLineDash([fs*0.9,fs*0.6]); c.strokeStyle='rgba(138,42,20,.85)'; c.lineWidth=Math.max(3,2.2/z); c.strokeRect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); c.setLineDash([]);
+        if(z<0.5){ c.font='italic bold '+fs*1.2+'px Georgia,serif'; c.lineWidth=fs*0.22; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); c.fillText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); } }
+      c.restore(); }catch(e){} };
 })();
 
 </script><script>(function(){

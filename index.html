@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='864a605b05';
+var UPDB='5d5b856982';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12734,12 +12734,14 @@ heroListHTML=function(){
   const NO=[[0,50],[50,36],[86,48],[134,48],[182,54],[236,49],[285,49],[334,45],[379,50],[429,49]];
   window.numHTML=function(str,h){ const k=h/72; return '<span style="display:inline-flex;vertical-align:middle;filter:drop-shadow(0 1px 1px #000a)">'+String(str).split('').map(c=>{ const d=NO[+c]; if(!d) return ''; return '<i style="display:inline-block;width:'+(d[1]*k)+'px;height:'+h+'px;background:url(rts/num_gold.webp) -'+(d[0]*k)+'px 0/'+(478*k)+'px '+h+'px no-repeat"></i>'; }).join('')+'</span>'; };
   const PT={spin:0,rot:0};
-  const day=()=>nowD().toDateString();
-  window.patrolBadge=()=>((S.pt&&S.pt.d===day())?0:1);
+  const DAY=24*3600*1000, now=()=>nowD().getTime();
+  const left=()=>{ const t=S.pt||{}; if(!t.t&&t.d===nowD().toDateString()) t.t=now(); return t.t?Math.max(0,t.t+DAY-now()):0; };
+  const fmt=ms=>{ const m=Math.ceil(ms/60000), h=Math.floor(m/60); return (h?h+' цаг ':'')+(m%60)+' мин'; };
+  window.patrolBadge=()=>(left()>0?0:1);
   window.patrolSpin=function(){
-    S.pt=S.pt||{}; if(PT.spin) return; if(S.pt.d===day()){ say('Өнөөдрийн эргүүлийг хийсэн. Маргааш дахин ирээрэй'); return; }
+    S.pt=S.pt||{}; if(PT.spin) return; if(left()>0){ say('Дараагийн эргүүл: '+fmt(left())+'-ын дараа'); return; }
     let r=Math.random()*100, i=0; for(let k=0;k<SG.length;k++){ if(r<SG[k].w){ i=k; break; } r-=SG[k].w; if(k===SG.length-1) i=k; }
-    const sg=SG[i], txt=sg.f(); S.pt.d=day(); S.pt.last=txt||sg.n; S.pt.n=(S.pt.n||0)+1; try{ save(); }catch(e){}
+    const sg=SG[i], txt=sg.f(); S.pt.t=now(); S.pt.last=txt||sg.n; S.pt.n=(S.pt.n||0)+1; try{ save(); }catch(e){}
     PT.spin=1; PT.rot=360*6-45*i+(Math.random()*24-12);
     const w=document.getElementById('ptw'), b=document.getElementById('ptb');
     if(b){ b.disabled=true; b.textContent='🎡 Эргэж байна…'; }
@@ -12748,14 +12750,14 @@ heroListHTML=function(){
     setTimeout(()=>{ PT.spin=0; try{ sfx('coin'); vib(30); }catch(e){} say('🎡 Эргүүл: '+S.pt.last); try{ refresh(); }catch(e){} },4400);
   };
   window.patrolHTML=function(){
-    S.pt=S.pt||{}; const done=S.pt.d===day(), D=280, R=D/2;
+    S.pt=S.pt||{}; const done=left()>0, D=280, R=D/2;
     const lab=SG.map((s,i)=>'<div style="position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate('+(45*i)+'deg)"><div style="position:absolute;left:-26px;top:-'+(R*0.66+22)+'px;width:52px;text-align:center;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000;font:800 13px/1.05 sans-serif"><span style="font-size:22px;display:block">'+s.e+'</span>'+numHTML(s.a,15)+'</div></div>').join('');
     return '<h2>🎡 Өдрийн эргүүл</h2><button class="btn" onclick="openM(\'menu\')">‹ Цэс</button>'
      +'<div class="card" style="text-align:center;margin-top:8px;padding-top:30px">'
      +'<div style="position:relative;width:'+D+'px;height:'+D+'px;margin:0 auto 12px"><div id="ptw" style="position:absolute;inset:0;transform:rotate('+PT.rot+'deg)"><img src="rts/pt_wheel.webp" style="width:100%;height:100%;display:block" alt="">'+lab+'</div>'
      +'<img src="rts/pt_ptr.webp" style="position:absolute;left:50%;top:-24px;width:38px;margin-left:-19px;filter:drop-shadow(0 3px 3px #000a)" alt=""></div>'
-     +(done?'<div class="sm" style="margin:6px 0">Өнөөдрийн шагнал: <b>'+(S.pt.last||'')+'</b><br>Маргааш дахин ирээрэй</div><button class="btn" disabled style="width:100%">✔ Авсан</button>'
-           :'<div class="sm" style="margin:6px 0">Өдөрт 1 удаа үнэгүй эргүүлнэ</div><button id="ptb" class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
+     +(done?'<div class="sm" style="margin:6px 0">Сүүлийн шагнал: <b>'+(S.pt.last||'')+'</b><br>Дараагийн эргүүл: <b>'+fmt(left())+'</b>-ын дараа</div><button class="btn" disabled style="width:100%">✔ Авсан</button>'
+           :'<div class="sm" style="margin:6px 0">24 цаг тутамд 1 удаа үнэгүй эргүүлнэ</div><button id="ptb" class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
      +'<div class="card"><h3 class="rb">Шагналууд</h3>'+SG.filter((s,i)=>SG.findIndex(x=>x.n===s.n)===i).map(s=>'<div class="row" style="padding:3px 0"><span>'+s.n+'</span><b>'+(Math.round(SG.filter(x=>x.n===s.n).reduce((a,x)=>a+x.w,0)*10)/10)+'%</b></div>').join('')+'</div>';
   };
   const _mc=modalContent;

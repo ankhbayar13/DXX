@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5ebfc0c2a5';
+var UPDB='c04a16121d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12764,6 +12764,19 @@ heroListHTML=function(){
   const _mc=modalContent;
   modalContent=function(k){ if(k==='patrol') return patrolHTML(); return _mc.apply(this,arguments); };
   const _fa=fillMA; fillMA=function(){ if(PT.spin&&cur==='patrol') return; return _fa.apply(this,arguments); };
+  /* Тоглоом эхэлснээс 4 мин дараа, эргүүл авагдаагүй бол өөрөө нээгдэнэ (сессэд 1 удаа). Тулаан/заавар/өөр цэс нээлттэй үед хүлээнэ. */
+  const AUTO={t0:Date.now(),done:0,ms:(window.PT_AUTO_MS||240000)};
+  setInterval(function(){
+    if(AUTO.done||document.hidden||Date.now()-AUTO.t0<AUTO.ms) return;
+    try{
+      if(typeof S==='undefined'||!S||!S.met||!S.tutDone){ return; }
+      if(left()>0){ AUTO.done=1; return; }
+      if(cur||PT.spin||document.getElementById('tutov')||document.getElementById('askov')||document.querySelector('.tutr')) return;
+      const m=document.getElementById('modal'); if(m&&m.style.display&&m.style.display!=='none') return;
+      if(typeof updBusy==='function'&&updBusy()) return;
+      AUTO.done=1; openM('patrol'); try{ sfx('click'); }catch(e){}
+    }catch(e){}
+  },4000);
   try{ MENU[2].i.push(['🎡','Өдрийн эргүүл',"openM('patrol')",'p']); }catch(e){}
 })();
 

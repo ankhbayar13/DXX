@@ -7013,7 +7013,7 @@ wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s
 
 
 /* 177: цэсний тайлбар (mnWrap) */
-var MND={'Түүхэн аян':'13 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Найзаа урь':'Найзаа дууд, хамт тогл','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
+var MND={'Түүхэн аян':'17 бүлгийн түүхэн тулаан','Тэмцээн':'Өдөр бүр 3 өрсөлдөгч, зэрэг ахи','Наадам':'Харвалт, морь, бөх','Дэлхий':'Газрын зураг, цуваа, довтлолт','Судалгаа':'Технологи судалж хөгж','Дайн':'7 дайсны шат','Даалгавар':'Даалгавар хийж шагнал ав','Захиалга':'Бараа хүргэж зоос ав','Цүнх':'Юу байгааг харах','Агуулах':'Нөөцөө хадгалж зарах','Дэлгүүр':'Алт, багц, баатар дуудах','Нөөц нэмэх':'Тэнхээ, зоос авах','Шуудан':'Мэдэгдэл, зарлал','Найзаа урь':'Найзаа дууд, хамт тогл','Хөгжим':'Дууны хэмжээ','Хөрөг':'Нэр, зураг, медаль','Cloud':'Өгөгдлөө хадгалах','Хүч':'Нийт хүч, зөвлөгөө','Хааны зэрэг':'Оноо цуглуулж зэрэг ах'};
 function mnWrap(nm,tile){ return '<div class="mnw">'+tile+'<div class="mnd">'+(MND[nm]||'')+'</div></div>'; }
 (function(){ const st=document.createElement('style'); st.textContent='.mnw{display:flex;flex-direction:column;min-width:0}.mnd{font-size:11px;line-height:1.2;color:#d9c48f;text-align:center;margin:1px 2px 4px;text-shadow:0 1px 0 #000}'; document.head.appendChild(st); })();
 
@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2a2d5a8eab';
+var UPDB='3eef5c39ad';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12715,6 +12715,40 @@ heroListHTML=function(){
   h+=list.length?'<div class="hl-grid">'+list.map(hCard).join('')+'</div>':'<div class="card"><div class="sm">Энэ төрөлд баатар алга.</div></div>';
   h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Дурсгал</button></div>';
   return h; };
+
+
+/* p32/patrol.js — 🎡 Өдрийн эргүүл: өдөрт 1 удаа үнэгүй эргүүлж шагнал авна (Цэс → Хөрөнгө) */
+(function(){
+  const PR=[
+    {w:35,n:'🪙 300 мөнгө',f:()=>{ S.res.gold+=300; }},
+    {w:25,n:'🌾 100 нөөц (санамсаргүй)',f:()=>{ const k=['meat','milk','wool','grain','wood'][Math.floor(Math.random()*5)]; S.res[k]=Math.min(cap(),(S.res[k]||0)+100); return {n:'+100 '+({meat:'мах',milk:'сүү',wool:'ноос',grain:'тариа',wood:'мод'})[k]}; }},
+    {w:15,n:'🪙 800 мөнгө',f:()=>{ S.res.gold+=800; }},
+    {w:12,n:'💎 3 Алт',f:()=>{ S.res.alt+=3; }},
+    {w:8,n:'🎴 Үнэгүй баатар дуудах',f:()=>{ S.fsum=(S.fsum||0)+1; }},
+    {w:5,n:'🌟 10 Алт',f:()=>{ S.res.alt+=10; }}
+  ];
+  const day=()=>nowD().toDateString();
+  window.patrolBadge=()=>((S.pt&&S.pt.d===day())?0:1);
+  window.patrolSpin=function(){
+    S.pt=S.pt||{}; if(S.pt.d===day()){ say('Өнөөдрийн эргүүлийг хийсэн. Маргааш дахин ирээрэй'); return; }
+    let r=Math.random()*100, p=PR[0]; for(const x of PR){ if(r<x.w){ p=x; break; } r-=x.w; }
+    const o=p.f()||{}; S.pt.d=day(); S.pt.last=o.n||p.n; S.pt.n=(S.pt.n||0)+1;
+    try{ sfx('coin'); }catch(e){} try{ vib(30); }catch(e){}
+    say('🎡 Эргүүл: '+S.pt.last); try{ refresh(); }catch(e){}
+  };
+  window.patrolHTML=function(){
+    S.pt=S.pt||{}; const done=S.pt.d===day();
+    return '<h2>🎡 Өдрийн эргүүл</h2><button class="btn" onclick="openM(\'menu\')">‹ Цэс</button>'
+     +'<div class="card" style="text-align:center;margin-top:8px"><div style="font-size:64px;line-height:1.1'+(done?'':';animation:ptSp 2.4s ease-in-out infinite')+'">🎡</div>'
+     +(done?'<div class="sm" style="margin:6px 0">Өнөөдрийн шагнал: <b>'+(S.pt.last||'')+'</b><br>Маргааш дахин ирээрэй</div><button class="btn" disabled style="width:100%">✔ Авсан</button>'
+           :'<div class="sm" style="margin:6px 0">Өдөрт 1 удаа үнэгүй эргүүлнэ</div><button class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
+     +'<div class="card"><h3 class="rb">Шагналууд</h3>'+PR.map(x=>'<div class="row" style="padding:3px 0"><span>'+x.n+'</span><b>'+x.w+'%</b></div>').join('')+'</div>';
+  };
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='patrol') return patrolHTML(); return _mc.apply(this,arguments); };
+  try{ MENU[2].i.push(['🎡','Өдрийн эргүүл',"openM('patrol')",'p']); }catch(e){}
+  const st=document.createElement('style'); st.textContent='@keyframes ptSp{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}'; document.head.appendChild(st);
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

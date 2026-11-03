@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='3eef5c39ad';
+var UPDB='dc6b0f498f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12717,37 +12717,51 @@ heroListHTML=function(){
   return h; };
 
 
-/* p32/patrol.js — 🎡 Өдрийн эргүүл: өдөрт 1 удаа үнэгүй эргүүлж шагнал авна (Цэс → Хөрөнгө) */
+/* p32/patrol.js — 🎡 Өдрийн эргүүл: өдөрт 1 удаа үнэгүй эргэлдэх дугуй (Цэс → Хөрөнгө). Зураг: rts/pt_wheel.webp, rts/pt_ptr.webp */
 (function(){
-  const PR=[
-    {w:35,n:'🪙 300 мөнгө',f:()=>{ S.res.gold+=300; }},
-    {w:25,n:'🌾 100 нөөц (санамсаргүй)',f:()=>{ const k=['meat','milk','wool','grain','wood'][Math.floor(Math.random()*5)]; S.res[k]=Math.min(cap(),(S.res[k]||0)+100); return {n:'+100 '+({meat:'мах',milk:'сүү',wool:'ноос',grain:'тариа',wood:'мод'})[k]}; }},
-    {w:15,n:'🪙 800 мөнгө',f:()=>{ S.res.gold+=800; }},
-    {w:12,n:'💎 3 Алт',f:()=>{ S.res.alt+=3; }},
-    {w:8,n:'🎴 Үнэгүй баатар дуудах',f:()=>{ S.fsum=(S.fsum||0)+1; }},
-    {w:5,n:'🌟 10 Алт',f:()=>{ S.res.alt+=10; }}
+  const RES=['meat','milk','wool','grain','wood'], RN={meat:'мах',milk:'сүү',wool:'ноос',grain:'тариа',wood:'мод'};
+  /* сегмент бүр 45°: 0 ногоон, 1 цэнхэр, 2 улбар шар, 3 хар хөх, 4 ягаан, 5 улаан, 6 бургунд, 7 шар (дээрээс цагийн зүүний дагуу) */
+  const SG=[
+    {w:12.5,e:'🌾',a:'100',n:'🌾 100 нөөц (санамсаргүй)',f:()=>{ const k=RES[Math.floor(Math.random()*5)]; S.res[k]=Math.min(cap(),(S.res[k]||0)+100); return '+100 '+RN[k]; }},
+    {w:12,e:'💎',a:'3',n:'💎 3 Алт',f:()=>{ S.res.alt+=3; }},
+    {w:17.5,e:'🪙',a:'300',n:'🪙 300 мөнгө',f:()=>{ S.res.gold+=300; }},
+    {w:12.5,e:'🌾',a:'100',n:'🌾 100 нөөц (санамсаргүй)',f:()=>{ const k=RES[Math.floor(Math.random()*5)]; S.res[k]=Math.min(cap(),(S.res[k]||0)+100); return '+100 '+RN[k]; }},
+    {w:8,e:'🎴',a:'1',n:'🎴 Үнэгүй баатар дуудах',f:()=>{ S.fsum=(S.fsum||0)+1; }},
+    {w:17.5,e:'🪙',a:'300',n:'🪙 300 мөнгө',f:()=>{ S.res.gold+=300; }},
+    {w:15,e:'🪙',a:'800',n:'🪙 800 мөнгө',f:()=>{ S.res.gold+=800; }},
+    {w:5,e:'🌟',a:'10',n:'🌟 10 Алт',f:()=>{ S.res.alt+=10; }}
   ];
+  const NO=[[0,50],[50,36],[86,48],[134,48],[182,54],[236,49],[285,49],[334,45],[379,50],[429,49]];
+  window.numHTML=function(str,h){ const k=h/72; return '<span style="display:inline-flex;vertical-align:middle;filter:drop-shadow(0 1px 1px #000a)">'+String(str).split('').map(c=>{ const d=NO[+c]; if(!d) return ''; return '<i style="display:inline-block;width:'+(d[1]*k)+'px;height:'+h+'px;background:url(rts/num_gold.webp) -'+(d[0]*k)+'px 0/'+(478*k)+'px '+h+'px no-repeat"></i>'; }).join('')+'</span>'; };
+  const PT={spin:0,rot:0};
   const day=()=>nowD().toDateString();
   window.patrolBadge=()=>((S.pt&&S.pt.d===day())?0:1);
   window.patrolSpin=function(){
-    S.pt=S.pt||{}; if(S.pt.d===day()){ say('Өнөөдрийн эргүүлийг хийсэн. Маргааш дахин ирээрэй'); return; }
-    let r=Math.random()*100, p=PR[0]; for(const x of PR){ if(r<x.w){ p=x; break; } r-=x.w; }
-    const o=p.f()||{}; S.pt.d=day(); S.pt.last=o.n||p.n; S.pt.n=(S.pt.n||0)+1;
-    try{ sfx('coin'); }catch(e){} try{ vib(30); }catch(e){}
-    say('🎡 Эргүүл: '+S.pt.last); try{ refresh(); }catch(e){}
+    S.pt=S.pt||{}; if(PT.spin) return; if(S.pt.d===day()){ say('Өнөөдрийн эргүүлийг хийсэн. Маргааш дахин ирээрэй'); return; }
+    let r=Math.random()*100, i=0; for(let k=0;k<SG.length;k++){ if(r<SG[k].w){ i=k; break; } r-=SG[k].w; if(k===SG.length-1) i=k; }
+    const sg=SG[i], txt=sg.f(); S.pt.d=day(); S.pt.last=txt||sg.n; S.pt.n=(S.pt.n||0)+1; try{ save(); }catch(e){}
+    PT.spin=1; PT.rot=360*6-45*i+(Math.random()*24-12);
+    const w=document.getElementById('ptw'), b=document.getElementById('ptb');
+    if(b){ b.disabled=true; b.textContent='🎡 Эргэж байна…'; }
+    if(w){ w.style.transition='transform 4.2s cubic-bezier(.12,.62,.08,1)'; void w.offsetWidth; w.style.transform='rotate('+PT.rot+'deg)'; }
+    try{ sfx('click'); }catch(e){}
+    setTimeout(()=>{ PT.spin=0; try{ sfx('coin'); vib(30); }catch(e){} say('🎡 Эргүүл: '+S.pt.last); try{ refresh(); }catch(e){} },4400);
   };
   window.patrolHTML=function(){
-    S.pt=S.pt||{}; const done=S.pt.d===day();
+    S.pt=S.pt||{}; const done=S.pt.d===day(), D=280, R=D/2;
+    const lab=SG.map((s,i)=>'<div style="position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate('+(45*i)+'deg)"><div style="position:absolute;left:-26px;top:-'+(R*0.66+22)+'px;width:52px;text-align:center;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000;font:800 13px/1.05 sans-serif"><span style="font-size:22px;display:block">'+s.e+'</span>'+numHTML(s.a,15)+'</div></div>').join('');
     return '<h2>🎡 Өдрийн эргүүл</h2><button class="btn" onclick="openM(\'menu\')">‹ Цэс</button>'
-     +'<div class="card" style="text-align:center;margin-top:8px"><div style="font-size:64px;line-height:1.1'+(done?'':';animation:ptSp 2.4s ease-in-out infinite')+'">🎡</div>'
+     +'<div class="card" style="text-align:center;margin-top:8px;padding-top:30px">'
+     +'<div style="position:relative;width:'+D+'px;height:'+D+'px;margin:0 auto 12px"><div id="ptw" style="position:absolute;inset:0;transform:rotate('+PT.rot+'deg)"><img src="rts/pt_wheel.webp" style="width:100%;height:100%;display:block" alt="">'+lab+'</div>'
+     +'<img src="rts/pt_ptr.webp" style="position:absolute;left:50%;top:-24px;width:38px;margin-left:-19px;filter:drop-shadow(0 3px 3px #000a)" alt=""></div>'
      +(done?'<div class="sm" style="margin:6px 0">Өнөөдрийн шагнал: <b>'+(S.pt.last||'')+'</b><br>Маргааш дахин ирээрэй</div><button class="btn" disabled style="width:100%">✔ Авсан</button>'
-           :'<div class="sm" style="margin:6px 0">Өдөрт 1 удаа үнэгүй эргүүлнэ</div><button class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
-     +'<div class="card"><h3 class="rb">Шагналууд</h3>'+PR.map(x=>'<div class="row" style="padding:3px 0"><span>'+x.n+'</span><b>'+x.w+'%</b></div>').join('')+'</div>';
+           :'<div class="sm" style="margin:6px 0">Өдөрт 1 удаа үнэгүй эргүүлнэ</div><button id="ptb" class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
+     +'<div class="card"><h3 class="rb">Шагналууд</h3>'+SG.filter((s,i)=>SG.findIndex(x=>x.n===s.n)===i).map(s=>'<div class="row" style="padding:3px 0"><span>'+s.n+'</span><b>'+(Math.round(SG.filter(x=>x.n===s.n).reduce((a,x)=>a+x.w,0)*10)/10)+'%</b></div>').join('')+'</div>';
   };
   const _mc=modalContent;
   modalContent=function(k){ if(k==='patrol') return patrolHTML(); return _mc.apply(this,arguments); };
+  const _fa=fillMA; fillMA=function(){ if(PT.spin&&cur==='patrol') return; return _fa.apply(this,arguments); };
   try{ MENU[2].i.push(['🎡','Өдрийн эргүүл',"openM('patrol')",'p']); }catch(e){}
-  const st=document.createElement('style'); st.textContent='@keyframes ptSp{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}'; document.head.appendChild(st);
 })();
 
 </script><script>(function(){

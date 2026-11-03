@@ -10582,7 +10582,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b592b5cf82';
+var UPDB='c270aafe68';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12729,7 +12729,7 @@ heroListHTML=function(){
     {w:8,e:'🎴',a:'1',n:'🎴 Үнэгүй баатар дуудах',f:()=>{ S.fsum=(S.fsum||0)+1; }},
     {w:17.5,e:'🪙',a:'300',n:'🪙 300 мөнгө',f:()=>{ S.res.gold+=300; }},
     {w:15,e:'🪙',a:'800',n:'🪙 800 мөнгө',f:()=>{ S.res.gold+=800; }},
-    {w:5,e:'💎',a:'10',n:'💎 10 Алт',f:()=>{ S.res.alt+=10; }}
+    {w:5,e:'💎',a:'100',n:'💎 100 Алт',f:()=>{ S.res.alt+=100; }}
   ];
   const NO=[[0,50],[50,36],[86,48],[134,48],[182,54],[236,49],[285,49],[334,45],[379,50],[429,49]];
   window.numHTML=function(str,h){ const k=h/72; return '<span style="display:inline-flex;vertical-align:middle;filter:drop-shadow(0 1px 1px #000a)">'+String(str).split('').map(c=>{ const d=NO[+c]; if(!d) return ''; return '<i style="display:inline-block;width:'+(d[1]*k)+'px;height:'+h+'px;background:url(rts/num_gold.webp) -'+(d[0]*k)+'px 0/'+(478*k)+'px '+h+'px no-repeat"></i>'; }).join('')+'</span>'; };

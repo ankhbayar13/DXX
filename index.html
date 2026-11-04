@@ -10065,7 +10065,7 @@ function spaced(c,t,x,y,sp){ const w=[...t].map(ch=>c.measureText(ch).width), to
 window.wmWorldDraw=function(c,D,z,t){
   let cv=worldImg(); if(!cv&&WST===3) cv=BDONE?BCV:bakeStart();
   if(cv) c.drawImage(cv,EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); else { c.fillStyle='#a3ad82'; c.fillRect(EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); }
-  try{ if(window.wmGroundDraw) wmGroundDraw(c,z); }catch(e){}
+  try{ if(window.wmGroundDraw) wmGroundDraw(c,z,D); }catch(e){}
   
   c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
   const fs=(z<0.03?10:15)/z, vx0=WMV.x-fs*10, vx1=WMV.x+c.canvas.clientWidth/z+fs*10, vy0=WMV.y-fs*3, vy1=WMV.y+c.canvas.clientHeight/z+fs*3;
@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='33eea5d704';
+var UPDB='9f7c272287';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12939,19 +12939,20 @@ heroListHTML=function(){
     [T.snow,[ [[0,71.5],[0,85],[180,85],[180,72],[110,73.5],[60,71],[30,71.5]] ]]
   ];
   const MIP=[48,96,192,384], MIPN=4;
-  let ATL=null, ATLST=0, WI=null, LM=null, MK=null, TILES=null, PATS={}, T1=null, T2=null, KEY='', LD=0;
+  let LF=null, LW=0, LH=0, ATL=null, ATLST=0, WI=null, LM=null, MK=null, TILES=null, PATS={}, T1=null, T2=null, KEY='', LD=0;
   function loadAtl(){ if(ATLST) return; ATLST=1; try{ ATL=new Image(); ATL.onload=()=>{ ATLST=2; }; ATL.onerror=()=>{ ATLST=3; }; ATL.src='gtiles.webp?v=1'; }catch(e){ ATLST=3; } }
   function prepTiles(){ TILES=[]; for(let i=0;i<10;i++){ const lv=[]; for(let k=0;k<MIPN;k++){ const L=MIP[k], c=document.createElement('canvas'); c.width=c.height=L; const x=c.getContext('2d'); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(ATL,(i%5)*384,Math.floor(i/5)*384,384,384,0,0,L,L); lv.push(c); } TILES.push(lv); } }
   function pat(i,k){ const key=i*10+k; if(PATS[key]) return PATS[key]; const p=T1.getContext('2d').createPattern(TILES[i][k],'repeat'); try{ p.setTransform(new DOMMatrix().scale(TW/MIP[k])); }catch(e){} return PATS[key]=p; }
-  function prepLand(){ const W=WI.naturalWidth, H=WI.naturalHeight, c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(WI,0,0); const im=x.getImageData(0,0,W,H), d=im.data;
-    for(let i=0;i<d.length;i+=4){ const a=(d[i]-d[i+2]-4)*21; d[i+3]=a<0?0:a>255?255:a; d[i]=d[i+1]=d[i+2]=0; } x.putImageData(im,0,0); LM=c; }
+  function prepLand(){ const W=WI.naturalWidth, H=WI.naturalHeight, c=document.createElement('canvas'); c.width=W; c.height=H; LW=W; LH=H; LF=new Uint8Array(W*H); const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(WI,0,0); const im=x.getImageData(0,0,W,H), d=im.data;
+    for(let i=0;i<d.length;i+=4){ const a=(d[i]-d[i+2]-4)*21; d[i+3]=a<0?0:a>255?255:a; LF[i>>2]=a>127?1:0; d[i]=d[i+1]=d[i+2]=0; } x.putImageData(im,0,0); LM=c; }
   function soft(c){ for(let n=0;n<3;n++){ const b=document.createElement('canvas'); b.width=Math.max(8,c.width>>1); b.height=Math.max(6,c.height>>1); const bx=b.getContext('2d'); bx.imageSmoothingEnabled=true; bx.drawImage(c,0,0,b.width,b.height); const x=c.getContext('2d'); x.globalCompositeOperation='copy'; x.imageSmoothingEnabled=true; x.drawImage(b,0,0,c.width,c.height); x.globalCompositeOperation='source-over'; } }
   function prepMasks(){ const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0, SW=Math.round(EW/64), SH=Math.round(EH/64); MK=[];
     LAY.forEach(L=>{ const c=document.createElement('canvas'); c.width=SW; c.height=SH; const x=c.getContext('2d'); x.fillStyle='#000'; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
       L[1].forEach(poly=>{ x.beginPath(); poly.forEach((q,i)=>{ const wx=WMGEO.x(q[0]), wy=WMGEO.y(q[1]); if(wx<x0)x0=wx; if(wx>x1)x1=wx; if(wy<y0)y0=wy; if(wy>y1)y1=wy; const px=(wx-E.x0)/64, py=(wy-E.y0)/64; if(i) x.lineTo(px,py); else x.moveTo(px,py); }); x.closePath(); x.fill(); });
       soft(c); MK.push({t:L[0],c:c,x0:x0-400,y0:y0-400,x1:x1+400,y1:y1+400}); }); }
+  function readyLand(){ if(LF) return true; if(!window.WMEXT||!window.WMWIMG) return false; try{ WI=window.WMWIMG; prepLand(); }catch(e){ LF=null; return false; } return true; }
   function ready(){ if(MK) return true; if(!window.WMEXT||!window.WMWIMG||!window.WMGEO) return false; loadAtl(); if(ATLST===3) return false; if(ATLST!==2) return false;
-    if(LD>0) return false; LD=1; try{ WI=window.WMWIMG; prepTiles(); T1=document.createElement('canvas'); T2=document.createElement('canvas'); prepLand(); prepMasks(); }catch(e){ try{ console.error('wmground',e); }catch(x){} MK=null; LD=-1; return false; } return true; }
+    if(LD>0) return false; LD=1; try{ WI=window.WMWIMG; prepTiles(); T1=document.createElement('canvas'); T2=document.createElement('canvas'); if(!LM) prepLand(); prepMasks(); }catch(e){ try{ console.error('wmground',e); }catch(x){} MK=null; LD=-1; return false; } return true; }
   let CC=null, LK='', LT=0; // кэш: {x0,y0,z,w,h}
   function rebuild(vx0,vy0,vx1,vy1,z){ const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0, mg=0.25, ww=vx1-vx0, wh=vy1-vy0;
     let cx0=vx0-ww*mg, cy0=vy0-wh*mg, cx1=vx1+ww*mg, cy1=vy1+wh*mg; cx0=Math.max(cx0,E.x0); cy0=Math.max(cy0,E.y0); cx1=Math.min(cx1,E.x1); cy1=Math.min(cy1,E.y1);
@@ -12966,7 +12967,8 @@ heroListHTML=function(){
       x1.setTransform(1,0,0,1,0,0); x1.drawImage(T2,0,0); });
     x1.setTransform(m); x1.globalCompositeOperation='destination-in'; x1.drawImage(LM,E.x0,E.y0,EW,EH); x1.globalCompositeOperation='source-over';
     CC={x0:cx0,y0:cy0,z:z,w:w,h:h}; }
-  window.wmGroundDraw=function(c,z){ try{
+  window.wmGroundDraw=function(c,z,D){ try{
+    if(D&&readyLand()&&D.fxS!==(D.sung?2:1)){ try{ fixWorld(D); }catch(e){ try{ console.error('wmfix',e); }catch(x){} } D.fxS=(D.sung?2:1); }
     if(z<0.05) return; const a=z>=0.12?1:(z-0.05)/0.07; if(LD<0) return; if(!ready()) return;
     const cv=c.canvas, W=cv.width, H=cv.height, m=c.getTransform(), now=performance.now();
     const vx0=(0-m.e)/m.a, vx1=(W-m.e)/m.a, vy0=(0-m.f)/m.d, vy1=(H-m.f)/m.d, key=m.a+','+m.e+','+m.f;
@@ -12977,6 +12979,48 @@ heroListHTML=function(){
     const sx=(vx0-CC.x0)*CC.z, sy=(vy0-CC.y0)*CC.z, sw=(vx1-vx0)*CC.z, sh=(vy1-vy0)*CC.z;
     c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=a; c.imageSmoothingEnabled=true; c.drawImage(T1,Math.max(0,sx),Math.max(0,sy),Math.min(sw,CC.w-Math.max(0,sx)),Math.min(sh,CC.h-Math.max(0,sy)),sx<0?-sx*W/sw:0,sy<0?-sy*H/sh:0,W*(Math.min(sw,CC.w-Math.max(0,sx))/sw),H*(Math.min(sh,CC.h-Math.max(0,sy))/sh)); c.restore();
   }catch(e){ try{ if(!window.__wgErr){ window.__wgErr=1; console.error('wmground draw',e); } }catch(x){} } };
+
+  /* ===== Логик байршил: далайд, нуурт орсон барилга/мод/уулыг зөөж, нөөцийн цэгүүдийг газрын шинж чанарт тааруулна ===== */
+  window.wmLandAt=function(x,y,m){ if(!LF) return true; const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0;
+    const t=(px,py)=>{ const i=Math.floor((px-E.x0)/EW*LW), j=Math.floor((py-E.y0)/EH*LH); if(i<0||j<0||i>=LW||j>=LH) return false; return LF[j*LW+i]===1; };
+    if(!t(x,y)) return false; if(m){ return t(x+m,y)&&t(x-m,y)&&t(x,y+m)&&t(x,y-m); } return true; };
+  let BP=null, BC=null;
+  window.wmBiomeAt=function(x,y){ if(!BP){ BP=LAY.map(L=>{ const p=new Path2D(); L[1].forEach(poly=>{ poly.forEach((q,i)=>{ const wx=WMGEO.x(q[0]), wy=WMGEO.y(q[1]); if(i) p.lineTo(wx,wy); else p.moveTo(wx,wy); }); p.closePath(); }); return [L[0],p]; }); BC=document.createElement('canvas').getContext('2d'); }
+    let r=T.gold; for(let i=0;i<BP.length;i++){ if(BC.isPointInPath(BP[i][1],x,y)) r=BP[i][0]; } return r; };
+  const hash=s=>{ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0); };
+  const rng=sd=>{ let s=(sd%2147483646)+1; return ()=>{ s=(s*16807)%2147483647; return s/2147483647; }; };
+  function fixWorld(D){ const R0={x0:0,y0:0,x1:3200,y1:4400}, RS={x0:700,y0:4400,x1:3000,y1:5640};
+    // 1) далай/нуурт орсон чимэглэл (мод, уул, амьтан…) устгана — нэг удаа
+    if(!D.decFx){ D.decFx=1; const keep=D.decor.filter(d=>wmLandAt(d.x,d.y,0)); D.decor.length=0; keep.forEach(d=>D.decor.push(d)); }
+    const mt=D.decor.filter(d=>d.k==='mt'), tr=D.decor.filter(d=>d.k==='tree'), G=120, grid={};
+    const gk=(x,y)=>Math.floor(x/G)+','+Math.floor(y/G); const put=(a,k)=>a.forEach(d=>{ const g=gk(d.x,d.y)+k; (grid[g]=grid[g]||[]).push(d); });
+    put(mt,'m'); put(tr,'t');
+    const cnt=(x,y,r,k)=>{ let n=0; const c=Math.ceil(r/G); for(let i=-c;i<=c;i++) for(let j=-c;j<=c;j++){ const a=grid[Math.floor(x/G)+i+','+(Math.floor(y/G)+j)+k]; if(a) for(const d of a) if(Math.hypot(d.x-x,d.y-y)<r) n++; } return n; };
+    const lakes=(D.lakes||[]), inLake=(x,y,m)=>lakes.some(l=>x>l.x-m&&x<l.x+l.w+m&&y>l.y-m&&y<l.y+l.h+m);
+    const lakeD=(x,y)=>{ let b=1e9; lakes.forEach(l=>{ const cx=Math.max(l.x,Math.min(x,l.x+l.w)), cy=Math.max(l.y,Math.min(y,l.y+l.h)); const d=Math.hypot(x-cx,y-cy); if(d<b) b=d; }); return b; };
+    const inRectX=(e)=>0, inRect=(e,x,y,g)=>{ g=g===undefined?70:g; const r=(typeof e.id==='string'&&e.id.indexOf('ns')===0)?RS:R0; return x>r.x0+g&&x<r.x1-g&&y>r.y0+g&&y<r.y1-g; };
+    const all=[].concat(D.ks,D.nodes,D.camps,D.chests);
+    const far=(e,x,y,d)=>all.every(o=>o===e||Math.hypot(o.x-x,o.y-y)>(o.t==='ks'||o.x===undefined?230:d));
+    const mtNear=(x,y,r)=>mt.some(d=>Math.hypot(d.x-x,d.y-y)<r);
+    // 2) далайд байгаа барилгыг ойрын газар руу
+    const toLand=e=>{ if(wmLandAt(e.x,e.y,18)&&!inLake(e.x,e.y,10)) return; let best=null,bd=1e9; for(let r=30;r<=420&&!best;r+=30){ for(let a=0;a<24;a++){ const x=e.x+Math.cos(a/24*6.283)*r, y=e.y+Math.sin(a/24*6.283)*r; if(!inRect(e,x,y,5)||!wmLandAt(x,y,18)||inLake(x,y,10)||!far(e,x,y,90)) continue; if(r<bd){ bd=r; best={x:x,y:y}; } } } if(best){ e.x=best.x; e.y=best.y; } };
+    D.ks.concat(D.camps,D.chests).forEach(e=>{ if(e.fx) return; e.fx=1; toLand(e); });
+    // 3) нөөцийн цэг: газрын шинж чанарт тааруулна
+    const BAD={4:1,5:1,6:1,8:1,9:1}, FOR={1:1,2:1,3:1,7:1};
+    const placed=D.nodes.filter(n=>n.fx);
+    D.nodes.forEach(n=>{ if(n.fx) return; n.fx=1; const rd=rng(hash(String(n.id))), ox=n.x, oy=n.y, cand=[[ox,oy]];
+      for(let i=0;i<70;i++){ const a=rd()*6.283, r=Math.sqrt(rd())*650; cand.push([ox+Math.cos(a)*r,oy+Math.sin(a)*r]); }
+      let best=null,bs=-1e9;
+      cand.forEach(q=>{ const x=q[0], y=q[1]; if(!inRect(n,x,y)||!wmLandAt(x,y,24)||inLake(x,y,20)||mtNear(x,y,50)||!far(n,x,y,110)) return;
+        if(placed.some(o=>o.rt===n.rt&&Math.hypot(o.x-x,o.y-y)<280)) return;
+        const b=wmBiomeAt(x,y), mc=cnt(x,y,190,'m'), tc=cnt(x,y,170,'t'), ld=lakeD(x,y); let sc=0;
+        if(n.rt==='wood'){ sc=Math.min(tc,14)*1.4+(FOR[b]?3:0)-(BAD[b]?9:0); }
+        else if(n.rt==='gold'){ sc=Math.min(mc,9)*2.2+(b===T.gravel||b===T.snowg?2:0)-(b===T.meadow?1:0); }
+        else if(n.rt==='grain'){ sc=(ld<260?7-ld/60:0)+(b===T.meadow||b===T.green?3:b===T.gold?1:0)-(BAD[b]?12:0)-mc*0.8-(tc>10?2:0); }
+        else { sc=(b===T.gold?3:b===T.meadow?2:b===T.green?1:0)-(BAD[b]?7:0)-mc*0.5; }
+        sc+=rd()*1.5-Math.hypot(x-ox,y-oy)*0.002; if(sc>bs){ bs=sc; best=q; } });
+      if(best){ n.x=best[0]; n.y=best[1]; } placed.push(n); });
+  }
   try{ const pre=()=>setTimeout(()=>{ try{ loadAtl(); }catch(e){} },6000); if(document.readyState==='complete') pre(); else window.addEventListener('load',pre); }catch(e){}
 })();
 

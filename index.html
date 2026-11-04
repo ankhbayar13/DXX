@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='430a44f0f0';
+var UPDB='5b96e254f6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13070,6 +13070,91 @@ heroListHTML=function(){
   const _o=wmOpen;
   wmOpen=function(){ _o.apply(this,arguments);
     try{ const st=wmSt(); if(!st.worldSeen){ st.worldSeen=1; setTimeout(()=>{ try{ say('🌍 Дэлхийн бүх нутаг нээгдлээ!'); }catch(e){} },900); } }catch(e){} };
+})();
+
+
+/* p32/gsign.js — «Google-ээр үргэлжлүүлэх»: бүртгүүлэх/нэвтрэх хоёуланд нэг товчоор.
+   Messenger/Facebook/Instagram доторх хөтөч дээр Google нэвтрэлтийг хаадаг тул тэнд Chrome/Safari-д нээх заавар гаргана. */
+(function(){
+  const UA=navigator.userAgent||'';
+  const IN_APP=/FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|MicroMessenger|Viber|Snapchat|TikTok|; wv\)/i.test(UA)||(/(iPhone|iPod|iPad)/i.test(UA)&&!/Safari\//i.test(UA)&&!/CriOS|FxiOS/i.test(UA));
+  const IS_AND=/Android/i.test(UA);
+  window.GIN_APP=IN_APP;
+  const GLOGO='<svg width="20" height="20" viewBox="0 0 48 48" style="flex:none"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+
+  // Firebase-ийн хэрэглэгчээс имэйл авах (Google-ээр холбосны дараа заримдаа user.email хоосон байдаг)
+  clUser=function(){ const u=FBM&&FBM.auth.currentUser; CL.uid=u?u.uid:null;
+    let em=null; if(u&&!u.isAnonymous){ em=u.email; if(!em&&u.providerData){ const p=u.providerData.find(x=>x&&x.email); em=p?p.email:null; } if(!em) em='google'; }
+    CL.email=em; };
+
+  function gErr(x){ const c=(x&&x.code)||String(x||'');
+    if(/popup-closed-by-user|cancelled-popup-request|user-cancelled/.test(c)) return '';
+    if(/popup-blocked/.test(c)) return 'Popup хаагдсан байна. Хөтчийн popup-г зөвшөөрөөд дахин дарна уу';
+    if(/operation-not-allowed|admin-restricted/.test(c)) return 'Google нэвтрэлт серверт идэвхжээгүй байна (админ Firebase → Authentication → Google-г асаах хэрэгтэй)';
+    if(/unauthorized-domain/.test(c)) return 'Энэ хаяг Google-д зөвшөөрөгдөөгүй байна (админ Firebase → Authorized domains-д нэмэх хэрэгтэй)';
+    if(/network-request-failed/.test(c)) return 'Интернет холболт тасарлаа. Дахин оролдоно уу';
+    if(/too-many-requests/.test(c)) return 'Хэт олон оролдлоо. Хэдэн минут хүлээнэ үү';
+    if(/user-disabled/.test(c)) return 'Энэ бүртгэл хаагдсан байна';
+    if(/web-storage-unsupported|disallowed_useragent/.test(c)) return 'Энэ хөтөч Google нэвтрэлтийг дэмжихгүй байна. Chrome эсвэл Safari-д нээнэ үү';
+    return 'Google-ээр нэвтэрч чадсангүй: '+c; }
+
+  // Google-ээр нэвтэрсний дараа: cloud-д хадгалсан тоглоом байвал ачаална (имэйлээр нэвтрэхтэй ижил дүрэм)
+  async function afterSignIn(){ const {Au,auth,F,db}=FBM; let reload=0; window._clR=1;
+    try{
+      clUser(); CL.pv=''; CL.msg='';
+      const s=await F.getDoc(F.doc(db,'saves',CL.uid)); const d=s.exists()?s.data().d:null;
+      if(d&&acUnpack(d)){
+        const hasLocal=(S.pl||1)>1||(S.won||0)>0||totalPower()>300;
+        const go=()=>{ reload=1; clAdopt(d,CL.uid); };
+        if(hasLocal){ reload=1; dxAsk('Энэ Google бүртгэлд хадгалсан тоглоом олдлоо. Ачаалвал энэ утсан дээрх одоогийн тоглоом солигдоно.','Ачаалах',go,'Болих');
+          const nb=document.getElementById('askn'); if(nb){ nb.onclick=async()=>{ document.getElementById('askov').remove(); try{ await Au.signOut(auth); await Au.signInAnonymously(auth); clUser(); }catch(x){} window._clR=0; CL.st='Холбогдсон (бүртгэлгүй)'; fillM(); }; }
+          return; }
+        go(); return; }
+      lsSet('dxx_own',CL.uid); CL.st='Холбогдсон · '+CL.email; say('Нэвтэрлээ ✓ (энэ тоглоом Google бүртгэлд холбогдлоо)'); window._clR=0; await clPush(true); fillM();
+    }finally{ if(!reload) window._clR=0; } }
+
+  async function afterLink(){ clUser(); CL.pv=''; CL.msg=''; CL.st='Холбогдсон · '+CL.email;
+    if(!S.regBonus){ S.regBonus=1; S.res.alt+=100; try{ refresh(); }catch(e){} say('Бүртгэгдлээ ✓ +100 Алт бэлэг!'); } else say('Бүртгэгдлээ ✓');
+    save(); await clPush(true); fillM(); }
+
+  function gHelp(){
+    const url=location.href.split('#')[0];
+    const msg='🔒 Google нь Messenger/Facebook/Instagram доторх хөтчөөр нэвтрэхийг хаадаг.<br><br>'+
+      (IS_AND?'«Chrome-д нээх» дарж, тэнд «Google-ээр үргэлжлүүлэх» дарна уу.':'Баруун дээд «⋯» → «Safari-д нээх» (эсвэл «Хөтчид нээх») дараад, тэнд «Google-ээр үргэлжлүүлэх» дарна уу.')+
+      '<br><br>⚠ Энэ утсан дээр тоглосон тоглоомоо алдахгүй бол энд имэйл + нууц кодоор бүртгүүл. Google нь шинээр эхэлж байгаа эсвэл өмнө Google-ээр бүртгүүлсэн хүнд тохиромжтой.';
+    const copy=()=>{ try{ navigator.clipboard.writeText(url).then(()=>say('Хаяг хуулагдлаа. Chrome/Safari-д буулгана уу'),()=>say(url)); }catch(e){ say(url); } };
+    if(IS_AND){ dxAsk(msg,'Chrome-д нээх',()=>{ const u=new URL(url); location.href='intent://'+u.host+u.pathname+u.search+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end'; setTimeout(copy,1500); },'Хаах'); }
+    else dxAsk(msg,'Хаяг хуулах',copy,'Хаах'); }
+
+  window.clGoogle=async function(){
+    if(CL.go) return;
+    if(IN_APP){ gHelp(); return; }
+    if(!CL.ok||!FBM){ clMsg('Интернет холбогдоогүй байна. Түр хүлээгээд дахин оролдоно уу'); return; }
+    CL.go=1; clMsg('Google нээгдэж байна…',1);
+    const {Au,auth}=FBM; let reg=0;
+    try{
+      const prov=new Au.GoogleAuthProvider(); prov.setCustomParameters({prompt:'select_account'});
+      const u=auth.currentUser;
+      if(u&&u.isAnonymous){
+        try{ await Au.linkWithPopup(u,prov); reg=1; }
+        catch(x){ const c=(x&&x.code)||'';
+          if(/credential-already-in-use/.test(c)){ const cr=Au.GoogleAuthProvider.credentialFromError(x); if(!cr) throw x; await Au.signInWithCredential(auth,cr); }
+          else if(/email-already-in-use|account-exists-with-different-credential/.test(c)){ CL.ev=(x.customData&&x.customData.email)||CL.ev||''; CL.pv=''; CL.tab='in'; CL.go=0; fillM(); clMsg('Энэ имэйл нууц кодоор бүртгэлтэй байна. Имэйл, нууц кодоороо нэвтэрнэ үү'); return; }
+          else throw x; } }
+      else if(!u){ await Au.signInWithPopup(auth,prov); }
+      else { clMsg('Та аль хэдийн нэвтэрсэн байна',1); CL.go=0; return; }
+      CL.go=0;
+      if(reg) await afterLink(); else await afterSignIn();
+    }catch(x){ CL.go=0; const m=gErr(x); if(m) clMsg(m); else clMsg(''); }
+    CL.go=0; };
+
+  // Google товчийг бүртгэл/нэвтрэх хуудсанд нэмнэ
+  const _card=clAuthCard;
+  clAuthCard=function(){ let h=_card.apply(this,arguments);
+    try{ const blk='<button onclick="clGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 8px;font-size:16px;font-weight:700;color:#3c4043;background:#fff;border:1px solid #dadce0;border-radius:9px;cursor:pointer;font-family:inherit">'+GLOGO+'<span>Google-ээр үргэлжлүүлэх</span></button>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;color:#c9a46a;font-size:13px"><span style="flex:1;height:1px;background:#6b4a24"></span>эсвэл<span style="flex:1;height:1px;background:#6b4a24"></span></div>';
+      const mk='<div style="padding:12px">'; const i=h.indexOf(mk); if(i>=0){ const j=i+mk.length; h=h.slice(0,j)+blk+h.slice(j); } }catch(e){}
+    return h; };
 })();
 
 </script><script>(function(){

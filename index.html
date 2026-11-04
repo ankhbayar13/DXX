@@ -3135,10 +3135,10 @@ function wmDrawS(c,k,x,y,w){ const s=SPR[k]; if(!s||!s.img||!s.img.complete||!s.
 function wmLabel(c,t,x,y,col,sz){ c.font='bold '+(sz||12)+'px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000'; c.strokeText(t,x,y); c.fillStyle=col||'#fff'; c.fillText(t,x,y); }
 function wmLoop(){
   if(!WMV||!WMV.on||!$('wmc')) return; const cv=$('wmc'), c=cv.getContext('2d'), D=wmGen(), dp=WMV.dp||1, z=WMV.z, t=performance.now()/1000;
-  c.setTransform(1,0,0,1,0,0); c.fillStyle='#a3bcb4'; c.fillRect(0,0,cv.width,cv.height); c.setTransform(dp*z,0,0,dp*z,-WMV.x*z*dp,-WMV.y*z*dp); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; try{ wmWorldDraw(c,D,z,t); }catch(e){} c.drawImage(D.bg,0,0,WM_W,WM_H); try{ wmHistUnder(c,D,z,t); }catch(e){}
+  c.setTransform(1,0,0,1,0,0); c.fillStyle='#a3bcb4'; c.fillRect(0,0,cv.width,cv.height); c.setTransform(dp*z,0,0,dp*z,-WMV.x*z*dp,-WMV.y*z*dp); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; try{ wmWorldDraw(c,D,z,t); }catch(e){} try{ wmHistUnder(c,D,z,t); }catch(e){}
   const vw=cv.clientWidth/z, vh=cv.clientHeight/z, vis=(x,y,m)=>x>WMV.x-m&&x<WMV.x+vw+m&&y>WMV.y-m&&y<WMV.y+vh+m;
   // fog border
-  c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14; c.strokeRect(0,0,WM_W,WM_H);
+  c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14;
   try{ wmPano(c); wmRivDraw(c,t); }catch(e){}
   try{ wmLakes(c,D,vis); }catch(e){}
   const items=[]; D.decor.forEach(d=>{ if(vis(d.x,d.y,d.big||(d.k==='mt'?170:70))) items.push({y:d.flat?-1e6+d.y:d.y,f:()=>wmDecorDraw(c,d)}); });
@@ -10066,14 +10066,13 @@ window.wmWorldDraw=function(c,D,z,t){
   let cv=worldImg(); if(!cv&&WST===3) cv=BDONE?BCV:bakeStart();
   if(cv) c.drawImage(cv,EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); else { c.fillStyle='#a3ad82'; c.fillRect(EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); }
   
-  c.save(); c.shadowColor='rgba(30,15,3,.75)'; c.shadowBlur=26; c.fillStyle='#98a35a'; c.fillRect(0,0,WM_W,WM_H); c.restore();
   c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
   const fs=(z<0.03?10:15)/z, vx0=WMV.x-fs*10, vx1=WMV.x+c.canvas.clientWidth/z+fs*10, vy0=WMV.y-fs*3, vy1=WMV.y+c.canvas.clientHeight/z+fs*3;
   if(z<0.5){ c.font='italic '+fs*0.82+'px Georgia,"Times New Roman",serif'; c.lineWidth=fs*0.16; c.strokeStyle='rgba(235,242,232,.7)'; c.fillStyle='rgba(40,70,85,.85)';
     if(z>=0.03) SEAS.forEach(a=>{ const X=gx(a[1]), Y=gy(a[2]); if(X<vx0||X>vx1||Y<vy0||Y>vy1) return; spaced(c,a[0],X,Y,fs*0.5); });
     c.font='italic bold '+fs+'px Georgia,"Times New Roman",serif'; c.lineWidth=fs*0.2; c.strokeStyle='rgba(244,230,190,.92)'; c.fillStyle='#4a2a10';
     window.WMLANDS.forEach(a=>{ if(a.x<vx0||a.x>vx1||a.y<vy0||a.y>vy1) return; c.strokeText(a.n,a.x,a.y); c.fillText(a.n,a.x,a.y); padlock(c,a.x,a.y+fs*1.5,fs*1.0); }); }
-  if(z<0.14){ const a2=Math.min(1,(0.14-z)/0.06); c.globalAlpha=a2; c.strokeStyle='#8a2a14'; c.lineWidth=Math.max(5,3/z); c.strokeRect(0,0,WM_W,WM_H); c.font='italic bold '+fs*1.25+'px Georgia,"Times New Roman",serif'; c.lineWidth=fs*0.25; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('ТАНЫ НУТАГ',WM_W/2,-fs*1.6); c.fillText('ТАНЫ НУТАГ',WM_W/2,-fs*1.6); c.globalAlpha=1; }
+  if(z<0.14){ const a2=Math.min(1,(0.14-z)/0.06); c.globalAlpha=a2; c.strokeStyle='#8a2a14'; c.lineWidth=Math.max(5,3/z); c.font='italic bold '+fs*1.25+'px Georgia,"Times New Roman",serif'; c.lineWidth=fs*0.25; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('ТАНЫ НУТАГ',WM_W/2,-fs*1.6); c.fillText('ТАНЫ НУТАГ',WM_W/2,-fs*1.6); c.globalAlpha=1; }
   c.restore(); };
 // ---- хил: бүх дэлхий руу чөлөөтэй гүйлгэх ----
 window.wmZmin=function(){ const c=document.getElementById('wmc'); if(!c||!c.clientWidth) return 0.01; return Math.max(0.004,Math.min(c.clientWidth/(EX.x1-EX.x0),c.clientHeight/(EX.y1-EX.y0))*0.99); };
@@ -10584,7 +10583,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a0193a0ee1';
+var UPDB='d2d360b8cc';
 (function(){
   const K='updTry';
   const _go=updGo;

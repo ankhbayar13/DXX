@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='ca06ef6219';
+var UPDB='eb105d0b1c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13218,6 +13218,32 @@ heroListHTML=function(){
   window.apkOpen=function(){
     dxAsk('📱 Тоглоомыг апп болгож суулгавал бүтэн дэлгэцээр, утасны цэснээс шууд нээгдэнэ. Шинэчлэл автоматаар ирнэ.<br><br>Дараагийн хуудсан дээрх «APK татах» товчийг дарж суулгана.','Татах хуудас нээх',function(){ try{ window.open('android.html','_blank'); }catch(e){ location.href='android.html'; } },'Болих'); };
   try{ MENU[MENU.length-1].i.push(['📱','Android апп',"apkOpen()"]); }catch(e){}
+})();
+
+
+/* p32/iosadd.js — iPhone/iPad дээр «Нүүр дэлгэцэнд нэмэх» заавар. «⚙ Бусад» цэсэнд товч.
+   Зөвхөн iOS хөтөч дээр, нүүр дэлгэцээс (апп хэлбэрээр) нээгээгүй үед харагдана. */
+(function(){
+  const UA=navigator.userAgent||'';
+  const IOS=/(iPhone|iPod|iPad)/i.test(UA)||(/Macintosh/i.test(UA)&&navigator.maxTouchPoints>1);
+  if(!IOS) return;
+  let isApp=false;
+  try{ isApp=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches); }catch(e){}
+  if(isApp) return;
+  const SAFARI=/Safari\//i.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Messenger|TikTok|Snapchat/i.test(UA);
+  const SHARE='<svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:-4px" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>';
+  const PLUS='<span style="display:inline-block;width:18px;height:18px;line-height:17px;text-align:center;border:2px solid #fff;border-radius:5px;font-weight:800;font-size:15px;vertical-align:-3px">+</span>';
+  const st=(n)=>'<div style="display:flex;gap:10px;align-items:flex-start;margin:9px 0;text-align:left"><b style="flex:none;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#f2c14e;color:#3a2600">'+n+'</b><div style="flex:1">';
+  window.iosAdd=function(){
+    const url=location.href.split('#')[0].split('?')[0];
+    const copy=()=>{ try{ navigator.clipboard.writeText(url).then(()=>say('Хаяг хуулагдлаа. Safari-д буулгана уу'),()=>say(url)); }catch(e){ say(url); } };
+    const steps=(SAFARI?'':st('1')+'<b>Safari</b> хөтчөөр нээнэ. Энэ хөтөч дээр «Нүүр дэлгэцэнд нэмэх» ажиллахгүй байж магадгүй. Хаягаа хуулж Safari-д буулгана уу.</div></div>')+
+      st(SAFARI?'1':'2')+'Доорх <b>хуваалцах товч</b> '+SHARE+' дарна.</div></div>'+
+      st(SAFARI?'2':'3')+'Доош гүйлгээд <b>«Нүүр дэлгэцэнд нэмэх»</b> '+PLUS+' (Add to Home Screen) дарна.</div></div>'+
+      st(SAFARI?'3':'4')+'Баруун дээд <b>«Нэмэх»</b> (Add) дарна.</div></div>';
+    const msg='📲 <b>iPhone дээр апп шиг суулгах</b><div style="margin-top:6px">'+steps+'</div><div style="font-size:13px;color:#c9a46a;margin-top:6px">Дараа нь нүүр дэлгэц дээрх «Тал Нутаг» иконоос бүтэн дэлгэцээр нээгдэнэ. Шинэчлэл автоматаар ирнэ.</div>';
+    if(SAFARI) dxAsk(msg,'Ойлголоо',function(){},'Хаах'); else dxAsk(msg,'Хаяг хуулах',copy,'Хаах'); };
+  try{ MENU[MENU.length-1].i.push(['📲','iPhone апп',"iosAdd()"]); }catch(e){}
 })();
 
 </script><script>(function(){

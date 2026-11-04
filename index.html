@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a062c7fe04';
+var UPDB='ca06ef6219';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13201,6 +13201,23 @@ heroListHTML=function(){
   // баатар дээр дарахад мэдэгдэл алга болно
   const _hi=heroInfo;
   heroInfo=function(id){ try{ if(S.newH&&S.newH[id]){ delete S.newH[id]; try{ save(); }catch(e){} dot(); } }catch(e){} return _hi.apply(this,arguments); };
+})();
+
+
+/* p32/apkbtn.js — «⚙ Бусад» цэсэнд «📱 Android апп» товч.
+   Зөвхөн Android утасны хөтөч дээр харагдана. Апп-аас (TWA / суулгасан PWA) нээсэн бол харагдахгүй. */
+(function(){
+  const UA=navigator.userAgent||'';
+  let isApp=false;
+  try{
+    if(/[?&]src=apk\b/.test(location.search)) localStorage.setItem('dxx_apk','1');
+    isApp=localStorage.getItem('dxx_apk')==='1'||(document.referrer||'').indexOf('android-app://')===0||
+      (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  }catch(e){}
+  if(!/Android/i.test(UA)||isApp) return;
+  window.apkOpen=function(){
+    dxAsk('📱 Тоглоомыг апп болгож суулгавал бүтэн дэлгэцээр, утасны цэснээс шууд нээгдэнэ. Шинэчлэл автоматаар ирнэ.<br><br>Дараагийн хуудсан дээрх «APK татах» товчийг дарж суулгана.','Татах хуудас нээх',function(){ try{ window.open('android.html','_blank'); }catch(e){ location.href='android.html'; } },'Болих'); };
+  try{ MENU[MENU.length-1].i.push(['📱','Android апп',"apkOpen()"]); }catch(e){}
 })();
 
 </script><script>(function(){

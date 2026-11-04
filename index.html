@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='cd21d4b620';
+var UPDB='7435ca13d4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13323,7 +13323,7 @@ var HSEL=null, HSOP=0;
 .hs-ti{flex:1;font:800 18px sans-serif;color:#ffe9a8;text-shadow:0 2px 3px #000}
 .hs-ti small{display:block;font:600 11px sans-serif;color:#e8d6a8;opacity:.9}
 .hs-ct{flex:none;position:relative}
-.hs-cb{background:linear-gradient(#5a3a1a,#2c1a0a);border:2px solid #d9a83a;color:#ffe9a8;border-radius:12px;font:bold 13px sans-serif;padding:8px 12px}
+.hs-cb{font:bold 13px sans-serif;white-space:nowrap}
 .hs-pp{position:absolute;right:0;top:calc(100% + 6px);width:min(86vw,300px);background:#241609f2;border:2px solid #d9a83a;border-radius:14px;padding:10px;box-shadow:0 6px 20px #000c;z-index:5}
 .hs-pp h4{margin:6px 0 5px;font:bold 12px sans-serif;color:#c9b58a}.hs-pp h4:first-child{margin-top:0}
 .hs-pp .hs-chs{display:flex;flex-wrap:wrap;gap:5px}
@@ -13351,13 +13351,13 @@ var HSEL=null, HSOP=0;
 .hs-fb{position:relative;max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 6px 8px #000a)}
 .hs-fb.dim{filter:grayscale(1) brightness(.35) drop-shadow(0 6px 8px #000a)}
 .hs-pt{position:relative;width:86%;max-width:86%;aspect-ratio:1;object-fit:cover;object-position:50% 18%;image-rendering:pixelated;margin-bottom:8%;border:3px solid #e3b24a;border-radius:18px;background:#1a0f06;box-shadow:0 0 0 2px #0008,0 8px 14px #000a,inset 0 0 18px #0009}
-.hs-rb{position:relative;margin-top:2px;width:94%;padding:7px 14px 8px;text-align:center;background:linear-gradient(#e03b2c,#a41a12);border-top:2px solid #ff9a7a;border-bottom:2px solid #5a0a06;box-shadow:0 3px 8px #000b;clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)}
+.hs-rb{position:relative;margin-top:2px;width:94%;max-width:340px;padding:7px 14px 8px;text-align:center;background:linear-gradient(#e03b2c,#a41a12);border-top:2px solid #ff9a7a;border-bottom:2px solid #5a0a06;box-shadow:0 3px 8px #000b;clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)}
 .hs-rb b{display:block;font:800 17px/1.15 sans-serif;color:#fff2c8;text-shadow:0 2px 2px #5a0a06;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hs-rb span{display:block;font:bold 13px/1.2 sans-serif;color:#ffe27a;text-shadow:0 1px 2px #000}
 .hs-rr{display:inline-block;font:800 10px/1 sans-serif;padding:2px 7px;border-radius:8px;background:linear-gradient(90deg,var(--g));color:#fff;margin-bottom:3px;box-shadow:0 0 0 1px #fff6}
-.hs-dt{margin-top:7px;background:linear-gradient(#ffd24a,#d99a1a);border:2px solid #fff0a8;border-radius:16px;color:#2b1d12;font:800 14px sans-serif;padding:8px 22px;box-shadow:0 3px 0 #7a4a08,0 5px 10px #000a}
+.hs-dt{margin-top:4px;font:800 14px sans-serif;min-width:150px}
 .hs-bt{position:relative;z-index:2;display:flex;gap:8px;padding:2px 10px max(10px,env(safe-area-inset-bottom))}
-.hs-bt button{flex:1;background:linear-gradient(#5a3a1a,#2c1a0a);border:2px solid #d9a83a;color:#ffe9a8;border-radius:14px;font:bold 14px sans-serif;padding:10px 6px}
+.hs-bt .btn{flex:1;font:bold 14px sans-serif;margin:0}
 .hs-em{padding:20px 6px;color:#e8d6a8;font:bold 13px sans-serif;text-align:center;text-shadow:0 1px 2px #000}
 `; document.head.appendChild(st);
 
@@ -13381,7 +13381,7 @@ var HSEL=null, HSOP=0;
     let art= full?'<img class="hs-fb'+(ow?'':' dim')+'" src="hf/'+id+'.webp" alt="">':(d?'<img class="hs-pt" src="'+d[0]+'" style="'+(ow?'':'filter:grayscale(1) brightness(.35)')+'">':'');
     return '<div class="hs-st">'+art+'</div>'+
       '<div class="hs-rb"><i class="hs-rr" style="--g:'+r.g+'">'+r.n+'</i><b>'+(ow||admOn()?H.n:'???')+'</b><span>'+(ow?'⚔ '+f(heroPowerEff(id)):'Эзэмшээгүй')+'</span></div>'+
-      '<button class="hs-dt" onclick="hsDetail()">Дэлгэрэнгүй</button>'; }
+      '<button class="btn hs-dt" onclick="hsDetail()">Дэлгэрэнгүй</button>'; }
   function popup(){
     const ch=(on,fn,t)=>'<button class="'+(on?'on':'')+'" onclick="'+fn+'">'+t+'</button>';
     return '<div class="hs-pp" onclick="event.stopPropagation()"><h4>Ховор байдал</h4><div class="hs-chs">'+
@@ -13396,9 +13396,9 @@ var HSEL=null, HSOP=0;
     const ls=o.querySelector('.hs-l'), sc=ls?ls.scrollTop:0;
     const flt=(HLF?1:0)+(HTF?1:0);
     o.innerHTML='<div class="hs-top"><button class="hs-bk" onclick="hsClose()">‹</button><div class="hs-ti">Баатар<small>Цуглуулга '+own+'/'+HEROES.length+' · тулалдаанд '+heroSlots()+'</small></div>'+
-      '<div class="hs-ct"><button class="hs-cb" onclick="hsPop(event)">Ангилал'+(flt?' ●':'')+' ▾</button>'+(HSOP?popup():'')+'</div></div>'+
+      '<div class="hs-ct"><button class="btn hs-cb" onclick="hsPop(event)">Ангилал'+(flt?' ●':'')+' ▾</button>'+(HSOP?popup():'')+'</div></div>'+
       '<div class="hs-body" onclick="if(HSOP){HSOP=0;hsRender()}"><div class="hs-l">'+(l.length?'<div class="hs-g">'+l.map(card).join('')+'</div>':'<div class="hs-em">Энэ ангилалд баатар алга</div>')+'</div><div class="hs-r">'+(HSEL?stage(HSEL):'')+'</div></div>'+
-      '<div class="hs-bt"><button onclick="hsGo(\'summon\')">🎴 Дуудах</button><button onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
+      '<div class="hs-bt"><button class="btn" onclick="hsGo(\'summon\')">🎴 Дуудах</button><button class="btn" onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
     const n=o.querySelector('.hs-l'); if(n) n.scrollTop=sc; }
   window.hsRender=render;
   window.hsOpen=function(){ let o=document.getElementById('hs'); if(!o){ o=document.createElement('div'); o.id='hs'; document.body.appendChild(o); }

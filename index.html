@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2bdc91f636';
+var UPDB='320c737d7e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12889,6 +12889,11 @@ heroListHTML=function(){
     gr=x.createLinearGradient(W,0,W-F,0); gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=gr; x.fillRect(W-F,0,F,H);
     gr=x.createLinearGradient(0,H,0,H-F); gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=gr; x.fillRect(0,H-F,W,F);
     x.globalCompositeOperation='source-over'; return cv; }
+  const SH=260; let SM=null, SMK='';
+  function seamGet(){ const pt=groundPat(); if(!pt) return null; const k=''+!!pt; if(SM&&SMK===k) return SM; const W=R.x1-R.x0, cv=document.createElement('canvas'); cv.width=W; cv.height=SH; const x=cv.getContext('2d');
+    x.fillStyle=pt; x.fillRect(0,0,W,SH); x.globalCompositeOperation='destination-in'; let g=x.createLinearGradient(0,0,0,SH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,1)'); x.fillStyle=g; x.fillRect(0,0,W,SH);
+    x.globalCompositeOperation='destination-out'; const F=48; g=x.createLinearGradient(0,0,F,0); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,F,SH);
+    g=x.createLinearGradient(W,0,W-F,0); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(W-F,0,F,SH); x.globalCompositeOperation='source-over'; SMK=k; return SM=cv; }
   function regGet(){ let k='s'; try{ k=(typeof seasonK==='function'?seasonK():'s'); }catch(e){} let ready=!!groundPat();
     if(!REG||(REGK!==k+ready)){ try{ REG=buildReg(); REGK=k+ready; }catch(e){ REG=REG||null; REGK=k+ready; } } return REG; }
 
@@ -12905,6 +12910,8 @@ heroListHTML=function(){
     return D; };
   const _tp=wmTap;
   wmTap=function(px,py){ try{ const wx=WMV.x+px/WMV.z, wy=WMV.y+py/WMV.z; if(inR(wx,wy)&&!wmSungOpen()){ WMS=null; wmSheet(); say('🔒 Сүн — Алтан улсыг ялбал нээгдэнэ'); return; } }catch(e){} return _tp.apply(this,arguments); };
+  const _gw=window.wmGeoWater;
+  if(_gw) window.wmGeoWater=function(c,z){ const r=_gw.apply(this,arguments); try{ if(wmSungOpen()){ const sm=seamGet(); if(sm) c.drawImage(sm,R.x0,R.y0-SH,R.x1-R.x0,SH); } }catch(e){} return r; };
   const _wd=window.wmWorldDraw;
   window.wmWorldDraw=function(c,D,z,t){ _wd.apply(this,arguments);
     try{ const op=wmSungOpen(), fs=(z<0.03?10:15)/z;

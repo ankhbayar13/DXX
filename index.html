@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f9b89ffc3c';
+var UPDB='cd21d4b620';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13306,6 +13306,119 @@ heroListHTML=function(){
     if(top+t.offsetHeight<=mt-6){ t.style.bottom='auto'; t.style.top=top+'px'; t.dataset.dk='1'; } else clear(t);
   }catch(e){} }
   setInterval(dock,300); window.addEventListener('resize',dock); window.addEventListener('orientationchange',()=>setTimeout(dock,300));
+})();
+
+
+/* p32/herostage.js — Баатрын шинэ дэлгэц: хээрийн бааз дэвсгэр, зүүн талд 2 баганатай баатрын карт,
+   баруун талд бүтэн биетэй баатар + улаан туг (нэр, хүч) + «Дэлгэрэнгүй». «Ангилал» нэг цэсэнд (од / төрөл / эрэмбэ).
+   Бүтэн биетэй зураггүй баатар хуучин хөрөг зургаараа том харагдана. */
+var HFULL=['chinggis','subeedei','khubilai','mukhulai','jelme','borte'];
+var HSEL=null, HSOP=0;
+(function(){
+  const st=document.createElement('style'); st.textContent=`
+#hs{position:fixed;inset:0;z-index:9;display:flex;flex-direction:column;background:#1b140c url(hf/camp.webp) 60% 50%/cover no-repeat;color:#fff;font-family:sans-serif;overflow:hidden}
+#hs:before{content:"";position:absolute;inset:0;background:linear-gradient(#0008,#0000 22%,#0000 70%,#000a);pointer-events:none}
+.hs-top{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:max(8px,env(safe-area-inset-top)) 10px 6px}
+.hs-bk{flex:none;background:linear-gradient(#5a3a1a,#2c1a0a);border:2px solid #d9a83a;color:#ffe9a8;border-radius:12px;font:bold 15px sans-serif;padding:7px 12px}
+.hs-ti{flex:1;font:800 18px sans-serif;color:#ffe9a8;text-shadow:0 2px 3px #000}
+.hs-ti small{display:block;font:600 11px sans-serif;color:#e8d6a8;opacity:.9}
+.hs-ct{flex:none;position:relative}
+.hs-cb{background:linear-gradient(#5a3a1a,#2c1a0a);border:2px solid #d9a83a;color:#ffe9a8;border-radius:12px;font:bold 13px sans-serif;padding:8px 12px}
+.hs-pp{position:absolute;right:0;top:calc(100% + 6px);width:min(86vw,300px);background:#241609f2;border:2px solid #d9a83a;border-radius:14px;padding:10px;box-shadow:0 6px 20px #000c;z-index:5}
+.hs-pp h4{margin:6px 0 5px;font:bold 12px sans-serif;color:#c9b58a}.hs-pp h4:first-child{margin-top:0}
+.hs-pp .hs-chs{display:flex;flex-wrap:wrap;gap:5px}
+.hs-pp button{background:#2b1d12;border:2px solid #6b4a24;color:#c9b58a;border-radius:14px;padding:5px 10px;font:bold 12px sans-serif}
+.hs-pp button.on{background:linear-gradient(#ffd24a,#d99a1a);color:#2b1d12;border-color:#ffe27a}
+.hs-body{position:relative;z-index:1;flex:1;min-height:0;display:flex;gap:4px;padding:0 0 6px 8px}
+.hs-l{flex:none;width:min(46%,196px);overflow-y:auto;overflow-x:hidden;padding:4px 4px 16px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hs-l::-webkit-scrollbar{display:none}
+.hs-g{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.hs-c{position:relative;aspect-ratio:3/4;border-radius:10px;border:2px solid #ffffff55;background:linear-gradient(var(--g));box-shadow:0 2px 0 #1a0f06,inset 0 0 0 1px #0005;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
+.hs-c .hsp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block}
+.hs-c:after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(#0000,#000c)}
+.hs-c.hn .hsp{filter:grayscale(1) brightness(.4)}
+.hs-c.sel{border-color:#ffe27a;box-shadow:0 0 0 2px #ffd24a,0 0 14px 3px #ffc43acc,0 2px 0 #1a0f06}
+.hs-lv{position:absolute;left:3px;top:3px;z-index:2;min-width:22px;height:22px;box-sizing:border-box;padding:0 4px;border-radius:50% 50% 50% 8px;background:linear-gradient(#3a2a18,#120a04);border:2px solid #ffd24a;color:#ffe9a8;font:800 11px/18px sans-serif;text-align:center}
+.hs-ty{position:absolute;right:3px;top:3px;z-index:2;font-size:12px;text-shadow:0 1px 2px #000}
+.hs-sr{position:absolute;left:0;right:0;bottom:3px;z-index:2;text-align:center;line-height:1}
+.hs-sr .hstr span{color:#ffffff44}.hs-sr .hstr span.on{color:#ffd35a}
+.hs-x{position:absolute;left:0;right:0;bottom:4px;z-index:2;text-align:center;font:bold 9px sans-serif;color:#ddd}
+.hs-up{position:absolute;right:3px;bottom:16px;z-index:3;font-style:normal;font-size:12px;color:#7fe08a;text-shadow:0 1px 2px #000}
+.hs-c .hc-nw{left:auto;right:3px;top:18px}
+.hs-r{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px}
+.hs-st{position:relative;flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.hs-st:before{content:"";position:absolute;left:10%;right:10%;bottom:-2px;height:7%;background:radial-gradient(#000a,#0000 70%);border-radius:50%}
+.hs-fb{position:relative;max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 6px 8px #000a)}
+.hs-fb.dim{filter:grayscale(1) brightness(.35) drop-shadow(0 6px 8px #000a)}
+.hs-pt{position:relative;width:86%;max-width:86%;aspect-ratio:1;object-fit:cover;object-position:50% 18%;image-rendering:pixelated;margin-bottom:8%;border:3px solid #e3b24a;border-radius:18px;background:#1a0f06;box-shadow:0 0 0 2px #0008,0 8px 14px #000a,inset 0 0 18px #0009}
+.hs-rb{position:relative;margin-top:2px;width:94%;padding:7px 14px 8px;text-align:center;background:linear-gradient(#e03b2c,#a41a12);border-top:2px solid #ff9a7a;border-bottom:2px solid #5a0a06;box-shadow:0 3px 8px #000b;clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)}
+.hs-rb b{display:block;font:800 17px/1.15 sans-serif;color:#fff2c8;text-shadow:0 2px 2px #5a0a06;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hs-rb span{display:block;font:bold 13px/1.2 sans-serif;color:#ffe27a;text-shadow:0 1px 2px #000}
+.hs-rr{display:inline-block;font:800 10px/1 sans-serif;padding:2px 7px;border-radius:8px;background:linear-gradient(90deg,var(--g));color:#fff;margin-bottom:3px;box-shadow:0 0 0 1px #fff6}
+.hs-dt{margin-top:7px;background:linear-gradient(#ffd24a,#d99a1a);border:2px solid #fff0a8;border-radius:16px;color:#2b1d12;font:800 14px sans-serif;padding:8px 22px;box-shadow:0 3px 0 #7a4a08,0 5px 10px #000a}
+.hs-bt{position:relative;z-index:2;display:flex;gap:8px;padding:2px 10px max(10px,env(safe-area-inset-bottom))}
+.hs-bt button{flex:1;background:linear-gradient(#5a3a1a,#2c1a0a);border:2px solid #d9a83a;color:#ffe9a8;border-radius:14px;font:bold 14px sans-serif;padding:10px 6px}
+.hs-em{padding:20px 6px;color:#e8d6a8;font:bold 13px sans-serif;text-align:center;text-shadow:0 1px 2px #000}
+`; document.head.appendChild(st);
+
+  const lvOf=id=>{ try{ return hlv(id); }catch(e){ return 1; } };
+  function list(){
+    const lv=id=>{ const v=S.heroes[id]; return typeof v==='number'?v:(v&&v.lv)||0; };
+    const cmp={ star:(a,b)=>b.s-a.s||heroPower(b.id)-heroPower(a.id), pow:(a,b)=>heroPower(b.id)-heroPower(a.id), lvl:(a,b)=>lvOf(b.id)-lvOf(a.id)||heroPower(b.id)-heroPower(a.id) }[HSO]||((a,b)=>b.s-a.s);
+    let l=HEROES.slice().sort((a,b)=>(!!S.heroes[b.id]-!!S.heroes[a.id])||cmp(a,b));
+    if(HLF) l=l.filter(x=>x.s===HLF); if(HTF) l=l.filter(x=>htype(x.id)===HTF);
+    return l; }
+  function card(x){ const id=x.id, ow=!!S.heroes[id], r=RAR[x.s], d=SPRDATA['hp_'+id], up=ow&&canStar(id);
+    let h='<button class="hs-c'+(ow?'':' hn')+(HSEL===id?' sel':'')+'" style="--g:'+r.g+'" data-id="'+id+'" onclick="hsPick(\''+id+'\')">'+
+      (d?'<img class="hsp" src="'+d[0]+'">':'')+
+      (ow?'<span class="hs-lv">'+lvOf(id)+'</span>':'')+'<i class="hs-ty">'+(CLSI[htype(id)]||'🗡')+'</i>'+(up?'<i class="hs-up">⬆</i>':'');
+    if(ow&&S.newH&&S.newH[id]) h+='<i class="hc-nw">ШИНЭ</i>';
+    h+= ow?'<span class="hs-sr">'+stRow(starOf(id),10)+'</span>':'<span class="hs-x">Эзэмшээгүй</span>';
+    return h+'</button>'; }
+  function stage(id){
+    const H=HEROES.find(x=>x.id===id); if(!H) return '';
+    const ow=!!S.heroes[id], r=RAR[H.s], full=HFULL.indexOf(id)>=0, d=SPRDATA['hp_'+id];
+    let art= full?'<img class="hs-fb'+(ow?'':' dim')+'" src="hf/'+id+'.webp" alt="">':(d?'<img class="hs-pt" src="'+d[0]+'" style="'+(ow?'':'filter:grayscale(1) brightness(.35)')+'">':'');
+    return '<div class="hs-st">'+art+'</div>'+
+      '<div class="hs-rb"><i class="hs-rr" style="--g:'+r.g+'">'+r.n+'</i><b>'+(ow||admOn()?H.n:'???')+'</b><span>'+(ow?'⚔ '+f(heroPowerEff(id)):'Эзэмшээгүй')+'</span></div>'+
+      '<button class="hs-dt" onclick="hsDetail()">Дэлгэрэнгүй</button>'; }
+  function popup(){
+    const ch=(on,fn,t)=>'<button class="'+(on?'on':'')+'" onclick="'+fn+'">'+t+'</button>';
+    return '<div class="hs-pp" onclick="event.stopPropagation()"><h4>Ховор байдал</h4><div class="hs-chs">'+
+      [0,5,4,3,2,1].map(r=>ch(HLF===r,'hsF(\'r\','+r+')',r?RAR[r].n:'Бүгд')).join('')+'</div><h4>Төрөл</h4><div class="hs-chs">'+
+      [['','Бүх төрөл'],['archer','🏹 Харваач'],['cav','🐎 Морьт'],['heavy','🛡 Хуягт'],['foot','🗡 Явган']].map(([k,n])=>ch(HTF===k,'hsF(\'t\',\''+k+'\')',n)).join('')+'</div><h4>Эрэмбэ</h4><div class="hs-chs">'+
+      [['star','Од'],['pow','Хүч'],['lvl','Түвшин']].map(([k,n])=>ch(HSO===k,'hsF(\'s\',\''+k+'\')',n)).join('')+'</div></div>'; }
+  function render(){
+    let o=document.getElementById('hs'); if(!o) return;
+    heroMig();
+    const l=list(), own=HEROES.filter(x=>S.heroes[x.id]).length;
+    if(!l.some(x=>x.id===HSEL)) HSEL=l.length?l[0].id:null;
+    const ls=o.querySelector('.hs-l'), sc=ls?ls.scrollTop:0;
+    const flt=(HLF?1:0)+(HTF?1:0);
+    o.innerHTML='<div class="hs-top"><button class="hs-bk" onclick="hsClose()">‹</button><div class="hs-ti">Баатар<small>Цуглуулга '+own+'/'+HEROES.length+' · тулалдаанд '+heroSlots()+'</small></div>'+
+      '<div class="hs-ct"><button class="hs-cb" onclick="hsPop(event)">Ангилал'+(flt?' ●':'')+' ▾</button>'+(HSOP?popup():'')+'</div></div>'+
+      '<div class="hs-body" onclick="if(HSOP){HSOP=0;hsRender()}"><div class="hs-l">'+(l.length?'<div class="hs-g">'+l.map(card).join('')+'</div>':'<div class="hs-em">Энэ ангилалд баатар алга</div>')+'</div><div class="hs-r">'+(HSEL?stage(HSEL):'')+'</div></div>'+
+      '<div class="hs-bt"><button onclick="hsGo(\'summon\')">🎴 Дуудах</button><button onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
+    const n=o.querySelector('.hs-l'); if(n) n.scrollTop=sc; }
+  window.hsRender=render;
+  window.hsOpen=function(){ let o=document.getElementById('hs'); if(!o){ o=document.createElement('div'); o.id='hs'; document.body.appendChild(o); }
+    if(!HSEL||!S.heroes[HSEL]){ const ids=heroOrder(); if(ids.length) HSEL=ids[0]; } HSOP=0; render(); };
+  window.hsClose=function(){ const o=document.getElementById('hs'); if(o) o.remove(); HSOP=0; closeM(); };
+  window.hsPick=function(id){ HSEL=id; HSOP=0; if(S.newH&&S.newH[id]){ try{ delete S.newH[id]; save(); }catch(e){} } render(); };
+  window.hsPop=function(e){ e.stopPropagation(); HSOP=HSOP?0:1; render(); };
+  window.hsF=function(k,v){ if(k==='r') HLF=v; else if(k==='t') HTF=v; else HSO=v; render(); };
+  window.hsDetail=function(){ if(HSEL) heroInfo(HSEL); };
+  window.hsGo=function(k){ const o=document.getElementById('hs'); if(o) o.remove(); HSOP=0; openM(k); };
+
+  const _om=openM;
+  openM=function(k){ const r=_om.apply(this,arguments);
+    try{ if(k==='baatar'&&cur==='baatar') hsOpen(); }catch(e){ console.error(e); }
+    return r; };
+  // Дэлгэрэнгүйгээс буцахад жагсаалтыг шинэчилнэ
+  const _hc=hdClose;
+  hdClose=function(){ const r=_hc.apply(this,arguments); try{ if(document.getElementById('hs')) render(); }catch(e){} return r; };
+  // өөр цонх нээгдвэл дэлгэц хаагдана
+  setInterval(()=>{ try{ if(document.getElementById('hs')&&cur!=='baatar') document.getElementById('hs').remove(); }catch(e){} },400);
 })();
 
 </script><script>(function(){

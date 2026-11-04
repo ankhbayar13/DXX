@@ -3138,7 +3138,7 @@ function wmLoop(){
   c.setTransform(1,0,0,1,0,0); c.fillStyle='#a3bcb4'; c.fillRect(0,0,cv.width,cv.height); c.setTransform(dp*z,0,0,dp*z,-WMV.x*z*dp,-WMV.y*z*dp); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; try{ wmWorldDraw(c,D,z,t); }catch(e){} c.drawImage(D.bg,0,0,WM_W,WM_H); try{ wmHistUnder(c,D,z,t); }catch(e){}
   const vw=cv.clientWidth/z, vh=cv.clientHeight/z, vis=(x,y,m)=>x>WMV.x-m&&x<WMV.x+vw+m&&y>WMV.y-m&&y<WMV.y+vh+m;
   // fog border
-  c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14; if(window.wmSungOpen&&wmSungOpen()){ c.beginPath(); c.moveTo(0,WM_H); c.lineTo(0,0); c.lineTo(WM_W,0); c.lineTo(WM_W,WM_H); c.stroke(); } else c.strokeRect(0,0,WM_W,WM_H);
+  c.strokeStyle='rgba(0,0,0,.4)'; c.lineWidth=14; c.strokeRect(0,0,WM_W,WM_H);
   try{ wmPano(c); wmRivDraw(c,t); }catch(e){}
   try{ wmLakes(c,D,vis); }catch(e){}
   const items=[]; D.decor.forEach(d=>{ if(vis(d.x,d.y,d.big||(d.k==='mt'?170:70))) items.push({y:d.flat?-1e6+d.y:d.y,f:()=>wmDecorDraw(c,d)}); });
@@ -9970,7 +9970,7 @@ window.wmHistUnder=function(c,D,z,t){
   try{ if(window.wmGeoWater) wmGeoWater(c,z); }catch(e){}
   const my=wmClanId(), op=my>=0?wmOpp(my,wmWeek()):-1, cs=cells();
   c.save(); c.lineJoin='round'; c.setLineDash([14/z*0.9+4,8/z*0.9+3]);
-  cs.forEach((p,i)=>{ if(p.length<3) return; const mine=i===my, opp=i===op; c.beginPath(); { const op2=window.wmSungOpen&&wmSungOpen(); for(let k=0;k<p.length;k++){ const a1=p[k], b1=p[(k+1)%p.length]; if(op2&&a1[1]>=WM_H-1&&b1[1]>=WM_H-1) continue; c.moveTo(a1[0],a1[1]); c.lineTo(b1[0],b1[1]); } }
+  cs.forEach((p,i)=>{ if(p.length<3) return; const mine=i===my, opp=i===op; c.beginPath(); { const op2=false; for(let k=0;k<p.length;k++){ const a1=p[k], b1=p[(k+1)%p.length]; if(op2&&a1[1]>=WM_H-1&&b1[1]>=WM_H-1) continue; c.moveTo(a1[0],a1[1]); c.lineTo(b1[0],b1[1]); } }
     c.strokeStyle=mine?hexA(CLN[i].c,.95):opp?'rgba(170,40,25,.9)':'rgba(88,48,20,.62)'; c.lineWidth=(mine||opp?3.4:2.2)/Math.max(z,0.25); c.stroke(); });
   c.setLineDash([]); c.restore();
   // нутгийн нэрс (хол харахад л)
@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='758ba92ba8';
+var UPDB='a0193a0ee1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12904,25 +12904,19 @@ heroListHTML=function(){
       CP.forEach((p,i)=>D.camps.push({id:'cs'+i,t:'camp',x:p[0],y:p[1],lv:5,p:2200+((i*397)%900)}));
       ND.forEach((p,i)=>D.nodes.push({id:'ns'+i,t:'node',x:p[0],y:p[1],rt:RT[i],lv:5}));
       CH.forEach((p,i)=>D.chests.push({id:'ts'+i,t:'chest',n:'Эрдэнэс',x:p[0],y:p[1],v:5}));
-      try{ genTerrain(D); }catch(e){ try{ console.error('wmsung terrain',e); }catch(x){} }
       const st=wmSt(); if(!st.sungSeen){ st.sungSeen=1; setTimeout(()=>{ try{ say('🏯 Сүн нутаг нээгдлээ!'); }catch(e){} },600); }
     } }catch(e){ try{ console.error('wmsung',e); }catch(x){} }
     return D; };
   const _tp=wmTap;
   wmTap=function(px,py){ try{ const wx=WMV.x+px/WMV.z, wy=WMV.y+py/WMV.z; if(inR(wx,wy)&&!wmSungOpen()){ WMS=null; wmSheet(); say('🔒 Сүн — Алтан улсыг ялбал нээгдэнэ'); return; } }catch(e){} return _tp.apply(this,arguments); };
   const _gw=window.wmGeoWater;
-  if(_gw) window.wmGeoWater=function(c,z){ const r=_gw.apply(this,arguments); try{ if(wmSungOpen()){ const sm=seamGet(); if(sm) c.drawImage(sm,R.x0,R.y0-SH,R.x1-R.x0,SH); } }catch(e){} return r; };
   const _wd=window.wmWorldDraw;
   window.wmWorldDraw=function(c,D,z,t){ _wd.apply(this,arguments);
     try{ const op=wmSungOpen(), fs=(z<0.03?10:15)/z;
       c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
       if(!op){ c.fillStyle='rgba(40,25,10,.40)'; c.fillRect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); c.setLineDash([fs*0.9,fs*0.6]); c.strokeStyle='rgba(60,30,10,.9)'; c.lineWidth=Math.max(3,2.2/z); c.strokeRect(R.x0,R.y0,R.x1-R.x0,R.y1-R.y0); c.setLineDash([]);
         if(z<0.5){ const cx=(R.x0+R.x1)/2, cy=(R.y0+R.y1)/2; c.font='italic bold '+fs*1.3+'px Georgia,serif'; c.lineWidth=fs*0.25; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#4a2a10'; c.strokeText('🔒 СҮН УЛС',cx,cy-fs*1.2); c.fillText('🔒 СҮН УЛС',cx,cy-fs*1.2); c.font='italic '+fs*0.95+'px Georgia,serif'; c.strokeText('Алтан улсыг ялбал нээгдэнэ',cx,cy+fs*0.6); c.fillText('Алтан улсыг ялбал нээгдэнэ',cx,cy+fs*0.6); } }
-      else { const rg=regGet(); if(rg) c.drawImage(rg,R.x0,R.y0,R.x1-R.x0,R.y1-R.y0);
-        if(z<0.5){ c.font='italic bold '+fs*1.2+'px Georgia,serif'; c.lineWidth=fs*0.22; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); c.fillText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2);
-          c.font='italic '+fs*0.8+'px Georgia,serif'; c.lineWidth=fs*0.16; c.strokeStyle='rgba(20,50,70,.55)'; c.fillStyle='rgba(235,246,250,.95)'; SEAL.forEach(a=>{ const X=WMGEO.x(a[1]), Y=WMGEO.y(a[2]); c.strokeText(a[0],X,Y); c.fillText(a[0],X,Y); });
-          c.strokeStyle='rgba(244,230,190,.9)'; c.fillStyle='#24516b'; RIVS.forEach(rv=>{ const m=Math.floor(rv[1].length/2), q=P(rv[1][m][0],rv[1][m][1]); c.strokeText(rv[0],q[0]+fs*1.5,q[1]); c.fillText(rv[0],q[0]+fs*1.5,q[1]); });
-          c.fillStyle='#4a2a10'; MTS.forEach(ch=>{ const m=Math.floor(ch[1].length/2), q=P(ch[1][m][0],ch[1][m][1]); c.strokeText(ch[0],q[0],q[1]+fs*2.4); c.fillText(ch[0],q[0],q[1]+fs*2.4); }); } }
+      else { if(z<0.5){ c.font='italic bold '+fs*1.2+'px Georgia,serif'; c.lineWidth=fs*0.22; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); c.fillText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); } }
       c.restore(); }catch(e){} };
 
 })();

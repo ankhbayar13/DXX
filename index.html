@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5b96e254f6';
+var UPDB='a062c7fe04';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13155,6 +13155,52 @@ heroListHTML=function(){
         '<div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;color:#c9a46a;font-size:13px"><span style="flex:1;height:1px;background:#6b4a24"></span>эсвэл<span style="flex:1;height:1px;background:#6b4a24"></span></div>';
       const mk='<div style="padding:12px">'; const i=h.indexOf(mk); if(i>=0){ const j=i+mk.length; h=h.slice(0,j)+blk+h.slice(j); } }catch(e){}
     return h; };
+})();
+
+
+/* p32/newhero.js — Баатар ямар ч замаар (дуудлага, эргүүл, бүлгийн шагнал, сонголт) ирэхэд:
+   1) «Баатар дуудаж байна…» нээгдэх/унах цонх ШУУД гарна (өмнө нь зөвхөн дуудлага дээр гардаг байсан),
+   2) өдрийн эргүүлийн 🎴 «Үнэгүй баатар дуудах» унахад дуудлагыг өөрөө хийж баатрыг нээж харуулна,
+   3) шинэ баатар баатрын жагсаалтад «ШИНЭ» тэмдэгтэй, доод цэсийн «Баатар» товч дээр улаан цэг гарна — баатар дээр дарахад алга болно. */
+(function(){
+  let busy=0;
+  const st=document.createElement('style'); st.textContent=
+    '.hc-nw{position:absolute;left:7%;top:3%;z-index:4;background:linear-gradient(#ff6a4a,#d1201a);color:#fff;font:800 9px/1 sans-serif;font-style:normal;padding:3px 5px;border-radius:7px;box-shadow:0 1px 3px #000a,0 0 0 1px #fff7;animation:nhp 1.1s ease-in-out infinite}'+
+    '@keyframes nhp{50%{transform:scale(1.14)}}'+
+    '.nwdot{position:absolute;top:3%;right:8%;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#e0261c;color:#fff;font:800 11px/18px sans-serif;text-align:center;box-shadow:0 0 0 2px #fff9,0 1px 4px #000;z-index:6;pointer-events:none;animation:nhp 1.1s ease-in-out infinite}';
+  document.head.appendChild(st);
+  const cnt=()=>{ try{ const m=S.newH||{}; return Object.keys(m).filter(k=>S.heroes&&S.heroes[k]).length; }catch(e){ return 0; } };
+  function dot(){ try{ const b=document.querySelector('#menu button[onclick*="baatar"]'); if(!b) return; let d=b.querySelector('.nwdot'); const n=cnt();
+      if(n){ if(!d){ d=document.createElement('b'); d.className='nwdot'; b.appendChild(d); } if(d.textContent!==String(n)) d.textContent=String(n); }
+      else if(d) d.remove(); }catch(e){} }
+  setInterval(dot,800);
+
+  // шинэ баатар ирэхэд: тэмдэглээд, шууд харуулна
+  function reveal(id,nw,up){ const h=HEROES.find(x=>x.id===id); if(!h) return; let tries=0;
+    const go=()=>{ const blocked=(typeof BT!=='undefined'&&BT)||document.getElementById('boxov')||document.getElementById('hpk');
+      if(blocked&&tries++<50) return setTimeout(go,600);
+      try{ sumShow([{h:h,nw:nw,s:h.s,n:h.n,up:nw?0:up,st:starOf(id)}]); }catch(e){} };
+    setTimeout(go,700); }
+  const _gh=giveHero;
+  giveHero=function(id){ const r=_gh.apply(this,arguments);
+    try{ if(r===true){ S.newH=S.newH||{}; S.newH[id]=1; setTimeout(dot,100); }
+      if(!busy) reveal(id,r===true,(typeof LASTUP!=='undefined'?LASTUP:0)); }catch(e){}
+    return r; };
+  // эдгээр нь өөрсдөө цонхоо гаргадаг — давхар гаргахгүй
+  ['summon','jamBuy','jamGet','jamSpin'].forEach(n=>{ try{ const f=eval(n); if(typeof f!=='function') return; eval(n+'=function(){ busy++; try{ return f.apply(this,arguments); } finally{ busy--; } }'); }catch(e){} });
+
+  // өдрийн эргүүл: 🎴 «Үнэгүй баатар дуудах» унахад дуудлагыг өөрөө хийнэ
+  const _ps=window.patrolSpin;
+  if(typeof _ps==='function') window.patrolSpin=function(){ const n0=(S.pt&&S.pt.n)||0; const r=_ps.apply(this,arguments);
+    try{ if(((S.pt&&S.pt.n)||0)>n0&&/Үнэгүй баатар/.test(S.pt.last||'')) setTimeout(()=>{ try{ if((S.fsum||0)>=1&&!document.getElementById('boxov')) summon(1,1); }catch(e){} },4800); }catch(e){}
+    return r; };
+
+  // жагсаалтад «ШИНЭ» тэмдэг
+  const _hc=hCard;
+  hCard=function(x){ let h=_hc.apply(this,arguments); try{ if(x&&S.newH&&S.newH[x.id]&&S.heroes[x.id]) h=h.replace('<i class="hc-c">','<i class="hc-nw">ШИНЭ</i><i class="hc-c">'); }catch(e){} return h; };
+  // баатар дээр дарахад мэдэгдэл алга болно
+  const _hi=heroInfo;
+  heroInfo=function(id){ try{ if(S.newH&&S.newH[id]){ delete S.newH[id]; try{ save(); }catch(e){} dot(); } }catch(e){} return _hi.apply(this,arguments); };
 })();
 
 </script><script>(function(){

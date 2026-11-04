@@ -43,6 +43,8 @@ jobs:
       - name: Signing key
         run: |
           set -e
+          exec > >(tee -a "$RUNNER_TEMP/log.txt") 2>&1
+          set -E; trap 'echo "FAILED line $LINENO: $BASH_COMMAND"' ERR
           mkdir -p "$RUNNER_TEMP/ks"; cd "$RUNNER_TEMP/ks"
           RID=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '[.[] | select(.draft==true and .name=="keystore-store")][0].id // empty')
           if [ -n "$RID" ]; then
@@ -89,7 +91,9 @@ jobs:
         working-directory: android
         env:
           RUN_NUMBER: ${{ github.run_number }}
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee -a "$RUNNER_TEMP/log.txt"
 
       - name: Verify signature
         run: |
@@ -104,3 +108,13 @@ jobs:
           gh release create apk talnutgiinhaan.apk --latest \
             --title "Тал Нутгийн Хаан · Android" \
             --notes "Android хувилбар (build ${{ github.run_number }}). Тоглоомын шинэчлэл автоматаар ирнэ, энэ файлыг дахин татах шаардлагагүй."
+
+      - name: Save log (debug)
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/lg" && cd "$RUNNER_TEMP/lg"
+          git init -q && git checkout -q -b apk-log
+          tail -n 150 "$RUNNER_TEMP/log.txt" > log.txt 2>/dev/null || echo "no log" > log.txt
+          git config user.name github-actions; git config user.email actions@users.noreply.github.com
+          git add log.txt && git commit -q -m "log run ${{ github.run_number }}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" apk-log || true

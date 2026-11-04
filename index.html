@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9f7c272287';
+var UPDB='e0a268ec46';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12983,7 +12983,7 @@ heroListHTML=function(){
   /* ===== Логик байршил: далайд, нуурт орсон барилга/мод/уулыг зөөж, нөөцийн цэгүүдийг газрын шинж чанарт тааруулна ===== */
   window.wmLandAt=function(x,y,m){ if(!LF) return true; const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0;
     const t=(px,py)=>{ const i=Math.floor((px-E.x0)/EW*LW), j=Math.floor((py-E.y0)/EH*LH); if(i<0||j<0||i>=LW||j>=LH) return false; return LF[j*LW+i]===1; };
-    if(!t(x,y)) return false; if(m){ return t(x+m,y)&&t(x-m,y)&&t(x,y+m)&&t(x,y-m); } return true; };
+    if(!t(x,y)) return false; if(m){ for(let a=0;a<8;a++){ const ca=Math.cos(a*0.7854), sa=Math.sin(a*0.7854); if(!t(x+ca*m,y+sa*m)||!t(x+ca*m*0.5,y+sa*m*0.5)) return false; } } return true; };
   let BP=null, BC=null;
   window.wmBiomeAt=function(x,y){ if(!BP){ BP=LAY.map(L=>{ const p=new Path2D(); L[1].forEach(poly=>{ poly.forEach((q,i)=>{ const wx=WMGEO.x(q[0]), wy=WMGEO.y(q[1]); if(i) p.lineTo(wx,wy); else p.moveTo(wx,wy); }); p.closePath(); }); return [L[0],p]; }); BC=document.createElement('canvas').getContext('2d'); }
     let r=T.gold; for(let i=0;i<BP.length;i++){ if(BC.isPointInPath(BP[i][1],x,y)) r=BP[i][0]; } return r; };
@@ -13003,8 +13003,9 @@ heroListHTML=function(){
     const far=(e,x,y,d)=>all.every(o=>o===e||Math.hypot(o.x-x,o.y-y)>(o.t==='ks'||o.x===undefined?230:d));
     const mtNear=(x,y,r)=>mt.some(d=>Math.hypot(d.x-x,d.y-y)<r);
     // 2) далайд байгаа барилгыг ойрын газар руу
-    const toLand=e=>{ if(wmLandAt(e.x,e.y,18)&&!inLake(e.x,e.y,10)) return; let best=null,bd=1e9; for(let r=30;r<=420&&!best;r+=30){ for(let a=0;a<24;a++){ const x=e.x+Math.cos(a/24*6.283)*r, y=e.y+Math.sin(a/24*6.283)*r; if(!inRect(e,x,y,5)||!wmLandAt(x,y,18)||inLake(x,y,10)||!far(e,x,y,90)) continue; if(r<bd){ bd=r; best={x:x,y:y}; } } } if(best){ e.x=best.x; e.y=best.y; } };
-    D.ks.concat(D.camps,D.chests).forEach(e=>{ if(e.fx) return; e.fx=1; toLand(e); });
+    const toLand=(e,m,R)=>{ if(wmLandAt(e.x,e.y,m)&&!inLake(e.x,e.y,10)) return; let best=null,bd=1e9; for(let r=30;r<=R&&!best;r+=30){ for(let a=0;a<24;a++){ const x=e.x+Math.cos(a/24*6.283)*r, y=e.y+Math.sin(a/24*6.283)*r; if(!inRect(e,x,y,5)||!wmLandAt(x,y,m)||inLake(x,y,10)||!far(e,x,y,90)) continue; if(r<bd){ bd=r; best={x:x,y:y}; } } } if(best){ e.x=best.x; e.y=best.y; } };
+    D.ks.forEach(e=>{ if(e.fx) return; e.fx=1; toLand(e,170,900); });
+    D.camps.concat(D.chests).forEach(e=>{ if(e.fx) return; e.fx=1; toLand(e,40,500); });
     // 3) нөөцийн цэг: газрын шинж чанарт тааруулна
     const BAD={4:1,5:1,6:1,8:1,9:1}, FOR={1:1,2:1,3:1,7:1};
     const placed=D.nodes.filter(n=>n.fx);
@@ -13020,6 +13021,10 @@ heroListHTML=function(){
         else { sc=(b===T.gold?3:b===T.meadow?2:b===T.green?1:0)-(BAD[b]?7:0)-mc*0.5; }
         sc+=rd()*1.5-Math.hypot(x-ox,y-oy)*0.002; if(sc>bs){ bs=sc; best=q; } });
       if(best){ n.x=best[0]; n.y=best[1]; } placed.push(n); });
+    // 4) барилгын ард/өмнө нуугдсан уулыг зайлуулна (уул нь өөрийн суурь доороо барилгыг халхалдаг)
+    const ent=[].concat(D.ks.map(e=>[e,1]),D.nodes.map(e=>[e,0]),D.camps.map(e=>[e,0]),D.chests.map(e=>[e,0]));
+    const dm=D.decor.filter(d=>{ if(d.k!=='mt') return true; return !ent.some(q=>{ const e=q[0], big=q[1]; const dx=Math.abs(d.x-e.x), dy=d.y-e.y; return big?(dx<230&&dy>-130&&dy<280):(dx<120&&dy>-70&&dy<200); }); });
+    if(dm.length!==D.decor.length){ D.decor.length=0; dm.forEach(d=>D.decor.push(d)); }
   }
   try{ const pre=()=>setTimeout(()=>{ try{ loadAtl(); }catch(e){} },6000); if(document.readyState==='complete') pre(); else window.addEventListener('load',pre); }catch(e){}
 })();

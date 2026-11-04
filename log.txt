@@ -1,0 +1,65 @@
+Шинэ түлхүүр үүсгэж байна
+Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 36,500 days
+	for: CN=Tal Nutgiin Khaan, O=Tal Nutgiin Khaan, C=MN
+https://github.com/ankhbayar13/DXX/releases/tag/untagged-214059c84671ba630973
+::add-mask::babdd3c392322a68a7a6cf49292f1373
+Fingerprint: 80:49:7B:E7:17:4B:D8:C6:3B:F3:5C:42:97:2E:50:A9:00:2A:06:BE:EB:7B:AE:F4:11:A7:D7:44:46:7A:68:5A
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.9/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:javaPreCompileRelease
+> Task :app:generateReleaseResValues
+> Task :app:checkReleaseAarMetadata
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:mergeReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :app:parseReleaseLocalResources
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:extractProguardFiles
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:desugarReleaseFileDependencies
+> Task :app:processReleaseManifestForPackage
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:mergeReleaseStartupProfile
+> Task :app:processReleaseResources
+> Task :app:compileReleaseJavaWithJavac NO-SOURCE
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:mergeExtDexRelease
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseJavaResource
+> Task :app:mergeDexRelease
+> Task :app:collectReleaseDependencies
+> Task :app:compileReleaseArtProfile
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :app:optimizeReleaseResources
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:lintVitalReportRelease
+> Task :app:lintVitalRelease
+> Task :app:assembleRelease
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_4-1793823040509.json
+
+BUILD SUCCESSFUL in 52s
+42 actionable tasks: 42 executed

@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='881ac2fb5a';
+var UPDB='227cf2b056';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13359,7 +13359,7 @@ var HSEL=null, HSOP=0;
 .hs-rb span{display:block;font:bold 13px/1.2 sans-serif;color:#ffe27a;text-shadow:0 1px 2px #000}
 .hs-rr{display:inline-block;font:800 10px/1 sans-serif;padding:2px 7px;border-radius:8px;background:linear-gradient(90deg,var(--g));color:#fff;margin-bottom:3px;box-shadow:0 0 0 1px #fff6}
 .hs-dt{margin-top:4px;font:800 14px sans-serif;min-width:150px}
-.hs-bt{position:relative;z-index:2;display:flex;gap:8px;padding:2px 10px max(10px,env(safe-area-inset-bottom))}
+.hs-bt{position:relative;z-index:2;display:flex;justify-content:center;padding:0 8px max(8px,env(safe-area-inset-bottom))}.hs-bar{position:relative;width:min(100%,560px)}.hs-bar img{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 5px #000b)}.hs-bar button{position:absolute;top:0;height:100%;background:none;border:0;padding:0;-webkit-tap-highlight-color:rgba(255,220,120,.25)}
 .hs-bt .btn{flex:1;font:bold 14px sans-serif;margin:0}.hs-bt .hs-bb{flex:1.7;font-size:13px;padding-left:4px;padding-right:4px}
 .hs-em{padding:20px 6px;color:#e8d6a8;font:bold 13px sans-serif;text-align:center;text-shadow:0 1px 2px #000}
 `; document.head.appendChild(st);
@@ -13401,7 +13401,7 @@ var HSEL=null, HSOP=0;
     o.innerHTML='<div class="hs-top"><button class="hs-bk" onclick="hsClose()">‹</button><div class="hs-ti">Баатар<small>Цуглуулга '+own+'/'+HEROES.length+' · тулалдаанд '+heroSlots()+'</small></div>'+
       '<div class="hs-ct"><button class="hs-cb" onclick="hsPop(event)"><img src="hf/b_ang.webp" alt="Ангилал">'+(flt?'<i class="hs-fd"></i>':'')+'</button>'+(HSOP?popup():'')+'</div></div>'+
       '<div class="hs-body" onclick="if(HSOP){HSOP=0;hsRender()}"><div class="hs-l">'+(l.length?'<div class="hs-g">'+l.map(card).join('')+'</div>':'<div class="hs-em">Энэ ангилалд баатар алга</div>')+'</div><div class="hs-r">'+(HSEL?stage(HSEL):'')+'</div></div>'+
-      (HSEL?banner(HSEL):'')+'<div class="hs-bt"><button class="btn hs-bb" onclick="hsGo(\'summon\')">🛒 Баатар худалдаж авах</button><button class="btn" onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
+      (HSEL?banner(HSEL):'')+'<div class="hs-bt"><div class="hs-bar"><img src="hf/b_bar.webp" alt=""><button style="left:0;width:39.5%" onclick="hsGo(\'summon\')"></button><button style="left:39.5%;width:28%" onclick="hsStats()"></button><button style="left:67.5%;width:32.5%" onclick="hsGo(\'relics\')"></button></div></div>';
     const n=o.querySelector('.hs-l'); if(n) n.scrollTop=sc; }
   window.hsRender=render;
   window.hsOpen=function(){ let o=document.getElementById('hs'); if(!o){ o=document.createElement('div'); o.id='hs'; document.body.appendChild(o); }
@@ -13410,6 +13410,7 @@ var HSEL=null, HSOP=0;
   window.hsPick=function(id){ HSEL=id; HSOP=0; if(S.newH&&S.newH[id]){ try{ delete S.newH[id]; save(); }catch(e){} } render(); };
   window.hsPop=function(e){ e.stopPropagation(); HSOP=HSOP?0:1; render(); };
   window.hsF=function(k,v){ if(k==='r') HLF=v; else if(k==='t') HTF=v; else HSO=v; render(); };
+  window.hsStats=function(){ if(HSEL) heroInfo(HSEL,0,'stats'); };
   window.hsDetail=function(){ if(HSEL) heroInfo(HSEL); };
   window.hsGo=function(k){ const o=document.getElementById('hs'); if(o) o.remove(); HSOP=0; openM(k); };
 

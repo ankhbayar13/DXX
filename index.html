@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='eb105d0b1c';
+var UPDB='75157e8b3b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13244,6 +13244,19 @@ heroListHTML=function(){
     const msg='📲 <b>iPhone дээр апп шиг суулгах</b><div style="margin-top:6px">'+steps+'</div><div style="font-size:13px;color:#c9a46a;margin-top:6px">Дараа нь нүүр дэлгэц дээрх «Тал Нутаг» иконоос бүтэн дэлгэцээр нээгдэнэ. Шинэчлэл автоматаар ирнэ.</div>';
     if(SAFARI) dxAsk(msg,'Ойлголоо',function(){},'Хаах'); else dxAsk(msg,'Хаяг хуулах',copy,'Хаах'); };
   try{ MENU[MENU.length-1].i.push(['📲','iPhone апп',"iosAdd()"]); }catch(e){}
+})();
+
+
+/* p32/legal.js — Нэвтрэх/бүртгүүлэх хуудас болон ☁ Cloud цонхны доор:
+   «Нууцлалын бодлого · Үйлчилгээний нөхцөл · Бүртгэл устгах» холбоос (шинэ цонхонд нээгдэнэ). */
+(function(){
+  const LK='<div class="lglinks" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin:12px 4px 4px;font-size:14px">'+
+    ['privacy.html|Нууцлалын бодлого','terms.html|Үйлчилгээний нөхцөл','delete-account.html|Бүртгэл устгах'].map(x=>{ const p=x.split('|');
+      return '<a href="'+p[0]+'" target="_blank" rel="noopener" style="color:inherit;opacity:.85;text-decoration:underline;font-weight:600">'+p[1]+'</a>'; }).join('')+'</div>';
+  const _card=clAuthCard;
+  clAuthCard=function(){ let h=_card.apply(this,arguments); try{ if(h.indexOf('lglinks')<0) h+=LK; }catch(e){} return h; };
+  const _cl=cloudHTML;
+  cloudHTML=function(){ let h=_cl.apply(this,arguments); try{ if(h.indexOf('lglinks')<0) h+=LK; }catch(e){} return h; };
 })();
 
 </script><script>(function(){

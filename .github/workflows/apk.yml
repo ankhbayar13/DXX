@@ -59,7 +59,7 @@ jobs:
             printf '%s' "$P" > tnh.pass
             keytool -genkeypair -keystore tnh.keystore -alias tnh -keyalg RSA -keysize 2048 -validity 36500 \
               -storepass "$P" -keypass "$P" -dname "CN=Tal Nutgiin Khaan, O=Tal Nutgiin Khaan, C=MN"
-            gh release create keystore-store tnh.keystore tnh.pass --draft --title keystore-store \
+            gh release create keystore-store tnh.keystore tnh.pass --repo "$GITHUB_REPOSITORY" --target main --draft --title keystore-store \
               --notes "Гарын үсгийн түлхүүр. Устгаж болохгүй, нийтэлж болохгүй." 
           fi
           P=$(cat tnh.pass)
@@ -105,7 +105,7 @@ jobs:
       - name: Publish release
         run: |
           gh release delete apk --yes --cleanup-tag || true
-          gh release create apk talnutgiinhaan.apk --latest \
+          gh release create apk talnutgiinhaan.apk --target main --latest \
             --title "Тал Нутгийн Хаан · Android" \
             --notes "Android хувилбар (build ${{ github.run_number }}). Тоглоомын шинэчлэл автоматаар ирнэ, энэ файлыг дахин татах шаардлагагүй."
 

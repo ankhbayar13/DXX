@@ -9915,7 +9915,7 @@ wmPano=function(){};
 let LFZ=null;
 function longFrozen(){ if(LFZ) return LFZ; const sp=LIM.long; if(!sp||!sp.im.complete||!sp.im.naturalWidth) return null; const cv=document.createElement('canvas'); cv.width=sp.im.naturalWidth; cv.height=sp.im.naturalHeight; const x=cv.getContext('2d'); x.drawImage(sp.im,0,0); x.globalCompositeOperation='source-atop'; x.fillStyle='rgba(222,238,248,.62)'; x.fillRect(0,0,cv.width,cv.height); x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(255,255,255,.35)'; x.lineWidth=2; x.globalCompositeOperation='source-atop'; for(let i=0;i<16;i++){ x.beginPath(); x.moveTo(cv.width*(0.1+0.8*((i*37)%11)/11),cv.height*(0.3+0.4*((i*53)%7)/7)); x.lineTo(cv.width*(0.1+0.8*((i*61)%13)/13),cv.height*(0.2+0.6*((i*29)%9)/9)); x.stroke(); } return LFZ=cv; }
 window.wmGeoWater=function(c,z){ c.save(); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high'; let fz=false; try{ fz=seasonK()==='winter'; }catch(e){}
-  LK.forEach(l=>{ let img=null, iw=0, ih=0, sp;
+  LK.forEach(l=>{ if(/байгал/i.test(l.n)) return; let img=null, iw=0, ih=0, sp;
     if(fz&&l.type==='long'){ const f=longFrozen(); if(f){ img=f; iw=f.width; ih=f.height; } }
     if(!img){ sp=(fz&&l.type!=='long'&&LIM.frz&&LIM.frz.im.complete&&LIM.frz.im.naturalWidth)?LIM.frz:LIM[l.type]; if(!sp||!sp.im.complete||!sp.im.naturalWidth) return; img=sp.im; iw=sp.w; ih=sp.h; }
     const w=l.W, h=w*ih/iw; c.save(); c.translate(l.cx,l.cy); c.rotate(l.rot); c.drawImage(img,-w/2,-h/2,w,h); c.restore(); });
@@ -10583,7 +10583,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d2d360b8cc';
+var UPDB='92a6d397d2';
 (function(){
   const K='updTry';
   const _go=updGo;

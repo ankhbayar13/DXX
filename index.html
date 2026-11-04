@@ -10053,7 +10053,7 @@ function bake(){ if(BDONE) return BCV; if(!BCV){ BK=1; BCV=document.createElemen
 window.wmWorldGet=bake; window.wmWorldWarm=bakeStart;
 // Бэлэн зураг (world1.webp): утсан дээр бэлдэхгүй, шууд ачаална. Ачаалж чадахгүй бол л хуучин аргаар бэлдэнэ.
 let WIMG=null, WST=0;
-function worldImg(){ if(WST) return WST===2?WIMG:null; WST=1; try{ WIMG=new Image(); WIMG.onload=()=>{ WST=2; }; WIMG.onerror=()=>{ WST=3; }; WIMG.src='world2.webp'; }catch(e){ WST=3; } return null; }
+function worldImg(){ if(WST) return WST===2?WIMG:null; WST=1; try{ WIMG=new Image(); WIMG.onload=()=>{ WST=2; }; WIMG.onerror=()=>{ WST=3; }; WIMG.src='world2.webp?v=2'; }catch(e){ WST=3; } return null; }
 // Тоглоом ачаалж дууссаны дараа дэвсгэрт урьдчилан татна (ачаалах хурдад нөлөөлөхгүй)
 try{ const pre=()=>setTimeout(()=>{ try{ worldImg(); }catch(e){} },4000); if(document.readyState==='complete') pre(); else window.addEventListener('load',pre); }catch(e){}
 // ---- газар нутгийн нэрс ----
@@ -10583,7 +10583,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='202a6b0d40';
+var UPDB='9ee2670143';
 (function(){
   const K='updTry';
   const _go=updGo;

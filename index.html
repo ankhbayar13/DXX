@@ -10053,7 +10053,7 @@ function bake(){ if(BDONE) return BCV; if(!BCV){ BK=1; BCV=document.createElemen
 window.wmWorldGet=bake; window.wmWorldWarm=bakeStart;
 // Бэлэн зураг (world1.webp): утсан дээр бэлдэхгүй, шууд ачаална. Ачаалж чадахгүй бол л хуучин аргаар бэлдэнэ.
 let WIMG=null, WST=0;
-function worldImg(){ if(WST) return WST===2?WIMG:null; WST=1; try{ WIMG=new Image(); WIMG.onload=()=>{ WST=2; }; WIMG.onerror=()=>{ WST=3; }; WIMG.src='world2.webp?v=3'; }catch(e){ WST=3; } return null; }
+function worldImg(){ if(WST) return WST===2?WIMG:null; WST=1; try{ WIMG=new Image(); WIMG.onload=()=>{ WST=2; window.WMWIMG=WIMG; }; WIMG.onerror=()=>{ WST=3; }; WIMG.src='world2.webp?v=3'; }catch(e){ WST=3; } return null; }
 // Тоглоом ачаалж дууссаны дараа дэвсгэрт урьдчилан татна (ачаалах хурдад нөлөөлөхгүй)
 try{ const pre=()=>setTimeout(()=>{ try{ worldImg(); }catch(e){} },4000); if(document.readyState==='complete') pre(); else window.addEventListener('load',pre); }catch(e){}
 // ---- газар нутгийн нэрс ----
@@ -10065,6 +10065,7 @@ function spaced(c,t,x,y,sp){ const w=[...t].map(ch=>c.measureText(ch).width), to
 window.wmWorldDraw=function(c,D,z,t){
   let cv=worldImg(); if(!cv&&WST===3) cv=BDONE?BCV:bakeStart();
   if(cv) c.drawImage(cv,EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); else { c.fillStyle='#a3ad82'; c.fillRect(EX.x0,EX.y0,EX.x1-EX.x0,EX.y1-EX.y0); }
+  try{ if(window.wmGroundDraw) wmGroundDraw(c,z); }catch(e){}
   
   c.save(); c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round';
   const fs=(z<0.03?10:15)/z, vx0=WMV.x-fs*10, vx1=WMV.x+c.canvas.clientWidth/z+fs*10, vy0=WMV.y-fs*3, vy1=WMV.y+c.canvas.clientHeight/z+fs*3;
@@ -10583,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='110385d39d';
+var UPDB='43a5e3b8a0';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12918,6 +12919,65 @@ heroListHTML=function(){
       else { if(z<0.5){ c.font='italic bold '+fs*1.2+'px Georgia,serif'; c.lineWidth=fs*0.22; c.strokeStyle='rgba(244,230,190,.95)'; c.fillStyle='#8a2a14'; c.strokeText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); c.fillText('СҮН УЛС',(R.x0+R.x1)/2,R.y0+fs*2); } }
       c.restore(); }catch(e){} };
 
+})();
+
+
+/* p32/wmground.js — Дэлхийн газар: нутаг бүрт зохих жижиг нарийн хөрсний хавтан (хээр, говь, элс, цас…) */
+(function(){
+  const TW=220; // нэг хавтангийн дэлхийн хэмжээ (барилга ~100)
+  const T={gold:0,green:1,autumn:2,meadow:3,gravel:4,sand:5,clay:6,snowg:7,snow:8,ice:9};
+  // давхарга: [хавтан, [[ [lon,lat],... ], ...]] — сүүлийнх нь дээрээс хучна. Үндсэн хөрс: шар хээр.
+  const LAY=[
+    [T.green,[ [[-12,43],[-12,60],[8,60],[12,54],[8,47],[2,43]], [[92,10],[93,22],[100,24],[108,22],[109,12],[101,8]], [[94,6],[94,-10],[145,-10],[145,6]], [[124,34],[124,42],[131,43],[132,34]], [[129,31],[131,36],[137,38],[142,45],[146,45],[142,36],[135,32]], [[118,5],[118,19],[127,19],[127,5]], [[72.5,8],[72.5,20],[76,20],[78,8]], [[79,5],[79,10],[82,10],[82,5]] ]],
+    [T.meadow,[ [[8,44],[8,58],[40,58],[42,48],[30,44]], [[74,22],[74,29],[90,28],[92,22]], [[26,40.5],[26,42],[42,41.5],[42,40]], [[34,6],[34,14],[42,14],[42,6]] ]],
+    [T.autumn,[ [[5,58],[8,66],[30,68],[42,66],[60,62],[60,56],[40,57],[28,58],[18,57]], [[55,55],[55,66],[100,70],[180,68],[180,52],[140,50],[120,52],[100,52],[75,54]] ]],
+    [T.gravel,[ [[79,36],[98,36],[100,32],[96,29.8],[86,29.5],[80,31.5]] ]],
+    [T.gravel,[ [[-17,31],[-17,17],[-5,15],[20,14],[36,17],[36,31],[10,32],[-5,33]], [[34,31],[34,17],[44,13],[56,17],[60,24],[56,27],[48,31]], [[36,30],[36,35],[44,35],[44,30]], [[48,36],[48,28],[58,26],[64,28],[64,36],[54,38]], [[96,43.5],[100,46],[112,46],[116,43],[112,40],[100,39]], [[100,37],[100,41],[108,41],[110,38]], [[60,28],[60,33],[70,33],[70,28]] ]],
+    [T.sand,[ [[-14,29],[-14,19],[0,18],[20,17],[32,20],[32,28],[10,30],[-5,30]], [[44,17.5],[44,22],[52,24],[56,22],[52,18]], [[38,28],[38,30.5],[43,31],[44,28.5]], [[53,37.5],[56,42],[64,43],[66,40],[62,37.5]], [[77,37.5],[78,40.5],[88,41],[90,38.5],[84,37]], [[68,24.5],[69,28],[73.5,29.5],[74,25.5]] ]],
+    [T.clay,[ [[52,31],[52,35.5],[58,35.5],[60,30.5]], [[42,30],[44,34],[48,33],[48,30]], [[30,20],[32,26],[36,26],[36,20]] ]],
+    [T.snowg,[ [[15,66],[30,71],[60,70],[100,74],[180,72],[180,64],[120,66],[60,66]], [[73,34.5],[80,31],[88,27.2],[98,27.5],[98,30],[88,29.5],[80,33],[74,37]], [[69,37.8],[75,37],[84,42],[91,43.5],[91,42.8],[84,41.2],[75,38.6]], [[84,51],[92,50.5],[98,48],[93,47],[86,49]], [[5,44],[7,46.5],[14,47.5],[15,46.5],[8,44]], [[37,44.5],[48,42.5],[48,41.5],[37,43.5]], [[58,52],[62,52],[60,68],[57,68]], [[-25,63],[-25,66.5],[-13,66.5],[-13,63]] ]],
+    [T.snow,[ [[0,71.5],[0,85],[180,85],[180,72],[110,73.5],[60,71],[30,71.5]] ]]
+  ];
+  const MIP=[48,96,192,384], MIPN=4;
+  let ATL=null, ATLST=0, WI=null, LM=null, MK=null, TILES=null, PATS={}, T1=null, T2=null, KEY='', LD=0;
+  function loadAtl(){ if(ATLST) return; ATLST=1; try{ ATL=new Image(); ATL.onload=()=>{ ATLST=2; }; ATL.onerror=()=>{ ATLST=3; }; ATL.src='gtiles.webp?v=1'; }catch(e){ ATLST=3; } }
+  function prepTiles(){ TILES=[]; for(let i=0;i<10;i++){ const lv=[]; for(let k=0;k<MIPN;k++){ const L=MIP[k], c=document.createElement('canvas'); c.width=c.height=L; const x=c.getContext('2d'); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high'; x.drawImage(ATL,(i%5)*384,Math.floor(i/5)*384,384,384,0,0,L,L); lv.push(c); } TILES.push(lv); } }
+  function pat(i,k){ const key=i*10+k; if(PATS[key]) return PATS[key]; const p=T1.getContext('2d').createPattern(TILES[i][k],'repeat'); try{ p.setTransform(new DOMMatrix().scale(TW/MIP[k])); }catch(e){} return PATS[key]=p; }
+  function prepLand(){ const W=WI.naturalWidth, H=WI.naturalHeight, c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(WI,0,0); const im=x.getImageData(0,0,W,H), d=im.data;
+    for(let i=0;i<d.length;i+=4){ const a=(d[i]-d[i+2]-4)*21; d[i+3]=a<0?0:a>255?255:a; d[i]=d[i+1]=d[i+2]=0; } x.putImageData(im,0,0); LM=c; }
+  function soft(c){ for(let n=0;n<3;n++){ const b=document.createElement('canvas'); b.width=Math.max(8,c.width>>1); b.height=Math.max(6,c.height>>1); const bx=b.getContext('2d'); bx.imageSmoothingEnabled=true; bx.drawImage(c,0,0,b.width,b.height); const x=c.getContext('2d'); x.globalCompositeOperation='copy'; x.imageSmoothingEnabled=true; x.drawImage(b,0,0,c.width,c.height); x.globalCompositeOperation='source-over'; } }
+  function prepMasks(){ const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0, SW=Math.round(EW/64), SH=Math.round(EH/64); MK=[];
+    LAY.forEach(L=>{ const c=document.createElement('canvas'); c.width=SW; c.height=SH; const x=c.getContext('2d'); x.fillStyle='#000'; let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+      L[1].forEach(poly=>{ x.beginPath(); poly.forEach((q,i)=>{ const wx=WMGEO.x(q[0]), wy=WMGEO.y(q[1]); if(wx<x0)x0=wx; if(wx>x1)x1=wx; if(wy<y0)y0=wy; if(wy>y1)y1=wy; const px=(wx-E.x0)/64, py=(wy-E.y0)/64; if(i) x.lineTo(px,py); else x.moveTo(px,py); }); x.closePath(); x.fill(); });
+      soft(c); MK.push({t:L[0],c:c,x0:x0-400,y0:y0-400,x1:x1+400,y1:y1+400}); }); }
+  function ready(){ if(MK) return true; if(!window.WMEXT||!window.WMWIMG||!window.WMGEO) return false; loadAtl(); if(ATLST===3) return false; if(ATLST!==2) return false;
+    if(LD>0) return false; LD=1; try{ WI=window.WMWIMG; prepTiles(); T1=document.createElement('canvas'); T2=document.createElement('canvas'); prepLand(); prepMasks(); }catch(e){ try{ console.error('wmground',e); }catch(x){} MK=null; LD=-1; return false; } return true; }
+  let CC=null, LK='', LT=0; // кэш: {x0,y0,z,w,h}
+  function rebuild(vx0,vy0,vx1,vy1,z){ const E=window.WMEXT, EW=E.x1-E.x0, EH=E.y1-E.y0, mg=0.25, ww=vx1-vx0, wh=vy1-vy0;
+    let cx0=vx0-ww*mg, cy0=vy0-wh*mg, cx1=vx1+ww*mg, cy1=vy1+wh*mg; cx0=Math.max(cx0,E.x0); cy0=Math.max(cy0,E.y0); cx1=Math.min(cx1,E.x1); cy1=Math.min(cy1,E.y1);
+    const w=Math.max(8,Math.min(2400,Math.ceil((cx1-cx0)*z))), h=Math.max(8,Math.min(2400,Math.ceil((cy1-cy0)*z)));
+    if(T1.width!==w||T1.height!==h){ T1.width=w; T1.height=h; T2.width=w; T2.height=h; PATS={}; }
+    const m=new DOMMatrix([z,0,0,z,-cx0*z,-cy0*z]), need=TW*z; let k=MIPN-1; for(let q=0;q<MIPN;q++){ if(MIP[q]>=need*0.9){ k=q; break; } }
+    const x1=T1.getContext('2d'), x2=T2.getContext('2d'); x1.setTransform(1,0,0,1,0,0); x1.globalCompositeOperation='source-over'; x1.clearRect(0,0,w,h); x1.setTransform(m); x1.fillStyle=pat(0,k); x1.fillRect(cx0,cy0,cx1-cx0,cy1-cy0);
+    x1.imageSmoothingEnabled=true; x2.imageSmoothingEnabled=true;
+    MK.forEach(L=>{ if(L.x1<cx0||L.x0>cx1||L.y1<cy0||L.y0>cy1) return;
+      x2.setTransform(1,0,0,1,0,0); x2.globalCompositeOperation='source-over'; x2.clearRect(0,0,w,h); x2.setTransform(m); x2.drawImage(L.c,E.x0,E.y0,EW,EH);
+      x2.globalCompositeOperation='source-in'; x2.fillStyle=pat(L.t,k); x2.fillRect(cx0,cy0,cx1-cx0,cy1-cy0);
+      x1.setTransform(1,0,0,1,0,0); x1.drawImage(T2,0,0); });
+    x1.setTransform(m); x1.globalCompositeOperation='destination-in'; x1.drawImage(LM,E.x0,E.y0,EW,EH); x1.globalCompositeOperation='source-over';
+    CC={x0:cx0,y0:cy0,z:z,w:w,h:h}; }
+  window.wmGroundDraw=function(c,z){ try{
+    if(z<0.05) return; const a=z>=0.12?1:(z-0.05)/0.07; if(LD<0) return; if(!ready()) return;
+    const cv=c.canvas, W=cv.width, H=cv.height, m=c.getTransform(), now=performance.now();
+    const vx0=(0-m.e)/m.a, vx1=(W-m.e)/m.a, vy0=(0-m.f)/m.d, vy1=(H-m.f)/m.d, key=m.a+','+m.e+','+m.f;
+    if(key!==LK){ LK=key; LT=now; }
+    let ok=CC&&vx0>=CC.x0-1&&vy0>=CC.y0-1&&(vx1-CC.x0)*CC.z<=CC.w+1&&(vy1-CC.y0)*CC.z<=CC.h+1;
+    if(ok&&Math.abs(Math.log(z/CC.z))>0.012&&(now-LT>160||Math.abs(Math.log(z/CC.z))>0.4)) ok=false;
+    if(!ok){ rebuild(vx0,vy0,vx1,vy1,z); }
+    const sx=(vx0-CC.x0)*CC.z, sy=(vy0-CC.y0)*CC.z, sw=(vx1-vx0)*CC.z, sh=(vy1-vy0)*CC.z;
+    c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=a; c.imageSmoothingEnabled=true; c.drawImage(T1,Math.max(0,sx),Math.max(0,sy),Math.min(sw,CC.w-Math.max(0,sx)),Math.min(sh,CC.h-Math.max(0,sy)),sx<0?-sx*W/sw:0,sy<0?-sy*H/sh:0,W*(Math.min(sw,CC.w-Math.max(0,sx))/sw),H*(Math.min(sh,CC.h-Math.max(0,sy))/sh)); c.restore();
+  }catch(e){ try{ if(!window.__wgErr){ window.__wgErr=1; console.error('wmground draw',e); } }catch(x){} } };
+  try{ const pre=()=>setTimeout(()=>{ try{ loadAtl(); }catch(e){} },6000); if(document.readyState==='complete') pre(); else window.addEventListener('load',pre); }catch(e){}
 })();
 
 

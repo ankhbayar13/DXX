@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c072a24a30';
+var UPDB='e4f6355a23';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13434,7 +13434,10 @@ var HSEL=null, HSOP=0;
    Зөвхөн гадаад төрх (CSS); цонхны агуулга, үйлдэл хуучин хэвээр. */
 (function(){
   const st=document.createElement('style'); st.textContent=`
-#hd{background:linear-gradient(#0000 0,#0000 250px,#1c1109 345px),url(hf/hd_bg.webp) 50% 0/auto 345px no-repeat,#1c1109}
+#hd{background:#1c1109}
+#hd:before{content:"";position:absolute;left:0;right:0;top:0;height:clamp(345px,56vh,640px);background:url(hf/hd_bg.webp) 50% 30%/cover no-repeat;-webkit-mask-image:linear-gradient(#000 78%,#0000);mask-image:linear-gradient(#000 78%,#0000);pointer-events:none}
+#hd>*{position:relative;z-index:1}
+@media(min-width:700px){.hd-stage{height:clamp(240px,34vh,360px)}.hd-top{padding-left:18px;padding-right:18px}.hd-pn{margin-left:max(4px,calc(50% - 460px));margin-right:max(4px,calc(50% - 460px))}.hd-tabs{padding-left:max(16px,calc(50% - 450px));padding-right:max(16px,calc(50% - 450px))}}
 .hd-top{padding-bottom:0}
 .hd-bk{background:none;border:0 solid transparent;border-width:0 24px;border-image:url(hf/hd_tab_off.webp) 0 40 0 40 fill/0 24px 0 24px stretch;border-radius:0;padding:9px 0;color:#ffe9b0;text-shadow:0 1px 2px #000;filter:drop-shadow(0 2px 3px #000a)}
 .hd-pw{background:linear-gradient(#e0402e,#8c180e);border:2px solid #f0b84a;box-shadow:0 2px 6px #000a,inset 0 1px 0 #ffb09a88;color:#fff2c8}

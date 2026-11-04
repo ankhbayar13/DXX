@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c360accaea';
+var UPDB='881ac2fb5a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13324,7 +13324,9 @@ var HSEL=null, HSOP=0;
 .hs-ti{flex:1;font:800 18px sans-serif;color:#ffe9a8;text-shadow:0 2px 3px #000}
 .hs-ti small{display:block;font:600 11px sans-serif;color:#e8d6a8;opacity:.9}
 .hs-ct{flex:none;position:relative}
-.hs-cb{font:bold 13px sans-serif;white-space:nowrap}
+.hs-cb{position:relative;display:block;width:150px;padding:0;border:0;background:none;-webkit-tap-highlight-color:transparent}.hs-cb img{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 3px #000a)}.hs-fd{position:absolute;right:5px;top:-2px;width:14px;height:14px;border-radius:50%;background:#ff4a3a;box-shadow:0 0 0 2px #fff9}
+.hs-inf{position:relative;display:flex;align-items:center;gap:6px;margin:4px 0 2px;padding:4px 10px;border-radius:14px;background:#000a;font:bold 13px sans-serif;color:#ffe27a;text-shadow:0 1px 2px #000}.hs-inf .hs-rr{margin:0}
+.hs-bn{position:relative;z-index:2;display:flex;justify-content:center;padding:0 8px 4px}.hs-bn img{display:block;width:min(100%,560px);height:auto;cursor:pointer;filter:drop-shadow(0 3px 5px #000b);-webkit-tap-highlight-color:transparent}
 .hs-pp{position:absolute;right:0;top:calc(100% + 6px);width:min(86vw,300px);background:#241609f2;border:2px solid #d9a83a;border-radius:14px;padding:10px;box-shadow:0 6px 20px #000c;z-index:5}
 .hs-pp h4{margin:6px 0 5px;font:bold 12px sans-serif;color:#c9b58a}.hs-pp h4:first-child{margin-top:0}
 .hs-pp .hs-chs{display:flex;flex-wrap:wrap;gap:5px}
@@ -13381,8 +13383,8 @@ var HSEL=null, HSOP=0;
     const ow=!!S.heroes[id], r=RAR[H.s], full=HFULL.indexOf(id)>=0, d=SPRDATA['hp_'+id];
     let art= full?'<img class="hs-fb'+(ow?'':' dim')+'" src="hf/'+id+'.webp" alt="">':(d?'<img class="hs-pt" src="'+d[0]+'" style="'+(ow?'':'filter:grayscale(1) brightness(.35)')+'">':'');
     return '<div class="hs-st">'+art+'</div>'+
-      '<div class="hs-rb"><i class="hs-rr" style="--g:'+r.g+'">'+r.n+'</i><b>'+(ow||admOn()?H.n:'???')+'</b><span>'+(ow?'⚔ '+f(heroPowerEff(id)):'Эзэмшээгүй')+'</span></div>'+
-      '<button class="btn hs-dt" onclick="hsDetail()">Дэлгэрэнгүй</button>'; }
+      '<div class="hs-inf"><i class="hs-rr" style="--g:'+r.g+'">'+r.n+'</i><span>'+(ow?'⚔ '+f(heroPowerEff(id)):'Эзэмшээгүй')+'</span></div>'; }
+  function banner(id){ return '<div class="hs-bn"><img src="hf/b_'+id+'.webp" alt="" onclick="hsDetail()"></div>'; }
   function popup(){
     const ch=(on,fn,t)=>'<button class="'+(on?'on':'')+'" onclick="'+fn+'">'+t+'</button>';
     return '<div class="hs-pp" onclick="event.stopPropagation()"><h4>Ховор байдал</h4><div class="hs-chs">'+
@@ -13397,9 +13399,9 @@ var HSEL=null, HSOP=0;
     const ls=o.querySelector('.hs-l'), sc=ls?ls.scrollTop:0;
     const flt=(HLF?1:0)+(HTF?1:0);
     o.innerHTML='<div class="hs-top"><button class="hs-bk" onclick="hsClose()">‹</button><div class="hs-ti">Баатар<small>Цуглуулга '+own+'/'+HEROES.length+' · тулалдаанд '+heroSlots()+'</small></div>'+
-      '<div class="hs-ct"><button class="btn hs-cb" onclick="hsPop(event)">Ангилал'+(flt?' ●':'')+' ▾</button>'+(HSOP?popup():'')+'</div></div>'+
+      '<div class="hs-ct"><button class="hs-cb" onclick="hsPop(event)"><img src="hf/b_ang.webp" alt="Ангилал">'+(flt?'<i class="hs-fd"></i>':'')+'</button>'+(HSOP?popup():'')+'</div></div>'+
       '<div class="hs-body" onclick="if(HSOP){HSOP=0;hsRender()}"><div class="hs-l">'+(l.length?'<div class="hs-g">'+l.map(card).join('')+'</div>':'<div class="hs-em">Энэ ангилалд баатар алга</div>')+'</div><div class="hs-r">'+(HSEL?stage(HSEL):'')+'</div></div>'+
-      '<div class="hs-bt"><button class="btn hs-bb" onclick="hsGo(\'summon\')">🛒 Баатар худалдаж авах</button><button class="btn" onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
+      (HSEL?banner(HSEL):'')+'<div class="hs-bt"><button class="btn hs-bb" onclick="hsGo(\'summon\')">🛒 Баатар худалдаж авах</button><button class="btn" onclick="hsGo(\'relics\')">🏺 Дурсгал</button></div>';
     const n=o.querySelector('.hs-l'); if(n) n.scrollTop=sc; }
   window.hsRender=render;
   window.hsOpen=function(){ let o=document.getElementById('hs'); if(!o){ o=document.createElement('div'); o.id='hs'; document.body.appendChild(o); }

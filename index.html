@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='6b9a270309';
+var UPDB='c072a24a30';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13336,17 +13336,18 @@ var HSEL=null, HSOP=0;
 .hs-l{flex:none;width:min(46%,196px);overflow-y:auto;overflow-x:hidden;padding:4px 4px 16px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .hs-l::-webkit-scrollbar{display:none}
 .hs-g{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.hs-c{position:relative;aspect-ratio:3/4;border-radius:10px;border:2px solid #ffffff55;background:linear-gradient(var(--g));box-shadow:0 2px 0 #1a0f06,inset 0 0 0 1px #0005;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}
-.hs-c .hsp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block}
-.hs-c:after{content:"";position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(#0000,#000c)}
+.hs-c{position:relative;aspect-ratio:1031/1235;border:0;background:none;box-shadow:none;border-radius:0;overflow:visible;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0;filter:drop-shadow(0 2px 3px #000a)}
+.hs-c .hsp{position:absolute;left:5.7%;top:14%;width:88.6%;height:73%;object-fit:cover;object-position:50% 18%;display:block;box-shadow:inset 0 0 10px 1px var(--c1,#0000)}
+.hs-c .hs-fr{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hs-c:after{content:"";position:absolute;left:5.7%;width:88.6%;bottom:13%;height:30%;background:linear-gradient(#0000,#000c);pointer-events:none}
 .hs-c.hn .hsp{filter:grayscale(1) brightness(.4)}
-.hs-c.sel{border-color:#ffe27a;box-shadow:0 0 0 2px #ffd24a,0 0 14px 3px #ffc43acc,0 2px 0 #1a0f06}
-.hs-lv{position:absolute;left:3px;top:3px;z-index:2;min-width:22px;height:22px;box-sizing:border-box;padding:0 4px;border-radius:50% 50% 50% 8px;background:linear-gradient(#3a2a18,#120a04);border:2px solid #ffd24a;color:#ffe9a8;font:800 11px/18px sans-serif;text-align:center}
-.hs-ty{position:absolute;right:3px;top:3px;z-index:2;font-size:12px;text-shadow:0 1px 2px #000}
-.hs-sr{position:absolute;left:0;right:0;bottom:3px;z-index:2;text-align:center;line-height:1}
+.hs-c.sel{filter:drop-shadow(0 0 3px #ffe27a) drop-shadow(0 0 8px #ffb82ccc) drop-shadow(0 2px 3px #000a)}
+.hs-lv{position:absolute;left:1px;top:7%;z-index:2;min-width:22px;height:22px;box-sizing:border-box;padding:0 4px;border-radius:50% 50% 50% 8px;background:linear-gradient(#3a2a18,#120a04);border:2px solid #ffd24a;color:#ffe9a8;font:800 11px/18px sans-serif;text-align:center}
+.hs-ty{position:absolute;right:9%;top:15%;z-index:2;font-size:12px;text-shadow:0 1px 2px #000}
+.hs-sr{position:absolute;left:0;right:0;bottom:15%;z-index:2;text-align:center;line-height:1}
 .hs-sr .hstr span{color:#ffffff44}.hs-sr .hstr span.on{color:#ffd35a}
-.hs-x{position:absolute;left:0;right:0;bottom:4px;z-index:2;text-align:center;font:bold 9px sans-serif;color:#ddd}
-.hs-up{position:absolute;right:3px;bottom:16px;z-index:3;font-style:normal;font-size:12px;color:#7fe08a;text-shadow:0 1px 2px #000}
+.hs-x{position:absolute;left:0;right:0;bottom:15.5%;z-index:2;text-align:center;font:bold 9px sans-serif;color:#ddd}
+.hs-up{position:absolute;right:9%;bottom:30%;z-index:3;font-style:normal;font-size:12px;color:#7fe08a;text-shadow:0 1px 2px #000}
 .hs-c .hc-nw{left:auto;right:3px;top:18px}
 .hs-r{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px}
 .hs-st{position:relative;flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center}
@@ -13372,8 +13373,8 @@ var HSEL=null, HSOP=0;
     if(HLF) l=l.filter(x=>x.s===HLF); if(HTF) l=l.filter(x=>htype(x.id)===HTF);
     return l; }
   function card(x){ const id=x.id, ow=!!S.heroes[id], r=RAR[x.s], d=SPRDATA['hp_'+id], up=ow&&canStar(id);
-    let h='<button class="hs-c'+(ow?'':' hn')+(HSEL===id?' sel':'')+'" style="--g:'+r.g+'" data-id="'+id+'" onclick="hsPick(\''+id+'\')">'+
-      (d?'<img class="hsp" src="'+d[0]+'">':'')+
+    let h='<button class="hs-c'+(ow?'':' hn')+(HSEL===id?' sel':'')+'" style="--g:'+r.g+';--c1:'+r.g.split(',')[0]+'" data-id="'+id+'" onclick="hsPick(\''+id+'\')">'+
+      (d?'<img class="hsp" src="'+d[0]+'">':'')+'<img class="hs-fr" src="hf/hd_frame'+x.s+'.webp" alt="">'+
       (ow?'<span class="hs-lv">'+lvOf(id)+'</span>':'')+'<i class="hs-ty">'+(CLSI[htype(id)]||'🗡')+'</i>'+(up?'<i class="hs-up">⬆</i>':'');
     if(ow&&S.newH&&S.newH[id]) h+='<i class="hc-nw">ШИНЭ</i>';
     h+= ow?'<span class="hs-sr">'+stRow(starOf(id),10)+'</span>':'<span class="hs-x">Эзэмшээгүй</span>';
@@ -13448,6 +13449,9 @@ var HSEL=null, HSOP=0;
 .hd-s.on{border-color:#ffd24a;box-shadow:inset 0 0 10px #ffb03a55,0 2px 5px #000a}
 .hd-s.sel{box-shadow:0 0 0 3px #ffd770aa,0 2px 5px #000a}
 .hd-nv{background:linear-gradient(#3e2410,#190d04);border:2px solid #d9a83a;color:#ffd770;box-shadow:0 2px 5px #000a}
+.hd-pf{position:relative;height:100%;aspect-ratio:1031/1235;max-width:100%;flex:none}
+.hd-pf .hd-img{position:absolute;left:5.7%;top:14%;width:88.6%!important;height:73%!important;max-width:none;aspect-ratio:auto;border:0;border-radius:0;box-shadow:none;object-fit:cover;object-position:50% 20%}
+.hd-pf .hd-fr{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 6px 10px #000b)}
 .hd-stl{text-shadow:0 1px 3px #000}
 .hd-tabs{gap:0;padding:2px 16px 0;position:relative;z-index:1}
 .hd-tb{flex:1;height:42px;padding:0;background:none;border:0 solid transparent;border-width:0 24px;border-image:url(hf/hd_tab_off.webp) 0 40 0 40 fill/0 24px 0 24px stretch;border-radius:0;color:#e8d6a8;text-shadow:0 1px 2px #000;font:bold 13px sans-serif;margin:0 -8px}
@@ -13461,6 +13465,7 @@ var HSEL=null, HSOP=0;
 `; document.head.appendChild(st);
   const _hi=heroInfo;
   heroInfo=function(){ const r=_hi.apply(this,arguments);
+    try{ document.querySelectorAll('#hd .hd-art .hd-img').forEach(im=>{ if(im.parentNode.classList.contains('hd-pf')) return; const w=document.createElement('div'); w.className='hd-pf'; im.parentNode.insertBefore(w,im); w.appendChild(im); const f=document.createElement('img'); f.className='hd-fr'; f.src='hf/hd_frame'+((HEROES.find(x=>x.id===HDS.id)||{s:5}).s)+'.webp'; f.alt=''; w.appendChild(f); }); }catch(e){}
     try{ document.querySelectorAll('#hd .hd-pn .sm').forEach(e=>{ if(e.textContent.indexOf('Зүүн талд зэвсэг')>=0) e.classList.add('hd-hint'); }); }catch(e){}
     return r; };
 })();

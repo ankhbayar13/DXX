@@ -51,7 +51,7 @@ Light and fast, made for phones. Registration is optional; back up your progress
 Game → Strategy (Стратеги). Tags: strategy, city builder, historical.
 
 ## Холбоо барих
-- Имэйл: SUPPORT_EMAIL
+- Имэйл: ankhbayarbatzorig13@gmail.com
 - Вэбсайт: https://talnutgiinhaan.com
 - Нууцлалын бодлого: https://talnutgiinhaan.com/privacy.html
 - Бүртгэл устгах хуудас: https://talnutgiinhaan.com/delete-account.html

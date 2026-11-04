@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='037cd898a4';
+var UPDB='f9b89ffc3c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13291,6 +13291,21 @@ heroListHTML=function(){
       return _sd.apply(this,arguments); };
     try{ const F2=Object.assign({},F); F2.setDoc=w; FBM.F=F2; }catch(e){} done=1;
   }catch(e){} },500);
+})();
+
+
+/* p32/tkdock.js — Зүүн талын «Бүлэг» (#tasks) самбарыг «Өдрийн даалгавар» (#dqbar, жишээ нь «1 захиалга хүргэ 0/1»)
+   самбарын яг доор нааж байрлуулна. Доор нь багтахгүй бага дэлгэц дээр хуучин байрлалдаа (доод зүүн) үлдэнэ. */
+(function(){
+  function clear(t){ if(t.dataset.dk){ t.style.top=''; t.style.bottom=''; delete t.dataset.dk; } }
+  function dock(){ try{
+    const t=document.getElementById('tasks'), d=document.getElementById('dqbar'), m=document.getElementById('menu'); if(!t) return;
+    if(!d||getComputedStyle(d).display==='none'||getComputedStyle(t).display==='none'){ clear(t); return; }
+    const dr=d.getBoundingClientRect(); if(!dr.height){ clear(t); return; }
+    const top=Math.round(dr.bottom+8), mt=m?m.getBoundingClientRect().top:innerHeight;
+    if(top+t.offsetHeight<=mt-6){ t.style.bottom='auto'; t.style.top=top+'px'; t.dataset.dk='1'; } else clear(t);
+  }catch(e){} }
+  setInterval(dock,300); window.addEventListener('resize',dock); window.addEventListener('orientationchange',()=>setTimeout(dock,300));
 })();
 
 </script><script>(function(){

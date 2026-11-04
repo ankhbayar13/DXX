@@ -1,0 +1,39 @@
+plugins { id 'com.android.application' }
+
+def run = (System.getenv('RUN_NUMBER') ?: '1').toInteger()
+
+android {
+    namespace 'com.talnutgiinhaan.game'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.talnutgiinhaan.game'
+        minSdk 24
+        targetSdk 34
+        versionCode run
+        versionName "1.0.${run}"
+    }
+    signingConfigs {
+        release {
+            if (System.getenv('KS_FILE')) {
+                storeFile file(System.getenv('KS_FILE'))
+                storePassword System.getenv('KS_PASS')
+                keyAlias 'tnh'
+                keyPassword System.getenv('KS_PASS')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

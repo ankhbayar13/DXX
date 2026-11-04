@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='75157e8b3b';
+var UPDB='037cd898a4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13257,6 +13257,40 @@ heroListHTML=function(){
   clAuthCard=function(){ let h=_card.apply(this,arguments); try{ if(h.indexOf('lglinks')<0) h+=LK; }catch(e){} return h; };
   const _cl=cloudHTML;
   cloudHTML=function(){ let h=_cl.apply(this,arguments); try{ if(h.indexOf('lglinks')<0) h+=LK; }catch(e){} return h; };
+})();
+
+
+/* p32/rktag.js — Хааны зэрэг (Нүүдэлчин … Тэнгэрийн хаан) найзууд, топ жагсаалт, тоглогчийн хуудсанд нэрийн ард шошгоор харагдана.
+   Зэргийг өөрийн lb бичлэгт `rk` талбараар хадгална (cloud-д бичих үед нэг дор). Сервер талбарыг хүлээж авахгүй бол
+   өөрөө салж, өмнөх хэлбэрээрээ хадгална (топ жагсаалт эвдрэхгүй). */
+(function(){
+  const IC=['🏕','🐑','📜','🏹','🛡','⚔','🏯','👑','👑','🌟','☀'];
+  // [текст өнгө, дэвсгэр, хүрээ]
+  const CO=[['#c9b48a','#2b2012','#6b5430'],['#d9c58f','#33260f','#7d6230'],['#a9d6ff','#122338','#3b6b9c'],['#a9d6ff','#122a44','#4a86c2'],
+            ['#b7f0a8','#13301a','#4d9a47'],['#b7f0a8','#173d1f','#5db455'],['#ffcf8a','#3a2208','#b9772a'],['#ffd770','#3f2a06','#d6a022'],
+            ['#2b1706','linear-gradient(#ffe083,#e0a526)','#fff1b0'],['#2b1706','linear-gradient(#ffe083,#e0a526)','#fff1b0'],['#fff','linear-gradient(#ff7a4a,#c4281a)','#ffd770']];
+  function tag(lv,big){ lv=Math.max(0,Math.min(10,lv|0)); const c=CO[lv], n=rkNames()[lv];
+    return '<span class="rktag" style="display:inline-block;vertical-align:middle;white-space:nowrap;font-weight:700;border-radius:9px;color:'+c[0]+';background:'+c[1]+';border:1px solid '+c[2]+';'+
+      (big?'font-size:13px;padding:2px 10px;':'font-size:10px;line-height:1.3;padding:0 6px;margin-left:4px;')+(lv===10?'box-shadow:0 0 6px #ff9a4a;':'')+'">'+IC[lv]+' '+n+'</span>'; }
+  window.rkTagHTML=tag;
+  const lvOf=x=>{ try{ if(x&&x.id===CL.uid) return rkLv(); }catch(e){} return (x&&typeof x.rk==='number')?x.rk:-1; };
+
+  const _row=socRow;
+  socRow=function(x){ let h=_row.apply(this,arguments); try{ const lv=lvOf(x); if(lv>=0) h=h.replace('</b>','</b>'+tag(lv,0)); }catch(e){} return h; };
+  const _sv=socView;
+  socView=function(){ let h=_sv.apply(this,arguments); try{ const lv=lvOf(CL.sv); if(lv>=0) h=h.replace('<div class="sm">#','<div style="margin:4px 0 2px">'+tag(lv,1)+'</div><div class="sm">#'); }catch(e){} return h; };
+
+  // өөрийн lb бичлэгт rk нэмэх (нэг бичилт). Сервер татгалзвал өмнөх хэлбэрээр бичнэ.
+  let off=0, done=0;
+  const iv=setInterval(()=>{ try{
+    if(done||typeof FBM==='undefined'||!FBM||!FBM.F) return; clearInterval(iv);
+    const F=FBM.F, _sd=F.setDoc; if(typeof _sd!=='function') return;
+    const w=async function(ref,data,opt){
+      try{ if(!off&&!opt&&data&&typeof data==='object'&&ref&&ref.path&&CL.uid&&ref.path==='lb/'+CL.uid){
+        try{ return await _sd.call(this,ref,Object.assign({},data,{rk:rkLv()})); }catch(e){ off=1; } } }catch(e){}
+      return _sd.apply(this,arguments); };
+    try{ const F2=Object.assign({},F); F2.setDoc=w; FBM.F=F2; }catch(e){} done=1;
+  }catch(e){} },500);
 })();
 
 </script><script>(function(){

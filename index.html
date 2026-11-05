@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='0b8e460e81';
+var UPDB='152666a6dd';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13590,6 +13590,10 @@ body:has(#wmap) #dayph{display:none!important}
   cmapHTML=function(ci){ const h=_c.apply(this,arguments);
     try{ return '<button class="btn" style="margin:0 0 6px;padding:8px 16px" onclick="openM(\'camp\')">‹ Буцах</button>'+h; }catch(e){ return h; } };
 })();
+
+
+/* p32/rkgift.js — Хааны зэрэг: өдөр бүрийн бэлгийн Алт (зэрэг тус бүрээр). Lv1..Lv10 = 50,60,70,80,90,100,200,300,400,500. Мөнгө (400×Lv) хуучин хэвээр. */
+rkGiftOf=function(l){ return {alt:[0,50,60,70,80,90,100,200,300,400,500][l]||0, gold:400*l}; };
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

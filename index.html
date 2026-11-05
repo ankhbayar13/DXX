@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5299f7e9ff';
+var UPDB='7576a79638';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13473,6 +13473,31 @@ var HSEL=null, HSOP=0;
     try{ document.querySelectorAll('#hd .hd-art .hd-img').forEach(im=>{ if(im.parentNode.classList.contains('hd-pf')) return; const w=document.createElement('div'); w.className='hd-pf'; im.parentNode.insertBefore(w,im); w.appendChild(im); const f=document.createElement('img'); f.className='hd-fr'; f.src='hf/hd_frame'+((HEROES.find(x=>x.id===HDS.id)||{s:5}).s)+'.webp'; f.alt=''; w.appendChild(f); }); }catch(e){}
     try{ document.querySelectorAll('#hd .hd-pn .sm').forEach(e=>{ if(e.textContent.indexOf('Зүүн талд зэвсэг')>=0) e.classList.add('hd-hint'); }); }catch(e){}
     return r; };
+})();
+
+
+/* p32/unlock.js — Барилга, мал, цонхнуудын нээгдэх түвшин (Гол гэрийн түвшин) шинэ хуваарь.
+   Бүх газраас унших BREQ / PEN / WLOCK-ийг хамгийн сүүлд нэг дор тохируулна. Аль хэдийн барьсан барилга алдагдахгүй. */
+(function(){
+  const B={
+    /* 1 */ hashaa:1, horgo:1, tarialan:1, well:1, ger:1,
+    /* 2 */ ger2:2, hureo:2, modcex:2, mahcex:2, market:2,
+    /* 3 */ ger3:3, airag:3, aaruul:3, ovoo:3,
+    /* 4 */ ger4:4, yard:4, stable:4,
+    /* 5 */ ger5:5, tos:5, esgii:5, smith:5,
+    /* 6 */ naadamring:6, range:6, buuz:6,
+    /* 7 */ school:7, healer:7, tower:7,
+    /* 8 */ suvarga:8,
+    /* 9 */ temple:9,
+    /* 10 */ hushuu:10
+  };
+  try{ Object.keys(B).forEach(k=>{ BREQ[k]=B[k]; }); }catch(e){}
+  // нэмэлт Модны цех (2-5) нэг түвшин хойш: 3..6
+  try{ ['modcex2','modcex3','modcex4','modcex5'].forEach((k,i)=>{ if(k in BREQ) BREQ[k]=i+3; }); }catch(e){}
+  // мал: хонь 1, ямаа 2, үхэр 4, морь 5, тэмээ 7
+  try{ const P={honi:1,yamaa:2,uher:4,aduu:5,temee:7}; Object.keys(P).forEach(k=>{ if(PEN[k]) PEN[k].req=P[k]; }); }catch(e){}
+  // цонхнууд: захиалга 2, судалгаа 4, наадам 6, тэмцээн 7
+  try{ WLOCK.orders[0]=2; WLOCK.res[0]=4; WLOCK.naadam[0]=6; WLOCK.arena[0]=7; }catch(e){}
 })();
 
 </script><script>(function(){

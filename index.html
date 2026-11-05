@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='22691ea79b';
+var UPDB='f24e2fb483';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13525,6 +13525,16 @@ body:has(#wmap) #dayph{display:none!important}
       el.querySelectorAll('.wmz').forEach((b,i)=>{ b.style.top=(152+i*52)+'px'; });
     }catch(e){}
     return r; };
+})();
+
+
+/* p32/menugift.js — Цэс → Хөрөнгө: «Өдрийн эргүүл» товчийг шинэ зургаар (hf/menu_gift.webp) солив. Үйлдэл хуучин хэвээр. */
+(function(){
+  const st=document.createElement('style'); st.textContent='.mng .mgw{grid-column:1/-1;cursor:pointer;-webkit-tap-highlight-color:transparent;margin:2px 0}.mgw img{width:100%;display:block;pointer-events:none;filter:drop-shadow(0 3px 5px #000a)}.mgw:active{transform:scale(.98)}'; document.head.appendChild(st);
+  const _m=menuHTML;
+  menuHTML=function(){ let h=_m.apply(this,arguments);
+    try{ h=h.replace(/<button class="btn"[^>]*onclick="openM\('patrol'\)"[^>]*>[^<]*<\/button>/,'<div class="mgw" onclick="openM(\'patrol\')"><img src="hf/menu_gift.webp" alt="Өдрийн бэлэг"></div>'); }catch(e){}
+    return h; };
 })();
 
 </script><script>(function(){

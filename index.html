@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='841fe6fd2f';
+var UPDB='3cb6d73f1d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13537,6 +13537,22 @@ body:has(#wmap) #dayph{display:none!important}
   menuHTML=function(){ let h=_m.apply(this,arguments);
     try{ h=h.replace(/<button class="btn"[^>]*onclick="openM\('patrol'\)"[^>]*>[^<]*<\/button>/,'<div class="mgw" onclick="openM(\'patrol\')"><img src="hf/menu_gift.webp" alt="Өдрийн бэлэг"></div>'); }catch(e){}
     return h; };
+})();
+
+
+/* p32/wmcompass.js — Дэлхийн газрын зураг: хуучин зурсан луужингийн оронд шинэ луужингийн зураг (hf/compass.webp). */
+(function(){
+  const IM=new Image(); IM.src='hf/compass.webp';
+  const _h=wmHistOver;
+  wmHistOver=function(c,D,z,t,dp){
+    /* хуучин луужин нь translate-ийн дараа зурагддаг → тэр үеэс fill/stroke/fillText-ийг түр хоосон болгоно */
+    const T=c.translate, M=['fill','stroke','fillText','strokeText'];
+    c.translate=function(x,y){ delete c.translate; M.forEach(m=>{ c[m]=function(){}; }); return c.translate(x,y); };
+    let r; try{ r=_h.apply(this,arguments); } finally{ delete c.translate; M.forEach(m=>{ delete c[m]; }); }
+    try{
+      if(IM.complete&&IM.naturalWidth){ const cv=c.canvas, W=108*dp, H=W*IM.naturalHeight/IM.naturalWidth; c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.drawImage(IM,72*dp-W/2,cv.height-124*dp-H/2,W,H); c.restore(); }
+    }catch(e){}
+    return r; };
 })();
 
 </script><script>(function(){

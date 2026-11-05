@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fb3825b81b';
+var UPDB='0b8e460e81';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12188,7 +12188,7 @@ bcard=function(k){
 })();
 
 
-/* p32/tamga.js — №3: Өөрийн тамга. 32×32 пиксел тамга зурна (S.tg = 1024 оронтой тэмдэгт, тус бүр 0..8 өнгө). Хуучин 8×8 (64), 16×16 (256 оронтой) тамга автоматаар томорч хөрвөнө. Зурах цонхонд томруулж гүйлгэх боломжтой.
+/* p32/tamga.js — №3: Өөрийн тамга. 64×64 пиксел тамга зурна (S.tg = 4096 оронтой тэмдэгт, тус бүр 0..8 өнгө). Хуучин 8×8, 16×16, 32×32 тамга автоматаар томорч хөрвөнө. Зурах цонх: canvas, томруулах, гүйлгэх, дүүргэх.
    Мал бүрийн биед, гэрийн хаалган дээр харагдана. Найзууд профайл, тосгоныг тань харахад тань тамга харагдана. Зураг болгож хуваалцана. */
 (function(){
   const PAL=['','#1a1410','#c0392b','#e67e22','#f1c40f','#2e8b57','#2f6fb5','#f5efe0','#7a4a22'];
@@ -12200,8 +12200,8 @@ bcard=function(k){
     ['Дөрөө', ['00333300','03000030','03000030','03000030','03000030','03000030','03333330','33333333']],
     ['Очир',   ['00066000','00677600','06777760','67777776','67777776','06777760','00677600','00066000']]
   ];
-  const NN=32, NC=NN*NN;
-  const OK=s=>typeof s==='string'&&(/^[0-8]{64}$/.test(s)||/^[0-8]{256}$/.test(s)||/^[0-8]{1024}$/.test(s))&&/[1-8]/.test(s);
+  const NN=64, NC=NN*NN;
+  const OK=s=>typeof s==='string'&&(/^[0-8]{64}$/.test(s)||/^[0-8]{256}$/.test(s)||/^[0-8]{1024}$/.test(s)||/^[0-8]{4096}$/.test(s))&&/[1-8]/.test(s);
   /* 8×8 → 16×16 (нэг нүд 2×2 болно) */
   const norm=s=>{ if(!OK(s)) return null; if(s.length===NC) return s; const n=Math.round(Math.sqrt(s.length)), f=NN/n; let o=''; for(let y=0;y<n;y++){ let r=''; for(let x=0;x<n;x++){ r+=s[y*n+x].repeat(f); } o+=r.repeat(f); } return o; };
   const rows2s=r=>r.join('');
@@ -12215,8 +12215,8 @@ bcard=function(k){
   }
   function url(s,px){
     const key=s+'|'+px; if(urls[key]) return urls[key];
-    const c=document.createElement('canvas'); c.width=c.height=NN*px/4; const x=c.getContext('2d'); x.imageSmoothingEnabled=false;
-    x.drawImage(cv8(s),0,0,NN*px/4,NN*px/4);
+    const c=document.createElement('canvas'); c.width=c.height=px*8; const x=c.getContext('2d'); x.imageSmoothingEnabled=true;
+    x.drawImage(cv8(s),0,0,px*8,px*8);
     if(Object.keys(urls).length>40) for(const k in urls) delete urls[k];
     return urls[key]=c.toDataURL('image/png');
   }
@@ -12279,39 +12279,50 @@ bcard=function(k){
   css.textContent='#tgo{position:fixed;inset:0;z-index:99985;background:#2a1b0e;color:#f3e2b8;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:14px 14px 24px;box-sizing:border-box}'+
     '#tgo h2{margin:2px 0 8px;color:#ffd770;font-size:20px;text-align:center}#tgo .sm{font-size:13px;opacity:.9;text-align:center}'+
     '#tgw{flex:none;width:min(92vw,340px);height:min(92vw,340px);overflow:auto;border:3px solid #c9972b;border-radius:6px;margin:8px 0;background:#e9dfc4;-webkit-overflow-scrolling:touch}'+
-    '#tgg{display:grid;grid-template-columns:repeat(32,minmax(0,1fr));width:calc(min(92vw,340px)*var(--z,1));height:calc(min(92vw,340px)*var(--z,1));grid-template-rows:repeat(32,minmax(0,1fr));touch-action:none;user-select:none;-webkit-user-select:none}'+
-    '#tgg div{border:0.5px solid #0002;box-sizing:border-box}'+
+    '#tgg{display:block;width:calc(min(92vw,340px)*var(--z,1));height:calc(min(92vw,340px)*var(--z,1));image-rendering:pixelated;user-select:none;-webkit-user-select:none}'+
+    '#tgo .btn.on{filter:brightness(1.25) drop-shadow(0 0 4px #ffd770)}'+
     '#tgp{flex:none;display:flex;flex-wrap:nowrap;gap:5px;justify-content:center;max-width:340px;margin:4px 0}'+
     '#tgp b{width:30px;height:30px;flex:none;border-radius:6px;border:2px solid #0006;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}'+
     '#tgp b.on{outline:3px solid #ffd770}'+
     '#tgo .row{flex:none;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:340px;margin:6px 0}'+
     '#tgo .btn{padding:7px 11px;font-size:14px}#tgx{position:absolute;top:8px;right:8px;width:42px;height:42px;border-radius:50%;border:2px solid #c9972b;background:#3b2815;color:#ffd770;font-size:20px}';
   document.head.appendChild(css);
-  let D=null, col=4, mir=1, dn=false, HIST=[], ZM=1, PAN=false;
-  const snap=()=>{ HIST.push(D.join('')); if(HIST.length>60) HIST.shift(); };
-  function undo(){ if(!HIST.length){ try{ say('Буцаах зүйл алга'); }catch(e){} return; } D=HIST.pop().split('').map(Number); draw(); }
+  let D=null, col=4, mir=1, dn=false, HIST=[], ZM=1, MODE=0, LAST=-1;   // MODE: 0 зурах, 1 дүүргэх, 2 гүйлгэх
+  const CP=16;   // canvas дээр нэг дөрвөлжин = 16 пиксел
+  const snap=()=>{ HIST.push(D.join('')); if(HIST.length>40) HIST.shift(); };
+  function undo(){ if(!HIST.length){ try{ say('Буцаах зүйл алга'); }catch(e){} return; } D=HIST.pop().split('').map(Number); paintAll(); draw(); }
   const dStr=()=>D.join('');
-  function paintCell(i){ const el=document.getElementById('tgg').children[i]; if(el) el.style.background=D[i]?PAL[D[i]]:''; }
-  function setCell(i,v){ if(i<0||i>=NC) return; D[i]=v; paintCell(i); if(mir){ const j=((i/NN)|0)*NN+(NN-1-(i%NN)); D[j]=v; paintCell(j); } }
+  function gctx(){ const c=document.getElementById('tgg'); return c&&c.getContext('2d'); }
+  function paintCell(i){ const x=gctx(); if(!x) return; const cx=(i%NN)*CP, cy=((i/NN)|0)*CP; x.fillStyle=D[i]?PAL[D[i]]:'#e9dfc4'; x.fillRect(cx,cy,CP,CP); x.fillStyle='rgba(0,0,0,.13)'; x.fillRect(cx,cy,CP,1); x.fillRect(cx,cy,1,CP); }
+  function paintAll(){ const x=gctx(); if(!x) return; x.fillStyle='#e9dfc4'; x.fillRect(0,0,NN*CP,NN*CP); for(let i=0;i<NC;i++){ if(D[i]){ x.fillStyle=PAL[D[i]]; x.fillRect((i%NN)*CP,((i/NN)|0)*CP,CP,CP); } }
+    x.fillStyle='rgba(0,0,0,.13)'; for(let k=0;k<=NN;k++){ x.fillRect(k*CP,0,1,NN*CP); x.fillRect(0,k*CP,NN*CP,1); }
+    x.fillStyle='rgba(0,0,0,.32)'; x.fillRect(NN*CP/2-1,0,2,NN*CP); x.fillRect(0,NN*CP/2-1,NN*CP,2); }
+  function setCell(i,v){ if(i<0||i>=NC) return; if(D[i]!==v){ D[i]=v; paintCell(i); } if(mir){ const j=((i/NN)|0)*NN+(NN-1-(i%NN)); if(D[j]!==v){ D[j]=v; paintCell(j); } } }
+  function line(a,b,v){ let x0=a%NN, y0=(a/NN)|0; const x1=b%NN, y1=(b/NN)|0, dx=Math.abs(x1-x0), dy=-Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1; let er=dx+dy; for(;;){ setCell(y0*NN+x0,v); if(x0===x1&&y0===y1) break; const e2=2*er; if(e2>=dy){ er+=dy; x0+=sx; } if(e2<=dx){ er+=dx; y0+=sy; } } }
+  function fill(i,v){ const old=D[i]; if(old===v) return; const st=[i]; while(st.length){ const k=st.pop(); if(D[k]!==old) continue; D[k]=v; paintCell(k); const x=k%NN, y=(k/NN)|0; if(x>0) st.push(k-1); if(x<NN-1) st.push(k+1); if(y>0) st.push(k-NN); if(y<NN-1) st.push(k+NN); } }
   function draw(){
-    const g=document.getElementById('tgg'); if(!g) return; g.innerHTML='';
-    for(let i=0;i<NC;i++){ const d=document.createElement('div'); d.dataset.i=i; if(D[i]) d.style.background=PAL[D[i]]; g.appendChild(d); }
     document.querySelectorAll('#tgp b').forEach(b=>b.classList.toggle('on',+b.dataset.c===col));
-    const zb=document.getElementById('tgz'); if(zb) zb.textContent='🔍 Томруулах ×'+ZM; const pb=document.getElementById('tgv'); if(pb) pb.textContent=PAN?'✋ Гүйлгэх (зурахгүй)':'✏ Зурах горим'; const gg=document.getElementById('tgg'); if(gg){ gg.style.setProperty('--z',ZM); gg.style.touchAction=PAN?'auto':'none'; }
+    const zb=document.getElementById('tgz'); if(zb) zb.textContent='🔍 Томруулах ×'+ZM;
+    [0,1,2].forEach(k=>{ const b=document.getElementById('tgd'+k); if(b) b.classList.toggle('on',MODE===k); });
+    const gg=document.getElementById('tgg'); if(gg){ gg.style.setProperty('--z',ZM); gg.style.touchAction=MODE===2?'auto':'none'; }
     const m=document.getElementById('tgm'); if(m) m.textContent=mir?'↔ Тэгш хэм: идэвхтэй':'↔ Тэгш хэм: унтраасан';
     const a=document.getElementById('tga'); if(a) a.textContent=(S.tgOn===0)?'🐑 Малд тамга дарах: унтраасан':'🐑 Малд тамга дарах: асаалттай';
   }
-  function cellAt(ev){ const t=ev.touches?ev.touches[0]:ev; const el=document.elementFromPoint(t.clientX,t.clientY); return (el&&el.parentNode&&el.parentNode.id==='tgg')?+el.dataset.i:-1; }
-  function down(ev){ if(PAN) return; dn=true; snap(); const i=cellAt(ev); if(i>=0) setCell(i,col); ev.preventDefault(); }
-  function move(ev){ if(PAN||!dn) return; const i=cellAt(ev); if(i>=0&&D[i]!==col) setCell(i,col); ev.preventDefault(); }
-  function up(){ dn=false; }
+  function cellAt(ev){ const c=document.getElementById('tgg'); if(!c) return -1; const t=ev.touches?ev.touches[0]:ev, r=c.getBoundingClientRect(); const x=Math.floor((t.clientX-r.left)/r.width*NN), y=Math.floor((t.clientY-r.top)/r.height*NN); return (x<0||y<0||x>=NN||y>=NN)?-1:y*NN+x; }
+  function down(ev){ if(MODE===2) return; const i=cellAt(ev); if(i<0) return; snap(); ev.preventDefault();
+    if(MODE===1){ fill(i,col); if(mir){ const j=((i/NN)|0)*NN+(NN-1-(i%NN)); if(D[j]!==col) fill(j,col); } return; }
+    dn=true; LAST=i; setCell(i,col); }
+  function move(ev){ if(MODE!==0||!dn) return; const i=cellAt(ev); if(i<0||i===LAST) return; line(LAST,i,col); LAST=i; ev.preventDefault(); }
+  function up(){ dn=false; LAST=-1; }
   window.tgOpen=function(){
     try{
       const old=document.getElementById('tgo'); if(old) old.remove();
-      D=(mine()||'0'.repeat(NC)).split('').map(Number); col=4; mir=1; HIST=[]; ZM=1; PAN=false;
+      D=(mine()||'0'.repeat(NC)).split('').map(Number); col=4; mir=1; HIST=[]; ZM=1; MODE=0;
       const el=document.createElement('div'); el.id='tgo';
-      el.innerHTML='<button id="tgx" class="nofit">✕</button><h2>🔥 Өөрийн тамга</h2><div class="sm">Өнгө сонгоод дөрвөлжин дээр хуруугаараа зурна. «🔍 Томруулах»-аар томруулж, «✋ Гүйлгэх» горимд хуруугаар зөөнө. Мал, гэр дээр тань тамга харагдана.</div>'+
-        '<div id="tgw"><div id="tgg"></div></div><div class="row"><button class="btn" id="tgz"></button><button class="btn" id="tgv"></button></div><div id="tgp">'+PAL.map((c,i)=>'<b data-c="'+i+'" title="'+NMS[i]+'" style="background:'+(c||'#e9dfc4')+'">'+(i?'':'⌫')+'</b>').join('')+'</div>'+
+      el.innerHTML='<button id="tgx" class="nofit">✕</button><h2>🔥 Өөрийн тамга</h2><div class="sm">Өнгө сонгоод дөрвөлжин дээр хуруугаараа зурна. «🔍 Томруулах»-аар томруулж, «✋ Гүйлгэх» горимд хуруугаар зөөнө. «🪣 Дүүргэх»-ээр талбайг нэг дор будна.</div>'+
+        '<div id="tgw"><canvas id="tgg" width="'+(NN*CP)+'" height="'+(NN*CP)+'"></canvas></div>'+
+        '<div class="row"><button class="btn" id="tgd0">✏ Зурах</button><button class="btn" id="tgd1">🪣 Дүүргэх</button><button class="btn" id="tgd2">✋ Гүйлгэх</button></div>'+
+        '<div class="row"><button class="btn" id="tgz"></button></div><div id="tgp">'+PAL.map((c,i)=>'<b data-c="'+i+'" title="'+NMS[i]+'" style="background:'+(c||'#e9dfc4')+'">'+(i?'':'⌫')+'</b>').join('')+'</div>'+
         '<div class="row"><button class="btn" id="tgu">↶ Буцаах</button><button class="btn" id="tgm">↔ Тэгш хэм</button><button class="btn" id="tgc">🗑 Цэвэрлэх</button></div>'+
         '<div class="sm">Бэлэн загвар:</div><div class="row">'+PRE.map((p,i)=>'<button class="btn" data-p="'+i+'">'+p[0]+'</button>').join('')+'</div>'+
         '<div class="row"><button class="btn" id="tga"></button></div>'+
@@ -12319,19 +12330,19 @@ bcard=function(k){
       document.body.appendChild(el);
       const g=el.querySelector('#tgg');
       g.addEventListener('pointerdown',down); g.addEventListener('pointermove',move); window.addEventListener('pointerup',up); g.addEventListener('pointercancel',up);
-      g.addEventListener('touchstart',e=>{ if(!PAN) e.preventDefault(); },{passive:false}); g.addEventListener('touchmove',e=>{ if(!PAN) e.preventDefault(); },{passive:false});
+      g.addEventListener('touchstart',e=>{ if(MODE!==2) e.preventDefault(); },{passive:false}); g.addEventListener('touchmove',e=>{ if(MODE!==2) e.preventDefault(); },{passive:false});
       el.querySelectorAll('#tgp b').forEach(b=>b.onclick=()=>{ col=+b.dataset.c; draw(); });
       el.querySelector('#tgx').onclick=()=>{ window.removeEventListener('pointerup',up); el.remove(); };
-      el.querySelector('#tgm').onclick=()=>{ mir=mir?0:1; draw(); };
-      el.querySelector('#tgz').onclick=()=>{ ZM=ZM>=3?1:ZM+1; if(ZM>1) PAN=false; draw(); const w=document.getElementById('tgw'); if(w&&ZM===1){ w.scrollLeft=0; w.scrollTop=0; } };
-      el.querySelector('#tgv').onclick=()=>{ PAN=!PAN; draw(); };
+      [0,1,2].forEach(k=>{ el.querySelector('#tgd'+k).onclick=()=>{ MODE=k; draw(); }; });
+      el.querySelector('#tgz').onclick=()=>{ ZM=ZM===1?2:ZM===2?4:ZM===4?6:1; draw(); const w=document.getElementById('tgw'); if(w&&ZM===1){ w.scrollLeft=0; w.scrollTop=0; } };
       el.querySelector('#tgu').onclick=undo;
-      el.querySelector('#tgc').onclick=()=>{ snap(); D=new Array(NC).fill(0); draw(); };
-      el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ snap(); D=norm(rows2s(PRE[+b.dataset.p][1])).split('').map(Number); draw(); });
+      el.querySelector('#tgm').onclick=()=>{ mir=mir?0:1; draw(); };
+      el.querySelector('#tgc').onclick=()=>{ snap(); D=new Array(NC).fill(0); paintAll(); draw(); };
+      el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ snap(); D=norm(rows2s(PRE[+b.dataset.p][1])).split('').map(Number); paintAll(); draw(); });
       el.querySelector('#tga').onclick=()=>{ S.tgOn=(S.tgOn===0)?1:0; try{ save(); }catch(e){} draw(); };
       el.querySelector('#tgs').onclick=()=>{ const s=dStr(); if(!OK(s)){ say('Тамга хоосон байна. Дор хаяад нэг өнгө зурна уу'); return; } S.tg=s; try{ save(); }catch(e){} say('🔥 Тамга хадгалагдлаа! Мал, гэр дээр харагдана'); try{ sfx('ok'); }catch(e){} try{ refresh(); }catch(e){} };
       el.querySelector('#tgh').onclick=()=>{ const s=OK(dStr())?dStr():mine(); if(!s){ say('Эхлээд тамгаа зурна уу'); return; } tgShare(s); };
-      draw();
+      paintAll(); draw();
     }catch(e){ console.log('tgOpen',e); }
   };
 
@@ -12367,7 +12378,7 @@ bcard=function(k){
       const s=mine();
       return h+'<div class="card" style="border:1px solid #c9972b"><b>🔥 Өөрийн тамга</b><div style="display:flex;align-items:center;gap:12px;margin-top:8px">'+
         (s?'<img src="'+url(s,8)+'" style="width:64px;height:64px;image-rendering:pixelated;border:2px solid #c9972b;border-radius:6px;background:#e9dfc4;flex:none">':'<div style="width:64px;height:64px;border:2px dashed #c9972b;border-radius:6px;flex:none"></div>')+
-        '<div class="sm" style="flex:1;min-width:0">'+(s?'Тань тамга мал, гэр дээр харагдаж байна.':'32×32 тамга зур. Мал бүр, гэр тань тамгатай болно. Найзууд харна.')+'</div></div>'+
+        '<div class="sm" style="flex:1;min-width:0">'+(s?'Тань тамга мал, гэр дээр харагдаж байна.':'64×64 тамга зур. Мал бүр, гэр тань тамгатай болно. Найзууд харна.')+'</div></div>'+
         '<button class="btn" style="margin-top:8px" onclick="tgOpen()">'+(s?'✏ Засах':'🎨 Тамга зурах')+'</button></div>'; }catch(e){} }
     return h;
   };

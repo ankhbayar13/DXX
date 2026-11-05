@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='3cb6d73f1d';
+var UPDB='ec2a63931e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12728,13 +12728,13 @@ heroListHTML=function(){
   /* сегмент бүр 45°: 0 ногоон, 1 цэнхэр, 2 улбар шар, 3 хар хөх, 4 ягаан, 5 улаан, 6 бургунд, 7 шар (дээрээс цагийн зүүний дагуу) */
   const big=(k,n)=>{ const b=S.res[k]||0, a=Math.max(b,Math.min(cap(),b+1500)); S.res[k]=a; return '+'+Math.round(a-b)+' '+n+(a-b<1500?' (агуулах дүүрсэн)':''); };
   const SG=[
-    {w:12.5,e:'🌾',a:'1500',n:'🌾 1500 тариа',f:()=>big('grain','тариа')},
+    {w:14,e:'🌾',a:'1500',n:'🌾 1500 тариа',f:()=>big('grain','тариа')},
     {w:12,e:'💎',a:'30',n:'💎 30 Алт',f:()=>{ S.res.alt+=30; }},
-    {w:17.5,e:'🪵',a:'1500',n:'🪵 1500 мод',f:()=>big('wood','мод')},
-    {w:12.5,e:'🥛',a:'1500',n:'🥛 1500 сүү',f:()=>big('milk','сүү')},
+    {w:14,e:'🪵',a:'1500',n:'🪵 1500 мод',f:()=>big('wood','мод')},
+    {w:14,e:'🥛',a:'1500',n:'🥛 1500 сүү',f:()=>big('milk','сүү')},
     {w:8,e:'🎴',a:'1',n:'🎴 Үнэгүй баатар дуудах',f:()=>{ S.fsum=(S.fsum||0)+1; }},
-    {w:17.5,e:'🪙',a:'1500',n:'🪙 1500 мөнгө',f:()=>{ S.res.gold+=1500; }},
-    {w:15,e:'🪙',a:'700',n:'🪙 700 мөнгө',f:()=>{ S.res.gold+=700; }},
+    {w:12,e:'🪙',a:'1500',n:'🪙 1500 мөнгө',f:()=>{ S.res.gold+=1500; }},
+    {w:21,e:'🪙',a:'700',n:'🪙 700 мөнгө',f:()=>{ S.res.gold+=700; }},
     {w:5,e:'💎',a:'100',n:'💎 100 Алт',f:()=>{ S.res.alt+=100; }}
   ];
   const NO=[[0,50],[50,36],[86,48],[134,48],[182,54],[236,49],[285,49],[334,45],[379,50],[429,49]];
@@ -12764,7 +12764,7 @@ heroListHTML=function(){
      +'<img src="rts/pt_ptr.webp" style="position:absolute;left:50%;top:-24px;width:38px;margin-left:-19px;filter:drop-shadow(0 3px 3px #000a)" alt=""></div>'
      +(done?'<div class="sm" style="margin:6px 0">Сүүлийн шагнал: <b>'+(S.pt.last||'')+'</b><br>Дараагийн эргүүл: <b>'+fmt(left())+'</b>-ын дараа</div><button class="btn" disabled style="width:100%">✔ Авсан</button>'
            :'<div class="sm" style="margin:6px 0">24 цаг тутамд 1 удаа үнэгүй эргүүлнэ</div><button id="ptb" class="btn" style="width:100%;font-size:17px;padding:12px" onclick="patrolSpin()">🎡 Эргүүлэх</button>')+'</div>'
-     +'<div class="card"><h3 class="rb">Шагналууд</h3>'+SG.filter((s,i)=>SG.findIndex(x=>x.n===s.n)===i).map(s=>'<div class="row" style="padding:3px 0"><span>'+s.n+'</span><b>'+(Math.round(SG.filter(x=>x.n===s.n).reduce((a,x)=>a+x.w,0)*10)/10)+'%</b></div>').join('')+'</div>';
+     +'<div class="card"><h3 class="rb">Шагналууд</h3>'+SG.filter((s,i)=>SG.findIndex(x=>x.n===s.n)===i).sort((a,b)=>b.w-a.w).map(s=>'<div class="row" style="padding:3px 0"><span>'+s.n+'</span><b>'+(Math.round(SG.filter(x=>x.n===s.n).reduce((a,x)=>a+x.w,0)*10)/10)+'%</b></div>').join('')+'</div>';
   };
   const _mc=modalContent;
   modalContent=function(k){ if(k==='patrol') return patrolHTML(); return _mc.apply(this,arguments); };

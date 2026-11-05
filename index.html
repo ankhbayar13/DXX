@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='ec2a63931e';
+var UPDB='f55431fc7e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11645,14 +11645,21 @@ bcard=function(k){
     const dp=cv.width/cv.clientWidth, c=cv.getContext('2d'), W=cv.width, H=cv.height;
     const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#86ad52'); g.addColorStop(1,'#6f9a45'); c.fillStyle=g; c.fillRect(0,0,W,H);
     if(!items.length) return;
+    const _items=items;
     let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; items.forEach(q=>{ x0=Math.min(x0,q.x); y0=Math.min(y0,q.y); x1=Math.max(x1,q.x+q.w); y1=Math.max(y1,q.y+q.h); });
     const top=86*dp, bw=Math.max(40,x1-x0), bh=Math.max(40,y1-y0), pad=14*dp;
     const s=Math.min((W-2*pad)/bw,(H-top-pad)/bh,2.6*dp), ox=(W-bw*s)/2-x0*s, oy=top+(H-top-pad-bh*s)/2-y0*s;
     view={s,ox,oy,dp};
+    /* Жинхэнэ тосгоны хөрсний зураг (өвс, толбо) */
+    try{ const G=groundSet(); if(G&&G.pat){ c.save(); c.setTransform(s,0,0,s,ox,oy); const m=new DOMMatrix(), gs=G.nw?28/768:GTW/256; m.scaleSelf(gs,gs); G.pat.setTransform(m); const wx0=-ox/s-2, wy0=-oy/s-2, ww=W/s+4, wh=H/s+4; c.fillStyle=G.pat; c.fillRect(wx0,wy0,ww,wh);
+      if(!G.nw){ const CS=GTW*0.8, PS=GTW*1.7, i0=Math.floor((wx0-PS)/CS), i1=Math.ceil((wx0+ww+PS)/CS), j0=Math.floor((wy0-PS)/CS), j1=Math.ceil((wy0+wh+PS)/CS);
+        for(let j=j0;j<=j1;j++) for(let i=i0;i<=i1;i++){ if(gHash(i,j,1)>0.72) continue; const k=GVAR[Math.floor(gHash(i,j,2)*GVAR.length)], px=(i+0.5+(gHash(i,j,3)-0.5)*0.9)*CS, py=(j+0.5+(gHash(i,j,4)-0.5)*0.9)*CS, sz=PS*(0.8+0.4*gHash(i,j,5)); c.drawImage(G.patch[k],px-sz/2,py-sz/2,sz,sz); } }
+      c.restore(); } }catch(e){}
     items.slice().sort((a,b)=>(a.y+a.h)-(b.y+b.h)).forEach(q=>{
       const X=ox+q.x*s, Y=oy+q.y*s, w=q.w*s, h=q.h*s;
       c.fillStyle='rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(X+w/2,Y+h*0.95,w*0.46,h*0.08,0,0,6.3); c.fill();
-      if(q.farm){ farm(c,X,Y,w,h); return; }
+      if(q.farm){ const L=SPR.fm_locked, T=SPR.fm_ripe; if(L&&T&&L.img.complete&&T.img.complete&&L.img.naturalWidth&&T.img.naturalWidth){ c.drawImage(L.img,X,Y,w,h); c.drawImage(T.img,X,Y,w,h); } else farm(c,X,Y,w,h); return; }
+      if(q.k==='hashaa'){ const P=SPR.pn3; if(P&&P.img.complete&&P.img.naturalWidth){ const PH=w*P.ih/P.iw; c.drawImage(P.img,X,Y+h-PH*s/s,w,PH); return; } }
       const o=SPR[q.spr]; if(!o||!o.img||!o.img.complete||!o.img.naturalWidth){ c.fillStyle='#8a6a3a'; c.fillRect(X,Y,w,h); return; }
       if(o.sx!==undefined) c.drawImage(o.img,o.sx,o.sy,o.iw,o.ih,X,Y,w,h); else c.drawImage(o.img,X,Y,w,h);
     });

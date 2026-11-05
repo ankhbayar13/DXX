@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='85b587b0e9';
+var UPDB='501d65f9d9';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13765,7 +13765,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
 /* p32/chpic2.js — Түүхэн аян: 17 бүлгийн бэлэн зураг (hf/ch1..17.webp) дээр амьд мэдээлэл (Нэгдсэн, Энэ бүлэг, тэнхээ, дайсны хүч) ба товчнууд. 18+ бүлэг хуучин арал-дэлгэцээр. */
 (function(){
-  const NP=17, IW=800, IH=1422, VER='1';
+  const NP=16, IW=800, IH=1422, VER='1';
   const G={ X:[1.5,2,13,7], panel:[2.3,10.7,47.3,12.6], plaq:[28.5,71.7,39.5,4.6],
     bat:[3.5,78.8,20.5,9.6], rat:[75.5,78.8,21.5,9.6], la:[26.5,79.2,14.5,9], ra:[60.5,79.2,14.5,9], ent:[20.5,89.6,59,7.8],
     pl:[0.5,33,25,31], pr:[73,33,26.5,31] };
@@ -13780,7 +13780,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     const e=document.getElementById('chs'); if(!e) return;
     const op=chOpen(i), jn=!!S.camp.join[i], n=chDoneN(i), N=CSN(i), jt=joinedN(), g=nrg(), boss=stepP(i,N-1);
     let P=document.getElementById('pc2'); if(!P){ P=document.createElement('div'); P.id='pc2'; e.appendChild(P); }
-    const m=IM[i]; document.getElementById('chbg').style.backgroundImage='url('+m.src+')';
+    const m=IM[i]; { const bg=document.getElementById('chbg'); bg.style.backgroundImage='url('+m.src+')'; bg.dataset.pc='1'; }
     let h='<div id="pcb" class="'+(op?'':'pclk')+'"><img class="pci" src="'+m.src+'">';
     h+='<div class="pcp" style="'+box('panel')+'"><div class="pcr">📜 Нэгдсэн: <b>'+jt+'/'+Math.max(NP,CAMP.length)+'</b></div><div class="pcr">🎁 Энэ бүлэг: <b>'+n+'/'+N+'</b>'+(jn?' <span style="color:#9fe08a">✓</span>':'')+'</div><div class="pcr pcz" onclick="$(\'chs\').remove();openM(\'sup\')">⚡ <b class="pcv">'+g.v+'</b></div><div class="pcr pcs pct">'+g.t+'</div></div>';
     h+='<div class="pcw" style="'+box('plaq')+'"><span>Хүч <b>'+fmtN(boss)+'</b></span></div>';
@@ -13800,7 +13800,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   window.addEventListener('resize',()=>{ try{ layout(); }catch(e){} });
   function show(){
     const e=document.getElementById('chs'); if(!e) return; const i=CHI;
-    if(i>=NP){ e.classList.remove('pc2'); const p=document.getElementById('pc2'); if(p) p.remove(); return; }
+    if(i>=NP){ e.classList.remove('pc2'); const p=document.getElementById('pc2'); if(p) p.remove(); const bg=document.getElementById('chbg'); if(bg&&bg.dataset.pc){ bg.style.backgroundImage=''; delete bg.dataset.pc; } return; }
     load(i,()=>{ if(!document.getElementById('chs')||CHI!==i) return; const m=IM[i]; if(m.bad){ e.classList.remove('pc2'); return; }
       e.classList.add('pc2'); build(i); load(i-1); load(i+1); });
   }

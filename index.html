@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bd6f6e0c19';
+var UPDB='148c1ccbc8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13505,22 +13505,23 @@ var HSEL=null, HSOP=0;
 (function(){
   const st=document.createElement('style'); st.textContent=`
 #wmfr{position:absolute;inset:0;pointer-events:none;border:48px solid transparent;border-image:url(hf/wm_big.webp) 72 fill/48px stretch;border-image-slice:72;box-sizing:border-box}
-#wmmf{position:absolute;right:3px;top:3px;width:106px;height:145px;box-sizing:border-box;pointer-events:none;border:0 solid transparent;border-width:15px 11px 14px 11px;border-image:url(hf/wm_mini.webp) 148 111 138 111/15px 11px 14px 11px stretch;filter:drop-shadow(0 2px 3px #000a)}
+#wmmf{position:absolute;right:3px;top:3px;width:114px;height:121px;box-sizing:border-box;pointer-events:none;border:0 solid transparent;border-width:15px 11px 14px 11px;border-image:url(hf/wm_mini.webp) 148 111 138 111/15px 11px 14px 11px stretch;filter:drop-shadow(0 2px 3px #000a)}
 #wmmini{right:14px!important;top:18px!important;border:0!important;border-radius:0!important;opacity:1!important}
 #wmx{left:16px!important;top:16px!important}
-#wmbar{left:68px!important;top:16px!important;right:118px!important}
-#wmheroes{left:68px!important;right:118px!important}
+#wmbar{left:68px!important;top:16px!important;right:124px!important}
+#wmheroes{left:68px!important;right:124px!important}
 #wmhome{right:16px!important}
 .wmz{right:16px!important}
 `; document.head.appendChild(st);
+  const _wm=wmMini; wmMini=function(m,D,mm){ try{ if(D.mini&&(D.mini.width!==mm.width||D.mini.height!==mm.height)) D.miniSrc=null; }catch(e){} return _wm.apply(this,arguments); };
   const _o=wmOpen;
   wmOpen=function(){ const r=_o.apply(this,arguments);
     try{
       const el=document.getElementById('wmap'); if(!el||el.querySelector('#wmfr')) return r;
       const c=document.getElementById('wmc'), f=document.createElement('div'); f.id='wmfr';
       if(c&&c.nextSibling) el.insertBefore(f,c.nextSibling); else el.appendChild(f);
-      const m=document.getElementById('wmmini'); if(m){ const g=document.createElement('div'); g.id='wmmf'; m.parentNode.insertBefore(g,m.nextSibling); }
-      el.querySelectorAll('.wmz').forEach((b,i)=>{ b.style.top=(162+i*52)+'px'; });
+      const m=document.getElementById('wmmini'); if(m){ m.width=92; m.height=92; const g=document.createElement('div'); g.id='wmmf'; m.parentNode.insertBefore(g,m.nextSibling); }
+      el.querySelectorAll('.wmz').forEach((b,i)=>{ b.style.top=(138+i*52)+'px'; });
     }catch(e){}
     return r; };
 })();

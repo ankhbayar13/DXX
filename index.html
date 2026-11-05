@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a6e903aadd';
+var UPDB='cbb7416268';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12619,7 +12619,7 @@ bcard=function(k){
 
   /* шинэ бүлгүүдэд бэлэн зураг байхгүй: хуучин (Хорезм) зургийг харуулахгүй, ердийн арал-дэлгэц гарна */
   const _pl=chpicLoad;
-  chpicLoad=function(i,cb){ if(i>=13){ try{ CHOK[i]=0; }catch(e){} cb&&cb(0); return; } return _pl.apply(this,arguments); };
+  chpicLoad=function(i,cb){ try{ CHOK[i]=0; }catch(e){} cb&&cb(0); };   // AI-аар хийсэн бэлэн зургуудыг хассан: бүх бүлэгт ердийн арал-дэлгэц
 
   /* бүлэг бүрийн тулааны тайлбар (5+ алхамд) */
   const _st=stTxt;

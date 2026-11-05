@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='09144b3c57';
+var UPDB='4b7b86aeb3';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13563,6 +13563,14 @@ body:has(#wmap) #dayph{display:none!important}
       if(IM.complete&&IM.naturalWidth){ const cv=c.canvas, W=108*dp, H=W*IM.naturalHeight/IM.naturalWidth; c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.drawImage(IM,72*dp-W/2,cv.height-124*dp-H/2,W,H); c.restore(); }
     }catch(e){}
     return r; };
+})();
+
+
+/* p32/cmback.js — Түүхэн аян: бүлгийн дотоод цонхонд «‹ Буцах» товч (бүлгийн жагсаалт руу буцна). */
+(function(){
+  const _c=cmapHTML;
+  cmapHTML=function(ci){ const h=_c.apply(this,arguments);
+    try{ return '<button class="btn" style="margin:0 0 6px;padding:8px 16px" onclick="openM(\'camp\')">‹ Буцах</button>'+h; }catch(e){ return h; } };
 })();
 
 </script><script>(function(){

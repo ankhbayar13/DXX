@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f24e2fb483';
+var UPDB='841fe6fd2f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11680,7 +11680,8 @@ bcard=function(k){
     {m:"openM('shop')",  n:'Дэлгүүр',   pl:3, ch:2},
     {m:"openM('soc')",   n:'Найз',      pl:4, ch:3},
     {m:"daily()",        n:'Үйл явдал', pl:5, ch:4},
-    {m:"chatOpen()",     n:'Чат',       pl:5, ch:4}
+    {m:"chatOpen()",     n:'Чат',       pl:5, ch:4},
+    {m:"openM('patrol')",n:'Өдрийн бэлэг', pl:3, ch:2}
   ];
   const KEY='dxx_mg';
   let seen={}; try{ seen=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){}
@@ -12721,7 +12722,7 @@ heroListHTML=function(){
   return h; };
 
 
-/* p32/patrol.js — 🎡 Өдрийн эргүүл: өдөрт 1 удаа үнэгүй эргэлдэх дугуй (Цэс → Хөрөнгө). Зураг: rts/pt_wheel.webp, rts/pt_ptr.webp */
+/* p32/patrol.js — 🎁 Өдрийн бэлэг: өдөрт 1 удаа үнэгүй эргэлдэх дугуй (Цэс → Хөрөнгө). Зураг: rts/pt_wheel.webp, rts/pt_ptr.webp */
 (function(){
   const RES=['meat','milk','wool','grain','wood'], RN={meat:'мах',milk:'сүү',wool:'ноос',grain:'тариа',wood:'мод'};
   /* сегмент бүр 45°: 0 ногоон, 1 цэнхэр, 2 улбар шар, 3 хар хөх, 4 ягаан, 5 улаан, 6 бургунд, 7 шар (дээрээс цагийн зүүний дагуу) */
@@ -12757,7 +12758,7 @@ heroListHTML=function(){
   window.patrolHTML=function(){
     S.pt=S.pt||{}; const done=left()>0, D=280, R=D/2;
     const lab=SG.map((s,i)=>'<div style="position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate('+(45*i)+'deg)"><div style="position:absolute;left:-26px;top:-'+(R*0.66+22)+'px;width:52px;text-align:center;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000;font:800 13px/1.05 sans-serif"><span style="font-size:22px;display:block">'+s.e+'</span>'+numHTML(s.a,15)+'</div></div>').join('');
-    return '<h2>🎡 Өдрийн эргүүл</h2><button class="btn" onclick="openM(\'menu\')">‹ Цэс</button>'
+    return '<h2>🎁 Өдрийн бэлэг</h2><button class="btn" onclick="openM(\'menu\')">‹ Цэс</button>'
      +'<div class="card" style="text-align:center;margin-top:8px;padding-top:30px">'
      +'<div style="position:relative;width:'+D+'px;height:'+D+'px;margin:0 auto 12px"><div id="ptw" style="position:absolute;inset:0;transform:rotate('+PT.rot+'deg)"><img src="rts/pt_wheel.webp" style="width:100%;height:100%;display:block" alt="">'+lab+'</div>'
      +'<img src="rts/pt_ptr.webp" style="position:absolute;left:50%;top:-24px;width:38px;margin-left:-19px;filter:drop-shadow(0 3px 3px #000a)" alt=""></div>'
@@ -12768,12 +12769,13 @@ heroListHTML=function(){
   const _mc=modalContent;
   modalContent=function(k){ if(k==='patrol') return patrolHTML(); return _mc.apply(this,arguments); };
   const _fa=fillMA; fillMA=function(){ if(PT.spin&&cur==='patrol') return; return _fa.apply(this,arguments); };
-  /* Тоглоом эхэлснээс 4 мин дараа, эргүүл авагдаагүй бол өөрөө нээгдэнэ (сессэд 1 удаа). Тулаан/заавар/өөр цэс нээлттэй үед хүлээнэ. */
-  const AUTO={t0:Date.now(),done:0,ms:(window.PT_AUTO_MS||240000)};
+  /* Тоглоом эхэлснээс 1 мин дараа, эргүүл авагдаагүй бол өөрөө нээгдэнэ (сессэд 1 удаа). Тулаан/заавар/өөр цэс нээлттэй үед хүлээнэ. */
+  const AUTO={t0:Date.now(),done:0,ms:(window.PT_AUTO_MS||60000)};
   setInterval(function(){
     if(AUTO.done||document.hidden||Date.now()-AUTO.t0<AUTO.ms) return;
     try{
       if(typeof S==='undefined'||!S||!S.met||!S.tutDone){ return; }
+      if(!((S.pl||1)>=3||(S.chap||0)>=2)) return;   // шинэ тоглогчид 3-р түвшин (эсвэл 2-р бүлэг)-ээс нээгдэнэ
       if(left()>0){ AUTO.done=1; return; }
       if(cur||PT.spin||document.getElementById('tutov')||document.getElementById('askov')||document.querySelector('.tutr')) return;
       const m=document.getElementById('modal'); if(m&&m.style.display&&m.style.display!=='none') return;
@@ -12781,7 +12783,7 @@ heroListHTML=function(){
       AUTO.done=1; openM('patrol'); try{ sfx('click'); }catch(e){}
     }catch(e){}
   },4000);
-  try{ MENU[2].i.push(['🎡','Өдрийн эргүүл',"openM('patrol')",'p']); }catch(e){}
+  try{ MENU[2].i.push(['🎁','Өдрийн бэлэг',"openM('patrol')",'p']); }catch(e){}
 })();
 
 

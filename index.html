@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4b7b86aeb3';
+var UPDB='0e931d57ac';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12286,7 +12286,9 @@ bcard=function(k){
     '#tgo .row{flex:none;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:340px;margin:6px 0}'+
     '#tgo .btn{padding:7px 11px;font-size:14px}#tgx{position:absolute;top:8px;right:8px;width:42px;height:42px;border-radius:50%;border:2px solid #c9972b;background:#3b2815;color:#ffd770;font-size:20px}';
   document.head.appendChild(css);
-  let D=null, col=4, mir=1, dn=false;
+  let D=null, col=4, mir=1, dn=false, HIST=[];
+  const snap=()=>{ HIST.push(D.join('')); if(HIST.length>60) HIST.shift(); };
+  function undo(){ if(!HIST.length){ try{ say('Буцаах зүйл алга'); }catch(e){} return; } D=HIST.pop().split('').map(Number); draw(); }
   const dStr=()=>D.join('');
   function paintCell(i){ const el=document.getElementById('tgg').children[i]; if(el) el.style.background=D[i]?PAL[D[i]]:''; }
   function setCell(i,v){ if(i<0||i>=NC) return; D[i]=v; paintCell(i); if(mir){ const j=(i>>4)*NN+(NN-1-(i&15)); D[j]=v; paintCell(j); } }
@@ -12298,17 +12300,17 @@ bcard=function(k){
     const a=document.getElementById('tga'); if(a) a.textContent=(S.tgOn===0)?'🐑 Малд тамга дарах: унтраасан':'🐑 Малд тамга дарах: асаалттай';
   }
   function cellAt(ev){ const t=ev.touches?ev.touches[0]:ev; const el=document.elementFromPoint(t.clientX,t.clientY); return (el&&el.parentNode&&el.parentNode.id==='tgg')?+el.dataset.i:-1; }
-  function down(ev){ dn=true; const i=cellAt(ev); if(i>=0) setCell(i,col); ev.preventDefault(); }
+  function down(ev){ dn=true; snap(); const i=cellAt(ev); if(i>=0) setCell(i,col); ev.preventDefault(); }
   function move(ev){ if(!dn) return; const i=cellAt(ev); if(i>=0&&D[i]!==col) setCell(i,col); ev.preventDefault(); }
   function up(){ dn=false; }
   window.tgOpen=function(){
     try{
       const old=document.getElementById('tgo'); if(old) old.remove();
-      D=(mine()||'0'.repeat(NC)).split('').map(Number); col=4; mir=1;
+      D=(mine()||'0'.repeat(NC)).split('').map(Number); col=4; mir=1; HIST=[];
       const el=document.createElement('div'); el.id='tgo';
       el.innerHTML='<button id="tgx" class="nofit">✕</button><h2>🔥 Өөрийн тамга</h2><div class="sm">Өнгө сонгоод дөрвөлжин дээр хуруугаараа зурна. Мал, гэр дээр тань тамга харагдана.</div>'+
         '<div id="tgg"></div><div id="tgp">'+PAL.map((c,i)=>'<b data-c="'+i+'" title="'+NMS[i]+'" style="background:'+(c||'#e9dfc4')+'">'+(i?'':'⌫')+'</b>').join('')+'</div>'+
-        '<div class="row"><button class="btn" id="tgm">↔ Тэгш хэм</button><button class="btn" id="tgc">🗑 Цэвэрлэх</button></div>'+
+        '<div class="row"><button class="btn" id="tgu">↶ Буцаах</button><button class="btn" id="tgm">↔ Тэгш хэм</button><button class="btn" id="tgc">🗑 Цэвэрлэх</button></div>'+
         '<div class="sm">Бэлэн загвар:</div><div class="row">'+PRE.map((p,i)=>'<button class="btn" data-p="'+i+'">'+p[0]+'</button>').join('')+'</div>'+
         '<div class="row"><button class="btn" id="tga"></button></div>'+
         '<div class="row"><button class="btn" id="tgs">✔ Хадгалах</button><button class="btn" id="tgh">📤 Зураг болгож хуваалцах</button></div>';
@@ -12319,8 +12321,9 @@ bcard=function(k){
       el.querySelectorAll('#tgp b').forEach(b=>b.onclick=()=>{ col=+b.dataset.c; draw(); });
       el.querySelector('#tgx').onclick=()=>{ window.removeEventListener('pointerup',up); el.remove(); };
       el.querySelector('#tgm').onclick=()=>{ mir=mir?0:1; draw(); };
-      el.querySelector('#tgc').onclick=()=>{ D=new Array(NC).fill(0); draw(); };
-      el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ D=norm(rows2s(PRE[+b.dataset.p][1])).split('').map(Number); draw(); });
+      el.querySelector('#tgu').onclick=undo;
+      el.querySelector('#tgc').onclick=()=>{ snap(); D=new Array(NC).fill(0); draw(); };
+      el.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{ snap(); D=norm(rows2s(PRE[+b.dataset.p][1])).split('').map(Number); draw(); });
       el.querySelector('#tga').onclick=()=>{ S.tgOn=(S.tgOn===0)?1:0; try{ save(); }catch(e){} draw(); };
       el.querySelector('#tgs').onclick=()=>{ const s=dStr(); if(!OK(s)){ say('Тамга хоосон байна. Дор хаяад нэг өнгө зурна уу'); return; } S.tg=s; try{ save(); }catch(e){} say('🔥 Тамга хадгалагдлаа! Мал, гэр дээр харагдана'); try{ sfx('ok'); }catch(e){} try{ refresh(); }catch(e){} };
       el.querySelector('#tgh').onclick=()=>{ const s=OK(dStr())?dStr():mine(); if(!s){ say('Эхлээд тамгаа зурна уу'); return; } tgShare(s); };

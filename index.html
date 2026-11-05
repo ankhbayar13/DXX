@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='611ce49f81';
+var UPDB='388fd13c50';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13682,6 +13682,61 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   if(typeof frList==='function'){ /* frList нь чатын IIFE дотор тул DOM-оор нэмнэ */ }
   setInterval(function(){ try{ const c=document.getElementById('chfr'); if(!c||c.dataset.px) return; const rows=c.querySelectorAll('.fr'); if(!rows.length) return; c.dataset.px='1';
     rows.forEach(row=>{ const mm=(row.getAttribute('onclick')||'').match(/chDm\('([^']+)'/); if(!mm) return; const d=(CL.fd&&CL.fd[mm[1]])||{}, v=d.v, a=avOfV(v); if(!a) return; const w=document.createElement('div'); w.innerHTML=byId(v.px)?slot(a,v.px,30,24,'margin-right:6px'):'<img src="'+a+'" style="width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid #c9972b;flex:none;margin-right:6px">'; row.insertBefore(w.firstChild,row.firstChild); }); }catch(e){} },700);
+})();
+
+
+/* p32/chpic2.js — Түүхэн аян: 17 бүлгийн бэлэн зураг (hf/ch1..17.webp) дээр амьд мэдээлэл (Нэгдсэн, Энэ бүлэг, тэнхээ, дайсны хүч) ба товчнууд. 18+ бүлэг хуучин арал-дэлгэцээр. */
+(function(){
+  const NP=17, IW=800, IH=1422, VER='1';
+  const G={ X:[1.5,2,13,7], panel:[2.3,10.7,47.3,12.6], plaq:[28.5,71.7,39.5,4.6],
+    bat:[3.5,78.8,20.5,9.6], rat:[75.5,78.8,21.5,9.6], la:[26.5,79.2,14.5,9], ra:[60.5,79.2,14.5,9], ent:[20.5,89.6,59,7.8],
+    pl:[0.5,33,25,31], pr:[73,33,26.5,31] };
+  const IM={}; const url=i=>'hf/ch'+(i+1)+'.webp?v='+VER;
+  function load(i,cb){ if(i<0||i>=NP) return; let m=IM[i]; if(!m){ m=IM[i]=new Image(); m.onload=()=>{ m.ok=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.onerror=()=>{ m.bad=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.src=url(i); }
+    if(cb){ if(m.ok||m.bad) cb(); else (m.cb=m.cb||[]).push(cb); } }
+  const box=(k,x)=>'left:'+G[k][0]+'%;top:'+G[k][1]+'%;width:'+G[k][2]+'%;height:'+G[k][3]+'%;'+(x||'');
+  const hs=(k,act)=>'<div class="pch" style="'+box(k)+'" onclick="'+act+'"></div>';
+  const fmtN=n=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  function nrg(){ try{ return chNrgShort(); }catch(e){ return {v:'',t:''}; } }
+  function build(i){
+    const e=document.getElementById('chs'); if(!e) return;
+    const op=chOpen(i), jn=!!S.camp.join[i], n=chDoneN(i), N=CSN(i), jt=joinedN(), g=nrg(), boss=stepP(i,N-1);
+    let P=document.getElementById('pc2'); if(!P){ P=document.createElement('div'); P.id='pc2'; e.appendChild(P); }
+    const m=IM[i]; document.getElementById('chbg').style.backgroundImage='url('+m.src+')';
+    let h='<div id="pcb" class="'+(op?'':'pclk')+'"><img class="pci" src="'+m.src+'">';
+    h+='<div class="pcp" style="'+box('panel')+'"><div class="pcr">📜 Нэгдсэн: <b>'+jt+'/'+Math.max(NP,CAMP.length)+'</b></div><div class="pcr">🎁 Энэ бүлэг: <b>'+n+'/'+N+'</b>'+(jn?' <span style="color:#9fe08a">✓</span>':'')+'</div><div class="pcr pcz" onclick="$(\'chs\').remove();openM(\'sup\')">⚡ <b class="pcv">'+g.v+'</b></div><div class="pcr pcs pct">'+g.t+'</div></div>';
+    h+='<div class="pcw" style="'+box('plaq')+'"><span>Хүч <b>'+fmtN(boss)+'</b></span></div>';
+    h+=hs('X',"$('chs').remove()")+hs('bat',"$('chs').remove();openM('baatar')")+hs('rat',"$('chs').remove();openM('world')");
+    if(i>0) h+=hs('la','chsGo(-1)')+hs('pl','chsGo(-1)');
+    if(i<CAMP.length-1&&i<NP-1) h+=hs('ra','chsGo(1)')+hs('pr','chsGo(1)');
+    else if(i<CAMP.length-1) h+=hs('ra','chsGo(1)');
+    h+=hs('ent','chsEnter()');
+    if(!op) h+='<div class="pcl">🔒</div><div class="pcm" style="left:15%;top:76.7%;width:70%;font-size:calc(var(--u)*2)">Өмнөх бүлгийг ялж нээ</div>';
+    h+='</div>'; P.innerHTML=h; layout();
+  }
+  function layout(){
+    const e=document.getElementById('chs'), b=document.getElementById('pcb'); if(!e||!b) return;
+    const W=e.clientWidth, H=e.clientHeight, s=Math.min(W/IW,H/IH), w=IW*s, h=IH*s;
+    b.style.width=w+'px'; b.style.height=h+'px'; b.style.left=(W-w)/2+'px'; b.style.top=(H-h)/2+'px'; b.style.setProperty('--u',(h/100)+'px');
+  }
+  window.addEventListener('resize',()=>{ try{ layout(); }catch(e){} });
+  function show(){
+    const e=document.getElementById('chs'); if(!e) return; const i=CHI;
+    if(i>=NP){ e.classList.remove('pc2'); const p=document.getElementById('pc2'); if(p) p.remove(); return; }
+    load(i,()=>{ if(!document.getElementById('chs')||CHI!==i) return; const m=IM[i]; if(m.bad){ e.classList.remove('pc2'); return; }
+      e.classList.add('pc2'); build(i); load(i-1); load(i+1); });
+  }
+  const _d=chsDraw; chsDraw=function(){ _d.apply(this,arguments); try{ show(); }catch(e){ console.log('pc2',e); } };
+  const st=document.createElement('style');
+  st.textContent='#pc2{position:absolute;inset:0;z-index:4;display:none}#chs.pc2 #pc2{display:block}#chs.pc2 #cht,#chs.pc2 #chp,#chs.pc2 #chm,#chs.pc2 .chn,#chs.pc2 #chmsg,#chs.pc2 #chh,#chs.pc2 #chw,#chs.pc2 #chx{display:none}'+
+   '#pcb{position:absolute;--u:6px;overflow:hidden;user-select:none;-webkit-user-select:none}#pcb .pci{position:absolute;inset:0;width:100%;height:100%;display:block}#pcb.pclk .pci{filter:grayscale(.75) brightness(.55)}'+
+   '.pch{position:absolute;cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent}.pch:active{background:rgba(255,255,255,.22)}'+
+   '.pcp{position:absolute;box-sizing:border-box;padding:calc(var(--u)*1.1) calc(var(--u)*1.8);display:flex;flex-direction:column;justify-content:space-between;color:#ffe9b0;font-family:Georgia,"Times New Roman",serif;text-shadow:0 1px 2px #000}'+
+   '.pcr{font-size:calc(var(--u)*2.05);line-height:1.1;white-space:nowrap;overflow:hidden}.pcr b{color:#ffd24a}.pcz{cursor:pointer;pointer-events:auto}.pcs{font-size:calc(var(--u)*1.65);opacity:.9;font-family:system-ui,sans-serif}'+
+   '.pcw{position:absolute;display:flex;align-items:center;justify-content:flex-end;padding-right:5%;box-sizing:border-box;color:#ffe9b0;font:calc(var(--u)*2.1)/1 Georgia,serif;text-shadow:0 1px 2px #000;pointer-events:none}.pcw span{display:block;width:70%;text-align:center}.pcw b{color:#ffd24a}'+
+   '.pcl{position:absolute;left:50%;top:50%;transform:translate(-50%,-60%);font-size:calc(var(--u)*12);filter:drop-shadow(0 4px 8px #000);pointer-events:none}.pcm{position:absolute;text-align:center;font:bold calc(var(--u)*2.4)/1.2 sans-serif;color:#fff;text-shadow:0 2px 4px #000;pointer-events:none}';
+  document.head.appendChild(st);
+  setInterval(()=>{ try{ const a=document.querySelector('#pcb .pcv'), b=document.querySelector('#pcb .pct'); if(!a) return; const g=nrg(); if(a.textContent!==g.v) a.textContent=g.v; if(b&&b.textContent!==g.t) b.textContent=g.t; }catch(e){} },1000);
 })();
 
 </script><script>(function(){

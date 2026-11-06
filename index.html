@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f58f646f0f';
+var UPDB='03cdd92eb2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14070,6 +14070,118 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   };
   window.navyTest=function(ci,s){ window.navyStart(ci,s); return G; };
   window.navyState=()=>G;
+})();
+
+
+/* p32/campmarch.js — Түүхэн аян ↔ Дэлхийн газрын зураг (14–30-р бүлэг).
+   Бүлгийн 1-р алхмын өмнө цэрэг тэр улс руу газрын зураг дээр жинхэнэ хугацаагаар (≈8 мин) морддог.
+   Очмогц 1-р алхмын тулаан нээгдэнэ. Алтаар хурдасгана (3 минут = 1 Алт), өдөрт 1 удаа үнэгүй.
+   Явж байхад баатрууд аянд байна: өөр аяны тулаан, газрын зураг дээрх дайралт хийж болохгүй. */
+(function(){
+  const C0=13, C1=29, SEC_PER_ALT=180, FREE_SEC=60;
+  const TG=['Корё','Дали','Аббасид','Сүн','Хорезм','Владимир-Суздаль','Унгар','Польш','Паган','Дай Вьет','Ява','Япон (Камакура)','Аюбид (Египет)','Хар Хятан','Дели','Мин улс','Мавераннахр'];
+  const NEWK=[
+    {id:'kc1',t:'kingdom',x:2300,y:6880,n:'Ява',p:13000,c:'#27ae60',i:9,ri:4,ty:'archer',fx:1,wo:1},
+    {id:'kc2',t:'kingdom',x:2780,y:4520,n:'Мин улс',p:21000,c:'#c0392b',i:12,ri:11,ty:'heavy',fx:1,wo:1}];
+  const fmt=s=>{ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+  const dayKey=()=>{ try{ return nowD().toISOString().slice(0,10); }catch(e){ return new Date().toISOString().slice(0,10); } };
+
+  const _g=wmGen;
+  wmGen=function(){ const D=_g.apply(this,arguments);
+    try{ if(!D.cm){ D.cm=1; NEWK.forEach(k=>{ if(!D.ks.some(x=>x.id===k.id)) D.ks.push(Object.assign({},k)); }); } }catch(e){}
+    return D; };
+
+  const tgt=ci=>{ try{ const n=TG[ci-C0]; return n?wmGen().ks.find(k=>k.n===n):null; }catch(e){ return null; } };
+  const need=ci=>ci>=C0&&ci<=C1&&!(S.camp&&S.camp.done&&S.camp.done[ci+':0']);
+  const mvOf=ci=>wmSt().m.find(m=>m.ty==='camp'&&m.ci===ci);
+  const anyMv=()=>wmSt().m.find(m=>m.ty==='camp');
+  const arr=ci=>!!(S.camp&&S.camp.arr&&S.camp.arr[ci]);
+  const rem=m=>m.d-(Date.now()-m.t0)/1000;
+  const cost=r=>r<=FREE_SEC?0:Math.ceil(r/SEC_PER_ALT);
+  const freeOk=()=>{ cpInit(); return S.camp.mvF!==dayKey(); };
+
+  /* баатрууд аянд байхад газрын зураг дээр дайралтад явахгүй */
+  const _wa=wmAway;
+  wmAway=function(){ const a=_wa.apply(this,arguments); try{ wmSt().m.forEach(m=>{ if(m.ty==='camp') (m.hs||[]).forEach(id=>{ a.h[id]=1; }); }); }catch(e){} return a; };
+
+  /* цуваа очлоо */
+  const _wb=wmBattle;
+  wmBattle=function(e,tc,mm){ if(mm&&mm.ty==='camp'){ arrive(mm); return; } return _wb.apply(this,arguments); };
+  function arrive(m){
+    cpInit(); S.camp.arr=S.camp.arr||{}; S.camp.arr[m.ci]=1; const t=CAMP[m.ci], e=wmEnt(m.tid)||{};
+    try{ sfx('win'); }catch(x){}
+    try{ pop('🚩 Цуваа очлоо!','<div style="margin:6px 0">'+ico(t.ic,56)+'</div>Монгол цэрэг <b>'+(e.n||t.n)+'</b>-д хүрлээ.<br>Түүхэн аян → <b>'+(m.ci+1)+'-р бүлэг</b> → <b>1-р алхам</b>-ыг дарж тулаанаа эхлүүл.'); }catch(x){ try{ say('🚩 Цуваа очлоо!'); }catch(y){} }
+    try{ refresh(); }catch(x){} }
+
+  function closeCard(){ const e=document.getElementById('scard'); if(e) e.remove(); if(closeCard.iv){ clearInterval(closeCard.iv); closeCard.iv=0; } }
+  function showMap(e){ try{ closeCard(); closeM(); wmOpen(); const go=()=>{ try{ const c=document.getElementById('wmc'), D=wmGen(); if(c&&e&&WMV){ WMV.z=.3; WMV.x=(D.C.x+e.x)/2-c.clientWidth/WMV.z/2; WMV.y=(D.C.y+e.y)/2-c.clientHeight/WMV.z/2; wmClamp(); } }catch(x){} }; go(); setTimeout(go,150); setTimeout(go,600); }catch(x){ console.log('campmarch map',x); } }
+
+  function startMarch(ci){
+    const e=tgt(ci); if(!e){ say('Газрын зураг дээр олдсонгүй'); return; }
+    if(anyMv()){ say('Өөр цуваа замд явж байна'); return; }
+    const hs=squad().filter(id=>S.heroes[id]), d=Math.max(30,Math.round(wmTrip(e))), st=wmSt();
+    st.m.push({id:'m'+Date.now(),tid:e.id,t0:Date.now(),d:d,ty:'camp',ci:ci,hs:hs,pc:{cav:0,archer:0,foot:0}});
+    try{ WMS=null; }catch(x){} try{ wmRefreshBar(); }catch(x){}
+    try{ save(); }catch(x){}
+    say('🚩 Цуваа гарлаа ('+fmt(d)+')'); showMap(e); }
+
+  function speedUp(ci){
+    const m=mvOf(ci); if(!m) return; const r=rem(m), c=cost(r), fr=freeOk();
+    if(c>0&&fr){ cpInit(); S.camp.mvF=dayKey(); say('⚡ Өдрийн үнэгүй хурдасгалт ашиглалаа'); }
+    else if(c>0){ if((S.res.alt||0)<c){ say('Алт хүрэлцэхгүй (хэрэгтэй: '+c+')'); try{ sfx('err'); }catch(x){} return; } S.res.alt-=c; say('⚡ -'+c+' Алт'); }
+    m.t0=Date.now()-m.d*1000-1000; closeCard(); try{ wmProcess(); }catch(x){} try{ refresh(); }catch(x){} }
+
+  function card(ci){
+    closeCard(); const t=CAMP[ci], e=tgt(ci), m=mvOf(ci); if(!e) return;
+    const d=document.createElement('div'); d.id='scard';
+    const fr=freeOk();
+    const body=()=>{ if(!m) return '<div class="sct"><b>🚩 Аян гарах</b><br>Монгол цэрэг <b>'+e.n+'</b> руу дэлхийн газрын зураг дээр морддог. Замын хугацаа: <b>'+fmt(Math.max(30,Math.round(wmTrip(e))))+'</b>.<br>Явж байхад баатрууд аянд байх тул өөр тулаан хийж чадахгүй. Очмогц <b>1-р алхмын тулаан</b> нээгдэнэ.</div>';
+      const r=rem(m), c=cost(r); return '<div class="sct"><b>🚩 Цуваа замд явна</b><br>Үлдсэн хугацаа: <b id="mvt">'+fmt(r)+'</b><br>Хурдасгах үнэ: <b>'+(c===0?'үнэгүй':fr?'өдрийн үнэгүй 1 удаа':c+' Алт')+'</b> <span class="sm">(3 минут = 1 Алт, өдөрт 1 удаа үнэгүй)</span></div>'; };
+    d.innerHTML='<div class="sci"><div class="sch">'+ico(t.ic,36)+'<div><b>'+(ci+1)+'-р бүлэг · '+t.n+'</b><div class="sm">'+e.n+' руу аян</div></div></div>'+body()+
+      (m?'<button class="btn" id="mvsp">⚡ Хурдасгах</button> <button class="btn" id="mvmp" style="background:#2d4a1f">🗺 Газрын зураг</button> ':'<button class="btn red" id="mvgo">🚩 Аян гарах</button> ')+'<button class="btn" style="background:#5b3d1e" id="mvno">Буцах</button></div>';
+    document.body.appendChild(d);
+    const q=id=>document.getElementById(id);
+    if(!m) q('mvgo').onclick=()=>{ closeCard(); startMarch(ci); };
+    else { q('mvsp').onclick=()=>speedUp(ci); q('mvmp').onclick=()=>showMap(e);
+      closeCard.iv=setInterval(()=>{ const el=q('mvt'); if(!el||!mvOf(ci)){ closeCard(); return; } el.textContent=fmt(rem(mvOf(ci))); },1000); }
+    q('mvno').onclick=closeCard; }
+
+  /* campStart: 1-р алхмын өмнө аян */
+  const _cs=campStart;
+  campStart=function(ci,s,skip){
+    try{
+      const o=anyMv();
+      if(o){ if(o.ci===ci&&s===0){ card(ci); return; } say('🚩 Цуваа замд явж байна — баатрууд аянд гарсан'); return; }
+      if(s===0&&need(ci)&&!arr(ci)&&ci>=C0){
+        if(stOpen(ci,0)){ card(ci); return; }
+      }
+    }catch(e){ console.log('campmarch gate',e); }
+    return _cs.apply(this,arguments);
+  };
+
+  /* аяны газрын зургийн дээд мөр */
+  const _ch=cmapHTML;
+  cmapHTML=function(ci){ const h=_ch.apply(this,arguments);
+    try{ if(!need(ci)) return h; const m=mvOf(ci), e=tgt(ci); if(!e) return h;
+      const b=arr(ci)?'✅ Цуваа очсон — <b>1-р алхмыг</b> дарж тулаан эхлүүл':m?'🚩 Цуваа замд явна · <b>'+fmt(rem(m))+'</b> · 1-р алхмыг дарж хурдасгана':'🚩 Эхлээд цэргээ <b>'+e.n+'</b> руу аянд гарга (1-р алхмыг дар)';
+      return '<div class="card" style="padding:6px 10px;font-size:13px">'+b+'</div>'+h; }catch(x){ return h; } };
+
+  /* дэлхийн газрын зураг дээр бүлгийн тэмдэг */
+  const _k=wmKs;
+  wmKs=function(c,D,vis,items,t){ _k.apply(this,arguments);
+    try{ for(let ci=C0;ci<=C1;ci++){ const e=tgt(ci); if(!e||!vis(e.x,e.y,200)) continue; const jn=!!(S.camp&&S.camp.join&&S.camp.join[ci]), op=chOpen(ci), mv=mvOf(ci);
+        items.push({y:e.y+2,f:()=>{ const z=WMV.z, sz=Math.min(160,Math.max(13,15/z)); wmLabel(c,(jn?'✓ ':mv?'🚩 ':op?'📜 ':'🔒 ')+(ci+1)+'-р бүлэг',e.x,e.y-(34+20/z),jn?'#9fe08a':op?'#ffd770':'#aaa',sz); }}); } }catch(x){} };
+
+  /* улс дээр дарахад «Түүхэн аян» товч */
+  const _sh=wmSheet;
+  wmSheet=function(){ _sh.apply(this,arguments);
+    try{ const e=WMS&&wmEnt(WMS); if(!e||e.t!=='kingdom') return; const ci=TG.indexOf(e.n); if(ci<0) return; const k=ci+C0, sh=document.getElementById('wmsheet'); if(!sh||sh.style.display==='none'||sh.querySelector('.cmbtn')) return;
+      const jn=!!(S.camp&&S.camp.join&&S.camp.join[k]), op=chOpen(k), b=document.createElement('div'); b.className='cmbtn'; b.style.cssText='margin:8px 0 2px;text-align:center';
+      b.innerHTML='<button class="btn" style="width:100%">📜 Түүхэн аян · '+(k+1)+'-р бүлэг'+(jn?' ✓':op?'':' 🔒')+'</button>';
+      b.querySelector('button').onclick=()=>{ if(!op){ say('Өмнөх бүлгийг ялснаар нээгдэнэ'); return; } wmShut(); openM('cmap:'+k); };
+      sh.appendChild(b); }catch(x){} };
+
+  window.cmTest={tgt:tgt,mvOf:mvOf,startMarch:startMarch,card:card,speedUp:speedUp,arr:arr,TG:TG};
 })();
 
 </script><script>(function(){

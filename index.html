@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='af4d02a8e4';
+var UPDB='b02dbd08d8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14331,6 +14331,13 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       if(S.camp.done&&S.camp.done['22:0']){ y.hint=1; return; }
       if(typeof cur!=='undefined'&&cur) return; if(document.getElementById('wmc')||document.getElementById('ypr')||document.getElementById('ycard')||document.getElementById('scard')) return;
       y.hint=1; try{ save(); }catch(e){} ask(true); }catch(e){} },2500);
+
+  /* амьтан, NPC нуурын усан дээгүүр алхахгүй — эрэгт хүрмэгц эрэг дагаж гүйнэ */
+  const _up=update;
+  update=function(dt){ _up.apply(this,arguments);
+    try{ const q=yq(); if(!q||!ents) return; const cx=q.x+q.w*0.5, cy=q.y+q.h*0.58, rx=q.w*0.44, ry=q.h*0.33;
+      ents.forEach(e=>{ if(e.type==='eagle'||e._in) return; const fx=e.x+entW(e)/2, fy=e.y+entH(e); const dx=(fx-cx)/rx, dy=(fy-cy)/ry, d=dx*dx+dy*dy;
+        if(d<1){ const m=Math.sqrt(d)||0.001; e.x+=cx+dx/m*rx*1.03-fx; e.y+=cy+dy/m*ry*1.03-fy; } }); }catch(e){} };
 })();
 
 

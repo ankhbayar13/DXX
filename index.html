@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='501d65f9d9';
+var UPDB='aba99ba5d8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13765,12 +13765,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
 /* p32/chpic2.js — Түүхэн аян: 17 бүлгийн бэлэн зураг (hf/ch1..17.webp) дээр амьд мэдээлэл (Нэгдсэн, Энэ бүлэг, тэнхээ, дайсны хүч) ба товчнууд. 18+ бүлэг хуучин арал-дэлгэцээр. */
 (function(){
-  const NP=16, IW=800, IH=1422, VER='1';
+  const HAS=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]), NP=30, IW=800, IH=1422, VER='1';
   const G={ X:[1.5,2,13,7], panel:[2.3,10.7,47.3,12.6], plaq:[28.5,71.7,39.5,4.6],
     bat:[3.5,78.8,20.5,9.6], rat:[75.5,78.8,21.5,9.6], la:[26.5,79.2,14.5,9], ra:[60.5,79.2,14.5,9], ent:[20.5,89.6,59,7.8],
     pl:[0.5,33,25,31], pr:[73,33,26.5,31] };
   const IM={}; const url=i=>'hf/ch'+(i+1)+'.webp?v='+VER;
-  function load(i,cb){ if(i<0||i>=NP) return; let m=IM[i]; if(!m){ m=IM[i]=new Image(); m.onload=()=>{ m.ok=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.onerror=()=>{ m.bad=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.src=url(i); }
+  function load(i,cb){ if(!HAS.has(i)) return; let m=IM[i]; if(!m){ m=IM[i]=new Image(); m.onload=()=>{ m.ok=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.onerror=()=>{ m.bad=1; (m.cb||[]).forEach(f=>f()); m.cb=[]; }; m.src=url(i); }
     if(cb){ if(m.ok||m.bad) cb(); else (m.cb=m.cb||[]).push(cb); } }
   const box=(k,x)=>'left:'+G[k][0]+'%;top:'+G[k][1]+'%;width:'+G[k][2]+'%;height:'+G[k][3]+'%;'+(x||'');
   const hs=(k,act)=>'<div class="pch" style="'+box(k)+'" onclick="'+act+'"></div>';
@@ -13786,8 +13786,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     h+='<div class="pcw" style="'+box('plaq')+'"><span>Хүч <b>'+fmtN(boss)+'</b></span></div>';
     h+=hs('X',"$('chs').remove()")+hs('bat',"$('chs').remove();openM('baatar')")+hs('rat',"$('chs').remove();openM('world')");
     if(i>0) h+=hs('la','chsGo(-1)')+hs('pl','chsGo(-1)');
-    if(i<CAMP.length-1&&i<NP-1) h+=hs('ra','chsGo(1)')+hs('pr','chsGo(1)');
-    else if(i<CAMP.length-1) h+=hs('ra','chsGo(1)');
+    if(i<CAMP.length-1) h+=hs('ra','chsGo(1)')+hs('pr','chsGo(1)');
     h+=hs('ent','chsEnter()');
     if(!op) h+='<div class="pcl">🔒</div><div class="pcm" style="left:15%;top:76.7%;width:70%;font-size:calc(var(--u)*2)">Өмнөх бүлгийг ялж нээ</div>';
     h+='</div>'; P.innerHTML=h; layout();
@@ -13800,7 +13799,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   window.addEventListener('resize',()=>{ try{ layout(); }catch(e){} });
   function show(){
     const e=document.getElementById('chs'); if(!e) return; const i=CHI;
-    if(i>=NP){ e.classList.remove('pc2'); const p=document.getElementById('pc2'); if(p) p.remove(); const bg=document.getElementById('chbg'); if(bg&&bg.dataset.pc){ bg.style.backgroundImage=''; delete bg.dataset.pc; } return; }
+    if(!HAS.has(i)){ e.classList.remove('pc2'); const p=document.getElementById('pc2'); if(p) p.remove(); const bg=document.getElementById('chbg'); if(bg&&bg.dataset.pc){ bg.style.backgroundImage=''; delete bg.dataset.pc; } return; }
     load(i,()=>{ if(!document.getElementById('chs')||CHI!==i) return; const m=IM[i]; if(m.bad){ e.classList.remove('pc2'); return; }
       e.classList.add('pc2'); build(i); load(i-1); load(i+1); });
   }

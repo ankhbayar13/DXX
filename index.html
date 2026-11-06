@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='43189e2ac3';
+var UPDB='df2155a0c9';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14313,6 +14313,45 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       if(S.camp.done&&S.camp.done['22:0']){ y.hint=1; return; }
       if(typeof cur!=='undefined'&&cur) return; if(document.getElementById('wmc')||document.getElementById('ypr')||document.getElementById('ycard')||document.getElementById('scard')) return;
       y.hint=1; try{ save(); }catch(e){} ask(true); }catch(e){} },2500);
+})();
+
+
+/* p32/pchover.js — Компьютерээр тоглоход хулгана барилга / NPC / нуур дээр очиход тод болж, курсор «гар» болно. */
+(function(){
+  let H=null;
+  function hit(x,y){
+    try{
+      if(typeof placing!=='undefined'&&placing) return null;
+      const z=zoneOf(x,y); if(!zoneOpen(z.c,z.r)) return null;
+      if(typeof dragging!=='undefined'&&dragging) return null;
+      const hp=ents.filter(e=>{ if(e._in||(e.kind!=='person'&&!(e.kind==='wild'&&e.friend))) return false; const w=entW(e), h=entH(e); return x>=e.x-6&&x<=e.x+w+6&&y>=e.y-9&&y<=e.y+h+5; })
+        .sort((a,b)=>Math.hypot(x-a.x-entW(a)/2,y-a.y-entH(a)/2)-Math.hypot(x-b.x-entW(b)/2,y-b.y-entH(b)/2))[0];
+      if(hp) return {t:'n',x:hp.x-2,y:hp.y-2,w:entW(hp)+4,h:entH(hp)+4,e:hp};
+      const q=L.ponds&&L.ponds[0]; if(q&&q._yd&&x>=q.x&&x<=q.x+q.w&&y>=q.y-4&&y<=q.y+q.h+8) return {t:'y',x:q.x,y:q.y-4,w:q.w,h:q.h+12,n:'⚓ Усан онгоцны зогсоол'};
+      for(const k of BKEYS){ if(!S.pos[k]||(S.sites&&S.sites[k])) continue; const r=brect(k);
+        if(x>=r.x-2&&x<=r.x+r.w+2&&y>=r.y-6&&y<=r.y+r.h+2){ let n=''; try{ n=(BUILD[k]&&BUILD[k].n)||''; }catch(e){} return {t:'b',x:r.x,y:r.y-4,w:r.w,h:r.h+6,n:n}; } }
+    }catch(e){}
+    return null;
+  }
+  try{
+    cv.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse'||e.buttons){ if(H){ H=null; cv.style.cursor=''; } return; }
+      const w=toWorld(e.clientX,e.clientY); H=hit(w.x,w.y); cv.style.cursor=H?'pointer':''; });
+    cv.addEventListener('pointerleave',()=>{ H=null; cv.style.cursor=''; });
+    cv.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'){} });
+  }catch(e){}
+  const _d=draw;
+  draw=function(t){ _d.apply(this,arguments);
+    if(!H) return;
+    try{ const P=SC*DPR*Z, r=H; ctx.save(); ctx.setTransform(P,0,0,P,-cam.x*P,-cam.y*P);
+      const cx=r.x+r.w/2, cy=r.y+r.h/2, rx=r.w*0.62+3, ry=r.h*0.6+3, pul=0.85+0.15*Math.sin((t||0)/220);
+      ctx.globalCompositeOperation='lighter'; const g=ctx.createRadialGradient(cx,cy,2,cx,cy,Math.max(rx,ry));
+      g.addColorStop(0,'rgba(255,225,140,'+(0.34*pul)+')'); g.addColorStop(1,'rgba(255,200,90,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,6.283); ctx.fill();
+      ctx.globalCompositeOperation='source-over'; ctx.strokeStyle='rgba(255,215,112,'+(0.9*pul)+')'; ctx.lineWidth=0.9;
+      ctx.beginPath(); ctx.ellipse(cx,r.y+r.h-1,r.w*0.5+1,Math.max(3,r.h*0.14),0,0,6.283); ctx.stroke();
+      if(r.n){ ctx.font='bold 4px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.3; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle='#ffe9a8'; ctx.strokeText(r.n,cx,r.y-3); ctx.fillText(r.n,cx,r.y-3); }
+      ctx.restore(); }catch(e){ try{ ctx.restore(); }catch(_){} }
+  };
 })();
 
 </script><script>(function(){

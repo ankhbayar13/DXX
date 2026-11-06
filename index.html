@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2566435e52';
+var UPDB='1de7cd9c9f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14073,84 +14073,6 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 })();
 
 
-/* p32/shipyard.js — Усан онгоцны зогсоол: гэрийн дэлгэцийн анхны нуур дээр. 3 түвшин, барилгын хугацаатай, Алтаар хурдасгана.
-   Түвшин нь усан тулаанд (23–25-р бүлэг) флотын бие, хүчийг нэмнэ (navy.js). Нээгдэх нөхцөл: 22-р бүлгийг ялсан. */
-(function(){
-  const V='1', KY=0.14, LW=88;
-  const COST=[null,{wood:200,gold:300,t:300},{wood:600,gold:900,alt:3,t:1800},{wood:1500,gold:2500,alt:10,t:7200}];
-  const NM=['Усан онгоцны зогсоол','Жижиг зогсоол','Усан онгоцны үйлдвэр','Эзэнт гүрний үйлдвэр'];
-  const HM=[.85,1,1.2,1.4], AM=[.95,1,1.1,1.2];
-  const SEC_PER_ALT=180;
-  const IM={};
-  function img(k){ let o=IM[k]; if(!o){ o=IM[k]={img:new Image(),ok:false}; o.img.onload=()=>{ o.ok=true; }; o.img.src='hf/yd/'+k+'.webp?v='+V; } return o.ok?o.img:null; }
-  const Y=()=>{ S.yard=S.yard||{lv:0,up:0,end:0}; return S.yard; };
-  const fmt=s=>{ s=Math.max(0,Math.round(s)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s%60).padStart(2,'0'); };
-  const open=()=>{ try{ return chOpen(22); }catch(e){ return false; } };
-  const rem=()=>{ const y=Y(); return y.up?Math.max(0,(y.end-Date.now())/1000):0; };
-  window.yardInfo=()=>{ const y=Y(), l=Math.max(0,Math.min(3,y.lv||0)); return {lv:l,hm:HM[l],am:AM[l]}; };
-
-  /* нуурыг томруулж, барилгатай эзэлнэ */
-  function fix(q){ if(q._yd) return; q._yd=1; q.w=LW; q.h=Math.round(LW*377/480); q.x=Math.round(q.x+40-LW)+0; q.y=Math.round(q.y+20-q.h); }
-  const yq=()=>{ try{ return L.ponds&&L.ponds[0]; }catch(e){ return null; } };
-
-  const _pd=pondDraw;
-  pondDraw=function(q){
-    if(q!==yq()) return _pd.apply(this,arguments);
-    const lk=img('lake'); if(!lk) return _pd.apply(this,arguments);
-    fix(q); const y=Y(), l=y.lv||0;
-    ctx.drawImage(lk,q.x,q.y,q.w,q.h);
-    const sp=img('y'+Math.max(1,y.up&&!l?1:l)); 
-    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*0.6-h,w,h); ctx.globalAlpha=1; } }
-    let tx='', cl='#fff';
-    if(y.up){ tx='🔨 '+fmt(rem()); cl='#ffd770'; } else if(l>0){ tx='Lv '+l; } else if(open()){ tx='⚓ Барих'; cl='#ffd770'; } else return;
-    try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h+6); }catch(e){}
-  };
-
-  /* барилгын цаг */
-  function done(){ const y=Y(); if(!y.up||Date.now()<y.end) return; y.lv=y.up; y.up=0; y.end=0; try{ save(); }catch(e){}
-    try{ sfx('win'); }catch(e){} try{ say('⚓ '+NM[y.lv]+' бэлэн боллоо (Lv '+y.lv+')'); }catch(e){}
-    if(document.getElementById('ycard')) card(); }
-  setInterval(()=>{ try{ if(typeof S==='undefined'||!S||!S.res) return; done(); }catch(e){} },1000);
-
-  function closeCard(){ const e=document.getElementById('ycard'); if(e) e.remove(); if(closeCard.iv){ clearInterval(closeCard.iv); closeCard.iv=0; } }
-  const cs=c=>(c.wood?'🪵'+c.wood+' ':'')+(c.gold?'🪙'+c.gold+' ':'')+(c.alt?'💎'+c.alt+' ':'');
-  const can=c=>(S.res.wood||0)>=(c.wood||0)&&(S.res.gold||0)>=(c.gold||0)&&(S.res.alt||0)>=(c.alt||0);
-  function upgrade(){ const y=Y(), n=(y.lv||0)+1, c=COST[n]; if(y.up||!c||!open()) return;
-    if(!can(c)){ try{ say('Нөөц хүрэлцэхгүй'); sfx('err'); }catch(e){} return; }
-    S.res.wood-=c.wood||0; S.res.gold-=c.gold||0; S.res.alt-=c.alt||0; y.up=n; y.end=Date.now()+c.t*1000;
-    try{ save(); updateHUD(); }catch(e){} try{ say('🔨 Барилга эхэллээ ('+fmt(c.t)+')'); }catch(e){} card(); }
-  function speed(){ const y=Y(), r=rem(); if(!y.up) return; const c=Math.max(1,Math.ceil(r/SEC_PER_ALT));
-    if((S.res.alt||0)<c){ try{ say('Алт хүрэлцэхгүй (хэрэгтэй: '+c+')'); sfx('err'); }catch(e){} return; }
-    S.res.alt-=c; y.end=Date.now()-1; try{ updateHUD(); }catch(e){} done(); try{ say('⚡ -'+c+' Алт'); }catch(e){} card(); }
-
-  function card(){
-    closeCard(); const y=Y(), l=y.lv||0, n=l+1, c=COST[n], d=document.createElement('div'); d.id='ycard'; d.className='sc'; d.id='ycard';
-    d.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55)';
-    const ef=(k)=>'🚢 Флотын бие <b>'+Math.round((HM[k]-1)*100)+'%</b> · хүч <b>'+Math.round((AM[k]-1)*100)+'%</b>';
-    let b='<div class="sct"><b>Одоо:</b> '+(l?NM[l]+' (Lv '+l+')':'Барьж амжаагүй')+'<br>'+ef(l)+'</div>';
-    if(!open()) b+='<div class="sct">🔒 22-р бүлэг (Дай Вьет)-ийг ялсны дараа нээгдэнэ.</div>';
-    else if(y.up) b+='<div class="sct"><b>🔨 '+NM[y.up]+'</b> баригдаж байна<br>Үлдсэн: <b id="ytm">'+fmt(rem())+'</b></div>';
-    else if(c) b+='<div class="sct"><b>Дараагийнх: '+NM[n]+' (Lv '+n+')</b><br>'+ef(n)+'<br>Үнэ: '+cs(c)+'<br>Хугацаа: '+fmt(c.t)+'</div>';
-    else b+='<div class="sct">✅ Хамгийн дээд түвшин</div>';
-    d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+NM[Math.max(l,0)]+'</b><div class="sm">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div></div></div>'+b+
-      (open()&&!y.up&&c?'<button class="btn red" id="yup">'+(l?'⬆ Сайжруулах':'🔨 Барих')+'</button> ':'')+
-      (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
-      '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
-    document.body.appendChild(d);
-    const q=id=>document.getElementById(id);
-    if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
-    if(y.up) closeCard.iv=setInterval(()=>{ const el=q('ytm'); if(!el){ clearInterval(closeCard.iv); return; } el.textContent=fmt(rem()); },1000); }
-  window.yardCard=card;
-
-  /* дэлгэц дээр дарах */
-  const _tap=tap;
-  tap=function(x,y){
-    try{ const q=yq(); if(q&&q._yd&&!placing){ const z=zoneOf(x,y); if(zoneOpen(z.c,z.r)&&x>=q.x&&x<=q.x+q.w&&y>=q.y-4&&y<=q.y+q.h+8){ card(); return; } } }catch(e){}
-    return _tap.apply(this,arguments);
-  };
-})();
-
-
 /* p32/kgcastle.js — Дэлхийн газрын зураг дээрх улсуудын шилтгээн/ордон: бүс нутаг бүр өөрийн хэв маягтай (hf/kg/*.webp).
    Зураг ачаалагдаагүй эсвэл жагсаалтад байхгүй улс хуучин зургаараа зурагдана. */
 (function(){
@@ -14290,6 +14212,107 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       sh.appendChild(b); }catch(x){} };
 
   window.cmTest={tgt:tgt,mvOf:mvOf,startMarch:startMarch,card:card,speedUp:speedUp,arr:arr,TG:TG};
+})();
+
+
+/* p32/shipyard.js — Усан онгоцны зогсоол: гэрийн дэлгэцийн анхны нуур дээр. 3 түвшин, барилгын хугацаатай, Алтаар хурдасгана.
+   Түвшин нь усан тулаанд (23–25-р бүлэг) флотын бие, хүчийг нэмнэ (navy.js). Нээгдэх нөхцөл: 22-р бүлгийг ялсан. */
+(function(){
+  const V='1', KY=0.14, LW=88;
+  const COST=[null,{wood:200,gold:300,t:300},{wood:600,gold:900,alt:3,t:1800},{wood:1500,gold:2500,alt:10,t:7200}];
+  const NM=['Усан онгоцны зогсоол','Жижиг зогсоол','Усан онгоцны үйлдвэр','Эзэнт гүрний үйлдвэр'];
+  const HM=[.85,1,1.2,1.4], AM=[.95,1,1.1,1.2];
+  const SEC_PER_ALT=180;
+  const IM={};
+  function img(k){ let o=IM[k]; if(!o){ o=IM[k]={img:new Image(),ok:false}; o.img.onload=()=>{ o.ok=true; }; o.img.src='hf/yd/'+k+'.webp?v='+V; } return o.ok?o.img:null; }
+  const Y=()=>{ S.yard=S.yard||{lv:0,up:0,end:0}; return S.yard; };
+  const fmt=s=>{ s=Math.max(0,Math.round(s)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s%60).padStart(2,'0'); };
+  const open=()=>{ try{ return chOpen(22); }catch(e){ return false; } };
+  const rem=()=>{ const y=Y(); return y.up?Math.max(0,(y.end-Date.now())/1000):0; };
+  window.yardInfo=()=>{ const y=Y(), l=Math.max(0,Math.min(3,y.lv||0)); return {lv:l,hm:HM[l],am:AM[l]}; };
+
+  /* нуурыг томруулж, барилгатай эзэлнэ */
+  function fix(q){ if(q._yd) return; q._yd=1; q.w=LW; q.h=Math.round(LW*377/480); q.x=Math.round(q.x+40-LW)+0; q.y=Math.round(q.y+20-q.h); }
+  const yq=()=>{ try{ return L.ponds&&L.ponds[0]; }catch(e){ return null; } };
+
+  const _pd=pondDraw;
+  pondDraw=function(q){
+    if(q!==yq()) return _pd.apply(this,arguments);
+    const lk=img('lake'); if(!lk) return _pd.apply(this,arguments);
+    fix(q); const y=Y(), l=y.lv||0;
+    ctx.drawImage(lk,q.x,q.y,q.w,q.h);
+    const sp=img('y'+Math.max(1,y.up&&!l?1:l)); 
+    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*0.6-h,w,h); ctx.globalAlpha=1; } }
+    let tx='', cl='#fff';
+    if(y.up){ tx='🔨 '+fmt(rem()); cl='#ffd770'; } else if(l>0){ tx='Lv '+l; } else if(open()){ tx='⚓ Барих'; cl='#ffd770'; } else return;
+    try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h+6); }catch(e){}
+  };
+
+  /* барилгын цаг */
+  function done(){ const y=Y(); if(!y.up||Date.now()<y.end) return; y.lv=y.up; y.up=0; y.end=0; try{ save(); }catch(e){}
+    try{ sfx('win'); }catch(e){} try{ say('⚓ '+NM[y.lv]+' бэлэн боллоо (Lv '+y.lv+')'); }catch(e){}
+    if(document.getElementById('ycard')) card(); }
+  setInterval(()=>{ try{ if(typeof S==='undefined'||!S||!S.res) return; done(); }catch(e){} },1000);
+
+  function closeCard(){ const e=document.getElementById('ycard'); if(e) e.remove(); if(closeCard.iv){ clearInterval(closeCard.iv); closeCard.iv=0; } }
+  const cs=c=>(c.wood?'🪵'+c.wood+' ':'')+(c.gold?'🪙'+c.gold+' ':'')+(c.alt?'💎'+c.alt+' ':'');
+  const can=c=>(S.res.wood||0)>=(c.wood||0)&&(S.res.gold||0)>=(c.gold||0)&&(S.res.alt||0)>=(c.alt||0);
+  function upgrade(){ const y=Y(), n=(y.lv||0)+1, c=COST[n]; if(y.up||!c||!open()) return;
+    if(!can(c)){ try{ say('Нөөц хүрэлцэхгүй'); sfx('err'); }catch(e){} return; }
+    S.res.wood-=c.wood||0; S.res.gold-=c.gold||0; S.res.alt-=c.alt||0; y.up=n; y.end=Date.now()+c.t*1000;
+    try{ save(); updateHUD(); }catch(e){} try{ say('🔨 Барилга эхэллээ ('+fmt(c.t)+')'); }catch(e){} card(); }
+  function speed(){ const y=Y(), r=rem(); if(!y.up) return; const c=Math.max(1,Math.ceil(r/SEC_PER_ALT));
+    if((S.res.alt||0)<c){ try{ say('Алт хүрэлцэхгүй (хэрэгтэй: '+c+')'); sfx('err'); }catch(e){} return; }
+    S.res.alt-=c; y.end=Date.now()-1; try{ updateHUD(); }catch(e){} done(); try{ say('⚡ -'+c+' Алт'); }catch(e){} card(); }
+
+  function card(){
+    closeCard(); const y=Y(), l=y.lv||0, n=l+1, c=COST[n], d=document.createElement('div'); d.id='ycard'; d.className='sc'; d.id='ycard';
+    d.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55)';
+    const ef=(k)=>'🚢 Флотын бие <b>'+Math.round((HM[k]-1)*100)+'%</b> · хүч <b>'+Math.round((AM[k]-1)*100)+'%</b>';
+    let b='<div class="sct"><b>Одоо:</b> '+(l?NM[l]+' (Lv '+l+')':'Барьж амжаагүй')+'<br>'+ef(l)+'</div>';
+    if(!open()) b+='<div class="sct">🔒 22-р бүлэг (Дай Вьет)-ийг ялсны дараа нээгдэнэ.</div>';
+    else if(y.up) b+='<div class="sct"><b>🔨 '+NM[y.up]+'</b> баригдаж байна<br>Үлдсэн: <b id="ytm">'+fmt(rem())+'</b></div>';
+    else if(c) b+='<div class="sct"><b>Дараагийнх: '+NM[n]+' (Lv '+n+')</b><br>'+ef(n)+'<br>Үнэ: '+cs(c)+'<br>Хугацаа: '+fmt(c.t)+'</div>';
+    else b+='<div class="sct">✅ Хамгийн дээд түвшин</div>';
+    d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+NM[Math.max(l,0)]+'</b><div class="sm">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div></div></div>'+b+
+      (open()&&!y.up&&c?'<button class="btn red" id="yup">'+(l?'⬆ Сайжруулах':'🔨 Барих')+'</button> ':'')+
+      (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
+      '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
+    document.body.appendChild(d);
+    const q=id=>document.getElementById(id);
+    if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
+    if(y.up) closeCard.iv=setInterval(()=>{ const el=q('ytm'); if(!el){ clearInterval(closeCard.iv); return; } el.textContent=fmt(rem()); },1000); }
+  window.yardCard=card;
+
+  /* дэлгэц дээр дарах */
+  const _tap=tap;
+  tap=function(x,y){
+    try{ const q=yq(); if(q&&q._yd&&!placing){ const z=zoneOf(x,y); if(zoneOpen(z.c,z.r)&&x>=q.x&&x<=q.x+q.w&&y>=q.y-4&&y<=q.y+q.h+8){ card(); return; } } }catch(e){}
+    return _tap.apply(this,arguments);
+  };
+
+  /* 23-р бүлгээс өмнө зогсоол ЗААВАЛ хэрэгтэй */
+  function goYard(){ try{ closeM(); }catch(e){} try{ const w=document.getElementById('wmc'); if(w&&typeof wmShut==='function') wmShut(); }catch(e){}
+    try{ const q=yq(); if(q){ Z=1.6; cam.x=q.x+q.w/2-innerWidth/(SC*Z)/2; cam.y=q.y+q.h/2-innerHeight/(SC*Z)/2-6; clampCam(); } }catch(e){}
+    setTimeout(card,250); }
+  function closeAsk(){ const e=document.getElementById('ypr'); if(e) e.remove(); }
+  function ask(first){
+    closeAsk(); const y=Y(), up=y.up&&y.lv<1, d=document.createElement('div'); d.id='ypr';
+    d.style.cssText='position:fixed;inset:0;z-index:9100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
+    d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+(first?'23-р бүлэг нээгдлээ!':'Усан тулаанд бэлдэх')+'</b><div class="sm">Хөлөггүйгээр усан тулаанд орж болохгүй</div></div></div>'+
+      '<div class="sct">Дай Вьет, Ява, Япон руу далайгаар довтлоход <b>флот</b> хэрэгтэй.<br>Эхлээд гэрийн нуур дээр <b>Усан онгоцны зогсоол</b> бариарай.'+(up?'<br><br>🔨 Одоо баригдаж байна: <b>'+fmt(rem())+'</b>':'<br><br>Lv 1: '+cs(COST[1])+'· '+fmt(COST[1].t))+'</div>'+
+      '<button class="btn red" id="ypg">⚓ Зогсоол руу очих</button> <button class="btn" style="background:#5b3d1e" id="ypn">Дараа</button></div>';
+    document.body.appendChild(d);
+    document.getElementById('ypg').onclick=()=>{ closeAsk(); goYard(); }; document.getElementById('ypn').onclick=closeAsk; }
+  const _cs=campStart;
+  campStart=function(ci,s,skip){
+    try{ if(ci>=22&&ci<=24&&yardInfo().lv<1){ ask(false); return; } }catch(e){}
+    return _cs.apply(this,arguments);
+  };
+  setInterval(()=>{ try{ if(typeof S==='undefined'||!S||!S.res||!S.camp) return; const y=Y(); if(y.hint||y.lv>0||y.up||!open()) return;
+      if(S.camp.done&&S.camp.done['22:0']){ y.hint=1; return; }
+      if(typeof cur!=='undefined'&&cur) return; if(document.getElementById('wmc')||document.getElementById('ypr')||document.getElementById('ycard')||document.getElementById('scard')) return;
+      y.hint=1; try{ save(); }catch(e){} ask(true); }catch(e){} },2500);
 })();
 
 </script><script>(function(){

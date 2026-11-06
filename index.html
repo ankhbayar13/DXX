@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='3b3b02a2de';
+var UPDB='c75bc4dd8c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14218,7 +14218,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 /* p32/shipyard.js — Усан онгоцны зогсоол: гэрийн дэлгэцийн анхны нуур дээр. 3 түвшин, барилгын хугацаатай, Алтаар хурдасгана.
    Түвшин нь усан тулаанд (23–25-р бүлэг) флотын бие, хүчийг нэмнэ (navy.js). Нээгдэх нөхцөл: 22-р бүлгийг ялсан. */
 (function(){
-  const V='1', KY=0.16, LW=110;
+  const V='1', KY=0.21, LW=150;
   const COST=[null,{wood:200,gold:300,t:300},{wood:600,gold:900,alt:3,t:1800},{wood:1500,gold:2500,alt:10,t:7200}];
   const NM=['Усан онгоцны зогсоол','Жижиг зогсоол','Усан онгоцны үйлдвэр','Эзэнт гүрний үйлдвэр'];
   const HM=[.85,1,1.2,1.4], AM=[.95,1,1.1,1.2];
@@ -14232,7 +14232,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   window.yardInfo=()=>{ const y=Y(), l=Math.max(0,Math.min(3,y.lv||0)); return {lv:l,hm:HM[l],am:AM[l]}; };
 
   /* нуур: газрын зургийн баруун талын уулын доор (газар 2_3) */
-  const LK={x:618,y:1132,w:LW,h:Math.round(LW*377/480)};
+  const LK={x:602,y:1128,w:LW,h:Math.round(LW*377/480)};
   const yq=()=>{ try{ return (L.ponds||[]).find(q=>q._yl)||null; }catch(e){ return null; } };
   window.yardRect=yq;
   function ensure(){ try{ if(!L||!L.ponds||yq()) return; const q=Object.assign({_yl:1,_yd:1},LK); L.ponds.push(q);

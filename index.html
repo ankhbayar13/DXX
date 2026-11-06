@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='03cdd92eb2';
+var UPDB='289f94bf28';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14070,6 +14070,36 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   };
   window.navyTest=function(ci,s){ window.navyStart(ci,s); return G; };
   window.navyState=()=>G;
+})();
+
+
+/* p32/kgcastle.js — Дэлхийн газрын зураг дээрх улсуудын шилтгээн/ордон: бүс нутаг бүр өөрийн хэв маягтай (hf/kg/*.webp).
+   Зураг ачаалагдаагүй эсвэл жагсаалтад байхгүй улс хуучин зургаараа зурагдана. */
+(function(){
+  const V='1', W=250;
+  const G={
+    a:['Арагон','Швед','Польш'], b:['Владимир-Суздаль','Рязань','Галич-Волынь'], c:['Дани','Унгар'], d:['Франц'],
+    e:['Волгийн Булгар','Азербайжан','Сэлжүк Рум','Аббасид','Аюбид (Египет)','Аюбид (Сири)','Хижаз','Йемен','Аламут','Хорезм','Мавераннахр','Хорасан','Фарс','Герат','Газни','Альмохад','Тлемсен','Хафсид','Нуби','Мали','Канем'],
+    f:['Дели','Бенгал','Гуджарат','Ядава','Пандья'], g:['Паган','Кхмер','Чампа','Ява'], h:['Япон (Камакура)'], i:['Корё'],
+    j:['Төвд (Сакья)','Дали','Дай Вьет','Хар Хятан','Мин улс','Сүн'],
+    s1:['Кастиль','Норвег'], s3:['Ариун Ромын','Ливон'], s4:['Новгород','Киев'], s5:['Англи','Папын улс','Литва'],
+    s6:['Сицили','Болгар','Никей (Византи)','Трапезунд','Киликийн Армен','Гүрж','Эфиоп']
+  };
+  const MAP={}; Object.keys(G).forEach(k=>G[k].forEach(n=>{ MAP[n]=k; }));
+  const IM={};
+  function img(k){ let o=IM[k]; if(!o){ o=IM[k]={img:new Image(),ok:false}; o.img.onload=()=>{ o.ok=true; }; o.img.src='hf/kg/'+k+'.webp?v='+V; } return o.ok?o.img:null; }
+  window.KGC={MAP:MAP,img:img};
+  const _k=wmKs;
+  wmKs=function(c,D,vis,items,t){
+    const mine=[], rest=[];
+    D.ks.forEach(k=>{ const g=MAP[k.n], im=g&&img(g); if(im) mine.push([k,im]); else rest.push(k); });
+    _k.call(this,c,Object.assign({},D,{ks:rest}),vis,items,t);
+    mine.forEach(([k,im])=>{ if(!vis(k.x,k.y,170)) return;
+      const w=MAP[k.n]==='j'?W*1.16:W, h=w*im.naturalHeight/im.naturalWidth, cd=wmCd(k.id);
+      items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.drawImage(im,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
+        wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11);
+        if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10);
+        if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); };
 })();
 
 

@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2884d1b931';
+var UPDB='4c7b57fd85';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14218,7 +14218,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 /* p32/shipyard.js — Усан онгоцны зогсоол: гэрийн дэлгэцийн анхны нуур дээр. 3 түвшин, барилгын хугацаатай, Алтаар хурдасгана.
    Түвшин нь усан тулаанд (23–25-р бүлэг) флотын бие, хүчийг нэмнэ (navy.js). Нээгдэх нөхцөл: 22-р бүлгийг ялсан. */
 (function(){
-  const V='1', KY=0.27, LW=200;
+  const V='1', KY=0.34, LW=200;
   const COST=[null,{wood:200,gold:300,t:300},{wood:600,gold:900,alt:3,t:1800},{wood:1500,gold:2500,alt:10,t:7200}];
   const NM=['Усан онгоцны зогсоол','Жижиг зогсоол','Усан онгоцны үйлдвэр','Эзэнт гүрний үйлдвэр'];
   const HM=[.85,1,1.2,1.4], AM=[.95,1,1.1,1.2];
@@ -14247,13 +14247,23 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   pondDraw=function(q){
     ensure(); if(!q._yl) return _pd.apply(this,arguments);
     const lk=img('lake'); if(!lk) return _pd.apply(this,arguments);
-    const y=Y(), l=y.lv||0;
     ctx.drawImage(lk,q.x,q.y,q.w,q.h);
-    const sp=img('y'+Math.max(1,y.up&&!l?1:l)); 
-    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*0.6-h,w,h); ctx.globalAlpha=1; } }
+  };
+  /* барилга: уулын (peak) дараа эрэмбээр зурагдана, ингэснээр уул барилгын дээгүүр гарахгүй */
+  const BY=0.7;
+  function drawTop(q){
+    const y=Y(), l=y.lv||0;
+    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*BY-h,w,h); ctx.globalAlpha=1; } }
     let tx='', cl='#fff';
     if(y.up){ tx='🔨 '+fmt(rem()); cl='#ffd770'; } else if(l>0){ tx='Lv '+l; } else if(open()){ tx='⚓ Барих'; cl='#ffd770'; } else return;
     try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h+6); }catch(e){}
+  }
+  let lastList=null;
+  const _pk=peakList;
+  peakList=function(list,vis,p){
+    _pk.apply(this,arguments);
+    try{ if(list===lastList) return; lastList=list; const q=yq(); if(!q||!img('lake')) return; if(!vis(q.x,q.y-90,q.w,q.h+100)) return;
+      list.push({y:q.y+q.h*BY,f:()=>drawTop(q)}); }catch(e){}
   };
 
   /* барилгын цаг */

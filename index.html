@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='df2155a0c9';
+var UPDB='3b3b02a2de';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14231,15 +14231,23 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   const rem=()=>{ const y=Y(); return y.up?Math.max(0,(y.end-Date.now())/1000):0; };
   window.yardInfo=()=>{ const y=Y(), l=Math.max(0,Math.min(3,y.lv||0)); return {lv:l,hm:HM[l],am:AM[l]}; };
 
-  /* нуурыг томруулж, барилгатай эзэлнэ */
-  function fix(q){ if(q._yd) return; q._yd=1; q.w=LW; q.h=Math.round(LW*377/480); q.x=Math.round(q.x+40-LW)+0; q.y=Math.round(q.y+20-q.h); }
-  const yq=()=>{ try{ return L.ponds&&L.ponds[0]; }catch(e){ return null; } };
+  /* нуур: газрын зургийн баруун талын уулын доор (газар 2_3) */
+  const LK={x:618,y:1132,w:LW,h:Math.round(LW*377/480)};
+  const yq=()=>{ try{ return (L.ponds||[]).find(q=>q._yl)||null; }catch(e){ return null; } };
+  window.yardRect=yq;
+  function ensure(){ try{ if(!L||!L.ponds||yq()) return; const q=Object.assign({_yl:1,_yd:1},LK); L.ponds.push(q);
+      const ov=(r)=>r.x<q.x+q.w+2&&r.x+r.w+2>q.x&&r.y<q.y+q.h+2&&r.y+r.h+2>q.y;
+      if(L.trees){ const th=sprH('tree'); L.trees=L.trees.filter(tr=>!ov({x:tr.x,y:tr.y,w:SZ.tree,h:th})); }
+      try{ for(let i=PROPS.length-1;i>=0;i--) if(ov(PROPS[i])) PROPS.splice(i,1); }catch(e){}
+    }catch(e){} }
+  function unlockZ(){ try{ S.zones=S.zones||{}; if(!S.zones[zk(2,3)]){ S.zones[zk(2,3)]=1; say('🗺 Усан онгоцны зогсоолын нутаг нээгдлээ'); save(); } }catch(e){} }
+  setInterval(ensure,700);
 
   const _pd=pondDraw;
   pondDraw=function(q){
-    if(q!==yq()) return _pd.apply(this,arguments);
+    ensure(); if(!q._yl) return _pd.apply(this,arguments);
     const lk=img('lake'); if(!lk) return _pd.apply(this,arguments);
-    fix(q); const y=Y(), l=y.lv||0;
+    const y=Y(), l=y.lv||0;
     ctx.drawImage(lk,q.x,q.y,q.w,q.h);
     const sp=img('y'+Math.max(1,y.up&&!l?1:l)); 
     if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*0.6-h,w,h); ctx.globalAlpha=1; } }
@@ -14292,12 +14300,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   };
 
   /* 23-р бүлгээс өмнө зогсоол ЗААВАЛ хэрэгтэй */
-  function goYard(){ try{ closeM(); }catch(e){} try{ const w=document.getElementById('wmc'); if(w&&typeof wmShut==='function') wmShut(); }catch(e){}
+  function goYard(){ unlockZ(); try{ closeM(); }catch(e){} try{ const w=document.getElementById('wmc'); if(w&&typeof wmShut==='function') wmShut(); }catch(e){}
     try{ const q=yq(); if(q){ Z=1.6; cam.x=q.x+q.w/2-innerWidth/(SC*Z)/2; cam.y=q.y+q.h/2-innerHeight/(SC*Z)/2-6; clampCam(); } }catch(e){}
     setTimeout(card,250); }
   function closeAsk(){ const e=document.getElementById('ypr'); if(e) e.remove(); }
   function ask(first){
-    closeAsk(); const y=Y(), up=y.up&&y.lv<1, d=document.createElement('div'); d.id='ypr';
+    closeAsk(); unlockZ(); const y=Y(), up=y.up&&y.lv<1, d=document.createElement('div'); d.id='ypr';
     d.style.cssText='position:fixed;inset:0;z-index:9100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
     d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+(first?'23-р бүлэг нээгдлээ!':'Усан тулаанд бэлдэх')+'</b><div class="sm">Хөлөггүйгээр усан тулаанд орж болохгүй</div></div></div>'+
       '<div class="sct">Дай Вьет, Ява, Япон руу далайгаар довтлоход <b>флот</b> хэрэгтэй.<br>Эхлээд гэрийн нуур дээр <b>Усан онгоцны зогсоол</b> бариарай.'+(up?'<br><br>🔨 Одоо баригдаж байна: <b>'+fmt(rem())+'</b>':'<br><br>Lv 1: '+cs(COST[1])+'· '+fmt(COST[1].t))+'</div>'+
@@ -14327,7 +14335,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       const hp=ents.filter(e=>{ if(e._in||(e.kind!=='person'&&!(e.kind==='wild'&&e.friend))) return false; const w=entW(e), h=entH(e); return x>=e.x-6&&x<=e.x+w+6&&y>=e.y-9&&y<=e.y+h+5; })
         .sort((a,b)=>Math.hypot(x-a.x-entW(a)/2,y-a.y-entH(a)/2)-Math.hypot(x-b.x-entW(b)/2,y-b.y-entH(b)/2))[0];
       if(hp) return {t:'n',x:hp.x-2,y:hp.y-2,w:entW(hp)+4,h:entH(hp)+4,e:hp};
-      const q=L.ponds&&L.ponds[0]; if(q&&q._yd&&x>=q.x&&x<=q.x+q.w&&y>=q.y-4&&y<=q.y+q.h+8) return {t:'y',x:q.x,y:q.y-4,w:q.w,h:q.h+12,n:'⚓ Усан онгоцны зогсоол'};
+      const q=window.yardRect&&window.yardRect(); if(q&&x>=q.x&&x<=q.x+q.w&&y>=q.y-4&&y<=q.y+q.h+8) return {t:'y',x:q.x,y:q.y-4,w:q.w,h:q.h+12,n:'⚓ Усан онгоцны зогсоол'};
       for(const k of BKEYS){ if(!S.pos[k]||(S.sites&&S.sites[k])) continue; const r=brect(k);
         if(x>=r.x-2&&x<=r.x+r.w+2&&y>=r.y-6&&y<=r.y+r.h+2){ let n=''; try{ n=(BUILD[k]&&BUILD[k].n)||''; }catch(e){} return {t:'b',x:r.x,y:r.y-4,w:r.w,h:r.h+6,n:n}; } }
     }catch(e){}

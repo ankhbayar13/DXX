@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4c7b57fd85';
+var UPDB='f625ece3f8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14250,13 +14250,13 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     ctx.drawImage(lk,q.x,q.y,q.w,q.h);
   };
   /* барилга: уулын (peak) дараа эрэмбээр зурагдана, ингэснээр уул барилгын дээгүүр гарахгүй */
-  const BY=0.7;
+  const BY=0.6, WD=[0,32,42,52];
   function drawTop(q){
     const y=Y(), l=y.lv||0;
-    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*BY-h,w,h); ctx.globalAlpha=1; } }
+    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=WD[Math.max(1,l||1)], h=w*k.naturalHeight/k.naturalWidth; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*BY-h,w,h); ctx.globalAlpha=1; } }
     let tx='', cl='#fff';
     if(y.up){ tx='🔨 '+fmt(rem()); cl='#ffd770'; } else if(l>0){ tx='Lv '+l; } else if(open()){ tx='⚓ Барих'; cl='#ffd770'; } else return;
-    try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h+6); }catch(e){}
+    try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h*BY+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h*BY+6); }catch(e){}
   }
   let lastList=null;
   const _pk=peakList;

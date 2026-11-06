@@ -9828,7 +9828,7 @@ WM_NAMES.length=GEO.length; WM_COL.length=GEO.length; WM_P.length=GEO.length; WM
 GEO.forEach((g,i)=>{ WM_NAMES[i]=g[0]; WM_KPOS.push([Math.round(G.x(g[1])),Math.round(G.y(g[2]))]); });
 try{ WMD=null; }catch(e){}
 // бүлэг: Хорезмыг хасаад 13 бүлэг. Үнэгүй баатар Мухулай 13-р бүлэгт шилжинэ.
-CAMP.length=13; CAMP.forEach((c,i)=>{ c.hero=({2:'khukhchu',6:'jochi',9:'ogodei',12:'mukhulai'})[i]||''; });
+CAMP.length=13; CAMP.forEach((c,i)=>{ c.hero=({2:'khukhchu',6:'jochi',9:'belgutei',12:'mukhulai'})[i]||''; });
 joinedN=function(){ return S.camp?Object.keys(S.camp.join).filter(k=>+k<CAMP.length).length:0; };
 })();
 
@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9c0f719896';
+var UPDB='ab1484cf10';
 (function(){
   const K='updTry';
   const _go=updGo;

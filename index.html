@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='562c843641';
+var UPDB='2566435e52';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14100,7 +14100,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     fix(q); const y=Y(), l=y.lv||0;
     ctx.drawImage(lk,q.x,q.y,q.w,q.h);
     const sp=img('y'+Math.max(1,y.up&&!l?1:l)); 
-    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h-h+3,w,h); ctx.globalAlpha=1; } }
+    if(l>0||y.up){ const k=img('y'+Math.max(1,l||1)); if(k){ const w=k.naturalWidth*KY, h=k.naturalHeight*KY; ctx.globalAlpha=(y.up&&!l)?0.55:1; ctx.drawImage(k,q.x+q.w/2-w/2,q.y+q.h*0.6-h,w,h); ctx.globalAlpha=1; } }
     let tx='', cl='#fff';
     if(y.up){ tx='🔨 '+fmt(rem()); cl='#ffd770'; } else if(l>0){ tx='Lv '+l; } else if(open()){ tx='⚓ Барих'; cl='#ffd770'; } else return;
     try{ ctx.font='bold 3.8px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.4; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=cl; ctx.strokeText(tx,q.x+q.w/2,q.y+q.h+6); ctx.fillText(tx,q.x+q.w/2,q.y+q.h+6); }catch(e){}

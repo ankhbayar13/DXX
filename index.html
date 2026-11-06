@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='0437b454e2';
+var UPDB='1ecc731354';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13836,6 +13836,20 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     {id:'move',n:'Байрлал',d:'Урд мөр ↔ ар мөр',tg:0,cd:0,i:'i4'},
     {id:'scope',n:'Ажиглалт',d:'Зорилтод 2 тойрог +40% хохирол',tg:1,cd:2,i:'i5',ch:'🔭'}];
   const A=id=>ACT.find(a=>a.id===id);
+  /* Усан онгоцны зогсоол (shipyard.js): хөлөг тус бүрийн түвшин, тулаанд оролцох эсэх, ур чадварын түвшин */
+  const SK=id=>{ try{ return typeof yardSk==='function'?Math.max(1,Math.min(3,yardSk(id))):1; }catch(e){ return 1; } };
+  const SKB={arrow:3,pot:3,hook:2};
+  const bs=(att,id,b)=>att.side==='p'?b+(SKB[id]||0)*(SK(id)-1):b;
+  function dsc(a){ const k=SK(a.id); switch(a.id){
+    case 'arrow': return 'Алс зайн: дайсны аль ч хөлөгт '+(14+3*(k-1))+' хохирол';
+    case 'pot': return 'Ойрын (урд мөрөөс): '+(11+3*(k-1))+' + 2 тойрог шатаана';
+    case 'hook': return 'Ойрын (урд мөрөөс): '+(9+2*(k-1))+' + дайсан 1 ээлж алгасна';
+    case 'shield': return 'Дараагийн цохилтыг '+[50,60,70][k-1]+'% бууруулна';
+    case 'scope': return 'Зорилтод 2 тойрог +'+[40,55,70][k-1]+'% хохирол';
+    default: return a.d; } }
+  function fleet(){ let r; try{ r=typeof yardFleet==='function'?yardFleet():null; }catch(e){ r=null; }
+    if(!r||!r.length) r=[0,1,2,3,4].map(k=>({hm:1,am:1,on:true}));
+    if(!r.some(x=>x.on)) r[0].on=true; return r; }
   const PF=430,PB=205,EF=850,EB=1075, YS=[300,440,573,372,512];
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -13908,7 +13922,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   addEventListener('resize',fit); addEventListener('orientationchange',()=>setTimeout(fit,200));
 
   const img=(n,x)=>'<img src="'+BASE+n+'.webp?v='+VER+'" '+(x||'')+' draggable="false">';
-  function mkShip(side,t,hm){ const mx=Math.round(TYPES[t].hp*hm); return {side,t,hp:mx,max:mx,front:t<3,sh:0,cd:{pot:0,hook:0,scope:0},burn:0,burnD:0,stun:0,mark:0,acted:0,alive:true,id:side+t,w:Math.round(SZ[(side==='p'?'b':'r')+t][0]*SC),h:Math.round(SZ[(side==='p'?'b':'r')+t][1]*SC)}; }
+  function mkShip(side,t,hm,am,off){ const mx=off?0:Math.round(TYPES[t].hp*hm); return {side,t,hp:mx,max:mx,am:am||1,off:!!off,front:t<3,sh:0,cd:{pot:0,hook:0,scope:0},burn:0,burnD:0,stun:0,mark:0,acted:0,alive:!off,id:side+t,w:Math.round(SZ[(side==='p'?'b':'r')+t][0]*SC),h:Math.round(SZ[(side==='p'?'b':'r')+t][1]*SC)}; }
   const P=()=>G.ps.filter(x=>x.alive), E=()=>G.es.filter(x=>x.alive);
   function pos(s){ s.x=s.side==='p'?(s.front?PF:PB):(s.front?EF:EB); s.y=YS[s.t]; }
 
@@ -13918,8 +13932,9 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     try{ const old=document.getElementById('nvy'); if(old) old.remove(); }catch(e){}
     const t=CAMP[ci], N=CSN(ci), p=stepP(ci,s), boss=s===N-1, fa=FAC[ci]||FAC[22];
     const YI=(typeof yardInfo==='function')?yardInfo():{lv:0,hm:1,am:1}, r=Math.max(.05,totalPower()/p), dm=clamp(Math.pow(r,.5),.6,2.2)*YI.am, em=clamp(Math.pow(1/r,.5),.55,2.0);
+    const FL=fleet();
     G={ci,s,N,p,boss,fa,dm,em,round:1,phase:'p',busy:false,sel:-1,act:null,done:false,rep:!!(S.camp&&S.camp.done&&S.camp.done[ci+':'+s]),
-      ps:[0,1,2,3,4].map(k=>mkShip('p',k,YI.hm)), es:compose(ci,s,N).map(k=>mkShip('e',k,boss?1.25:1)), qt:0 };
+      ps:[0,1,2,3,4].map(k=>{ const f=FL[k]; return mkShip('p',k,YI.hm*f.hm,f.am,!f.on); }), es:compose(ci,s,N).map(k=>mkShip('e',k,boss?1.25:1)), qt:0 };
     G.ps.concat(G.es).forEach(pos);
     G.bl=window.BT_LAND; window.BT_LAND=1; try{ dispatchEvent(new Event('resize')); }catch(e){}
     root=document.createElement('div'); root.id='nvy'; stg=document.createElement('div'); stg.id='nvs'; root.appendChild(stg); document.body.appendChild(root);
@@ -13955,7 +13970,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       qe.innerHTML=P().map(row).join('')+'<div class="qs"></div>'+E().map(row).join(''); qe.querySelectorAll('.qi.p').forEach(q=>{ q.onclick=()=>{ const sh=G.ps.find(z=>z.id===q.dataset.k); if(sh) pick(sh); }; }); }
     G.ps.concat(G.es).forEach(x=>{
       const e=x.el; pos(x); e.style.left=(x.x-x.w/2)+'px'; e.style.top=(x.y-x.h)+'px'; e.style.zIndex=Math.round(x.y/10);
-      e.classList.toggle('dead',!x.alive); e.classList.toggle('sel',x.side==='p'&&G.ps[G.sel]===x&&x.alive);
+      e.style.display=x.off?'none':''; e.classList.toggle('dead',!x.alive); e.classList.toggle('sel',x.side==='p'&&G.ps[G.sel]===x&&x.alive);
       e.classList.toggle('acted',x.side==='p'&&x.alive&&!!x.acted);
       e.classList.toggle('tg',x.side==='e'&&x.alive&&!!G.act&&G.phase==='p'&&!G.busy&&valid(G.ps[G.sel],G.act,x));
       const f=x.alive?Math.ceil(clamp(x.hp/x.max,0,1)*6):0; e.querySelectorAll('.nvhb i').forEach((i,k)=>i.classList.toggle('on',k<f));
@@ -13971,7 +13986,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     let hint='';
     if(G.done) hint=''; else if(G.phase!=='p') hint='Дайсан довтолж байна...'; else if(!sel||!sel.alive||sel.acted) hint='Хөлгөө сонго (доорх карт эсвэл далайд)';
     else if(G.act) hint=A(G.act).n+': дайсны улаан хөлөг дээр дар'; else hint=sel.stun?'':'Үйлдлээ сонго →';
-    const ia=G.act&&A(G.act), ds=ia?ia.d:(sel&&sel.alive?TYPES[sel.t].n+' · '+Math.ceil(sel.hp)+'/'+sel.max+(sel.front?' · урд мөр':' · ар мөр'):'');
+    const ia=G.act&&A(G.act), ds=ia?dsc(ia):(sel&&sel.alive?TYPES[sel.t].n+' · '+Math.ceil(sel.hp)+'/'+sel.max+(sel.front?' · урд мөр':' · ар мөр'):'');
     const inn=document.getElementById('nvin');
     if(inn) inn.innerHTML='<div class="hint">'+hint+'</div><div>'+ds+'</div><div style="margin-top:4px"><span class="nvbn" id="nvend">⏭ Дуусгах</span><span class="nvbn red" id="nvqt">🏳 Бууж өгөх</span></div>';
     const be=document.getElementById('nvend'); if(be) be.onclick=()=>{ if(G.phase==='p'&&!G.busy&&!G.done) endPlayer(); };
@@ -13992,19 +14007,19 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   function fx(x,y,t,c){ const e=document.createElement('div'); e.className='nvfx '+(c||''); e.textContent=t; e.style.left=x+'px'; e.style.top=y+'px'; stg.appendChild(e); setTimeout(()=>e.remove(),1000); }
   async function proj(a,b,ch){ const e=document.createElement('div'); e.className='nvpj'; e.textContent=ch; e.style.left=a.x+'px'; e.style.top=(a.y-a.h*.6)+'px'; stg.appendChild(e); await wait(30); e.style.left=b.x+'px'; e.style.top=(b.y-b.h*.5)+'px'; await wait(400); e.remove(); }
   function sfxs(n){ try{ sfx(n); }catch(e){} }
-  function dmgOf(att,tgt,base){ const m=att.side==='p'?G.dm:G.em; let d=base*TYPES[att.t].at*m*(.88+Math.random()*.24)*(1+Math.max(0,G.round-10)*.2); if(tgt.sh) d*=.5; if(tgt.mark) d*=1.4; return Math.max(1,Math.round(d)); }
+  function dmgOf(att,tgt,base){ const m=att.side==='p'?G.dm:G.em; let d=base*TYPES[att.t].at*(att.am||1)*m*(.88+Math.random()*.24)*(1+Math.max(0,G.round-10)*.2); if(tgt.sh) d*=(tgt.side==='p'?[.5,.4,.3][SK('shield')-1]:.5); if(tgt.mark) d*=(tgt.side==='e'?[1.4,1.55,1.7][SK('scope')-1]:1.4); return Math.max(1,Math.round(d)); }
   function hurt(tgt,d,tag){ tgt.hp-=d; fx(tgt.x,tgt.y-tgt.h*.6,'−'+d,''); tgt.el.classList.add('hit'); setTimeout(()=>tgt.el&&tgt.el.classList.remove('hit'),300); sfxs('hit'); if(tgt.hp<=0){ tgt.hp=0; tgt.alive=false; fx(tgt.x,tgt.y-tgt.h*.4,'💥',''); } }
 
   async function doAct(att,id,tgt){
     const a=A(id), nm=(att.side==='p'?'':'Дайсны ')+TYPES[att.t].n; G.busy=true; att.el.classList.add('go'); await wait(180);
     if(id==='shield'){ att.sh=1; fx(att.x,att.y-att.h*.6,'🛡',''); let m=nm+': бамбай';
-      if(att.t===3){ const al=(att.side==='p'?P():E()).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0]; if(al&&al.hp<al.max){ const hl=Math.round(18*(att.side==='p'?1:1)); al.hp=Math.min(al.max,al.hp+hl); fx(al.x,al.y-al.h*.6,'+'+hl,'g'); m+=' · засвар +'+hl; } }
+      if(att.t===3){ const al=(att.side==='p'?P():E()).sort((p,q)=>p.hp/p.max-q.hp/q.max)[0]; if(al&&al.hp<al.max){ const hl=Math.round(18*(att.side==='p'?[1,1.33,1.67][SK('shield')-1]:1)); al.hp=Math.min(al.max,al.hp+hl); fx(al.x,al.y-al.h*.6,'+'+hl,'g'); m+=' · засвар +'+hl; } }
       say2(m); sfxs('click'); }
     else if(id==='move'){ att.front=!att.front; say2(nm+': '+(att.front?'урд мөр рүү':'ар мөр рүү')); sfxs('click'); await wait(450); }
     else { await proj(att,tgt,a.ch);
-      if(id==='arrow'){ const d=dmgOf(att,tgt,14); hurt(tgt,d); say2(nm+' → '+a.n+': −'+d); }
-      else if(id==='pot'){ const d=dmgOf(att,tgt,11); hurt(tgt,d); if(tgt.alive){ tgt.burn=2; tgt.burnD=Math.max(2,Math.round(6*TYPES[att.t].at*(att.side==='p'?G.dm:G.em))); } att.cd.pot=2; say2(nm+' → '+a.n+': −'+d+' 🔥'); }
-      else if(id==='hook'){ const d=dmgOf(att,tgt,9); hurt(tgt,d); if(tgt.alive){ tgt.stun=1; fx(tgt.x,tgt.y-tgt.h*.9,'💫',''); } att.cd.hook=2; say2(nm+' → '+a.n+': −'+d+' · ээлж алгасна'); }
+      if(id==='arrow'){ const d=dmgOf(att,tgt,bs(att,'arrow',14)); hurt(tgt,d); say2(nm+' → '+a.n+': −'+d); }
+      else if(id==='pot'){ const d=dmgOf(att,tgt,bs(att,'pot',11)); hurt(tgt,d); if(tgt.alive){ tgt.burn=2; tgt.burnD=Math.max(2,Math.round(6*TYPES[att.t].at*(att.am||1)*(att.side==='p'?G.dm*[1,1.3,1.6][SK('pot')-1]:G.em))); } att.cd.pot=2; say2(nm+' → '+a.n+': −'+d+' 🔥'); }
+      else if(id==='hook'){ const d=dmgOf(att,tgt,bs(att,'hook',9)); hurt(tgt,d); if(tgt.alive){ tgt.stun=1; fx(tgt.x,tgt.y-tgt.h*.9,'💫',''); } att.cd.hook=2; say2(nm+' → '+a.n+': −'+d+' · ээлж алгасна'); }
       else if(id==='scope'){ tgt.mark=2; att.cd.scope=2; fx(tgt.x,tgt.y-tgt.h*.8,'🎯',''); say2(nm+' → '+a.n+': +40% хохирол'); } }
     await wait(520); att.el.classList.remove('go'); upd(); G.busy=false;
   }
@@ -14225,7 +14240,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   const SEC_PER_ALT=180;
   const IM={};
   function img(k){ let o=IM[k]; if(!o){ o=IM[k]={img:new Image(),ok:false}; o.img.onload=()=>{ o.ok=true; }; o.img.src='hf/yd/'+k+'.webp?v='+V; } return o.ok?o.img:null; }
-  const Y=()=>{ S.yard=S.yard||{lv:0,up:0,end:0}; return S.yard; };
+  const Y=()=>{ const y=S.yard=S.yard||{lv:0,up:0,end:0}; if(!y.sh){ y.sh=[0,0,0,0,0]; } if(!y.sk){ y.sk=[1,1,1,1,1]; } if(!y.eq){ y.eq=[1,1,1,1,1]; } if(y.sb===undefined) y.sb=0; if(y.lv>=1&&!y.sh[0]) y.sh[0]=1; return y; };
   const fmt=s=>{ s=Math.max(0,Math.round(s)); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s%60).padStart(2,'0'); };
   const open=()=>{ try{ return chOpen(22); }catch(e){ return false; } };
   const rem=()=>{ const y=Y(); return y.up?Math.max(0,(y.end-Date.now())/1000):0; };
@@ -14247,7 +14262,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   pondDraw=function(q){
     ensure(); if(!q._yl) return _pd.apply(this,arguments);
     const lk=img('lake'); if(!lk) return _pd.apply(this,arguments);
-    ctx.drawImage(lk,q.x,q.y,q.w,q.h);
+    ctx.drawImage(lk,q.x,q.y,q.w,q.h); drawShips(q);
   };
   /* барилга: уулын (peak) дараа эрэмбээр зурагдана, ингэснээр уул барилгын дээгүүр гарахгүй */
   const BY=0.3, WD=[0,32,42,52];
@@ -14294,11 +14309,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     else b+='<div class="sct">✅ Хамгийн дээд түвшин</div>';
     d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+NM[Math.max(l,0)]+'</b><div class="sm">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div></div></div>'+b+
       (open()&&!y.up&&c?'<button class="btn red" id="yup">'+(l?'⬆ Сайжруулах':'🔨 Барих')+'</button> ':'')+
+      (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> ':'')+
       (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
       '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
     document.body.appendChild(d);
     const q=id=>document.getElementById(id);
-    if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
+    if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
     if(y.up) closeCard.iv=setInterval(()=>{ const el=q('ytm'); if(!el){ clearInterval(closeCard.iv); return; } el.textContent=fmt(rem()); },1000); }
   window.yardCard=card;
 
@@ -14335,9 +14351,94 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   /* амьтан, NPC нуурын усан дээгүүр алхахгүй — эрэгт хүрмэгц эрэг дагаж гүйнэ */
   const _up=update;
   update=function(dt){ _up.apply(this,arguments);
-    try{ const q=yq(); if(!q||!ents) return; const cx=q.x+q.w*0.5, cy=q.y+q.h*0.58, rx=q.w*0.44, ry=q.h*0.33;
+    try{ const q=yq(); if(!q||!ents) return; const cx=q.x+q.w*0.5, cy=q.y+q.h*0.58, rx=q.w*0.44+20, ry=q.h*0.33+20;
       ents.forEach(e=>{ if(e.type==='eagle'||e._in) return; const fx=e.x+entW(e)/2, fy=e.y+entH(e); const dx=(fx-cx)/rx, dy=(fy-cy)/ry, d=dx*dx+dy*dy;
         if(d<1){ const m=Math.sqrt(d)||0.001; e.x+=cx+dx/m*rx*1.03-fx; e.y+=cy+dy/m*ry*1.03-fy; } }); }catch(e){} };
+
+  /* ===== Хөлөг үйлдвэрлэх, сайжруулах, тоноглох + ур чадвар сайжруулах ===== */
+  const SHN=['Эскорт','Дунд хөлөг','Флагман','Тээврийн хөлөг','Хөнгөн хөлөг'];
+  const SHD=['Хурдан, тэнцвэртэй','Дунд хүчтэй','Хамгийн хүчтэй, том','Бамбайгаар нөхдөө засна','Хөнгөн, хямд'];
+  const SHC=[
+    [null,null,{wood:150,gold:200,t:240},{wood:400,gold:700,alt:2,t:900}],
+    [null,{wood:250,gold:400,t:420},{wood:500,gold:800,alt:2,t:1200},{wood:900,gold:1600,alt:5,t:3000}],
+    [null,{wood:500,gold:900,alt:3,t:1200},{wood:900,gold:1800,alt:6,t:3000},{wood:1600,gold:3500,alt:12,t:6000}],
+    [null,{wood:300,gold:500,t:600},{wood:600,gold:1000,alt:2,t:1500},{wood:1000,gold:2000,alt:5,t:3600}],
+    [null,{wood:200,gold:300,t:300},{wood:400,gold:700,alt:1,t:900},{wood:700,gold:1300,alt:3,t:2400}]];
+  const HL=[1,1,1.25,1.5], AL=[1,1,1.1,1.2];
+  const SKI={arrow:0,pot:1,hook:2,shield:3,scope:4};
+  const SKN=[['arrow','Галт сум','i0'],['pot','Гал асаагуур','i1'],['hook','Дэгээ','i2'],['shield','Бамбай','i3'],['scope','Ажиглалт','i5']];
+  const SKT={arrow:['14','17','20'],pot:['11 + шатаалт','14 + шатаалт +30%','17 + шатаалт +60%'],hook:['9','11','13'],shield:['−50%','−60%','−70%'],scope:['+40%','+55%','+70%']};
+  const SKC=[null,null,{gold:600,alt:1},{gold:2000,alt:5}];
+  window.yardSk=id=>{ const v=(Y().sk||[])[SKI[id]]; return v>0?v:1; };
+  window.yardFleet=()=>{ const y=Y(); return [0,1,2,3,4].map(k=>{ const lv=y.sh[k]||0; return {lv:lv,hm:HL[lv]||1,am:AL[lv]||1,on:lv>0&&y.eq[k]!==0}; }); };
+
+  const NI={};
+  function nimg(n){ let o=NI[n]; if(!o){ o=NI[n]={img:new Image(),ok:false}; o.img.onload=()=>{ o.ok=true; }; o.img.src='hf/nv/'+n+'.webp?v=1'; } return o.ok?o.img:null; }
+  const shRem=()=>{ const y=Y(); return y.sb?Math.max(0,(y.sb.end-Date.now())/1000):0; };
+  function shDone(){ const y=Y(); if(!y.sb||Date.now()<y.sb.end) return; const b=y.sb; y.sh[b.k]=b.lv; if(b.lv===1) y.eq[b.k]=1; y.sb=0;
+    try{ save(); }catch(e){} try{ sfx('win'); say('🚢 '+SHN[b.k]+' бэлэн боллоо (Lv '+b.lv+')'); }catch(e){} if(document.getElementById('yfl')) fleetCard(); }
+  setInterval(()=>{ try{ if(typeof S==='undefined'||!S||!S.res) return; shDone(); }catch(e){} },1000);
+
+  function shBuild(k){ const y=Y(); if(y.sb){ say('Өөр хөлөг баригдаж байна'); return; } const n=(y.sh[k]||0)+1; if(n>3||!SHC[k][n]) return;
+    if(n>(y.lv||0)){ say('Зогсоолын Lv '+n+' хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
+    const c=SHC[k][n]; if(!can(c)){ say('Нөөц хүрэлцэхгүй'); try{ sfx('err'); }catch(e){} return; }
+    S.res.wood-=c.wood||0; S.res.gold-=c.gold||0; S.res.alt-=c.alt||0; y.sb={k:k,lv:n,end:Date.now()+c.t*1000};
+    try{ save(); updateHUD(); }catch(e){} say('🔨 '+SHN[k]+' баригдаж эхэллээ ('+fmt(c.t)+')'); fleetCard(); }
+  function shSpeed(){ const y=Y(); if(!y.sb) return; const c=Math.max(1,Math.ceil(shRem()/SEC_PER_ALT));
+    if((S.res.alt||0)<c){ say('Алт хүрэлцэхгүй (хэрэгтэй: '+c+')'); try{ sfx('err'); }catch(e){} return; }
+    S.res.alt-=c; y.sb.end=Date.now()-1; try{ updateHUD(); }catch(e){} shDone(); say('⚡ -'+c+' Алт'); fleetCard(); }
+  function shEq(k){ const y=Y(); if(!(y.sh[k]>0)) return; const on=y.eq[k]!==0, cnt=[0,1,2,3,4].filter(i=>y.sh[i]>0&&y.eq[i]!==0).length;
+    if(on&&cnt<=1){ say('Дор хаяж 1 хөлөг тулаанд оролцоно'); return; } y.eq[k]=on?0:1; try{ save(); }catch(e){} fleetCard(); }
+  function skUp(i){ const y=Y(), cur=y.sk[i]||1, n=cur+1; if(n>3) return; if(n>(y.lv||0)){ say('Зогсоолын Lv '+n+' хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
+    const c=SKC[n]; if(!can(c)){ say('Нөөц хүрэлцэхгүй'); try{ sfx('err'); }catch(e){} return; }
+    S.res.gold-=c.gold||0; S.res.alt-=c.alt||0; y.sk[i]=n; try{ save(); updateHUD(); sfx('win'); }catch(e){} say('🎯 '+SKN[i][1]+' Lv '+n); fleetCard(); }
+
+  let ftab='s';
+  function fleetCard(tab){
+    if(tab) ftab=tab; const y=Y(); let d=document.getElementById('yfl'); const keep=d?d.querySelector('.ybx'):null, sc=keep?keep.scrollTop:0; if(d) d.remove();
+    d=document.createElement('div'); d.id='yfl'; d.style.cssText='position:fixed;inset:0;z-index:9050;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
+    const tb=(id,t)=>'<button class="btn" data-a="tab" data-v="'+id+'" style="'+(ftab===id?'':'background:#5b3d1e;')+'padding:6px 10px">'+t+'</button> ';
+    let b='';
+    if(ftab==='s'){
+      if(y.sb) b+='<div class="sct">🔨 <b>'+SHN[y.sb.k]+'</b> (Lv '+y.sb.lv+') баригдаж байна · <b id="yft">'+fmt(shRem())+'</b> <button class="btn" data-a="ssp" style="padding:4px 8px">⚡ '+Math.max(1,Math.ceil(shRem()/SEC_PER_ALT))+' Алт</button></div>';
+      b+='<div class="sm" style="margin:4px 0">Зогсоолын түвшин: <b>Lv '+(y.lv||0)+'</b> · хөлгийн түвшин зогсоолоос өндөр байж болохгүй</div>';
+      for(let k=0;k<5;k++){ const lv=y.sh[k]||0, n=lv+1, c=n<=3?SHC[k][n]:null, on=lv>0&&y.eq[k]!==0, busy=y.sb&&y.sb.k===k;
+        b+='<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,215,112,.18)">'+
+          '<img src="hf/nv/b'+k+'.webp?v=1" style="width:56px;height:44px;object-fit:contain;'+(lv?'':'filter:grayscale(1) brightness(.6);')+'" draggable="false">'+
+          '<div style="flex:1;min-width:0"><b>'+SHN[k]+'</b> '+(lv?'<span style="color:#ffd770">Lv '+lv+'</span>':'<span style="color:#aaa">барьсангүй</span>')+'<div class="sm">'+SHD[k]+(lv?' · амь +'+Math.round((HL[lv]-1)*100)+'% · хүч +'+Math.round((AL[lv]-1)*100)+'%':'')+'</div>'+
+          (c&&!busy?'<div class="sm">Lv '+n+': '+cs(c)+'· '+fmt(c.t)+'</div>':'')+'</div>'+
+          '<div style="display:flex;flex-direction:column;gap:4px">'+
+          (lv>0?'<button class="btn" data-a="eq" data-v="'+k+'" style="padding:4px 8px;'+(on?'':'background:#5b3d1e;')+'">'+(on?'⚔ Тулаанд':'💤 Амарна')+'</button>':'')+
+          (c&&!busy&&!y.sb?'<button class="btn red" data-a="sb" data-v="'+k+'" style="padding:4px 8px">'+(lv?'⬆ Lv '+n:'🔨 Барих')+'</button>':'')+
+          '</div></div>'; }
+    } else {
+      b+='<div class="sm" style="margin:4px 0">Ур чадварын түвшин зогсоолын түвшнээс өндөр байж болохгүй (Зогсоол Lv '+(y.lv||0)+'). Тулаан эхлэхэд хүчин төгөлдөр болно.</div>';
+      SKN.forEach((s,i)=>{ const lv=y.sk[i]||1, n=lv+1, c=n<=3?SKC[n]:null;
+        b+='<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,215,112,.18)">'+
+          '<img src="hf/nv/'+s[2]+'.webp?v=1" style="width:44px;height:44px;object-fit:contain" draggable="false">'+
+          '<div style="flex:1;min-width:0"><b>'+s[1]+'</b> <span style="color:#ffd770">Lv '+lv+'</span><div class="sm">Одоо: '+SKT[s[0]][lv-1]+(c?' → Lv '+n+': '+SKT[s[0]][n-1]:' (дээд түвшин)')+'</div>'+(c?'<div class="sm">Үнэ: '+cs(c)+'</div>':'')+'</div>'+
+          (c?'<button class="btn red" data-a="sk" data-v="'+i+'" style="padding:4px 8px">⬆ Lv '+n+'</button>':'<span style="color:#9fe08a">✅</span>')+'</div>'; });
+    }
+    d.innerHTML='<div class="sci" style="max-width:380px;width:92%"><div class="sch"><div style="font-size:28px">🚢</div><div><b>Усан онгоцны зогсоол</b><div class="sm">Флот, ур чадвар</div></div></div>'+
+      '<div style="margin:4px 0">'+tb('s','🚢 Хөлөг')+tb('k','🎯 Ур чадвар')+'</div><div class="ybx" style="max-height:50vh;overflow-y:auto">'+b+'</div>'+
+      '<div style="margin-top:6px"><button class="btn" style="background:#5b3d1e" data-a="x">Хаах</button></div></div>';
+    document.body.appendChild(d); const nb=d.querySelector('.ybx'); if(nb) nb.scrollTop=sc;
+    d.onclick=e=>{ if(e.target===d){ d.remove(); return; } const t=e.target.closest('[data-a]'); if(!t) return; const a=t.dataset.a, v=t.dataset.v;
+      if(a==='x') d.remove(); else if(a==='tab') fleetCard(v); else if(a==='eq') shEq(+v); else if(a==='sb') shBuild(+v); else if(a==='ssp') shSpeed(); else if(a==='sk') skUp(+v); };
+    if(fleetCard.iv){ clearInterval(fleetCard.iv); fleetCard.iv=0; }
+    if(y.sb&&ftab==='s') fleetCard.iv=setInterval(()=>{ const el=document.getElementById('yft'); if(!el){ clearInterval(fleetCard.iv); fleetCard.iv=0; return; } el.textContent=fmt(shRem()); },1000);
+  }
+  window.yardFleetCard=fleetCard;
+
+  /* нуур дээр хөлгүүд хөвнө */
+  const SLT=[[.26,.64],[.44,.82],[.62,.62],[.78,.78],[.50,.50]], SWD=[26,30,38,30,24];
+  function drawShips(q){ try{ const y=Y(), t=Date.now()/1000;
+    for(let k=0;k<5;k++){ const lv=y.sh[k]||0, bd=y.sb&&y.sb.k===k; if(!lv&&!bd) continue; const im=nimg('b'+k); if(!im) continue;
+      const w=SWD[k], h=w*im.naturalHeight/im.naturalWidth, cx=q.x+q.w*SLT[k][0], cy=q.y+q.h*SLT[k][1]+Math.sin(t*1.3+k*1.7)*0.8;
+      ctx.globalAlpha=lv?1:.45; ctx.drawImage(im,cx-w/2,cy-h*.75,w,h); ctx.globalAlpha=1;
+      ctx.font='bold 3px sans-serif'; ctx.textAlign='center'; ctx.lineWidth=1.1; ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.fillStyle=lv?'#fff':'#ffd770';
+      const tx=lv?(y.eq[k]===0?'💤 ':'')+'Lv '+lv:'🔨'; ctx.strokeText(tx,cx,cy+h*.25+3); ctx.fillText(tx,cx,cy+h*.25+3); }
+    }catch(e){} }
 })();
 
 

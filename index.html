@@ -9269,9 +9269,9 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
 })();
 
 
-/* p32/freehero.js — үнэгүй баатар: аймаг 3/7/10/14 → Хөхчү/Жочи/Өгөдэй/Мухулай. Үнэгүй 2 дуудлага: 1-р = 2★ санамсаргүй, 2-р = Сүбээдэй/Хубилай/Хасар/Мухулай-ийн нэг. */
+/* p32/freehero.js — үнэгүй баатар: аймаг 3/7/10/14 → Хөхчү/Жочи/Бэлгүтэй/Мухулай. Үнэгүй 2 дуудлага: 1-р = 2★ санамсаргүй, 2-р = Сүбээдэй/Хубилай/Хасар/Мухулай-ийн нэг. */
 (function(){
-  const CH={2:'khukhchu',6:'jochi',9:'ogodei',13:'mukhulai'};
+  const CH={2:'khukhchu',6:'jochi',9:'belgutei',13:'mukhulai'};
   CAMP.forEach((c,i)=>{ c.hero=CH[i]||''; });
   const FOUR=['subeedei','khubilai','khasar','mukhulai'];
   let FR=0;
@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e144d010e6';
+var UPDB='9c0f719896';
 (function(){
   const K='updTry';
   const _go=updGo;

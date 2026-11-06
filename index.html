@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7009313c0a';
+var UPDB='f58f646f0f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13765,7 +13765,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
 /* p32/chpic2.js — Түүхэн аян: 17 бүлгийн бэлэн зураг (hf/ch1..17.webp) дээр амьд мэдээлэл (Нэгдсэн, Энэ бүлэг, тэнхээ, дайсны хүч) ба товчнууд. 18+ бүлэг хуучин арал-дэлгэцээр. */
 (function(){
-  const HAS=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]), NP=30, IW=800, IH=1422, VER='1';
+  const HAS=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]), NP=30, IW=800, IH=1422, VER='2';
   const G={ X:[1.5,2,13,7], panel:[2.3,10.7,47.3,12.6], plaq:[28.5,71.7,39.5,4.6],
     bat:[3.5,78.8,20.5,9.6], rat:[75.5,78.8,21.5,9.6], la:[26.5,79.2,14.5,9], ra:[60.5,79.2,14.5,9], ent:[20.5,89.6,59,7.8],
     pl:[0.5,33,25,31], pr:[73,33,26.5,31] };
@@ -13850,6 +13850,14 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     '#nvs .nvov{position:absolute;background:#08121f;transition:width .5s}'+
     '#nvs .nvhn{position:absolute;top:6px;font-size:21px;font-weight:bold;color:#ffe9b0;text-shadow:0 2px 4px #000,0 0 6px #000;white-space:nowrap}'+
     '#nvs .nvtn{position:absolute;left:570px;top:10px;width:140px;text-align:center;background:linear-gradient(#3a2610ee,#1f1408ee);border:2px solid #c9972b;border-radius:10px;padding:4px 0;font-size:14px;font-weight:bold;color:#ffe9b0;line-height:1.25;z-index:150}'+
+    '#nvs .nvq{position:absolute;left:8px;top:112px;width:62px;padding:6px 4px 6px 12px;background:linear-gradient(#142133ee,#0a1320ee);border:2px solid #c9972b;border-radius:10px;z-index:120}'+
+    '#nvs .nvq .qi{position:relative;height:38px;margin:0 0 4px 0;border-radius:6px;border:2px solid #2d6fc4;background:#0d1a2b;display:flex;align-items:center;justify-content:center;cursor:pointer}'+
+    '#nvs .nvq .qi.e{border-color:#c43b2d;background:#2b0f0d;cursor:default}'+
+    '#nvs .nvq .qi img{max-width:44px;max-height:32px;object-fit:contain}'+
+    '#nvs .nvq .qi.dn{filter:grayscale(.9) brightness(.55)}'+
+    '#nvs .nvq .qi.cur{box-shadow:0 0 10px 2px #ffd770;border-color:#ffd770}'+
+    '#nvs .nvq .qi.cur::before{content:"\u25B6";position:absolute;left:-17px;top:7px;font-size:16px;color:#ffd770;text-shadow:0 1px 3px #000}'+
+    '#nvs .nvq .qs{height:1px;background:#c9972b88;margin:2px 0 6px}'+
     '#nvs .nvlg{position:absolute;left:250px;width:780px;top:104px;text-align:center;font-size:20px;font-weight:bold;color:#fff;text-shadow:0 2px 5px #000,0 0 8px #000;z-index:150;pointer-events:none;min-height:26px}'+
     '#nvs .nvsh{position:absolute;transition:left .45s,transform .2s;cursor:default}'+
     '#nvs .nvsh img{display:block;width:100%;pointer-events:none}'+
@@ -13921,7 +13929,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     h+='<div class="nvhn" style="left:'+(6+HW*.31)+'px">Монголын флот</div>';
     h+='<div class="nvhd e"><div class="fl">'+img(fa.he)+'<div class="nvov" id="nvoe" style="left:'+(se[0]*100)+'%;top:'+(se[1]*100)+'%;height:'+((se[3]-se[1])*100)+'%;width:0"></div></div></div>';
     h+='<div class="nvhn" style="left:'+(714+HW*.2)+'px;width:'+(HW*.5)+'px;text-align:center">'+fa.n+'</div>';
-    h+='<div class="nvtn" id="nvtn"></div><div class="nvlg" id="nvlg"></div>';
+    h+='<div class="nvtn" id="nvtn"></div><div class="nvlg" id="nvlg"></div><div class="nvq" id="nvq"></div>';
     G.ps.concat(G.es).forEach(x=>{ const k=(x.side==='p'?'b':'r')+x.t;
       h+='<div class="nvsh '+x.side+'" id="nv_'+x.id+'" style="width:'+x.w+'px"><div class="nvst"></div><div class="nvhb '+x.side+'">'+'<i></i>'.repeat(6)+'</div><img src="'+BASE+k+'.webp?v='+VER+'" style="'+(x.side==='e'&&fa.f?'filter:'+fa.f:'')+'" draggable="false"></div>'; });
     h+='<div class="nvbt"></div>';
@@ -13943,6 +13951,8 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     const sumP=G.ps.reduce((a,x)=>a+Math.max(0,x.hp),0)/G.ps.reduce((a,x)=>a+x.max,0), sumE=G.es.reduce((a,x)=>a+Math.max(0,x.hp),0)/G.es.reduce((a,x)=>a+x.max,0);
     ovl(document.getElementById('nvom'),SEG.hm,sumP); ovl(document.getElementById('nvoe'),SEG[G.fa.he],sumE);
     const tn=document.getElementById('nvtn'); if(tn) tn.innerHTML='Тойрог '+G.round+'<br>'+(G.phase==='p'?'Таны ээлж':'Дайсны ээлж');
+    const qe=document.getElementById('nvq'); if(qe){ const row=(x)=>{ const cur=x.side==='p'?(G.phase==='p'&&G.ps[G.sel]===x):(G.cur===x); return '<div class="qi '+x.side+(x.side==='p'&&x.acted?' dn':'')+(cur?' cur':'')+'" data-k="'+x.id+'"><img src="'+BASE+(x.side==='p'?'b':'r')+x.t+'.webp?v='+VER+'" draggable="false"></div>'; };
+      qe.innerHTML=P().map(row).join('')+'<div class="qs"></div>'+E().map(row).join(''); qe.querySelectorAll('.qi.p').forEach(q=>{ q.onclick=()=>{ const sh=G.ps.find(z=>z.id===q.dataset.k); if(sh) pick(sh); }; }); }
     G.ps.concat(G.es).forEach(x=>{
       const e=x.el; pos(x); e.style.left=(x.x-x.w/2)+'px'; e.style.top=(x.y-x.h)+'px'; e.style.zIndex=Math.round(x.y/10);
       e.classList.toggle('dead',!x.alive); e.classList.toggle('sel',x.side==='p'&&G.ps[G.sel]===x&&x.alive);
@@ -14015,7 +14025,8 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     if(G.done||G.phase!=='p') return; G.phase='e'; G.act=null; G.sel=-1; upd(); await wait(500);
     for(const e of G.es.slice()){ if(G.done) return; if(!e.alive) continue;
       if(e.stun){ e.stun=0; fx(e.x,e.y-e.h*.8,'💫',''); say2('Дайсны '+TYPES[e.t].n+' ээлж алгасав'); upd(); await wait(600); continue; }
-      const ch=aiPick(e); if(!ch) continue; await doAct(e,ch.id,ch.t); if(chk()) return; await wait(250); }
+      const ch=aiPick(e); if(!ch) continue; G.cur=e; upd(); await doAct(e,ch.id,ch.t); if(chk()) return; await wait(250); }
+    G.cur=null;
     // тойргийн төгсгөл: түлэгдэлт, хүлээлт
     G.busy=true; let burned=false;
     G.ps.concat(G.es).forEach(x=>{ if(x.alive&&x.burn>0){ x.burn--; hurt(x,x.burnD,'burn'); burned=true; } });

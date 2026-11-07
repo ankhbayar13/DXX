@@ -10579,7 +10579,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d572ea0a69';
+var UPDB='75f752da35';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15288,6 +15288,32 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   // 4) Клантай тоглогчийн хамгаалалт +5%
   const _dm=defMul; defMul=function(){ let m=_dm.apply(this,arguments); try{ if(hasClan()) m+=0.05; }catch(e){} return m; };
   window.wmMoveDbg={isFree:isFree,hasClan:hasClan};
+})();
+
+
+/* p32/wmwarn.js — Кланд нэгдээгүй тоглогч дэлхийн газрын зураг нээхэд (бүр удаа) анхааруулга гаргана */
+(function(){
+  const _o=wmOpen;
+  wmOpen=function(){
+    const r=_o.apply(this,arguments);
+    try{
+      const noClan=!(S.clan!=null&&S.clan>=0&&CLN[S.clan]);
+      if(noClan&&S.clanAsk&&!document.getElementById('nfwarn')){
+        const d=document.createElement('div'); d.id='nfwarn';
+        d.style.cssText='position:fixed;inset:0;z-index:420;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center';
+        d.innerHTML='<div style="max-width:330px;width:88%;background:#3b2815;border:2px solid #c9972b;border-radius:14px;padding:16px;color:#f3e4bd;text-align:center">'
+          +'<div style="font-size:30px">⚠️</div><h3 style="margin:4px 0;color:#ffd770">Та кланд нэгдээгүй байна</h3>'
+          +'<div style="font-size:13px;line-height:1.45;text-align:left;margin-top:6px">• Клангүй тоглогч «Нутгийн айл» болж, дэлхийн чөлөөт газарт амьдарна.<br>'
+          +'• Гэр 5-р түвшинтэй бусад тоглогч таныг өдөрт 5 хүртэл удаа <b>дээрэмдэж</b> болно (нөөцийн 25% хүртэл), ялангуяа 12 цагаас дээш тоглоогүй үед.<br>'
+          +'• Кланд нэгдвэл хамгаалалт <b>+5%</b>, клан дайн, долоо хоногийн шагнал авна.</div>'
+          +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn red" id="nfw1" style="flex:1">⚑ Клан сонгох</button><button class="btn" id="nfw2" style="flex:1">Ойлголоо</button></div></div>';
+        document.body.appendChild(d);
+        document.getElementById('nfw1').onclick=()=>{ d.remove(); try{ cwOpen(); }catch(e){} };
+        document.getElementById('nfw2').onclick=()=>d.remove();
+      }
+    }catch(e){}
+    return r;
+  };
 })();
 
 </script><script>(function(){

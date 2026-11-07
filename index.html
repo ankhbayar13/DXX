@@ -438,7 +438,7 @@ const XPG={col:0.2,win:25,up:20,ord:12,nd:12,sell:5};
 function xpNeed(l){ return Math.floor(30+l*l*14); }
 function dqInit(){ const d=nowD().toDateString(); if(!S.dq||S.dq.d!==d) S.dq={d:d,c:{},cl:{},box:0}; }
 function qh(t,n){ S.st=S.st||{}; S.st[t]=(S.st[t]||0)+n; dqInit(); S.dq.c[t]=(S.dq.c[t]||0)+n; addXP((XPG[t]||0)*n); }
-function addXP(n){ if(!(n>0)) return; n=Math.round(n*(1+rsb('cul_xp')+0.08*(S.bld.school||0))); S.pig=Math.min(500,(S.pig||0)+n*0.06); S.xp=(S.xp||0)+n; S.pl=S.pl||1; while(S.xp>=xpNeed(S.pl)){ S.xp-=xpNeed(S.pl); S.pl++; lvUp(S.pl); } }
+function addXP(n){ if(!(n>0)) return; n=Math.round(n*(1+rsb('cul_xp')+0.08*(S.bld.school||0))); S.xp=(S.xp||0)+n; S.pl=S.pl||1; while(S.xp>=xpNeed(S.pl)){ S.xp-=xpNeed(S.pl); S.pl++; lvUp(S.pl); } }
 function lvUp(l){
   const g=100*l; S.res.gold+=g; S.res.alt+=2; sfx('lvl'); vib([30,40,30]);
   let e=$('lvup'); if(!e){ e=document.createElement('div'); e.id='lvup'; e.onclick=()=>{e.style.display='none'}; document.body.appendChild(e); }
@@ -560,7 +560,7 @@ const PACKS=[
 ];
 const STARTER={id:'starter',mnt:4900,give:{alt:150,gold:3000,meat:300,milk:300,wool:200}};
 const MONTH={id:'month',mnt:9900};
-const PIG={id:'pig',mnt:1900};
+const PIG={id:'pig',mnt:4999};
 const PASSV={id:'passvip',mnt:14900};
 function fmtMnt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')+'₮'; }
 function vipActive(){ return !!(S.vip&&S.vip.end>Date.now()); }
@@ -571,7 +571,7 @@ function grantPack(id){
   else if(id==='starter'){ if(S.paid.starter) return; S.paid.starter=1; const g=STARTER.give; S.res.alt+=g.alt; S.res.gold+=g.gold; ['meat','milk','wool'].forEach(k=>S.res[k]=Math.min(cap(),S.res[k]+g[k])); say('Эхлэлийн багц авлаа!'); }
   else if(id==='month'){ const now=Date.now(); S.vip={end:Math.max(now,(S.vip&&S.vip.end)||0)+30*864e5,last:(S.vip&&S.vip.last)||''}; say('Хааны тэтгэмж идэвхжлээ (30 хоног)'); }
   else if(id==='passvip'){ if(!S.pass) S.pass={p:0,c:0}; S.pass.vip=1; say('Хүндэт пасс идэвхжлээ!'); }
-  else if(id==='pig'){ const a=Math.floor(S.pig); if(a<10) return; S.res.alt+=a; S.pig=0; say('Гахайн хадгаламжаас +'+a+' Алт'); }
+  else if(id==='pig'){ const a=Math.floor(S.pig); if(a<10) return; S.res.alt+=a; S.pig=0; S.pigd={n:0,last:(S.pigd&&S.pigd.last)||''}; say('Гахайн хадгаламжаас +'+a+' Алт'); }
   try{ rkAdd(Math.floor((({starter:STARTER.mnt,month:MONTH.mnt,passvip:PASSV.mnt,pig:PIG.mnt})[id]||((PACKS.find(x=>x.id===id)||{}).mnt)||0)/100),'Худалдан авалт'); }catch(e){}
   refresh();
 }
@@ -608,7 +608,7 @@ function shopHTML(){
   h+='<div class="card sp"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_crown',62)+'<div><h3>Хааны тэтгэмж</h3><div class="sm">30 хоног: өдөр бүр 50 Алт, үйлдвэрлэл +10%</div>'+(vd?'<div class="sm" style="color:#9fe08a">Идэвхтэй · '+vleft+' хоног үлдсэн</div>':'')+'</div></div><button class="btn red" onclick="buyReal(\'month\')">'+fmtMnt(MONTH.mnt)+'</button></div>'+
    (vd?'<button class="btn" style="margin-top:8px;width:100%" '+(S.vip.last===nowD().toDateString()?'disabled':'')+' onclick="vipClaim()">Өнөөдрийн 50 Алт авах</button>':'')+'</div>';
   const pg=Math.floor(S.pig);
-  h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_pig',62)+'<div><h3>Алтан хадгаламж</h3><div class="sm">Тоглох тусам Алт хуримтлагдана. Хагалбал бүгдийг авна.</div><div class="hb" style="width:150px"><i style="width:'+Math.min(100,pg/5)+'%;background:#ffd770"></i></div><div class="sm">'+pg+' / 500 Алт</div></div></div><button class="btn" '+(pg<10?'disabled':'')+' onclick="buyReal(\'pig\')">'+fmtMnt(PIG.mnt)+'</button></div></div>';
+  h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_pig',62)+'<div><h3>Алтан хадгаламж</h3><div class="sm">30 хоног тасралтгүй нэвтэрвэл 500 Алт дүүрнэ. Хагалбал бүгдийг авна.</div><div class="hb" style="width:150px"><i style="width:'+Math.min(100,pg/5)+'%;background:#ffd770"></i></div><div class="sm">'+pg+' / 500 Алт</div><div class="sm">📅 Нэвтэрсэн өдөр: <b>'+pdn()+' / 30</b></div></div></div><button class="btn" '+(pg<10?'disabled':'')+' onclick="buyReal(\'pig\')">'+fmtMnt(PIG.mnt)+'</button></div></div>';
   h+=stnShopHTML();
   h+='<h3 style="margin:12px 4px 4px">Алт худалдан авах</h3><div class="pgrid">';
   PACKS.forEach((p,pi)=>{ const first=!S.paid[p.id]; h+='<div class="pk">'+(p.tag?'<div class="tagx">'+p.tag+'</div>':'')+'<div style="height:70px;display:flex;align-items:center;justify-content:center">'+ico('al'+pi,66)+'</div><b>'+p.alt+' Алт</b>'+(first?'<div class="sm" style="color:#9fe08a">Эхний удаа ×2 → '+(p.alt*2)+'</div>':'<div class="sm">'+p.n+'</div>')+'<button class="btn" style="width:100%;margin-top:6px" onclick="buyReal(\''+p.id+'\')">'+fmtMnt(p.mnt)+'</button></div>'; });
@@ -10579,7 +10579,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='75f752da35';
+var UPDB='14834aff69';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15314,6 +15314,25 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     }catch(e){}
     return r;
   };
+})();
+
+
+/* p32/pigdays.js — «Алтан хадгаламж»: нэвтэрсэн өдрөөр дүүрнэ. Өдөр бүр нэвтэрвэл +1 өдөр (дээд тал нь 30), орхисон өдөр тоологдохгүй ч явц алдагдахгүй. 30 өдөр = 500 Алт. */
+(function(){
+  const PER=500/30;
+  function pigTick(){
+    try{
+      if(typeof S==='undefined'||!S||!S.res) return;
+      const today=(typeof dayKey==='function')?dayKey():new Date().toDateString();
+      let P=S.pigd;
+      if(!P||typeof P.n!=='number'){ P=S.pigd={n:Math.max(0,Math.min(30,Math.ceil((S.pig||0)/PER-1e-9))),last:''}; }
+      if(P.last!==today){ if(P.n<30) P.n++; P.last=today; try{ save(); }catch(e){} }
+      const v=P.n*PER; if(Math.abs((S.pig||0)-v)>1e-6) S.pig=v;
+    }catch(e){}
+  }
+  window.pdn=function(){ pigTick(); return (S.pigd&&S.pigd.n)||0; };
+  window.pigTick=pigTick;
+  setTimeout(pigTick,4000); setInterval(pigTick,60000);
 })();
 
 </script><script>(function(){

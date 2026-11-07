@@ -9289,17 +9289,6 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
 })();
 
 
-/* p32/ndclose.js — 212: Сур харвалт, Морин уралдааг түр хаав (Тун удахгүй). Бөх л нээлттэй. */
-(function(){
-  const MSG='🔒 Түр хаалттай · Тун удахгүй нээгдэнэ';
-  const _a=archOpen; archOpen=function(){ try{ say('Сур харвалт түр хаалттай. Тун удахгүй!'); }catch(e){} };
-  const _r=raceOpen; raceOpen=function(){ try{ say('Морин уралдаан түр хаалттай. Тун удахгүй!'); }catch(e){} };
-  const _p=ndPlayCards; ndPlayCards=function(){ let h=_p.apply(this,arguments);
-    try{ h=h.replace(/<button class="btn"[^>]*onclick="(archOpen|raceOpen)\(\)">[^<]*<\/button>/g,'<button class="btn" disabled>🔒 Тун удахгүй</button>')
-      .replace('Харваач бэлтгэл хийж сураа нэм',MSG).replace('Морио товшиж давхиул. Хурд, тэсвэр бэлтгэлээр нэмэгдэнэ',MSG); }catch(e){} return h; };
-})();
-
-
 /* p32/ndwev.js — 213: Наадмын цэс (ndPlayCards) дээр бөхийн цол, Сум/Аймаг/Улсын наадмын самбар гаргах; жагсаалтад өөрийн цол */
 (function(){
   const D='<div class="card"><img';
@@ -10585,7 +10574,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='40b6684063';
+var UPDB='a1c1de3a63';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15218,6 +15207,14 @@ function sdEnd(){
 window.sdSel=function(t,v){ SEL[t]=v; document.querySelectorAll('[data-sd'+t+']').forEach(b=>{ b.style.outline=(+b.getAttribute('data-sd'+t)===v)?'3px solid #6fff6f':''; }); };
 window.sdStart=sdStart; window.sdBot=sdBot; window.sdCancel=sdCancel;
 window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,state:()=>({SD,Q}),_Q:()=>Q};
+})();
+
+
+/* p32/arenand.js — Сур харвалт, Морин уралдаа «Тэмцээн» цэсэнд бас гарна (Наадмын картуудтай адил) */
+(function(){ const _a=arenaHTML; arenaHTML=function(){
+  let h=_a.apply(this,arguments);
+  try{ const p=ndPlayCards().split('<div class="card">'); if(p.length>=3) h+='<div class="sm" style="text-align:center;margin:10px 0 2px;color:#ffd770">🏹 Наадмын тэмцээн</div>'+'<div class="card">'+p[1]+'<div class="card">'+p[2]; }catch(e){}
+  return h; };
 })();
 
 </script><script>(function(){

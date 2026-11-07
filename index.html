@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='418aadc5eb';
+var UPDB='40b6684063';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14873,7 +14873,7 @@ const IM={}; function img(n){ let o=IM[n]; if(!o){ o=IM[n]={img:new Image(),ok:f
 const SKL=id=>{ try{ return clamp(SKA.lv(id)||1,1,3); }catch(e){ return 1; } };
 const RANKS=[[0,'Шинэ далайчин'],[900,'Далайчин'],[1100,'Ахлагч'],[1300,'Ахмад далайчин'],[1500,'Далайн хаан']];
 const rkIdx=r=>{ let k=0; RANKS.forEach((x,i)=>{ if(r>=x[0]) k=i; }); return k; };
-const rkImg=(r,h)=>'<img src="'+ART+'rk'+rkIdx(r)+'.webp?v=1" style="height:'+h+'px;vertical-align:middle">';
+const rkImg=(r,h)=>'<img src="'+ART+'rk'+rkIdx(r)+'.webp?v=2" style="height:'+h+'px;vertical-align:middle">';
 const SKI=id=>SKA.MAP[id]||SKA.MAP.arrow;
 const BASEIDS=['arrow','pot','hook','shield','scope'];
 

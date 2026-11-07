@@ -10574,7 +10574,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bda80fa535';
+var UPDB='f4f5fb82c4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15243,6 +15243,46 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     }catch(e){}
     return h; };
   window.ssnDbg={check:check,sid:sid,rk:rk};
+})();
+
+
+/* p32/wmmove.js — Дэлхий: нүүх (клан солих) дүрэм. 5 бүлэг дууссаны дараа; 7 хоногт 1 удаа үнэгүй, 7 хоногийн дотор дахин нүүвэл 100 Алт. Клантай тоглогчийн хамгаалалт +5%. */
+(function(){
+  const WEEK=7*864e5, FEE=100, NEED=5;
+  const cj=()=>{ try{ return joinedN(); }catch(e){ return 0; } };
+  const adm=()=>{ try{ return typeof admOn==='function'&&admOn(); }catch(e){ return false; } };
+  const hasClan=()=>S.clan!=null&&S.clan>=0&&!!CLN[S.clan];
+  const isFree=()=>!S.clanT||Date.now()-S.clanT>=WEEK;
+  const leftTxt=()=>{ const ms=Math.max(0,WEEK-(Date.now()-(S.clanT||0))), d=Math.floor(ms/864e5), h=Math.ceil(ms%864e5/36e5); return d+'ө '+h+'ц'; };
+  // 1) Нүүх товч: 3 хоногийн хоригийг авч, 5 бүлгийн нөхцөл тавина
+  const _cc=cwChange;
+  cwChange=function(){
+    if(!hasClan()){ return _cc.apply(this,arguments); }
+    if(cj()<NEED&&!adm()){ say('🚚 Нүүх: Түүхэн аянаас '+NEED+' бүлэг дуусгасны дараа нээгдэнэ (одоо '+cj()+')'); try{ sfx('err'); }catch(e){} return; }
+    const t=S.clanT; S.clanT=0; try{ _cc.apply(this,arguments); } finally{ S.clanT=t; }
+  };
+  // 2) Нэгдэх (нүүх): өмнө нь нүүгээд 7 хоног болоогүй бол 100 Алт; амжилттай нүүсний дараа л суутгана
+  const _cj=cwJoin;
+  cwJoin=function(i){
+    const was=S.clan, wasT=S.clanT;
+    if(!hasClan()||i===was){ return _cj.apply(this,arguments); }
+    if(cj()<NEED&&!adm()){ say('🚚 Нүүх: '+NEED+' бүлэг дууссаны дараа'); return; }
+    const free=isFree();
+    if(!free&&(S.res.alt||0)<FEE){ say('💰 7 хоногийн дотор дахин нүүхэд '+FEE+' Алт хэрэгтэй (чинийх '+(S.res.alt||0)+'). Үнэгүй нүүх: '+leftTxt()+'-ийн дараа'); try{ sfx('err'); }catch(e){} return; }
+    const r=_cj.apply(this,arguments); let n=0;
+    const iv=setInterval(()=>{ n++; if(S.clan===i&&was!==i){ clearInterval(iv); if(!free){ S.res.alt=Math.max(0,(S.res.alt||0)-FEE); try{ save(); updateHUD(); }catch(e){} try{ say('🚚 Нүүлээ · −'+FEE+' Алт'); }catch(e){} } else { try{ say('🚚 Нүүлээ (7 хоногт 1 удаа үнэгүй)'); }catch(e){} } } else if(n>24) clearInterval(iv); },500);
+    return r;
+  };
+  // 3) Сонгох самбарт тайлбар
+  const _cr=cwRender;
+  cwRender=function(){
+    _cr.apply(this,arguments);
+    try{ if(!hasClan()||!CWD.pick) return; const p=document.getElementById('cwp'); if(!p) return; const s=p.querySelector('.sm'); if(!s) return;
+      s.insertAdjacentHTML('afterend','<div class="sm" style="margin:6px 0;padding:6px;border:1px solid #c9972b;border-radius:8px">🚚 <b>Нүүх:</b> 7 хоногт 1 удаа үнэгүй. 7 хоногийн дотор дахин нүүвэл <b>'+FEE+' Алт</b>.<br>'+(isFree()?'🆓 Одоо үнэгүй нүүнэ.':'💰 Одоо '+FEE+' Алт (үнэгүй болоход '+leftTxt()+').')+'<br>⚠ Шинэ кланд энэ долоо хоногийн клан онооны таны хувь 0-ээс эхэлнэ.</div>'); }catch(e){}
+  };
+  // 4) Клантай тоглогчийн хамгаалалт +5%
+  const _dm=defMul; defMul=function(){ let m=_dm.apply(this,arguments); try{ if(hasClan()) m+=0.05; }catch(e){} return m; };
+  window.wmMoveDbg={isFree:isFree,hasClan:hasClan};
 })();
 
 </script><script>(function(){

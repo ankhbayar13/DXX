@@ -10078,7 +10078,7 @@ wmClamp=function(){ const c=document.getElementById('wmc'); if(!c) return; const
    Хоёр утас ижил тулааныг тус тусдаа тооцоолно (тогтмол алхам 1/30с + seed-тэй санамсаргүй тоо, зөвхөн + - * / sqrt).
    Firestore: duel/{id}  — бүрэлдэхүүн, бэлэн дохио, үр дүн, бууж өгөх дохиог л солилцоно. */
 (function(){
-const FIX=1/30, DW=640, DH=420, TMAX=75;
+const FIX=1/30, DW=380, DH=700, TMAX=75;
 const DU=window.DU={st:'idle',stat:null};
 
 /* ---------- seed-тэй санамсаргүй тоо (mulberry32) ---------- */
@@ -10574,7 +10574,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a4ef485d8e';
+var UPDB='c0b314f9dd';
 (function(){
   const K='updTry';
   const _go=updGo;

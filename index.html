@@ -608,7 +608,7 @@ function shopHTML(){
   h+='<div class="card sp"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_crown',62)+'<div><h3>Хааны тэтгэмж</h3><div class="sm">30 хоног: өдөр бүр 50 Алт, үйлдвэрлэл +10%</div>'+(vd?'<div class="sm" style="color:#9fe08a">Идэвхтэй · '+vleft+' хоног үлдсэн</div>':'')+'</div></div><button class="btn red" onclick="buyReal(\'month\')">'+fmtMnt(MONTH.mnt)+'</button></div>'+
    (vd?'<button class="btn" style="margin-top:8px;width:100%" '+(S.vip.last===nowD().toDateString()?'disabled':'')+' onclick="vipClaim()">Өнөөдрийн 50 Алт авах</button>':'')+'</div>';
   const pg=Math.floor(S.pig);
-  h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_pig',62)+'<div><h3>Алтан хадгаламж</h3><div class="sm">30 хоног тасралтгүй нэвтэрвэл 500 Алт дүүрнэ. Хагалбал бүгдийг авна.</div><div class="hb" style="width:150px"><i style="width:'+Math.min(100,pg/5)+'%;background:#ffd770"></i></div><div class="sm">'+pg+' / 500 Алт</div><div class="sm">📅 Нэвтэрсэн өдөр: <b>'+pdn()+' / 30</b></div></div></div><button class="btn" '+(pg<10?'disabled':'')+' onclick="buyReal(\'pig\')">'+fmtMnt(PIG.mnt)+'</button></div></div>';
+  h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+ico('shop_pig',62)+'<div><h3>Алтан хадгаламж</h3><div class="sm">30 өдөр нэвтэрч дүүрмэгц хагалж 500 Алт авна. Дараа нь 0-ээс дахин эхэлнэ.</div><div class="hb" style="width:150px"><i style="width:'+Math.min(100,pg/5)+'%;background:#ffd770"></i></div><div class="sm">'+pg+' / 500 Алт</div><div class="sm">📅 Нэвтэрсэн өдөр: <b>'+pdn()+' / 30</b></div></div></div><button class="btn" '+(pdn()<30?'disabled':'')+' onclick="buyReal(\'pig\')">'+fmtMnt(PIG.mnt)+'</button></div></div>';
   h+=stnShopHTML();
   h+='<h3 style="margin:12px 4px 4px">Алт худалдан авах</h3><div class="pgrid">';
   PACKS.forEach((p,pi)=>{ const first=!S.paid[p.id]; h+='<div class="pk">'+(p.tag?'<div class="tagx">'+p.tag+'</div>':'')+'<div style="height:70px;display:flex;align-items:center;justify-content:center">'+ico('al'+pi,66)+'</div><b>'+p.alt+' Алт</b>'+(first?'<div class="sm" style="color:#9fe08a">Эхний удаа ×2 → '+(p.alt*2)+'</div>':'<div class="sm">'+p.n+'</div>')+'<button class="btn" style="width:100%;margin-top:6px" onclick="buyReal(\''+p.id+'\')">'+fmtMnt(p.mnt)+'</button></div>'; });
@@ -10579,7 +10579,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='14834aff69';
+var UPDB='bbbf802149';
 (function(){
   const K='updTry';
   const _go=updGo;

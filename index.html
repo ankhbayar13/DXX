@@ -10574,7 +10574,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bc83b0cebc';
+var UPDB='a4ef485d8e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13609,7 +13609,7 @@ var HSEL=null, HSOP=0;
   // мал: хонь 1, ямаа 2, үхэр 4, морь 5, тэмээ 7
   try{ const P={honi:1,yamaa:2,uher:4,aduu:5,temee:7}; Object.keys(P).forEach(k=>{ if(PEN[k]) PEN[k].req=P[k]; }); }catch(e){}
   // цонхнууд: захиалга 2, судалгаа 4, наадам 6, тэмцээн 7
-  try{ WLOCK.orders[0]=2; WLOCK.res[0]=4; WLOCK.naadam[0]=6; WLOCK.arena[0]=7; }catch(e){}
+  try{ WLOCK.orders[0]=2; WLOCK.res[0]=4; WLOCK.naadam[0]=6; WLOCK.arena[0]=5; }catch(e){}
 })();
 
 
@@ -15207,6 +15207,42 @@ function sdEnd(){
 window.sdSel=function(t,v){ SEL[t]=v; document.querySelectorAll('[data-sd'+t+']').forEach(b=>{ b.style.outline=(+b.getAttribute('data-sd'+t)===v)?'3px solid #6fff6f':''; }); };
 window.sdStart=sdStart; window.sdBot=sdBot; window.sdCancel=sdCancel;
 window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,state:()=>({SD,Q}),_Q:()=>Q};
+})();
+
+
+/* p32/seasons.js — «Тэмцээн» 14 хоногийн улирал: зэрэг хагасаар буурна, улирлын төгсгөлд зэргээрээ шагнал авна */
+(function(){
+  const EP=Date.UTC(2026,10,2), LEN=14*864e5;
+  const RK=[[0,'Шинэ далайчин'],[900,'Далайчин'],[1100,'Ахлагч'],[1300,'Ахмад далайчин'],[1500,'Далайн хаан']];
+  const GOLD=[0,300,800,1500,3000], ALT=[0,0,1,2,5];
+  const rk=r=>{ let k=0; RK.forEach((x,i)=>{ if(r>=x[0]) k=i; }); return k; };
+  const sid=()=>Math.floor((Date.now()-EP)/LEN);
+  const sdS=()=>{ if(!S.sd) S.sd={r:1000,w:0,l:0,dd:'',dc:0}; return S.sd; };
+  const duS=()=>{ try{ return stats(); }catch(e){ return null; } };
+  function check(){
+    const n=sid(); if(!S.ssn) S.ssn={id:n,pend:null,hist:[]};
+    const Z=S.ssn; if(Z.id==null) Z.id=n; if(Z.id>=n) return Z;
+    const a=sdS(), d=duS(); const best=Math.max(a.r||1000,d?(d.dr||1000):1000), games=(a.w||0)+(a.l||0)+(d?(d.dw||0)+(d.dl||0):0);
+    if(games>0){ const t=rk(best); const old=Z.pend; Z.pend={s:Z.id,t:t,g:GOLD[t]+(old?old.g:0),a:ALT[t]+(old?old.a:0),b:best};
+      Z.hist=(Z.hist||[]).concat([{s:Z.id,t:t,b:best}]).slice(-6); }
+    const soft=v=>Math.round(1000+((v==null?1000:v)-1000)*0.5);
+    a.r=soft(a.r); a.w=0; a.l=0; if(d){ d.dr=soft(d.dr); d.dw=0; d.dl=0; }
+    Z.id=n; try{ save(); }catch(e){} return Z; }
+  window.ssnClaim=function(){ const Z=check(); const p=Z.pend; if(!p) return; Z.pend=null; S.res.gold+=p.g; S.res.alt=(S.res.alt||0)+p.a;
+    try{ save(); updateHUD(); }catch(e){} try{ say('🏆 Улирлын шагнал: +'+p.g+' 🪙'+(p.a?' +'+p.a+' Алт':'')); }catch(e){} try{ openM('arena'); }catch(e){} };
+  const _a=arenaHTML; arenaHTML=function(){
+    let h=_a.apply(this,arguments);
+    try{ const Z=check(), a=sdS(), d=duS(), cur=Math.max(a.r||1000,d?(d.dr||1000):1000), t=rk(cur), left=Math.max(0,Math.ceil((EP+(Z.id+1)*LEN-Date.now())/864e5));
+      const img=k=>'<img src="hf/sq/rk'+k+'.webp?v=2" style="height:34px;vertical-align:middle">';
+      let c='<div class="card" style="border:2px solid #ffd770"><h3>🏆 Улирал '+(Z.id+1)+'</h3><div class="sm">14 хоногийн улирал · дуустал <b>'+left+'</b> өдөр. Шинэ улирал эхлэхэд зэрэг хагасаар буурна, хуучин зэргээрээ шагнал авна.</div>'
+        +'<div class="row" style="margin-top:6px"><div>'+img(t)+' <b>'+RK[t][1]+'</b><div class="sm">Одоогийн дээд зэрэг: '+cur+'</div></div></div>'
+        +'<div class="sm" style="margin-top:6px">Шагнал: '+RK.map((x,i)=>i?img(i).replace('34px','22px')+' '+GOLD[i]+'🪙'+(ALT[i]?'+'+ALT[i]+'Алт':''):'').filter(Boolean).join(' · ')+'</div>';
+      if(Z.pend){ c+='<div class="row" style="margin-top:8px"><div>Өмнөх улирал: '+img(Z.pend.t)+' <b>'+RK[Z.pend.t][1]+'</b><div class="sm">+'+Z.pend.g+' 🪙'+(Z.pend.a?' · +'+Z.pend.a+' Алт':'')+'</div></div><button class="btn red" onclick="ssnClaim()">🎁 Шагнал авах</button></div>'; }
+      c+='</div>';
+      const i=h.indexOf('<div class="card"'); h=i<0?h+c:h.slice(0,i)+c+h.slice(i);
+    }catch(e){}
+    return h; };
+  window.ssnDbg={check:check,sid:sid,rk:rk};
 })();
 
 </script><script>(function(){

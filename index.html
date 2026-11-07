@@ -10579,7 +10579,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bbbf802149';
+var UPDB='c339a88f1a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15333,6 +15333,30 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   window.pdn=function(){ pigTick(); return (S.pigd&&S.pigd.n)||0; };
   window.pigTick=pigTick;
   setTimeout(pigTick,4000); setInterval(pigTick,60000);
+})();
+
+
+/* p32/passrew.js — Пасс: нөөцийн шагнал (3 дахь шат бүр, 4 дэх шат бүр), 5/10/15 шатанд Алт. Хүндэт пасс = нөөц ×3 */
+(function(){
+  const A=[{wood:3000},{grain:3000},{wool:3000},{gold:5000},{meat:3000},{airag:20}];   // 3,6,9,12,15,18
+  const B=[{grain:3000},{aaruul:15},{meat:3000},{wool:3000},{wood:3000}];             // 4,8,12,16,20
+  function merge(o,r,m){ for(const k in r) o[k]=(o[k]||0)+r[k]*m; }
+  function resAt(n,m){ const o={}; if(n%3===0) merge(o,A[(n/3-1)%A.length],m); if(n%4===0) merge(o,B[(n/4-1)%B.length],m); return o; }
+  const _free=passRew, _prem=passPrem;
+  passRew=function(i){ const n=i+1; let r;
+    if(n===PASSN) r={alt:60,relic:3}; else if(n===10) r={alt:10,relic:3}; else if(n===5) r={alt:5}; else if(n===15) r={alt:15}; else r={alt:(n%3===0||n%4===0)?0:5};
+    const x=resAt(n,1); if(Object.keys(x).length) r.res=x; if(!r.alt) delete r.alt; return r; };
+  passPrem=function(i){ const n=i+1; const r=_prem(i); const x=resAt(n,3); if(Object.keys(x).length) r.res=x; return r; };
+  const NM={gold:'🪙',wood:'Мод',grain:'Тариа',wool:'Ноос',meat:'Мах',airag:'Айраг',aaruul:'Ааруул'};
+  const fm=n=>n>=1000?(n/1000)+'K':''+n;
+  const _rewT=rewT;
+  rewT=function(r){ const it=[]; if(r.alt) it.push('<span style="white-space:nowrap">'+ico('ui_gem',16)+' <b>'+r.alt+'</b></span>');
+    if(r.res){ for(const k in r.res){ const ic=(k==='gold')?'<span style="font-size:15px">🪙</span>':iconHTML(k,18); it.push('<span style="white-space:nowrap">'+ic+' <b>'+fm(r.res[k])+'</b></span>'); } }
+    let h='<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px 8px">'+it.join('')+'</div>';
+    if(r.relic) h+='<small>+ '+'★'.repeat(r.relic)+' дурсгал</small>';
+    return h; };
+  const _giv=givR;
+  givR=function(r){ if(r.res){ for(const k in r.res){ S.res[k]=(S.res[k]||0)+r.res[k]; } } return _giv.apply(this,arguments); };
 })();
 
 </script><script>(function(){

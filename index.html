@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b95a7fdcb1';
+var UPDB='f8236b9c0a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14718,6 +14718,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     for(const f of Q.fx){ c.globalAlpha=clamp(f.t*1.6,0,1); c.font=(f.big?'bold 22px':'bold 13px')+' sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000a'; c.strokeText(f.v,f.x,f.y); c.fillStyle=f.c; c.fillText(f.v,f.x,f.y); c.globalAlpha=1; }
     // жойстик
     c.setTransform(d,0,0,d,0,0);
+    try{ drawMini(c,L); }catch(e){ console.log('seamini',e); }
     if(Q.joy){ c.strokeStyle='rgba(255,255,255,.45)'; c.lineWidth=3; c.beginPath(); c.arc(Q.joy.x0,Q.joy.y0,48,0,Math.PI*2); c.stroke(); const dx=Q.joy.x-Q.joy.x0, dy=Q.joy.y-Q.joy.y0, m=Math.hypot(dx,dy), k=m>48?48/m:1; c.fillStyle='rgba(255,255,255,.55)'; c.beginPath(); c.arc(Q.joy.x0+dx*k,Q.joy.y0+dy*k,20,0,Math.PI*2); c.fill(); }
     else if(Q.t<8){ c.fillStyle='rgba(255,255,255,.8)'; c.font='bold 14px sans-serif'; c.textAlign='center'; c.fillText('Дэлгэцийг дарж чирээд хөлгөө удирд',W/2,H*.78); }
     // HUD
@@ -14725,6 +14726,36 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     let sh=''; Q.ships.forEach(s=>{ const p=s.alive?Math.round(s.hp/s.max*100):0; sh+='<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;width:56px;opacity:.9">'+NM[s.t]+'</span><div style="width:62px;height:6px;background:#0008;border-radius:3px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:'+(p>40?'#49d06b':'#e0483a')+'"></div></div></div>'; });
     Q.hud.innerHTML='<div style="display:flex;flex-direction:column;gap:2px">'+sh+'</div><div style="flex:1;text-align:center;padding-right:84px">⏱ '+ml+':'+ss+'<br>🪙 '+Q.loot.gold+' · 🪵 '+Q.loot.wood+(Q.loot.alt?' · 💎 '+Q.loot.alt:'')+'<br><span style="font-size:11px;opacity:.85">Живүүлсэн: '+Q.kills+'</span></div>';
     Q.btn.forEach((b,i)=>{ const v=b.querySelector('.cdv'); const cd=Q.cd[i]; v.style.display=cd>0?'flex':'none'; if(cd>0) v.textContent=Math.ceil(cd); });
+  }
+
+  // ===== жижиг газрын зураг + биссыг заагч сум =====
+  function drawMini(c,L){
+    const W=Q.W, R=54, cx=W-R-10, cy=R+56, k=R/(WORLD+60);
+    c.save(); c.globalAlpha=.9; c.fillStyle='rgba(6,24,44,.78)'; c.beginPath(); c.arc(cx,cy,R,0,Math.PI*2); c.fill();
+    c.strokeStyle='rgba(255,215,112,.9)'; c.lineWidth=2; c.stroke(); c.globalAlpha=1;
+    c.save(); c.beginPath(); c.arc(cx,cy,R-1,0,Math.PI*2); c.clip();
+    // арлууд
+    Q.isl.forEach(o=>{ c.fillStyle=o.k>=4?'#8a6a4a':'#5da64a'; c.beginPath(); c.arc(cx+o.x*k,cy+o.y*k,Math.max(2,o.r*k),0,Math.PI*2); c.fill(); });
+    // харагдах хэсэг
+    const vw=Q.W/Q.sc*k, vh=Q.H/Q.sc*k; c.strokeStyle='rgba(255,255,255,.55)'; c.lineWidth=1; c.strokeRect(cx+Q.cam.x*k-vw/2,cy+Q.cam.y*k-vh/2,vw,vh);
+    // авдар
+    c.fillStyle='#ffd770'; Q.cr.forEach(o=>{ c.fillRect(cx+o.x*k-1.5,cy+o.y*k-1.5,3,3); });
+    // дайсан
+    Q.en.forEach(e=>{ if(!e.alive) return; const x=cx+e.x*k, y=cy+e.y*k;
+      if(e.kraken){ c.fillStyle='#b25cff'; c.beginPath(); c.arc(x,y,6,0,Math.PI*2); c.fill(); c.strokeStyle='#fff'; c.lineWidth=1.5; c.stroke(); }
+      else if(e.kind==='boss'){ c.fillStyle='#ff2d6f'; c.beginPath(); c.arc(x,y,5.5,0,Math.PI*2); c.fill(); c.strokeStyle='#fff'; c.lineWidth=1.5; c.stroke(); }
+      else if(e.kind==='merchant'){ c.fillStyle='#ffc23a'; c.beginPath(); c.arc(x,y,3.2,0,Math.PI*2); c.fill(); }
+      else { c.fillStyle='#ff5a4a'; c.beginPath(); c.arc(x,y,3,0,Math.PI*2); c.fill(); } });
+    // манай флот
+    Q.ships.forEach(s=>{ if(!s.alive) return; c.fillStyle='#5dff7a'; c.beginPath(); c.arc(cx+s.x*k,cy+s.y*k,s===L?3.6:2.4,0,Math.PI*2); c.fill(); });
+    c.restore(); c.restore();
+    // дэлгэцээс гадуурх босс/мангасыг заана
+    const sc=Q.sc, W2=Q.W, H2=Q.H, m=34;
+    Q.en.forEach(e=>{ if(!e.alive||e.kind!=='boss') return; const sx=W2/2+(e.x-Q.cam.x)*sc, sy=H2/2+(e.y-Q.cam.y)*sc; if(sx>m&&sx<W2-m&&sy>m+40&&sy<H2-m) return;
+      const dx=sx-W2/2, dy=sy-H2/2, ang=Math.atan2(dy,dx); let t=1e9; if(dx) t=Math.min(t,((dx>0?W2-m:m)-W2/2)/dx); if(dy) t=Math.min(t,((dy>0?H2-m-80:m+46)-H2/2)/dy); t=Math.max(0,Math.min(t,1));
+      const px=W2/2+dx*t, dist0=0, py0=H2/2+dy*t, py=(px>W2-130&&py0<200)?200:py0, dist=Math.round(Math.hypot(e.x-L.x,e.y-L.y));
+      c.save(); c.translate(px,py); c.rotate(ang); c.fillStyle=e.kraken?'#b25cff':'#ff2d6f'; c.strokeStyle='#fff'; c.lineWidth=2; c.beginPath(); c.moveTo(16,0); c.lineTo(-8,-11); c.lineTo(-8,11); c.closePath(); c.fill(); c.stroke(); c.restore();
+      c.font='bold 13px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='#000b'; const tx=e.kraken?'🐙 Мангас '+dist:'☠ Босс '+dist; const lx=Math.max(62,Math.min(W2-62,px)); c.strokeText(tx,lx,py-18); c.fillStyle='#fff'; c.fillText(tx,lx,py-18); });
   }
   function loop(now){ if(!Q) return; const dt=Math.min(.05,(now-Q.last)/1000); Q.last=now; if(Q.run&&!Q.over){ try{ update(dt); }catch(e){ console.log('sea',e); } } try{ draw(); }catch(e){ console.log('seadraw',e); } if(Q) Q.raf=requestAnimationFrame(loop); }
 

@@ -7866,7 +7866,7 @@ function wmSpread(pts,fixed,cx,cy,ky,DX,DY){
 
 /* 184/185: «Нутгийн айл» — клангүй тоглогчид. Гэр Lv 5-тай тоглогч дайрч болно (хамгаалалт, олзны хязгаартай) */
 var WMNF={t:0,busy:0,list:[],ents:[],key:''};
-const NF_C={x:1900,y:2150};
+const NF_C={x:360,y:3830};
 const NF={minGer:5,day:5,capPct:25,weakPct:10,weakRatio:0.5,immH:6};
 CLN[-1]={n:'Клангүй',c:'#9a9a9a',x:-9999,y:-9999};
 const nfDay=()=>Math.floor((wmNow()+8*36e5)/864e5);
@@ -10574,7 +10574,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f4f5fb82c4';
+var UPDB='7f4caa45f5';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -560,7 +560,7 @@ const PACKS=[
 ];
 const STARTER={id:'starter',mnt:4900,give:{alt:150,gold:3000,meat:300,milk:300,wool:200}};
 const MONTH={id:'month',mnt:9900};
-const PIG={id:'pig',mnt:4999};
+const PIG={id:'pig',mnt:4900};
 const PASSV={id:'passvip',mnt:14900};
 function fmtMnt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')+'₮'; }
 function vipActive(){ return !!(S.vip&&S.vip.end>Date.now()); }
@@ -10579,7 +10579,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='14834aff69';
+var UPDB='9a1266ba42';
 (function(){
   const K='updTry';
   const _go=updGo;

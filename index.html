@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='28a239be67';
+var UPDB='04248d68bf';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15594,7 +15594,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 })();
 
 
-/* p32/autostore.js — 221: түүхий эд (мах, сүү, ноос) болон цехийн бүтээгдэхүүн (цэргийнхээс бусад) автоматаар агуулахад орно */
+/* p32/autostore.js — 221: түүхий эд (мах, сүү, ноос) автоматаар агуулахад орно. Цехээс гарсан бүтээгдэхүүнийг тоглогч өөрөө дарж авна */
 (function(){
   let acc=0;
   function run(){
@@ -15602,7 +15602,6 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
       if(!S||!S.met||!S.tutDone||!S.pend) return;
       let n=0;
       ['meat','milk','wool'].forEach(k=>{ const v=Math.floor(S.pend[k]||0); if(v>=1){ S.pend[k]-=v; S.res[k]=(S.res[k]||0)+v; try{ qh('col',v); }catch(e){} n+=v; } });
-      (typeof PROD!=='undefined'?PROD:[]).forEach(k=>{ const st=S.proc&&S.proc[k]; if(!st||st.ready<1||!S.bld[k]||(S.sites&&S.sites[k])) return; const o=BUILD[k]&&BUILD[k].proc&&BUILD[k].proc.out; if(!o||String(o).indexOf('t_')===0) return; const m=Math.floor(st.ready); st.ready-=m; S.res[o]=(S.res[o]||0)+m; n+=m; });
       if(n>0){ acc+=n; try{ refresh(); }catch(e){} }
     }catch(e){}
   }

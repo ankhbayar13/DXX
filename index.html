@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f39a945498';
+var UPDB='9d5f56d58d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15423,6 +15423,48 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
       +'<button class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById(\'invm\').remove()">Хаах</button></div>';
     document.body.appendChild(o); show('Дээрх «Шагнал авах» товчийг дарж шалга',0,0); };
   (function(){ const st=document.createElement('style'); st.textContent='#invm{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:14px}.invb{width:min(360px,100%);background:linear-gradient(#3a2614,#241709);border:2px solid #b8893a;border-radius:14px;padding:14px;color:#f1e4c4;box-shadow:0 0 24px #000}.invb h3{margin:0 0 8px;color:#ffd770;text-align:center}.invr{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#1a1109;border:1px solid #6b4a24;border-radius:8px;padding:7px 9px;margin:6px 0;font-size:13px}.invr b{color:#ffd770}.invs{background:#150e07;border-radius:8px;padding:8px;margin-top:8px;font-size:13px;text-align:center}.invb .sm{font-size:12px;opacity:.9;margin-top:4px}'; document.head.appendChild(st); })();
+})();
+
+
+/* p32/guestlim.js — Бүртгэлгүй (зочин) тоглогчийн зөөлөн хязгаар:
+   1) Хөрөг (профайл) дотор «Бүртгүүлэх / Нэвтрэх» хэсэг  2) Чатад бичихийг бүртгэл шаардана (унших нээлттэй)
+   3) Эхний 3 хоногийн дараа зочин Алт авбал хүлээгдэнэ, бүртгүүлмэгц орно */
+(function(){
+  const GRACE=3*864e5, reg=()=>{ try{ return !!(CL&&CL.email); }catch(e){ return false; } };
+  /* 1) профайл дотор бүртгэл/нэвтрэх */
+  const _ph=profHTML;
+  profHTML=function(){ let h=_ph.apply(this,arguments);
+    try{
+      let add='';
+      if(reg()){ add='<div class="card"><h3>☁ Бүртгэл</h3><div class="sm">✔ Бүртгэлтэй: <b>'+esc2(CL.email)+'</b></div><div class="sm">Тоглоом cloud дээр хадгалагдаж байна.</div></div>'; }
+      else{
+        const hold=Math.floor(S.altHold||0);
+        add='<div class="card"><h3>☁ Бүртгүүлэх / Нэвтрэх</h3><div class="sm" style="margin-bottom:6px">Бүртгүүлээгүй бол <b>чатад бичих</b>, <b>Алт авах</b> (3 хоногийн дараа) боломжгүй.'+(hold?'<br>⏳ Хүлээгдэж буй Алт: <b style="color:#ffd770">'+hold+'</b> — бүртгүүлмэгц орно':'')+'</div></div>'+clAuthCard();
+      }
+      h=h.replace(/(<\/div>\s*)$/,add+'$1');
+      if(h.indexOf(add)<0) h+=add;
+    }catch(e){}
+    return h; };
+  /* 2) чатад бичих */
+  const _cs=chatSend;
+  chatSend=async function(){ if(!reg()){ try{ say('Чатад бичихийн тулд Хөрөг дотор имэйл эсвэл Google-ээр бүртгүүлнэ үү'); }catch(e){} return; } return _cs.apply(this,arguments); };
+  /* 3) Алт хүлээлгэх */
+  const _gv=givR;
+  givR=function(r){
+    try{
+      if(r&&r.alt&&!reg()&&S.guestT0&&Date.now()-S.guestT0>GRACE){
+        S.altHold=(S.altHold||0)+r.alt; const r2=Object.assign({},r); delete r2.alt;
+        try{ say('⏳ +'+r.alt+' Алт хүлээгдэж байна. Хөрөг дотор бүртгүүлбэл орно'); }catch(e){}
+        return _gv.call(this,r2);
+      }
+    }catch(e){}
+    return _gv.apply(this,arguments); };
+  function tick(){ try{
+    if(typeof S==='undefined'||!S||!S.res) return;
+    if(!S.guestT0){ S.guestT0=Date.now(); try{ save(); }catch(e){} }
+    if(reg()&&S.altHold>0){ const a=Math.floor(S.altHold); S.altHold=0; S.res.alt+=a; try{ save(); refresh(); }catch(e){} try{ say('🔓 Бүртгүүлсэн тул хүлээгдсэн Алт +'+a+' орлоо'); }catch(e){} }
+  }catch(e){} }
+  setInterval(tick,5000); setTimeout(tick,3000);
 })();
 
 </script><script>(function(){

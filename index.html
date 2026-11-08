@@ -3019,7 +3019,7 @@ function btDraw(t){
 }
 const E_isCamp=e=>!!e.cb;
 function btFinish(win){
-  BT.done=true; BT.win=win; sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(1-(win?0.15:0.25)*((e.pc&&e.pc[T.ty]!=null)?e.pc[T.ty]:1))); if(n>keep){ const _w=woundAdd(T,n-keep); lossTxt+=T.n+' -'+(n-keep)+(_w?' (шархтан '+_w+')':'')+'  '; } S.res[T.k]=keep; });
+  BT.done=true; BT.win=win; sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(1-btLossRate(win)*((e.pc&&e.pc[T.ty]!=null)?e.pc[T.ty]:1))); if(n>keep){ const _w=woundAdd(T,n-keep); lossTxt+=T.n+' -'+(n-keep)+(_w?' (шархтан '+_w+')':'')+'  '; } S.res[T.k]=keep; });
   if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+(rp?'<div class="sm">Өмнө нь ялсан тул шагнал 20%</div>':'')+lootAnimals(Math.min(3,1+Math.floor((e.bi||0)/2)),rp)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
@@ -6181,7 +6181,7 @@ function rtsStep(dt){
 // ---------- дуусгах ----------
 function rtsFinish(win,timeout){ const R=RT; if(R.done) return; R.done=true; R.win=win; R.endT=0; R.timeout=!!timeout; try{ sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); }catch(e){} }
 function rtsResult(){ const R=RT, E=R.E, win=R.win; let lossTxt='', h='';
-  R.G.filter(g=>!g.side&&g.kind==='troop').forEach(g=>{ const mx=g.us.reduce((a,u)=>a+u.max,0), hp=g.us.reduce((a,u)=>a+Math.max(0,u.hp),0), fr=mx?hp/mx:0, lf=Math.max(0.03,(1-fr)*(win?0.5:0.7)), n=Math.floor(S.res[g.T.k]||0), l=Math.min(n,Math.floor(g.n*lf)); const _w=l>0?woundAdd(g.T,l):0; S.res[g.T.k]=n-l; if(l>0) lossTxt+=g.T.n+' -'+l+(_w?' (шархтан '+_w+')':'')+'  '; });
+  R.G.filter(g=>!g.side&&g.kind==='troop').forEach(g=>{ const mx=g.us.reduce((a,u)=>a+u.max,0), hp=g.us.reduce((a,u)=>a+Math.max(0,u.hp),0), fr=mx?hp/mx:0, lf=win?Math.max(0.03,(1-fr)*0.6):Math.max(0.1,1-fr), n=Math.floor(S.res[g.T.k]||0), l=Math.min(n,Math.floor(g.n*lf)); const _w=l>0?woundAdd(g.T,l):0; S.res[g.T.k]=n-l; if(l>0) lossTxt+=g.T.n+' -'+l+(_w?' (шархтан '+_w+')':'')+'  '; });
   if(win){ qh('win',1); passAdd(10); const G=Math.round(E.g*evBonus().g), M=E.m; S.res.gold+=G; S.res.meat+=M; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Штаб устгагдлаа!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+lootAnimals(Math.min(3,1+Math.floor((E.bi||0)/2)),false)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>'+(R.timeout?'Цаг дууслаа':'Ялагдлаа')+'</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2daa7aa108';
+var UPDB='7983c53dd4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16362,6 +16362,8 @@ function woundAdd(T,lost){ try{
   for(let i=0;i<10;i++){ let n=Math.min(li[i],a[i]); a[i]-=n; let wn=Math.min(Math.floor(n*0.6+0.0001),room); if(wn>0){ w[i]+=wn; room-=wn; got+=wn; } }
   return got; }catch(e){ return 0; } }
 
+/* тулааны алдагдал: ялбал авсан гэмтлээрээ (5–50%), бүрэн ялагдвал 100% (60% шархтан, 40% үхнэ) */
+function btLossRate(win){ try{ const m=BT.units.filter(u=>!u.side&&!u.sup), mx=m.reduce((a,u)=>a+u.max,0), hp=m.reduce((a,u)=>a+Math.max(0,u.hp),0), fr=mx?hp/mx:0; return win?Math.min(0.5,Math.max(0.05,(1-fr)*0.6)):Math.max(0.1,1-fr); }catch(e){ return win?0.15:0.25; } }
 /* ---- нөөц, хугацаа ---- */
 function hpUnit(T,i){ const f=1+0.4*i; return {gold:2*f,main:1*f,mk:T.ty==='archer'?'wood':'meat',t:0.5*f}; }
 function hpCalc(sel){ let gold=0,wood=0,meat=0,t=0,n=0; TR.forEach(T=>{ const w=ttArr(T.k,1), c=sel[T.k]||0; if(c<=0) return; const tw=ttSum(w); for(let i=0;i<10;i++){ const k=tw?Math.round(c*w[i]/tw):0; if(!k) continue; const u=hpUnit(T,i); gold+=k*u.gold; if(u.mk==='wood') wood+=k*u.main; else meat+=k*u.main; t+=k*u.t; n+=k; } });
@@ -16419,7 +16421,7 @@ function hospOpen(keep){ const b=hsMk('h','','🏥 Эмнэлэг · Эмчий�
   TR.forEach(T=>{ const n=ttSum(ttArr(T.k,1)); if(HPSEL[T.k]>n) HPSEL[T.k]=n;
     h+='<div class="hz_hr"><div class="hz_t">'+iconHTML(T.k,28)+' '+T.n+' <em id="hn_'+T.k+'">'+hsFm(n)+' шархтан</em></div><div class="hz_s"><input type="range" min="0" max="'+n+'" value="'+(j?0:HPSEL[T.k])+'" '+((n<1||j)?'disabled':'')+' oninput="hospSet(\''+T.k+'\',this.value)"><div class="hz_vb" id="hv_'+T.k+'">'+(j?0:HPSEL[T.k])+'</div></div></div>'; });
   h+='<div class="hz_rs" id="hrs"></div><div class="hz_df" id="hdf"></div><div class="hz_bt"><button '+(j||!tot?'disabled':'')+' onclick="hospAll()">Бүгдийг сонго</button><button class="hz_y" id="hbtn" onclick="hospGo()"></button></div>';
-  h+='<div class="hz_note">Тулаанд унасан цэргийн 60% шархтан болно, 40% нь үхнэ. Шархтан цэрэг багтаамжаас хэтэрвэл үхнэ. Эмчийн гэрийн түвшин ахихад багтаамж, эдгээх хурд нэмэгдэнэ.</div>';
+  h+='<div class="hz_note">Тулаанд унасан цэргийн 60% шархтан болно, 40% нь үхнэ. Бүр мөсөн ялагдвал оролцсон цэрэг бүгд унана (60% шархтан, 40% үхнэ). Шархтан цэрэг багтаамжаас хэтэрвэл үхнэ. Эмчийн гэрийн түвшин ахихад багтаамж, эдгээх хурд нэмэгдэнэ.</div>';
   b.innerHTML=h; document.getElementById('hsp').dataset.live='1'; hospCalc(); hsLive(); }
 function hospSet(k,v){ HPSEL[k]=Math.max(0,+v||0); const e=document.getElementById('hv_'+k); if(e) e.textContent=HPSEL[k]; hospCalc(); }
 function hospAll(){ TR.forEach(T=>{ HPSEL[T.k]=ttSum(ttArr(T.k,1)); }); hospOpen(1); }

@@ -5311,7 +5311,7 @@ function chatDraw(scroll){ const l=document.getElementById('chl2'); if(!l) retur
   if(!ms.length){ l.innerHTML='<div class="kE">Одоогоор зурвас алга. Эхний зурвасыг та бичээрэй!</div>'; return; }
   const near=l.scrollHeight-l.scrollTop-l.clientHeight<80;
   l.innerHTML=ms.map(m=>{ const av=chAv(m);
-    return '<div class="kM'+(m.uid===me?' me':'')+'"><img src="'+av+'"><div class="kB" onclick="chatSel(\''+m.id+'\')"><div class="kN">'+esc2(m.n||'Хаан')+'<i>Lv '+(m.lv||1)+'</i><s>'+chTime(m.t)+'</s></div>'+esc2(m.m)+(CHT.sel===m.id?'<div class="kA">'+(m.uid!==me?'<button onclick="event.stopPropagation();chatHide(\''+m.uid+'\')">🚫 Нуух</button>':'')+(isAdm()?'<button onclick="event.stopPropagation();chatDel(\''+m.id+'\')">🗑 Устгах</button>':'')+'</div>':'')+'</div></div>'; }).join('');
+    return '<div class="kM'+(m.uid===me?' me':'')+'"><img src="'+av+'"><div class="kB" onclick="chatSel(\''+m.id+'\')"><div class="kN">'+esc2(m.n||'Хаан')+'<i>Lv '+(m.lv||1)+'</i>'+(m.ti?'<u class="kT" style="color:'+(/^#[0-9a-fA-F]{3,8}$/.test(m.tc||'')?m.tc:'#ffd770')+'">'+esc2(String(m.ti).slice(0,24))+'</u>':'')+'<s>'+chTime(m.t)+'</s></div>'+esc2(m.m)+(CHT.sel===m.id?'<div class="kA">'+(m.uid!==me?'<button onclick="event.stopPropagation();chatHide(\''+m.uid+'\')">🚫 Нуух</button>':'')+(isAdm()?'<button onclick="event.stopPropagation();chatDel(\''+m.id+'\')">🗑 Устгах</button>':'')+'</div>':'')+'</div></div>'; }).join('');
   if(scroll===true&&near||scroll===2) l.scrollTop=l.scrollHeight; }
 
 /* профайл зураг чатад: зургаа 48px жижиг болгож хавсаргана */
@@ -5328,7 +5328,7 @@ async function chatSend(){ const i=document.getElementById('chin'); if(!i) retur
   if(now-CHT.last<3000){ try{ say('3 секунд хүлээнэ үү'); }catch(e){} return; }
   const t=chClean(i.value); if(!t) return; CHT.last=now; i.value='';
   let im=''; try{ im=await chThumb(); }catch(e){}
-  try{ const {F,db}=FBM; await F.addDoc(chColl(F,db),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:chSp(),im:im,m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
+  try{ const {F,db}=FBM; await F.addDoc(chColl(F,db),{uid:CL.uid,n:String(S.prof.name||'Хаан').replace(/[<>&"]/g,'').slice(0,14),lv:(S.pl||1),sp:chSp(),ti:(window.ttlSend?ttlSend():''),tc:(window.ttlCol?ttlCol():''),im:im,m:t,t:F.serverTimestamp()}); setTimeout(()=>chatDraw(2),300); }
   catch(e){ try{ say((e&&e.code==='permission-denied')?'Чат хараахан идэвхжээгүй байна':'Илгээж чадсангүй'); }catch(_){} } }
 
 
@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='eb264d0ed7';
+var UPDB='c130fee3ce';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15607,6 +15607,95 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     }catch(e){}
   }
   setInterval(run,1000);
+})();
+
+
+/* p32/chatplus.js — 217: чатад цол тэмдэг (профайлаас сонгоно) + шинэ зурвасын улаан цэг (нийтийн / клан / найз) */
+(function(){
+  // ---------- цол тэмдэг ----------
+  function owned(){
+    const L=[];
+    try{ const rk=rkLv(), nm=rkNames(); for(let i=0;i<=rk&&i<nm.length;i++) L.push({id:'r'+i,t:nm[i],c:'#ffd770'}); }catch(e){}
+    try{ const o=(wsSt()||{}).own||[]; for(let i=0;i<WRT.length;i++) if(o[i]) L.push({id:'w'+i,t:WRT[i][0],c:(typeof wtCol==='function'?wtCol(i):'#ffd770')}); }catch(e){}
+    try{ const M=MEDS(); S.medal=S.medal||{}; M.forEach((m,i)=>{ if(S.medal[i]) L.push({id:'m'+i,t:'🎖 '+m[0],c:'#9fe08a'}); }); }catch(e){}
+    return L;
+  }
+  const cur=()=>{ try{ const id=S.prof&&S.prof.ti; if(!id) return null; return owned().find(x=>x.id===id)||null; }catch(e){ return null; } };
+  window.ttlOwned=owned;
+  window.ttlSend=function(){ const c=cur(); return c?String(c.t).replace(/[<>&"]/g,'').slice(0,24):''; };
+  window.ttlCol=function(){ const c=cur(); return (c&&/^#[0-9a-fA-F]{3,8}$/.test(c.c||''))?c.c:''; };
+  window.setTitle=function(id){
+    try{ S.prof.ti=id||''; save(); refresh(); say(id?'Цол тэмдэг солигдлоо ✓':'Цол тэмдэг авлаа'); }catch(e){}
+    setTimeout(()=>{ try{ clPush(true); }catch(e){} },2000);
+  };
+  const _ph=profHTML;
+  profHTML=function(){
+    let h=_ph.apply(this,arguments);
+    try{
+      const L=owned(), c=cur();
+      const chip=(id,t,col,on)=>'<button onclick="setTitle(\''+id+'\')" style="margin:3px;padding:6px 10px;border-radius:14px;border:2px solid '+(on?'#ffd770':'#6b4a24')+';background:'+(on?'#5a3b17':'#2b1d12')+';color:'+col+';font-weight:bold;font-size:13px">'+t+'</button>';
+      const card='<div class="card"><div class="sm" style="margin-bottom:4px">🏷 Цол тэмдэг — чат дээр нэрийн хажууд харагдана</div>'
+        +'<div style="text-align:center;margin-bottom:4px">Одоогийн: <b style="color:'+(c?c.c:'#c9b890')+'">'+(c?c.t:'байхгүй')+'</b></div>'
+        +'<div style="display:flex;flex-wrap:wrap;justify-content:center">'+chip('', 'Цолгүй','#c9b890',!c)+L.map(x=>chip(x.id,x.t,x.c,c&&c.id===x.id)).join('')+'</div>'
+        +'<div class="sm" style="margin-top:4px;opacity:.8">Хааны зэрэг, бөхийн цол, медаль авах тусам сонголт нэмэгдэнэ</div></div>';
+      const k='<div class="card" style="text-align:center"><div style="margin:2px 0 4px" class="sm">Нэр (14 тэмдэгт хүртэл)</div>';
+      const i=h.indexOf(k); h=i>=0?h.slice(0,i)+card+h.slice(i):h+card;
+    }catch(e){}
+    return h;
+  };
+  // ---------- улаан цэг ----------
+  const st=document.createElement('style');
+  st.textContent='.chdot{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#ff3b30;border:2px solid #fff;box-shadow:0 0 6px #ff3b30aa;pointer-events:none;display:none;box-sizing:border-box}.chdot.on{display:block}#chtabs button{position:relative}#chtabs .chdot{top:3px;right:6px}.kN u{text-decoration:none;font-size:10px;font-weight:bold;margin-left:6px;padding:1px 6px;border-radius:8px;background:#0007;border:1px solid currentColor;vertical-align:1px}';
+  document.head.appendChild(st);
+  const U={pub:0,clan:0,fr:{}}, subs={};
+  const seen=k=>{ try{ return +localStorage.getItem('chs_'+k)||0; }catch(e){ return 0; } };
+  const setSeen=(k,t)=>{ try{ localStorage.setItem('chs_'+k,String(t||Date.now())); }catch(e){} };
+  const init=k=>{ try{ if(localStorage.getItem('chs_'+k)==null) localStorage.setItem('chs_'+k,String(Date.now())); }catch(e){} };
+  const myClan=()=>{ try{ if(S.clan!=null&&S.clan>=0) return S.clan; if(S.ckOwn!=null&&S.ckOwn>=0) return S.ckOwn; }catch(e){} return null; };
+  const open=()=>{ const d=document.getElementById('chat'); return !!(d&&d.style.display==='flex'); };
+  function curKey(){ if(!open()) return null; const t=CHT.tab; if(t==='pub') return 'pub'; if(t==='clan'){ const k=myClan(); return k==null?null:'clan'+k; } if(CHT.dm&&typeof CHT.room==='string'&&CHT.room.indexOf('dm:')===0) return 'dm_'+CHT.room.slice(3); return null; }
+  function tsOf(m){ try{ if(m.t&&m.t.toMillis) return m.t.toMillis(); }catch(e){} return Date.now(); }
+  function paint(){
+    try{
+      const anyFr=Object.keys(U.fr).some(k=>U.fr[k]);
+      const any=U.pub||U.clan||anyFr;
+      document.querySelectorAll('#rcol button[onclick="chatOpen()"]').forEach(b=>{ let d=b.querySelector('.chdot'); if(!d){ d=document.createElement('i'); d.className='chdot'; b.style.position='relative'; b.appendChild(d); } d.classList.toggle('on',!!any); });
+      const tb=document.getElementById('chtabs');
+      if(tb) [['pub',U.pub],['clan',U.clan],['fr',anyFr]].forEach(a=>{ const b=tb.querySelector('[data-t="'+a[0]+'"]'); if(!b) return; let d=b.querySelector('.chdot'); if(!d){ d=document.createElement('i'); d.className='chdot'; b.appendChild(d); } d.classList.toggle('on',!!a[1]); });
+    }catch(e){}
+  }
+  function listen(key,coll,onFlag){
+    if(subs[key]&&subs[key].c===coll) return;
+    if(subs[key]){ try{ subs[key].u(); }catch(e){} }
+    init(key);
+    try{
+      const {F,db}=FBM, ref=coll(F,db);
+      const u=F.onSnapshot(F.query(ref,F.orderBy('t','desc'),F.limit(1)),s=>{
+        const d=s.docs[0]; if(!d){ onFlag(false); paint(); return; }
+        const m=d.data(), t=tsOf(m), mine=(m.uid===CL.uid);
+        if(curKey()===key){ setSeen(key,t+1); onFlag(false); } else onFlag(!mine&&t>seen(key));
+        paint();
+      },()=>{});
+      subs[key]={u,c:coll};
+    }catch(e){}
+  }
+  function ensure(){
+    try{
+      if(!CL||!CL.ok||!FBM||!CL.uid) return;
+      listen('pub',(F,db)=>F.collection(db,'chat'),v=>{ U.pub=v?1:0; });
+      const k=myClan();
+      if(k!=null) listen('clan'+k,(F,db)=>F.collection(db,'clanchat','c'+k,'m'),v=>{ U.clan=v?1:0; });
+      else { U.clan=0; }
+      (S.friends||[]).slice(0,10).forEach(fr=>{ if(!fr||!fr.id) return; const key=[CL.uid,fr.id].sort().join('_'); listen('dm_'+key,(F,db)=>F.collection(db,'dm',key,'m'),v=>{ U.fr[key]=v?1:0; }); });
+      paint();
+    }catch(e){}
+  }
+  function tick(){
+    const k=curKey();
+    if(k){ setSeen(k,Date.now()); if(k==='pub') U.pub=0; else if(k.indexOf('clan')===0) U.clan=0; else U.fr[k.slice(3)]=0; paint(); }
+  }
+  setInterval(ensure,5000); setInterval(tick,1000); setTimeout(()=>{ ensure(); paint(); },3000);
+  try{ const _cs=chatOpen; } catch(e){}
 })();
 
 </script><script>(function(){

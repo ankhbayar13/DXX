@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9d5f56d58d';
+var UPDB='7df59c6bc1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15459,6 +15459,10 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
       }
     }catch(e){}
     return _gv.apply(this,arguments); };
+  /* бүртгүүлсний дараа токений «anonymous» тэмдэг шинэчлэгдэж, сервер бүртгэлтэйд тооцно (rules: signedUp) */
+  async function tokFix(){ try{ const u=FBM&&FBM.auth&&FBM.auth.currentUser; if(!u||u.isAnonymous) return; const r=await u.getIdTokenResult(); if(r&&r.signInProvider==='anonymous') await u.getIdToken(true); }catch(e){} }
+  if(typeof clPush==='function'){ const _p2=clPush; clPush=async function(){ if(reg()) await tokFix(); return _p2.apply(this,arguments); }; }
+  if(typeof chatSend==='function'){ const _c2=chatSend; chatSend=async function(){ if(reg()) await tokFix(); return _c2.apply(this,arguments); }; }
   function tick(){ try{
     if(typeof S==='undefined'||!S||!S.res) return;
     if(!S.guestT0){ S.guestT0=Date.now(); try{ save(); }catch(e){} }

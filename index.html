@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b81f7cf741';
+var UPDB='833e053e78';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15714,6 +15714,50 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   const _hi=heroInfo;
   heroInfo=function(){ const r=_hi.apply(this,arguments); try{ bar(); }catch(e){} return r; };
   setInterval(()=>{ try{ const b=document.querySelector('#hd .hd-res'); if(b) b.innerHTML=html(); }catch(e){} },800);
+})();
+
+
+/* p32/btorder.js — 219: 5vs5 тулаан дээр баатруудын дараалал (ногоон тоо) ба дайсны дараалал (улаан тоо) харагдана.
+   Бэлтгэлийн самбарт «Дайсны дараалал» мөр нэмнэ. */
+(function(){
+  const mine=()=>BT.sel?BT.sel.filter(x=>!(typeof SUPP!=='undefined'&&SUPP[x])):[];
+  function orders(){
+    const m=mine(), em=BT.units.filter(u=>u.side&&!u.sup), out=[];
+    BT.units.forEach(u=>{
+      if(u.hp<=0&&BT.t-(u.dead==null?BT.t:u.dead)>1.5) return;
+      if(u.tk||u.sup) return;
+      let n=0; if(!u.side){ const i=m.indexOf(u.id); n=i>=0?i+1:0; } else { n=em.indexOf(u)+1; }
+      if(n>0) out.push({u,n});
+    });
+    return out;
+  }
+  const _bd=btDraw;
+  btDraw=function(t){
+    _bd.apply(this,arguments);
+    try{
+      if(!BT||!BT.ctx) return;
+      const c=BT.ctx, dp=BT.dp, H=(typeof STDH!=='undefined'?STDH:74);
+      c.save(); c.setTransform(dp,0,0,dp,0,0);
+      orders().forEach(o=>{
+        const u=o.u, x=u.x-44, y=u.y-H-5, dead=u.hp<=0;
+        c.globalAlpha=dead?0.35:1;
+        c.beginPath(); c.arc(x,y,8.5,0,Math.PI*2); c.fillStyle=u.side?'#d6372a':'#2f9e44'; c.fill(); c.lineWidth=2; c.strokeStyle='#fff'; c.stroke();
+        c.fillStyle='#fff'; c.font='bold 11px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(String(o.n),x,y+0.5);
+      });
+      c.restore();
+    }catch(e){}
+  };
+  const _mh=matchHint;
+  matchHint=function(){
+    _mh.apply(this,arguments);
+    try{
+      if(!BT) return; const el=document.getElementById('bmatch'); if(!el) return;
+      const E=BT.units.filter(u=>u.side&&!u.sup);
+      const num=['①','②','③','④','⑤','⑥','⑦','⑧'];
+      const row=E.map((u,i)=>num[i]+' '+(CLSI[u.type]||'')+' '+(TNAME[u.type]||u.type)).join(' · ');
+      el.innerHTML=el.innerHTML.replace(/<div class="bord">.*?<\/div>/,'')+'<div class="bord" style="margin-top:3px;color:#ffb0a0"><b>Дайсны дараалал:</b> '+row+'</div>';
+    }catch(e){}
+  };
 })();
 
 </script><script>(function(){

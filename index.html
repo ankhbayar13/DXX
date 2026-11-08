@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7732fadbd1';
+var UPDB='abf22e3f64';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16011,6 +16011,9 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
   '.bu-sk .bulk{position:absolute;left:8%;right:8%;top:10%;bottom:10%;background:#000b;border-radius:'+U(4)+';display:none;align-items:center;justify-content:center;flex-direction:column;color:#ffd770;font:bold '+U(9)+'/1.1 sans-serif;text-shadow:0 1px 2px #000}'+
   '.bu-sk.lock .bulk{display:flex}.bu-sk.lock{opacity:.8}'+
   '.bu-sk .buco{position:absolute;right:'+U(-4)+';top:'+U(-5)+';min-width:'+U(17)+';height:'+U(17)+';border-radius:50%;background:radial-gradient(circle at 35% 30%,#d6efff,#3d8cf0 55%,#1a4fb0);border:'+U(1.5)+' solid #d9a43a;color:#fff;font:bold '+U(10)+'/'+U(14)+' sans-serif;text-align:center;box-shadow:0 1px 3px #000;z-index:2}'+
+  '.bu-sk .skimg{position:absolute;left:12%;top:12%;width:76%;height:76%;border-radius:'+U(5)+';object-fit:cover;border:'+U(1.5)+' solid #d9a43a;z-index:1;background:#1a0f06;display:block}'+
+  '.bu-sk.lock .skimg{filter:grayscale(.8) brightness(.6)}.bu-sk.dim .skimg{filter:grayscale(.6) brightness(.75)}'+
+  '.bu-sk .bulk,.bu-sk .buco{z-index:3}'+
   '.bu-sk.dim .ic{filter:grayscale(.7) brightness(.7) drop-shadow(0 2px 3px #000a)}'+
   '.bu-sk.armed .ic{filter:drop-shadow(0 0 9px #ff5a3a) brightness(1.2);transform:translateY(-4px)}';
   const st=document.createElement('style'); st.id='cssbu'; st.textContent=css; document.head.appendChild(st);
@@ -16139,7 +16142,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
     const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
     if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
-      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="hf/sk_'+x.k+'.webp?v=1" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
       setHTML($$('bu-sks'),'sks',skh,su.id);
       L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), ok=open&&pk&&en2>=x.cost;
         el.className='bu-sk'+(open?'':' lock')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }

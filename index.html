@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c130fee3ce';
+var UPDB='b81f7cf741';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15696,6 +15696,24 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   }
   setInterval(ensure,5000); setInterval(tick,1000); setTimeout(()=>{ ensure(); paint(); },3000);
   try{ const _cs=chatOpen; } catch(e){}
+})();
+
+
+/* p32/herores.js — 218: Баатрын дэлгэц дээр (сайжруулах үед) Алт, зоос, ид шидийн чулууны тоог үргэлж харуулна */
+(function(){
+  const st=document.createElement('style');
+  st.textContent='#hd .hd-res{display:flex;justify-content:center;gap:8px;padding:5px 8px;margin:0 8px 4px;background:linear-gradient(#3b2815,#24160a);border:2px solid #c9972b;border-radius:12px;color:#ffe9b0;font-weight:900;font-size:14px;flex:none}#hd .hd-res span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}';
+  document.head.appendChild(st);
+  const html=()=>'<span>'+ico('ui_gem',18)+' '+f(Math.floor(S.res.alt||0))+'</span><span>🪙 '+f(Math.floor(S.res.gold||0))+'</span><span>🔮 '+f(Math.floor((typeof stnN==='function'?stnN():0)||0))+'</span>';
+  function bar(){
+    const d=document.getElementById('hd'); if(!d) return;
+    let b=d.querySelector('.hd-res'); const pn=d.querySelector('.hd-pn'); if(!pn) return;
+    if(!b){ b=document.createElement('div'); b.className='hd-res'; pn.parentNode.insertBefore(b,pn); }
+    b.innerHTML=html();
+  }
+  const _hi=heroInfo;
+  heroInfo=function(){ const r=_hi.apply(this,arguments); try{ bar(); }catch(e){} return r; };
+  setInterval(()=>{ try{ const b=document.querySelector('#hd .hd-res'); if(b) b.innerHTML=html(); }catch(e){} },800);
 })();
 
 </script><script>(function(){

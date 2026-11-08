@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='04248d68bf';
+var UPDB='182828633c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15591,21 +15591,6 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     if((S.res.alt||0)<c){ say('Алт хүрэхгүй байна · '+c+' Алт хэрэгтэй'); return; }
     dxAsk('<b>'+BUILD[k].n+'</b> түргэсгэх үү?<br>Үлдсэн хугацаа: '+fmtT(sec)+'<br>Үнэ: <b>'+c+' Алт</b><br><span style="font-size:12px;opacity:.8">3 минутаас бага үлдвэл үнэгүй</span>','Түргэсгэх',go);
   };
-})();
-
-
-/* p32/autostore.js — 221: түүхий эд (мах, сүү, ноос) автоматаар агуулахад орно. Цехээс гарсан бүтээгдэхүүнийг тоглогч өөрөө дарж авна */
-(function(){
-  let acc=0;
-  function run(){
-    try{
-      if(!S||!S.met||!S.tutDone||!S.pend) return;
-      let n=0;
-      ['meat','milk','wool'].forEach(k=>{ const v=Math.floor(S.pend[k]||0); if(v>=1){ S.pend[k]-=v; S.res[k]=(S.res[k]||0)+v; try{ qh('col',v); }catch(e){} n+=v; } });
-      if(n>0){ acc+=n; try{ refresh(); }catch(e){} }
-    }catch(e){}
-  }
-  setInterval(run,1000);
 })();
 
 

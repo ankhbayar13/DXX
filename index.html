@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='76ddb475be';
+var UPDB='7732fadbd1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15832,23 +15832,65 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     volley:[['snipe','Онгон сум','Сонгосон дайсанд 6 дахин цохилт',10,1],['cleave','Сумны хур','Бүх дайсанд 1.6 дахин цохилт',14,1],['volley','Тэнгэрийн сум','3 дайсанд 5 дахин сум',16,1.6]],
     charge:[['cleave','Давхин цохих','Бүх дайсанд 1.6 дахин цохилт',12,1],['snipe','Толгой авах','Сонгосон дайсанд 6 дахин цохилт',14,1.2],['rally','Дайны дуу','Бүх цэрэгт цохилт +30% (8с)',16,1]]
   };
+  /* 24 баатар бүрт өөрийн 3 скилл: [төрөл, нэр] — Lv10 · Lv20 · Lv30 */
+  const HL={
+    chinggis:[['cleave','Тэнгэрийн сэв'],['weaken','Хааны дуулга'],['execute','Их хааны шийтгэл']],
+    subeedei:[['snipe','Үл үзэгдэх сум'],['execute','Тэнгэрийн мөр'],['cleave','Дөрвөн чиглэлийн давалгаа']],
+    khubilai:[['weaken','Нойны зарлиг'],['heal','Чөлөөт хүч'],['stun','Хаант улсын гав']],
+    mukhulai:[['cleave','Дэглэмийн давалгаа'],['focus','Мухулайн дайчин'],['rally','Алтан тугны мандат']],
+    jelme:[['guard','Төмөр хана'],['stun','Зэлмийн дайралт'],['drain','Цусан ангаах']],
+    borte:[['heal','Хатны ивээл'],['guard','Хатны хамгаалалт'],['burn','Бөртийн галт сум']],
+    khasar:[['snipe','Хасарын онилго'],['volley','Мянган сум'],['execute','Хасарын шийдвэр']],
+    boorchu:[['focus','Борохулын зориг'],['stun','Давхин мөргөх'],['cleave','Морин давалгаа']],
+    borchi:[['stun','Боорчийн цохилт'],['heal','Найрсаг сэргээлт'],['rally','Анд найзын урам']],
+    zev:[['snipe','Хурц сум'],['burn','Галт сум'],['volley','Зэвийн бороо']],
+    oelun:[['heal','Эхийн ивээл'],['weaken','Эхийн өршөөл'],['guard','Эхийн хамгаалалт']],
+    belgutei:[['stun','Бэлгүтэйн нугалаа'],['execute','Хүч түрэх'],['focus','Зэрлэг зориг']],
+    ogodei:[['heal','Хааны ивээл'],['drain','Алтан бөмбөлөг'],['rally','Хааны найр']],
+    tolui:[['burn','Толуйн гал'],['snipe','Дээд онилго'],['volley','Хүйтний бороо']],
+    jochi:[['snipe','Жочийн онилго'],['weaken','Салхин хүйтэн'],['volley','Хойд салхи']],
+    chagadai:[['stun','Хуулийн гав'],['guard','Хуулийн хана'],['execute','Хуулийн ялалт']],
+    khukhchu:[['heal','Хөхчүгийн тахил'],['weaken','Тэнгэрийн зарлиг'],['stun','Тэнгэрийн дуу']],
+    arav:[['focus','Аравтын нэгдэл'],['cleave','Аравтын дайрал'],['guard','Аравтын хана']],
+    harvaach:[['snipe','Нэг сум'],['focus','Тэвчээртэй харваач'],['burn','Галт сум']],
+    sorkh:[['guard','Ухаалаг зөвлөгөө'],['heal','Эхийн сэргээлт'],['weaken','Хуйвалдааныг таслах']],
+    hulan:[['heal','Хатны тэтгэр'],['guard','Хатны дэнж'],['rally','Дайчдын урам']],
+    yelu:[['weaken','Бичгийн хууль'],['guard','Засаглалын хана'],['stun','Хуулийн шийтгэл']],
+    haiyun:[['heal','Мөнхийн жим'],['guard','Тэнгэрийн ивээл'],['drain','Төгс ухаан']],
+    jamukha:[['stun','Хуурамч андгай'],['burn','Хар гал'],['execute','Хүйтэн шийтгэл']]
+  };
+  const DS={cleave:m=>'Бүх дайсанд '+(1.6*m).toFixed(1)+' дахин цохилт',snipe:m=>'Сонгосон дайсанд '+(6*m).toFixed(1)+' дахин цохилт',volley:m=>'3 дайсанд '+Math.round(4*m)+' дахин сум',
+    rally:m=>'Бүх цэрэгт цохилт +'+Math.round(30+20*m)+'% (8с)',guard:m=>'Бүх цэргийн авах гэмтэл -50% (8с)',heal:m=>'Бүх цэргийг '+Math.round(18*m)+'% эдгээнэ',charge:m=>'Сонгосон дайсан руу давхиж 5 дахин цохино',
+    stun:m=>'Сонгосон дайсанд '+(1.5*m).toFixed(1)+' дахин цохилт, 6с ээлжээ алгасна',burn:m=>'Бүх дайсныг 8с шатаана (секунд бүр цохилтын 30%)',
+    drain:m=>'Сонгосон дайсанд '+(3*m).toFixed(1)+' дахин цохилт, хохирлын 35%-аар бүх цэргийг эдгээнэ',execute:m=>'Сонгосон дайсанд 4 дахин, HP 35%-иас доош бол 9 дахин цохилт',
+    focus:m=>'Өөрийн цохилт +80% (14с)',weaken:m=>'Бүх дайсны цохилт -35% (8с)'};
+  const SLOTM=[1,1.15,1.3];
+  window.SKTG=['snipe','charge','stun','drain','execute'];
   window.heroSkills=function(id){
     const d=HSK[id]; if(!d) return [];
-    const lad=LAD[d[0]]||LAD.rally;
+    const own=HL[id], lad=own?own.map((e,j)=>[e[0],e[1],DS[e[0]](SLOTM[j]),14+j*2,SLOTM[j]]):(LAD[d[0]]||LAD.rally);
     return [d].concat(lad).map((s,i)=>({i,k:s[0],n:s[1],d:s[2],cd:s[3],m:s[4],cost:SKCOST[i],lv:SKUNL[i],arr:s}));
   };
   window.skOpen=function(id,i){ return (typeof hlv==='function'?hlv(id):1)>=SKUNL[i]; };
 
   /* шинэ төрлийн чадварууд: cleave, snipe, мөн сонгосон дайсанд давхих */
+  const NEWK=['cleave','snipe','stun','burn','drain','execute','focus','weaken'];
   const _cs=castSkill;
   castSkill=function(u){
     const d=HSK[u.id]; if(!d) return _cs.apply(this,arguments);
-    if(d[0]==='cleave'||d[0]==='snipe'||(d[0]==='charge'&&BT&&BT.forceTg&&BT.forceTg.hp>0)){
+    if(NEWK.indexOf(d[0])>=0||(d[0]==='charge'&&BT&&BT.forceTg&&BT.forceTg.hp>0)){
       const U=BT.units, en=U.filter(x=>x.side&&x.hp>0&&!x.sup); if(!en.length) return false;
       const lv=Math.max(1,S.heroes[u.id]||1), k=(1+SKB[Math.min(6,lv-1)]/100)*(d[4]||1);
-      const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); };
+      const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); return dm; };
+      const al=U.filter(x=>!x.side&&x.hp>0&&!x.sup), pickT=()=>(BT.forceTg&&BT.forceTg.hp>0)?BT.forceTg:en.reduce((a,b)=>b.hp>a.hp?b:a);
       if(d[0]==='cleave'){ en.forEach(e=>{ hitE(e,1.6); try{ efAdd(1,e.x,e.y-18,54,0.5); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }catch(x){} }); BT.shake=Math.min(1,(BT.shake||0)+0.5); }
-      else if(d[0]==='snipe'){ const tg=(BT.forceTg&&BT.forceTg.hp>0)?BT.forceTg:en.reduce((a,b)=>b.hp>a.hp?b:a); hitE(tg,6); try{ efAdd(0,tg.x,tg.y-18,60,0.5); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.3); }
+      else if(d[0]==='stun'){ const tg=pickT(); hitE(tg,1.5*(d[4]||1)); tg.cd=(tg.cd>0?tg.cd:0)+6; try{ efAdd(2,tg.x,tg.y-18,60,0.6); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.35); }
+      else if(d[0]==='burn'){ en.forEach(e=>{ e.dot={until:BT.t+8,dps:u.atk*0.3*k,acc:0}; try{ efAdd(6,e.x,e.y-18,54,0.6); }catch(x){} }); }
+      else if(d[0]==='drain'){ const tg=pickT(), dm=hitE(tg,3*(d[4]||1)); al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+dm*0.35); try{ efAdd(4,a.x,a.y+4,60,0.8,true); }catch(x){} }); try{ efAdd(6,tg.x,tg.y-18,60,0.5); }catch(x){} }
+      else if(d[0]==='execute'){ const tg=pickT(); hitE(tg,tg.hp<=tg.max*0.35?9:4); try{ efAdd(6,tg.x,tg.y-18,66,0.6); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.5); }
+      else if(d[0]==='focus'){ u.bAtk={m:1+0.8*k,t:BT.t+14}; try{ efAdd(3,u.x,u.y+4,66,0.8,true); }catch(x){} }
+      else if(d[0]==='weaken'){ en.forEach(e=>{ e.wk=BT.t+8; try{ efAdd(2,e.x,e.y+4,50,0.6,true); }catch(x){} }); }
+      else if(d[0]==='snipe'){ const tg=pickT(); hitE(tg,6*(d[4]||1)); try{ efAdd(0,tg.x,tg.y-18,60,0.5); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.3); }
       else { const tg=BT.forceTg; hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; BT.shake=Math.min(1,(BT.shake||0)+0.6); try{ BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); efAdd(3,u.x,u.y+4,66,0.7,true); efAdd(6,tg.x,tg.y-18,60,0.5); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} }
       BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true;
     }
@@ -15861,9 +15903,13 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     return ok;
   };
   try{ SKI.cleave=['🌀','Нийтийн цохилт']; SKI.snipe=['🎯','Онилсон цохилт']; }catch(e){}
+  /* суларсан дайсны цохилт -35% */
+  const _th=turnHit; turnHit=function(u,tg){ if(u.wk&&u.wk>BT.t){ const a=u.atk; u.atk=a*0.65; try{ return _th.apply(this,arguments); } finally{ u.atk=a; } } return _th.apply(this,arguments); };
+  /* шатаалт (dot): тулаан зогсож байхад үйлчлэхгүй */
+  window.dotTick=function(dt){ if(!BT) return; BT.units.forEach(u=>{ const d=u.dot; if(!d||u.hp<=0) return; if(BT.t>d.until){ u.dot=null; return; } u.hp-=d.dps*dt; d.acc+=dt; u.hurt=Math.max(u.hurt||0,0.1); if(d.acc>=1){ d.acc-=1; BT.dm.push({x:u.x,y:u.y-30,t:0,v:Math.round(d.dps),big:false,side:0}); } if(u.hp<=0&&!u.dead) u.dead=BT.t; }); };
 
   /* Баатрын дэлгэц → «Ур чадвар»: 4 скилл */
-  const GL={rally:'📯',guard:'🛡',heal:'✚',volley:'🏹',charge:'🐎',cleave:'🌀',snipe:'🎯',anda:'🤝'};
+  const GL={rally:'📯',guard:'🛡',heal:'✚',volley:'🏹',charge:'🐎',cleave:'🌀',snipe:'🎯',anda:'🤝',stun:'⚡',burn:'🔥',drain:'🩸',execute:'☠',focus:'👁',weaken:'⬇'};
   hdSkillHTML=function(id,ow){
     const L=heroSkills(id); if(!L.length) return '<div class="sm">Ур чадвар байхгүй</div>';
     const lv=hlv(id), s=ow?starOf(id):0;
@@ -16015,7 +16061,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     const P=BT.pick; if(!P||P.u!==su){ say('Одоо '+hname(su.id)+'-ийн ээлж биш'); return; }
     const en=su.en==null?1:su.en; if(en<sk.cost){ say('Энерги хүрэхгүй · '+en+'/'+sk.cost); return; }
     const E=E0(); if(!E.length) return;
-    if(sk.k==='snipe'||sk.k==='charge'){ if(E.length>1){ BT.mode=(BT.mode&&BT.mode.i===i)?null:{i}; tick(true); return; } doSkill(su,sk,E[0]); return; }
+    if(SKTG.indexOf(sk.k)>=0){ if(E.length>1){ BT.mode=(BT.mode&&BT.mode.i===i)?null:{i}; tick(true); return; } doSkill(su,sk,E[0]); return; }
     doSkill(su,sk,null); };
   window.buTgt=function(tg){ const P=BT&&BT.pick; if(!P||!tg||tg.hp<=0||!tg.side) return; const u=P.u;
     if(BT.mode){ const sk=heroSkills(u.id)[BT.mode.i]; doSkill(u,sk,tg); return; }
@@ -16091,7 +16137,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     }
     bu.classList.toggle('bupk',!!BT.pick);
     { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
-    const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4};
+    const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
     if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
       const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
       setHTML($$('bu-sks'),'sks',skh,su.id);
@@ -16152,6 +16198,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
   turnSched=function(dt){
     if(!BT) return;
     if(BT.pick){ const pu=BT.pick.u; if(pu.hp<=0||BT.done||!E0().length){ BT.pick=null; BT.mode=null; } else { BT.t-=dt; return; } }
+    try{ dotTick(dt); }catch(e){}
     BT.tq=(BT.tq||0)-dt; if(BT.tq>0) return; const UU=BT.units;
     for(let k=0;k<2;k++){ const sd=((BT.ts||0)+k)&1; const c=UU.filter(u=>u.side===sd&&u.hp>0&&!u.sup&&!u.go&&u.cd<=0); if(!c.length) continue;
       c.sort((a,b)=>(a.lastGo||0)-(b.lastGo||0)); const u=c[0];

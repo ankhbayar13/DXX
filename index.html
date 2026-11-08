@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f262ed5b3a';
+var UPDB='48a8c54583';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15472,80 +15472,88 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 })();
 
 
-/* p32/sumreveal.js — Баатар дуудах шинэ эффект: хайрцаг сэгсрэнэ → баатрууд унана (шилдэг нь сүүлд) → эгнэнэ →
-   хоёр талаас хаалга хаагдана → шилдэг баатар бүтэн биетэй, хажууд нь карт → «Үргэлжлүүлэх» → нийт жагсаалт */
+/* p32/sumreveal.js — Баатар дуудах: CS2 шиг хайрцаг нээгдэж баатрууд гүйдэг хэсэг ХЭВЭЭР (rlRun).
+   Гүйлт зогсмогц: хаалга хаагдана → баатрууд нэг нэгээр (ховор нь сүүлд): том баатар + хүрээтэй карт + доор нь түүх →
+   5 хүрээтэй карт → «Баатар руу очих» */
 (function(){
-  const _orig=sumShow;
   const tierOf=g=>g.s>=5?3:g.s===4?2:g.s===3?1:0;
   const HF=(typeof HFULL!=='undefined')?HFULL:[];
-  let TM=[];
-  const T=(f,ms)=>{ const t=setTimeout(f,ms); TM.push(t); return t; };
-  const clr=()=>{ TM.forEach(clearTimeout); TM=[]; };
-  function grid(got){ clr(); const keep=rlRun; rlRun=function(o2,ids,done){ try{ done(); }catch(e){} };
-    try{ _orig(got); } finally{ rlRun=keep; } }
-  function art(g,cls){ const id=g.h.id; return HF.indexOf(id)>=0?'<img class="'+cls+'" src="hf/'+id+'.webp?v=2" alt="">':hpi(id,200,1); }
-  function revealHTML(g,n){ const t=tierOf(g), col=SKT[t].col, R=RAR[g.s]||RAR[1];
-    return '<div class="srv t'+t+'" style="--c:'+col+';--g:'+R.g+'"><div class="srrays"></div><div class="srglow"></div>'
-      +'<div class="srhero">'+art(g,'srimg')+'</div>'
-      +'<div class="srcard"><i class="srrar" style="background:linear-gradient(180deg,'+R.g+')">'+R.n+'</i><b class="srnm">'+g.n+'</b><div class="srst">'+stars(g.s)+'</div>'
-      +'<div class="sm">⚔ '+(typeof heroPowerEff==='function'?f(heroPowerEff(g.h.id)):'')+'</div>'
-      +(g.nw?'<div class="srnw">Шинэ!</div>':(g.up?'<div class="sm" style="color:#ffd770">★ Од нэмэгдлээ → '+g.st+'★</div>':'<div class="sm">Хэлтэрхий +'+DUPSH+'</div>'))+'</div>'
-      +'<button class="btn red srgo" id="srgo">'+(n>1?'Үргэлжлүүлэх ›':'Болсон')+'</button></div>'; }
+  let TM=[]; const T=(f,ms)=>{ const t=setTimeout(f,ms); TM.push(t); return t; }; const clr=()=>{ TM.forEach(clearTimeout); TM=[]; };
+  const close=()=>{ clr(); const x=document.getElementById('boxov'); if(x) x.remove(); };
+  const toHero=id=>{ close(); try{ openM('baatar'); setTimeout(()=>{ try{ if(typeof hsPick==='function') hsPick(id); }catch(e){} },150); }catch(e){} };
+  window.srClose=()=>{ close(); try{ fillM(); }catch(e){} };
+  window.srToHero=toHero;
+  function frameCard(g,cls){ const id=g.h.id, R=RAR[g.s]||RAR[1], d=SPRDATA['hp_'+id];
+    return '<div class="hs-c srcd '+(cls||'')+'" style="--g:'+R.g+';--c1:'+R.g.split(',')[0]+'">'+(d?'<img class="hsp" src="'+d[0]+'">':'')+'<img class="hs-fr" src="hf/hd_frame'+g.s+'.webp" alt=""><span class="hs-sr">'+stRow(g.st||starOf(id),10)+'</span></div>'; }
+  function story(id){ const b=(typeof HBIO!=='undefined')&&HBIO[id]; if(!b) return '';
+    const row=(l,t)=>t&&t!=='—'?'<div class="srsr"><b>'+l+'</b> '+t+'</div>':'';
+    return ((typeof HEPI!=='undefined'&&HEPI[id])?'<div class="srep">'+HEPI[id]+'</div>':'')+row('📍 Гарал',b.b)+row('⚔ Үйлс',b.d); }
+  function status(g){ return g.nw?'<span class="srnw">Шинэ!</span>':(g.up?'<span style="color:#ffd770">★ Од нэмэгдлээ → '+g.st+'★</span>':'<span>Хэлтэрхий +'+DUPSH+'</span>'); }
+  function heroHTML(g,last,n){ const id=g.h.id, t=tierOf(g), col=SKT[t].col, R=RAR[g.s]||RAR[1];
+    const img=HF.indexOf(id)>=0?'<img class="srimg" src="hf/'+id+'.webp?v=2" alt="">':hpi(id,220,1);
+    return '<div class="srv t'+t+'" style="--c:'+col+';--g:'+R.g+'"><div class="srbg"></div><div class="srglow"></div>'
+      +'<div class="srhero">'+img+'</div>'
+      +'<div class="srside">'+frameCard(g,'srbig')+'<div class="srlab"><i class="srrar" style="background:linear-gradient(180deg,'+R.g+')">'+R.n+'</i><b class="srnm">'+g.n+'</b><div class="sm">⚔ '+f(heroPowerEff(id))+' · '+status(g)+'</div></div>'
+      +'<div class="srstory">'+story(id)+'</div></div>'
+      +(last?'<div class="srbtns">'+(n>1?'<button class="btn red" onclick="srSum()">Үргэлжлүүлэх ›</button>':'<button class="btn red" onclick="srToHero(\''+id+'\')">Баатар руу очих</button><button class="btn" onclick="srClose()">Болсон</button>')+'</div>':'<div class="srhint">Дараагийнх руу дар</div>')+'</div>'; }
+  let GOT=[];
+  window.srSum=function(){ clr(); const o=document.getElementById('boxov'); if(!o) return; const best=GOT[0], bt=tierOf(best);
+    o.innerHTML='<div class="srw"><div class="srsum"><h3>Дуудсан баатрууд</h3><div class="srgrid">'+GOT.map((g,i)=>'<div class="srcell" style="animation-delay:'+(i*0.18)+'s">'+frameCard(g,'t'+tierOf(g))+'<div class="sm">'+status(g)+'</div></div>').join('')+'</div>'
+      +'<div class="srbtns"><button class="btn red" onclick="srToHero(\''+best.h.id+'\')">Баатар руу очих</button><button class="btn" onclick="srClose()">Болсон</button></div></div></div>';
+    GOT.forEach((g,i)=>T(()=>{ try{ sfxRev(tierOf(g)); }catch(e){} },i*180+100)); };
+  function seq(o,got){
+    GOT=got; const n=got.length, asc=got.slice().reverse(); let i=0;
+    const w=document.createElement('div'); w.className='srw'; w.innerHTML='<div class="srstage" id="srs"></div><div class="srgl" id="srgl"></div><div class="srgr" id="srgr"></div><div class="srfl" id="srfl"></div>'+(n>1?'<button class="btn srskip" id="srsk">Алгасах</button>':'');
+    o.appendChild(w); const $=id=>document.getElementById(id), alive=()=>o.parentNode&&w.parentNode;
+    if(n>1) $('srsk').onclick=e=>{ e.stopPropagation(); srSum(); };
+    const hold=g=>[1500,1800,2400,3200][tierOf(g)];
+    const show=()=>{ if(!alive()) return; const g=asc[i], last=i===n-1, st=$('srs'); st.innerHTML=heroHTML(g,last,n);
+      try{ sfxRev(tierOf(g)); if(last&&tierOf(g)>=3) T(()=>sfx('horn'),250); }catch(e){}
+      clr(); if(!last) T(next,hold(g)); };
+    const next=()=>{ if(!alive()||i>=n-1) return; i++; const f=$('srfl'); if(f){ f.className='srfl'; void f.offsetWidth; f.className='srfl on'; } show(); };
+    w.onclick=e=>{ if(e.target.closest('button')) return; if(i<n-1) { clr(); next(); } };
+    // хаалга хаагдана
+    void w.offsetWidth; $('srgl').classList.add('cls'); $('srgr').classList.add('cls'); sfx('slash');
+    T(()=>{ if(!alive()) return; const f=$('srfl'); if(f) f.className='srfl on'; sfx('big'); try{ vib(40); }catch(e){}
+      [...o.children].forEach(c=>{ if(c!==w) c.remove(); }); },470);
+    // нээгдэж, эхний баатар гарна
+    T(()=>{ if(!alive()) return; show(); $('srgl').classList.remove('cls'); $('srgr').classList.remove('cls'); },700);
+  }
   sumShow=function(got){
-    clr(); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov';
-    const n=got.length, best=got[0], bt=tierOf(best), asc=got.slice().reverse();
-    const done=()=>{ if(n>1) grid(got); else { clr(); const x=document.getElementById('boxov'); if(x) x.remove(); try{ fillM(); }catch(e){} } };
-    o.innerHTML='<div class="srw"><div class="srstage" id="srs"><div class="srchest" id="srch"><img src="'+SPRDATA.chest0[0]+'"></div><div class="srt">Баатар дуудаж байна...</div></div><div class="srgl" id="srgl"></div><div class="srgr" id="srgr"></div><div class="srfl" id="srfl"></div><button class="btn srskip" id="srsk">Алгасах</button></div>';
-    document.body.appendChild(o); sfx('box');
-    const $s=id=>document.getElementById(id), alive=()=>document.getElementById('boxov')===o;
-    const showReveal=(inst)=>{ if(!alive()) return; clr(); const st=$s('srs'); if(!st) return; st.innerHTML=revealHTML(best,n); const sk=$s('srsk'); if(sk) sk.style.display='none';
-      const go=$s('srgo'); if(go){ go.style.opacity=0; go.onclick=done; T(()=>{ go.style.transition='opacity .4s'; go.style.opacity=1; },inst?100:1300); }
-      sfxRev(bt); if(bt>=3) T(()=>sfx('horn'),250); };
-    $s('srsk').onclick=()=>{ clr(); if(n>1){ grid(got); } else { const gl=$s('srgl'),gr=$s('srgr'); if(gl) gl.className='srgl'; if(gr) gr.className='srgr'; showReveal(1); } };
-    // 1) хайрцаг сэгсрэх
-    T(()=>{ const c=$s('srch'); if(c){ c.classList.add('shake'); c.firstChild.src=SPRDATA.chest1[0]; } },100);
-    T(()=>{ const c=$s('srch'); if(c){ c.firstChild.src=SPRDATA.chest2[0]; c.classList.add('burst'); } sfx('big'); },1000);
-    // 2) баатрууд унана (шилдэг нь сүүлд)
-    T(()=>{ if(!alive()) return; const st=$s('srs'); if(!st) return;
-      st.innerHTML='<div class="srrow'+(n>1?' many':'')+'" id="srrow">'+asc.map((g,i)=>{ const t=tierOf(g); return '<div class="srfc t'+t+'" style="--c:'+SKT[t].col+';animation-delay:'+(i*0.3)+'s"><div class="srfa">'+hpi(g.h.id,n>1?50:84,1)+'</div><b style="color:'+SKT[t].col+'">'+stars(g.s)+'</b></div>'; }).join('')+'</div>';
-      asc.forEach((g,i)=>T(()=>{ sfx(i===n-1&&bt>=2?'big':'hit',40); },i*300+420)); },1700);
-    const fall=1700+(n-1)*300+900;
-    // 3) «сап» — хоёр талаас хаалга хаагдана
-    T(()=>{ if(!alive()) return; const gl=$s('srgl'),gr=$s('srgr'); if(gl) gl.className='srgl cls'; if(gr) gr.className='srgr cls'; sfx('slash'); },fall);
-    T(()=>{ if(!alive()) return; const f=$s('srfl'); if(f){ f.className='srfl on'; } sfx('big'); try{ vib(40); }catch(e){} },fall+380);
-    // 4) нэгдэх үед шилдэг баатар гарч ирнэ
-    T(()=>{ if(!alive()) return; showReveal(0); const gl=$s('srgl'),gr=$s('srgr'); if(gl) gl.className='srgl'; if(gr) gr.className='srgr'; },fall+380+(bt>=3?700:(bt>=2?450:250)));
+    clr(); const best=Math.max(...got.map(tierOf)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box');
+    o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Баатар дуудаж байна...</div></div>'; document.body.appendChild(o);
+    rlRun(o,got.map(g=>g.h.id),()=>{ if(!o.parentNode) return; seq(o,got); });
   };
   const st=document.createElement('style');
-  st.textContent='#boxov .srw{background:radial-gradient(circle at 50% 45%,#2a1b0d 0,#0b0704 70%);position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;display:flex;align-items:center;justify-content:center}'
-  +'.srstage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}'
-  +'.srt{color:#ffe9a8;font-weight:bold;margin-top:10px;text-shadow:0 2px 6px #000}'
-  +'.srchest img{width:160px;display:block}.srchest.shake{animation:srShake .18s linear infinite}.srchest.burst{animation:srBurst .7s ease-out forwards}'
-  +'@keyframes srShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-7px) rotate(-3deg)}75%{transform:translateX(7px) rotate(3deg)}}'
-  +'@keyframes srBurst{0%{transform:scale(1);filter:brightness(1)}40%{transform:scale(1.25);filter:brightness(2.2)}100%{transform:scale(1.1);filter:brightness(1.4)}}'
-  +'.srrow{display:flex;gap:6px;justify-content:center;align-items:flex-end;width:100%;padding:0 6px;box-sizing:border-box}'
-  +'.srfc{flex:none;text-align:center;border:3px solid var(--c);border-radius:10px;background:linear-gradient(#2b1d12,#150d06);padding:4px 3px 3px;box-shadow:0 0 12px var(--c);opacity:0;animation:srFall .6s cubic-bezier(.3,.7,.4,1) forwards}.srfc.t3{box-shadow:0 0 22px var(--c),0 0 40px var(--c)}'
-  +'.srrow:not(.many) .srfc{padding:8px 8px 5px}.srfa{display:flex;justify-content:center}'
-  +'@keyframes srFall{0%{opacity:1;transform:translateY(-110vh) rotate(-10deg)}55%{opacity:1;transform:translateY(0) rotate(2deg)}72%{opacity:1;transform:translateY(-22px)}86%{opacity:1;transform:translateY(0)}100%{opacity:1;transform:translateY(0)}}'
-  +'.srgl,.srgr{position:absolute;top:0;bottom:0;width:51%;z-index:5;background:linear-gradient(180deg,#3a2614,#1c1209);transition:transform .38s cubic-bezier(.6,0,.9,.4);pointer-events:none}'
-  +'.srgl{left:0;transform:translateX(-102%);border-right:4px solid #d8a93a;box-shadow:inset -18px 0 24px #000a}.srgr{right:0;transform:translateX(102%);border-left:4px solid #d8a93a;box-shadow:inset 18px 0 24px #000a}'
-  +'.srgl:after,.srgr:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,#ffffff08 0 14px,#0000 14px 28px)}'
-  +'.srgl.cls,.srgr.cls{transform:translateX(0)}.srgl,.srgr{transition:transform .38s cubic-bezier(.6,0,.9,.4)}'
-  +'.srfl{position:absolute;inset:0;z-index:6;background:#fff;opacity:0;pointer-events:none}.srfl.on{animation:srFlash .6s ease-out}'
-  +'@keyframes srFlash{0%{opacity:0}15%{opacity:.95}100%{opacity:0}}'
-  +'.srskip{position:absolute;top:14px;right:14px;z-index:8}'
-  +'.srv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:0;overflow:hidden}'
-  +'.srglow{position:absolute;inset:0;background:radial-gradient(circle at 36% 48%,var(--c) 0,#0000 55%);opacity:.5}'
-  +'.srrays{position:absolute;left:-60%;top:-40%;width:220%;height:180%;background:repeating-conic-gradient(from 0deg at 36% 48%,var(--c) 0 6deg,#0000 6deg 20deg);opacity:.16;animation:srSpin 18s linear infinite}@keyframes srSpin{to{transform:rotate(360deg)}}'
-  +'.srhero{position:relative;flex:0 0 63%;height:78vh;display:flex;align-items:flex-end;justify-content:center;animation:srHero .8s cubic-bezier(.2,.9,.3,1.1) both}'
-  +'.srimg{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 0 18px var(--c)) drop-shadow(0 6px 12px #000)}'
+  st.textContent='#boxov .srw{position:absolute;inset:0;overflow:hidden;z-index:3}'
+  +'.srstage{position:absolute;inset:0;background:#0b0704}'
+  +'.srgl,.srgr{position:absolute;top:0;bottom:0;width:50.5%;z-index:5;background-size:100% 100%;background-repeat:no-repeat;transition:transform .4s cubic-bezier(.6,0,.9,.4);pointer-events:none;filter:drop-shadow(0 0 14px #000)}'
+  +'.srgl{left:0;transform:translateX(-102%);background-image:url(hf/sr_dl.webp)}.srgr{right:0;transform:translateX(102%);background-image:url(hf/sr_dr.webp)}'
+  +'.srgl.cls,.srgr.cls{transform:translateX(0)}'
+  +'.srfl{position:absolute;inset:0;z-index:6;background:#fff;opacity:0;pointer-events:none}.srfl.on{animation:srFlash .55s ease-out}'
+  +'@keyframes srFlash{0%{opacity:0}15%{opacity:.9}100%{opacity:0}}'
+  +'.srskip{position:absolute;top:14px;left:14px;z-index:8}'
+  +'.srv{position:absolute;inset:0;overflow:hidden}'
+  +'.srbg{position:absolute;inset:0;background:url(hf/sr_bg.webp) center/100% 100% no-repeat}.srv.t3 .srbg{filter:hue-rotate(115deg) saturate(1.5) brightness(1.15)}.srv.t1 .srbg{filter:hue-rotate(-70deg) saturate(1.1)}.srv.t0 .srbg{filter:grayscale(.85) brightness(.9)}'
+  +'.srglow{position:absolute;inset:0;background:radial-gradient(circle at 34% 50%,var(--c) 0,#0000 52%);opacity:.45}'
+  +'.srhero{position:absolute;left:1%;top:5%;width:60%;height:84%;display:flex;align-items:flex-end;justify-content:center;animation:srHero .7s cubic-bezier(.2,.9,.3,1.1) both}'
+  +'.srimg{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 0 16px var(--c)) drop-shadow(0 6px 12px #000)}'
   +'@keyframes srHero{0%{opacity:0;transform:scale(.6) translateY(30px);filter:brightness(3)}100%{opacity:1;transform:none;filter:none}}'
-  +'.srcard{position:relative;flex:0 0 34%;margin-right:2%;text-align:center;background:linear-gradient(#35230f,#1a1008);border:3px solid var(--c);border-radius:12px;padding:10px 6px;box-shadow:0 0 24px var(--c);animation:srCard .6s .45s cubic-bezier(.2,.9,.3,1.1) both;color:#f5e6c4}'
-  +'@keyframes srCard{0%{opacity:0;transform:translateX(60px)}100%{opacity:1;transform:none}}'
-  +'.srrar{display:block;font-style:normal;font-weight:900;font-size:12px;color:#fff;border-radius:6px;padding:2px 4px;margin-bottom:6px;text-shadow:0 1px 2px #000}'
-  +'.srnm{display:block;font-size:17px;color:#ffe9a8;margin-bottom:3px}.srst{margin-bottom:4px}.srnw{color:#9fe08a;font-weight:bold;margin-top:4px}'
-  +'.srgo{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);z-index:3;min-width:180px;font-size:18px}'
-  +'.srv.t3 .srimg{animation:srPulse 1.6s ease-in-out infinite}@keyframes srPulse{0%,100%{filter:drop-shadow(0 0 18px var(--c)) drop-shadow(0 6px 12px #000)}50%{filter:drop-shadow(0 0 38px var(--c)) drop-shadow(0 6px 12px #000)}}';
+  +'.srside{position:absolute;right:2%;top:6%;width:36%;display:flex;flex-direction:column;align-items:center;gap:6px;animation:srCard .6s .35s cubic-bezier(.2,.9,.3,1.1) both}'
+  +'@keyframes srCard{0%{opacity:0;transform:translateX(50px)}100%{opacity:1;transform:none}}'
+  +'.srbig{width:100%;flex:none;pointer-events:none;filter:drop-shadow(0 0 14px var(--c1))}'
+  +'.srlab{text-align:center;color:#f5e6c4;width:100%}.srrar{display:inline-block;font-style:normal;font-weight:900;font-size:12px;color:#fff;border-radius:6px;padding:1px 8px;text-shadow:0 1px 2px #000}'
+  +'.srnm{display:block;font-size:16px;color:#ffe9a8;margin:2px 0}.srnw{color:#9fe08a;font-weight:bold}'
+  +'.srstory{width:100%;max-height:42vh;overflow:auto;box-sizing:border-box;padding:8px 8px 8px;border:2px solid #c9972b;border-radius:10px;background:linear-gradient(#2a1b0ee8,#140c06ee);box-shadow:0 0 0 2px #0008 inset,0 0 14px #000;color:#f1e3c2;font-size:12px;line-height:1.35}'
+  +'.srstory:empty{display:none}.srep{font-style:italic;color:#ffd770;margin-bottom:4px}.srsr{margin-top:3px}.srsr b{color:#ffd770}'
+  +'.srbtns{position:absolute;left:0;right:0;bottom:4vh;display:flex;gap:10px;justify-content:center;z-index:3}.srbtns .btn{min-width:150px;font-size:16px}'
+  +'.srhint{position:absolute;left:0;right:0;bottom:3vh;text-align:center;color:#ffe9a8aa;font-size:13px;animation:srBlink 1.2s infinite alternate}@keyframes srBlink{to{opacity:.35}}'
+  +'.srsum{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,#2a1b0d 0,#0b0704 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;box-sizing:border-box}'
+  +'.srsum h3{color:#ffd770;margin:0 0 10px;text-shadow:0 2px 6px #000}.srgrid{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;width:100%}'
+  +'.srcell{width:28vw;max-width:130px;text-align:center;color:#f1e3c2;animation:srPop .5s both}.srcell .srcd{width:100%}.srcell .sm{font-size:11px;margin-top:2px}'
+  +'.srcell .srcd.t3{filter:drop-shadow(0 0 12px #ffd24a)}.srcell .srcd.t2{filter:drop-shadow(0 0 9px #b887f5)}'
+  +'@keyframes srPop{0%{opacity:0;transform:scale(.4) translateY(30px)}60%{opacity:1;transform:scale(1.12)}100%{opacity:1;transform:none}}'
+  +'.srsum .srbtns{position:static;margin-top:16px}';
   document.head.appendChild(st);
 })();
 

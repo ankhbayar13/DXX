@@ -2936,7 +2936,7 @@ function btStep(dt){
   BT.fx.forEach(f=>f.t+=dt*4); BT.fx=BT.fx.filter(f=>f.t<1); try{ efTick(dt); }catch(e){} try{ skUi(); }catch(e){} BT.dm.forEach(d=>d.t+=dt); BT.dm=BT.dm.filter(d=>d.t<1.4);
   U.forEach(u=>{ if(u.hit>0) u.hit-=dt; if(u.atkT>0) u.atkT-=dt; if(u.hurt>0) u.hurt-=dt; });
   const pa=U.filter(u=>!u.side&&!u.sup&&u.hp>0), ea=U.filter(u=>u.side&&u.hp>0);
-  if(!pa.length||!ea.length||BT.t>75){ let win; if(!ea.length) win=true; else if(!pa.length) win=false; else win=pa.reduce((a,u)=>a+u.hp,0)/BT.p0>=ea.reduce((a,u)=>a+u.hp,0)/BT.e0; btFinish(win); }
+  if(!pa.length||!ea.length||BT.t>(BT.tmax||75)){ let win; if(!ea.length) win=true; else if(!pa.length) win=false; else win=pa.reduce((a,u)=>a+u.hp,0)/BT.p0>=ea.reduce((a,u)=>a+u.hp,0)/BT.e0; btFinish(win); }
 }
 
 function btBG(W2,H2,dp){
@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a49a130d6d';
+var UPDB='76ddb475be';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15819,6 +15819,62 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 })();
 
 
+/* p32/hskills.js — 224: баатар бүр 4 скилтэй. Lv1 · Lv10 · Lv20 · Lv30 дээр нээгдэнэ (хаалттай нь «🔒 Lv» гэж харагдана).
+   1-р скилл нь хуучин HSK[id]. Бусад 3 нь баатрын төрлөөс (rally/guard/heal/volley/charge) хамаарна.
+   Шинэ төрөл: 'cleave' (бүх дайсанд), 'snipe' (сонгосон нэг дайсанд). */
+var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
+(function(){
+  const LAD={
+    rally:[['cleave','Нийтийн довтолгоо','Бүх дайсанд 1.6 дахин цохилт',14,1],['rally','Их мандат','Бүх цэрэгт цохилт +50% (8с), 15% эдгээнэ',18,1.7],['volley','Тэнгэрийн бороо','3 дайсанд 4 дахин сум',16,1.3]],
+    anda:[['cleave','Нийтийн довтолгоо','Бүх дайсанд 1.6 дахин цохилт',14,1],['rally','Их мандат','Бүх цэрэгт цохилт +50% (8с), 15% эдгээнэ',18,1.7],['volley','Тэнгэрийн бороо','3 дайсанд 4 дахин сум',16,1.3]],
+    guard:[['snipe','Хатгалт','Сонгосон дайсанд 6 дахин цохилт',12,1],['heal','Сэргээлт','Бүх цэргийг 18% эдгээнэ',14,1],['cleave','Хүчит цохилт','Бүх дайсанд 1.6 дахин цохилт',16,1.2]],
+    heal:[['heal','Их ивээл','Бүх цэргийг 27% эдгээнэ',14,1.5],['guard','Ивээлийн бамбай','Бүх цэргийн авах гэмтэл -50% (8с)',14,1.4],['rally','Урам','Бүх цэрэгт цохилт +30% (8с)',16,1]],
+    volley:[['snipe','Онгон сум','Сонгосон дайсанд 6 дахин цохилт',10,1],['cleave','Сумны хур','Бүх дайсанд 1.6 дахин цохилт',14,1],['volley','Тэнгэрийн сум','3 дайсанд 5 дахин сум',16,1.6]],
+    charge:[['cleave','Давхин цохих','Бүх дайсанд 1.6 дахин цохилт',12,1],['snipe','Толгой авах','Сонгосон дайсанд 6 дахин цохилт',14,1.2],['rally','Дайны дуу','Бүх цэрэгт цохилт +30% (8с)',16,1]]
+  };
+  window.heroSkills=function(id){
+    const d=HSK[id]; if(!d) return [];
+    const lad=LAD[d[0]]||LAD.rally;
+    return [d].concat(lad).map((s,i)=>({i,k:s[0],n:s[1],d:s[2],cd:s[3],m:s[4],cost:SKCOST[i],lv:SKUNL[i],arr:s}));
+  };
+  window.skOpen=function(id,i){ return (typeof hlv==='function'?hlv(id):1)>=SKUNL[i]; };
+
+  /* шинэ төрлийн чадварууд: cleave, snipe, мөн сонгосон дайсанд давхих */
+  const _cs=castSkill;
+  castSkill=function(u){
+    const d=HSK[u.id]; if(!d) return _cs.apply(this,arguments);
+    if(d[0]==='cleave'||d[0]==='snipe'||(d[0]==='charge'&&BT&&BT.forceTg&&BT.forceTg.hp>0)){
+      const U=BT.units, en=U.filter(x=>x.side&&x.hp>0&&!x.sup); if(!en.length) return false;
+      const lv=Math.max(1,S.heroes[u.id]||1), k=(1+SKB[Math.min(6,lv-1)]/100)*(d[4]||1);
+      const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); };
+      if(d[0]==='cleave'){ en.forEach(e=>{ hitE(e,1.6); try{ efAdd(1,e.x,e.y-18,54,0.5); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }catch(x){} }); BT.shake=Math.min(1,(BT.shake||0)+0.5); }
+      else if(d[0]==='snipe'){ const tg=(BT.forceTg&&BT.forceTg.hp>0)?BT.forceTg:en.reduce((a,b)=>b.hp>a.hp?b:a); hitE(tg,6); try{ efAdd(0,tg.x,tg.y-18,60,0.5); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.3); }
+      else { const tg=BT.forceTg; hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; BT.shake=Math.min(1,(BT.shake||0)+0.6); try{ BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); efAdd(3,u.x,u.y+4,66,0.7,true); efAdd(6,tg.x,tg.y-18,60,0.5); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} }
+      BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true;
+    }
+    return _cs.apply(this,arguments);
+  };
+  /* сонгосон скиллээр чадвар хэрэглэх (түр HSK-г сольж) */
+  window.castWith=function(u,sk,tg){
+    const o=HSK[u.id]; HSK[u.id]=sk.arr; BT.forceTg=tg||null; let ok=false;
+    try{ ok=castSkill(u); }catch(e){ ok=false; } finally{ HSK[u.id]=o; BT.forceTg=null; }
+    return ok;
+  };
+  try{ SKI.cleave=['🌀','Нийтийн цохилт']; SKI.snipe=['🎯','Онилсон цохилт']; }catch(e){}
+
+  /* Баатрын дэлгэц → «Ур чадвар»: 4 скилл */
+  const GL={rally:'📯',guard:'🛡',heal:'✚',volley:'🏹',charge:'🐎',cleave:'🌀',snipe:'🎯',anda:'🤝'};
+  hdSkillHTML=function(id,ow){
+    const L=heroSkills(id); if(!L.length) return '<div class="sm">Ур чадвар байхгүй</div>';
+    const lv=hlv(id), s=ow?starOf(id):0;
+    return '<div class="sm" style="text-align:center;margin-bottom:6px">Баатрын түвшин <b style="color:#ffd770">'+lv+'</b> · Скилл бүр түвшингээр нээгдэнэ</div>'+
+      L.map(x=>{ const open=ow&&lv>=x.lv; return '<div class="hd-sk" style="'+(open?'':'opacity:.55;filter:grayscale(.7)')+';margin-bottom:6px"><div class="hd-ski">'+(open?(GL[x.k]||'✦'):'🔒')+'</div><div style="flex:1;min-width:0"><b>'+x.n+'</b> <span class="hd-act">'+(open?'Идэвхтэй':'Lv '+x.lv+' дээр нээгдэнэ')+'</span><div class="hd-sd">'+x.d+'</div><div class="sm">Энерги: <b style="color:#7fc4ff">'+x.cost+'</b> ◆'+(x.i===0?' · эхний скилл':'')+'</div></div></div>'; }).join('')+
+      '<div class="hd-sb">'+SKB.slice(1).map((v,i)=>'<div class="'+(s>i?'ok':'')+'"><span>Ур чадварын хүч +'+v+'%</span><em>'+(s>i?'✓':'('+(i+1)+' од нээгдэнэ)')+'</em></div>').join('')+'</div>'+
+      (ow&&s<STMAX?'<button class="btn" onclick="hdTab(\'star\')">★ Од нэмэх</button>':'');
+  };
+})();
+
+
 /* p32/btui.js — 223: тулааны шинэ дэлгэц (Монгол загвар):
    дээд самбар (хоёр талын хүч · 5 vs 5 · хугацаа), баатруудын дугуй зураг, зүүн талын «Тулааны дараалал»,
    доод талын баатрын самбар (HP, чадварын цэнэг, скиллүүд, том «Чадвар» товч), ×1 ×2 ×3 · Авто · ⚙.
@@ -15901,7 +15957,16 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   '#bu-ctl button.on{color:#fff;filter:drop-shadow(0 0 7px #ffb53a) brightness(1.25)}'+
   '#bu-ctl .gear{flex:0 0 '+U(46)+';background-image:'+IMG('gear')+'}'+
   '#bu-ctl .bsd{flex:1}'+
-  '#bu-ctl .au{flex:1.7;display:flex;align-items:center;justify-content:center;gap:'+U(5)+'}';
+  '#bu-ctl .au{flex:1.7;display:flex;align-items:center;justify-content:center;gap:'+U(5)+'}'+
+  '.bu-hint{position:absolute;left:50%;top:'+U(104)+';transform:translateX(-50%);display:none;padding:'+U(5)+' '+U(16)+';border-radius:'+U(18)+';background:linear-gradient(#7a1d12ee,#3d0d08ee);border:'+U(2)+' solid #ffd770;color:#fff1c8;font:bold '+U(13)+'/1.2 Georgia,serif;text-shadow:0 1px 3px #000;white-space:nowrap;box-shadow:0 0 14px #ff4a2a99,0 2px 8px #000a;animation:bu-hp 1s infinite alternate;pointer-events:none;max-width:92%}'+
+  '#bu.bupk .bu-hint{display:block}#bu:not(.fi) .bu-hint,#bu.dn .bu-hint{display:none!important}'+
+  '@keyframes bu-hp{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.06)}}'+
+  '#bu.bupk .bu-pt.r:not(.dead){border-color:#ff5a3a;box-shadow:0 0 10px #ff4a2a;cursor:pointer}'+
+  '.bu-sk .bulk{position:absolute;left:8%;right:8%;top:10%;bottom:10%;background:#000b;border-radius:'+U(4)+';display:none;align-items:center;justify-content:center;flex-direction:column;color:#ffd770;font:bold '+U(9)+'/1.1 sans-serif;text-shadow:0 1px 2px #000}'+
+  '.bu-sk.lock .bulk{display:flex}.bu-sk.lock{opacity:.8}'+
+  '.bu-sk .buco{position:absolute;right:'+U(-4)+';top:'+U(-5)+';min-width:'+U(17)+';height:'+U(17)+';border-radius:50%;background:radial-gradient(circle at 35% 30%,#d6efff,#3d8cf0 55%,#1a4fb0);border:'+U(1.5)+' solid #d9a43a;color:#fff;font:bold '+U(10)+'/'+U(14)+' sans-serif;text-align:center;box-shadow:0 1px 3px #000;z-index:2}'+
+  '.bu-sk.dim .ic{filter:grayscale(.7) brightness(.7) drop-shadow(0 2px 3px #000a)}'+
+  '.bu-sk.armed .ic{filter:drop-shadow(0 0 9px #ff5a3a) brightness(1.2);transform:translateY(-4px)}';
   const st=document.createElement('style'); st.id='cssbu'; st.textContent=css; document.head.appendChild(st);
 
   const $$=id=>document.getElementById(id);
@@ -15932,19 +15997,33 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
        +'<div class="bu-hp"><u id="bu-hu"></u><span id="bu-ht"></span></div>'
        +'<div class="bu-en"><span id="bu-et">Чадвар</span><b></b><b></b><b></b><b></b><b></b></div>'
      +'</div>'
-     +'<button class="bu-go" id="bu-go" onclick="buCast()"><b>Чадвар</b></button>'
+     +'<button class="bu-go" id="bu-go" onclick="buAtkBtn()"><b>Довтлох</b></button>'
+     +'<div class="bu-hint" id="bu-hint"></div>'
      +'<div class="bu-sks" id="bu-sks"></div>'
      +'<div id="bu-ctl"><button class="gear" onclick="buGear()"></button></div>'
      +'</div>';
     bti.appendChild(bu); const bl=$$('btl'); if(bl) bl.classList.add('bu-on');
+    const cv=$$('bc'); if(cv&&!cv._bu){ cv._bu=1; cv.addEventListener('pointerdown',canvasTap); }
   }
 
-  window.buSp=n=>{ if(!BT) return; BT.sp=n; try{ const b=$$('bsp'); if(b) b.textContent='×'+n; }catch(e){} tick(true); };
-  window.buAuto=()=>{ try{ skToggle(); }catch(e){} tick(true); };
+  const E0=()=>foes().filter(x=>x.hp>0);
+  function doSkill(u,sk,tg){ if(!castWith(u,sk,tg)) return; u.en=(u.en==null?1:u.en)-sk.cost; u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; tick(true); }
   window.buGear=()=>{ try{ dxAsk('Тулаанаас гарах уу?','Гарах',()=>{ btEnd(true); },'Үргэлжлүүл'); }catch(e){ btEnd(true); } };
-  window.buSel=id=>{ if(!BT) return; BT.bsel=id; BT.bselT=BT.t||0; BT.bselM=performance.now(); tick(true); };
-  window.buCast=()=>{ if(!BT||BT.wait||BT.done) return; const id=BT.bsel; if(id) try{ skCast(id); }catch(e){} tick(true); };
-  window.buCastId=id=>{ if(!BT||BT.wait||BT.done) return; BT.bsel=id; BT.bselM=performance.now(); try{ skCast(id); }catch(e){} tick(true); };
+  window.buSel=id=>{ if(!BT) return; BT.bsel=id; BT.bselM=performance.now(); tick(true); };
+  window.buSkill=function(i){ if(!BT||BT.done) return; const su=mine().find(u=>u.id===BT.bsel); if(!su) return; const sk=heroSkills(su.id)[i]; if(!sk) return;
+    if(!skOpen(su.id,i)){ say('🔒 '+sk.n+' · Lv '+sk.lv+' дээр нээгдэнэ'); return; }
+    const P=BT.pick; if(!P||P.u!==su){ say('Одоо '+hname(su.id)+'-ийн ээлж биш'); return; }
+    const en=su.en==null?1:su.en; if(en<sk.cost){ say('Энерги хүрэхгүй · '+en+'/'+sk.cost); return; }
+    const E=E0(); if(!E.length) return;
+    if(sk.k==='snipe'||sk.k==='charge'){ if(E.length>1){ BT.mode=(BT.mode&&BT.mode.i===i)?null:{i}; tick(true); return; } doSkill(su,sk,E[0]); return; }
+    doSkill(su,sk,null); };
+  window.buTgt=function(tg){ const P=BT&&BT.pick; if(!P||!tg||tg.hp<=0||!tg.side) return; const u=P.u;
+    if(BT.mode){ const sk=heroSkills(u.id)[BT.mode.i]; doSkill(u,sk,tg); return; }
+    u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; try{ sfx('tap'); }catch(e){} tick(true); };
+  window.buTg=i=>{ if(!BT) return; buTgt(foes()[i]); };
+  window.buAtkBtn=function(){ if(!BT||!BT.pick) return; if(BT.mode){ BT.mode=null; tick(true); return; } const E=E0(); if(E.length===1) buTgt(E[0]); else say('Дайсан дээр дарж сонго'); };
+  function canvasTap(ev){ if(!BT||!BT.pick) return; const r=ev.currentTarget.getBoundingClientRect(); const gx=(ev.clientX-r.left)*(BT.W/r.width), gy=(ev.clientY-r.top)*(BT.H/r.height); let best=null,bd=1e9;
+    E0().forEach(e=>{ const d=Math.hypot(e.x-gx,(e.y-STDH*0.45)-gy); if(d<bd){ bd=d; best=e; } }); if(best&&bd<90) buTgt(best); }
 
   const sig={};
   function setHTML(el,key,html,sk){ const s2=(sk==null?html:sk); if(sig[key]===s2) return; sig[key]=s2; el.innerHTML=html; }
@@ -15954,14 +16033,15 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   function order(){
     const lg=(a,b)=>(a.lastGo||0)-(b.lastGo||0);
     const A=mine().filter(u=>u.hp>0).sort(lg), B=foes().filter(u=>u.hp>0).sort(lg);
-    const act=BT.units.filter(u=>u.go&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0));
+    const pk=BT.pick&&BT.pick.u, act=BT.units.filter(u=>(u.go||u===pk)&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0));
     const out=[]; act.forEach(u=>out.push(u));
-    const aA=A.filter(u=>!u.go), bB=B.filter(u=>!u.go), q=[aA,bB]; let s=(BT.ts||0)&1, guard=0;
+    const aA=A.filter(u=>!u.go&&u!==pk), bB=B.filter(u=>!u.go), q=[aA,bB]; let s=(BT.ts||0)&1, guard=0;
     while((q[0].length||q[1].length)&&guard++<30){ if(q[s].length) out.push(q[s].shift()); else out.push(q[s^1].shift()); s^=1; }
     return out.slice(0,10);
   }
 
   function curActor(){
+    if(BT.pick&&BT.pick.u.hp>0) return BT.pick.u;
     const act=mine().filter(u=>u.go&&u.hp>0).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0));
     return act[0]||null;
   }
@@ -15981,23 +16061,23 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     const lh=$$('bu-lh'), rh=$$('bu-rh'); if(lh) lh.style.width=Math.max(0,Math.min(100,100*pa/(BT.p0||1)))+'%'; if(rh) rh.style.width=Math.max(0,Math.min(100,100*ea/(BT.e0||1)))+'%';
     set('bu-rn',(BT.e&&BT.e.n)||'Дайсны цэрэг');
     const vs=bu.querySelector('.bu-vs b'); const vt=Math.max(1,M.length)+' vs '+Math.max(1,E.length); if(vs&&vs.textContent!==vt) vs.textContent=vt;
-    const tm=Math.max(0,75-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0'));
+    const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0'));
     if(!fight) return;
     /* дугуй зургууд */
     const mx=Math.min(5,(typeof heroSlots==='function'?heroSlots():5));
     const sel=BT.bsel;
     const hw=u=>Math.max(0,Math.min(100,100*u.hp/u.max));
     const lr=M.map(u=>'<div class="bu-pt'+(u.hp<=0?' dead':'')+(u.id===sel?' sel':'')+'" onclick="buSel(\''+u.id+'\')">'+portHTML(u)+'<s><b style="width:'+hw(u)+'%"></b></s></div>').join('');
-    const rr=E.map(u=>'<div class="bu-pt r'+(u.hp<=0?' dead':'')+'">'+portHTML(u)+'<s><b style="width:'+hw(u)+'%"></b></s></div>').join('');
+    const rr=E.map((u,i)=>'<div class="bu-pt r'+(u.hp<=0?' dead':'')+'" onclick="buTg('+i+')">'+portHTML(u)+'<s><b style="width:'+hw(u)+'%"></b></s></div>').join('');
     const lk=M.map(u=>u.id+(u.hp<=0?'d':'')+(u.id===sel?'s':'')).join(), rk=E.map((u,i)=>i+(u.hp<=0?'d':'')).join();
     setHTML($$('bu-lr'),'lr',lr,lk); setHTML($$('bu-rr'),'rr',rr,rk);
     $$('bu-lr').querySelectorAll('s b').forEach((b,i)=>{ if(M[i]) b.style.width=hw(M[i])+'%'; });
     $$('bu-rr').querySelectorAll('s b').forEach((b,i)=>{ if(E[i]) b.style.width=hw(E[i])+'%'; });
     /* дараалал */
     const ord=order(), cur=curActor();
-    setHTML($$('bu-ol'),'ol',ord.map((u,i)=>'<div class="bu-oi'+(u.side?' r':'')+(u.go?' act':'')+'"'+(u.side?'':' onclick="buSel(\''+u.id+'\')"')+'>'+(u.side?'<em>'+cl(u.type)+'</em>':hpi(u.id,30))+'<i>'+(i+1)+'</i></div>').join(''));
+    setHTML($$('bu-ol'),'ol',ord.map((u,i)=>'<div class="bu-oi'+(u.side?' r':'')+((u.go||(BT.pick&&BT.pick.u===u))?' act':'')+'"'+(u.side?'':' onclick="buSel(\''+u.id+'\')"')+'>'+(u.side?'<em>'+cl(u.type)+'</em>':hpi(u.id,30))+'<i>'+(i+1)+'</i></div>').join(''));
     /* сонгогдсон баатар: гараар сонгосон бол 7с барина, үгүй бол ээлж авсан нь */
-    const manual=BT.bselM&&(performance.now()-BT.bselM<7000)&&M.some(u=>u.id===BT.bsel&&u.hp>0);
+    const manual=!BT.pick&&BT.bselM&&(performance.now()-BT.bselM<7000)&&M.some(u=>u.id===BT.bsel&&u.hp>0);
     if(!manual){ if(cur) BT.bsel=cur.id; else if(!BT.bsel||!M.some(u=>u.id===BT.bsel&&u.hp>0)){ const al=M.find(u=>u.hp>0); BT.bsel=al?al.id:(M[0]&&M[0].id); } }
     const su=M.find(u=>u.id===BT.bsel)||M[0];
     if(su){
@@ -16005,26 +16085,24 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
       setHTML($$('bu-po'),'po',hpi(su.id,70)); set('bu-lv',String(lvOf(su.id)));
       set('bu-nm',hname(su.id)); set('bu-cl',cl(su.type)+' '+tn(su.type)+(d?' · '+d[1]:''));
       const hu=$$('bu-hu'); if(hu) hu.style.width=Math.max(0,Math.min(100,100*su.hp/su.max))+'%'; set('bu-ht',fm(Math.max(0,Math.round(su.hp)))+' / '+fm(Math.round(su.max)));
-      let ch=0; if(d&&su.hp>0){ const tot=su.skt||5, fr=(su.skc==null)?0:Math.max(0,Math.min(1,su.skc/tot)); ch=Math.round(5*(1-fr)); if(su.skc!=null&&su.skc<=0) ch=5; }
-      const dots=bu.querySelectorAll('.bu-en b'); dots.forEach((b,i)=>b.classList.toggle('on',i<ch)); set('bu-et',d?('Чадвар '+ch+'/5'):'Чадваргүй');
-      const go=$$('bu-go'); const rdy=!!(d&&su.hp>0&&su.skc!=null&&su.skc<=0); go.classList.toggle('rdy',rdy);
+      const en=su.en==null?1:su.en;
+      const dots=bu.querySelectorAll('.bu-en b'); dots.forEach((b,i)=>b.classList.toggle('on',i<en)); set('bu-et','Энерги '+en+'/5');
+      const go=$$('bu-go'); go.classList.toggle('rdy',!!BT.pick);
     }
-    /* скиллийн товчууд */
-    const hs=M.filter(u=>typeof HSK!=='undefined'&&HSK[u.id]), man=(typeof skManual==='function')&&skManual();
-    const SKI={charge:3,volley:2,rally:4,guard:1,heal:5};
-    const skh=hs.map(u=>'<div class="bu-sk" data-id="'+u.id+'" onclick="buCastId(\''+u.id+'\')"><div class="ic" style="background-image:'+IMG('s'+(SKI[HSK[u.id][0]]||1))+'"><div class="cd"></div><div class="hm">'+hpi(u.id,16)+'</div></div><small>'+(n=>n.length>7?n.slice(0,6)+'…':n)(String(HSK[u.id][1]).split(' ')[0])+'</small></div>').join('');
-    setHTML($$('bu-sks'),'sks',skh);
-    hs.forEach(u=>{ const el=bu.querySelector('.bu-sk[data-id="'+u.id+'"]'); if(!el) return; const dead=u.hp<=0, rdy=!dead&&(u.skc!=null&&u.skc<=0), tot=u.skt||5, fr=dead?1:(u.skc==null?1:Math.max(0,Math.min(1,u.skc/tot)));
-      el.className='bu-sk'+(rdy?' rdy':'')+(rdy&&man?' man':'')+(dead?' dead':'')+(u.id===BT.bsel?' sel':''); const c=el.querySelector('.cd'); if(c) c.style.height=(fr*76)+'%'; });
-    /* хурд / авто */
-    bu.querySelectorAll('#bu-ctl .bsd').forEach(b=>b.classList.toggle('on',Number(b.dataset.s)===(BT.sp||1)));
-    const au=$$('bu-au'); if(au){ au.classList.toggle('on',!man); set('bu-aul',man?'Гар':'Авто'); }
+    bu.classList.toggle('bupk',!!BT.pick);
+    { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
+    const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4};
+    if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      setHTML($$('bu-sks'),'sks',skh,su.id);
+      L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), ok=open&&pk&&en2>=x.cost;
+        el.className='bu-sk'+(open?'':' lock')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
   }
   function ensure(){ if(!tmr) tmr=setInterval(()=>{ try{ tick(); }catch(e){} },110); }
 
   /* тулаан эхлэхэд HUD угсарна */
   const _sb=startBattle;
-  startBattle=function(){ try{ if(S&&S.skMan) S.skMan=0; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ build(); ensure(); tick(true); } }catch(e){} return r; };
+  startBattle=function(){ try{ S.skMan=1; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ BT.tmax=150; build(); ensure(); tick(true); } }catch(e){} return r; };
 
   /* талбар дээр: ээлж авсан баатарт алтан цагираг + ▼, байгаа байгаа дайсанд улаан цагираг + нум сум; түвшингийн тэмдэг */
   const _bd=btDraw;
@@ -16043,6 +16121,8 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
           else { c.fillStyle='#8a2218'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffb0a0'; c.stroke(); c.fillStyle='#fff'; c.font='10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(cl(u.type),x,y+1); }
         });
         const ac=BT.units.filter(u=>u.go&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0)).slice(0,3);
+        if(BT.pick&&BT.pick.u.hp>0&&!ac.includes(BT.pick.u)) ac.unshift(BT.pick.u);
+        if(BT.pick){ const pu=Math.abs(Math.sin(t*5)); BT.units.forEach(e=>{ if(!e.side||e.hp<=0||e.sup) return; c.save(); c.strokeStyle='rgba(255,70,50,'+(0.55+0.45*pu)+')'; c.lineWidth=3; c.setLineDash([7,5]); c.beginPath(); c.ellipse(e.x,e.y+2,34+pu*3,12+pu,0,0,7); c.stroke(); c.setLineDash([]); c.fillStyle='#ff4a3a'; const my=e.y-H-26+Math.sin(t*6)*3; c.beginPath(); c.moveTo(e.x-8,my-9); c.lineTo(e.x+8,my-9); c.lineTo(e.x,my+3); c.closePath(); c.fill(); c.restore(); }); }
         const bob=Math.sin(t*6)*2;
         ac.forEach((u,ai)=>{
           c.save(); c.lineWidth=3; c.strokeStyle='#ffd24a'; c.shadowColor='#ffb53a'; c.shadowBlur=10;
@@ -16067,6 +16147,18 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   /* баатрууд талбайд жаахан дээш (доод самбарт дарагдахгүй) */
   goSpread=function(){ const B=BT; if(!B) return; const U=B.units; if(!U.length) return; const vs=[...new Set(U.map(u=>Math.round(u.hy)))].sort((a,b)=>a-b); if(vs.length<2) return;
     const por=B.H>B.W, t0=B.H*(por?0.31:0.34), t1=B.H*(por?0.68:0.78); U.forEach(u=>{ const i=vs.indexOf(Math.round(u.hy)); u.hy=t0+i/(vs.length-1)*(t1-t0); }); };
+
+  /* ТОГЛОГЧ ДАЙСНАА СОНГОНО: өөрийн баатрын ээлж ирэхэд тулаан хүлээнэ (цаг зогсоно). Дайсан автоматаар довтолно. */
+  turnSched=function(dt){
+    if(!BT) return;
+    if(BT.pick){ const pu=BT.pick.u; if(pu.hp<=0||BT.done||!E0().length){ BT.pick=null; BT.mode=null; } else { BT.t-=dt; return; } }
+    BT.tq=(BT.tq||0)-dt; if(BT.tq>0) return; const UU=BT.units;
+    for(let k=0;k<2;k++){ const sd=((BT.ts||0)+k)&1; const c=UU.filter(u=>u.side===sd&&u.hp>0&&!u.sup&&!u.go&&u.cd<=0); if(!c.length) continue;
+      c.sort((a,b)=>(a.lastGo||0)-(b.lastGo||0)); const u=c[0];
+      if(sd===0){ u.lastGo=BT.t; BT.ts=1; BT.tq=0.26; u.en=Math.min(5,(u.en==null?1:u.en)+1); BT.pick={u}; BT.mode=null; BT.bselM=0; BT.bsel=u.id; try{ sfx('tap'); }catch(e){} return; }
+      const tg=turnPick(u); if(!tg) continue;
+      u.lastGo=BT.t; u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
+    BT.tq=0.15; };
 })();
 
 </script><script>(function(){

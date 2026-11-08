@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7983c53dd4';
+var UPDB='91eff38640';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16371,6 +16371,7 @@ function hpCalc(sel){ let gold=0,wood=0,meat=0,t=0,n=0; TR.forEach(T=>{ const w=
 function upUnit(T,i){ const f=i+1; return {gold:6*f,main:3*f,mk:T.ty==='archer'?'wood':'meat',t:1.5*f}; }
 function upCalc(T,i,c){ const u=upUnit(T,i), t=(u.t*c)/(1+0.1*Math.max(0,(S.bld[T.b]||1)-1)); return {gold:Math.ceil(u.gold*c),main:Math.ceil(u.main*c),mk:u.mk,t:Math.max(1,Math.ceil(t))}; }
 function hsFmtT(s){ s=Math.max(0,Math.ceil(s)); const d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), x=s%60; return (d?d+'ө ':'')+(h?String(h).padStart(2,'0')+':':(d?'00:':''))+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0'); }
+function hsAlt(px){ try{ return '<img src="'+RICON.alt+'" style="height:'+px+'px;vertical-align:middle">'; }catch(e){ return ''; } }
 function hsFm(n){ try{ return f(n); }catch(e){ return String(Math.round(n)); } }
 function hsSkipCost(end){ return Math.max(1,Math.ceil((end-Date.now())/60000/2)); }
 
@@ -16435,7 +16436,7 @@ function hospGo(){ if(S.hj) return; const c=hpCalc(HPSEL); if(c.n<1||!hsHave(c))
   S.res.gold-=c.gold; S.res.meat-=c.meat; S.res.wood-=c.wood; const now=Date.now(); S.hj={arr:arr,start:now,end:now+c.t*1000,n:c.n}; HPSEL={t_cav:0,t_arc:0,t_spr:0}; try{ save(); sfx('click'); }catch(e){} hospOpen(1); }
 function hospSkip(){ const j=S.hj; if(!j) return; const c=hsSkipCost(j.end); if((S.res.alt||0)<c){ try{ say('Алт хүрэхгүй ('+c+')'); }catch(e){} return; } S.res.alt-=c; hjFinish(); }
 function hsLive(){ const j=S.hj, el=document.getElementById('hjb'); if(el&&j){ const left=Math.max(0,(j.end-Date.now())/1000), tot=Math.max(1,(j.end-j.start)/1000), p=Math.round(100*(1-left/tot));
-    const h='<b>🏥 '+j.n+' цэрэг эдгээгдэж байна</b><div class="hz_bar"><u style="width:'+p+'%"></u></div><div style="font-size:18px;font-weight:bold">⏱ '+hsFmtT(left)+'</div><div class="hz_bt"><button class="hz_y" onclick="hospSkip()">Одоо дуусга<br>🪙 Алт '+hsSkipCost(j.end)+'</button></div>';
+    const h='<b>🏥 '+j.n+' цэрэг эдгээгдэж байна</b><div class="hz_bar"><u style="width:'+p+'%"></u></div><div style="font-size:18px;font-weight:bold">⏱ '+hsFmtT(left)+'</div><div class="hz_bt"><button class="hz_y" onclick="hospSkip()">Одоо дуусга<br>'+hsAlt(20)+' Алт '+hsSkipCost(j.end)+'</button></div>';
     if(el._h!==h){ el._h=h; el.innerHTML=h; } else { const u=el.querySelector('u'); if(u) u.style.width=p+'%'; } } }
 
 /* ---- ЦЭРГИЙН ЛАГЕРЬ: I–X ---- */
@@ -16468,7 +16469,7 @@ function campGo(k){ if(S.uj) return; const T=TR.find(x=>x.k===k), c=upCalc(T,CPS
 function campSkip(){ const j=S.uj; if(!j) return; const c=hsSkipCost(j.end); if((S.res.alt||0)<c){ try{ say('Алт хүрэхгүй ('+c+')'); }catch(e){} return; } S.res.alt-=c; ujFinish(); }
 /* хугацааны самбар: аль ажил байгаагаас хамаарна */
 (function(){ const _l=hsLive; hsLive=function(){ const el=document.getElementById('hjb'), o=document.getElementById('hsp'); if(el&&o&&o.dataset.kind==='c'&&S.uj){ const j=S.uj, left=Math.max(0,(j.end-Date.now())/1000), tot=Math.max(1,(j.end-j.start)/1000), p=Math.round(100*(1-left/tot));
-    const h='<b>⬆ '+j.n+' цэрэг '+ttNames()[j.from+1]+' түвшинд сайжирч байна</b><div class="hz_bar"><u style="width:'+p+'%"></u></div><div style="font-size:18px;font-weight:bold">⏱ '+hsFmtT(left)+'</div><div class="hz_bt"><button class="hz_y" onclick="campSkip()">Одоо дуусга<br>🪙 Алт '+hsSkipCost(j.end)+'</button></div>';
+    const h='<b>⬆ '+j.n+' цэрэг '+ttNames()[j.from+1]+' түвшинд сайжирч байна</b><div class="hz_bar"><u style="width:'+p+'%"></u></div><div style="font-size:18px;font-weight:bold">⏱ '+hsFmtT(left)+'</div><div class="hz_bt"><button class="hz_y" onclick="campSkip()">Одоо дуусга<br>'+hsAlt(20)+' Алт '+hsSkipCost(j.end)+'</button></div>';
     if(el._h!==h){ el._h=h; el.innerHTML=h; } else { const u=el.querySelector('u'); if(u) u.style.width=p+'%'; } return; } return _l.apply(this,arguments); }; })();
 
 </script><script>(function(){

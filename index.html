@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a944b8bd5f';
+var UPDB='f39a945498';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15364,6 +15364,65 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   givR=function(r){ if(r.res){ for(const k in r.res){ S.res[k]=(S.res[k]||0)+r.res[k]; } } return _giv.apply(this,arguments); };
   // 7 хоногийн шагнал: Алт багасч, нөөц нэмэгдэнэ
   LOGR.length=0; LOGR.push({alt:5},{res:{wood:3000}},{alt:5},{res:{grain:3000}},{alt:10},{res:{gold:5000,wool:3000}},{alt:20,relic:3,res:{airag:20}});
+})();
+
+
+/* p32/invrew.js — «Найзаа урь»: найз имэйл/Google-ээр бүртгүүлж 5-р түвшинд хүрэхэд урьсан хүнд Алт 50 + Мод 5K, найзад Алт 20 */
+(function(){
+  const NEED=5, CAP=20, R_INV={alt:50,res:{wood:5000}}, R_NEW={alt:20};
+  const code=()=>{ try{ return (typeof CL!=='undefined'&&CL.uid)?'f'+String(CL.uid).slice(0,6):''; }catch(e){ return ''; } };
+  const inv=()=>{ if(!S.inv) S.inv={done:{},n:0}; if(!S.inv.done) S.inv.done={}; return S.inv; };
+  /* 1) Урилгаар ирсэн тоглогчийн src-г нийтийн «lb» бичлэгт нэмж хадгална (clPush бичлэгийг дарж бичдэг тул дараа нь merge) */
+  if(typeof clPush==='function'){ const _p=clPush; clPush=async function(){ const ok=await _p.apply(this,arguments);
+    try{ if(ok&&S.src&&/^f/.test(S.src)&&CL.uid){ const {F,db}=FBM; await F.setDoc(F.doc(db,'lb',CL.uid),{s:String(S.src).slice(0,24)},{merge:true}); CL.srcErr=0; } }catch(e){ CL.srcErr=1; }
+    return ok; }; }
+  /* 2) Ирсэн найзад бэлэг: бүртгүүлсэн + 5-р түвшин */
+  function newTick(){ try{
+    if(typeof S==='undefined'||!S||!S.res||S.invGot) return;
+    if(!S.src||!/^f/.test(S.src)||S.src===code()) return;
+    if(!(typeof CL!=='undefined'&&CL.email)||(S.pl||1)<NEED) return;
+    S.invGot=1; givR(R_NEW); try{ save(); }catch(e){} say('🎁 Урилгаар ирсний бэлэг: +'+R_NEW.alt+' Алт'); try{ refresh(); }catch(e){}
+  }catch(e){} }
+  setInterval(newTick,20000);
+  /* 3) Урьсан хүний шагнал: lb дотор s==миний кодтой, l>=5, r==1 бичлэгүүдийг тоолно */
+  async function check(){
+    const m=document.getElementById('invst'); const set=t=>{ if(m) m.innerHTML=t; };
+    if(!(typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM)){ set('Интернэт эсвэл cloud холбогдоогүй байна'); return; }
+    set('Шалгаж байна…');
+    try{
+      const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('s','==',code()),F.limit(60)));
+      const I=inv(); let got=0, wait=0, noreg=0;
+      s.docs.forEach(d=>{ const x=d.data(); if(d.id===CL.uid||I.done[d.id]) return;
+        if((x.l||1)<NEED){ wait++; return; } if(x.r!==1){ noreg++; return; }
+        if(I.n>=CAP) return; I.done[d.id]=1; I.n++; got++; givR(R_INV); });
+      if(got){ try{ save(); refresh(); }catch(e){} sfx&&sfx('coin'); say('🎁 '+got+' найзаас шагнал авлаа'); }
+      show(got?'Шинээр '+got+' найзын шагнал орлоо: +'+(R_INV.alt*got)+' Алт, +'+(R_INV.res.wood*got/1000)+'K Мод':(wait||noreg?'Шагнал авах найз одоохондоо алга':'Одоохондоо таны холбоосоор орсон найз олдсонгүй'),wait,noreg);
+    }catch(e){ set('Шалгаж чадсангүй. Дараа дахин оролдоно уу'); }
+  }
+  function show(msg,wait,noreg){ const m=document.getElementById('invst'); if(!m) return; const I=inv();
+    m.innerHTML='<div>'+msg+'</div>'+(wait?'<div class="sm">⏳ '+wait+' найз 5-р түвшинд хүрээгүй байна</div>':'')+(noreg?'<div class="sm">✉ '+noreg+' найз бүртгүүлээгүй байна</div>':'')+'<div class="sm">Шагнал авсан найз: <b>'+I.n+' / '+CAP+'</b></div>'; }
+  window.invCheck=check;
+  window.inviteShare=function(){ try{ const id=(typeof CL!=='undefined'&&CL.uid)?String(CL.uid).slice(0,6):'x';
+      const url='https://talnutgiinhaan.com/?src=f'+id, text='«Тал Нутгийн Хаан» — монгол нүүдэлчний тоглоом. Хамт тоглоцгооё!';
+      if(navigator.share){ navigator.share({title:'Тал Нутгийн Хаан',text:text,url:url}).catch(()=>{}); return; }
+      const done=()=>{ try{ say('Хаяг хуулагдлаа'); }catch(e){} };
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text+' '+url).then(done,()=>{ try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }); } else { try{ prompt('Хаягаа хуулна уу',url); }catch(e){} }
+    }catch(e){} };
+  window.inviteFriend=function(){
+    let o=document.getElementById('invm'); if(o) o.remove(); o=document.createElement('div'); o.id='invm';
+    o.onclick=e=>{ if(e.target===o) o.remove(); };
+    const I=inv(), reg=!!(typeof CL!=='undefined'&&CL.email);
+    o.innerHTML='<div class="invb"><h3>👥 Найзаа урь</h3>'
+      +'<div class="sm" style="line-height:1.5">Найзаа холбоосоор оруул. Тэр <b>имэйл эсвэл Google-ээр бүртгүүлж</b>, <b>'+NEED+'-р түвшинд</b> хүрвэл:</div>'
+      +'<div class="invr"><span>Чамд</span><b>💎 '+R_INV.alt+' Алт + 🪵 '+(R_INV.res.wood/1000)+'K Мод</b></div>'
+      +'<div class="invr"><span>Найзад</span><b>💎 '+R_NEW.alt+' Алт</b></div>'
+      +'<div class="sm">Хамгийн ихдээ '+CAP+' найз тоологдоно.</div>'
+      +(S.src&&/^f/.test(S.src)?'<div class="sm" style="color:#9fe08a">✔ Та найзын урилгаар ирсэн'+(S.invGot?' (бэлэг авсан)':(reg?'. '+NEED+'-р түвшинд хүрмэгц бэлэг авна':'. Бэлэг авахын тулд имэйл/Google-ээр бүртгүүл'))+'</div>':'')
+      +'<div id="invst" class="invs"></div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn red" style="flex:1" onclick="inviteShare()">📤 Холбоос илгээх</button><button class="btn" style="flex:1" onclick="invCheck()">🎁 Шагнал авах</button></div>'
+      +'<button class="btn" style="width:100%;margin-top:8px" onclick="document.getElementById(\'invm\').remove()">Хаах</button></div>';
+    document.body.appendChild(o); show('Дээрх «Шагнал авах» товчийг дарж шалга',0,0); };
+  (function(){ const st=document.createElement('style'); st.textContent='#invm{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:14px}.invb{width:min(360px,100%);background:linear-gradient(#3a2614,#241709);border:2px solid #b8893a;border-radius:14px;padding:14px;color:#f1e4c4;box-shadow:0 0 24px #000}.invb h3{margin:0 0 8px;color:#ffd770;text-align:center}.invr{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#1a1109;border:1px solid #6b4a24;border-radius:8px;padding:7px 9px;margin:6px 0;font-size:13px}.invr b{color:#ffd770}.invs{background:#150e07;border-radius:8px;padding:8px;margin-top:8px;font-size:13px;text-align:center}.invb .sm{font-size:12px;opacity:.9;margin-top:4px}'; document.head.appendChild(st); })();
 })();
 
 </script><script>(function(){

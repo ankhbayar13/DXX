@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5f2ba025b9';
+var UPDB='a49a130d6d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15865,7 +15865,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   '.bu-oi i{position:absolute;left:0;right:0;bottom:0;text-align:center;font:bold '+U(9)+'/1 sans-serif;color:#fff;font-style:normal;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 1px #000;background:linear-gradient(transparent,#0009);padding-top:'+U(3)+'}'+
   '.bu-oi.act{border-color:#fff0a0;box-shadow:0 0 0 2px #ffb53acc,0 0 12px #ffb53a;overflow:visible}'+
   '.bu-oi.act::after{content:"";position:absolute;right:'+U(-14)+';top:50%;margin-top:'+U(-6)+';border:'+U(6)+' solid transparent;border-left:'+U(9)+' solid #ffc83a;border-right:0;filter:drop-shadow(0 0 3px #ff9a2a)}'+
-  '#bu-pan{position:absolute;left:'+U(2)+';bottom:'+U(48)+';width:'+U(300)+';aspect-ratio:604/228;display:none;pointer-events:none;background:'+IMG('pan')+' 0 0/100% 100% no-repeat;filter:drop-shadow(0 -2px 6px #000a)}'+
+  '#bu-pan{position:absolute;left:'+U(2)+';bottom:'+U(6)+';width:'+U(300)+';aspect-ratio:604/228;display:none;pointer-events:none;background:'+IMG('pan')+' 0 0/100% 100% no-repeat;filter:drop-shadow(0 -2px 6px #000a)}'+
   '#bu.fi #bu-pan{display:block}'+
   '.bu-po{position:absolute;left:4.7%;top:14.3%;width:24.2%;height:64%;border-radius:50%;overflow:hidden;background:#1a0f06;pointer-events:auto}'+
   '.bu-po img{width:100%!important;height:100%!important;object-fit:cover;display:block}'+
@@ -15879,7 +15879,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   '.bu-en span{font-size:'+U(9)+';color:#d9bd80;margin-right:'+U(2)+';white-space:nowrap}'+
   '.bu-en b{display:block;flex:none;width:'+U(11)+';height:'+U(11)+';border-radius:50%;background:radial-gradient(#1a1008,#0a0603);border:'+U(1.5)+' solid #9a7220;box-shadow:inset 0 0 3px #000}'+
   '.bu-en b.on{background:radial-gradient(circle at 35% 30%,#d6efff,#3d8cf0 55%,#1a4fb0);border-color:#d9a43a;box-shadow:0 0 6px #5aa8ff}'+
-  '.bu-sks{position:absolute;left:'+U(8)+';right:'+U(6)+';bottom:'+U(160)+';display:none;gap:'+U(4)+';align-items:flex-end;justify-content:flex-end;pointer-events:none}'+
+  '.bu-sks{position:absolute;left:'+U(8)+';right:'+U(6)+';bottom:'+U(124)+';display:none;gap:'+U(4)+';align-items:flex-end;justify-content:flex-end;pointer-events:none}'+
   '#bu.fi .bu-sks{display:flex}'+
   '.bu-sk{position:relative;flex:0 0 '+U(46)+';width:'+U(46)+';pointer-events:auto;text-align:center;touch-action:manipulation;cursor:pointer}'+
   '.bu-sk .ic{position:relative;width:'+U(46)+';height:'+U(40)+';background-size:100% 100%;background-repeat:no-repeat;filter:drop-shadow(0 2px 3px #000a)}'+
@@ -15892,10 +15892,10 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   '.bu-sk.sel .ic{filter:drop-shadow(0 0 5px #fff3b0)}'+
   '.bu-sk.dead{filter:grayscale(1);opacity:.45}'+
   '@keyframes bu-p{from{transform:translateY(0) scale(1)}to{transform:translateY(-3px) scale(1.07)}}'+
-  '.bu-go{position:absolute;right:'+U(4)+';bottom:'+U(52)+';width:'+U(82)+';height:'+U(66)+';pointer-events:auto;background:'+IMG('big')+' center/100% 100% no-repeat;border:0;padding:0;touch-action:manipulation;cursor:pointer;filter:grayscale(.55) brightness(.75) drop-shadow(0 2px 4px #000a)}'+
+  '.bu-go{position:absolute;right:'+U(4)+';bottom:'+U(10)+';width:'+U(82)+';height:'+U(66)+';pointer-events:auto;background:'+IMG('big')+' center/100% 100% no-repeat;border:0;padding:0;touch-action:manipulation;cursor:pointer;filter:grayscale(.55) brightness(.75) drop-shadow(0 2px 4px #000a)}'+
   '.bu-go.rdy{filter:drop-shadow(0 0 10px #ffb53a) brightness(1.1);animation:bu-p .8s infinite alternate}'+
   '.bu-go b{position:absolute;left:0;right:0;bottom:'+U(3)+';font:bold '+U(11)+'/1 Georgia,serif;color:#fff1c8;text-shadow:0 1px 3px #000,0 0 6px #000}'+
-  '#bu-ctl{position:absolute;left:'+U(4)+';right:'+U(4)+';bottom:'+U(4)+';height:'+U(42)+';display:none;align-items:center;gap:'+U(3)+';pointer-events:none}'+
+  '#bu-ctl{position:absolute;right:'+U(4)+';bottom:'+U(82)+';width:'+U(46)+';height:'+U(42)+';display:none;align-items:center;gap:'+U(3)+';pointer-events:none}'+
   '#bu.fi #bu-ctl{display:flex}'+
   '#bu-ctl button{pointer-events:auto;height:'+U(40)+';border:0;padding:0;color:#e9cf93;font:bold '+U(15)+'/1 Georgia,serif;background:'+IMG('btn')+' center/100% 100% no-repeat;text-shadow:0 1px 3px #000,0 0 4px #000;touch-action:manipulation;filter:drop-shadow(0 2px 3px #000a)}'+
   '#bu-ctl button.on{color:#fff;filter:drop-shadow(0 0 7px #ffb53a) brightness(1.25)}'+
@@ -15934,7 +15934,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
      +'</div>'
      +'<button class="bu-go" id="bu-go" onclick="buCast()"><b>Чадвар</b></button>'
      +'<div class="bu-sks" id="bu-sks"></div>'
-     +'<div id="bu-ctl"><button class="gear" onclick="buGear()"></button><button class="bsd" data-s="1" onclick="buSp(1)">×1</button><button class="bsd" data-s="2" onclick="buSp(2)">×2</button><button class="bsd" data-s="3" onclick="buSp(3)">×3</button><button class="au" id="bu-au" onclick="buAuto()"><span>⚔</span><span id="bu-aul">Авто</span></button></div>'
+     +'<div id="bu-ctl"><button class="gear" onclick="buGear()"></button></div>'
      +'</div>';
     bti.appendChild(bu); const bl=$$('btl'); if(bl) bl.classList.add('bu-on');
   }
@@ -16024,7 +16024,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 
   /* тулаан эхлэхэд HUD угсарна */
   const _sb=startBattle;
-  startBattle=function(){ const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ build(); ensure(); tick(true); } }catch(e){} return r; };
+  startBattle=function(){ try{ if(S&&S.skMan) S.skMan=0; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ build(); ensure(); tick(true); } }catch(e){} return r; };
 
   /* талбар дээр: ээлж авсан баатарт алтан цагираг + ▼, байгаа байгаа дайсанд улаан цагираг + нум сум; түвшингийн тэмдэг */
   const _bd=btDraw;

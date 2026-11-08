@@ -10585,7 +10585,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='abf22e3f64';
+var UPDB='c4044b9354';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16142,7 +16142,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
     { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
     const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
     if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
-      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="hf/sk_'+x.k+'.webp?v=1" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="hf/sk_'+x.k+'.webp?v=2" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
       setHTML($$('bu-sks'),'sks',skh,su.id);
       L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), ok=open&&pk&&en2>=x.cost;
         el.className='bu-sk'+(open?'':' lock')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
@@ -16209,6 +16209,133 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
       const tg=turnPick(u); if(!tg) continue;
       u.lastGo=BT.t; u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
     BT.tq=0.15; };
+})();
+
+
+/* p32/rtsui.js — 229: «Дэлхийн дайн» (ШТАБ руу довтлох) дэлгэцийн шинэ дээд / доод самбар (Монгол загвар).
+   Логик өөрчлөгдөөгүй: зөвхөн хуучин DOM-ийг шинэ зургаар (hf/rt_top, hf/rt_pan) өмсгөнө. ×1 ба Авто товч алга. */
+(function(){
+  const u=v=>(v/21.72).toFixed(3)+'cqw';          // зургийн пиксел → хэмжээ (самбарын өргөнөөс)
+  const W='min(100vw,540px)', TH='calc('+W+'*0.2178)';
+  const KI={volley:1,charge:1,might:1,haste:1,heal:1,ward:1};     // зурагтай чадварууд (hf/rt_k_*.webp)
+  const TX=[[606,208],[846,203],[1081,203],[1316,203],[1551,203]];  // доод эгнээний нүднүүд (x, өргөн)
+  const css='#rts #rtop{display:none!important}#rts #rx,#rts #rsp,#rts #rau{display:none!important}'+
+  '#rts #rbt{top:calc('+TH+' + 6px);zoom:1!important}'+
+  '#rts #rhint{top:calc('+TH+' + 6px);zoom:1!important}'+
+  /* ---- дээд самбар ---- */
+  '#rtu{position:absolute;left:50%;top:0;transform:translateX(-50%);width:'+W+';aspect-ratio:2172/473;container-type:inline-size;background:url(hf/rt_top.webp?v=1) 0 0/100% 100% no-repeat;pointer-events:none;z-index:3;filter:drop-shadow(0 2px 4px #0008)}'+
+  '#rtu *{box-sizing:border-box}'+
+  '#rtu .p{position:absolute;top:'+u(66)+';width:'+u(410)+';height:'+u(170)+';text-align:center;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000}'+
+  '#rtu .p.l{left:'+u(270)+'}#rtu .p.r{left:'+u(1490)+'}'+
+  '#rtu .p small{display:block;font:bold '+u(46)+'/1 Georgia,serif;color:#cfe2ff;margin-top:'+u(10)+'}#rtu .p.r small{color:#ffd6cf}'+
+  '#rtu .p b{display:block;font:bold '+u(96)+'/1.05 Georgia,serif;margin-top:'+u(4)+'}'+
+  '#rtu .p i{position:absolute;left:'+u(20)+';right:'+u(20)+';bottom:'+u(8)+';height:'+u(24)+';border-radius:'+u(12)+';background:#0009;border:'+u(2)+' solid #0009;overflow:hidden}'+
+  '#rtu .p i u{display:block;height:100%;background:linear-gradient(#a8f08a,#3f9a26);border-radius:'+u(12)+';transition:width .3s}#rtu .p.r i u{background:linear-gradient(#ff9a8a,#b3261a);float:right}'+
+  '#rtu .tm{position:absolute;left:'+u(900)+';top:'+u(50)+';width:'+u(380)+';height:'+u(170)+';display:flex;align-items:center;justify-content:center;color:#ffe9b0;font:bold '+u(104)+'/1 Georgia,serif;text-shadow:0 2px 6px #000,0 0 12px #ff9a2a99}'+
+  '#rtu .hq{position:absolute;left:'+u(940)+';top:'+u(262)+';width:'+u(300)+';height:'+u(54)+';border-radius:'+u(10)+';background:#000a;overflow:hidden;border:'+u(2)+' solid #0008}'+
+  '#rtu .hq u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#ffc44a,#d9822b)}'+
+  '#rtu .hq span{position:absolute;inset:0;text-align:center;color:#fff;font:bold '+u(38)+'/'+u(50)+' Georgia,serif;text-shadow:0 1px 3px #000}'+
+  '#rtu .c{position:absolute;top:'+u(296)+';width:'+u(124)+';height:'+u(124)+';border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:'+u(76)+';line-height:1;color:#fff}'+
+  '#rtu .c.dead{filter:grayscale(1) brightness(.5)}'+
+  '#rtu .c img{width:100%!important;height:100%!important;max-width:none!important;object-fit:cover;display:block;border-radius:50%}'+
+  '#rtu .c em{font-style:normal;text-shadow:0 1px 3px #000}'+
+  /* ---- доод самбар ---- */
+  '#rts #rpan{position:absolute;left:50%;right:auto;bottom:0;transform:translateX(-50%);width:'+W+';height:auto;aspect-ratio:3/1;padding:0;gap:0;display:block;container-type:inline-size;background:url(hf/rt_pan.webp?v=1) 0 0/100% 100% no-repeat;zoom:1!important;z-index:3}'+
+  '#rts #rpan *{box-sizing:border-box}'+
+  '#rts #rpan .pt{position:absolute;left:'+u(146)+';top:'+u(82)+';width:'+u(372)+';height:'+u(372)+';flex:none}'+
+  '#rts #rpan .pt .c{width:100%;height:100%;border:none;margin:0;border-radius:50%;box-shadow:none;background:#2a1c10}'+
+  '#rts #rpan .pt .c *{width:100%!important;height:100%!important;max-width:none!important;object-fit:cover;display:block}'+
+  '#rts #rpan .pt span{display:none}'+
+  '#rts #rpan .g{display:block;position:static;flex:none}'+
+  '#rts #rpan #rcmd,#rts #rpan #rchips{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none}'+
+  '#rts #rpan #rcmd .b.cm{position:absolute;top:'+u(540)+';height:'+u(146)+';padding:0;margin:0;border:none;background:none;color:transparent;font-size:0;pointer-events:auto;border-radius:'+u(30)+';-webkit-tap-highlight-color:transparent;touch-action:manipulation}'+
+  '#rts #rpan #rcmd .b.cm:nth-child(1){left:'+u(372)+';width:'+u(358)+'}#rts #rpan #rcmd .b.cm:nth-child(2){left:'+u(768)+';width:'+u(326)+'}'+
+  '#rts #rpan #rcmd .b.cm:nth-child(3){left:'+u(1124)+';width:'+u(356)+'}#rts #rpan #rcmd .b.cm:nth-child(4){left:'+u(1504)+';width:'+u(376)+'}'+
+  '#rts #rpan #rcmd .b.cm:active,#rpg:active,#rpsw:active{background:#ffffff40}'+
+  '#rpg,#rpsw{position:absolute;border:none;background:none;padding:0;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation}'+
+  '#rpg{left:'+u(100)+';top:'+u(544)+';width:'+u(164)+';height:'+u(140)+';border-radius:'+u(30)+'}'+
+  '#rpsw{left:'+u(1796)+';top:'+u(90)+';width:'+u(350)+';height:'+u(430)+';border-radius:'+u(60)+'}'+
+  /* баатрын мэдээлэл (дээд зурвас) */
+  '#rpi{position:absolute;left:'+u(640)+';top:'+u(66)+';width:'+u(1090)+';height:'+u(176)+';color:#fff3c8;text-shadow:0 1px 3px #000;pointer-events:none}'+
+  '#rpi b{display:block;font:bold '+u(76)+'/1.1 Georgia,serif;color:#ffd770}#rpi small{display:block;font:bold '+u(44)+'/1.2 Georgia,serif;color:#e8d2a0}'+
+  '#rpi .bar{position:absolute;left:0;right:0;bottom:'+u(4)+';height:'+u(40)+';border-radius:'+u(20)+';background:#0009;border:'+u(2)+' solid #6b4a1a;overflow:hidden}'+
+  '#rpi .bar u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#a8f08a,#3f9a26);transition:width .3s}'+
+  '#rpi .bar span{position:absolute;inset:0;text-align:center;font:bold '+u(32)+'/'+u(36)+' sans-serif;color:#fff}'+
+  /* нүднүүд */
+  '#rts #rpan #rchips .b{position:absolute;top:'+u(284)+';width:'+u(208)+';height:'+u(190)+';padding:0;margin:0;border:none;background:none;box-shadow:none;border-radius:'+u(14)+';pointer-events:auto;overflow:visible;touch-action:manipulation;-webkit-tap-highlight-color:transparent}'+
+  '#rts #rpan #rchips .b>span{display:none}'+
+  '#rts #rpan #rchips #rc_foot{left:'+u(606)+'}#rts #rpan #rchips #rc_cav{left:'+u(846)+'}#rts #rpan #rchips #rc_archer{left:'+u(1081)+'}#rts #rpan #rchips #rs_0{left:'+u(1316)+'}#rts #rpan #rchips #rs_1{left:'+u(1551)+'}'+
+  '#rts #rpan #rchips .b small{position:absolute;right:'+u(30)+';top:'+u(24)+';margin:0;padding:0;opacity:1;font:bold '+u(44)+'/1 sans-serif;color:#fff;text-shadow:0 1px 3px #000,0 0 5px #000}'+
+  '#rts #rpan #rchips .b i{position:absolute;left:'+u(26)+';top:'+u(150)+';right:auto;width:auto;max-width:'+u(156)+';height:'+u(16)+';margin:0;border-radius:'+u(8)+';background:none;overflow:hidden}'+
+  '#rts #rpan #rchips .b[id^=rc_] i{width:'+u(156)+';background:#0009}'+
+  '#rts #rpan #rchips .b[id^=rc_] i u{display:block;height:100%;background:linear-gradient(#b8ff8a,#4fb02a);border-radius:'+u(8)+'}'+
+  '#rts #rpan #rchips .b.sk0 i.cd{background:linear-gradient(#9fe8ff,#18a6d9)}#rts #rpan #rchips .b.sk1 i.cd{background:linear-gradient(#e0b0ff,#9a4de0)}'+
+  '#rts #rpan #rchips .b i.cd u{display:none}'+
+  '#rts #rpan #rchips .b[id^=rc_]:not(.on)::before{content:"";position:absolute;left:'+u(14)+';right:'+u(14)+';top:'+u(14)+';bottom:'+u(12)+';background:#000a;border-radius:'+u(10)+'}'+
+  '#rts #rpan #rchips .b.dead::before{background:#000d!important}'+
+  '#rts #rpan #rchips .b[id^=rc_].on::after,#rts #rpan #rchips .b.rdy::after{content:"";position:absolute;inset:'+u(6)+';border:'+u(5)+' solid #ffe27a;border-radius:'+u(14)+';box-shadow:0 0 '+u(26)+' #ffc83aaa;pointer-events:none}'+
+  '#rts #rpan #rchips .b.rdy::after{animation:rtu-p .8s infinite alternate}@keyframes rtu-p{from{opacity:.35}to{opacity:1}}'+
+  '#rts #rpan #rchips .b .ki{position:absolute;left:'+u(20)+';top:'+u(20)+';width:'+u(168)+';height:'+u(122)+';object-fit:cover;border-radius:'+u(10)+';display:flex;align-items:center;justify-content:center;font-size:'+u(90)+';text-shadow:0 2px 4px #000}'+
+  '#rts #rpan #rchips .b.sk0:not(.rdy) .ki,#rts #rpan #rchips .b.sk1:not(.rdy) .ki{filter:grayscale(.7) brightness(.6)}'+
+  '#rts #rpan #rchips .b.sk0 small,#rts #rpan #rchips .b.sk1 small{left:0;right:0;top:'+u(98)+';text-align:center;font-size:'+u(40)+'}';
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  const fm=n=>{ try{ return f(n); }catch(e){ return String(Math.round(n)); } };
+  const TYI={cav:'🐎',archer:'🏹',foot:'🛡'};
+  let sig={};
+  function setH(el,key,html){ if(!el) return; if(sig[key]===html) return; sig[key]=html; el.innerHTML=html; }
+  window.rtuExit=function(){ const R=RT; if(!R||R.done) return; try{ dxAsk('Тулаанаас гарах уу?','Гарах',()=>{ const r=RT; if(r&&!r.done){ r.win=undefined; rtsEnd(true); } },'Үргэлжлүүл'); }catch(e){ R.win=undefined; rtsEnd(true); } };
+
+  function skin(R){
+    const rt=document.getElementById('rts'); if(!rt) return;
+    if(!document.getElementById('rtu')){
+      sig={}; R.sp=1; R.auto=false;
+      let h='<div class="p l"><small>Миний цэрэг</small><b id="rtu-lp">0</b><i><u id="rtu-lh"></u></i></div><div class="p r"><small>Дайсан</small><b id="rtu-rp">0</b><i><u id="rtu-rh"></u></i></div>'+
+        '<div class="tm" id="rtu-tm">0:00</div><div class="hq"><u id="rtu-hu"></u><span>ШТАБ</span></div>';
+      const LX=[174,326,478,628,776], RX=[1400,1552,1706,1858,2010];
+      for(let i=0;i<5;i++) h+='<div class="c l" id="rtu-l'+i+'" style="left:'+u(LX[i]-62)+'"></div>';
+      for(let i=0;i<5;i++) h+='<div class="c r" id="rtu-r'+i+'" style="left:'+u(RX[i]-62)+'"></div>';
+      const d=document.createElement('div'); d.id='rtu'; d.innerHTML=h; rt.appendChild(d);
+    }
+    const pn=document.getElementById('rpan');
+    if(pn&&!document.getElementById('rpg')){
+      pn.insertAdjacentHTML('beforeend','<button id="rpg" onclick="rtuExit()" aria-label="Гарах"></button><button id="rpsw" onclick="rtsCmd(\'charge\')" aria-label="Дайр"></button><div id="rpi"><b id="rpi-n"></b><small id="rpi-s"></small><div class="bar"><u id="rpi-u"></u><span id="rpi-t"></span></div></div>');
+    }
+    if(R.hero) [0,1].forEach(k=>{ const e=document.getElementById('rs_'+k), s=R.hero.sk[k]; if(!e||!s||e.querySelector('.ki')) return;
+      e.insertAdjacentHTML('beforeend',KI[s.k]?'<img class="ki" alt="" src="hf/rt_k_'+s.k+'.webp?v=1">':'<div class="ki">'+(RTSI[s.k]||'✦')+'</div>'); });
+  }
+
+  function circle(g,side){
+    if(!g) return '';
+    const hp=g.us.reduce((a,x)=>a+Math.max(0,x.hp),0), mx=g.us.reduce((a,x)=>a+x.max,0), p=Math.round(100*hp/Math.max(1,mx));
+    return {p:p,dead:!g.us.some(x=>x.hp>0),t:g.type};
+  }
+  function fill(el,c,hero,side){
+    if(!el) return; const key=JSON.stringify(c)+(hero?'h':'');
+    if(el._k===key) return; el._k=key;
+    if(!c){ el.innerHTML=''; el.style.background=''; el.classList.remove('dead'); return; }
+    const col=side?'#d9382c':'#4fb02a';
+    el.style.background='linear-gradient(to top,'+col+'aa '+c.p+'%,#00000055 '+c.p+'%)';
+    el.classList.toggle('dead',c.dead);
+    el.innerHTML=hero?hpi(hero,50):'<em>'+(TYI[c.t]||'⚔')+'</em>';
+  }
+  function upd(){
+    const R=RT; if(!R||!R.hero) return; skin(R);
+    const set=(id,v)=>{ const e=document.getElementById(id); if(e&&e.textContent!==v) e.textContent=v; };
+    const pa=R.U.filter(x=>!x.side).reduce((a,x)=>a+Math.max(0,x.hp),0), ea=R.U.filter(x=>x.side).reduce((a,x)=>a+Math.max(0,x.hp),0), tm=Math.max(0,R.tmax-Math.floor(R.t));
+    set('rtu-lp',fm(Math.ceil(pa/14))); set('rtu-rp',fm(Math.ceil(ea/14))); set('rtu-tm',Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0'));
+    const lh=document.getElementById('rtu-lh'), rh=document.getElementById('rtu-rh'), hu=document.getElementById('rtu-hu');
+    if(lh) lh.style.width=Math.round(100*pa/Math.max(1,R.p0))+'%'; if(rh) rh.style.width=Math.round(100*ea/Math.max(1,R.e0))+'%'; if(hu) hu.style.width=Math.round(100*Math.max(0,R.hq.hp)/R.hq.max)+'%';
+    const mg=R.G.filter(g=>!g.side), eg=R.G.filter(g=>g.side);
+    fill(document.getElementById('rtu-l0'),{p:Math.round(100*pa/Math.max(1,R.p0)),dead:pa<=0,t:'foot'},R.hero.id,0);
+    for(let i=0;i<4;i++) fill(document.getElementById('rtu-l'+(i+1)),circle(mg[i],0)||null,null,0);
+    for(let i=0;i<5;i++) fill(document.getElementById('rtu-r'+i),circle(eg[i],1)||null,null,1);
+    set('rpi-n',R.hero.name); set('rpi-s','Командлагч · Lv '+(R.hero.lv||1)+' · '+mg.length+' бүлэг');
+    const pu=document.getElementById('rpi-u'); if(pu) pu.style.width=Math.round(100*pa/Math.max(1,R.p0))+'%'; set('rpi-t',fm(Math.ceil(pa/14))+' / '+fm(Math.ceil(R.p0/14)));
+  }
+  const _h=rtsHud;
+  rtsHud=function(){ const r=_h.apply(this,arguments); try{ upd(); }catch(e){} return r; };
+  /* тулаан дуусахад дээд самбар үлдэхгүй (DOM #rts-тэй хамт устана) */
 })();
 
 </script><script>(function(){

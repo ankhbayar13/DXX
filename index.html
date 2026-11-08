@@ -10,11 +10,11 @@ if(/[?&]nofr\b/.test(location.search))return;
 var w=innerWidth,h=innerHeight;if(w<900||h<600)return;
 window.stop();
 var u=location.href.split('#')[0],hs=location.hash||'';u+=(u.indexOf('?')<0?'?':'&')+'fr=1'+hs;
-document.documentElement.innerHTML='<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Тал Нутгийн Хаан</title><meta name="theme-color" content="#0f2a5c"><link rel="manifest" href="manifest.json"><style>html,body{margin:0;height:100%;overflow:hidden;background:#070b16 radial-gradient(ellipse at 50% 30%,#14234a 0,#070b16 70%)}iframe{position:fixed;top:0;border:0;background:#000;box-shadow:0 0 60px #000c,0 0 0 2px #c9972b66}</style></head><body><iframe id="gfr" src="'+u.replace(/"/g,'&quot;')+'" allow="autoplay; fullscreen; clipboard-write; clipboard-read" allowfullscreen></iframe></body>';
+document.documentElement.innerHTML='<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Тал Нутгийн Хаан</title><meta name="theme-color" content="#0f2a5c"><link rel="manifest" href="manifest.json"><style>html,body{margin:0;height:100%;overflow:hidden;background:url(hf/splash_pc.webp) 50% 0/auto 100% no-repeat,linear-gradient(#0009,#0009),url(hf/splash_pc.webp) 50% 50%/cover no-repeat #070b16}html.go,html.go body{background:#070b16 radial-gradient(ellipse at 50% 30%,#14234a 0,#070b16 70%)}iframe{position:fixed;top:0;border:0;background:#000;box-shadow:0 0 60px #000c,0 0 0 2px #c9972b66}</style></head><body><iframe id="gfr" src="'+u.replace(/"/g,'&quot;')+'" allow="autoplay; fullscreen; clipboard-write; clipboard-read" allowfullscreen></iframe></body>';
 /* өндөр дэлгэц дээр бүх товч, цэс жижиг харагдахгүй: iframe-ийг k дахин томруулна (хөтчийн zoom-той адил, зураг тод хэвээр) */
 var fit=function(){try{var x=document.getElementById('gfr');if(!x)return;var W=innerWidth,H=innerHeight,d=window.devicePixelRatio||1,sp=Math.max(1,Math.min(2,H*d/720)),k=Math.max(1,Math.min(4,sp/d)),fw=Math.min(W,Math.max(390,H*1.6));
 x.style.zoom=k;x.style.width=(fw/k)+'px';x.style.height=(H/k)+'px';x.style.left=((W-fw)/2/k)+'px';}catch(e){}};
-fit();addEventListener('resize',fit);try{matchMedia('(resolution: '+(window.devicePixelRatio||1)+'dppx)').addEventListener('change',fit);}catch(e){}
+addEventListener('message',function(e){try{if(e.data==='dxxgo')document.documentElement.className='go';}catch(_){}});fit();addEventListener('resize',fit);try{matchMedia('(resolution: '+(window.devicePixelRatio||1)+'dppx)').addEventListener('change',fit);}catch(e){}
 var f=function(){try{var x=document.getElementById('gfr');if(x&&x.contentWindow)x.contentWindow.focus();}catch(e){}};setTimeout(f,800);document.addEventListener('visibilitychange',function(){if(!document.hidden)f();});
 }catch(e){}})();
 </script>
@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f4366c02c3';
+var UPDB='662b889100';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15596,7 +15596,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 (function(){var t=["Адуугаа бэлдэж байна…","Гэрээ барьж байна…","Цэргээ цуглуулж байна…","Хаанаа угтаж байна…"],p=0,i=document.getElementById('pbi'),x=document.getElementById('ptx');document.getElementById('ld').className='';
 var iv=setInterval(function(){p+=12+Math.random()*14;if(p>=100&&window.BLST!==3&&(Date.now()-(window.DXXT0||(window.DXXT0=Date.now())))<30000){p=96;}else if(p>=100){p=100;clearInterval(iv);document.getElementById('ld').style.display='none';document.getElementById('goBtn').style.display='block';}
 i.style.width=p+'%';x.textContent=t[Math.min(3,p/26|0)];},260);
-document.getElementById('goBtn').onclick=function(){try{window.DXX_SPLSTOP&&DXX_SPLSTOP();}catch(e){}var s=document.getElementById('splash');s.classList.add('off');setTimeout(function(){s.remove()},600);};
+document.getElementById('goBtn').onclick=function(){try{window.DXX_SPLSTOP&&DXX_SPLSTOP();}catch(e){}try{if(window.parent!==window)parent.postMessage('dxxgo','*');}catch(e){}var s=document.getElementById('splash');s.classList.add('off');setTimeout(function(){s.remove()},600);};
 
 })();
 </script>

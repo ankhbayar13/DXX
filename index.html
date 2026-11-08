@@ -339,7 +339,7 @@ const BUILD = {
   ger4:    {n:'Жижиг гэр', spr:'gerT1', w:30, cost:1500, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   ger5:    {n:'Жижиг гэр', spr:'gerT1', w:30, cost:3000, up:100, desc:'Хүн суурьшуулна. Түвшин: 1-2→2, 3→3, 4→4, 5→5 хүн'},
   hashaa:  {n:'Хашаа', w:70, h:44, cost:40, up:80, desc:'Бүх хашааны хэсгийн дэд бүтэц. Түвшин бүр +2 мал/хэсэг'},
-  horgo:   {n:'Хорго', spr:'hay1', w:27, cost:150, up:60, desc:'Агуулах +300'},
+  horgo:   {n:'Агуулах', spr:'hay1', w:27, cost:150, up:60, desc:'Нөөцийг хязгааргүй хадгална'},
   market:  {n:'Зах', spr:'mk1', w:22, cost:200, up:120, desc:'Зарах үнэ +25%'},
   modcex:  {n:'Модны цех', spr:'mod1', w:26, cost:250, up:150, desc:'Ажилчид мод тайраад энд зөөнө. Түвшин бүр +20% мод'},
   mahcex:  {n:'Махны цех', spr:'mah1', w:26, cost:500, up:250, desc:'Хашаанаас мал аваад энд нядалж мах гаргана'},
@@ -408,7 +408,7 @@ const TASKS = [
   {t:'Хонь 5 болго (Мал цэс)', ok:()=>S.animals.honi>=5},
   {t:'Тариалан бариул', ok:()=>S.bld.tarialan>0},
   {t:'Зах бариул', ok:()=>S.bld.market>0},
-  {t:'Хорго бариул', ok:()=>S.bld.horgo>0},
+  {t:'Агуулах бариул', ok:()=>S.bld.horgo>0},
   {t:'Цэргийн хүрээ бариул', ok:()=>S.bld.hureo>0},
   {t:'Баатар дууд', ok:()=>Object.keys(S.heroes).length>0},
   {t:'Татар отгийг ял', ok:()=>S.won>=1},
@@ -820,7 +820,7 @@ function load(){
 function save(){ acHook(); acWrite(); }
 
 // ---------- тооцоо ----------
-const cap = () => 300 + 300 * S.bld.horgo + rsb('eco_cap');
+const capL = () => 300 + 300 * S.bld.horgo + rsb('eco_cap'); const cap = () => 1e12;
 const herdMax = () => Object.keys(PEN).reduce((a,t)=>a+Math.max(penCap(t),S.animals[t]||0),0) + rsb('eco_herd');
 const POPCAP=[2,2,3,4,5];
 const popCap=()=>['ger','ger2','ger3','ger4','ger5'].reduce((a,k)=>a+((S.bld[k]>0&&!(S.sites&&S.sites[k]))?POPCAP[Math.min(POPCAP.length,S.bld[k])-1]:0),0)+Math.floor(rsb('cul_pop'))+Math.floor((S.bld.ger||0)/3)||2;
@@ -2086,7 +2086,7 @@ function npcText(i){
   if(!S.bld.hashaa) tip='Мал олширвол хашаа хэрэгтэй. '+BUILD.hashaa.cost+' зоос цуглуулаад Барилга цэсээс хашаа бариарай.';
   else if(!S.bld.tarialan) tip='Тариалан бариад бидэнд тариа ургуулуулаарай. Намайг сонгоод тариалан дээр дарахад л болно.';
   else if(!S.bld.market) tip='Зах барьбал бүтээгдэхүүнээ илүү үнээр зарна.';
-  else if(!S.bld.horgo) tip='Хорго барьбал илүү их нөөц хадгалж чадна.';
+  else if(!S.bld.horgo) tip='Агуулах барьбал нөөцөө эмх цэгцтэй хадгална.';
   else if(!S.bld.hureo) tip='Баатруудаа цуглуулахын тулд цэргийн хүрээ бариарай.';
   else if(!Object.keys(S.heroes).length) tip='Баатар цэснээс эхний баатраа дуудаарай.';
   else if(S.won<1) tip='Татар отог руу дайрч эхний ялалтаа авна уу.';
@@ -3966,9 +3966,9 @@ const AGHK=['meat','milk','wool','grain','wood','airag','aaruul','tos','esgii','
 let AGHC=0;
 function aghTotal(){ let t=0; AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n>=1) t+=Math.floor(n*ITEMS[k].p*sellMult()); }); return t; }
 function aghHTML(){
-  let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>'+f(cap())+'</b> нэг бүрд'+(S.bld.horgo>0?' · Хорго Lv '+S.bld.horgo:' · Хорго барьбал +200')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
+  let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>Хязгааргүй</b>'+(S.bld.horgo>0?' · Агуулах Lv '+S.bld.horgo:'')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
   AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n<1) return; any=true;
-    h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" onclick="sellItem(\''+k+'\')">Зарах '+f(Math.floor(n*ITEMS[k].p*sellMult()))+' 🪙</button></div></div>'; });
+    h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'</div><button class="btn" onclick="sellItem(\''+k+'\')">Зарах '+f(Math.floor(n*ITEMS[k].p*sellMult()))+' 🪙</button></div></div>'; });
   if(!any) return h+'<div class="card"><div class="sm" style="text-align:center;padding:10px 4px">Агуулах хоосон байна.<br>Хашаан дээрх бөмбөлгийг дарж мах, сүү, ноос цуглуулаад дараа нь энд зарна.</div></div>';
   const arm=AGHC&&Date.now()<AGHC;
   h+='<div class="card" style="border-color:#ffd770"><div class="row"><div><b>Бүгд</b> · '+f(tot)+' 🪙</div><button class="btn '+(arm?'red':'')+'" onclick="aghSellAll()">'+(arm?'Дахин дар: батлах':'💰 Бүгдийг зарах')+'</button></div><div class="sm" style="margin-top:4px">Захиалгад хэрэгтэй зүйлээ үлдээж, бусдыг нь тус тусад нь зарж болно.</div></div>';
@@ -8379,7 +8379,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   try{ const g=MENU.find(x=>x.t.indexOf('Бусад')>=0); if(g&&!g.i.some(x=>x[1]==='Заавар')) g.i.push(['❓','Заавар',"tutReplay()"]); }catch(e){}
 
   /* ---------- 4) Цэс доторх заасан карт/товч шар гэрлээр анивчина + баригдаж буй барилга ---------- */
-  const CARD={hashaa:'Малын хашаа',tarialan:'Тариалан',market:'Зах',horgo:'Хорго',hureo:'Цэргийн хүрээ'}, TABK={hureo:'army'};
+  const CARD={hashaa:'Малын хашаа',tarialan:'Тариалан',market:'Зах',horgo:'Агуулах',hureo:'Цэргийн хүрээ'}, TABK={hureo:'army'};
   function tgTarget(){
     let o=null;
     if(window.TGO!=null&&Date.now()<(window.TGT||0)&&TASKS[window.TGO]&&!TASKS[window.TGO].ok()&&S&&S.tutDone&&S.met) o=window.TGO;
@@ -9492,10 +9492,10 @@ window.STONEI="data:image/webp;base64,UklGRuQoAABXRUJQVlA4WAoAAAAQAAAAXwAAXgAAQU
   };
   const chip=(k,x,t,n)=>{ const u=cnt(k), on=(x>=1?u===n:u===Math.floor(n*x)); return '<span class="agch_'+k+'" data-x="'+x+'" onclick="aghFr(\''+k+'\','+x+')" style="display:inline-block;min-width:40px;text-align:center;padding:5px 8px;margin:0 2px;border-radius:10px;border:2px solid '+(on?'#ffd770':'#6b4a1f')+';background:'+(on?'#7a5214':'#2c1d0f')+';color:#ffe9b0;font-size:13px;font-weight:bold">'+t+'</span>'; };
   aghHTML=function(){
-    let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>'+f(cap())+'</b> нэг бүрд'+(S.bld.horgo>0?' · Хорго Lv '+S.bld.horgo:' · Хорго барьбал +200')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
+    let h='<h2>'+ico('or_depot',36)+' Агуулах</h2><div class="card"><div class="sm" style="text-align:center">Багтаамж: <b>Хязгааргүй</b>'+(S.bld.horgo>0?' · Агуулах Lv '+S.bld.horgo:'')+'</div>'+(S.bld.market>0?'<div style="text-align:center;margin-top:6px"><button class="btn" onclick="openM(\'bld:market\')">🔄 Солилцоо ›</button></div>':'<div class="sm" style="text-align:center;margin-top:4px">Зах барьбал материал солилцож болно</div>')+'</div>', any=false, tot=aghTotal();
     AGHK.forEach(k=>{ const n=Math.floor(S.res[k]||0); if(n<1) return; any=true;
       const u=cnt(k), v=val(k,u);
-      h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'<span class="sm" style="color:'+(n>=cap()?'#ff9a8a':'#d9c9a0')+'"> / '+f(cap())+'</span></div><button class="btn" id="agB_'+k+'" '+(u<1||v<1?'disabled':'')+' onclick="sellItem(\''+k+'\')">Зарах '+f(v)+' 🪙</button></div>'+
+      h+='<div class="card"><div class="row"><div>'+iconHTML(k,26)+' <b>'+ITEMS[k].n+'</b>: '+f(n)+'</div><button class="btn" id="agB_'+k+'" '+(u<1||v<1?'disabled':'')+' onclick="sellItem(\''+k+'\')">Зарах '+f(v)+' 🪙</button></div>'+
         '<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input type="range" id="agS_'+k+'" min="0" max="'+n+'" step="1" value="'+u+'" oninput="aghSet(\''+k+'\',this.value)" style="flex:1;min-width:0;height:28px;accent-color:#ffd770">'+
         '<input type="number" id="agN_'+k+'" inputmode="numeric" min="0" max="'+n+'" value="'+u+'" oninput="aghSet(\''+k+'\',this.value)" onchange="aghSet(\''+k+'\',this.value)" style="width:78px;padding:5px;border-radius:8px;border:2px solid #6b4a1f;background:#2c1d0f;color:#ffe9b0;font-size:15px;font-weight:bold;text-align:center"></div>'+
         '<div style="text-align:center;margin-top:6px">'+chip(k,0.25,'25%',n)+chip(k,0.5,'50%',n)+chip(k,0.75,'75%',n)+chip(k,1,'Бүгд',n)+'</div></div>'; });
@@ -10584,7 +10584,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='06ea698207';
+var UPDB='0c67a30ea4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12016,7 +12016,7 @@ bcard=function(k){
     const mul=(typeof prodMul==='function')?prodMul():1;
     const pm={meat:0,milk:0,wool:0,gold:0};
     KEYS.forEach(k=>{ const c=O.sent[k]||0; if(!c) return; for(const x in pm) pm[x]+=(ANIMALS[k][x]||0)*c*mul; });
-    const f=kind==='wolf'?0.10:kind==='great'?0.40:0.25, mins=hrs*60, lim=Math.round((4*cap()+600)*(kind==='wolf'?0.4:kind==='great'?1:0.7));   // агуулахын багтаамжаар хязгаарлана (тоглоомын ердийн орлогыг эвдэхгүй)
+    const f=kind==='wolf'?0.10:kind==='great'?0.40:0.25, mins=hrs*60, lim=Math.round((4*capL()+600)*(kind==='wolf'?0.4:kind==='great'?1:0.7));   // агуулахын багтаамжаар хязгаарлана (тоглоомын ердийн орлогыг эвдэхгүй)
     const gain={}; for(const x in pm) gain[x]=Math.min(lim,Math.round(pm[x]*mins*f));
     for(const x in gain) S.res[x]=(S.res[x]||0)+gain[x];
     /* төл */

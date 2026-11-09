@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='00e6eeee90';
+var UPDB='9e6ffec0a1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18194,6 +18194,170 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     }catch(e){}
     return _co.apply(this,arguments);
   };
+})();
+
+
+/* p32/ctrn.js — Кланы долоо хоногийн тэмцээн (1-р шат).
+   Даваа 15:00 (УБ цаг) эхэлж Ням 22:00-д дуусна. Өдөр бүр өөр сэдэв: тухайн өдрийн сэдвийн үйлдэл л оноо өгнө.
+   Ням 22:00-д бүх клан оноогоороо эрэмбэлэгдэж, шагнал олгоно. Дараа нь шинэ долоо хоног Даваа 15:00-д эхэлнэ.
+   Сервер: ctm/{долоо хоног}_{uid} — {w,c,n,s,d[7],t} (rules_ctm.txt-д дүрэм). */
+(function(){
+  const HR=36e5, DAY=864e5, WEEK=7*DAY, A0=Date.UTC(2024,0,1,7,0,0), END=6*DAY+7*HR;   /* 2024-01-01 Даваа 15:00 УБ */
+  const DN=['Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба','Ням'];
+  const TH=[
+    {n:'Нөөц цуглуулах',d:'Мод, мах, сүү, ноос, тариа зэрэг нөөц цуглуулсан хэмжээ'},
+    {n:'Наймаа',d:'Караванд зарж наймаа хийсэн зоосны дүн'},
+    {n:'Зоос цуглуулах',d:'Шинээр олсон зоосны хэмжээ'},
+    {n:'Агнуур',d:'Нэрэн агнуурт цуглуулсан оноо'},
+    {n:'Баатар',d:'Баатрын түвшин, од нэмсэн хэмжээ'},
+    {n:'Газар эзлэх',d:'Газрын зураг дээр улс, нутаг эзэлсэн дайн'},
+    {n:'Гүрний дайн',d:'Дайсан клан руу довтолсон дайны оноо'}];
+  const PRIZE=[ /* клан эрэмбийн шагнал: Алт, зоосны үржвэр (хүчээр), дурсгалын магадлал */
+    {a:500,g:3.0,r:1},{a:300,g:2.0,r:0.5},{a:200,g:1.5,r:0.5},{a:120,g:1.0,r:0},{a:100,g:0.8,r:0},{a:80,g:0.6,r:0},{a:60,g:0.5,r:0},{a:50,g:0.4,r:0},{a:40,g:0.3,r:0},{a:30,g:0.2,r:0}];
+  const BOX=[{n:'Хүрэл авдар',pt:300,a:2,g:0.3,r:0},{n:'Мөнгөн авдар',pt:1000,a:5,g:0.6,r:0},{n:'Алтан авдар',pt:2500,a:10,g:1.0,r:0.5}];
+  const MINP=100;   /* кланы шагнал авахад дор хаяж энэ оноо */
+  const now=()=>(typeof wmNow==='function'?wmNow():Date.now());
+  const cn2=v=>{ try{ return cn(v); }catch(e){ return String(Math.round(v)); } };
+
+  /* ---- цаг ---- */
+  function st(t){ t=t==null?now():t; const w=Math.floor((t-A0)/WEEK), off=t-A0-w*WEEK, active=off<END;
+    const g=new Date(t+8*HR).getUTCDay(), day=(g+6)%7, wStart=A0+w*WEEK;
+    return {w:w,off:off,active:active,day:day,start:wStart,end:wStart+END,next:wStart+WEEK}; }
+  window.ctState=st;
+  function fmt(ms){ ms=Math.max(0,ms); const d=Math.floor(ms/DAY), h=Math.floor(ms%DAY/HR), m=Math.floor(ms%HR/6e4); return d?d+'ө '+h+'ц':h?h+'ц '+m+'м':m+'м'; }
+
+  /* ---- өөрийн оноо ---- */
+  function me(){ S.ct=S.ct||{w:-1,d:[0,0,0,0,0,0,0],s:0}; const s=st();
+    if(S.ct.w!==s.w){ if(S.ct.w>=0&&S.ct.w===s.w-1) S.ctp={w:S.ct.w,d:S.ct.d.slice(),s:S.ct.s}; S.ct={w:s.w,d:[0,0,0,0,0,0,0],s:0}; }
+    return S.ct; }
+  let dirty=0, pt=0;
+  function add(th,n){ try{ n=Math.round(n); if(!(n>0)) return; const s=st(); if(!s.active||s.day!==th) return; const c=me(); c.d[th]+=n; c.s+=n; dirty=1; }catch(e){} }
+  window.ctAdd=add;
+
+  /* ---- сервер ---- */
+  const clanId=()=>{ try{ return (typeof wmClanId==='function')?wmClanId():-1; }catch(e){ return -1; } };
+  async function push(){
+    try{ if(!dirty) return; if(!(typeof CL!=='undefined'&&CL.ok&&typeof FBM!=='undefined'&&FBM)) return; const k=clanId(); if(k<0) return;
+      const c=me(), {F,db}=FBM; dirty=0;
+      await F.setDoc(F.doc(db,'ctm',c.w+'_'+CL.uid),{w:c.w,c:k,n:String((S.prof&&S.prof.name)||'Хаан').slice(0,20),s:Math.min(1e8,c.s),d:c.d.slice(),t:Date.now()});
+    }catch(e){ dirty=1; }
+  }
+  const DT={rows:{},t:{},busy:{}};
+  async function fetchW(w,force){
+    try{ if(!(typeof CL!=='undefined'&&CL.ok&&typeof FBM!=='undefined'&&FBM)) return DT.rows[w]||null;
+      if(!force&&DT.t[w]&&Date.now()-DT.t[w]<180000) return DT.rows[w]; if(DT.busy[w]) return DT.rows[w]; DT.busy[w]=1;
+      const {F,db}=FBM, s=await F.getDocs(F.query(F.collection(db,'ctm'),F.where('w','==',w),F.limit(1000)));
+      DT.rows[w]=s.docs.map(d=>Object.assign({id:d.id},d.data())); DT.t[w]=Date.now(); DT.busy[w]=0; return DT.rows[w];
+    }catch(e){ DT.busy[w]=0; return DT.rows[w]||null; } }
+  function board(w){ const rows=DT.rows[w]; const n=(typeof CLN!=='undefined')?CLN.length:10; const a=[]; for(let i=0;i<n;i++) a.push({k:i,s:0,m:0});
+    (rows||[]).forEach(r=>{ if(r&&r.c>=0&&r.c<n){ a[r.c].s+=(r.s||0); a[r.c].m++; } });
+    /* өөрийн оноо серверт хараахан очоогүй байж болно */
+    const k=clanId(), c=me(); if(k>=0&&c.w===w&&a[k]){ const mine=(rows||[]).find(r=>r.id===w+'_'+(CL&&CL.uid)); if(!mine||(mine.s||0)<c.s){ a[k].s+=c.s-(mine?mine.s||0:0); if(!mine) a[k].m++; } }
+    a.sort((x,y)=>y.s-x.s||x.k-y.k); a.forEach((x,i)=>{ x.r=i+1; }); return a; }
+  window.ctBoard=board;
+
+  /* ---- оноо цуглуулах дэгээнүүд ---- */
+  /* нөөц (0), зоос (2), баатар (4): секунд тутам зөвхөн өсөлтийг тооцно */
+  let snap=null, snapR=null, hs0=null, tk=0;
+  const heroScore=()=>{ let v=0; try{ Object.keys(S.heroes||{}).forEach(id=>{ v+=(hlv(id)||1)*20+starOf(id)*200; }); }catch(e){} return v; };
+  function sample(){
+    try{ const R=S.res; if(!R) return;
+      if(snapR!==R||!snap){ snapR=R; snap={}; Object.keys(R).forEach(k=>{ snap[k]=+R[k]||0; }); hs0=heroScore(); return; }
+      let res=0, gold=0;
+      Object.keys(R).forEach(k=>{ const v=+R[k]||0, p=snap[k]==null?v:snap[k], d=v-p; snap[k]=v;
+        if(d>0&&d<20000){ if(k==='gold') gold+=d; else if(k!=='alt'&&k!=='gem') res+=d; } });
+      if(res>0) add(0,res); if(gold>0) add(2,gold);
+      const h=heroScore(); if(h>hs0&&h-hs0<5000) add(4,h-hs0); hs0=h;
+    }catch(e){} }
+  /* наймаа (1) */
+  if(typeof tradeSell==='function'){ const _ts=tradeSell; tradeSell=function(k){ const b=S.res.gold; const r=_ts.apply(this,arguments); try{ const d=S.res.gold-b; if(d>0) add(1,d); }catch(e){} return r; }; }
+  /* агнуур (3) */
+  if(typeof cwHunt==='function'){ const _ch=cwHunt; cwHunt=function(){ let b=0; try{ b=wmHuntGet().s; }catch(e){} const r=_ch.apply(this,arguments); try{ const d=wmHuntGet().s-b; if(d>0) add(3,d*20); }catch(e){} return r; }; }
+  /* газар эзлэх (5): улс ялсан */
+  let rp0=null;
+  function sampleRp(){ try{ const v=S.rp||0; if(rp0==null){ rp0=v; return; } const d=v-rp0; rp0=v; if(d>0&&d<500) add(5,d*10); }catch(e){} }
+  /* гүрний дайн (6): кланы дайны оноо */
+  if(typeof wmCsAdd==='function'){ const _wc=wmCsAdd; wmCsAdd=function(n){ try{ add(6,n); }catch(e){} return _wc.apply(this,arguments); }; }
+
+  const _up=update;
+  update=function(dt){
+    try{ tk+=dt; if(tk>=1){ tk=0; sample(); sampleRp(); } pt+=dt; if(pt>=20){ pt=0; push(); } }catch(e){}
+    return _up.apply(this,arguments);
+  };
+
+  /* ---- шагнал ---- */
+  function myRank(w){ const k=clanId(); const b=board(w); const x=b.find(y=>y.k===k); return x?x.r:0; }
+  function prizeText(p,P){ return p.a+' Алт · '+cn2(Math.round(P*p.g))+' зоос'+(p.r>=1?' · дурсгал':p.r>0?' · дурсгалын боломж':''); }
+  function claimable(){ const s=st(), w=s.active?s.w-1:s.w; if(w<0) return null; if((S.ctClaim==null?-1:S.ctClaim)>=w) return null; const c=me(); const own=(c.w===w&&c.s>0)||(S.ctp&&S.ctp.w===w&&S.ctp.s>0); return own?w:null; }
+  function myWeekPts(w){ const c=me(); if(c.w===w) return c.s; if(S.ctp&&S.ctp.w===w) return S.ctp.s;
+    const r=(DT.rows[w]||[]).find(x=>CL&&x.id===w+'_'+CL.uid); return r?r.s||0:0; }
+  window.ctClaim=async function(){
+    const w=claimable(); if(w==null){ say('Шагнал авах зүйл алга'); return; }
+    await fetchW(w,true); const k=clanId(), s=myWeekPts(w), P=Math.max(500,totalPower());
+    if(k<0){ say('Кланд нэгдээгүй байна'); return; }
+    let a=0,g=0,txt=[],rel='';
+    const rk=myRank(w), pr=PRIZE[(rk||PRIZE.length)-1];
+    if(s>=MINP&&pr){ a+=pr.a; g+=Math.round(P*pr.g); txt.push(rk+'-р байр'); if(pr.r>0&&Math.random()<pr.r){ try{ rel=' + '+wmRelicGrant(); }catch(e){} } }
+    let bx=null; BOX.forEach(b=>{ if(s>=b.pt) bx=b; });
+    if(bx){ a+=bx.a; g+=Math.round(P*bx.g); txt.push(bx.n); if(bx.r>0&&Math.random()<bx.r){ try{ rel+=' + '+wmRelicGrant(); }catch(e){} } }
+    S.ctClaim=w; if(a<1&&g<1){ say('Энэ долоо хоногт оролцоогүй тул шагнал алга'); try{ save(); }catch(e){} return; }
+    S.res.alt+=a; S.res.gold+=g; try{ sfx('coin'); vib([40,30,40]); }catch(e){}
+    say('Тэмцээний шагнал: +'+a+' Алт, +'+cn2(g)+' зоос ('+txt.join(', ')+')'+rel); try{ refresh(); save(); }catch(e){}
+    try{ aliRender(); }catch(e){}
+  };
+
+  /* ---- хуудас ---- */
+  const ic=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
+  const fmtPt=v=>cn2(v);
+  ALP.ct=function(){
+    const s=st(), c=me(), k=clanId(), w=s.active?s.w:s.w;   /* идэвхтэй бол энэ долоо хоног, амралтын үед дөнгөж дууссан */
+    const shownW=w, b=board(shownW);
+    let h='';
+    /* 1. төлөв */
+    const head=s.active?'Тэмцээн явагдаж байна':'Тэмцээн дууслаа · шагнал авах цаг';
+    const left=s.active?'Дуусахад: '+fmt(s.end-now()):'Шинэ тэмцээн эхлэхэд: '+fmt(s.next-now());
+    h+='<div class="ali-card ct-hd"><div class="ct-t">'+ic('ui_tour',36)+'<div><b>'+head+'</b><div class="ali-sm">'+left+'</div></div></div>';
+    if(k<0) h+='<div class="ali-sm" style="margin-top:6px">Тэмцээнд оролцохын тулд кланд нэгдэнэ үү.</div>';
+    h+='</div>';
+    /* 2. өнөөдрийн сэдэв */
+    if(s.active){ const T=TH[s.day]; h+='<div class="ali-card ct-td"><div class="ali-sm">Өнөөдөр · '+DN[s.day]+'</div><div class="ct-n">'+T.n+'</div><div class="ali-sm">'+T.d+'</div><div class="ct-pt"><b>'+fmtPt(c.d[s.day])+'</b><span>миний өнөөдрийн оноо</span></div></div>'; }
+    /* 3. миний оноо ба авдар */
+    const nxt=BOX.find(x=>c.s<x.pt), top=BOX[BOX.length-1];
+    h+='<div class="ali-card"><div class="ali-kv"><span>Миний нийт оноо</span><b>'+fmtPt(c.w===shownW?c.s:myWeekPts(shownW))+'</b></div>'+
+       '<div class="ct-bar"><u style="width:'+Math.min(100,Math.round(100*(c.w===shownW?c.s:myWeekPts(shownW))/top.pt))+'%"></u>'+BOX.map(x=>'<i style="left:'+Math.round(100*x.pt/top.pt)+'%"></i>').join('')+'</div>'+
+       '<div class="ct-bx">'+BOX.map(x=>'<span class="'+((c.w===shownW?c.s:myWeekPts(shownW))>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+'</em></span>').join('')+'</div></div>';
+    /* 4. 7 өдөр */
+    h+='<div class="ali-sm" style="margin:12px 2px 4px">7 өдрийн сэдэв</div><div class="ali-card ct-dy">'+TH.map((T,i)=>{ const cls=s.active&&i===s.day?'now':(s.active&&i<s.day)||(!s.active)?'past':''; return '<div class="ct-r '+cls+'"><span class="ct-d">'+DN[i]+'</span><span class="ct-nm">'+T.n+'</span><b>'+(c.w===shownW?fmtPt(c.d[i]):'')+'</b></div>'; }).join('')+'</div>';
+    /* 5. кланы эрэмбэ */
+    h+='<div class="ali-sm" style="margin:12px 2px 4px">Кланы эрэмбэ</div>';
+    h+=b.map(x=>{ const q=CLN[x.k], mine=x.k===k; return '<div class="ali-rr'+(x.r<=3?' t'+x.r:'')+(mine?' me':'')+'"><span class="ali-md'+(x.r<=3?' m'+x.r:'')+'">'+x.r+'</span><span class="ali-rnm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?' (миний клан)':'')+'</span><span class="ali-sm">'+x.m+' хүн</span><span class="ali-rv">'+fmtPt(x.s)+'</span></div>'; }).join('');
+    /* 6. шагнал */
+    const P=Math.max(500,totalPower());
+    h+='<div class="ali-sm" style="margin:12px 2px 4px">Кланы шагнал</div><div class="ali-card ct-pz">'+PRIZE.map((p,i)=>'<div class="ct-r"><span class="ct-d">'+(i+1)+'-р байр</span><span class="ct-nm">'+prizeText(p,P)+'</span></div>').join('')+'<div class="ali-sm" style="margin-top:6px">Кланы шагнал авахад дор хаяж '+MINP+' оноо хэрэгтэй. Авдар нь өөрийн оноогоор нэмэлтээр олгогдоно.</div></div>';
+    /* 7. шагнал авах */
+    const cw=claimable();
+    if(cw!=null&&k>=0) h+=aliBtn('Шагнал авах · '+(cw===s.w?'энэ':'өнгөрсөн')+' долоо хоног','ctClaim()');
+    else if(!s.active) h+='<div class="ali-em">Шагнал авагдсан. Шинэ тэмцээн Даваа 15:00-д эхэлнэ.</div>';
+    return {t:'Долоо хоногийн тэмцээн',h:h};
+  };
+  /* нүүр хуудсанд дээд талд баннер */
+  const _home=ALP.home;
+  ALP.home=function(){ const r=_home.apply(this,arguments); try{ const s=st(), T=s.active?TH[s.day]:null, cw=claimable(), k=clanId();
+    const sub=s.active?('Өнөөдөр: '+T.n+' · дуусахад '+fmt(s.end-now())):('Шагнал авах цаг · шинэ тэмцээн '+fmt(s.next-now())+'-д');
+    const bn='<button class="ali-it big ct-bn" onclick="aliGo(\'ct\')">'+ic('ui_tour',40)+'<b>Долоо хоногийн тэмцээн</b><span class="ali-sm">'+sub+'</span>'+(cw!=null&&k>=0?'<u class="ali-bg">!</u>':'')+'</button><div style="height:10px"></div>';
+    r.h=r.h.replace('<div class="ali-gr">',bn+'<div class="ali-gr">'); }catch(e){} return r; };
+  /* хуудас нээгдэхэд сервэрээс эрэмбийг татна */
+  const _gf=aliLoadFor;
+  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='ct'){ const s=st(), w=s.w; push(); fetchW(w,true).then(()=>{ if(ALI.pg==='ct') aliRender(); }); const cw=claimable(); if(cw!=null&&cw!==w) fetchW(cw); } }catch(e){} return r; };
+  const sty=document.createElement('style'); sty.textContent=`
+#alv .ct-hd .ct-t{display:flex;align-items:center;gap:10px}#alv .ct-hd b{font-size:16px;color:#ffe3a0}
+#alv .ct-td{text-align:center;padding-top:22px!important;padding-bottom:20px!important}#alv .ct-hd,#alv .ct-dy,#alv .ct-pz{padding-top:18px!important;padding-bottom:18px!important}#alv .ali-rr{margin-bottom:8px}#alv .ali-md:not(.m1):not(.m2):not(.m3){color:#f1dfae;background:#3a2410;border:1px solid #7a5a30}#alv .ali-rr.me{outline:2px solid #ffd24a;outline-offset:-3px;border-radius:10px}#alv .ct-n{font:bold 24px Georgia,serif;color:#ffe3a0;margin:4px 0}#alv .ct-pt{margin-top:8px}#alv .ct-pt b{display:block;font-size:30px;color:#fff1c8}#alv .ct-pt span{font-size:12px;color:#cdb584}
+#alv .ct-bar{position:relative;height:12px;border-radius:7px;background:#140d06;border:1px solid #5c4020;margin:8px 0 4px;overflow:visible}#alv .ct-bar u{display:block;height:100%;border-radius:7px;background:linear-gradient(#ffe08a,#d9a33a)}#alv .ct-bar i{position:absolute;top:-3px;width:2px;height:18px;background:#f1dfae}
+#alv .ct-bx{display:flex;justify-content:space-between;gap:4px;margin-top:6px}#alv .ct-bx span{flex:1;text-align:center;font-size:11px;color:#a89570;padding:4px 2px;border-radius:8px;background:#1f1409}#alv .ct-bx span.on{color:#3a2208;background:linear-gradient(#ffe08a,#d79a24);font-weight:bold}#alv .ct-bx em{display:block;font-style:normal;font-size:10px;opacity:.85}
+#alv .ct-r{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid #5c402055;font-size:13px}#alv .ct-r:last-child{border-bottom:0}#alv .ct-d{flex:none;width:74px;color:#cdb584}#alv .ct-nm{flex:1;min-width:0;color:#f1dfae}#alv .ct-r b{color:#ffe3a0}
+#alv .ct-r.now{background:#d9a33a33;border-radius:8px}#alv .ct-r.now .ct-d,#alv .ct-r.now .ct-nm{color:#fff1c8;font-weight:bold}#alv .ct-r.past .ct-nm{opacity:.7}
+#alv .ct-bn{width:100%;position:relative;flex-direction:column;height:auto!important;padding:6px 2px!important}#alv .ct-bn b{font-size:16px}
+`; document.head.appendChild(sty);
 })();
 
 </script><script>(function(){

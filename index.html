@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a2ef932239';
+var UPDB='3624ac01ec';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17421,6 +17421,78 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 
 .sh2-jl{gap:8px}.sh2-jl>span,.sh2-jl>b{min-width:0;flex:1}.sh2-jl .sh2-ub{flex:none;width:auto;min-width:0;padding:8px 14px}
 .sh2-t.sel{border-color:#ffd770;box-shadow:0 0 0 2px #ffd77099 inset}
+`; document.head.appendChild(st);
+})();
+
+
+/* p32/wrk.js — Хүн хуваарилалт: цех бүрт хэдэн хүн ажиллахыг сонгоно. Дүүрэн хүнтэй цех = 100% үйлдвэрлэл. */
+(function(){
+  const WK=['modcex','airag','aaruul','tos','esgii','buuz'];
+  const built=k=>!!(S.bld&&S.bld[k]>0&&!(S.sites&&S.sites[k]));
+  const lvl=k=>S.bld[k]||1;
+  const slotsOf=k=>1+(lvl(k)>=6?1:0)+(lvl(k)>=12?1:0);   /* Lv1-5: 1 хүн, 6-11: 2, 12+: 3 */
+  const people=()=>{ try{ return Math.max(1,Math.min(popCap(),NPCS.length)-((S.dead||[]).length)); }catch(e){ return 6; } };
+  const list=()=>WK.filter(built);
+  function fill(keys,out,left){ while(left>0){ const c=keys.filter(k=>out[k]<slotsOf(k)); if(!c.length) break; c.sort((a,b)=>out[a]/slotsOf(a)-out[b]/slotsOf(b)); out[c[0]]++; left--; } }
+  function alloc(){ const L=list(), P=people(), out={}; L.forEach(k=>{ out[k]=0; });
+    const W=S.wk||(S.wk={m:0,a:{}});
+    if(W.m){ L.forEach(k=>{ if(W.a[k]!=null) out[k]=Math.max(0,Math.min(slotsOf(k),W.a[k])); });
+      let tot=L.reduce((s,k)=>s+out[k],0);
+      while(tot>P){ const mk=L.filter(k=>out[k]>0).sort((a,b)=>out[b]-out[a])[0]; if(!mk) break; out[mk]--; tot--; }
+      fill(L.filter(k=>W.a[k]==null),out,P-tot);
+    } else fill(L,out,P);
+    return out; }
+  const eff=k=>{ if(WK.indexOf(k)<0||!built(k)) return 1; const n=alloc()[k]||0; return Math.max(0.3,n/slotsOf(k)); };
+  window.wrkEff=eff;
+
+  /* үйлдвэрлэлд нөлөөлнө: цех бүрийн хурд = ажилчдын хувь */
+  const _pt=prodTick;
+  prodTick=function(secs){
+    let E={}; try{ PROD.forEach(k=>{ if(S.bld[k]&&!(S.sites&&S.sites[k])) E[k]=eff(k); }); }catch(e){ return _pt.apply(this,arguments); }
+    const vals=[]; Object.keys(E).forEach(k=>{ if(vals.indexOf(E[k])<0) vals.push(E[k]); });
+    if(vals.length<=1&&(vals[0]===1||vals.length===0)) return _pt.apply(this,arguments);
+    vals.forEach(v=>{ const hid=Object.keys(E).filter(k=>E[k]!==v), old={};
+      hid.forEach(k=>{ old[k]=S.sites[k]; S.sites[k]=true; });
+      try{ _pt.call(this,secs*v); } finally { hid.forEach(k=>{ if(old[k]===undefined) delete S.sites[k]; else S.sites[k]=old[k]; }); } });
+  };
+  /* модны цех: мод зөөх хэмжээ */
+  if(typeof haulTo==='function'){ const _ht=haulTo; haulTo=function(e,k,res,amt){
+    try{ if(res==='wood'&&e&&e.friend&&e.gb&&/^modcex\d?$/.test(e.gb)){ amt=Math.max(1,Math.round(amt*eff('modcex'))); } }catch(x){}
+    return _ht.call(this,e,k,res,amt); }; }
+
+  const im=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
+  const pct=v=>Math.round(v*100);
+  function bimg(k,px){ try{ const s=(typeof TSET!=='undefined'&&TSET[k])?TSET[k][Math.max(0,Math.min(TSET[k].length-1,lvl(k)-1))]:BUILD[k].spr; return im(s,px)||im(BUILD[k].spr,px); }catch(e){ return ''; } }
+  window.wrkAdj=function(k,d){ const A=alloc(), W=S.wk, cur=A[k]||0, sl=slotsOf(k), spare=people()-Object.keys(A).reduce((s,x)=>s+A[x],0);
+    if(d>0){ if(cur>=sl){ say('Энэ цех дүүрэн байна'); return; } if(spare<1){ say('Сул хүн алга. Өөр цехээс хас эсвэл гэр нэм'); try{ sfx('err'); }catch(e){} return; } }
+    else if(cur<1) return;
+    if(!W.m){ W.m=1; W.a={}; Object.keys(A).forEach(x=>{ W.a[x]=A[x]; }); }
+    W.a[k]=cur+d; try{ sfx('tap'); }catch(e){} try{ save(); }catch(e){} try{ fillM(); }catch(e){} };
+  window.wrkAuto=function(){ S.wk={m:0,a:{}}; try{ sfx('lvl'); }catch(e){} try{ save(); }catch(e){} try{ fillM(); }catch(e){} };
+  function eftxt(k,v){ return k==='modcex'?'Мод зөөх '+pct(v)+'%':'Үйлдвэрлэл '+pct(v)+'%'; }
+  function wrkHTML(){
+    const L=list(), A=alloc(), P=people(), work=L.reduce((s,k)=>s+A[k],0), rest=Math.max(0,P-work), W=S.wk||{};
+    let h='<h2>'+im('ui_worker',34)+' Хүн хуваарилалт</h2>';
+    h+='<div class="wk-sum"><div><b>'+P+'</b><span>Нийт хүн</span></div><div class="g"><b>'+work+'</b><span>Ажиллаж байгаа</span></div><div class="y"><b>'+rest+'</b><span>Амарч байгаа</span></div></div>';
+    if(!L.length) return h+'<div class="card"><div class="sm" style="text-align:center;padding:8px">Цех (Модны цех, Айраг, Ааруул, Тос, Эсгий, Бууз) барьбал энд хүн хуваарилна.</div></div>';
+    h+='<div class="sm" style="margin:6px 2px">Цех дүүрэн хүнтэй бол 100% хурдтай ажиллана. Хүн дутвал хурд буурна (хамгийн багадаа 30%).</div>';
+    L.forEach(k=>{ const n=A[k], sl=slotsOf(k), v=Math.max(0.3,n/sl), col=v>=1?'#8fe39a':(v>=0.6?'#ffd770':'#ff9a8a');
+      let pp=''; for(let i=0;i<sl;i++) pp+='<span style="opacity:'+(i<n?1:0.25)+'">'+im('ui_worker',22)+'</span>';
+      h+='<div class="card wk-r"><div class="wk-i">'+bimg(k,46)+'</div><div class="wk-m"><b>'+BUILD[k].n+' <span class="sm">Lv '+lvl(k)+'</span></b><div class="wk-p">'+pp+'</div><div class="sm" style="color:'+col+'">'+eftxt(k,v)+'</div></div>'+
+        '<div class="wk-c"><button onclick="wrkAdj(\''+k+'\',-1)" '+(n<1?'disabled':'')+'>−</button><b>'+n+'/'+sl+'</b><button onclick="wrkAdj(\''+k+'\',1)" '+(n>=sl||rest<1?'disabled':'')+'>+</button></div></div>'; });
+    h+='<div style="text-align:center;margin-top:10px"><button class="btn" onclick="wrkAuto()" '+(W.m?'':'style="outline:2px solid #ffd770"')+'>'+im('q_bolt',18)+' Автоматаар хуваах'+(W.m?'':' ✔')+'</button></div><div class="sm" style="text-align:center;margin-top:6px">Гэр нэмж, хүн олширвол ажиллах хүн нэмэгдэнэ.</div>';
+    return h; }
+  window.wrkHTML=wrkHTML;
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='wrk') return wrkHTML(); return _mc.apply(this,arguments); };
+  /* Цэс: Хөрөнгө хэсэгт */
+  try{ const g=MENU.find(x=>/Хөрөнгө/.test(x.t)); if(g&&!g.i.some(x=>x[2]==="openM('wrk')")) g.i.push([{toString(){ return im('ui_worker',22); }},'Хүн хуваарилалт',"openM('wrk')"]); MIC['Хүн хуваарилалт']='ui_worker'; }catch(e){}
+  /* цехийн цонхонд мөр */
+  if(typeof prodPanel==='function'){ const _pp=prodPanel; prodPanel=function(k){ let h=_pp.apply(this,arguments); try{ if(h&&WK.indexOf(k)>=0&&built(k)){ const n=alloc()[k]||0; h+='<div class="sm" style="text-align:center;margin:4px 0">'+im('ui_worker',16)+' Ажилчид <b>'+n+'/'+slotsOf(k)+'</b> · хурд <b>'+pct(eff(k))+'%</b> <button class="btn" style="padding:3px 10px" onclick="openM(\'wrk\')">Хуваарилах</button></div>'; } }catch(e){} return h; }; }
+  const st=document.createElement('style'); st.textContent=`
+.wk-sum{display:flex;gap:8px;margin:6px 0}.wk-sum>div{flex:1;text-align:center;background:#2c1d0f;border:2px solid #6b4a1f;border-radius:12px;padding:8px 2px}.wk-sum b{display:block;font-size:24px;color:#ffe9b0}.wk-sum span{font-size:12px;color:#c9b58a}.wk-sum .g b{color:#8fe39a}.wk-sum .y b{color:#ffd770}
+.wk-r{display:flex;align-items:center;gap:10px}.wk-i{flex:none;width:76px;height:54px;display:flex;align-items:center;justify-content:center;overflow:hidden}.wk-i img{max-width:74px;max-height:54px;height:auto!important}.wk-m{flex:1;min-width:0}.wk-p{display:flex;gap:2px;margin:3px 0}.wk-c{flex:none;display:flex;align-items:center;gap:6px}.wk-c b{min-width:36px;text-align:center;font-size:15px}
+.wk-c button{width:38px;height:38px;border-radius:10px;border:2px solid #2a8f86;background:linear-gradient(#5fd6c8,#2fa99c);color:#fff;font-size:22px;font-weight:bold}.wk-c button:disabled{background:#6b625a;border-color:#4a443e;opacity:.7}
 `; document.head.appendChild(st);
 })();
 

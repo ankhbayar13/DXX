@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='09b5a95468';
+var UPDB='e3f89a980b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17309,14 +17309,23 @@ body:has(#alv) #ckov{z-index:88!important}
   const _sh=shopHTML;
   shopHTML=function(){
     const t=S.shTab||'main';
-    const hd='<div class="sh2-hd"><b>Дэлгүүр</b><span class="sh2-al">'+gem()+' '+alt()+' Алт</span></div>';
-    const bar='<div class="sh2-tabs">'+TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')"><i>'+x[1]+'</i><span>'+x[2]+'</span></button>').join('')+'</div>';
-    if(t==='main') return hd+bar+_sh.apply(this,arguments);
+    if(t==='main') return _sh.apply(this,arguments);
     const body=t==='sp'?tabSp():t==='pr'?tabPr():t==='pk'?tabPk():tabDl();
-    return hd+bar+'<div class="sh2-bd">'+body+'</div>';
+    return '<div class="sh2-bd">'+body+'</div>';
   };
-  { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ document.body.classList.toggle('sh2fs',typeof cur!=='undefined'&&cur==='shop'); }catch(e){} return r; };
-    const _c=closeM; closeM=function(){ document.body.classList.remove('sh2fs'); return _c.apply(this,arguments); }; }
+  /* дээд мөр + доод таб нь гүйдэг хэсгийн ГАДНА (.box дотор) байрлана */
+  function chrome(on){
+    const box=document.querySelector('#modal .box'), mb=document.getElementById('mbody'); if(!box||!mb) return;
+    let hd=document.getElementById('sh2hd'), bar=document.getElementById('sh2bar');
+    if(!on){ if(hd) hd.remove(); if(bar) bar.remove(); return; }
+    if(!hd){ hd=document.createElement('div'); hd.id='sh2hd'; hd.className='sh2-hd'; box.insertBefore(hd,mb); }
+    if(!bar){ bar=document.createElement('div'); bar.id='sh2bar'; bar.className='sh2-tabs'; box.appendChild(bar); }
+    const t=S.shTab||'main';
+    hd.innerHTML='<b>Дэлгүүр</b><span class="sh2-al">'+gem()+' '+alt()+' Алт</span>';
+    bar.innerHTML=TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')"><i>'+x[1]+'</i><span>'+x[2]+'</span></button>').join('');
+  }
+  { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ const on=typeof cur!=='undefined'&&cur==='shop'; document.body.classList.toggle('sh2fs',on); chrome(on); }catch(e){ console.error(e); } return r; };
+    const _c=closeM; closeM=function(){ document.body.classList.remove('sh2fs'); try{ chrome(false); }catch(e){} return _c.apply(this,arguments); }; }
 
   /* ---- Хамгаалалт: дайралтыг хориглоно ---- */
   const _ro=raidOK; raidOK=function(){ if(shdLeft()>0) return false; return _ro.apply(this,arguments); };
@@ -17325,14 +17334,14 @@ body:has(#alv) #ckov{z-index:88!important}
   setInterval(()=>{ try{ if(typeof cur!=='undefined'&&cur==='shop'&&S.shTab&&S.shTab!=='main'&&!document.getElementById('askov')) fillM(); }catch(e){} },5000);
 
   const st=document.createElement('style'); st.textContent=`
-body.sh2fs #modal .box{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;border:0!important;border-image:none!important;border-radius:0!important;background:#2b1d12!important;box-shadow:none!important;padding:calc(56px + env(safe-area-inset-top)) 0 calc(74px + env(safe-area-inset-bottom))!important;display:flex!important;flex-direction:column!important;transform:none!important}
+body.sh2fs #modal .box{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;border:0!important;border-image:none!important;border-radius:0!important;background:#2b1d12!important;box-shadow:none!important;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)!important;display:flex!important;flex-direction:column!important;transform:none!important;overflow:hidden!important}
 body.sh2fs #mbody>h2{display:none!important}
 body.sh2fs #modal .box:before,body.sh2fs #modal .box:after{display:none!important}
-body.sh2fs #mbody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 12px;-webkit-overflow-scrolling:touch}
+body.sh2fs #mbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 12px}
 body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:auto!important;top:calc(9px + env(safe-area-inset-top))!important;width:40px!important;height:40px!important;z-index:6!important}
-.sh2-hd{position:fixed;left:0;right:0;top:0;z-index:5;height:calc(56px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);display:flex;align-items:center;justify-content:center;background:linear-gradient(#8a5a2b,#5e3b1a);border-bottom:3px solid #d9a43a;box-shadow:0 3px 8px #000a}.sh2-hd b{font:bold 21px Georgia,serif;color:#fff1c8;text-shadow:0 2px 3px #000}
-.sh2-hd .sh2-al{position:absolute;right:10px;top:calc(10px + env(safe-area-inset-top));margin:0;padding:3px 10px;font-size:13px}
-.sh2-tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;background:linear-gradient(#4a301a,#2b1d12);border-top:3px solid #d9a43a;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -3px 8px #000a}
+.sh2-hd{position:relative;flex:none;height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#8a5a2b,#5e3b1a);border-bottom:3px solid #d9a43a;box-shadow:0 3px 8px #000a}.sh2-hd b{font:bold 21px Georgia,serif;color:#fff1c8;text-shadow:0 2px 3px #000}
+.sh2-hd .sh2-al{position:absolute;right:10px;top:10px;margin:0;padding:3px 10px;font-size:13px}
+.sh2-tabs{position:relative;flex:none;display:flex;background:linear-gradient(#4a301a,#2b1d12);border-top:3px solid #d9a43a;box-shadow:0 -3px 8px #000a}
 .sh2-tabs button{flex:1;min-width:0;border:0;background:none;color:#c9b58a;padding:7px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:1px}.sh2-tabs button i{font-size:26px;font-style:normal;line-height:1.1}.sh2-tabs button span{font:bold 11px sans-serif}
 .sh2-tabs button.on{background:linear-gradient(#ffd770,#e0a82a);color:#3a2208}
 .sh2-bd{padding:2px 0 14px}

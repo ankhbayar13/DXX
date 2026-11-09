@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f91461f197';
+var UPDB='44909050a1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16412,8 +16412,8 @@ setInterval(hsTick,1000);
   document.head.appendChild(st);
 })();
 function hsRefresh(){ const o=document.getElementById('hsp'); if(!o) return; if(o.dataset.kind==='h') hospOpen(1); else if(o.dataset.kind==='c') campOpen(o.dataset.k,1); }
-function hsClose(){ const o=document.getElementById('hsp'); if(o) o.remove(); }
-function hsMk(kind,k,title){ let o=document.getElementById('hsp'); if(!o){ o=document.createElement('div'); o.id='hsp'; document.body.appendChild(o); } o.dataset.kind=kind; o.dataset.k=k||''; o.dataset.live=''; o.innerHTML='<div class="hz_hh"><button class="hz_hx" onclick="hsClose()">←</button>'+title+'</div><div class="hz_hb" id="hsb"></div>'; return document.getElementById('hsb'); }
+function hospClose(){ const o=document.getElementById('hsp'); if(o) o.remove(); }
+function hsMk(kind,k,title){ let o=document.getElementById('hsp'); if(!o){ o=document.createElement('div'); o.id='hsp'; document.body.appendChild(o); } o.dataset.kind=kind; o.dataset.k=k||''; o.dataset.live=''; o.innerHTML='<div class="hz_hh"><button class="hz_hx" onclick="hospClose()">←</button>'+title+'</div><div class="hz_hb" id="hsb"></div>'; return document.getElementById('hsb'); }
 function hsHave(c){ return (S.res.gold>=c.gold)&&((c.wood||0)<=(S.res.wood||0))&&((c.meat||0)<=(S.res.meat||0)); }
 
 /* ---- ЭМНЭЛЭГ ---- */

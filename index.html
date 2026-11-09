@@ -864,7 +864,7 @@ function totalPower(){
   const list = squad().map(heroPower);
   return Math.floor((list.reduce((a,b)=>a+b,0)+TR.reduce((a,T)=>a+trPow(T),0)) * (1 + 0.1*Math.max(0,S.bld.hureo-1)) * (1+0.05*(S.bld.hushuu||0)));
 }
-const heroSlots = () => { try{ if(typeof BT!=='undefined'&&BT&&BT.e&&BT.e.slots) return BT.e.slots; }catch(e){} return Math.min(5,3+S.bld.ger); };
+const heroSlots = () => { try{ if(typeof BT!=='undefined'&&BT&&BT.e&&BT.e.slots) return BT.e.slots; }catch(e){} return S.bld.ger>=2?5:3; };
 function canPay(inn){ for(const k in inn) if((S.res[k]||0)<inn[k]) return false; return true; }
 function prodTick(secs){
   PROD.forEach(k=>{
@@ -2902,7 +2902,7 @@ function btTray(){ try{ matchHint(); }catch(e){} const t=$('btray'); if(!t||!BT)
     return '<div class="bc'+(on?' on':'')+'" onclick="btPick(\''+id+'\')">'+(on?'<i class="bn">'+(SUPP[id]?'✨':(o+1))+'</i>':'')+hpi(id,40)+'<b>'+hn+'</b><span>'+(id===BT.req?'📜 Зайлшгүй':SUPP[id]?'✨ Туслах':'⚔ '+f(heroPower(id)))+'</span></div>'; }).join('');
   const b=$('bstart'); if(b){ b.className=n?'rdy':'off'; b.textContent=n?'⚔ ЭХЛЭХ':'Баатар сонго'; } }
 function btPick(id){ if(!BT||!BT.wait||BT.vs) return; if(id===BT.req){ say('Түүхэн баатар зайлшгүй оролцоно'); return; } const i=BT.sel.indexOf(id), mx=Math.min(5,heroSlots()); if(i>=0) BT.sel.splice(i,1); else if(SUPP[id]){ BT.sel=BT.sel.filter(x=>!SUPP[x]); BT.sel.push(id); say(HEROES.find(x=>x.id===id).n+': '+SUPP[id].t); } else { if(BT.sel.filter(x=>!SUPP[x]).length>=mx){ say('Хамгийн ихдээ '+mx+' баатар'); return; } BT.sel.push(id); } btRedeploy(); btTray(); }
-function btQuick(){ if(!BT||!BT.wait||BT.vs) return; BT.sel=(BT.req?[BT.req]:[]).concat(squad().filter(x=>!SUPP[x]&&x!==BT.req&&(!(BT.e&&BT.e.hs&&BT.e.hs.length)||BT.e.hs.includes(x)))).slice(0,Math.min(5,heroSlots())); { const sp=['borte','oelun'].find(x=>S.heroes[x]); if(sp) BT.sel.push(sp); } btRedeploy(); btTray(); }
+function btQuick(){ if(!BT||!BT.wait||BT.vs) return; BT.sel=(BT.req?[BT.req]:[]).concat(squad().filter(x=>!SUPP[x]&&x!==BT.req&&(!(BT.e&&BT.e.hs&&BT.e.hs.length)||BT.e.hs.includes(x)))).slice(0,Math.min(5,heroSlots())); btRedeploy(); btTray(); }
 function btGo(){ if(!BT||!BT.wait||BT.vs) return; if(!BT.sel.filter(x=>!SUPP[x]).length){ say('Эхлээд баатраа сонго'); return; } BT.vs=1; { const m=document.getElementById('bmatch'); if(m) m.remove(); } sfx('horn'); vib(40); const pn=$('btpan'); if(pn) pn.remove(); const bl=$('btl'); if(bl) bl.classList.remove('wt'); goSplash(); }
 function btSpeed(){ BT.sp=BT.sp>=2?1:BT.sp+1; $('bsp').textContent='×'+BT.sp; }
 function btLoop(now){
@@ -2915,7 +2915,7 @@ function btStep(dt){
     U.forEach(u=>{ u.x=u.sx+(u.hx-u.sx)*e; u.y=u.sy+(u.hy-u.sy)*e; u.mv=BT.ip<0.97; if(Math.abs(u.hx-u.sx)>4) u.fdir=u.hx>u.sx?1:-1; if(u.type==='cav'&&Math.random()<dt*14) BT.pt.push({x:u.x,y:u.y,vx:(Math.random()-0.5)*14,vy:-6-Math.random()*8,t:0,l:0.6,c:'dust'}); });
     BT.pt.forEach(p=>{ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; }); BT.pt=BT.pt.filter(p=>p.t<p.l); return; }
   BT.t+=dt; BT.shake=Math.max(0,BT.shake-dt*3);
-  BT.heal=(BT.heal||0)+dt; if(BT.heal>=1){ BT.heal=0; if(U.some(u=>u.sup&&u.id==='oelun')) U.forEach(u=>{ if(!u.side&&!u.sup&&u.hp>0) u.hp=Math.min(u.max,u.hp+u.max*0.025); }); }
+  BT.heal=(BT.heal||0)+dt; if(BT.heal>=1){ BT.heal=0; if(U.some(u=>!u.side&&u.hp>0&&u.id==='oelun')) U.forEach(u=>{ if(!u.side&&!u.sup&&u.hp>0) u.hp=Math.min(u.max,u.hp+u.max*0.025); }); }
   U.forEach(u=>{ u.tc=0; });
   if(TURNB) turnSched(dt);
   U.forEach(u=>{ if(u.hp<=0) return; if(u.sup){ u.mv=false; return; } u.cd-=dt;
@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bbbf615e2a';
+var UPDB='78cae78139';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17711,6 +17711,46 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   '.av2i{width:100%;box-sizing:border-box;font-size:17px;padding:9px;border-radius:9px;border:2px solid #c9972b;background:#2b1d12;color:#fff;text-align:center}'+
   '.av2b{display:flex;gap:10px;justify-content:center}.av2b .btn{flex:1;font-size:16px;padding:10px 6px}.av2b .btn.on{outline:3px solid #ffd770}';
   document.head.appendChild(st);
+})();
+
+
+/* p32/bt2.js — Тулаан: 1) бүгд ээлжээр довтолно (нэг нэгээр) 2) 6-р слот алга: Бөртэ, Өэлүн нар ердийн баатар шиг цохилттой
+   3) мэдэгдэл зөвхөн тосгон дээр 4) хохирлын тоонууд давхцахгүй. */
+(function(){
+  /* 2) дэмжигч баатар → ердийн баатар (слот 3/5-д орно). Онцлог нь тулаанд үлдэнэ: Бөртэ +12%, Өэлүн эдгээнэ (үндсэн кодод). */
+  try{ Object.keys(SUPP).forEach(k=>{ delete SUPP[k]; }); }catch(e){}
+  { const _rd=btRedeploy; btRedeploy=function(){ const r=_rd.apply(this,arguments);
+      try{ const B=BT; if(B&&B.sel&&B.sel.indexOf('borte')>=0){ B.units.forEach(u=>{ if(!u.side){ u.hp*=1.12; u.max*=1.12; u.atk*=1.12; } }); B.p0=B.units.filter(u=>!u.side&&!u.sup).reduce((a,u)=>a+u.max,0); } }catch(e){}
+      return r; }; }
+
+  /* сонгосон баг (E.hs) бүрэн орно — өмнө нь хамгийн хүчтэй 3-аас шүүгдэж, сонгосон баатар алдагддаг байсан */
+  { const _bq=btQuick; btQuick=function(){ const r=_bq.apply(this,arguments);
+      try{ if(BT&&BT.wait&&!BT.vs&&BT.e&&BT.e.hs&&BT.e.hs.length){ const mx=Math.min(5,heroSlots());
+          BT.sel=(BT.req?[BT.req]:[]).concat(BT.e.hs.filter(x=>x!==BT.req&&S.heroes[x])).slice(0,mx); btRedeploy(); btTray(); } }catch(e){ console.error(e); }
+      return r; }; }
+
+  /* 1) нэг дор нэг л хүн довтолно: өмнөх довтолгоо дуусаад (буцаж байрандаа очоод) дараагийнх нь эхэлнэ */
+  { const _ts=turnSched; turnSched=function(dt){
+      try{ if(BT&&BT.dm){ BT.dm.forEach(d=>{ if(d._o) return; d._o=1; let n=0; BT.dm.forEach(o=>{ if(o!==d&&o._o&&o.t<0.8&&Math.abs(o.x-d.x)<46&&Math.abs((o.y-o.t*0)-d.y)<30) n++; }); if(n) d.y-=24*n; }); } }catch(e){}
+      try{ if(BT&&!BT.pick&&!BT.done){ const g=BT.units.find(u=>u.go&&u.hp>0);
+          if(g){ BT._gw=(BT._gw||0)+dt;
+            if(BT._gw<4){ try{ dotTick(dt); }catch(e){} BT.tq=Math.max(BT.tq||0,0.12); return; }
+            g.go=null; } /* гацсан бол 4 секундын дараа суллана */
+          BT._gw=0; } }catch(e){}
+      return _ts.apply(this,arguments); }; }
+
+  /* 3) мэдэгдэл (say) зөвхөн тосгонд: тулаан, цэс, дэлхий, аян, ачаалал дээр гарахгүй */
+  const village=()=>{ try{
+    if(typeof BT!=='undefined'&&BT) return false;
+    if(typeof cur!=='undefined'&&cur) return false;
+    const md=document.getElementById('modal'); if(md&&md.style.display&&md.style.display!=='none') return false;
+    for(const el of document.body.children){ if(el.id==='msg'||el.tagName==='CANVAS'&&el.id==='cv') continue;
+      const cs=getComputedStyle(el); if(cs.display==='none'||cs.visibility==='hidden') continue;
+      if(cs.position!=='fixed'&&cs.position!=='absolute') continue;
+      const r=el.getBoundingClientRect(); if(r.width>=innerWidth*0.9&&r.height>=innerHeight*0.9) return false; }
+    return true; }catch(e){ return true; } };
+  window.isVillage=village;
+  { const _say=say; say=function(m){ if(!village()){ return; } return _say.apply(this,arguments); }; }
 })();
 
 </script><script>(function(){

@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='70eac9cf21';
+var UPDB='a2ef932239';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17225,7 +17225,7 @@ body:has(#alv) #ckov{z-index:88!important}
   const wk=()=>Math.floor((Date.now()+8*36e5)/(7*864e5));
   const toNextDay=()=>{ const d=new Date(Date.now()+8*36e5); return (86400-(d.getUTCHours()*3600+d.getUTCMinutes()*60+d.getUTCSeconds())); };
   const shdLeft=()=>Math.max(0,((S.shd||0)-Date.now())/1000);
-  const rr=()=>{ try{ refresh(); }catch(e){} try{ if(typeof cur!=='undefined'&&cur==='shop') fillM(); }catch(e){} };
+  const rr=()=>{ try{ refresh(); }catch(e){} try{ if(typeof cur!=='undefined'&&(cur==='shop'||cur==='agh')) fillM(); }catch(e){} };
 
   /* ---- Хязгаар: өдөр / 7 хоног ---- */
   function lim(scope,id){ const key=scope==='d'?day():wk(); S.shl=S.shl||{}; const o=S.shl[scope]; if(!o||o.k!==key) S.shl[scope]={k:key,n:{}}; return S.shl[scope].n; }
@@ -17247,7 +17247,7 @@ body:has(#alv) #ckov{z-index:88!important}
   function spend(p){ if(alt()<p){ say('Алт хүрэхгүй байна'); sfx('err'); return false; } S.res.alt-=p; return true; }
   function buyAsk(name,p,fn){ dxAsk('<b>'+name+'</b><br>Үнэ: '+p+' Алт<br><span class="sm">Таны Алт: '+alt()+'</span>','Авах · '+p+' Алт',()=>{ if(!spend(p)) return; const ok=fn(); if(ok===false){ S.res.alt+=p; return; } sfx('coin'); try{ save(); }catch(e){} rr(); },'Болих'); }
   window.sh2Buy=function(k){ const it=IK[k]; if(!it) return; buyAsk(it.n+' хурдасгагч',it.p,()=>{ itAdd(k,1); say('✔ '+it.n+' +1'); }); };
-  window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('Хамгаалалт '+s.h+' цаг',s.p,()=>{ S.shd=Math.max(Date.now(),S.shd||0)+s.h*3600e3; say('Хамгаалалт идэвхжлээ: '+s.h+' цаг'); }); };
+  window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('Хамгаалалт '+s.h+' цаг',s.p,()=>{ itAdd('sd'+s.h,1); say('✔ Хамгаалалт '+s.h+'ц +1 · Агуулахад'); }); };
   window.sh2TpBuy=function(){ buyAsk('Нүүлгэгч',TPP,()=>{ itAdd('tp',1); say('✔ Нүүлгэгч +1'); }); };
   window.sh2TpUse=function(){ if(itn('tp')<1){ say('Нүүлгэгч алга'); sfx('err'); return; }
     if(!S.clanT||Date.now()-S.clanT>=3*864e5){ say('Одоо клан солих хүлээлт байхгүй байна'); return; }
@@ -17277,7 +17277,7 @@ body:has(#alv) #ckov{z-index:88!important}
     {id:'d3',e:()=>spd('b','8ц',46),n:'Барилга 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('b8',1); return true; }},
     {id:'d4',e:()=>spd('r','8ц',46),n:'Судалгаа 8ц',p:50,o:70,l:2,fn:()=>{ itAdd('r8',1); return true; }},
     {id:'d5',e:()=>spd('t','8ц',46),n:'Цэрэг 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('t8',1); return true; }},
-    {id:'d6',e:()=>shdI('24ц',46),n:'Хамгаалалт 24ц',p:50,o:80,l:1,fn:()=>{ S.shd=Math.max(Date.now(),S.shd||0)+24*3600e3; return true; }}
+    {id:'d6',e:()=>shdI('24ц',46),n:'Хамгаалалт 24ц',p:50,o:80,l:1,fn:()=>{ itAdd('sd24',1); return true; }}
   ];
   const HS=[{id:'h2',n:2,p:48,o:60,l:5},{id:'h5',n:5,p:120,o:150,l:3},{id:'h10',n:10,p:240,o:300,l:2}];
   window.sh2Hs=function(id){ const k=HS.find(x=>x.id===id); if(!k) return; if(used('d',id)>=k.l){ say('Өнөөдрийн хязгаар дууссан'); sfx('err'); return; }
@@ -17290,17 +17290,14 @@ body:has(#alv) #ckov{z-index:88!important}
   const chip=()=>'';
   function tile(e,n,sub,price,onclk,off){ return '<button class="sh2-t'+(off?' off':'')+'" onclick="'+onclk+'"><span class="sh2-te">'+e+'</span><b>'+n+'</b><em>'+sub+'</em><span class="sh2-tp">'+gem()+' '+price+'</span></button>'; }
   function tabSp(){
-    const J=jobs(); let h=chip()+'<div class="sh2-h">'+im('q_bolt',20)+' Идэвхтэй ажил</div>';
-    if(!J.length) h+='<div class="sh2-em">Одоо идэвхтэй ажил алга. Барилга, судалгаа, эмчилгээ эхлүүлээд ирээрэй.</div>';
-    J.forEach(j=>{ const ty=jtype(j), a=IT.filter(x=>x.t===ty);
-      h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+j.lab+'</b><span>⏱ '+fmtT(j.rem)+'</span></div><div class="sh2-jr">'+a.map(x=>'<button class="sh2-ub" '+(itn(x.k)<1?'disabled':'')+' onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+x.k+'\')">'+im(IM[x.t],20)+' '+x.n.split(' ')[1]+' · ×'+itn(x.k)+'</button>').join('')+'</div></div>'; });
-    h+='<div class="sh2-h">'+im('ic_shop',20)+' Хурдасгагч авах</div><div class="sh2-g">'+IT.map(x=>tile(spd(x.t,x.n.split(' ')[1],46),x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
+    let h='<div class="sh2-sm">Авсан хурдасгагчаа <b>Агуулах</b> хэсгээс ашиглана.</div>';
+    h+='<div class="sh2-g">'+IT.map(x=>tile(spd(x.t,x.n.split(' ')[1],46),x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
     return h; }
   function tabPr(){
     const L=shdLeft(); let h=chip()+'<div class="sh2-sb'+(L>0?' on':'')+'">'+(L>0?im(SHI,22)+' Идэвхтэй · '+fmtT(L)+' үлдсэн':im(SHI,22)+' Хамгаалалтгүй')+'<div class="sm">Хамгаалалттай үед дээрэмчин, овгийн дайралт ирэхгүй.</div></div>';
-    h+='<div class="sh2-g">'+SHD.map((s,i)=>tile(shdI(s.h+'ц',46),'Хамгаалалт '+s.h+'ц','Дайралт хориглоно',s.p,'sh2Shield('+i+')')).join('')+'</div>';
+    h+='<div class="sh2-g">'+SHD.map((s,i)=>tile(shdI(s.h+'ц',46),'Хамгаалалт '+s.h+'ц','Байгаа: '+itn('sd'+s.h),s.p,'sh2Shield('+i+')')).join('')+'</div>';
     const cd=S.clanT&&Date.now()-S.clanT<3*864e5;
-    h+='<div class="sh2-h">'+im('ic_world',20)+' Нүүлгэгч</div><div class="sh2-jb"><div class="sh2-jl"><b>Нутаг солих эрх · Байгаа: '+itn('tp')+'</b></div><div class="sm">'+(cd?'Клан солих хүлээлт: '+fmtT((3*864e5-(Date.now()-S.clanT))/1000):'Одоо клан солих хүлээлт байхгүй.')+' Нүүлгэгч нь хүлээлтийг арилгаж, өөр клан руу шууд нүүх боломж олгоно.</div><div class="sh2-jr"><button class="sh2-ub" onclick="sh2TpBuy()">'+gem()+' '+TPP+' · Авах</button><button class="sh2-ub" '+(itn('tp')<1?'disabled':'')+' onclick="sh2TpUse()">Ашиглах</button></div></div>';
+    h+='<div class="sh2-h">'+im('ic_world',20)+' Нүүлгэгч</div><div class="sh2-jb"><div class="sh2-jl"><b>Нутаг солих эрх · Байгаа: '+itn('tp')+'</b></div><div class="sm">'+(cd?'Клан солих хүлээлт: '+fmtT((3*864e5-(Date.now()-S.clanT))/1000):'Одоо клан солих хүлээлт байхгүй.')+' Нүүлгэгч нь хүлээлтийг арилгаж, өөр клан руу шууд нүүх боломж олгоно. Ашиглахдаа Агуулах хэсэгт орно.</div><div class="sh2-jr"><button class="sh2-ub" onclick="sh2TpBuy()">'+gem()+' '+TPP+' · Авах</button></div></div>';
     return h; }
   const GN={b1:'Барилга 1ц',b8:'Барилга 8ц',r1:'Судалгаа 1ц',r8:'Судалгаа 8ц',t1:'Цэрэг 1ц',t8:'Цэрэг 8ц',stn:'Ид шидийн чулуу',gold:'Зоос',wood:'Мод',grain:'Тариа',meat:'Мах',sh:'Баатрын хэлтэрхий'};
   const GO=Object.keys(GN);
@@ -17328,6 +17325,31 @@ body:has(#alv) #ckov{z-index:88!important}
     DL.forEach(k=>{ const left=k.l-used('d',k.id), pc=Math.round((1-k.p/k.o)*100);
       h+='<div class="sh2-dw">'+(pc>0?'<i class="sh2-off">-'+pc+'%</i>':'')+tile(typeof k.e==='function'?k.e():k.e,k.n,'Үлдсэн: '+left,k.p,'sh2Deal(\''+k.id+'\')',left<1)+'</div>'; });
     return h+'</div>'; }
+
+  /* ---- Агуулах: «Миний зүйлс» (дэлгүүрээс авсан зүйлс, эндээс л ашиглана) ---- */
+  const SHK=SHD.map(x=>({k:'sd'+x.h,h:x.h}));
+  window.sh2Ag=function(k){ S.agSel=(S.agSel===k?null:k); try{ fillM(); }catch(e){} };
+  window.sh2ShUse=function(h){ const k='sd'+h; if(itn(k)<1){ say('Хамгаалалт алга'); sfx('err'); return; }
+    const L=shdLeft();
+    dxAsk('<b>Хамгаалалт '+h+' цаг</b><br><span class="sm">'+(L>0?'Одоо '+fmtT(L)+' үлдсэн байна. Ашиглавал '+h+' цаг нэмэгдэнэ.':'Ашиглавал '+h+' цагийн турш дайралт ирэхгүй.')+'</span>','Ашиглах',()=>{
+      if(itn(k)<1) return; S.it[k]--; S.shd=Math.max(Date.now(),S.shd||0)+h*3600e3; sfx('win'); say('Хамгаалалт идэвхжлээ: '+h+' цаг'); if(itn(k)<1) S.agSel=null; try{ save(); }catch(e){} rr(); },'Болих'); };
+  function agItems(){
+    const L=[]; IT.forEach(x=>{ if(itn(x.k)>0) L.push({k:x.k,n:x.n,c:itn(x.k),e:spd(x.t,x.n.split(' ')[1],46)}); });
+    SHK.forEach(x=>{ if(itn(x.k)>0) L.push({k:x.k,n:'Хамгаалалт '+x.h+'ц',c:itn(x.k),e:shdI(x.h+'ц',46)}); });
+    if(itn('tp')>0) L.push({k:'tp',n:'Нүүлгэгч',c:itn('tp'),e:im('ic_world',46)});
+    let h='<div class="sh2-h">'+im('ic_bag',20)+' Миний зүйлс</div>';
+    const Lf=shdLeft(); if(Lf>0) h+='<div class="sh2-sb on">'+im(SHI,22)+' Хамгаалалт идэвхтэй · '+fmtT(Lf)+' үлдсэн</div>';
+    if(!L.length){ return h+'<div class="sh2-em">Одоохондоо зүйл алга. Дэлгүүрээс хурдасгагч, хамгаалалт авч болно.<div style="margin-top:8px"><button class="sh2-ub" onclick="openM(\'shop\')">'+im('ic_shop',18)+' Дэлгүүр</button></div></div>'; }
+    h+='<div class="sh2-g">'+L.map(x=>'<button class="sh2-t'+(S.agSel===x.k?' sel':'')+'" onclick="sh2Ag(\''+x.k+'\')"><span class="sh2-te">'+x.e+'</span><b>'+x.n+'</b><em>Байгаа: '+x.c+'</em></button>').join('')+'</div>';
+    const k=S.agSel;
+    if(k&&itn(k)<1) S.agSel=null;
+    else if(k&&IK[k]){ const it=IK[k], ty=it.t, J=jobs().filter(j=>jtype(j)===ty);
+      h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+it.n+' · хаана ашиглах вэ?</b></div>'+(J.length?J.map(j=>'<div class="sh2-jl" style="margin-top:6px"><span>'+j.lab+' · ⏱ '+fmtT(j.rem)+'</span><button class="sh2-ub" onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+k+'\')">Ашиглах</button></div>').join(''):'<div class="sm">Одоо ашиглах ажил алга ('+(ty==='b'?'барилга':ty==='r'?'судалгаа':'цэрэг, эмчилгээ')+' эхлүүлээд ирээрэй).</div>')+'</div>'; }
+    else if(k&&k.indexOf('sd')===0){ const hh=+k.slice(2); h+='<div class="sh2-jb"><div class="sh2-jl"><b>Хамгаалалт '+hh+' цаг</b><button class="sh2-ub" onclick="sh2ShUse('+hh+')">Ашиглах</button></div></div>'; }
+    else if(k==='tp'){ h+='<div class="sh2-jb"><div class="sh2-jl"><b>Нүүлгэгч</b><button class="sh2-ub" onclick="sh2TpUse()">Ашиглах</button></div><div class="sm">Клан солих хүлээлтийг арилгана.</div></div>'; }
+    return h; }
+  const _ag=aghHTML;
+  aghHTML=function(){ const r=_ag.apply(this,arguments); const i=r.indexOf('</h2>'); let it=''; try{ it=agItems(); }catch(e){ it=''; } return i<0?it+r:r.slice(0,i+5)+it+r.slice(i+5); };
 
   const TABS=[['main','nd_alt','Нүүр'],['sp','q_bolt','Хурдасгагч'],['pr','ic_power','Хамгаалалт'],['pk','ui2_chest','Багц'],['dl','vf_star','Хямдрал']];
   window.sh2Tab=function(k){ S.shTab=k; try{ fillM(); }catch(e){} try{ const m=document.getElementById('mbody'); if(m) m.scrollTop=0; }catch(e){} };
@@ -17396,6 +17418,9 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 .sh2-ic{position:relative;display:inline-block;line-height:0}.sh2-ic img{display:block}.sh2-ic i{position:absolute;left:-4px;top:-4px;background:#1c1208;border:1px solid #ffd770;border-radius:8px;padding:0 4px;font:bold 11px/15px sans-serif;font-style:normal;color:#ffe9b0}.sh2-ic i.pz{left:auto;right:-5px;top:auto;bottom:-4px;border:0;background:none;font-size:16px;line-height:1;padding:0}
 .sh2-te{display:flex;align-items:center;justify-content:center;min-height:50px}.sh2-pb span{display:flex;align-items:center;justify-content:center}.sh2-hi{image-rendering:pixelated}
 .sh2-tabs button i{display:flex;align-items:center;justify-content:center;height:32px}
+
+.sh2-jl{gap:8px}.sh2-jl>span,.sh2-jl>b{min-width:0;flex:1}.sh2-jl .sh2-ub{flex:none;width:auto;min-width:0;padding:8px 14px}
+.sh2-t.sel{border-color:#ffd770;box-shadow:0 0 0 2px #ffd77099 inset}
 `; document.head.appendChild(st);
 })();
 

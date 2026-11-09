@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='956a425485';
+var UPDB='09fb20371e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18037,7 +18037,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     const sv=W(), hn=sv.hn||(k=>k);
     const home=e=>{ try{ const k=hmOf(e); return k?hn(k):'гэргүй'; }catch(x){ return ''; } };
     const pc=Math.max(0,Math.min(100,Math.round(100*tot/Math.max(1,cap))));
-    let h='<h2>Ажилчид</h2>';
+    let h='<h2>Ажилчид</h2><div class="w2root">';
     /* 1. тоон самбар */
     h+='<div class="w2-top"><div class="w2-big">'+im('ui_worker',46)+'<div><b>'+tot+'</b><span>Нийт хүн</span></div></div>'+
        '<div class="w2-mini"><div><b>'+P.length+'<i>/'+vis+'</i></b><span>Газар дээр</span></div><div><b>'+Math.max(0,tot-P.length)+'</b><span>Цехэд</span></div><div><b>'+G.length+'</b><span>Харуул</span></div></div>'+
@@ -18056,7 +18056,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     /* 5. зөвлөмж */
     const tips=(sv.nextHint?sv.nextHint(Lay):[]).map(t=>t.replace(/^[^\wА-яЁёӨөҮү]+\s*/,'').replace(/^Хамгийн ойр:\s*/,'Хамгийн ойр: '));
     if(tips.length) h+='<div class="w2-h"><i></i><span>Зөвлөмж</span><i></i></div><div class="w2-tip">'+tips.map(t=>'<div>'+im('q_bolt',16)+'<span>'+esc(t)+'</span></div>').join('')+'</div>';
-    return h;
+    return h+'</div>';
   }
   const _mc=modalContent;
   modalContent=function(k){ if(k==='wk'){ try{ return html(); }catch(x){ console.log('wk2',x); } } return _mc.apply(this,arguments); };
@@ -18075,6 +18075,15 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 .w2-tip{border-radius:14px;border:2px dashed #7a5522;background:#25180c;padding:6px 10px}.w2-tip>div{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:12.5px;color:#e9d9b0;line-height:1.35}.w2-tip>div+div{border-top:1px solid #5c402033}.w2-tip img{flex:none;margin-top:1px}
 .w2-wb .card{background:linear-gradient(#3a2713,#2b1b0d);border:2px solid #6b4a1f;border-radius:14px}.w2-wb .wk-sum{display:none}.w2-wb>.sm{background:#25180c;border-radius:10px;padding:6px 8px;margin:4px 0 8px}
 .w2-wb .wk-i{background:#1a1108;border:2px solid #8a6630;border-radius:12px;width:72px;height:56px}
+
+/* ---- AI хүрээний зургууд (rts/ui_*.webp) ---- */
+.w2root{background:#1c1109 url(rts/ui_wood.webp?v=1) 0 0/220px 220px;border-radius:10px;padding:8px 6px 10px;margin:0 -2px}
+.w2-top{border:0;border-style:solid;border-width:30px 30px;border-image:url(rts/ui_rect.webp?v=1) 95 fill/30px stretch;background:#0000;box-shadow:none;padding:0 2px 2px}
+.w2-p,.w2-wb .card{border:0;border-style:solid;border-width:15px 17px;border-image:url(rts/ui_wide.webp?v=1) 42 52 fill/15px 17px stretch;background:#0000;box-shadow:none;padding:8px 4px}
+.w2-p{margin:8px 0}
+.w2-wb .wk-c button{background:linear-gradient(#ffe08a,#d79a24);border:2px solid #5c3a0e;color:#3a2208;text-shadow:0 1px 0 #fff6}
+.w2-wb .wk-c button:disabled{background:#6b5a42;border-color:#3f3220;color:#2a2012}
+.w2-wb .btn{border:0;border-style:solid;border-width:22px 46px;border-image:url(rts/ui_btn.webp?v=1) 70 140 fill/22px 46px stretch;background:#0000;box-shadow:none;outline:0!important;color:#4a2a05;font-weight:bold;text-shadow:0 1px 0 #fff8;padding:4px 0;min-width:200px}
 `; document.head.appendChild(st);
 })();
 

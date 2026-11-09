@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='dd961a02c8';
+var UPDB='15a9cfb2d8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15820,10 +15820,13 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
 })();
 
 
-/* p32/hskills.js — 224: баатар бүр 4 скилтэй. Lv1 · Lv10 · Lv20 · Lv30 дээр нээгдэнэ (хаалттай нь «🔒 Lv» гэж харагдана).
+/* p32/hskills.js — 224: баатар бүр 4 скилтэй. Баатрын Lv1 · Lv5 · Lv10 · Lv20 дээр нээгдэнэ; скилл бүр өөрийн түвшинтэй (од л дээд хязгаар) (хаалттай нь «🔒 Lv» гэж харагдана).
    1-р скилл нь хуучин HSK[id]. Бусад 3 нь баатрын төрлөөс (rally/guard/heal/volley/charge) хамаарна.
    Шинэ төрөл: 'cleave' (бүх дайсанд), 'snipe' (сонгосон нэг дайсанд). */
-var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
+var SKUNL=[1,5,10,20], SKCOST=[2,3,4,5], SKCAPS=[3,4,5,6,8,9,10], SKLM=0.12;
+window.skLv=function(id,i){ const a=S.sl&&S.sl[id]; return Math.max(1,Math.min(10,(a&&a[i])||1)); };
+window.skCap=function(id){ return SKCAPS[Math.max(0,Math.min(6,starOf(id)))]; };
+window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
 (function(){
   const LAD={
     rally:[['cleave','Нийтийн довтолгоо','Бүх дайсанд 1.6 дахин цохилт',14,1],['rally','Их мандат','Бүх цэрэгт цохилт +50% (8с), 15% эдгээнэ',18,1.7],['volley','Тэнгэрийн бороо','3 дайсанд 4 дахин сум',16,1.3]],
@@ -15869,8 +15872,8 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
   window.SKTG=['snipe','charge','stun','drain','execute'];
   window.heroSkills=function(id){
     const d=HSK[id]; if(!d) return [];
-    const own=HL[id], lad=own?own.map((e,j)=>[e[0],e[1],DS[e[0]](SLOTM[j]),14+j*2,SLOTM[j]]):(LAD[d[0]]||LAD.rally);
-    return [d].concat(lad).map((s,i)=>({i,k:s[0],n:s[1],d:s[2],cd:s[3],m:s[4],cost:SKCOST[i],lv:SKUNL[i],arr:s}));
+    const own=HL[id], lad=own?own.map((e,j)=>[e[0],e[1],'',14+j*2,SLOTM[j]]):(LAD[d[0]]||LAD.rally);
+    return [d].concat(lad).map((s,i)=>{ const lm=skMul(id,i), m=(s[4]||1)*lm, a=s.slice(); a[4]=m; if(i>0&&own) a[2]=DS[s[0]](m); return {i,k:s[0],n:s[1],d:a[2],cd:s[3],m:m,lm:lm,L:skLv(id,i),cost:SKCOST[i],lv:SKUNL[i],arr:a}; });
   };
   window.skOpen=function(id,i){ return (typeof hlv==='function'?hlv(id):1)>=SKUNL[i]; };
 
@@ -15885,23 +15888,32 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
       const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); return dm; };
       const al=U.filter(x=>!x.side&&x.hp>0&&!x.sup), pickT=()=>(BT.forceTg&&BT.forceTg.hp>0)?BT.forceTg:en.reduce((a,b)=>b.hp>a.hp?b:a);
       if(d[0]==='cleave'){ en.forEach(e=>{ hitE(e,1.6); try{ efAdd(1,e.x,e.y-18,54,0.5); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }catch(x){} }); BT.shake=Math.min(1,(BT.shake||0)+0.5); }
-      else if(d[0]==='stun'){ const tg=pickT(); hitE(tg,1.5*(d[4]||1)); tg.cd=(tg.cd>0?tg.cd:0)+6; try{ efAdd(2,tg.x,tg.y-18,60,0.6); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.35); }
+      else if(d[0]==='stun'){ const tg=pickT(); hitE(tg,1.5); tg.cd=(tg.cd>0?tg.cd:0)+6; try{ efAdd(2,tg.x,tg.y-18,60,0.6); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.35); }
       else if(d[0]==='burn'){ en.forEach(e=>{ e.dot={until:BT.t+8,dps:u.atk*0.3*k,acc:0}; try{ efAdd(6,e.x,e.y-18,54,0.6); }catch(x){} }); }
-      else if(d[0]==='drain'){ const tg=pickT(), dm=hitE(tg,3*(d[4]||1)); al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+dm*0.35); try{ efAdd(4,a.x,a.y+4,60,0.8,true); }catch(x){} }); try{ efAdd(6,tg.x,tg.y-18,60,0.5); }catch(x){} }
+      else if(d[0]==='drain'){ const tg=pickT(), dm=hitE(tg,3); al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+dm*0.35); try{ efAdd(4,a.x,a.y+4,60,0.8,true); }catch(x){} }); try{ efAdd(6,tg.x,tg.y-18,60,0.5); }catch(x){} }
       else if(d[0]==='execute'){ const tg=pickT(); hitE(tg,tg.hp<=tg.max*0.35?9:4); try{ efAdd(6,tg.x,tg.y-18,66,0.6); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.5); }
       else if(d[0]==='focus'){ u.bAtk={m:1+0.8*k,t:BT.t+14}; try{ efAdd(3,u.x,u.y+4,66,0.8,true); }catch(x){} }
       else if(d[0]==='weaken'){ en.forEach(e=>{ e.wk=BT.t+8; try{ efAdd(2,e.x,e.y+4,50,0.6,true); }catch(x){} }); }
-      else if(d[0]==='snipe'){ const tg=pickT(); hitE(tg,6*(d[4]||1)); try{ efAdd(0,tg.x,tg.y-18,60,0.5); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.3); }
+      else if(d[0]==='snipe'){ const tg=pickT(); hitE(tg,6); try{ efAdd(0,tg.x,tg.y-18,60,0.5); BT.fx.push({k:'arrow',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.3); }
       else { const tg=BT.forceTg; hitE(tg,5); u.x+=(tg.x-u.x)*0.55; u.y+=(tg.y-u.y)*0.55; BT.shake=Math.min(1,(BT.shake||0)+0.6); try{ BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); efAdd(3,u.x,u.y+4,66,0.7,true); efAdd(6,tg.x,tg.y-18,60,0.5); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} }
       BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true;
     }
     return _cs.apply(this,arguments);
   };
   /* сонгосон скиллээр чадвар хэрэглэх (түр HSK-г сольж) */
+  let _cw=0;
   window.castWith=function(u,sk,tg){
-    const o=HSK[u.id]; HSK[u.id]=sk.arr; BT.forceTg=tg||null; let ok=false;
-    try{ ok=castSkill(u); }catch(e){ ok=false; } finally{ HSK[u.id]=o; BT.forceTg=null; }
+    const o=HSK[u.id]; HSK[u.id]=sk.arr; BT.forceTg=tg||null; let ok=false; _cw=1;
+    try{ ok=castSkill(u); }catch(e){ ok=false; } finally{ _cw=0; HSK[u.id]=o; BT.forceTg=null; }
     return ok;
+  };
+  /* автомат (ээлжгүй) дуудалт: 1-р ур чадварын түвшний бонус */
+  const _cs1=castSkill;
+  castSkill=function(u){
+    const o=HSK[u.id]; if(_cw||!o) return _cs1.apply(this,arguments);
+    const lm=skMul(u.id,0); if(lm===1) return _cs1.apply(this,arguments);
+    const a=o.slice(); a[4]=(o[4]||1)*lm; HSK[u.id]=a;
+    try{ return _cs1.apply(this,arguments); } finally{ HSK[u.id]=o; }
   };
   try{ SKI.cleave=['🌀','Нийтийн цохилт']; SKI.snipe=['🎯','Онилсон цохилт']; }catch(e){}
   /* суларсан дайсны цохилт -35% */
@@ -15909,16 +15921,7 @@ var SKUNL=[1,10,20,30], SKCOST=[2,3,4,5];
   /* шатаалт (dot): тулаан зогсож байхад үйлчлэхгүй */
   window.dotTick=function(dt){ if(!BT) return; BT.units.forEach(u=>{ const d=u.dot; if(!d||u.hp<=0) return; if(BT.t>d.until){ u.dot=null; return; } u.hp-=d.dps*dt; d.acc+=dt; u.hurt=Math.max(u.hurt||0,0.1); if(d.acc>=1){ d.acc-=1; BT.dm.push({x:u.x,y:u.y-30,t:0,v:Math.round(d.dps),big:false,side:0}); } if(u.hp<=0&&!u.dead) u.dead=BT.t; }); };
 
-  /* Баатрын дэлгэц → «Ур чадвар»: 4 скилл */
-  const GL={rally:'📯',guard:'🛡',heal:'✚',volley:'🏹',charge:'🐎',cleave:'🌀',snipe:'🎯',anda:'🤝',stun:'⚡',burn:'🔥',drain:'🩸',execute:'☠',focus:'👁',weaken:'⬇'};
-  hdSkillHTML=function(id,ow){
-    const L=heroSkills(id); if(!L.length) return '<div class="sm">Ур чадвар байхгүй</div>';
-    const lv=hlv(id), s=ow?starOf(id):0;
-    return '<div class="sm" style="text-align:center;margin-bottom:6px">Баатрын түвшин <b style="color:#ffd770">'+lv+'</b> · Скилл бүр түвшингээр нээгдэнэ</div>'+
-      L.map(x=>{ const open=ow&&lv>=x.lv; return '<div class="hd-sk" style="'+(open?'':'opacity:.55;filter:grayscale(.7)')+';margin-bottom:6px"><div class="hd-ski">'+(open?(GL[x.k]||'✦'):'🔒')+'</div><div style="flex:1;min-width:0"><b>'+x.n+'</b> <span class="hd-act">'+(open?'Идэвхтэй':'Lv '+x.lv+' дээр нээгдэнэ')+'</span><div class="hd-sd">'+x.d+'</div><div class="sm">Энерги: <b style="color:#7fc4ff">'+x.cost+'</b> ◆'+(x.i===0?' · эхний скилл':'')+'</div></div></div>'; }).join('')+
-      '<div class="hd-sb">'+SKB.slice(1).map((v,i)=>'<div class="'+(s>i?'ok':'')+'"><span>Ур чадварын хүч +'+v+'%</span><em>'+(s>i?'✓':'('+(i+1)+' од нээгдэнэ)')+'</em></div>').join('')+'</div>'+
-      (ow&&s<STMAX?'<button class="btn" onclick="hdTab(\'star\')">★ Од нэмэх</button>':'');
-  };
+  window.SKGL={rally:'📯',guard:'🛡',heal:'✚',volley:'🏹',charge:'🐎',cleave:'🌀',snipe:'🎯',anda:'🤝',stun:'⚡',burn:'🔥',drain:'🩸',execute:'☠',focus:'👁',weaken:'⬇'};
 })();
 
 
@@ -16471,6 +16474,109 @@ function campSkip(){ const j=S.uj; if(!j) return; const c=hsSkipCost(j.end); if(
 (function(){ const _l=hsLive; hsLive=function(){ const el=document.getElementById('hjb'), o=document.getElementById('hsp'); if(el&&o&&o.dataset.kind==='c'&&S.uj){ const j=S.uj, left=Math.max(0,(j.end-Date.now())/1000), tot=Math.max(1,(j.end-j.start)/1000), p=Math.round(100*(1-left/tot));
     const h='<b>⬆ '+j.n+' цэрэг '+ttNames()[j.from+1]+' түвшинд сайжирч байна</b><div class="hz_bar"><u style="width:'+p+'%"></u></div><div style="font-size:18px;font-weight:bold">⏱ '+hsFmtT(left)+'</div><div class="hz_bt"><button class="hz_y" onclick="campSkip()">Одоо дуусга<br>'+hsAlt(20)+' Алт '+hsSkipCost(j.end)+'</button></div>';
     if(el._h!==h){ el._h=h; el.innerHTML=h; } else { const u=el.querySelector('u'); if(u) u.style.width=p+'%'; } return; } return _l.apply(this,arguments); }; })();
+
+
+/* p32/hdsk.js — Баатрын дэлгэц: «Ур чадвар» (4 нүд, скилл бүр өөрийн түвшинтэй, Ид шидийн чулуугаар ахиулна)
+   + «Од нэмэх» шинэ загвар. Бүх class/id нь hdk- угтвартай (тоглоомын CSS-тэй давхцахгүй).
+   Өгөгдөл: S.sl[id]=[l1,l2,l3,l4] (1..10). Дээд хязгаар = од (SKCAPS). Нээгдэх: баатрын Lv 1/5/10/20 (SKUNL). */
+(function(){
+  if(typeof HDS==='undefined') return;
+  const SKMAX=10;
+  const stoneN=()=>{ try{ return stnN(); }catch(e){ return 0; } };
+  window.skUpCost=function(id,i){ return skLv(id,i)*2+i; };
+  window.skUp=function(id,i){
+    if(!S.heroes[id]){ say('Эзэмшээгүй баатар'); return; }
+    const L=skLv(id,i);
+    if(hlv(id)<SKUNL[i]){ say('Баатар Lv '+SKUNL[i]+' хүрэх ёстой'); sfx('err'); return; }
+    if(L>=SKMAX){ say('Дээд түвшин'); return; }
+    if(L>=skCap(id)){ say('Баатарын од нэмэх ёстой'); sfx('err'); return; }
+    const c=skUpCost(id,i); if(stoneN()<c){ say('Ид шидийн чулуу хүрэхгүй ('+stoneN()+'/'+c+')'); sfx('err'); return; }
+    S.sl=S.sl||{}; const a=S.sl[id]||(S.sl[id]=[1,1,1,1]);
+    S.stn-=c; a[i]=L+1; sfx('lvl'); say(heroSkills(id)[i].n+' · Lv.'+(L+1)+' боллоо!');
+    try{ refresh(); }catch(e){}
+    heroInfo(id);
+  };
+  window.hdSs=function(i,t){ HDS.ss=i; if(t) HDS.tab=t; heroInfo(HDS.id); };
+
+  function tile(id,i,ow,sm){
+    const x=heroSkills(id)[i]; if(!x) return '';
+    const open=ow&&hlv(id)>=x.lv, cap=skCap(id), dot=open&&x.L<Math.min(cap,SKMAX)&&stoneN()>=skUpCost(id,i);
+    const sel=(HDS.ss||0)===i&&HDS.tab==='skill';
+    return '<div class="hdk-t'+(sm?' hdk-sm':'')+(open?'':' hdk-lk')+(sel?' hdk-sel':'')+'" onclick="hdSs('+i+(sm?',\'skill\'':'')+')">'+
+      '<div class="hdk-ic"><span>'+(SKGL[x.k]||'✦')+'</span><img src="hf/sk_'+x.k+'.webp?v=2" alt="" onerror="this.remove()"></div>'+
+      (open?'':'<i class="hdk-pad">🔒</i>')+(dot?'<u class="hdk-dot"></u>':'')+
+      '<em>'+(open?'Lv.'+x.L:'🔒 Lv '+x.lv)+'</em></div>';
+  }
+
+  /* ---- «Ур чадвар» хэсгийн доод самбар ---- */
+  hdSkillHTML=function(id,ow){
+    const L=heroSkills(id); if(!L.length) return '<div class="sm">Ур чадвар байхгүй</div>';
+    let q=HDS.ss||0; if(q>3||!L[q]) q=HDS.ss=0;
+    const x=L[q], hl=ow?hlv(id):0, open=ow&&hl>=x.lv, cap=skCap(id), s=ow?starOf(id):0, lvl=x.L, mx=lvl>=SKMAX, atCap=lvl>=cap;
+    const pct=v=>Math.round((v-1)*100);
+    const hd='<div class="hdk-hd"><b>'+x.n+'</b> <span class="hdk-lv">Lv.'+lvl+'/'+Math.min(cap,SKMAX)+'</span><span class="hdk-ty">Идэвхтэй</span></div>'+
+      '<div class="hdk-ds">'+x.d+'</div>'+
+      '<div class="hdk-meta">Энерги: <b>'+x.cost+'</b> ◆ · Хүлээлт: <b>'+x.cd+'</b> сек</div>';
+    const ls='<div class="hdk-ls">'+
+        '<div class="ok"><span>⭐ Түвшин Lv.'+lvl+': хүч +'+pct(x.lm)+'%</span><em>✓</em></div>'+
+        (mx?'':'<div><span>Lv.'+(lvl+1)+': хүч +'+pct(1+SKLM*lvl)+'%</span><em>'+(lvl+1>cap?'(од хэрэгтэй)':'ахиулна')+'</em></div>')+
+        [1,2,3,4,5,6].map(n=>'<div class="'+(s>=n?'ok':'')+'"><span>'+(s>=n?'⭐':'☆')+' '+n+' од: дээд түвшин Lv.'+SKCAPS[n]+'</span><em>'+(s>=n?'✓':'('+n+' од хэрэгтэй)')+'</em></div>').join('')+
+      '</div>';
+    if(!ow) return hd+ls+'<div class="hdk-need">Эзэмшээгүй баатар. Дуудлагаар олно.</div>';
+    let ac='';
+    if(!open) ac='<div class="hdk-need">Нээгдэх нөхцөл: Баатар Lv '+x.lv+' хүрэх (одоо Lv '+hl+')</div>';
+    else if(mx) ac='<div class="hdk-max">Дээд түвшин</div>';
+    else if(atCap) ac='<div class="hdk-need">Ахиулах нөхцөл: Баатар '+(s+1)+' одтой болох</div><button class="btn hdk-up" onclick="hdTab(\'star\')">★ Од нэмэх</button>';
+    else{ const c=skUpCost(id,q); ac='<button class="btn hdk-up" onclick="skUp(\''+id+'\','+q+')">⬆ Ахиулах · '+c+' 🔮</button>'; }
+    return hd+ac+'<div class="hdk-st">🔮 Ид шидийн чулуу: <b>'+stoneN()+'</b></div>'+ls;
+  };
+
+  /* ---- «Од нэмэх» хэсэг ---- */
+  hdStarHTML=function(id){
+    const s=starOf(id), mx=s>=STMAX, c=mx?0:stcOf(id,s), have=shN(id), pw=heroPowerEff(id), nx=mx?pw:Math.floor(pw*(1+0.25*(s+1))/(1+0.25*s)), ow=!!S.heroes[id];
+    const kv=(n,a,b)=>'<div class="hd-kv"><span>'+n+'</span><b>'+a+(mx?'':' → <u>'+b+'</u>')+'</b></div>';
+    return '<div style="text-align:center;margin-bottom:6px">'+stRow(s,34)+'</div>'+
+      kv('Хүч',f(pw),f(nx))+
+      kv('Ур чадварын хүч','+'+SKB[s]+'%','+'+SKB[Math.min(STMAX,s+1)]+'%')+
+      kv('Ур чадварын дээд түвшин','Lv.'+SKCAPS[s],'Lv.'+SKCAPS[Math.min(STMAX,s+1)])+
+      '<div class="hdk-row">'+[0,1,2,3].map(i=>tile(id,i,ow,true)).join('')+'</div>'+
+      '<div class="hd-shd"><div class="hd-shi">'+hdImg(id,0,'hd-shim')+'</div><div style="flex:1"><div class="sm">Баатрын хэлтэрхий</div><div class="hd-bar2"><i style="width:'+(mx?100:Math.min(100,have/c*100))+'%"></i></div></div><b>'+(mx?'MAX':have+'/'+c)+'</b></div>'+
+      (mx?'<div class="sm" style="text-align:center;margin-top:8px">Дээд од хүрсэн</div>':'<button class="btn" '+(have>=c?'':'disabled')+' onclick="starUp(\''+id+'\')">★ Од нэмэх</button><div class="sm" style="margin-top:6px">Давхцсан баатар → +'+DUPSH+' хэлтэрхий.</div><button class="btn" onclick="hdClose();openM(\'summon\')">🎴 Баатар дуудах</button>');
+  };
+
+  /* ---- баатрын хоёр талд 4 нүд ---- */
+  function fill(){
+    const o=document.getElementById('hd'); if(!o||HDS.tab!=='skill'||!HDS.id) return;
+    const cs=o.querySelectorAll('.hd-stage .hd-sc'); if(cs.length<2) return;
+    const ow=!!S.heroes[HDS.id];
+    cs[0].innerHTML=tile(HDS.id,0,ow)+tile(HDS.id,2,ow); cs[1].innerHTML=tile(HDS.id,1,ow)+tile(HDS.id,3,ow);
+  }
+  const _hi=heroInfo;
+  heroInfo=function(id){ if(HDS.id!==id) HDS.ss=0; const r=_hi.apply(this,arguments); try{ fill(); }catch(e){ console.error(e); } return r; };
+
+  const st=document.createElement('style'); st.textContent=`
+#hd .hd-sc:has(.hdk-t){width:60px;gap:14px}
+.hdk-t{position:relative;width:56px;height:56px;border-radius:12px;background:linear-gradient(#3e2410,#190d04);border:2px solid #d9a83a;box-shadow:inset 0 0 8px #000a,0 2px 5px #000a;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hdk-t .hdk-ic{position:absolute;inset:0;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px}
+.hdk-t .hdk-ic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hdk-t.hdk-sel{border-color:#ffe27a;box-shadow:0 0 0 3px #ffb03acc,0 0 14px #ffb03a99,0 2px 5px #000a}
+.hdk-t.hdk-lk .hdk-ic{filter:grayscale(1) brightness(.55)}
+.hdk-t .hdk-pad{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;text-shadow:0 1px 3px #000}
+.hdk-t em{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);white-space:nowrap;background:#2b1d12ee;border:1px solid #8a6420;color:#ffe9b0;border-radius:9px;padding:0 6px;font:bold 11px/16px sans-serif;font-style:normal;text-shadow:0 1px 1px #000}
+.hdk-dot{position:absolute;right:-3px;top:-3px;width:13px;height:13px;border-radius:50%;background:#e8362b;border:2px solid #fff;box-shadow:0 0 4px #000a;text-decoration:none}
+.hdk-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.hdk-hd b{font-size:16px;color:#fff1c8}
+.hdk-lv{font:bold 14px sans-serif;color:#9ae85a}.hdk-ty{margin-left:auto;font:bold 12px sans-serif;color:#ffd24a}
+.hdk-ds{font-size:14px;margin:6px 0 4px;color:#f3e4bd;line-height:1.35}.hdk-meta{font-size:12px;color:#c9b58a;margin-bottom:6px}.hdk-meta b{color:#7fc4ff}
+.hdk-ls{border-top:1px solid #8a6420;padding-top:4px}
+.hdk-ls div{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #5d4224;font-size:13px;color:#a79273}
+.hdk-ls div.ok{color:#c8f08a}.hdk-ls div em{font-style:normal;color:#ff9a7a;text-align:right;flex:none}.hdk-ls div.ok em{color:#9fe08a}
+.hdk-st{text-align:center;font-size:13px;margin:8px 0 2px;color:#e8d6a8}.hdk-st b{color:#ffd770}
+.hdk-need{text-align:center;color:#ff6a5a;font:bold 14px sans-serif;margin:8px 0;text-shadow:0 1px 2px #000}
+.hdk-max{text-align:center;color:#9ae85a;font:bold 14px sans-serif;margin:8px 0}
+.hdk-up{width:100%;margin-top:6px}
+.hdk-row{display:flex;justify-content:center;gap:12px;margin:12px 0 18px}.hdk-row .hdk-t{width:52px;height:52px}
+`; document.head.appendChild(st);
+})();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='40d9eb560e';
+var UPDB='27c33f2bc5';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16184,8 +16184,8 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
     const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
     if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
-      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="hf/sk_'+x.k+'.webp?v=2" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
-      setHTML($$('bu-sks'),'sks',skh,su.id);
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="'+((typeof SKP==='function'&&SKP(su.id,x.i))||('hf/sk_'+x.k+'.webp?v=2'))+'" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      setHTML($$('bu-sks'),'sks',skh,su.id+(window.SKPN?'p':''));
       L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), ok=open&&pk&&en2>=x.cost;
         el.className='bu-sk'+(open?'':' lock')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
   }
@@ -16541,7 +16541,7 @@ function campSkip(){ const j=S.uj; if(!j) return; const c=hsSkipCost(j.end); if(
     const open=ow&&hlv(id)>=x.lv, cap=skCap(id), dot=open&&x.L<Math.min(cap,SKMAX)&&stoneN()>=skUpCost(id,i);
     const sel=(HDS.ss||0)===i&&HDS.tab==='skill';
     return '<div class="hdk-t'+(sm?' hdk-sm':'')+(open?'':' hdk-lk')+(sel?' hdk-sel':'')+'" onclick="hdSs('+i+(sm?',\'skill\'':'')+')">'+
-      '<div class="hdk-ic"><span>'+(SKGL[x.k]||'✦')+'</span><img src="hf/sk_'+x.k+'.webp?v=2" alt="" onerror="this.remove()"></div>'+
+      '<div class="hdk-ic"><span>'+(SKGL[x.k]||'✦')+'</span><img src="'+((typeof SKP==='function'&&SKP(id,i))||('hf/sk_'+x.k+'.webp?v=2'))+'" alt="" onerror="this.remove()"></div>'+
       (open?'':'<i class="hdk-pad">🔒</i>')+(dot?'<u class="hdk-dot"></u>':'')+
       '<em>'+(open?'Lv.'+x.L:'🔒 Lv '+x.lv)+'</em></div>';
   }
@@ -18781,6 +18781,17 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   const _bp=btPick; btPick=function(id){ try{ if(BT&&BT.wait&&!BT.vs&&BT.sel&&BT.sel.indexOf(id)<0&&id!==BT.req){ const w=fmWhy(BT.sel.filter(x=>!SUPP[x]),id); if(w){ say(w); try{ sfx('err'); }catch(e){} return; } } }catch(e){} return _bp.apply(this,arguments); };
   squad=function(){ const out=[]; Object.keys(S.heroes).filter(id=>!(typeof SUPP!=='undefined'&&SUPP[id])).sort((a,b)=>heroPower(b)-heroPower(a)).forEach(id=>{ if(out.length<heroSlots()&&!fmWhy(out,id)) out.push(id); }); return out; };
 })();
+
+
+/* p32/skpic.js — чадвар бүрийн өөрийн дүрс (skic.bin): SKP(баатар, дугаар) */
+(function(){ const M={}; window.SKPN=0;
+  window.SKP=function(h,i){ return M[h+'_'+i]||null; };
+  function ld(n){ try{ fetch('skic.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+      Object.keys(hd).forEach(k=>{ const a=hd[k]; M[k]=URL.createObjectURL(new Blob([new Uint8Array(buf,base+a[0],a[1])],{type:'image/webp'})); });
+      window.SKPN=Object.keys(M).length;
+    }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,4000+n*2500)); }); }catch(e){} }
+  setTimeout(()=>ld(0),1500); })();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

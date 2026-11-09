@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='94f1e64171';
+var UPDB='03df94e589';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18770,6 +18770,16 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
         FX(sp.f,a,'a'); }); if(sp.tn&&!as.includes(u)) u.tn=t+sp.tn; }
     FX(sp.f,u,'c');
     BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true; };
+  /* ---------- бүрэлдэхүүн: ард ≤2 (Нумтан/Дэмжигч), өмнө ≤3 (Хамгаалагч ≤2, Довтлогч ≤2) ---------- */
+  const fmCnt=ids=>{ const c={b:0,d:0,a:0}; ids.forEach(x=>{ const k=hcls(x); if(k==='heavy') c.d++; else if(k==='cav') c.a++; else c.b++; }); return c; };
+  window.fmWhy=function(ids,id){ const c=fmCnt(ids.concat([id])), k=hcls(id);
+    if(c.b>2&&k!=='heavy'&&k!=='cav') return 'Ард эгнээнд 2 хүртэл Нумтан эсвэл Дэмжигч';
+    if(c.d>2&&k==='heavy') return 'Хамгаалагч 2-оос олон болохгүй';
+    if(c.a>2&&k==='cav') return 'Довтлогч 2-оос олон болохгүй';
+    if(c.d+c.a>3&&(k==='heavy'||k==='cav')) return 'Урд эгнээнд 3 хүртэл (1 Хамгаалагч + 2 Довтлогч эсвэл 2 + 1)';
+    return ''; };
+  const _bp=btPick; btPick=function(id){ try{ if(BT&&BT.wait&&!BT.vs&&BT.sel&&BT.sel.indexOf(id)<0&&id!==BT.req){ const w=fmWhy(BT.sel.filter(x=>!SUPP[x]),id); if(w){ say(w); try{ sfx('err'); }catch(e){} return; } } }catch(e){} return _bp.apply(this,arguments); };
+  squad=function(){ const out=[]; Object.keys(S.heroes).filter(id=>!(typeof SUPP!=='undefined'&&SUPP[id])).sort((a,b)=>heroPower(b)-heroPower(a)).forEach(id=>{ if(out.length<heroSlots()&&!fmWhy(out,id)) out.push(id); }); return out; };
 })();
 
 </script><script>(function(){

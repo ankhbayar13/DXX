@@ -864,7 +864,7 @@ function totalPower(){
   const list = squad().map(heroPower);
   return Math.floor((list.reduce((a,b)=>a+b,0)+TR.reduce((a,T)=>a+trPow(T),0)) * (1 + 0.1*Math.max(0,S.bld.hureo-1)) * (1+0.05*(S.bld.hushuu||0)));
 }
-const heroSlots = () => Math.min(5,3+S.bld.ger);
+const heroSlots = () => { try{ if(typeof BT!=='undefined'&&BT&&BT.e&&BT.e.slots) return BT.e.slots; }catch(e){} return Math.min(5,3+S.bld.ger); };
 function canPay(inn){ for(const k in inn) if((S.res[k]||0)<inn[k]) return false; return true; }
 function prodTick(secs){
   PROD.forEach(k=>{
@@ -2473,7 +2473,7 @@ function evoShow(tab){ let o=document.getElementById('hbio'); if(o) o.remove(); 
   o.innerHTML='<div class="hbc hbf">'+tabs+body+'<button class="btn" style="margin-top:8px;width:100%" onclick="document.getElementById(\'hbio\').remove()">Хаах</button></div>'; document.body.appendChild(o); }
 (function(){ const st=document.createElement('style'); st.textContent='.evg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.evd{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:6px 3px;text-align:center;font-size:11px;display:flex;flex-direction:column;gap:3px;min-height:58px;justify-content:center}.evd b{color:#ffd770;font-size:10px}.evd.cu{border-color:#ffd24a;box-shadow:0 0 10px #ffd24a;background:#4a3414}.evd.dn{opacity:.55}.evd i,.pssi i{position:absolute;top:1px;right:4px;color:#9fe08a;font-style:normal;font-size:14px}.evd:nth-child(7){grid-column:span 2}.pssh,.pssi{display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;align-items:stretch}.pssh{margin-top:10px;font-size:11px;color:#c9b58a;text-align:center}.pssl{display:flex;flex-direction:column;gap:5px;margin-top:4px;max-height:42vh;overflow:auto}.pssi{padding:0;background:none;border:0}.pssn{display:flex;align-items:center;justify-content:center;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;color:#ffd770;font-size:13px}.pssi.rd .pssn{border-color:#ffd24a;box-shadow:0 0 8px #ffd24a}.pssc{position:relative;background:#2b1d12;border:2px solid #6b4a24;border-radius:8px;padding:4px 6px;text-align:center;font-size:13px;min-height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center}.pssc img{vertical-align:middle}.pssc small{font-size:10px;color:#e8c36a}.pssc.pssp{border-color:#a8841f;background:#3a2a10}.pssc.pssk{opacity:.7}.pssc.dn{opacity:.45}.pssc i{position:absolute;top:1px;right:4px;color:#9fe08a;font-style:normal;font-size:13px}.pssc i.lkk{color:#fff;font-size:12px}'; document.head.appendChild(st); })();
 
-const UPQ=()=>1+(S.bld.ger>=3?1:0)+(S.bld.ger>=5?1:0)+(rkLv()>=5?1:0);
+const UPQ=()=>1+(S.bld.ger>=3?1:0)+(S.bld.ger>=5?1:0)+(rkLv()>=5?1:0)+(S.qx?1:0);
 const upNeed=k=>Math.round(30*lvK(S.bld[k]));
 const rushC=u=>{ const r=u.need-u.p; return r<=180?0:Math.ceil(r/60)*10; };
 function ecoMig(){ try{ for(const k in S.bld){ if(typeof S.bld[k]==='number'&&S.bld[k]>MAXB) S.bld[k]=MAXB; } if(S.upg) for(const k in S.upg){ const u=S.upg[k]; if(!u) continue; if((S.bld[k]||0)>=MAXB){ delete S.upg[k]; continue; } const n=upNeed(k); if(u.need>n) u.need=n; if(u.p>u.need) u.p=u.need; } }catch(e){} }
@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fb82535ada';
+var UPDB='c3d70fbe2f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17232,6 +17232,11 @@ body:has(#alv) #ckov{z-index:88!important}
   const stoneI=px=>(window.STONEI?'<img src="'+window.STONEI+'" style="height:'+px+'px;vertical-align:middle">':'');
   const spd=(ty,tg,px)=>'<span class="sh2-ic">'+im(IM[ty],px)+'<i>'+tg+'</i></span>';
   const shdI=(tg,px)=>'<span class="sh2-ic">'+im(SHI,px)+(tg?'<i>'+tg+'</i>':'')+'</span>';
+  const BK=[{k:'bkS',n:'Жижиг ном',xp:150,p:20,tg:'+150'},{k:'bkL',n:'Том ном',xp:900,p:90,tg:'+900'}];
+  window.HBK_XP={bkS:150,bkL:900};
+  const QXP=250;
+  const bkI=(k,px)=>'<span class="sh2-ic">'+im('or_scroll',px)+'<i>'+(k==='bkS'?'+150':'+900')+'</i></span>';
+  window.hbkIcon=bkI;
   const itn=k=>((S.it&&S.it[k])||0);
   const itAdd=(k,n)=>{ S.it=S.it||{}; S.it[k]=(S.it[k]||0)+n; };
   const day=()=>new Date(Date.now()+8*36e5).toISOString().slice(0,10);
@@ -17259,6 +17264,8 @@ body:has(#alv) #ckov{z-index:88!important}
   /* ---- Худалдан авалт ---- */
   function spend(p){ if(alt()<p){ say('Алт хүрэхгүй байна'); sfx('err'); return false; } S.res.alt-=p; return true; }
   function buyAsk(name,p,fn){ dxAsk('<b>'+name+'</b><br>Үнэ: '+p+' Алт<br><span class="sm">Таны Алт: '+alt()+'</span>','Авах · '+p+' Алт',()=>{ if(!spend(p)) return; const ok=fn(); if(ok===false){ S.res.alt+=p; return; } sfx('coin'); try{ save(); }catch(e){} rr(); },'Болих'); }
+  window.sh2BkBuy=function(k){ const it=BK.find(x=>x.k===k); if(!it) return; buyAsk(it.n+' (+'+it.xp+' туршлага)',it.p,()=>{ itAdd(k,1); say('✔ '+it.n+' +1 · Агуулахад'); }); };
+  window.sh2QxBuy=function(){ if(S.qx){ say('Аль хэдийн авсан'); return; } buyAsk('Барилгын нэмэлт дараалал (байнга)',QXP,()=>{ S.qx=1; say('✔ Нэмэлт барилгын дараалал нээгдлээ'); }); };
   window.sh2Buy=function(k){ const it=IK[k]; if(!it) return; buyAsk(it.n+' хурдасгагч',it.p,()=>{ itAdd(k,1); say('✔ '+it.n+' +1'); }); };
   window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('Хамгаалалт '+s.h+' цаг',s.p,()=>{ itAdd('sd'+s.h,1); say('✔ Хамгаалалт '+s.h+'ц +1 · Агуулахад'); }); };
   window.sh2TpBuy=function(){ buyAsk('Нүүлгэгч',TPP,()=>{ itAdd('tp',1); say('✔ Нүүлгэгч +1'); }); };
@@ -17305,6 +17312,8 @@ body:has(#alv) #ckov{z-index:88!important}
   function tabSp(){
     let h='<div class="sh2-sm">Авсан хурдасгагчаа <b>Агуулах</b> хэсгээс ашиглана.</div>';
     h+='<div class="sh2-g">'+IT.map(x=>tile(spd(x.t,x.n.split(' ')[1],46),x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
+    h+='<div class="sh2-h">'+im('or_scroll',20)+' Баатрын сургалтын ном</div><div class="sm" style="margin:0 2px 6px">Агуулахаас баатарт өгч туршлага олгоно. Түвшин ахина.</div><div class="sh2-g">'+BK.map(x=>tile(bkI(x.k,46),x.n,'Байгаа: '+itn(x.k),x.p,'sh2BkBuy(\''+x.k+'\')')).join('')+'</div>';
+    h+='<div class="sh2-h">'+im('m_barilga',20)+' Барилгын дараалал</div><div class="sh2-g">'+tile('<span class="sh2-ic">'+im('m_barilga',46)+'<i>+1</i></span>','Нэмэлт дараалал',S.qx?'Авсан':'Байнга · одоо '+(typeof UPQ==='function'?UPQ():1),QXP,'sh2QxBuy()',!!S.qx)+'</div>';
     return h; }
   function tabPr(){
     const L=shdLeft(); let h=chip()+'<div class="sh2-sb'+(L>0?' on':'')+'">'+(L>0?im(SHI,22)+' Идэвхтэй · '+fmtT(L)+' үлдсэн':im(SHI,22)+' Хамгаалалтгүй')+'<div class="sm">Хамгаалалттай үед дээрэмчин, овгийн дайралт ирэхгүй.</div></div>';
@@ -17349,6 +17358,7 @@ body:has(#alv) #ckov{z-index:88!important}
   function agItems(){
     const L=[]; IT.forEach(x=>{ if(itn(x.k)>0) L.push({k:x.k,n:x.n,c:itn(x.k),e:spd(x.t,x.n.split(' ')[1],46)}); });
     SHK.forEach(x=>{ if(itn(x.k)>0) L.push({k:x.k,n:'Хамгаалалт '+x.h+'ц',c:itn(x.k),e:shdI(x.h+'ц',46)}); });
+    BK.forEach(x=>{ if(itn(x.k)>0) L.push({k:x.k,n:x.n,c:itn(x.k),e:bkI(x.k,46)}); });
     if(itn('tp')>0) L.push({k:'tp',n:'Нүүлгэгч',c:itn('tp'),e:im('ic_world',46)});
     let h='<div class="sh2-h">'+im('ic_bag',20)+' Миний зүйлс</div>';
     const Lf=shdLeft(); if(Lf>0) h+='<div class="sh2-sb on">'+im(SHI,22)+' Хамгаалалт идэвхтэй · '+fmtT(Lf)+' үлдсэн</div>';
@@ -17358,6 +17368,7 @@ body:has(#alv) #ckov{z-index:88!important}
     if(k&&itn(k)<1) S.agSel=null;
     else if(k&&IK[k]){ const it=IK[k], ty=it.t, J=jobs().filter(j=>jtype(j)===ty);
       h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+it.n+' · хаана ашиглах вэ?</b></div>'+(J.length?J.map(j=>'<div class="sh2-jl" style="margin-top:6px"><span>'+j.lab+' · ⏱ '+fmtT(j.rem)+'</span><button class="sh2-ub" onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+k+'\')">Ашиглах</button></div>').join(''):'<div class="sm">Одоо ашиглах ажил алга ('+(ty==='b'?'барилга':ty==='r'?'судалгаа':'цэрэг, эмчилгээ')+' эхлүүлээд ирээрэй).</div>')+'</div>'; }
+    else if(k&&(k==='bkS'||k==='bkL')){ h+=(typeof window.hbkList==='function'?window.hbkList(k):''); }
     else if(k&&k.indexOf('sd')===0){ const hh=+k.slice(2); h+='<div class="sh2-jb"><div class="sh2-jl"><b>Хамгаалалт '+hh+' цаг</b><button class="sh2-ub" onclick="sh2ShUse('+hh+')">Ашиглах</button></div></div>'; }
     else if(k==='tp'){ h+='<div class="sh2-jb"><div class="sh2-jl"><b>Нүүлгэгч</b><button class="sh2-ub" onclick="sh2TpUse()">Ашиглах</button></div><div class="sm">Клан солих хүлээлтийг арилгана.</div></div>'; }
     return h; }
@@ -17506,6 +17517,87 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 .wk-sum{display:flex;gap:8px;margin:6px 0}.wk-sum>div{flex:1;text-align:center;background:#2c1d0f;border:2px solid #6b4a1f;border-radius:12px;padding:8px 2px}.wk-sum b{display:block;font-size:24px;color:#ffe9b0}.wk-sum span{font-size:12px;color:#c9b58a}.wk-sum .g b{color:#8fe39a}.wk-sum .y b{color:#ffd770}
 .wk-r{display:flex;align-items:center;gap:10px}.wk-i{flex:none;width:76px;height:54px;display:flex;align-items:center;justify-content:center;overflow:hidden}.wk-i img{max-width:74px;max-height:54px;height:auto!important}.wk-m{flex:1;min-width:0}.wk-p{display:flex;gap:2px;margin:3px 0}.wk-c{flex:none;display:flex;align-items:center;gap:6px}.wk-c b{min-width:36px;text-align:center;font-size:15px}
 .wk-c button{width:38px;height:38px;border-radius:10px;border:2px solid #2a8f86;background:linear-gradient(#5fd6c8,#2fa99c);color:#fff;font-size:22px;font-weight:bold}.wk-c button:disabled{background:#6b625a;border-color:#4a443e;opacity:.7}
+`; document.head.appendChild(st);
+})();
+
+
+/* p32/hbk.js — 1) Нэмэлт барилгын дараалал (дүүрэн үед санал болгоно) 2) Баатрын сургалтын ном 3) Багийн арена 3 vs 3 */
+(function(){
+  const im=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
+
+  /* ---------- 1. Барилгын дараалал дүүрсэн үед нэмэлт дараалал санал болгоно ---------- */
+  const _up=upgrade;
+  upgrade=function(k){
+    try{ S.upg=S.upg||{};
+      if(!S.qx&&!(S.sites&&S.sites[k])&&!S.upg[k]&&(S.bld[k]||0)<MAXB&&Object.keys(S.upg).length>=UPQ()){
+        dxAsk('Барилгын дараалал дүүрэн ('+UPQ()+').<br><span class="sm">Нэмэлт дараалал авбал нэг дор нэг барилга илүү сайжруулна (байнга).</span>','Авах · 250 Алт',()=>{
+          if(S.res.alt<250){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
+          S.res.alt-=250; S.qx=1; try{ sfx('coin'); }catch(e){} say('✔ Нэмэлт дараалал нээгдлээ'); try{ save(); }catch(e){} try{ refresh(); }catch(e){} },'Болих');
+        return; }
+    }catch(e){}
+    return _up.apply(this,arguments);
+  };
+
+  /* ---------- 2. Баатрын сургалтын ном ---------- */
+  const XP=()=>window.HBK_XP||{bkS:150,bkL:900};
+  const need=l=>80+l*40;
+  const hx=id=>{ S.hx=S.hx||{}; return S.hx[id]||0; };
+  const fighters=()=>Object.keys(S.heroes).filter(id=>!(typeof SUPP!=='undefined'&&SUPP[id])&&HEROES.find(h=>h.id===id));
+  const hn=id=>{ try{ return HEROES.find(h=>h.id===id).n; }catch(e){ return id; } };
+  window.hbkList=function(k){
+    const ids=Object.keys(S.heroes).filter(id=>HEROES.find(h=>h.id===id)).sort((a,b)=>hlv(b)-hlv(a));
+    if(!ids.length) return '<div class="sh2-jb"><div class="sm">Баатар алга.</div></div>';
+    return '<div class="sh2-jb"><div class="sh2-jl"><b>Хэнд өгөх вэ? (+'+XP()[k]+' туршлага)</b></div>'+ids.map(id=>{ const l=hlv(id), mx=l>=HLMAX;
+      return '<div class="sh2-jl" style="margin-top:6px;align-items:center"><span style="display:flex;align-items:center;gap:8px">'+(typeof hdImg==='function'?'<span style="width:38px;height:38px;border-radius:50%;overflow:hidden;display:inline-block;flex:none">'+hdImg(id,0,'sh2-hi',38)+'</span>':'')+'<span><b>'+hn(id).split(' ')[0]+'</b> <span class="sm">Lv '+l+(mx?' · дээд':' · '+hx(id)+'/'+need(l))+'</span></span></span><button class="sh2-ub" '+(mx?'disabled':'')+' onclick="hbkUse(\''+k+'\',\''+id+'\')">Өгөх</button></div>'; }).join('')+'</div>'; };
+  window.hbkUse=function(k,id){
+    S.it=S.it||{}; if((S.it[k]||0)<1){ say('Ном алга'); try{ sfx('err'); }catch(e){} return; }
+    if(!S.heroes[id]) return; let l=hlv(id); if(l>=HLMAX){ say('Баатар дээд түвшинд байна'); return; }
+    const gain=XP()[k]||0; let x=hx(id)+gain; const l0=l;
+    while(l<HLMAX&&x>=need(l)){ x-=need(l); l++; }
+    if(l>=HLMAX) x=0;
+    S.hl=S.hl||{}; S.hl[id]=l; S.hx[id]=x; S.it[k]--;
+    try{ sfx(l>l0?'lvl':'ok'); }catch(e){}
+    say(hn(id).split(' ')[0]+' +'+gain+' туршлага'+(l>l0?' · Lv '+l+'!':'')); if((S.it[k]||0)<1) S.agSel=null;
+    try{ save(); }catch(e){} try{ refresh(); }catch(e){} try{ if(typeof cur!=='undefined'&&(cur==='agh'||cur==='shop')) fillM(); }catch(e){} };
+
+  /* ---------- 3. Багийн арена 3 vs 3 ---------- */
+  const NAMES=['Мэргид','Татар','Тайчууд','Найман','Хэрэйд','Жалайр','Хонгирад','Уйгур','Тангуд','Хиргис'];
+  const dk=()=>{ try{ return dayKey(); }catch(e){ return new Date().toDateString(); } };
+  function tInit(){ if(!S.ta) S.ta={r:0,w:0,l:0,d:'',n:0,team:[]}; if(S.ta.d!==dk()){ S.ta.d=dk(); S.ta.n=0; }
+    S.ta.team=(S.ta.team||[]).filter(id=>S.heroes[id]&&!(SUPP&&SUPP[id])); const F=fighters().sort((a,b)=>heroPower(b)-heroPower(a));
+    for(const id of F){ if(S.ta.team.length>=3) break; if(S.ta.team.indexOf(id)<0) S.ta.team.push(id); } }
+  const teamPow=()=>{ const A=S.ta.team.reduce((s,id)=>s+heroPower(id),0), T=TR.reduce((s,t)=>s+trPow(t),0); return Math.floor((A+T)*(1+0.1*Math.max(0,S.bld.hureo-1))*(1+0.05*(S.bld.hushuu||0))); };
+  function opps(){ const P=Math.max(120,teamPow()), d=dk(); const TN=['Залуу баг','Мэргэн баг','Жанжин баг'];
+    return [0.8,1.05,1.35].map((m,i)=>({i,n:NAMES[hsh(d+'t'+i)%NAMES.length]+' · '+TN[i],p:Math.round(P*m),pts:[15,25,40][i]})); }
+  const rk=r=>{ try{ return arRank(r); }catch(e){ return ['Дайчин',0]; } };
+  function portrait(id,px){ return typeof hdImg==='function'?'<span class="ta-pt" style="width:'+px+'px;height:'+px+'px">'+hdImg(id,0,'ta-img',px)+'</span>':''; }
+  window.taPickToggle=function(){ S.taPick=!S.taPick; try{ fillM(); }catch(e){} };
+  window.taTog=function(id){ tInit(); const T=S.ta.team, i=T.indexOf(id); if(i>=0){ if(T.length<=1){ say('Дор хаяж 1 баатар'); return; } T.splice(i,1); } else { if(T.length>=3){ say('Хамгийн ихдээ 3 баатар. Нэгийг нь хас'); return; } T.push(id); }
+    try{ save(); }catch(e){} try{ fillM(); }catch(e){} };
+  window.taFight=function(i){ tInit(); const F=fighters(); if(F.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
+    const A=S.ta, o=opps()[i]; if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=5; } A.n++; S.taPick=false;
+    closeM(); startBattle(0,{n:'Багийн арена: '+o.n,p:o.p,g:Math.round(o.p*0.15),m:Math.round(o.p*0.04),bi:Math.min(6,i*2),rep:false,hs:A.team.slice(),slots:3,
+      cb:()=>{ A.r+=o.pts; A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} },cbl:()=>{ A.r=Math.max(0,A.r-Math.round(o.pts/2)); A.l++; },back:'tarena'}); };
+  function tarenaHTML(){
+    tInit(); const A=S.ta, F=fighters(), r=rk(A.r), free=Math.max(0,5-A.n);
+    let h='<h2>'+im('ic_arena',34)+' Багийн арена</h2>';
+    if(F.length<3) return h+'<div class="card"><div class="sm" style="text-align:center;padding:8px">3 баатартай болбол 3 vs 3 тулаанд орно. Одоо '+F.length+' баатар байна.</div></div>';
+    h+='<div class="card row"><div><b>'+r[0]+'</b><div class="sm">Оноо: '+A.r+' · Ялалт '+A.w+' · Ялагдал '+A.l+'</div></div><div class="sm">Өнөөдөр үнэгүй: <b>'+free+'</b>/5</div></div>';
+    h+='<div class="card"><div class="row"><b>Миний баг (3)</b><button class="btn" onclick="taPickToggle()">'+(S.taPick?'Дуусгах':'Баг сонгох')+'</button></div><div class="ta-team">'+
+      [0,1,2].map(i=>{ const id=A.team[i]; return id?'<div class="ta-s">'+portrait(id,56)+'<b>'+hn(id).split(' ')[0]+'</b><span class="sm">'+f(heroPower(id))+'</span></div>':'<div class="ta-s emp">+</div>'; }).join('')+'</div><div class="sm" style="text-align:center">Багийн хүч: <b>'+f(teamPow())+'</b></div></div>';
+    if(S.taPick){
+      h+='<div class="card"><b>Баатраа сонго</b> <span class="sm">('+A.team.length+'/3 · дарж сонгоно, дахин дарвал хасна)</span><div class="ta-grid">'+F.sort((a,b)=>heroPower(b)-heroPower(a)).map(id=>{ const on=A.team.indexOf(id)>=0; return '<div class="ta-c'+(on?' on':'')+'" onclick="taTog(\''+id+'\')">'+portrait(id,46)+'<b>'+hn(id).split(' ')[0]+'</b><span class="sm">'+f(heroPower(id))+'</span></div>'; }).join('')+'</div></div>'; }
+    opps().forEach(o=>{ h+='<div class="card"><div class="row"><div><b>'+o.n+'</b><div class="sm">3 баатар · Хүч '+f(o.p)+' · Ялвал +'+o.pts+' оноо, +'+Math.round(o.p*0.15)+' зоос</div></div><button class="btn" onclick="taFight('+o.i+')">'+(free>0?'Тулах':'Тулах · 5 Алт')+'</button></div></div>'; });
+    h+='<div class="sm" style="text-align:center;margin-top:6px">Тулаанд зөвхөн таны сонгосон 3 баатар оролцоно. Цэргүүд баатруудад нэмэгдэнэ.</div>';
+    return h; }
+  window.tarenaHTML=tarenaHTML;
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='tarena') return tarenaHTML(); return _mc.apply(this,arguments); };
+  try{ const g=MENU.find(x=>/Тулалдаан/.test(x.t)); if(g&&!g.i.some(x=>x[2]==="openM('tarena')")) g.i.push([{toString(){ return im('ic_arena',22); }},'Багийн арена',"openM('tarena')"]); MIC['Багийн арена']='ic_arena'; }catch(e){}
+  const st=document.createElement('style'); st.textContent=`
+.ta-team{display:flex;gap:8px;justify-content:center;margin:8px 0}.ta-s{flex:1;max-width:110px;text-align:center;background:#2c1d0f;border:2px solid #6b4a1f;border-radius:12px;padding:6px 2px}.ta-s b{display:block;font-size:13px;color:#ffe9b0}.ta-s.emp{display:flex;align-items:center;justify-content:center;font-size:34px;color:#6b4a1f;min-height:92px}
+.ta-pt{display:inline-block;border-radius:50%;overflow:hidden;border:2px solid #d9a43a;background:#1a0f06}.ta-pt img,.ta-pt .ta-img{width:100%!important;height:100%!important;object-fit:cover;display:block}
+.ta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.ta-c{text-align:center;background:#2c1d0f;border:2px solid #6b4a1f;border-radius:10px;padding:5px 2px;font-size:11px}.ta-c.on{border-color:#ffd770;background:#5a3a10}.ta-c b{display:block;color:#ffe9b0}
 `; document.head.appendChild(st);
 })();
 

@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f2e559dfa8';
+var UPDB='313985f30b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18266,18 +18266,19 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   window.ctHolder=function(){ try{ const tw=trTarget(); if(tw<0) return null; const T=S.ctTr;
     if(!T||T.w<tw){ if(typeof CL!=='undefined'&&CL.ok) trResolve(tw); }
     return (T&&T.k>=0)?{k:T.k,w:T.w}:null; }catch(e){ return null; } };
-  const TIMG=new Image(); TIMG.src='rts/trophy.webp?v=1'; window.ctTrophyImg=TIMG;
+  const TIMG=new Image(); TIMG.src='rts/trophy_mon.webp?v=1'; window.ctTrophyImg=TIMG;
   /* газрын зураг дээр: ялсан кланы төвийн дээр алтан цом */
   if(typeof wmClanDraw==='function'){ const _wd=wmClanDraw; wmClanDraw=function(c,D,z,t,vis,items){
     _wd.apply(this,arguments);
     try{ const H=ctHolder(); if(!H||!TIMG.complete||!TIMG.naturalWidth) return; const i=H.k, q=CLN[i]; if(!q) return;
       const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0'), s=ok?wmS('wm_hq'+i):null, isMy=i===my, ww=s?(isMy?0.85:0.78)*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
       if(!vis(qx,qy,320)) return;
-      const th=110, tw=th*TIMG.naturalWidth/TIMG.naturalHeight, by=qy-(s?hh*0.86:44)-30;
-      items.push({y:1e5+qy+3,f:()=>{ c.save(); const bob=Math.sin(t*2.2)*4, pu=0.5+0.5*Math.sin(t*2.2);
-        c.globalAlpha=0.25+0.2*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.ellipse(qx,by-th*0.45+bob,tw*0.62,th*0.55,0,0,7); c.fill(); c.globalAlpha=1;
-        c.drawImage(TIMG,qx-tw/2,by-th+bob,tw,th);
-        wmLabel(c,'Цомын эзэн',qx,by+16+bob,'#ffe28a',13); c.restore(); }});
+      /* дурсгал: кланы төвийн баруун талд зогсоно */
+      const th=210, tw=th*TIMG.naturalWidth/TIMG.naturalHeight, mx=qx+(s?ww*0.74:160), my2=qy+(s?hh*0.06:30);
+      items.push({y:1e5+my2,f:()=>{ c.save(); const pu=0.5+0.5*Math.sin(t*2.2);
+        c.globalAlpha=0.16+0.1*pu; c.fillStyle='#ffd770'; c.beginPath(); c.ellipse(mx,my2-th*0.55,tw*0.5,th*0.5,0,0,7); c.fill(); c.globalAlpha=1;
+        c.drawImage(TIMG,mx-tw/2,my2-th*0.9,tw,th);
+        wmLabel(c,'Цомын эзэн',mx,my2+18,'#ffe28a',14); c.restore(); }});
     }catch(e){} }; }
 
   /* ---- оноо цуглуулах дэгээнүүд ---- */

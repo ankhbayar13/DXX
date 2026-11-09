@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='17823914be';
+var UPDB='956a425485';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -11357,6 +11357,7 @@ bcard=function(k){
       if(s!==last){ last=s; row.innerHTML='👥 '+s; } } }catch(x){}
     return _up.apply(this,arguments);
   };
+  window.wkSt={stP:stP,stG:stG,nextHint:nextHint,hn:hn};
 })();
 
 
@@ -18019,6 +18020,62 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
       c.restore();
     }catch(e){ try{ BT.ctx.restore(); }catch(_){} }
   };
+})();
+
+
+/* p32/wk2.js — «Ажилчид» цонхны шинэ дизайн: тоон самбар + гэрийн суудлын зурвас, цехийн хуваарилалт,
+   хүн бүрт хөрөг зурагтай карт (төлөвийн өнгөт шошго), харуулын карт, зөвлөмж. Эмодзигүй — тоглоомын өөрийн дүрсүүд. */
+(function(){
+  const im=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
+  const W=()=>window.wkSt||{};
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const TONE=s=>/унтаж|нуугд/.test(s)?'b':/амарч|гэртээ|ярилц|хоол/.test(s)?'y':/явж|тэнүүч|эргүүл/.test(s)?'n':'g';
+  function portrait(i,px){ const d=SPRDATA['npc'+(i+1)]; return d?'<img src="'+d[0]+'" style="width:'+px+'px;height:'+px+'px;object-fit:cover;object-position:50% 12%">':im('ui_worker',px); }
+  function html(){
+    const Lay=hmLayout(), P=ents.filter(e=>e.kind==='person').sort((a,b)=>a.idx-b.idx), G=ents.filter(e=>e.kind==='wild'&&e.friend&&e.type==='guard'&&e.gb);
+    const vis=Math.min(popCap(),NPCS.length,window.wrkVis||5), tot=(window.wrkPeople?wrkPeople():vis), cap=Math.min(24,popCap());
+    const sv=W(), hn=sv.hn||(k=>k);
+    const home=e=>{ try{ const k=hmOf(e); return k?hn(k):'гэргүй'; }catch(x){ return ''; } };
+    const pc=Math.max(0,Math.min(100,Math.round(100*tot/Math.max(1,cap))));
+    let h='<h2>Ажилчид</h2>';
+    /* 1. тоон самбар */
+    h+='<div class="w2-top"><div class="w2-big">'+im('ui_worker',46)+'<div><b>'+tot+'</b><span>Нийт хүн</span></div></div>'+
+       '<div class="w2-mini"><div><b>'+P.length+'<i>/'+vis+'</i></b><span>Газар дээр</span></div><div><b>'+Math.max(0,tot-P.length)+'</b><span>Цехэд</span></div><div><b>'+G.length+'</b><span>Харуул</span></div></div>'+
+       '<div class="w2-bar"><u style="width:'+pc+'%"></u></div><div class="w2-cap">Хүн амын хязгаар '+tot+' / '+cap+'</div></div>';
+    /* 2. цехийн хуваарилалт */
+    if(window.wrkBody){ h+='<div class="w2-h"><i></i><span>Цехийн хуваарилалт</span><i></i></div><div class="w2-wb">'+wrkBody()+'</div>'; }
+    /* 3. тосгоны хүмүүс */
+    h+='<div class="w2-h"><i></i><span>Тосгоны хүмүүс</span><i></i></div>';
+    h+=P.map(e=>{ const st=sv.stP?sv.stP(e):'', job=(window.wjPlace&&wjPlace(e))||'';
+      return '<div class="w2-p" onclick="wkGo(\'p\','+e.idx+')"><div class="w2-av">'+portrait(e.idx,52)+'</div><div class="w2-in"><b>'+esc(NPCS[e.idx].n)+'</b><div class="w2-tg"><em>'+esc(NPCS[e.idx].role)+'</em><em class="h">'+esc(home(e))+'</em>'+(job?'<em class="j">'+esc(job)+'</em>':'')+'</div></div><div class="w2-st '+TONE(st)+'">'+esc(st)+'</div></div>'; }).join('')||'<div class="w2-e">Ажилчин алга</div>';
+    /* 4. харуул */
+    if(G.length){
+      h+='<div class="w2-h"><i></i><span>Харуул, анчин</span><i></i></div>';
+      h+=G.map(e=>{ const st=sv.stG?sv.stG(e):''; return '<div class="w2-p" onclick="wkGo(\'g\',\''+e.gb+'\')"><div class="w2-av g">'+im('ui_shield',40)+'</div><div class="w2-in"><b>'+esc(e.name)+(window.gjLv?' <small>Лв '+gjLv(e)+'</small>':'')+'</b><div class="w2-tg"><em>'+esc(hn(e.gb))+'</em><em class="h">'+esc(home(e))+'</em></div></div><div class="w2-st '+TONE(st)+'">'+esc(st)+'</div></div>'; }).join('');
+    }
+    /* 5. зөвлөмж */
+    const tips=(sv.nextHint?sv.nextHint(Lay):[]).map(t=>t.replace(/^[^\wА-яЁёӨөҮү]+\s*/,'').replace(/^Хамгийн ойр:\s*/,'Хамгийн ойр: '));
+    if(tips.length) h+='<div class="w2-h"><i></i><span>Зөвлөмж</span><i></i></div><div class="w2-tip">'+tips.map(t=>'<div>'+im('q_bolt',16)+'<span>'+esc(t)+'</span></div>').join('')+'</div>';
+    return h;
+  }
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='wk'){ try{ return html(); }catch(x){ console.log('wk2',x); } } return _mc.apply(this,arguments); };
+  const st=document.createElement('style'); st.textContent=`
+.w2-top{margin:4px 0 8px;padding:12px;border-radius:14px;border:2px solid #7a5522;background:linear-gradient(160deg,#4a3118,#2a1a0b);box-shadow:inset 0 0 0 1px #c89b4a55,0 3px 8px #0006}
+.w2-big{display:flex;align-items:center;gap:12px}.w2-big img{filter:drop-shadow(0 2px 3px #000a)}.w2-big b{display:block;font-size:34px;line-height:1;color:#ffe9b0;text-shadow:0 2px 0 #000a}.w2-big span{font-size:12px;color:#d9c08a}
+.w2-mini{display:flex;gap:8px;margin-top:10px}.w2-mini>div{flex:1;text-align:center;border-radius:10px;padding:6px 2px;background:#1f1409;border:1px solid #6b4a1f}.w2-mini b{display:block;font-size:19px;color:#fff1c8}.w2-mini b i{font-style:normal;font-size:13px;color:#b9a074}.w2-mini span{font-size:11px;color:#c9b58a}
+.w2-bar{height:9px;border-radius:6px;background:#140d06;border:1px solid #5c4020;margin-top:10px;overflow:hidden}.w2-bar u{display:block;height:100%;background:linear-gradient(#ffe08a,#d9a33a);border-radius:6px}.w2-cap{font-size:11px;color:#c9b58a;margin-top:4px;text-align:right}
+.w2-h{display:flex;align-items:center;gap:8px;margin:14px 2px 8px}.w2-h span{font-weight:bold;font-size:15px;color:#ffe3a0;letter-spacing:.3px;white-space:nowrap}.w2-h i{flex:1;height:2px;background:linear-gradient(90deg,#0000,#c89b4a,#0000)}
+.w2-p{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;border-radius:14px;border:2px solid #6b4a1f;background:linear-gradient(#3a2713,#2b1b0d);box-shadow:inset 0 0 0 1px #d9b36a22,0 2px 5px #0005;cursor:pointer}.w2-p:active{transform:scale(.985);filter:brightness(1.15)}
+.w2-av{flex:none;width:56px;height:56px;border-radius:50%;overflow:hidden;border:3px solid #d9a33a;background:#1a1108;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px #000a}.w2-av.g{border-color:#7fb0e0}
+.w2-in{flex:1;min-width:0}.w2-in>b{display:block;font-size:15px;color:#ffeab8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.w2-in small{font-size:11px;color:#9fd0ff;font-weight:normal}
+.w2-tg{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.w2-tg em{font-style:normal;font-size:11px;padding:2px 7px;border-radius:9px;background:#5a3f1c;color:#f1dfae;border:1px solid #8a6630}.w2-tg em.h{background:#2c3f2a;border-color:#5b8a4e;color:#cdeec0}.w2-tg em.j{background:#3a2c52;border-color:#7a62b0;color:#e0d2ff}
+.w2-st{flex:none;max-width:38%;text-align:center;font-size:11px;font-weight:bold;padding:5px 8px;border-radius:12px;line-height:1.2}.w2-st.g{background:#1f4a22;color:#a8f0b0;border:1px solid #4fa75a}.w2-st.y{background:#4d3b12;color:#ffdf7e;border:1px solid #b08a2a}.w2-st.b{background:#1d2f55;color:#a9c8ff;border:1px solid #4f78c0}.w2-st.n{background:#3b332b;color:#e4d6bd;border:1px solid #7a6a55}
+.w2-e{text-align:center;padding:14px;color:#c9b58a;font-size:13px}
+.w2-tip{border-radius:14px;border:2px dashed #7a5522;background:#25180c;padding:6px 10px}.w2-tip>div{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:12.5px;color:#e9d9b0;line-height:1.35}.w2-tip>div+div{border-top:1px solid #5c402033}.w2-tip img{flex:none;margin-top:1px}
+.w2-wb .card{background:linear-gradient(#3a2713,#2b1b0d);border:2px solid #6b4a1f;border-radius:14px}.w2-wb .wk-sum{display:none}.w2-wb>.sm{background:#25180c;border-radius:10px;padding:6px 8px;margin:4px 0 8px}
+.w2-wb .wk-i{background:#1a1108;border:2px solid #8a6630;border-radius:12px;width:72px;height:56px}
+`; document.head.appendChild(st);
 })();
 
 </script><script>(function(){

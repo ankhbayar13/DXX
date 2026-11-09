@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='09fb20371e';
+var UPDB='441690228a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18085,6 +18085,118 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 .w2-wb .wk-c button:disabled{background:#6b5a42;border-color:#3f3220;color:#2a2012}
 .w2-wb .btn{border:0;border-style:solid;border-width:22px 46px;border-image:url(rts/ui_btn.webp?v=1) 70 140 fill/22px 46px stretch;background:#0000;box-shadow:none;outline:0!important;color:#4a2a05;font-weight:bold;text-shadow:0 1px 0 #fff8;padding:4px 0;min-width:200px}
 `; document.head.appendChild(st);
+})();
+
+
+/* p32/alsk.js — Клан цонхны шинэ арьс: бараан модон хавтан, AI хүрээтэй карт, алтан товч. Зөвхөн CSS (ali-* классууд). */
+(function(){
+  const st=document.createElement('style'); st.id='alsk'; st.textContent=`
+#alv{color:#f1dfae}
+#alv .ali-bd{background:#1c1109 url(rts/ui_wood.webp?v=1) 0 0/220px 220px;color:#f1dfae}
+#alv .ali-hd{background:linear-gradient(#5a3b1c,#2e1c0c);border-bottom:3px solid #d9a33a}
+#alv .ali-t{color:#ffe9b0}
+#alv .ali-ft{background:linear-gradient(#3b2612,#1e1208);border-top:3px solid #d9a33a}
+/* карт, мөр */
+#alv .ali-card,#alv .ali-rk,#alv .ali-rr,#alv .ali-lg,#alv .ali-inf,#alv .ali-an,#alv .ali-si{border:0;border-style:solid;border-width:13px 15px;border-image:url(rts/ui_wide.webp?v=1) 42 52 fill/13px 15px stretch;background:#0000;box-shadow:none;border-radius:0;padding:4px 2px;color:#f1dfae}
+#alv .ali-card,#alv .ali-rk,#alv .ali-rr,#alv .ali-lg{margin-bottom:8px}
+#alv .ali-an{min-height:54px;padding:6px 4px;color:#ead9a8}
+#alv .ali-inf{padding:2px 2px}
+#alv .ali-it{border:0;border-style:solid;border-width:13px 15px;border-image:url(rts/ui_wide.webp?v=1) 42 52 fill/13px 15px stretch;background:#0000;box-shadow:none;border-radius:0;color:#ffe9b0;padding:0 2px}
+#alv .ali-it.red{border-image-source:url(rts/ui_wide.webp?v=1);background:#6a1f1488}
+#alv .ali-it b{color:#ffe9b0}
+#alv .ali-it.big{height:100px}
+#alv .ali-ml{background:#1a100866;border-radius:0 0 10px 10px}
+#alv .ali-mr{border-bottom:1px solid #6b4a1f}
+#alv .ali-rr.t1{background:linear-gradient(90deg,#8a6a1c99,#d9a33a99)}#alv .ali-rr.t2{background:linear-gradient(90deg,#6a788899,#a8b8c899)}#alv .ali-rr.t3{background:linear-gradient(90deg,#8a523299,#c0825a99)}
+#alv .ali-rr.me{outline:2px solid #ffd24a;outline-offset:-4px}
+#alv .ali-meb{background:#24150aee;border-top:2px solid #d9a33a}
+/* бичиг: бараан хүрэн → цайвар алтлаг */
+#alv .ali-rn,#alv .ali-rc,#alv .ali-rt2,#alv .ali-nm,#alv .ali-kn,#alv .ali-rc,#alv .ali-rv,#alv .ali-gl,#alv .ali-mh b{color:#ffe3a0}
+#alv .ali-kv span,#alv .ali-sm,#alv .ali-sn,#alv .ali-em,#alv .ali-rh,#alv .ali-dh,#alv .ali-ar,#alv .ali-si em{color:#cdb584}
+#alv .ali-kv b,#alv .ali-mn b,#alv .ali-rnm,#alv .ali-si b,#alv .ali-nd{color:#f6e6b8}
+#alv .ali-rr.t1 .ali-rnm,#alv .ali-rr.t1 .ali-rv,#alv .ali-rr.t2 .ali-rnm,#alv .ali-rr.t2 .ali-rv,#alv .ali-rr.t3 .ali-rnm,#alv .ali-rr.t3 .ali-rv{color:#fff6dc;text-shadow:0 1px 2px #000a}
+#alv .ali-rh{background:#00000055}
+#alv .ali-dh span{background:#24150a;color:#cdb584}
+#alv .ali-need{color:#ff9a7a}
+#alv .ali-tr+.ali-tr:before{background:#c89b4a}
+/* товч: алтан */
+#alv .ali-b{background:linear-gradient(#ffe08a,#d79a24);color:#3a2208;border:2px solid #6b4310;text-shadow:0 1px 0 #fff7;box-shadow:0 3px 0 #5c3a0e,0 4px 6px #0006}
+#alv .ali-b:disabled{background:#5a4c38;color:#a8977a;border-color:#3a2f20;box-shadow:0 3px 0 #2a2014;text-shadow:none}
+#alv .ali-b.red{background:linear-gradient(#f0907a,#c4503a);color:#fff;border-color:#6a1f14;text-shadow:0 1px 1px #0008;box-shadow:0 3px 0 #6a1f14}
+#alv .ali-b.blue{background:linear-gradient(#6cc0e6,#2a7aa8);color:#fff;border-color:#164a66;text-shadow:0 1px 1px #0008;box-shadow:0 3px 0 #164a66}
+#alv .ali-b.on{background:linear-gradient(#fff0a8,#e8a826)}
+#alv .ali-seg button{background:#3b2815;color:#e0cb9a;border:2px solid #6b4a1f}
+#alv .ali-seg button.on{background:linear-gradient(#ffe08a,#d79a24);color:#3a2208;border-color:#6b4310}
+/* дэд цонх */
+#alsub .ali-sb{background:#1c1109 url(rts/ui_wood.webp?v=1) 0 0/200px 200px;border:0;border-style:solid;border-width:28px 28px;border-image:url(rts/ui_rect.webp?v=1) 95 fill/28px stretch;border-radius:0;color:#f1dfae;padding:2px}
+#alsub .ali-sb .ali-nm,#alsub .ali-sb b{color:#ffe3a0}
+#alsub input,#alsub textarea,#alv input,#alv textarea,#alv select{background:#2a1a0c;color:#ffeab8;border:2px solid #7a5522;border-radius:8px}
+
+/* хуучин самбар → шинэ «Дайн» хуудас дотор */
+#alv #cwp{display:block!important;position:static;left:auto;right:auto;top:auto;max-height:none;overflow:visible;margin:0 0 12px;color:#f1dfae;background:#0000;border:0;border-style:solid;border-width:26px 26px;border-image:url(rts/ui_rect.webp?v=1) 95 fill/26px stretch;border-radius:0;padding:2px 4px 6px}
+#alv .cwh{display:none}
+#alv .cwt{font:bold 20px Georgia,serif;margin:0 0 6px}
+#alv .cwr{color:#f1dfae;border-bottom:1px solid #6b4a1f;padding:6px 0}
+#alv #cwp .sm{color:#cdb584;font-size:12.5px;margin:4px 0;line-height:1.35}
+#alv #cwp .btn{margin:4px 4px 0 0}
+`; document.head.appendChild(st);
+})();
+
+
+/* p32/clmg.js — Хуучин «газрын зураг дээрх клан самбар»-ыг шинэ Клан цонхны «Дайн» хуудас руу нэгтгэв:
+   долоо хоногийн дайны оноо, Нэрэн агнуур, дайсны нутаг, гэр, клан солих — бүгд шинэ цонхон дотор.
+   Газрын зураг дээрх «Клан» товч шууд шинэ цонхыг (Дайн хуудас) нээнэ. */
+(function(){
+  /* 1. «Дайн» хуудасны дээр хуучин самбарын агуулга */
+  const _w=ALP.war;
+  ALP.war=function(){ const r=_w.apply(this,arguments); try{ r.h='<div id="cwp"></div>'+r.h; }catch(e){} return r; };
+
+  /* 2. зураглал дээр байсан #cwp-тэй ID давхцахгүйн тулд түр нэрийг нь солино */
+  function park(){ const m=document.querySelector('#wmap #cwp'); if(m) m.id='cwpM'; }
+  function unpark(){ const m=document.getElementById('cwpM'); if(m) m.id='cwp'; }
+  const _ac=aliClose; aliClose=function(){ const r=_ac.apply(this,arguments); try{ unpark(); }catch(e){} return r; };
+
+  /* 3. «Дайн» хуудас зурагдсаны дараа хуучин самбарыг дүүргэнэ */
+  const _ar=aliRender;
+  aliRender=function(){
+    const r=_ar.apply(this,arguments);
+    try{
+      if(ALI.pg==='war'&&document.getElementById('alv')&&document.querySelector('#alv #cwp')){
+        park(); const p=document.querySelector('#alv #cwp'); if(!p) return r;
+        cwRender(); fix(p);
+        if(!ALI._cwf||Date.now()-ALI._cwf>60000){ ALI._cwf=Date.now(); cwFetch(true).then(()=>{ const q=document.querySelector('#alv #cwp'); if(q&&ALI.pg==='war'){ cwRender(); fix(q); } }); try{ cwPrev(); }catch(e){} }
+      }
+    }catch(e){ console.log('clmg',e); }
+    return r;
+  };
+  /* самбарын товчнуудыг шинэ цонхонд тохируулна */
+  function fix(p){
+    try{
+      p.style.display='block';
+      p.innerHTML=p.innerHTML.replace('onclick="cwGoOp()"','onclick="aliMapGo(\'op\')"').replace('onclick="wmHome();cwClose()"','onclick="aliMapGo(\'home\')"');
+    }catch(e){}
+  }
+  /* хуучин самбарыг дахин зурах бүрд (агнах, шагнал авах…) шинэ цонхыг ч шинэчилнэ */
+  const _cr=cwRender;
+  cwRender=function(){ _cr.apply(this,arguments); try{ const p=document.querySelector('#alv #cwp'); if(p&&!p.dataset.fx){ fix(p); } }catch(e){} };
+
+  /* 4. газрын зураг руу гараад үйлдэл хийх */
+  window.aliMapGo=function(a){
+    try{ aliClose(); }catch(e){}
+    try{ openM('wmap'); }catch(e){}
+    setTimeout(()=>{ try{ if(a==='op') cwGoOp(); else wmHome(); }catch(e){} },450);
+  };
+
+  /* 5. газрын зураг дээрх «Клан» товч → шинэ цонх */
+  const _co=cwOpen;
+  cwOpen=function(){
+    try{
+      const k=(typeof wmClanId==='function')?wmClanId():-1;
+      if(k>=0&&!document.getElementById('alv')){ ckOpen(k); if(document.getElementById('alv')){ aliGo('war'); return; } }
+      else if(document.getElementById('alv')){ return; }
+    }catch(e){}
+    return _co.apply(this,arguments);
+  };
 })();
 
 </script><script>(function(){

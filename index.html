@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='44680a9789';
+var UPDB='bbbf615e2a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17619,15 +17619,12 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 })();
 
 
-/* p32/fix3.js — Цэс цэвэрлэгээ: хуучин «Тэмцээн» арена арилж Багийн арена 3 vs 3 цорын ганц арена болно.
-   Хүн хуваарилалт цэснээс гарч «Ажилчид» цонхны дээр орсон. */
+/* p32/fix3.js — Цэс цэвэрлэгээ: «Тэмцээн» цэс хэвээр, дотор нь цорын ганц арена — Багийн арена 3 vs 3.
+   Хуучин арена, давхардсан «Багийн арена» цэсний мөр арилна. Хүн хуваарилалт «Ажилчид» цонхонд орсон. */
 (function(){
-  try{ MENU.forEach(g=>{ g.i=g.i.filter(x=>!(x[2]==="openM('arena')"||x[2]==="openM('wrk')")); }); }catch(e){}
+  try{ MENU.forEach(g=>{ g.i=g.i.filter(x=>!(x[2]==="openM('tarena')"||x[2]==="openM('wrk')")); }); }catch(e){}
+  try{ const g=MENU.find(x=>/Тулалдаан/.test(x.t)); if(g&&!g.i.some(x=>x[2]==="openM('arena')")) g.i.splice(1,0,['🏟','Тэмцээн',"openM('arena')"]); }catch(e){}
   { const _om=openM; openM=function(k){ if(k==='arena') k='tarena'; return _om.apply(this,arguments.length>1?[k].concat([].slice.call(arguments,1)):[k]); }; }
-  const st=document.createElement('style');
-  st.textContent='#lcol [data-x=arena],#rcol [data-x=arena]{display:none!important}';
-  document.head.appendChild(st);
-  setInterval(()=>{ try{ document.querySelectorAll('[data-x=arena]').forEach(b=>b.remove()); }catch(e){} },3000);
 })();
 
 

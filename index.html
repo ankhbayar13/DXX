@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d4e6e9a94c';
+var UPDB='2a67d4b0e7';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18315,10 +18315,10 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   function myS(w){ const c=me(); return c.w===w?c.s:myWeekPts(w); }
   function rowTop(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
     const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
-    return '<div class="ct-w ct-t3'+(mine?' me':'')+'"><span class="ct-bd m'+x.r+'">'+x.r+'</span><span class="ct-nm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
+    return '<div class="ct-w ct-t3'+(mine?' me':'')+'"><span class="ct-bd m'+x.r+'">'+x.r+'</span><span class="ct-nm">'+(window.flgImg?flgImg(x.k,34):'<span style="color:'+q.c+'">&#9873;</span>')+' '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
   function rowLow(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
     const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
-    return '<div class="ct-lo'+(mine?' me':'')+'"><i>'+x.r+'</i><span class="ct-nm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
+    return '<div class="ct-lo'+(mine?' me':'')+'"><i>'+x.r+'</i><span class="ct-nm">'+(window.flgImg?flgImg(x.k,26):'<span style="color:'+q.c+'">&#9873;</span>')+' '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
   ALP.ct=function(){
     const s=st(), c=me(), k=clanId(), w=shownW(), b=board(w), tab=(ALI.sub&&ALI.sub.ct)||'d', P=Math.max(500,totalPower()), mw=myS(w);
     let h='<div class="ct-root">';
@@ -18357,7 +18357,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     r.h=r.h.replace('<div class="ali-gr">',bn+'<div class="ali-gr">'); }catch(e){} return r; };
   /* хуудас нээгдэхэд сервэрээс эрэмбийг татна */
   const _gf=aliLoadFor;
-  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='ct'){ const w=st().w; push(); fetchW(w,true).then(()=>{ if(ALI.pg==='ct') aliRender(); }); const cw=claimable(); if(cw!=null&&cw!==w) fetchW(cw); } }catch(e){} return r; };
+  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='ct'){ const w=st().w; push(); try{ ckFetch().then(()=>{ if(ALI.pg==='ct') aliRender(); }); }catch(e){} fetchW(w,true).then(()=>{ if(ALI.pg==='ct') aliRender(); }); const cw=claimable(); if(cw!=null&&cw!==w) fetchW(cw); } }catch(e){} return r; };
   const sty=document.createElement('style'); sty.textContent=`
 #alv .ct-root{background:#1c1109 url(rts/ui_wood.webp?v=1) 0 0/220px 220px;border-radius:10px;padding:8px 6px 12px;margin:0 -2px;color:#f1dfae}
 #alv .ct-hero{border:0;border-style:solid;border-width:30px 30px;border-image:url(rts/ui_rect.webp?v=1) 95 fill/30px stretch;background:#0000;padding:0 2px 2px;text-align:center}
@@ -18389,6 +18389,57 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 #alv .ct-bn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:calc(100% - 92px);margin:0 auto 6px;padding:0;height:22px;line-height:22px;font-size:13px}
 #alv .ct-bn b{font-size:14px;white-space:nowrap}#alv .ct-bn span{font-size:12px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #alv .ct-bn u{position:absolute;right:-34px;top:-14px;width:12px;height:12px;border-radius:50%;background:#e8362b;border:2px solid #fff}
+`; document.head.appendChild(sty);
+})();
+
+
+/* p32/flg.js — Кланы туг: 20 туг, Хаан сонгоно (clans/c{k}.fl = 0..19). Сонгоогүй бол клан бүр өөрийн анхны тугтай.
+   Харагдах газар: клан цонхны толгой, Нутаг хуудас, тэмцээний эрэмбэ. Сонгох: Удирдах → Туг сонгох (зөвхөн Хаан). */
+(function(){
+  const N=20, DEF=[0,1,5,15,6,7,13,12,9,2];            /* Хэнтий,Онон,Хэрлэн,Хангай,Алтай,Говь,Туул,Хөвсгөл,Сэлэнгэ,Орхон */
+  const FN=['Нар сар','Цагаан морь','Хөх чоно','Цасан ирвэс','Хөх бүргэд','Бар','Нум сум','Тэмээ','Наран уул','Хөх сэлэм','Лянхуа','Бух','Шонхор','Цагаан чоно','Мөнхийн зангилаа','Алтан уул','Буга','Гэр','Дайны бөмбөр','Луу'];
+  function flgOf(k){ try{ const d=CKD.docs[k]; if(d&&typeof d.fl==='number'&&d.fl>=0&&d.fl<N) return d.fl|0; }catch(e){} return DEF[k]!=null?DEF[k]:0; }
+  const src=i=>'rts/flag'+(i<9?'0':'')+(i+1)+'.webp?v=1';
+  window.flgOf=flgOf;
+  window.flgImg=function(k,h,cls){ return '<img class="flg '+(cls||'')+'" alt="" draggable="false" style="height:'+h+'px" src="'+src(flgOf(k))+'">'; };
+  window.flgSrc=src;
+
+  /* клан цонхны толгой: хуучин өнгөт туг → зураг */
+  function fix(r,k){ try{ r.h=r.h.replace(/<div class="ali-bn( mini)?" style="--c:[^"]*"><i>⚑<\/i><\/div>/g,(m,mi)=>'<div class="ali-bn fl'+(mi||'')+'">'+flgImg(k,mi?70:112)+'</div>'); }catch(e){} return r; }
+  ['home','terr'].forEach(p=>{ const o=ALP[p]; if(!o) return; ALP[p]=function(){ return fix(o.apply(this,arguments),ALI.k); }; });
+
+  /* Удирдах хуудсанд «Туг сонгох» (зөвхөн Хаан) */
+  const _mg=ALP.manage;
+  ALP.manage=function(){ const r=_mg.apply(this,arguments); try{ if(ckRole(ALI.k)==='own'){
+    const tile='<button class="ali-it big" onclick="flgOpen()"><i>'+flgImg(ALI.k,46)+'</i><b>Туг сонгох</b></button>';
+    r.h=r.h.replace('<div class="ali-gr">','<div class="ali-gr">'+tile); } }catch(e){} return r; };
+
+  const FS={sel:-1,busy:0};
+  function view(){
+    const k=ALI.k, cur=flgOf(k), sel=FS.sel<0?cur:FS.sel;
+    let h='<div class="flg-h">Кланы туг сонгох</div><div class="flg-s">Хаан сонгоно. Сонгосон туг бүх гишүүдэд харагдана.</div><div class="flg-g">';
+    for(let i=0;i<N;i++) h+='<button class="flg-c'+(i===sel?' on':'')+(i===cur?' cur':'')+'" onclick="flgSel('+i+')"><img alt="" draggable="false" src="'+src(i)+'"></button>';
+    h+='</div><div class="flg-n">'+FN[sel]+(sel===cur?' · одоогийн туг':'')+'</div>'+
+       '<div class="flg-b">'+aliBtn('Хадгалах','flgSave()','ok',FS.busy||sel===cur)+aliBtn('Хаах','aliSubClose()')+'</div>';
+    return h; }
+  window.flgOpen=function(){ if(ckRole(ALI.k)!=='own'){ say('Тугийг зөвхөн Хаан сонгоно'); return; } FS.sel=-1; aliSub(view()); };
+  window.flgSel=function(i){ FS.sel=i; try{ sfx('tap'); }catch(e){} aliSub(view()); };
+  window.flgSave=async function(){
+    const k=ALI.k, i=FS.sel; if(i<0||i===flgOf(k)||FS.busy) return;
+    if(ckRole(k)!=='own'){ say('Тугийг зөвхөн Хаан сонгоно'); return; }
+    FS.busy=1;
+    try{ await ckPatch(k,{fl:i},'own'); aliSubClose(); say('Кланы туг солигдлоо: '+FN[i]); try{ sfx('ok'); vib([30,20,40]); }catch(e){} aliRender(); }
+    catch(e){ say('Туг солиж чадсангүй. Дахин оролдоно уу'); try{ sfx('err'); }catch(x){} aliSub(view()); }
+    FS.busy=0; };
+
+  const sty=document.createElement('style'); sty.textContent=`
+.ali-bn.fl{background:none!important;clip-path:none!important;border:0!important;filter:drop-shadow(0 3px 4px #0009);width:auto;min-width:70px}.ali-bn.fl.mini{min-width:44px;height:auto}.ali-bn.fl img{display:block}
+img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);pointer-events:none}
+#alsub .flg-h{font:bold 18px Georgia,serif;color:#ffe3a0;text-align:center;margin:4px 0 2px}#alsub .flg-s{font-size:12px;color:#cdb584;text-align:center;margin-bottom:8px}
+#alsub .flg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:62vh;overflow:auto;padding:4px 2px}
+#alsub .flg-c{border:2px solid #5c4020;border-radius:10px;background:#140d06cc;padding:4px 2px;display:flex;justify-content:center}#alsub .flg-c img{width:100%;max-width:50px;height:auto;display:block;pointer-events:none}
+#alsub .flg-c.cur{border-color:#a89570}#alsub .flg-c.on{border-color:#ffd24a;background:#d9a33a33;box-shadow:0 0 0 2px #ffd24a66}
+#alsub .flg-n{text-align:center;font-weight:bold;color:#ffe3a0;margin:8px 0 4px}#alsub .flg-b{display:flex;gap:8px;justify-content:center}
 `; document.head.appendChild(sty);
 })();
 

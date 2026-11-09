@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d8a5e1f1ad';
+var UPDB='05df4eeb90';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17393,7 +17393,9 @@ body:has(#alv) #ckov{z-index:88!important}
     if(!on){ if(hd) hd.remove(); if(bar) bar.remove(); return; }
     if(!hd){ hd=document.createElement('div'); hd.id='sh2hd'; hd.className='sh2-hd'; box.insertBefore(hd,mb); }
     const isS=(typeof cur!=='undefined'&&cur==='shop');
-    if(!isS){ if(bar) bar.remove(); hd.innerHTML='<b>'+(cur==='bag'?'Цүнх':'Агуулах')+'</b>'; return; }
+    if(!isS){ hd.innerHTML='<b>'+(cur==='bag'?'Цүнх':'Агуулах')+'</b>';
+      if(!bar){ bar=document.createElement('div'); bar.id='sh2bar'; bar.className='sh2-tabs'; box.appendChild(bar); }
+      bar.innerHTML=[['agh','ic_agh','Агуулах'],['bag','ic_bag','Цүнх']].map(x=>'<button class="'+(cur===x[0]?'on':'')+'" onclick="openM(\''+x[0]+'\')"><i>'+im(x[1],30)+'</i><span>'+x[2]+'</span></button>').join(''); return; }
     if(!bar){ bar=document.createElement('div'); bar.id='sh2bar'; bar.className='sh2-tabs'; box.appendChild(bar); }
     const t=S.shTab||'main';
     hd.innerHTML='<b>Дэлгүүр</b><span class="sh2-al">'+gem()+' '+alt()+' Алт</span>';

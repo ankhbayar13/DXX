@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9e6ffec0a1';
+var UPDB='d4e6e9a94c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18306,57 +18306,89 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     try{ aliRender(); }catch(e){}
   };
 
-  /* ---- хуудас ---- */
+  /* ---- хуудас: Ажилчдын цонхтой ижил хүрээ (rect = дээд самбар, wide = мөр/карт, pill = таб, sq = дугаар, btn = товч) ---- */
   const ic=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
-  const fmtPt=v=>cn2(v);
+  const AB=['Да','Мя','Лх','Пү','Ба','Бя','Ня'];
+  const pts=v=>v>0?cn2(v):'–';
+  const TABS=[['d','Өнөөдөр'],['r','Эрэмбэ'],['p','Шагнал']];
+  function shownW(){ return st().w; }
+  function myS(w){ const c=me(); return c.w===w?c.s:myWeekPts(w); }
+  function rowTop(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
+    const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
+    return '<div class="ct-w ct-t3'+(mine?' me':'')+'"><span class="ct-bd m'+x.r+'">'+x.r+'</span><span class="ct-nm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
+  function rowLow(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
+    const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
+    return '<div class="ct-lo'+(mine?' me':'')+'"><i>'+x.r+'</i><span class="ct-nm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
   ALP.ct=function(){
-    const s=st(), c=me(), k=clanId(), w=s.active?s.w:s.w;   /* идэвхтэй бол энэ долоо хоног, амралтын үед дөнгөж дууссан */
-    const shownW=w, b=board(shownW);
-    let h='';
-    /* 1. төлөв */
-    const head=s.active?'Тэмцээн явагдаж байна':'Тэмцээн дууслаа · шагнал авах цаг';
-    const left=s.active?'Дуусахад: '+fmt(s.end-now()):'Шинэ тэмцээн эхлэхэд: '+fmt(s.next-now());
-    h+='<div class="ali-card ct-hd"><div class="ct-t">'+ic('ui_tour',36)+'<div><b>'+head+'</b><div class="ali-sm">'+left+'</div></div></div>';
-    if(k<0) h+='<div class="ali-sm" style="margin-top:6px">Тэмцээнд оролцохын тулд кланд нэгдэнэ үү.</div>';
+    const s=st(), c=me(), k=clanId(), w=shownW(), b=board(w), tab=(ALI.sub&&ALI.sub.ct)||'d', P=Math.max(500,totalPower()), mw=myS(w);
+    let h='<div class="ct-root">';
+    /* дээд самбар */
+    h+='<div class="ct-hero"><div class="ct-st">'+(s.active?'Тэмцээн явагдаж байна · дуусахад '+fmt(s.end-now()):'Тэмцээн дууслаа · шинэ тэмцээн '+fmt(s.next-now())+'-д')+'</div>';
+    if(s.active){ const T=TH[s.day]; h+='<div class="ct-day">Өнөөдөр · '+DN[s.day]+'</div><div class="ct-th">'+T.n+'</div><div class="ct-ds">'+T.d+'</div><div class="ct-sc"><b>'+cn2(c.d[s.day])+'</b><span>миний өнөөдрийн оноо</span></div>'; }
+    else h+='<div class="ct-th">Шагнал авах цаг</div><div class="ct-sc"><b>'+cn2(mw)+'</b><span>миний нийт оноо</span></div>';
+    h+='<div class="ct-wk">'+AB.map((a,i)=>'<div class="ct-c'+(s.active&&i===s.day?' now':'')+'"><i>'+a+'</i><b>'+(c.w===w?pts(c.d[i]):'–')+'</b></div>').join('')+'</div>';
+    if(k<0) h+='<div class="ct-ds" style="margin-top:6px">Тэмцээнд оролцохын тулд кланд нэгдэнэ үү.</div>';
     h+='</div>';
-    /* 2. өнөөдрийн сэдэв */
-    if(s.active){ const T=TH[s.day]; h+='<div class="ali-card ct-td"><div class="ali-sm">Өнөөдөр · '+DN[s.day]+'</div><div class="ct-n">'+T.n+'</div><div class="ali-sm">'+T.d+'</div><div class="ct-pt"><b>'+fmtPt(c.d[s.day])+'</b><span>миний өнөөдрийн оноо</span></div></div>'; }
-    /* 3. миний оноо ба авдар */
-    const nxt=BOX.find(x=>c.s<x.pt), top=BOX[BOX.length-1];
-    h+='<div class="ali-card"><div class="ali-kv"><span>Миний нийт оноо</span><b>'+fmtPt(c.w===shownW?c.s:myWeekPts(shownW))+'</b></div>'+
-       '<div class="ct-bar"><u style="width:'+Math.min(100,Math.round(100*(c.w===shownW?c.s:myWeekPts(shownW))/top.pt))+'%"></u>'+BOX.map(x=>'<i style="left:'+Math.round(100*x.pt/top.pt)+'%"></i>').join('')+'</div>'+
-       '<div class="ct-bx">'+BOX.map(x=>'<span class="'+((c.w===shownW?c.s:myWeekPts(shownW))>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+'</em></span>').join('')+'</div></div>';
-    /* 4. 7 өдөр */
-    h+='<div class="ali-sm" style="margin:12px 2px 4px">7 өдрийн сэдэв</div><div class="ali-card ct-dy">'+TH.map((T,i)=>{ const cls=s.active&&i===s.day?'now':(s.active&&i<s.day)||(!s.active)?'past':''; return '<div class="ct-r '+cls+'"><span class="ct-d">'+DN[i]+'</span><span class="ct-nm">'+T.n+'</span><b>'+(c.w===shownW?fmtPt(c.d[i]):'')+'</b></div>'; }).join('')+'</div>';
-    /* 5. кланы эрэмбэ */
-    h+='<div class="ali-sm" style="margin:12px 2px 4px">Кланы эрэмбэ</div>';
-    h+=b.map(x=>{ const q=CLN[x.k], mine=x.k===k; return '<div class="ali-rr'+(x.r<=3?' t'+x.r:'')+(mine?' me':'')+'"><span class="ali-md'+(x.r<=3?' m'+x.r:'')+'">'+x.r+'</span><span class="ali-rnm"><span style="color:'+q.c+'">&#9873;</span> '+esc2(q.n)+(mine?' (миний клан)':'')+'</span><span class="ali-sm">'+x.m+' хүн</span><span class="ali-rv">'+fmtPt(x.s)+'</span></div>'; }).join('');
-    /* 6. шагнал */
-    const P=Math.max(500,totalPower());
-    h+='<div class="ali-sm" style="margin:12px 2px 4px">Кланы шагнал</div><div class="ali-card ct-pz">'+PRIZE.map((p,i)=>'<div class="ct-r"><span class="ct-d">'+(i+1)+'-р байр</span><span class="ct-nm">'+prizeText(p,P)+'</span></div>').join('')+'<div class="ali-sm" style="margin-top:6px">Кланы шагнал авахад дор хаяж '+MINP+' оноо хэрэгтэй. Авдар нь өөрийн оноогоор нэмэлтээр олгогдоно.</div></div>';
-    /* 7. шагнал авах */
+    /* таб */
+    h+='<div class="ct-tabs">'+TABS.map(x=>'<button class="'+(tab===x[0]?'on':'')+'" onclick="ALI.sub.ct=\''+x[0]+'\';aliRender()">'+x[1]+'</button>').join('')+'</div>';
+    if(tab==='d'){
+      const top=BOX[BOX.length-1], mine=b.find(y=>y.k===k);
+      h+='<div class="ct-w ct-bx0"><div class="ct-lb">Миний нийт оноо</div><div class="ct-big">'+cn2(mw)+'</div>'+
+         '<div class="ct-bar"><u style="width:'+Math.min(100,Math.round(100*mw/top.pt))+'%"></u>'+BOX.map(x=>'<i style="left:'+Math.round(100*x.pt/top.pt)+'%"></i>').join('')+'</div>'+
+         '<div class="ct-bxs">'+BOX.map(x=>'<span class="'+(mw>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+' оноо</em></span>').join('')+'</div></div>';
+      if(mine) h+='<div class="ct-w ct-rk"><span class="ct-bd m'+(mine.r<=3?mine.r:0)+'">'+mine.r+'</span><span class="ct-nm">Миний клан · '+esc2(CLN[mine.k].n)+'<small>'+mine.m+' хүн оролцож байна</small></span><b>'+pts(mine.s)+'</b></div>';
+      if(s.active) h+='<div class="ct-w ct-tp"><b>Яаж оноо авах вэ</b><span>'+TH[s.day].d+'. Өөр сэдвийн үйлдэл өнөөдөр оноо өгөхгүй.</span></div>';
+    } else if(tab==='r'){
+      h+=b.slice(0,3).map(x=>rowTop(x,k,'r',P)).join('')+'<div class="ct-ls">'+b.slice(3).map(x=>rowLow(x,k,'r',P)).join('')+'</div>';
+    } else {
+      h+=b.slice(0,3).map(x=>rowTop(x,k,'p',P)).join('')+'<div class="ct-ls">'+b.slice(3).map(x=>rowLow(x,k,'p',P)).join('')+'</div>'+
+         '<div class="ct-nt">Кланы шагнал авахад дор хаяж '+MINP+' оноо хэрэгтэй. Авдар нь өөрийн оноогоор нэмэлтээр олгогдоно.</div>';
+    }
     const cw=claimable();
-    if(cw!=null&&k>=0) h+=aliBtn('Шагнал авах · '+(cw===s.w?'энэ':'өнгөрсөн')+' долоо хоног','ctClaim()');
-    else if(!s.active) h+='<div class="ali-em">Шагнал авагдсан. Шинэ тэмцээн Даваа 15:00-д эхэлнэ.</div>';
-    return {t:'Долоо хоногийн тэмцээн',h:h};
+    if(cw!=null&&k>=0) h+='<button class="ct-go" onclick="ctClaim()">Шагнал авах</button>';
+    else if(!s.active) h+='<div class="ct-nt">Шагнал авагдсан. Шинэ тэмцээн Даваа 15:00-д эхэлнэ.</div>';
+    return {t:'Долоо хоногийн тэмцээн',h:h+'</div>'};
   };
-  /* нүүр хуудсанд дээд талд баннер */
+  /* нүүр хуудсанд нэг мөр товч */
   const _home=ALP.home;
-  ALP.home=function(){ const r=_home.apply(this,arguments); try{ const s=st(), T=s.active?TH[s.day]:null, cw=claimable(), k=clanId();
-    const sub=s.active?('Өнөөдөр: '+T.n+' · дуусахад '+fmt(s.end-now())):('Шагнал авах цаг · шинэ тэмцээн '+fmt(s.next-now())+'-д');
-    const bn='<button class="ali-it big ct-bn" onclick="aliGo(\'ct\')">'+ic('ui_tour',40)+'<b>Долоо хоногийн тэмцээн</b><span class="ali-sm">'+sub+'</span>'+(cw!=null&&k>=0?'<u class="ali-bg">!</u>':'')+'</button><div style="height:10px"></div>';
+  ALP.home=function(){ const r=_home.apply(this,arguments); try{ const s=st(), cw=claimable(), k=clanId();
+    const sub=s.active?(DN[s.day]+' · '+fmt(s.end-now())):('Шагнал авах цаг');
+    const bn='<button class="ct-bn" onclick="aliGo(\'ct\')"><b>Долоо хоногийн тэмцээн</b><span>'+sub+'</span>'+(cw!=null&&k>=0?'<u></u>':'')+'</button>';
     r.h=r.h.replace('<div class="ali-gr">',bn+'<div class="ali-gr">'); }catch(e){} return r; };
   /* хуудас нээгдэхэд сервэрээс эрэмбийг татна */
   const _gf=aliLoadFor;
-  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='ct'){ const s=st(), w=s.w; push(); fetchW(w,true).then(()=>{ if(ALI.pg==='ct') aliRender(); }); const cw=claimable(); if(cw!=null&&cw!==w) fetchW(cw); } }catch(e){} return r; };
+  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='ct'){ const w=st().w; push(); fetchW(w,true).then(()=>{ if(ALI.pg==='ct') aliRender(); }); const cw=claimable(); if(cw!=null&&cw!==w) fetchW(cw); } }catch(e){} return r; };
   const sty=document.createElement('style'); sty.textContent=`
-#alv .ct-hd .ct-t{display:flex;align-items:center;gap:10px}#alv .ct-hd b{font-size:16px;color:#ffe3a0}
-#alv .ct-td{text-align:center;padding-top:22px!important;padding-bottom:20px!important}#alv .ct-hd,#alv .ct-dy,#alv .ct-pz{padding-top:18px!important;padding-bottom:18px!important}#alv .ali-rr{margin-bottom:8px}#alv .ali-md:not(.m1):not(.m2):not(.m3){color:#f1dfae;background:#3a2410;border:1px solid #7a5a30}#alv .ali-rr.me{outline:2px solid #ffd24a;outline-offset:-3px;border-radius:10px}#alv .ct-n{font:bold 24px Georgia,serif;color:#ffe3a0;margin:4px 0}#alv .ct-pt{margin-top:8px}#alv .ct-pt b{display:block;font-size:30px;color:#fff1c8}#alv .ct-pt span{font-size:12px;color:#cdb584}
-#alv .ct-bar{position:relative;height:12px;border-radius:7px;background:#140d06;border:1px solid #5c4020;margin:8px 0 4px;overflow:visible}#alv .ct-bar u{display:block;height:100%;border-radius:7px;background:linear-gradient(#ffe08a,#d9a33a)}#alv .ct-bar i{position:absolute;top:-3px;width:2px;height:18px;background:#f1dfae}
-#alv .ct-bx{display:flex;justify-content:space-between;gap:4px;margin-top:6px}#alv .ct-bx span{flex:1;text-align:center;font-size:11px;color:#a89570;padding:4px 2px;border-radius:8px;background:#1f1409}#alv .ct-bx span.on{color:#3a2208;background:linear-gradient(#ffe08a,#d79a24);font-weight:bold}#alv .ct-bx em{display:block;font-style:normal;font-size:10px;opacity:.85}
-#alv .ct-r{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid #5c402055;font-size:13px}#alv .ct-r:last-child{border-bottom:0}#alv .ct-d{flex:none;width:74px;color:#cdb584}#alv .ct-nm{flex:1;min-width:0;color:#f1dfae}#alv .ct-r b{color:#ffe3a0}
-#alv .ct-r.now{background:#d9a33a33;border-radius:8px}#alv .ct-r.now .ct-d,#alv .ct-r.now .ct-nm{color:#fff1c8;font-weight:bold}#alv .ct-r.past .ct-nm{opacity:.7}
-#alv .ct-bn{width:100%;position:relative;flex-direction:column;height:auto!important;padding:6px 2px!important}#alv .ct-bn b{font-size:16px}
+#alv .ct-root{background:#1c1109 url(rts/ui_wood.webp?v=1) 0 0/220px 220px;border-radius:10px;padding:8px 6px 12px;margin:0 -2px;color:#f1dfae}
+#alv .ct-hero{border:0;border-style:solid;border-width:30px 30px;border-image:url(rts/ui_rect.webp?v=1) 95 fill/30px stretch;background:#0000;padding:0 2px 2px;text-align:center}
+#alv .ct-st{font-size:12px;color:#cdb584}#alv .ct-day{font-size:12px;color:#cdb584;margin-top:6px}
+#alv .ct-th{font:bold 24px Georgia,serif;color:#ffe3a0;margin:2px 0}#alv .ct-ds{font-size:12px;color:#cdb584;line-height:1.35}
+#alv .ct-sc{margin:8px 0 6px}#alv .ct-sc b{display:block;font-size:32px;line-height:1.1;color:#fff1c8}#alv .ct-sc span{font-size:12px;color:#cdb584}
+#alv .ct-wk{display:flex;gap:3px;margin-top:6px}#alv .ct-c{flex:1;border-radius:8px;background:#140d06aa;border:1px solid #5c4020;padding:3px 0;min-width:0}#alv .ct-c i{display:block;font-style:normal;font-size:11px;color:#cdb584}#alv .ct-c b{display:block;font-size:12px;color:#f1dfae}
+#alv .ct-c.now{background:linear-gradient(#ffe08a,#d79a24);border-color:#fff1c8}#alv .ct-c.now i,#alv .ct-c.now b{color:#3a2208}
+#alv .ct-tabs{display:flex;gap:6px;margin:8px 0 6px}
+#alv .ct-tabs button{flex:1;border:0;border-style:solid;border-width:16px 24px;border-image:url(rts/ui_pill.webp?v=1) 70 100 fill/16px 24px stretch;background:#0000;color:#cdb584;font:bold 14px sans-serif;padding:0;height:20px;line-height:20px;box-sizing:content-box}
+#alv .ct-tabs button.on{color:#fff6d6;background:linear-gradient(#b9781f,#7a4a12);border-radius:24px}
+#alv .ct-w{border:0;border-style:solid;border-width:15px 17px;border-image:url(rts/ui_wide.webp?v=1) 42 52 fill/15px 17px stretch;background:#0000;box-shadow:none;padding:2px 4px;margin:0 0 4px;display:flex;align-items:center;gap:8px;min-width:0}
+#alv .ct-nm{flex:1;min-width:0;font-size:15px;color:#f1dfae}#alv .ct-nm small{display:block;font-size:11px;color:#a89570}#alv .ct-nm em{font-style:normal;font-size:10px;color:#3a2208;background:#ffd24a;border-radius:6px;padding:1px 5px;margin-left:6px}
+#alv .ct-t3 b{font-size:20px;color:#ffe3a0}#alv .ct-t3 .ct-pz{font-size:11px;color:#ffe3a0;text-align:right;max-width:46%}#alv .ct-t3.me{background:#d9a33a22}
+#alv .ct-bd{flex:none;width:36px;height:36px;box-sizing:border-box;border:0;border-style:solid;border-width:9px;border-image:url(rts/ui_sq.webp?v=1) 90 fill/9px stretch;background:#3a2410;display:flex;align-items:center;justify-content:center;font:bold 15px sans-serif;color:#f1dfae}
+#alv .ct-bd.m1{background:#ffd24a;color:#3a2208}#alv .ct-bd.m2{background:#d9dde3;color:#2a2f36}#alv .ct-bd.m3{background:#d08a4e;color:#3a1c06}
+#alv .ct-ls{border-radius:10px;background:#140d06cc;border:1px solid #5c4020;margin:6px 2px 4px}
+#alv .ct-lo{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #5c402066}#alv .ct-lo:last-child{border-bottom:0}
+#alv .ct-lo i{flex:none;width:22px;text-align:center;font-style:normal;font-weight:bold;color:#a89570;font-size:14px}#alv .ct-lo b{color:#ffe3a0;font-size:15px}#alv .ct-lo .ct-pz{font-size:11px;color:#cdb584;text-align:right;max-width:52%}
+#alv .ct-lo.me{background:#d9a33a2a;box-shadow:inset 3px 0 0 #ffd24a}#alv .ct-lo.me i{color:#ffd24a}
+#alv .ct-bx0{flex-direction:column;align-items:stretch;gap:0;padding:6px 8px}#alv .ct-lb{font-size:12px;color:#cdb584}#alv .ct-big{font:bold 28px Georgia,serif;color:#fff1c8}
+#alv .ct-bar{position:relative;height:12px;border-radius:7px;background:#140d06;border:1px solid #5c4020;margin:8px 0 6px}#alv .ct-bar u{display:block;height:100%;border-radius:7px;background:linear-gradient(#ffe08a,#d9a33a)}#alv .ct-bar i{position:absolute;top:-3px;width:2px;height:18px;background:#f1dfae}
+#alv .ct-bxs{display:flex;gap:4px}#alv .ct-bxs span{flex:1;text-align:center;font-size:11px;color:#a89570;padding:4px 2px;border-radius:8px;background:#1f1409}#alv .ct-bxs span.on{color:#3a2208;background:linear-gradient(#ffe08a,#d79a24);font-weight:bold}#alv .ct-bxs em{display:block;font-style:normal;font-size:10px;opacity:.85}
+#alv .ct-rk b{font-size:18px;color:#ffe3a0}
+#alv .ct-tp{flex-direction:column;align-items:flex-start;gap:2px;padding:6px 8px;font-size:12px;color:#cdb584}#alv .ct-tp b{color:#ffe3a0;font-size:14px}
+#alv .ct-nt{font-size:12px;color:#a89570;text-align:center;padding:6px 8px}
+#alv .ct-go,#alv .ct-bn{border:0;border-style:solid;border-width:22px 46px;border-image:url(rts/ui_btn.webp?v=1) 70 140 fill/22px 46px stretch;background:#0000;box-shadow:none;color:#4a2a05;font-weight:bold;text-shadow:0 1px 0 #fff8;position:relative;box-sizing:content-box}
+#alv .ct-go{display:block;width:calc(100% - 92px);margin:8px auto 0;padding:0;font-size:16px;height:22px;line-height:22px}
+#alv .ct-bn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:calc(100% - 92px);margin:0 auto 6px;padding:0;height:22px;line-height:22px;font-size:13px}
+#alv .ct-bn b{font-size:14px;white-space:nowrap}#alv .ct-bn span{font-size:12px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#alv .ct-bn u{position:absolute;right:-34px;top:-14px;width:12px;height:12px;border-radius:50%;background:#e8362b;border:2px solid #fff}
 `; document.head.appendChild(sty);
 })();
 

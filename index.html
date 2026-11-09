@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f35909e592';
+var UPDB='40d9eb560e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16208,7 +16208,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
           if(u.hp<=0||u.sup||u.tk) return;
           const x=u.x-44, y=u.y-H-5;
           c.beginPath(); c.arc(x,y,9,0,Math.PI*2);
-          if(!u.side){ c.fillStyle='#2c6e1c'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffd770'; c.stroke(); c.fillStyle='#fff'; c.font='bold 10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(String(lvOf(u.id)),x,y+0.5); }
+          if(!u.side){ c.fillStyle='#2c6e1c'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffd770'; c.stroke(); c.fillStyle='#fff'; c.font='11px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(({heavy:'🛡',cav:'⚔',foot:'⚔',archer:'🏹',support:'✨'})[(typeof hcls==='function'?hcls(u.id):u.type)]||'⚔',x,y+1); }
           else { c.fillStyle='#8a2218'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffb0a0'; c.stroke(); c.fillStyle='#fff'; c.font='10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(cl(u.type),x,y+1); }
         });
         const ac=BT.units.filter(u=>u.go&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0)).slice(0,3);

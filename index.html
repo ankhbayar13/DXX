@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='642c0fa43f';
+var UPDB='382e1ddbf2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17194,6 +17194,148 @@ body:has(#alv) #ckov{z-index:88!important}
 .br2-ba{height:15px;border-radius:8px;background:#3a2c20;margin-top:5px;overflow:hidden;box-shadow:inset 0 1px 3px #000}.br2-ba i{display:block;height:100%;border-radius:8px}
 .br2-bt{display:flex;gap:12px;padding:6px 14px 4px;flex:0 0 auto}.br2-b{flex:1;border:0;border-radius:12px;background:linear-gradient(#6fd6c4,#2a9d8f);border-bottom:4px solid #1c6a60;color:#fff;font:bold 18px Georgia,serif;padding:13px 4px;text-shadow:0 2px 2px #0a4a42;box-shadow:0 3px 8px #000a}
 .br2-au{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 calc(12px + env(safe-area-inset-bottom));font:bold 14px sans-serif;color:#e8d6a8;flex:0 0 auto}.br2-ck{width:24px;height:24px;border-radius:6px;border:2px solid #d9a83a;background:#2a1a0c;display:inline-flex;align-items:center;justify-content:center;color:#9ae85a;font-size:18px}.br2-ck.on{background:#2a5a1a}
+`; document.head.appendChild(st);
+})();
+
+
+/* p32/shop2.js — Үндсэн дэлгүүрт табууд: Нүүр (хуучин) | Хурдасгагч | Хамгаалалт | Багц | Хямдрал.
+   Бүгд зөвхөн Алтаар. Хурдасгагч нь S.it-д хадгалагдаж, идэвхтэй ажил дээр ашиглагдана.
+   🛡 Хамгаалалт: S.shd (дуусах цаг) — дайралт (raidOK) хориглоно. 📍 Нүүлгэгч: S.it.tp — клан солих хүлээлтийг арилгана.
+   Бүх class нь sh2- угтвартай. */
+(function(){
+  if(typeof shopHTML!=='function') return;
+  const IT=[
+    {k:'b1',t:'b',n:'Барилга 1ц',s:3600,p:15,e:'🔨'},{k:'b8',t:'b',n:'Барилга 8ц',s:28800,p:100,e:'🏗'},
+    {k:'r1',t:'r',n:'Судалгаа 1ц',s:3600,p:10,e:'🔬'},{k:'r8',t:'r',n:'Судалгаа 8ц',s:28800,p:70,e:'📚'},
+    {k:'t1',t:'t',n:'Цэрэг 1ц',s:3600,p:15,e:'⚔'},{k:'t8',t:'t',n:'Цэрэг 8ц',s:28800,p:100,e:'🛡'}
+  ];
+  const IK={}; IT.forEach(x=>{ IK[x.k]=x; });
+  const SHD=[{h:8,p:30},{h:24,p:80},{h:72,p:200}];
+  const TPP=60;
+  const alt=()=>Math.floor(S.res.alt||0);
+  const gem=()=>{ try{ return ico('ui_gem',16); }catch(e){ return '💎'; } };
+  const itn=k=>((S.it&&S.it[k])||0);
+  const itAdd=(k,n)=>{ S.it=S.it||{}; S.it[k]=(S.it[k]||0)+n; };
+  const day=()=>new Date(Date.now()+8*36e5).toISOString().slice(0,10);
+  const wk=()=>Math.floor((Date.now()+8*36e5)/(7*864e5));
+  const toNextDay=()=>{ const d=new Date(Date.now()+8*36e5); return (86400-(d.getUTCHours()*3600+d.getUTCMinutes()*60+d.getUTCSeconds())); };
+  const shdLeft=()=>Math.max(0,((S.shd||0)-Date.now())/1000);
+  const rr=()=>{ try{ refresh(); }catch(e){} try{ if(typeof cur!=='undefined'&&cur==='shop') fillM(); }catch(e){} };
+
+  /* ---- Хязгаар: өдөр / 7 хоног ---- */
+  function lim(scope,id){ const key=scope==='d'?day():wk(); S.shl=S.shl||{}; const o=S.shl[scope]; if(!o||o.k!==key) S.shl[scope]={k:key,n:{}}; return S.shl[scope].n; }
+  const used=(scope,id)=>lim(scope)[id]||0;
+  const useOne=(scope,id)=>{ const n=lim(scope); n[id]=(n[id]||0)+1; };
+
+  /* ---- Идэвхтэй ажлууд ---- */
+  function jobs(){ let o=[]; try{ o=aliJobs().slice(); }catch(e){}
+    try{ ['cur','c2'].forEach(sl=>{ const c=S.rs&&S.rs[sl]; if(c&&c.left>30){ const t=TECH.find(x=>x.id===c.id); o.push({t:'r',id:sl,lab:'🔬 '+(t?t.n:'Судалгаа'),rem:c.left,tot:c.tot||c.left}); } }); }catch(e){}
+    return o; }
+  const jtype=j=>j.t==='b'?'b':j.t==='r'?'r':'t';
+  function cut(j,sec){ if(j.t==='r'){ const c=S.rs&&S.rs[j.id]; if(!c) return false; c.left-=sec; return true; } try{ return aliJobCut(j.t+':'+j.id,sec); }catch(e){ return false; } }
+  window.sh2Use=function(jt,jid,k){ const it=IK[k]; if(!it||itn(k)<1){ say('Хурдасгагч алга'); sfx('err'); return; }
+    const j=jobs().find(x=>x.t===jt&&String(x.id)===String(jid)); if(!j){ say('Ажил дууссан байна'); rr(); return; }
+    S.it[k]--; if(!cut(j,it.s)){ S.it[k]++; say('Ажиллахгүй байна'); return; }
+    sfx('lvl'); say('⚡ '+it.n+' ашиглалаа'); try{ save(); }catch(e){} rr(); };
+
+  /* ---- Худалдан авалт ---- */
+  function spend(p){ if(alt()<p){ say('Алт хүрэхгүй байна'); sfx('err'); return false; } S.res.alt-=p; return true; }
+  function buyAsk(name,p,fn){ dxAsk('<b>'+name+'</b><br>Үнэ: '+p+' Алт<br><span class="sm">Таны Алт: '+alt()+'</span>','Авах · '+p+' Алт',()=>{ if(!spend(p)) return; const ok=fn(); if(ok===false){ S.res.alt+=p; return; } sfx('coin'); try{ save(); }catch(e){} rr(); },'Болих'); }
+  window.sh2Buy=function(k){ const it=IK[k]; if(!it) return; buyAsk(it.n+' хурдасгагч',it.p,()=>{ itAdd(k,1); say('✔ '+it.n+' +1'); }); };
+  window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('🛡 Хамгаалалт '+s.h+' цаг',s.p,()=>{ S.shd=Math.max(Date.now(),S.shd||0)+s.h*3600e3; say('🛡 Хамгаалалт идэвхжлээ: '+s.h+' цаг'); }); };
+  window.sh2TpBuy=function(){ buyAsk('📍 Нүүлгэгч',TPP,()=>{ itAdd('tp',1); say('✔ Нүүлгэгч +1'); }); };
+  window.sh2TpUse=function(){ if(itn('tp')<1){ say('Нүүлгэгч алга'); sfx('err'); return; }
+    if(!S.clanT||Date.now()-S.clanT>=3*864e5){ say('Одоо клан солих хүлээлт байхгүй байна'); return; }
+    dxAsk('📍 Нүүлгэгч ашиглах уу?<br><span class="sm">Клан солих хүлээлт арилж, өөр клан руу шууд нүүж болно.</span>','Ашиглах',()=>{ S.it.tp--; S.clanT=0; sfx('win'); say('📍 Одоо клан солих боломжтой боллоо'); try{ save(); }catch(e){} rr(); },'Болих'); };
+
+  function shard(){ const ids=Object.keys(S.heroes||{}); if(!ids.length){ say('Баатар алга'); return false; }
+    const d=day(); let h=0; for(let i=0;i<d.length;i++) h=(h*31+d.charCodeAt(i))|0; const id=ids[Math.abs(h)%ids.length];
+    S.sh=S.sh||{}; S.sh[id]=(S.sh[id]||0)+1; say('🧩 '+HEROES.find(x=>x.id===id).n+' хэлтэрхий +1'); return true; }
+  const giveAll=g=>{ Object.keys(g).forEach(k=>{ if(IK[k]) itAdd(k,g[k]); else if(k==='stn') stnGain(g[k]); else if(k==='gold'||k==='wood'||k==='grain'||k==='meat') S.res[k]=(S.res[k]||0)+g[k]; }); };
+
+  /* ---- Багцууд (7 хоногт хязгаартай) ---- */
+  const PK=[
+    {id:'pb',e:'🏗',n:'Барилгачин багц',p:150,l:3,g:{b1:5,b8:1,wood:3000,gold:20000},d:'Барилга 1ц ×5 · 8ц ×1 · Мод 3,000 · Зоос 20,000'},
+    {id:'pr',e:'🔬',n:'Судалгааны багц',p:150,l:3,g:{r1:5,r8:1,stn:20},d:'Судалгаа 1ц ×5 · 8ц ×1 · Ид шидийн чулуу ×20'},
+    {id:'pt',e:'⚔',n:'Цэргийн багц',p:150,l:3,g:{t1:5,t8:1,grain:3000,meat:5000},d:'Цэрэг 1ц ×5 · 8ц ×1 · Тариа 3,000 · Мах 5,000'},
+    {id:'ph',e:'🧩',n:'Баатрын багц',p:300,l:2,g:{stn:30},sh:5,d:'Баатрын хэлтэрхий ×5 · Ид шидийн чулуу ×30'},
+    {id:'pg',e:'🎁',n:'Том багц',p:700,l:1,g:{b1:10,b8:3,r1:10,r8:3,t1:10,t8:3,stn:60,gold:60000},sh:10,d:'Бүх хурдасгагч ×10 / ×3 · Баатрын хэлтэрхий ×10 · Чулуу ×60 · Зоос 60,000'}
+  ];
+  window.sh2Pack=function(id){ const k=PK.find(x=>x.id===id); if(!k) return; if(used('w',id)>=k.l){ say('Энэ 7 хоногийн хязгаар дууссан'); sfx('err'); return; }
+    buyAsk(k.n,k.p,()=>{ if(k.sh){ const ids=Object.keys(S.heroes||{}); if(!ids.length){ say('Баатар алга'); return false; } S.sh=S.sh||{}; for(let i=0;i<k.sh;i++){ const h=ids[Math.floor(Math.random()*ids.length)]; S.sh[h]=(S.sh[h]||0)+1; } }
+      giveAll(k.g); useOne('w',id); say('🎁 '+k.n+' авлаа'); }); };
+
+  /* ---- Өдрийн хямдрал ---- */
+  const DL=[
+    {id:'d1',e:'🧩',n:'Баатрын хэлтэрхий ×1',p:20,o:67,l:5,fn:()=>shard()},
+    {id:'d2',e:'🔮',n:'Ид шидийн чулуу ×10',p:30,o:50,l:5,fn:()=>{ stnGain(10); return true; }},
+    {id:'d3',e:'🏗',n:'Барилга 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('b8',1); return true; }},
+    {id:'d4',e:'📚',n:'Судалгаа 8ц',p:50,o:70,l:2,fn:()=>{ itAdd('r8',1); return true; }},
+    {id:'d5',e:'🛡',n:'Цэрэг 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('t8',1); return true; }},
+    {id:'d6',e:'🛡',n:'Хамгаалалт 24ц',p:50,o:80,l:1,fn:()=>{ S.shd=Math.max(Date.now(),S.shd||0)+24*3600e3; return true; }}
+  ];
+  window.sh2Deal=function(id){ const k=DL.find(x=>x.id===id); if(!k) return; if(used('d',id)>=k.l){ say('Өнөөдрийн хязгаар дууссан'); sfx('err'); return; }
+    buyAsk(k.n,k.p,()=>{ const r=k.fn(); if(r===false) return false; useOne('d',id); say('✔ '+k.n); }); };
+
+  /* ---- Дэлгэцүүд ---- */
+  const chip=()=>'<div class="sh2-al">'+gem()+' <b>'+alt()+' Алт</b></div>';
+  function tile(e,n,sub,price,onclk,off){ return '<button class="sh2-t'+(off?' off':'')+'" onclick="'+onclk+'"><span class="sh2-te">'+e+'</span><b>'+n+'</b><em>'+sub+'</em><span class="sh2-tp">'+gem()+' '+price+'</span></button>'; }
+  function tabSp(){
+    const J=jobs(); let h=chip()+'<div class="sh2-h">⚡ Идэвхтэй ажил</div>';
+    if(!J.length) h+='<div class="sh2-em">Одоо идэвхтэй ажил алга. Барилга, судалгаа, эмчилгээ эхлүүлээд ирээрэй.</div>';
+    J.forEach(j=>{ const ty=jtype(j), a=IT.filter(x=>x.t===ty);
+      h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+j.lab+'</b><span>⏱ '+fmtT(j.rem)+'</span></div><div class="sh2-jr">'+a.map(x=>'<button class="sh2-ub" '+(itn(x.k)<1?'disabled':'')+' onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+x.k+'\')">'+x.e+' '+x.n.split(' ')[1]+' · ×'+itn(x.k)+'</button>').join('')+'</div></div>'; });
+    h+='<div class="sh2-h">🛒 Хурдасгагч авах</div><div class="sh2-g">'+IT.map(x=>tile(x.e,x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
+    return h; }
+  function tabPr(){
+    const L=shdLeft(); let h=chip()+'<div class="sh2-sb'+(L>0?' on':'')+'">'+(L>0?'🛡 Идэвхтэй · '+fmtT(L)+' үлдсэн':'🛡 Хамгаалалтгүй')+'<div class="sm">Хамгаалалттай үед дээрэмчин, овгийн дайралт ирэхгүй.</div></div>';
+    h+='<div class="sh2-g">'+SHD.map((s,i)=>tile('🛡','Хамгаалалт '+s.h+'ц','Дайралт хориглоно',s.p,'sh2Shield('+i+')')).join('')+'</div>';
+    const cd=S.clanT&&Date.now()-S.clanT<3*864e5;
+    h+='<div class="sh2-h">📍 Нүүлгэгч</div><div class="sh2-jb"><div class="sh2-jl"><b>Нутаг солих эрх · Байгаа: '+itn('tp')+'</b></div><div class="sm">'+(cd?'Клан солих хүлээлт: '+fmtT((3*864e5-(Date.now()-S.clanT))/1000):'Одоо клан солих хүлээлт байхгүй.')+' Нүүлгэгч нь хүлээлтийг арилгаж, өөр клан руу шууд нүүх боломж олгоно.</div><div class="sh2-jr"><button class="sh2-ub" onclick="sh2TpBuy()">'+gem()+' '+TPP+' · Авах</button><button class="sh2-ub" '+(itn('tp')<1?'disabled':'')+' onclick="sh2TpUse()">Ашиглах</button></div></div>';
+    return h; }
+  function tabPk(){
+    let h=chip()+'<div class="sh2-sm">7 хоног бүр шинэчлэгдэнэ.</div>';
+    PK.forEach(k=>{ const u=used('w',k.id), left=k.l-u;
+      h+='<div class="sh2-pk"><div class="sh2-pe">'+k.e+'</div><div class="sh2-pm"><b>'+k.n+'</b><div class="sm">'+k.d+'</div><div class="sm">Үлдсэн: '+left+'/'+k.l+'</div></div><button class="sh2-ub big" '+(left<1?'disabled':'')+' onclick="sh2Pack(\''+k.id+'\')">'+gem()+' '+k.p+'</button></div>'; });
+    return h; }
+  function tabDl(){
+    let h=chip()+'<div class="sh2-sm">⏱ Дараагийн шинэчлэл: <b>'+fmtT(toNextDay())+'</b></div><div class="sh2-g">';
+    DL.forEach(k=>{ const left=k.l-used('d',k.id), pc=Math.round((1-k.p/k.o)*100);
+      h+='<div class="sh2-dw">'+(pc>0?'<i class="sh2-off">-'+pc+'%</i>':'')+tile(k.e,k.n,'Үлдсэн: '+left,k.p,'sh2Deal(\''+k.id+'\')',left<1)+'</div>'; });
+    return h+'</div>'; }
+
+  const TABS=[['main','💎 Нүүр'],['sp','⚡ Хурдасгагч'],['pr','🛡 Хамгаалалт'],['pk','🎁 Багц'],['dl','🔥 Хямдрал']];
+  window.sh2Tab=function(k){ S.shTab=k; try{ fillM(); }catch(e){} };
+  const _sh=shopHTML;
+  shopHTML=function(){
+    const t=S.shTab||'main';
+    const bar='<div class="sh2-tabs">'+TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
+    if(t==='main') return bar+_sh.apply(this,arguments);
+    const body=t==='sp'?tabSp():t==='pr'?tabPr():t==='pk'?tabPk():tabDl();
+    return bar+'<div class="sh2-bd"><h2 onclick="shopTitleTap&&shopTitleTap()">Дэлгүүр</h2>'+body+'</div>';
+  };
+
+  /* ---- Хамгаалалт: дайралтыг хориглоно ---- */
+  const _ro=raidOK; raidOK=function(){ if(shdLeft()>0) return false; return _ro.apply(this,arguments); };
+
+  /* ---- хугацаа тоологчийг шинэчлэх (дэлгүүр нээлттэй үед) ---- */
+  setInterval(()=>{ try{ if(typeof cur!=='undefined'&&cur==='shop'&&S.shTab&&S.shTab!=='main'&&!document.getElementById('askov')) fillM(); }catch(e){} },5000);
+
+  const st=document.createElement('style'); st.textContent=`
+.sh2-tabs{display:flex;flex-wrap:nowrap!important;gap:6px;overflow-x:auto;padding:4px 2px 8px;margin:-4px 0 6px;position:sticky;top:0;z-index:2;background:linear-gradient(#2b1d12,#2b1d12ee 80%,transparent);-webkit-overflow-scrolling:touch;scrollbar-width:none}.sh2-tabs::-webkit-scrollbar{display:none}
+.sh2-tabs button{flex:none;border:2px solid #8a6420;border-radius:12px;background:#3b2815;color:#e8d6a8;font:bold 13px sans-serif;padding:8px 12px;white-space:nowrap}.sh2-tabs button.on{background:linear-gradient(#ffd770,#e0a82a);color:#3a2208;border-color:#fff1b0}
+.sh2-bd{padding:2px 0 14px}.sh2-bd h2{margin:6px 0 10px}
+.sh2-al{display:inline-flex;align-items:center;gap:6px;background:#00000055;border:1px solid #8a6420;border-radius:14px;padding:4px 12px;margin-bottom:10px;font-size:15px}
+.sh2-h{font:bold 15px sans-serif;color:#ffd770;margin:12px 2px 6px}.sh2-sm{font-size:13px;color:#d9c9a0;margin:2px 2px 8px}.sh2-em{background:#00000040;border-radius:10px;padding:12px;font-size:13px;color:#d9c9a0;text-align:center}
+.sh2-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sh2-t{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid #8a6420;border-radius:12px;background:linear-gradient(#5a3a1c,#3a2410);padding:10px 4px 6px;color:#fff1c8;width:100%}
+.sh2-t.off{opacity:.45}.sh2-te{font-size:34px;line-height:1}.sh2-t b{font-size:12px;text-align:center;line-height:1.15;min-height:28px}.sh2-t em{font:11px sans-serif;font-style:normal;color:#c9b58a}
+.sh2-tp{display:inline-flex;align-items:center;gap:3px;background:#1c1208;border-radius:9px;padding:3px 8px;font:bold 13px sans-serif;color:#ffe9b0;margin-top:2px}
+.sh2-dw{position:relative}.sh2-off{position:absolute;left:-4px;top:-5px;z-index:1;background:#e8362b;color:#fff;font:bold 11px sans-serif;font-style:normal;border-radius:9px;padding:2px 6px;transform:rotate(-8deg);box-shadow:0 1px 3px #000a}
+.sh2-jb{background:#00000040;border:1px solid #6b4a20;border-radius:12px;padding:10px;margin-bottom:8px}.sh2-jl{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:#fff1c8;margin-bottom:6px}.sh2-jl span{color:#9ae85a;font:bold 13px sans-serif;flex:none}
+.sh2-jr{display:flex;gap:8px;flex-wrap:wrap}.sh2-ub{flex:1;border:0;border-radius:10px;background:linear-gradient(#6fd6c4,#2a9d8f);border-bottom:3px solid #1c6a60;color:#fff;font:bold 13px sans-serif;padding:9px 6px;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:90px}.sh2-ub:disabled{background:#6b6258;border-bottom-color:#4a423a;color:#b9b0a0}.sh2-ub.big{flex:none;min-width:80px;background:linear-gradient(#ffd770,#e0a82a);border-bottom-color:#9a6a10;color:#3a2208}
+.sh2-sb{border-radius:12px;padding:12px;margin-bottom:10px;background:#00000040;border:2px solid #6b4a20;font:bold 16px sans-serif;color:#d9c9a0}.sh2-sb.on{border-color:#7fe08a;color:#b8ffc0;background:#1c3a22}.sh2-sb .sm{font:12px sans-serif;margin-top:4px;color:#c9b58a}
+.sh2-pk{display:flex;align-items:center;gap:10px;background:linear-gradient(#5a3a1c,#3a2410);border:2px solid #8a6420;border-radius:12px;padding:10px;margin-bottom:8px;color:#fff1c8}.sh2-pe{font-size:36px;flex:none;width:44px;text-align:center}.sh2-pm{flex:1;min-width:0}.sh2-pm b{font-size:15px}.sh2-pm .sm{font-size:12px;color:#c9b58a;margin-top:2px}
 `; document.head.appendChild(st);
 })();
 

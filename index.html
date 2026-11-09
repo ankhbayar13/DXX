@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='6cec3d0fb2';
+var UPDB='9e2129b842';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16004,17 +16004,17 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   '.bu-go{position:absolute;right:'+U(4)+';bottom:'+U(10)+';width:'+U(82)+';height:'+U(66)+';pointer-events:auto;background:'+IMG('big')+' center/100% 100% no-repeat;border:0;padding:0;touch-action:manipulation;cursor:pointer;filter:grayscale(.55) brightness(.75) drop-shadow(0 2px 4px #000a)}'+
   '.bu-go.rdy{filter:drop-shadow(0 0 10px #ffb53a) brightness(1.1);animation:bu-p .8s infinite alternate}'+
   '.bu-go b{position:absolute;left:0;right:0;bottom:'+U(3)+';font:bold '+U(11)+'/1 Georgia,serif;color:#fff1c8;text-shadow:0 1px 3px #000,0 0 6px #000}'+
-  '#bu-ctl{position:absolute;right:'+U(4)+';bottom:'+U(82)+';height:'+U(42)+';display:none;align-items:center;gap:'+U(3)+';pointer-events:none}'+
+  '#bu-ctl{position:absolute;right:'+U(3)+';top:'+U(150)+';display:none;flex-direction:column;align-items:center;gap:'+U(4)+';pointer-events:none}'+
   '#bu.fi #bu-ctl{display:flex}'+
-  '#bu-ctl button{pointer-events:auto;height:'+U(40)+';border:0;padding:0;color:#e9cf93;font:bold '+U(15)+'/1 Georgia,serif;background:'+IMG('btn')+' center/100% 100% no-repeat;text-shadow:0 1px 3px #000,0 0 4px #000;touch-action:manipulation;filter:drop-shadow(0 2px 3px #000a)}'+
+  '#bu-ctl button{pointer-events:auto;height:'+U(34)+';border:0;padding:0;color:#e9cf93;font:bold '+U(15)+'/1 Georgia,serif;background:'+IMG('btn')+' center/100% 100% no-repeat;text-shadow:0 1px 3px #000,0 0 4px #000;touch-action:manipulation;filter:drop-shadow(0 2px 3px #000a)}'+
   '#bu-ctl button.on{color:#fff;filter:drop-shadow(0 0 7px #ffb53a) brightness(1.25)}'+
-  '#bu-ctl .gear{flex:0 0 '+U(46)+';background-image:'+IMG('gear')+'}'+
-  '#bu-ctl .bsd{flex:0 0 '+U(40)+'}'+
-  '#bu-ctl .au{flex:0 0 '+U(56)+';display:flex;align-items:center;justify-content:center}'+
+  '#bu-ctl .gear{flex:0 0 auto;width:'+U(42)+';height:'+U(38)+';background-image:'+IMG('gear')+'}'+
+  '#bu-ctl .bsd{flex:0 0 auto;width:'+U(42)+';height:'+U(34)+'}'+
+  '#bu-ctl .au{flex:0 0 auto;width:'+U(42)+';height:'+U(34)+';display:flex;align-items:center;justify-content:center}'+
   '#bu-ctl .lkc{position:absolute;right:'+U(5)+';top:'+U(4)+';width:'+U(10)+';height:'+U(7)+';border-radius:'+U(2)+';background:#e9b94a;box-shadow:0 1px 2px #000;display:none}'+
   '#bu-ctl .lkc::before{content:"";position:absolute;left:'+U(1.5)+';top:'+U(-5)+';width:'+U(4)+';height:'+U(5)+';border:'+U(1.5)+' solid #e9b94a;border-bottom:0;border-radius:'+U(4)+' '+U(4)+' 0 0}'+
   '#bu-ctl .bsd{position:relative}#bu-ctl .bsd.blk{filter:grayscale(.7) brightness(.75)}#bu-ctl .bsd.blk .lkc{display:block}'+
-  '#bu-ctl .au{font-size:'+U(14)+'}#bu-ctl .au:not(.on){filter:grayscale(.55) brightness(.85)}'+
+  '#bu-ctl .au{font-size:'+U(12.5)+'}#bu-ctl .au:not(.on){filter:grayscale(.55) brightness(.85)}'+
   '.bu-hint{position:absolute;left:50%;top:'+U(104)+';transform:translateX(-50%);display:none;padding:'+U(5)+' '+U(16)+';border-radius:'+U(18)+';background:linear-gradient(#7a1d12ee,#3d0d08ee);border:'+U(2)+' solid #ffd770;color:#fff1c8;font:bold '+U(13)+'/1.2 Georgia,serif;text-shadow:0 1px 3px #000;white-space:nowrap;box-shadow:0 0 14px #ff4a2a99,0 2px 8px #000a;animation:bu-hp 1s infinite alternate;pointer-events:none;max-width:92%}'+
   '#bu.bupk .bu-hint{display:block}#bu:not(.fi) .bu-hint,#bu.dn .bu-hint{display:none!important}'+
   '@keyframes bu-hp{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.06)}}'+

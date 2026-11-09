@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='15a9cfb2d8';
+var UPDB='f91461f197';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16577,6 +16577,536 @@ function campSkip(){ const j=S.uj; if(!j) return; const c=hsSkipCost(j.end); if(
 .hdk-row{display:flex;justify-content:center;gap:12px;margin:12px 0 18px}.hdk-row .hdk-t{width:52px;height:52px}
 `; document.head.appendChild(st);
 })();
+
+
+/* p32/alli.js — Клан (Alliance) шинэ дэлгэцүүд: суурь, Нүүр, Гишүүд (R1–R5), Удирдах.
+   Бүх нэр ali* / ALI / .ali- угтвартай. Одоогийн клан системийг (CKD, ckFetch, ckMem, ckRole, ckTitle...) ашиглана.
+   Өгөгдлийн шинэ цуглуулгууд: cx/{c} (кланы оноо, технологи), cxm/{c}/u/{uid} (гишүүний хандив), cxh/{c}/r/{uid} (тусламж хүсэлт). */
+var ALI={pg:'home',k:-1,stack:[],open:{},legacy:0,cx:null,cxT:0,cm:null,cmT:0,hp:null,hpT:0,lg:null,lgT:0,sub:{},busy:0};
+var ALP={};   /* хуудас бүр: ALP.name=()=>({t:'Гарчиг',h:'<html>',hx:'толгойн баруун',ft:'доод нэмэлт'}) */
+var ALD={     /* өгөгдлийн давхарга (тестэд сольж болно) */
+  async get(...p){ const {F,db}=FBM, s=await F.getDoc(F.doc(db,...p)); return s.exists()?s.data():null; },
+  async list(path,lim){ const {F,db}=FBM, s=await F.getDocs(F.query(F.collection(db,...path),F.limit(lim||100))); return s.docs.map(d=>Object.assign({id:d.id},d.data())); },
+  async set(path,data,merge){ const {F,db}=FBM; return F.setDoc(F.doc(db,...path),data,merge?{merge:true}:undefined); },
+  async del(path){ const {F,db}=FBM; return F.deleteDoc(F.doc(db,...path)); },
+  inc(n){ return FBM.F.increment(n); },
+  arr(v){ return FBM.F.arrayUnion(v); }
+};
+const aliK=()=>ALI.k;
+const aliC=()=>'c'+ALI.k;
+const aliDay=()=>Math.floor((wmNow()+8*36e5)/864e5);
+const aliNeedAt=i=>2000+600*i;
+function aliLv(pt){ pt=Math.max(0,pt||0); let l=1,r=pt; while(l<50&&r>=aliNeedAt(l-1)){ r-=aliNeedAt(l-1); l++; } return {l:l,r:r,need:l>=50?0:aliNeedAt(l-1)}; }
+function aliMe(){ S.ali=S.ali||{}; const a=S.ali; a.co=a.co||0; a.gl=a.gl||0; a.rcl=a.rcl||0; a.ct=a.ct||{da:0,dd:0,dk:0,dw:0,wk:0,hp:0}; a.shop=a.shop||{d:0,b:{}}; a.don=a.don||{d:0,n:0}; return a; }
+function aliCt(){ const a=aliMe(), c=a.ct, d=aliDay(), w=wmWeek(); if(c.dk!==d){ c.dk=d; c.dd=0; c.hp=0; } if(c.wk!==w){ c.wk=w; c.dw=0; } return c; }
+function aliCoin(n){ const a=aliMe(); a.co=Math.max(0,a.co+Math.floor(n)); }
+var _aliPushT=0;
+function aliPushMe(){ clearTimeout(_aliPushT); _aliPushT=setTimeout(async()=>{ try{ if(!ckOn()||S.clan==null||S.clan<0) return; const c=aliCt(); await ALD.set(['cxm','c'+S.clan,'u',CL.uid],{n:String(S.prof&&S.prof.name||'Тоглогч').slice(0,20),da:c.da,dd:c.dd,dk:c.dk,dw:c.dw,wk:c.wk,hp:c.hp,t:Date.now()}); }catch(e){} },1800); }
+/* хандив/тусламжийн оноо: өөрийн + кланы нийт оноо (pt) */
+function aliContrib(n,pts){ const c=aliCt(); n=Math.max(0,Math.floor(n)); c.da+=n; c.dd+=n; c.dw+=n; try{ save(); }catch(e){} aliPushMe(); const k=S.clan; if(k!=null&&k>=0&&ckOn()&&pts>0){ pts=Math.floor(pts); const lo=ALI.cx?aliLv(ALI.cx.pt).l:0; ALD.set(['cx','c'+k],{pt:ALD.inc(pts)},true).catch(()=>{}); if(ALI.cx){ ALI.cx.pt=(ALI.cx.pt||0)+pts; const ln=aliLv(ALI.cx.pt).l; if(lo&&ln>lo) aliLog('lvl',CLN[k].n,ln); } } }
+function aliLog(e,n,x){ try{ if(S.clan!=null&&S.clan>=0) ckLog(S.clan,e,n,x); }catch(er){} }
+
+/* ---------- өгөгдөл ачаалах ---------- */
+async function aliLoad(kind,force){
+  const k=ALI.k; if(k<0||!ckOn()) return;
+  const now=Date.now();
+  try{
+    if(kind==='cx'&&(force||now-ALI.cxT>25000)){ ALI.cxT=now; ALI.cx=(await ALD.get('cx','c'+k))||{pt:0,te:{}}; }
+    else if(kind==='cm'&&(force||now-ALI.cmT>25000)){ ALI.cmT=now; ALI.cm=await ALD.list(['cxm','c'+k,'u'],101); }
+    else if(kind==='hp'&&(force||now-ALI.hpT>12000)){ ALI.hpT=now; ALI.hp=await ALD.list(['cxh','c'+k,'r'],80); }
+    else if(kind==='lg'&&(force||now-ALI.lgT>25000)){ ALI.lgT=now; ALI.lg=await ALD.list(['clanlog','c'+k,'e'],200); }
+    else if(kind==='ck'){ await Promise.all([ckFetch(force),ckMem(k,force)]); }
+  }catch(e){}
+  aliRender();
+}
+function aliLoadFor(pg){
+  aliLoad('ck'); aliLoad('cx');
+  if(pg==='rank'||pg==='war') aliLoad('cm');
+  if(pg==='help') aliLoad('hp');
+  if(pg==='logs') aliLoad('lg');
+}
+
+/* ---------- гадна бүрхүүл ---------- */
+function aliOpen(k){
+  if(k==null||k<0) k=S.clan; if(k==null||k<0) return false;
+  ALI.k=k; ALI.pg='home'; ALI.stack=[]; ALI.sub={};
+  let o=document.getElementById('alv'); if(!o){ o=document.createElement('div'); o.id='alv'; document.body.appendChild(o); }
+  aliRender(); aliLoadFor('home'); return true;
+}
+function aliClose(){ const o=document.getElementById('alv'); if(o) o.remove(); ['alsub'].forEach(i=>{ const e=document.getElementById(i); if(e) e.remove(); }); }
+function aliGo(pg,sub){ ALI.stack.push(ALI.pg); ALI.pg=pg; if(sub!=null) ALI.sub[pg]=sub; aliRender(); aliLoadFor(pg); const b=document.getElementById('albd'); if(b) b.scrollTop=0; }
+function aliTab(pg){ ALI.stack=[]; ALI.pg=pg; aliRender(); aliLoadFor(pg); }
+function aliBack(){ if(ALI.stack.length){ ALI.pg=ALI.stack.pop(); aliRender(); aliLoadFor(ALI.pg); } else aliClose(); }
+const ALROOT=['home','members','manage'];
+function aliRender(){
+  const o=document.getElementById('alv'); if(!o||ALI.k<0) return;
+  const p=ALP[ALI.pg]||ALP.home, r=p(), root=ALROOT.indexOf(ALI.pg)>=0;
+  const bd=document.getElementById('albd'), st=bd?bd.scrollTop:0, same=bd&&o.dataset.pg===ALI.pg;
+  const tabs=root?[['home','⚑','Клан'],['members','👥','Гишүүд'],['manage','⚙','Удирдах']].map(t=>'<button class="ali-tb'+(ALI.pg===t[0]?' on':'')+'" onclick="aliTab(\''+t[0]+'\')"><i>'+t[1]+'</i><b>'+t[2]+'</b>'+(t[0]==='manage'&&aliReqN()?'<u>'+aliReqN()+'</u>':'')+'</button>').join(''):'';
+  o.innerHTML='<div class="ali-hd"><div class="ali-t">'+r.t+'</div><div class="ali-hx">'+(r.hx||'')+'</div></div>'+
+    '<div class="ali-bd" id="albd">'+r.h+'</div>'+
+    '<div class="ali-ft"><button class="ali-bk" onclick="aliBack()">⬅</button>'+tabs+(r.ft||'')+'</div>';
+  o.dataset.pg=ALI.pg;
+  const nb=document.getElementById('albd'); if(nb&&same) nb.scrollTop=st;
+}
+function aliReqN(){ try{ return ckRole(ALI.k)?(CK6.req[ALI.k]||[]).length:0; }catch(e){ return 0; } }
+function aliAv(n,c,sz){ const ch=String(n||'?').trim().slice(0,1).toUpperCase()||'?'; return '<span class="ali-av" style="'+(sz?'width:'+sz+'px;height:'+sz+'px;font-size:'+Math.floor(sz*0.5)+'px;':'')+(c?'background:'+c:'')+'">'+esc2(ch)+'</span>'; }
+function aliBtn(t,fn,cls,dis){ return '<button class="ali-b '+(cls||'')+'" '+(dis?'disabled ':'')+'onclick="'+fn+'">'+t+'</button>'; }
+function aliBar(v,mx,txt){ const p=mx>0?Math.min(100,Math.max(0,v/mx*100)):0; return '<div class="ali-pr"><i style="width:'+p+'%"></i><b>'+(txt!=null?txt:cn(v)+'/'+cn(mx))+'</b></div>'; }
+function aliSub(html){ let o=document.getElementById('alsub'); if(o) o.remove(); o=document.createElement('div'); o.id='alsub'; o.onclick=e=>{ if(e.target===o) o.remove(); }; o.innerHTML='<div class="ali-sb">'+html+'</div>'; document.body.appendChild(o); }
+function aliSubClose(){ const o=document.getElementById('alsub'); if(o) o.remove(); }
+function aliDoc(){ return CKD.docs[ALI.k]||{}; }
+function aliTot(){ return ckRows(ALI.k).reduce((a,x)=>a+(x.p||0),0); }
+function aliRankOf(d,x){ if(d.ow===x.id) return 5; const t=(d.tt&&d.tt[x.id])|0; return t===1?4:t===2?3:t>=3?2:1; }
+
+/* ---------- НҮҮР ---------- */
+function aliBadgeHelp(){ try{ return aliHelpOpenN(); }catch(e){ return 0; } }
+function aliBadgeGift(){ try{ return aliGiftN(); }catch(e){ return 0; } }
+ALP.home=function(){
+  const k=ALI.k, q=CLN[k], d=aliDoc(), rows=ckRows(k), L=aliLv((ALI.cx&&ALI.cx.pt)||0), sl=d.sl||CK.SL0;
+  const bg=(n)=>n?'<u class="ali-bg">'+n+'</u>':'';
+  const items=[['⚔','Дайн','war',0],['🤝','Тусламж','help',aliBadgeHelp()],['🔬','Технологи','tech',0],['🎁','Бэлэг','gifts',aliBadgeGift()],['🏪','Дэлгүүр','shop',0],['🗺','Нутаг','terr',0],['🏆','Эрэмбэ','rank',0],['📜','Түүх','logs',0]];
+  const h='<div class="ali-top"><div class="ali-bn" style="--c:'+q.c+'"><i>⚑</i></div><div class="ali-inf">'+
+      '<div class="ali-nm">'+esc2(q.n)+' клан</div>'+
+      '<div class="ali-kv"><span>👑 Хаан</span><b>'+esc2(String(d.on||'Эзэнгүй'))+'</b></div>'+
+      '<div class="ali-kv"><span>⚔ Кланы хүч</span><b>'+cn(aliTot())+'</b></div>'+
+      '<div class="ali-kv"><span>👥 Гишүүд</span><b>'+rows.length+'/'+sl+'</b></div>'+
+      '<div class="ali-kv"><span>🗺 Төв</span><b>'+esc2(q.n)+'</b></div></div></div>'+
+    '<div class="ali-lv"><span class="ali-gf">🎁<em>Lv.'+L.l+'</em></span>'+aliBar(L.r,L.need||1,L.need?cn(L.r)+'/'+cn(L.need):'MAX')+'</div>'+
+    '<div class="ali-an">'+(d.an?esc2(d.an):'Кланд тавтай морил! Хамтдаа хөгжинө.')+'</div>'+
+    '<div class="ali-gr">'+items.map(x=>'<button class="ali-it" onclick="aliGo(\''+x[2]+'\')"><i>'+x[0]+'</i><b>'+x[1]+'</b>'+bg(x[3])+'</button>').join('')+'</div>';
+  return {t:'Клан',h:h};
+};
+
+/* ---------- ГИШҮҮД (R1–R5) ---------- */
+function aliMemRow(k,d,x){
+  const t=(d.tt&&d.tt[x.id])|0, own=d.ow===x.id;
+  return '<div class="ali-mr" onclick="aliMemOpen(\''+x.id+'\')">'+aliAv(x.n)+'<div class="ali-mn"><b>'+esc2(String(x.n||'Тоглогч').slice(0,16))+'</b>'+(t&&!own?' <em>'+CK_TT[t]+'</em>':'')+'<div class="ali-sm">⚔ '+cn(x.p||0)+' · Lv '+(x.l||1)+'</div></div><span class="ali-sn">'+(ckAgo(x.t)||'')+'</span></div>';
+}
+ALP.members=function(){
+  const k=ALI.k, d=aliDoc(), rows=ckRows(k), by={5:[],4:[],3:[],2:[],1:[]};
+  rows.forEach(x=>{ by[aliRankOf(d,x)].push(x); });
+  const king=by[5][0], names={4:'Жанжин',3:'Ноён',2:'Тайж · Мэргэн · Бэхи',1:'Гишүүн'};
+  let h='<div class="ali-chip">👥 '+rows.length+'</div>';
+  h+='<div class="ali-kg">'+(king?aliAv(king.n,'#c9972b',64)+'<div class="ali-kn">👑 '+esc2(String(king.n||d.on||'Хаан').slice(0,16))+'</div><div class="ali-sm">⚔ '+cn(king.p||0)+' · '+(ckAgo(king.t)||'онлайн')+'</div>':'<div class="ali-sm">Эзэнгүй клан</div>')+'</div>';
+  [4,3,2,1].forEach(r=>{ const a=by[r]; const op=!!ALI.open[r]; a.sort((x,y)=>(y.p||0)-(x.p||0));
+    h+='<div class="ali-rk" onclick="aliRkTog('+r+')"><span class="ali-rb">R'+r+'</span><div class="ali-rn">'+names[r]+'</div><span class="ali-rc">👤 '+a.length+'</span><span class="ali-ar">'+(op?'▴':'▾')+'</span></div>';
+    if(op) h+='<div class="ali-ml">'+(a.length?a.map(x=>aliMemRow(k,d,x)).join(''):'<div class="ali-sm" style="padding:6px">Хоосон</div>')+'</div>'; });
+  return {t:'Гишүүд',h:h};
+};
+function aliRkTog(r){ ALI.open[r]=!ALI.open[r]; aliRender(); }
+function aliMemOpen(uid){
+  const k=ALI.k, d=aliDoc(), me=CL.uid, role=ckRole(k), x=ckRows(k).find(y=>y.id===uid); if(!x) return;
+  const t=(d.tt&&d.tt[uid])|0, own=d.ow===uid, isOwner=d.ow===me;
+  let h='<div class="ali-mh">'+aliAv(x.n,own?'#c9972b':'',54)+'<div><b>'+(own?'👑 ':'')+esc2(String(x.n||'Тоглогч').slice(0,16))+'</b><div class="ali-sm">R'+aliRankOf(d,x)+(t&&!own?' · '+CK_TT[t]:'')+' · ⚔ '+cn(x.p||0)+' · Lv '+(x.l||1)+'</div></div></div>';
+  h+='<div class="ali-bw">'+aliBtn('ℹ Дэлгэрэнгүй','aliSubClose();ckInfo('+k+',\''+uid+'\')')+(uid!==me?aliBtn('✉ Зурвас','aliSubClose();try{dmOpen(\''+uid+'\')}catch(e){say(\'Зурвас нээгдсэнгүй\')}'):'')+'</div>';
+  if(isOwner&&!own){ h+='<div class="ali-sm" style="margin:6px 0 3px">Цол өгөх</div><div class="ali-bw">'+[0,1,2,3,4,5].map(i=>aliBtn(i?CK_TT[i]:'Цолгүй','aliSubClose();ckTitle('+k+',\''+uid+'\','+i+')',t===i?'on':'')).join('')+'</div>';
+    h+=aliBtn('🚫 Кланаас хасах','aliKickAsk(\''+uid+'\')','red'); }
+  aliSub(h+aliBtn('Хаах','aliSubClose()'));
+}
+function aliKickAsk(uid){ const k=ALI.k; aliSubClose(); try{ dxAsk('Энэ гишүүнийг кланаас хасах уу? (7 хоног эргэж орж болохгүй)','Хасах',()=>{ ckKick(k,uid).then(()=>{ ckMem(k,true).then(()=>aliRender()); }); },'Болих'); }catch(e){ ckKick(k,uid); } }
+
+/* ---------- УДИРДАХ ---------- */
+ALP.manage=function(){
+  const k=ALI.k, role=ckRole(k), n=aliReqN();
+  const it=(ic,t,fn,cls,bg)=>'<button class="ali-it big '+(cls||'')+'" onclick="'+fn+'"><i>'+ic+'</i><b>'+t+'</b>'+(bg?'<u class="ali-bg">'+bg+'</u>':'')+'</button>';
+  const h='<div class="ali-gr">'+
+    it('⚙','Тохиргоо','aliLegacy('+k+')')+
+    it('📋','Кланы жагсаалт','aliList()')+
+    (role?it('👤','Хүсэлтүүд','aliGo(\'reqs\')','',n):'')+
+    (role?it('📢','Мэдэгдэл','ckAnOpen('+k+')'):'')+
+    it('💬','Кланы чат','chatOpen('+k+')')+
+    it('🚪','Гарах','aliLeaveAsk()','red')+'</div>'+
+    '<div class="ali-sm" style="text-align:center;margin-top:10px">Тохиргоо: нэр, слот, орох нөхцөл, цол, хасалт.</div>';
+  return {t:'Тохиргоо',h:h};
+};
+function aliLegacy(k){ ALI.legacy=1; try{ ckOpen(k); } finally{ ALI.legacy=0; } }
+function aliList(){ ALI.legacy=1; try{ ckOpen(-1); ckList(); } finally{ ALI.legacy=0; } }
+ALP.reqs=function(){
+  const k=ALI.k, a=CK6.req[k]||[];
+  const h=a.length?a.map(r=>'<div class="ali-mr">'+aliAv(r.n)+'<div class="ali-mn"><b>'+esc2(String(r.n||'Тоглогч').slice(0,16))+'</b><div class="ali-sm">Lv '+(r.l||1)+' · ⚔ '+cn(r.p||0)+' · '+ckWhen(r.t)+'</div></div><button class="ali-b ok sm" onclick="aliReqAns(\''+r.id+'\',1)">✓</button><button class="ali-b red sm" onclick="aliReqAns(\''+r.id+'\',0)">✕</button></div>').join(''):'<div class="ali-em">Хүсэлт алга</div>';
+  return {t:'Хүсэлтүүд',h:h};
+};
+async function aliReqAns(uid,ok){ try{ await ckReqAnswer(ALI.k,uid,ok); }catch(e){} try{ await ckReqFetch(ALI.k,true); }catch(e){} aliRender(); }
+function aliLeaveAsk(){
+  const k=ALI.k, d=aliDoc();
+  if(d.ow===CL.uid){ say('Хаан клангаасаа гарж болохгүй'); try{ sfx('err'); }catch(e){} return; }
+  try{ dxAsk('Клангаас гарах уу? Кланы оноо, хандив хуучин клан дээрээ үлдэнэ.','Гарах',()=>{ const nm=S.prof.name||'Тоглогч'; aliLog('leave',nm,0); S.clan=-1; S.clanT=0; try{ save(); clPush(true); }catch(e){} try{ WMD=null; }catch(e){} aliClose(); say('Клангаас гарлаа'); },'Үлдэх'); }catch(e){}
+}
+
+/* ---------- онцлох: хуучин цонхны оронд шинийг нээх ---------- */
+(function(){
+  const _o=ckOpen, _s=ckShow;
+  const mine=k=>k!=null&&k>=0&&ckOn()&&(S.clan===k||ckOwnerK()===k)&&!ALI.legacy;
+  ckOpen=function(k){ if(k==null||k<0) k=(typeof wmClanId==='function'?wmClanId():-1); if(mine(k)){ ckClose(); aliOpen(k); return; } _o.apply(this,arguments); };
+  ckShow=function(k){ if(mine(k)){ ckClose(); aliOpen(k); return; } _s.apply(this,arguments); };
+  /* хуучин цонхыг хаахад, шинэ дэлгэц нээлттэй бол шинэчилнэ */
+  const _c=ckClose; ckClose=function(){ _c(); try{ if(document.getElementById('alv')) aliLoad('ck',true); }catch(e){} };
+})();
+
+(function(){ const st=document.createElement('style'); st.textContent=`
+#alv{position:fixed;inset:0;z-index:85;display:flex;flex-direction:column;background:#2a1a0d;color:#3a2410;font-family:sans-serif}
+.ali-hd{flex:none;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;background:linear-gradient(#6b4a24,#4a3016);border-bottom:3px solid #c9972b;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 3px 8px #0008}
+.ali-t{font:bold 20px Georgia,serif;color:#ffe9b0;text-shadow:0 2px 0 #000}.ali-hx{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 8px);display:flex;gap:6px;align-items:center;color:#ffe9b0;font:bold 13px sans-serif}
+.ali-bd{flex:1;min-height:0;overflow:auto;padding:12px 12px 16px;background:linear-gradient(#efe0bf,#e2cc9e);-webkit-overflow-scrolling:touch}
+.ali-ft{flex:none;display:flex;align-items:center;gap:4px;padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);background:linear-gradient(#4a3016,#2e1d0d);border-top:3px solid #c9972b}
+.ali-bk{width:46px;height:46px;border-radius:50%;border:2px solid #c9972b;background:radial-gradient(#8a5a28,#4a2f14);color:#ffe9b0;font-size:22px;flex:none}
+.ali-tb{flex:1;position:relative;height:52px;border:0;border-radius:12px;background:none;color:#cfb78a;display:flex;flex-direction:column;align-items:center;justify-content:center;font:bold 12px sans-serif}
+.ali-tb i{font-style:normal;font-size:20px;line-height:1}.ali-tb.on{background:linear-gradient(#ffd24a,#d99a1a);color:#3a2208}
+.ali-tb u{position:absolute;right:16px;top:2px;background:#e8362b;color:#fff;border-radius:9px;min-width:16px;height:16px;line-height:16px;font-size:11px;text-decoration:none;text-align:center}
+.ali-top{display:flex;gap:12px;align-items:center}.ali-bn{width:84px;height:104px;flex:none;position:relative;background:linear-gradient(var(--c),#0006),var(--c);clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);display:flex;align-items:center;justify-content:center;border-top:6px solid #c9972b}
+.ali-bn i{font-style:normal;font-size:44px;color:#fff;text-shadow:0 2px 4px #0008}
+.ali-inf{flex:1;min-width:0;background:#00000012;border-radius:10px;padding:6px 8px}.ali-nm{font:bold 18px Georgia,serif;color:#5a3410;margin-bottom:3px}
+.ali-kv{display:flex;justify-content:space-between;gap:6px;font-size:13px;padding:2px 0}.ali-kv span{color:#7a5a30}.ali-kv b{color:#3a2410;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ali-lv{display:flex;align-items:center;gap:6px;margin:12px 0 8px}.ali-gf{position:relative;font-size:30px;flex:none;width:44px;text-align:center}.ali-gf em{position:absolute;left:0;right:0;bottom:-6px;font:bold 11px sans-serif;font-style:normal;color:#fff;background:#4a3016;border-radius:8px;padding:0 3px}
+.ali-pr{position:relative;flex:1;height:22px;border-radius:11px;background:#6d5a42;border:2px solid #4a3016;overflow:hidden}.ali-pr i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#a6e45a,#4fa322)}.ali-pr b{position:absolute;inset:0;text-align:center;line-height:18px;font-size:12px;color:#fff;text-shadow:0 1px 2px #000}
+.ali-an{background:#00000014;border:1px solid #b79a64;border-radius:10px;padding:10px;font-size:14px;color:#5a4528;min-height:54px;word-break:break-word;margin-bottom:12px}
+.ali-gr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ali-it{position:relative;height:62px;border:0;border-radius:12px;background:linear-gradient(#f6e7c6,#dcc08a);box-shadow:0 3px 0 #9c7a3e,0 4px 6px #0004;display:flex;align-items:center;gap:8px;padding:0 10px;color:#4a2f10}
+.ali-it i{font-style:normal;font-size:30px;width:40px;text-align:center}.ali-it b{flex:1;font-size:15px;text-align:center}.ali-it:active{transform:translateY(2px)}
+.ali-it.big{height:96px;flex-direction:column;justify-content:center;gap:2px}.ali-it.big i{font-size:36px}.ali-it.red{background:linear-gradient(#e8806a,#c4503a);color:#fff}
+.ali-bg{position:absolute;right:-4px;top:-6px;background:#e8362b;color:#fff;border:2px solid #fff;border-radius:11px;min-width:20px;height:20px;line-height:17px;font:bold 11px sans-serif;text-decoration:none;text-align:center;padding:0 3px;box-sizing:border-box}
+.ali-chip{display:inline-block;background:#4a3016;color:#ffe9b0;border-radius:10px;padding:2px 10px;font:bold 13px sans-serif}
+.ali-kg{text-align:center;margin:6px 0 12px}.ali-av{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(#8a5a28,#5a3a18);color:#ffe9b0;font:bold 18px sans-serif;border:2px solid #c9972b;flex:none;box-shadow:0 2px 4px #0005}
+.ali-kn{font:bold 17px Georgia,serif;color:#5a3410;margin-top:4px}.ali-sm{font-size:12px;color:#7a5a30}
+.ali-rk{display:flex;align-items:center;gap:8px;background:linear-gradient(#f6e7c6,#e2c892);border-radius:10px;padding:8px 10px;margin-top:8px;box-shadow:0 2px 0 #9c7a3e}
+.ali-rb{background:linear-gradient(#ffd24a,#d99a1a);color:#3a2208;font:bold 15px sans-serif;border-radius:6px 6px 12px 12px;padding:4px 9px;border:1px solid #a87a1a}.ali-rn{flex:1;font:bold 14px sans-serif;color:#5a3410}.ali-rc{font:bold 14px sans-serif;color:#5a3410}.ali-ar{color:#7a5a30;font-size:16px}
+.ali-ml{background:#fff6e0;border-radius:0 0 10px 10px;padding:2px 6px;margin-top:-4px}
+.ali-mr{display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #d8c394}.ali-mr:last-child{border-bottom:0}.ali-mn{flex:1;min-width:0}.ali-mn b{font-size:14px;color:#3a2410}.ali-mn em{font:bold 11px sans-serif;font-style:normal;color:#fff;background:#6a9a3a;border-radius:6px;padding:1px 5px}.ali-sn{font-size:12px;color:#7a5a30;flex:none}
+.ali-b{border:0;border-radius:10px;background:linear-gradient(#7ac95a,#459a2a);color:#fff;font:bold 15px sans-serif;padding:10px 14px;box-shadow:0 3px 0 #2c6a18;text-shadow:0 1px 1px #0006}.ali-b:disabled{background:#b5a88e;box-shadow:0 3px 0 #8a7e68;color:#e8dcc4}
+.ali-b.red{background:linear-gradient(#e8806a,#c4503a);box-shadow:0 3px 0 #8a2e1e}.ali-b.on{background:linear-gradient(#ffd24a,#d99a1a);color:#3a2208;text-shadow:none;box-shadow:0 3px 0 #9c6a0a}.ali-b.sm{padding:6px 12px;margin-left:4px}.ali-b.blue{background:linear-gradient(#5ab0d9,#2a7aa8);box-shadow:0 3px 0 #1a5272}
+.ali-fb{flex:1;height:48px;margin:0 4px}
+.ali-em{text-align:center;color:#7a5a30;padding:30px 0;font-size:14px}
+#alsub{position:fixed;inset:0;z-index:90;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px}
+.ali-sb{width:min(94vw,380px);max-height:86vh;overflow:auto;background:linear-gradient(#efe0bf,#e2cc9e);border:3px solid #c9972b;border-radius:14px;padding:14px;color:#3a2410;box-shadow:0 8px 30px #000b}
+.ali-sb .ali-b{width:100%;margin-top:8px}.ali-bw{display:flex;flex-wrap:wrap;gap:6px}.ali-bw .ali-b{width:auto;flex:1;margin-top:4px;padding:8px 10px;font-size:13px}
+.ali-mh{display:flex;align-items:center;gap:10px;margin-bottom:8px}.ali-mh b{font:bold 17px Georgia,serif}
+`; document.head.appendChild(st); })();
+
+
+/* p32/alli2.js — Клан: Тусламж (барилга/эмчилгээ/цэргийн шат хурдасгах) + Кланы бэлэг (Энгийн/Ховор).
+   Тусламж: cxh/{c}/r/{uid} = {u,n,jk,lab,t,tt,mx,h:[uid...]}. Хүсэгч өөрөө (20с тутам) шалгаж, шинэ тусламж бүрээр ажлын хугацаагаа багасгана. */
+var HLPTTL=12*3600e3, HLPDAY=300;
+const aliTBv=k=>{ try{ return aliTB(k); }catch(e){ return 0; } };
+function aliJobs(){
+  const out=[], now=Date.now();
+  try{ for(const k in (S.upg||{})){ const u=S.upg[k]; if(u&&u.need-u.p>60) out.push({t:'b',id:k,lab:'🏠 '+BUILD[k].n+' · Lv '+((S.bld[k]||0)+1),rem:u.need-u.p,tot:u.need}); } }catch(e){}
+  try{ if(S.hj&&S.hj.end-now>60000) out.push({t:'h',id:'h',lab:'✚ Эмчилгээ · '+(S.hj.n||0)+' цэрэг',rem:(S.hj.end-now)/1000,tot:Math.max(60,(S.hj.end-(S.hj.start||now))/1000)}); }catch(e){}
+  try{ if(S.uj&&S.uj.end-now>60000) out.push({t:'u',id:S.uj.k,lab:'⬆ Цэргийн шат ахиулалт · '+(S.uj.n||0),rem:(S.uj.end-now)/1000,tot:Math.max(60,(S.uj.end-(S.uj.start||now))/1000)}); }catch(e){}
+  return out;
+}
+function aliJobGet(jk){ const t=jk[0], id=jk.slice(2), now=Date.now(); try{
+  if(t==='b'){ const u=S.upg&&S.upg[id]; return (u&&u.need>u.p)?{rem:u.need-u.p}:null; }
+  if(t==='h') return (S.hj&&S.hj.end>now)?{rem:(S.hj.end-now)/1000}:null;
+  if(t==='u') return (S.uj&&S.uj.end>now)?{rem:(S.uj.end-now)/1000}:null; }catch(e){} return null; }
+function aliJobCut(jk,sec){ const t=jk[0], id=jk.slice(2);
+  if(t==='b'){ const u=S.upg&&S.upg[id]; if(!u) return false; u.p=Math.min(u.need,u.p+sec); try{ upSweep(); }catch(e){} return true; }
+  if(t==='h'){ if(!S.hj) return false; S.hj.end-=sec*1000; try{ hsTick(); }catch(e){} return true; }
+  if(t==='u'){ if(!S.uj) return false; S.uj.end-=sec*1000; try{ hsTick(); }catch(e){} return true; }
+  return false; }
+const aliStep=tt=>Math.max(30,Math.round(tt*0.03*(1+aliTBv('helpt'))));
+const aliHMax=()=>Math.min(30,10+aliLv((ALI.cx&&ALI.cx.pt)||0).l+Math.round(aliTBv('helpn')));
+function aliHvalid(r){ return r&&r.t&&Date.now()-r.t<HLPTTL&&Array.isArray(r.h); }
+function aliHelpOpenN(){ const me=CL&&CL.uid; if(!me||!ALI.hp) return 0; return ALI.hp.filter(r=>aliHvalid(r)&&r.id!==me&&r.h.indexOf(me)<0&&r.h.length<(r.mx||10)).length; }
+ALP.help=function(){
+  const me=CL.uid, c=aliCt(), a=aliMe(), list=(ALI.hp||[]).filter(aliHvalid), mine=list.find(r=>r.id===me), jobs=aliJobs();
+  let h='<div class="ali-card"><div class="ali-sm" style="margin-bottom:6px">Өнөөдрийн тусламжийн оноо</div>'+aliBar(Math.min(HLPDAY,c.hp||0),HLPDAY,(c.hp||0)+'/'+HLPDAY)+'</div>';
+  /* миний хүсэлт / ажлууд */
+  if(mine){ h+='<div class="ali-card"><div class="ali-rq">'+aliAv(mine.n)+'<div class="ali-mn"><b>Миний хүсэлт</b><div class="ali-sm">'+esc2(mine.lab||'')+'</div></div></div>'+aliBar(mine.h.length,mine.mx||10,mine.h.length+'/'+(mine.mx||10))+'<button class="ali-b red" style="width:100%;margin-top:8px" onclick="aliHelpCancel()">Цуцлах</button></div>'; }
+  else if(jobs.length){ h+='<div class="ali-card"><div class="ali-sm" style="margin-bottom:4px">Тусламж хүсэх ажил</div>'+jobs.map(j=>'<div class="ali-rq"><div class="ali-mn"><b>'+esc2(j.lab)+'</b><div class="ali-sm">Үлдсэн: '+fmtT(j.rem)+'</div></div><button class="ali-b sm" onclick="aliHelpAsk(\''+j.t+':'+j.id+'\')">🤝 Хүсэх</button></div>').join('')+'</div>'; }
+  else h+='<div class="ali-card ali-sm">Одоо хурдасгах ажил алга. Барилга сайжруулах, цэрэг эмчлэх үед энд тусламж хүснэ.</div>';
+  /* бусдын хүсэлтүүд */
+  const oth=list.filter(r=>r.id!==me).sort((x,y)=>y.t-x.t);
+  h+='<div class="ali-sm" style="margin:10px 2px 4px">Гишүүдийн хүсэлт</div>';
+  if(!ALI.hp) h+='<div class="ali-em">Ачаалж байна…</div>';
+  else if(!oth.length) h+='<div class="ali-em">Одоо хүсэлт алга</div>';
+  else h+=oth.map(r=>{ const done=r.h.indexOf(me)>=0, full=r.h.length>=(r.mx||10);
+    return '<div class="ali-card"><div class="ali-rq">'+aliAv(r.n)+'<div class="ali-mn"><b>'+esc2(String(r.n||'').slice(0,16))+'</b><div class="ali-sm">'+esc2(r.lab||'Тусламж')+'</div></div>'+(done?'<span class="ali-ok">✓</span>':(full?'<span class="ali-sm">Дүүрсэн</span>':'<button class="ali-b sm" onclick="aliHelpDo(\''+r.id+'\')">Тусла</button>'))+'</div>'+aliBar(r.h.length,r.mx||10,r.h.length+'/'+(r.mx||10))+'</div>'; }).join('');
+  const open=aliHelpOpenN();
+  return {t:'Тусламж',h:h,ft:'<button class="ali-b ali-fb" '+(open?'':'disabled ')+'onclick="aliHelpAll()">🤝 Бүгдэд тусла'+(open?' ('+open+')':'')+'</button>'};
+};
+async function aliHelpAsk(jk){
+  const j=aliJobs().find(x=>x.t+':'+x.id===jk); if(!j||!ckOn()||S.clan==null||S.clan<0) return;
+  const a=aliMe(), now=Date.now();
+  try{
+    await ALD.set(['cxh','c'+S.clan,'r',CL.uid],{u:CL.uid,n:String(S.prof&&S.prof.name||'Тоглогч').slice(0,20),jk:jk,lab:j.lab.replace(/^[^ ]+ /,'').slice(0,40),t:now,tt:Math.round(j.tot),mx:aliHMax(),h:[]});
+    a.rq={jk:jk,ap:0}; try{ save(); }catch(e){} try{ sfx('ok'); }catch(e){} say('🤝 Тусламж хүслээ');
+  }catch(e){ say('Хүсэлт илгээж чадсангүй'); try{ sfx('err'); }catch(x){} }
+  aliLoad('hp',true);
+}
+async function aliHelpCancel(){ const a=aliMe(); try{ await ALD.del(['cxh','c'+S.clan,'r',CL.uid]); }catch(e){} a.rq=null; try{ save(); }catch(e){} aliLoad('hp',true); }
+function aliHelpGain(){ /* нэг тусламжийн шагнал (өдрийн дээд хязгаартай) */
+  const c=aliCt(); if(c.hp>=HLPDAY) return 0; const g=Math.min(10,HLPDAY-c.hp); c.hp+=g; aliContrib(g,g); aliCoin(g/2); return g; }
+async function aliHelpDo(uid,quiet){
+  if(!ckOn()||S.clan==null||S.clan<0) return false;
+  try{ await ALD.set(['cxh','c'+S.clan,'r',uid],{h:ALD.arr(CL.uid)},true); }catch(e){ if(!quiet){ say('Тусалж чадсангүй'); try{ sfx('err'); }catch(x){} } return false; }
+  const r=(ALI.hp||[]).find(x=>x.id===uid); if(r&&r.h.indexOf(CL.uid)<0) r.h.push(CL.uid);
+  const g=aliHelpGain(); if(!quiet){ say('🤝 Тусаллаа'+(g?' · +'+g+' оноо':'')); try{ sfx('ok'); }catch(e){} aliRender(); }
+  return true;
+}
+async function aliHelpAll(){
+  if(ALI.busy) return; ALI.busy=1; const me=CL.uid;
+  try{ const a=(ALI.hp||[]).filter(r=>aliHvalid(r)&&r.id!==me&&r.h.indexOf(me)<0&&r.h.length<(r.mx||10)); let n=0; for(const r of a){ if(await aliHelpDo(r.id,true)) n++; }
+    if(n){ say('🤝 '+n+' гишүүнд тусаллаа'); try{ sfx('ok'); }catch(e){} aliLog('help',S.prof.name||'',n); } }catch(e){}
+  ALI.busy=0; aliLoad('hp',true);
+}
+/* хүсэгч: ирсэн тусламжийг өөрийн ажилд хэрэглэх */
+async function aliHelpSync(){
+  try{
+    const a=aliMe(), q=a.rq; if(!q||!ckOn()||S.clan==null||S.clan<0||!CL.uid) return;
+    const d=await ALD.get('cxh','c'+S.clan,'r',CL.uid);
+    const j=aliJobGet(q.jk);
+    if(!d||!j){ if(d) ALD.del(['cxh','c'+S.clan,'r',CL.uid]).catch(()=>{}); a.rq=null; try{ save(); }catch(e){} return; }
+    const n=(d.h||[]).length;
+    if(n>(q.ap||0)){ const k=n-(q.ap||0), sec=aliStep(d.tt||j.rem)*k; q.ap=n; aliJobCut(q.jk,sec); try{ save(); sfx('ok'); }catch(e){} say('🤝 '+k+' гишүүн тусаллаа · −'+fmtT(sec)); }
+  }catch(e){}
+}
+setInterval(()=>{ if(!document.hidden) aliHelpSync(); },20000);
+setTimeout(aliHelpSync,9000);
+
+/* ---------- БЭЛЭГ ---------- */
+function aliGiftInit(){ const a=aliMe(); if(a.glk!==S.clan){ a.glk=S.clan; a.gl=aliLv((ALI.cx&&ALI.cx.pt)||0).l; a.rcl=Math.floor(aliCt().da/5000); a.glI=ALI.cx?1:0; } else if(!a.glI&&ALI.cx){ a.gl=aliLv(ALI.cx.pt||0).l; a.glI=1; } }
+function aliGiftCom(){ const a=aliMe(); if(!ALI.cx||!a.glI) return 0; return Math.max(0,aliLv(ALI.cx.pt||0).l-a.gl); }
+function aliGiftRare(){ const a=aliMe(); return Math.max(0,Math.floor(aliCt().da/5000)-(a.rcl||0)); }
+function aliGiftN(){ try{ aliGiftInit(); return aliGiftCom()+aliGiftRare(); }catch(e){ return 0; } }
+function aliGiftOpen1(rare){
+  const out=[]; const R=n=>Math.floor(n[0]+Math.random()*(n[1]-n[0]+1));
+  if(!rare){ const g=R([3000,8000]); S.res.gold=(S.res.gold||0)+g; out.push('🪙 '+f(g)); const st=R([2,5]); stnGain(st); out.push('🔮 '+st); if(Math.random()<0.5){ const w=R([200,500]); S.res.wood=(S.res.wood||0)+w; out.push('🪵 '+w); } if(Math.random()<0.2){ const al=R([2,5]); S.res.alt=(S.res.alt||0)+al; out.push('💎 '+al); } }
+  else{ const g=R([20000,40000]); S.res.gold=(S.res.gold||0)+g; out.push('🪙 '+f(g)); const st=R([10,20]); stnGain(st); out.push('🔮 '+st); const al=R([10,25]); S.res.alt=(S.res.alt||0)+al; out.push('💎 '+al);
+    const ids=Object.keys(S.heroes||{}); if(ids.length){ const id=ids[Math.floor(Math.random()*ids.length)], n=R([1,3]); S.sh=S.sh||{}; S.sh[id]=(S.sh[id]||0)+n; try{ out.push('🧩 '+HEROES.find(x=>x.id===id).n+' ×'+n); }catch(e){} } }
+  return out.join(' · ');
+}
+function aliGiftClaim(rare){
+  aliGiftInit(); const a=aliMe(), n=rare?aliGiftRare():aliGiftCom(); if(!n){ say('Нээх бэлэг алга'); return; }
+  const take=Math.min(n,rare?10:20), res=[]; for(let i=0;i<take;i++) res.push(aliGiftOpen1(rare));
+  if(rare) a.rcl=(a.rcl||0)+take; else a.gl+=take;
+  try{ refresh(); sfx('ok'); }catch(e){}
+  aliSub('<div style="text-align:center"><div style="font-size:54px">'+(rare?'🎁':'📦')+'</div><b style="font:bold 18px Georgia,serif">'+(rare?'Ховор бэлэг':'Энгийн бэлэг')+' ×'+take+'</b><div class="ali-gl">'+res.slice(0,8).map(x=>'<div>'+x+'</div>').join('')+(res.length>8?'<div class="ali-sm">… ба бусад '+(res.length-8)+'</div>':'')+'</div></div><button class="ali-b" onclick="aliSubClose();aliRender()">Баярлалаа</button>');
+  aliRender();
+}
+ALP.gifts=function(){
+  aliGiftInit(); const t=ALI.sub.gifts||'c', L=aliLv((ALI.cx&&ALI.cx.pt)||0), nc=aliGiftCom(), nr=aliGiftRare(), da=aliCt().da;
+  const tabs='<div class="ali-seg"><button class="'+(t==='c'?'on':'')+'" onclick="ALI.sub.gifts=\'c\';aliRender()">Энгийн'+(nc?' <u>'+nc+'</u>':'')+'</button><button class="'+(t==='r'?'on':'')+'" onclick="ALI.sub.gifts=\'r\';aliRender()">Ховор'+(nr?' <u>'+nr+'</u>':'')+'</button></div>';
+  let h='<div class="ali-chest">🎁</div><div class="ali-lv" style="margin-top:0"><span class="ali-sm" style="flex:none">Lv '+L.l+'</span>'+aliBar(L.r,L.need||1,L.need?cn(L.r)+'/'+cn(L.need):'MAX')+'</div>'+tabs;
+  if(t==='c'){ h+=nc?'<div class="ali-card"><div class="ali-rq"><span class="ali-ic">📦</span><div class="ali-mn"><b>Кланы түвшний бэлэг ×'+nc+'</b><div class="ali-sm">Клан түвшин ахих бүрт гишүүн бүр авна</div></div><button class="ali-b sm" onclick="aliGiftClaim(0)">Нээх</button></div></div>':'<div class="ali-em">Нээх бэлэг алга.<br><span class="ali-sm">Тусламж, хандивлах тусам клан түвшин ахиж, бэлэг ирнэ.</span></div>'; }
+  else{ h+=nr?'<div class="ali-card"><div class="ali-rq"><span class="ali-ic">🎁</span><div class="ali-mn"><b>Хандивын бэлэг ×'+nr+'</b><div class="ali-sm">Хандивлаж 5,000 оноо цуглуулах бүрт</div></div><button class="ali-b sm" onclick="aliGiftClaim(1)">Нээх</button></div></div>':'<div class="ali-em">Ховор бэлэг алга.<br><span class="ali-sm">Дараагийнх: '+cn(da%5000)+' / 5,000 хандивын оноо</span></div>'; }
+  return {t:'Кланы бэлэг',h:h};
+};
+
+(function(){ const st=document.createElement('style'); st.textContent=`
+.ali-card{background:linear-gradient(#f9edd0,#ecd7a6);border:1px solid #b79a64;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:0 2px 0 #9c7a3e55}
+.ali-rq{display:flex;align-items:center;gap:8px;margin-bottom:6px}.ali-ok{color:#3a9a2a;font:bold 22px sans-serif;padding:0 8px}
+.ali-seg{display:flex;gap:6px;margin:10px 0}.ali-seg button{flex:1;border:0;border-radius:10px;padding:9px;background:#cdb88a;color:#5a3410;font:bold 14px sans-serif}.ali-seg button.on{background:linear-gradient(#ffd24a,#d99a1a);color:#3a2208;box-shadow:0 2px 0 #9c6a0a}.ali-seg u{background:#e8362b;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;text-decoration:none}
+.ali-chest{text-align:center;font-size:84px;line-height:1.1;margin:2px 0 8px;filter:drop-shadow(0 6px 6px #0005)}.ali-ic{font-size:34px;width:44px;text-align:center}
+.ali-gl{margin:10px 0;display:flex;flex-direction:column;gap:4px;font:bold 15px sans-serif;color:#5a3410}
+`; document.head.appendChild(st); })();
+
+
+/* p32/alli3.js — Клан: Технологи (3 хэсэг, хандивлаж ахиулна) + Кланы дэлгүүр (кланы зоосоор).
+   Технологийн туршлага: cx/{c}.te[id]. Түвшин = туршлагаас тооцогдоно. Үр нөлөө rsb(k)-д нэмэгдэнэ (aliTB). */
+var ALTN=[
+  {tab:'dev',id:'d1',row:0,n:'Хамтын хөдөлмөр',e:'🤝',mx:5,k:'helpn',v:1,fmt:v=>'Тусламжийн тоо +'+v},
+  {tab:'dev',id:'d2',row:0,n:'Найрамдлын гэрээ',e:'📜',mx:5,k:'helpt',v:0.1,fmt:v=>'Тусламжаар багасах хугацаа +'+Math.round(v*100)+'%'},
+  {tab:'dev',id:'d3',row:1,n:'Алт угаалга',e:'🪙',mx:10,k:'eco_prod',v:0.005,fmt:v=>'Үйлдвэрлэл +'+(v*100).toFixed(1)+'%'},
+  {tab:'dev',id:'d4',row:1,n:'Худалдааны зам',e:'🐪',mx:10,k:'eco_sell',v:0.005,fmt:v=>'Зарах үнэ +'+(v*100).toFixed(1)+'%'},
+  {tab:'dev',id:'d5',row:2,n:'Агуулахын сан',e:'📦',mx:10,k:'eco_cap',v:20,fmt:v=>'Нөөцийн багтаамж +'+v},
+  {tab:'dev',id:'d6',row:2,n:'Мэдлэгийн хөтөлбөр',e:'📚',mx:10,k:'cul_xp',v:0.01,fmt:v=>'Туршлага +'+Math.round(v*100)+'%'},
+  {tab:'dev',id:'d7',row:3,n:'Ангийн мэргэн',e:'🏹',mx:10,k:'mil_hunt',v:0.02,fmt:v=>'Агнуурын олз +'+Math.round(v*100)+'%'},
+  {tab:'cmb',id:'c1',row:0,n:'Байлдааны стратеги',e:'🧭',mx:10,k:'mil_all',v:0.004,fmt:v=>'Бүх баатрын хүч +'+(v*100).toFixed(1)+'%'},
+  {tab:'cmb',id:'c2',row:1,n:'Морин цэргийн бэлтгэл',e:'🐎',mx:10,k:'mil_troop',v:0.005,fmt:v=>'Цэргийн хүч +'+(v*100).toFixed(1)+'%'},
+  {tab:'cmb',id:'c3',row:1,n:'Харваачийн бэлтгэл',e:'🎯',mx:10,k:'mil_atk',v:0.005,fmt:v=>'Баатрын цохилт +'+(v*100).toFixed(1)+'%'},
+  {tab:'cmb',id:'c4',row:1,n:'Жадчны бэлтгэл',e:'🔱',mx:10,k:'mil_def',v:0.005,fmt:v=>'Хамгаалалт +'+(v*100).toFixed(1)+'%'},
+  {tab:'cmb',id:'c5',row:2,n:'Эмнэлгийн хамтын ажил',e:'✚',mx:10,k:'mil_hp',v:0.005,fmt:v=>'Баатрын бие +'+(v*100).toFixed(1)+'%'},
+  {tab:'cmb',id:'c6',row:2,n:'Хамтарсан довтолгоо',e:'⚔',mx:10,k:'mil_troop',v:0.005,fmt:v=>'Цэргийн хүч +'+(v*100).toFixed(1)+'%'},
+  {tab:'rgn',id:'r1',row:0,n:'Төвлөрсөн цохилт',e:'🗡',mx:10,k:'mil_atk',v:0.005,fmt:v=>'Баатрын цохилт +'+(v*100).toFixed(1)+'%'},
+  {tab:'rgn',id:'r2',row:0,n:'Хамгаалалтын хэрэм',e:'🛡',mx:10,k:'mil_def',v:0.005,fmt:v=>'Хамгаалалт +'+(v*100).toFixed(1)+'%'},
+  {tab:'rgn',id:'r3',row:0,n:'Бат бөх бүтэц',e:'❤',mx:10,k:'mil_hp',v:0.005,fmt:v=>'Баатрын бие +'+(v*100).toFixed(1)+'%'},
+  {tab:'rgn',id:'r4',row:1,n:'Нутгийн өсөлт',e:'🏰',mx:3,k:'cul_pop',v:1,fmt:v=>'Хүн амын багтаамж +'+v},
+  {tab:'rgn',id:'r5',row:2,n:'Нөөцийн хөрөнгө',e:'🏺',mx:10,k:'eco_cap',v:20,fmt:v=>'Нөөцийн багтаамж +'+v},
+  {tab:'rgn',id:'r6',row:2,n:'Тоосгоны уул',e:'⛏',mx:10,k:'eco_prod',v:0.005,fmt:v=>'Үйлдвэрлэл +'+(v*100).toFixed(1)+'%'}
+];
+const ALTAB=[['dev','Хөгжил'],['cmb','Тулаан'],['rgn','Засаглал']];
+const aliCum=n=>400*n*(n+1);               /* n түвшинд хүрэх нийт туршлага */
+function aliTExp(id){ return Math.floor(((ALI.cx&&ALI.cx.te&&ALI.cx.te[id])||0)); }
+function aliTL(t){ const e=aliTExp(t.id); let l=0; while(l<t.mx&&e>=aliCum(l+1)) l++; return l; }
+function aliTOpen(t){ if(t.row===0) return true; return ALTN.some(x=>x.tab===t.tab&&x.row===t.row-1&&aliTL(x)>=1); }
+function aliTB(k){ let v=0; if(!ALI.cx||!ALI.cx.te) return 0; ALTN.forEach(t=>{ if(t.k===k){ const l=aliTL(t); if(l) v+=t.v*l; } }); return v; }
+/* тоглоомын бонусууд (rsb) — зөвхөн кланд байхад */
+(function(){ const _r=rsb; rsb=function(k){ let v=_r.apply(this,arguments); try{ if(S.clan!=null&&S.clan>=0&&ALI.cx&&ALI.k===S.clan) v+=aliTB(k); }catch(e){} return v; }; })();
+/* ачаалахгүй байсан үед ч бонус үйлчлэхийн тулд кланы мэдээллийг эхэндээ татна */
+function aliBoot(){ try{ if(S.clan!=null&&S.clan>=0&&ckOn()){ ALI.k=S.clan; aliLoad('cx',true); } }catch(e){} }
+setTimeout(aliBoot,12000); setInterval(()=>{ if(!document.hidden) aliBoot(); },10*60000);
+
+/* ---------- ТЕХНОЛОГИ ---------- */
+function aliCoinChip(){ return '<span class="ali-cc">🏅 '+cn(aliMe().co)+'</span>'; }
+ALP.tech=function(){
+  const tab=ALI.sub.tech||'dev', rows={};
+  ALTN.filter(t=>t.tab===tab).forEach(t=>{ (rows[t.row]=rows[t.row]||[]).push(t); });
+  const nd=t=>{ const l=aliTL(t), op=aliTOpen(t), e=aliTExp(t.id), mx=l>=t.mx;
+    return '<button class="ali-nd'+(op?'':' lk')+(mx?' mx':'')+'" onclick="aliTechOpen(\''+t.id+'\')"><span class="ali-hx6"><i>'+t.e+'</i></span><em>'+(mx?'MAX':l+'/'+t.mx)+'</em><b>'+t.n+'</b></button>'; };
+  let h='<div class="ali-seg">'+ALTAB.map(x=>'<button class="'+(tab===x[0]?'on':'')+'" onclick="ALI.sub.tech=\''+x[0]+'\';aliRender()">'+x[1]+'</button>').join('')+'</div>';
+  h+='<div class="ali-tree">'+Object.keys(rows).sort((a,b)=>a-b).map(r=>'<div class="ali-tr">'+rows[r].map(nd).join('')+'</div>').join('')+'</div>';
+  h+='<div class="ali-sm" style="text-align:center;margin-top:8px">Дүрс дээр дарж нөөц хандивлана. Түвшин ахихад бүх гишүүнд бонус өгнө.</div>';
+  return {t:'Кланы технологи',h:h,hx:aliCoinChip()};
+};
+function aliDonOpts(){ return [{r:'gold',e:'🪙',c:3000,x:100},{r:'wood',e:'🪵',c:1500,x:100},{r:'grain',e:'🌾',c:1500,x:100}]; }
+function aliTechOpen(id){
+  const t=ALTN.find(x=>x.id===id); if(!t) return; const l=aliTL(t), op=aliTOpen(t), e=aliTExp(id), a=aliMe();
+  if(a.don.d!==aliDay()){ a.don.d=aliDay(); a.don.n=0; }
+  const lim=20, left=Math.max(0,lim-a.don.n);
+  let h='<div class="ali-mh"><span class="ali-hx6 big"><i>'+t.e+'</i></span><div><b>'+t.n+'</b><div class="ali-sm">Түвшин '+l+'/'+t.mx+'</div></div></div>';
+  h+='<div class="ali-card"><div class="ali-kv"><span>Одоо</span><b>'+(l?t.fmt(t.v*l):'—')+'</b></div>'+(l<t.mx?'<div class="ali-kv"><span>Дараагийн</span><b style="color:#3a9a2a">'+t.fmt(t.v*(l+1))+'</b></div>':'')+'</div>';
+  if(l>=t.mx) return aliSub(h+'<div class="ali-em" style="padding:10px">Дээд түвшин</div><button class="ali-b" onclick="aliSubClose()">Хаах</button>');
+  if(!op) return aliSub(h+'<div class="ali-need">Нээгдээгүй: өмнөх эгнээний аль нэг технологийг 1 түвшин хүргэнэ</div><button class="ali-b" onclick="aliSubClose()">Хаах</button>');
+  const cur=e-aliCum(l), need=800*(l+1);
+  h+=aliBar(cur,need,cn(cur)+'/'+cn(need));
+  h+='<div class="ali-sm" style="margin:6px 0 2px">Өнөөдөр үлдсэн хандив: <b>'+left+'</b>/'+lim+'</div>';
+  h+=aliDonOpts().map(o=>{ const have=S.res[o.r]||0; return '<button class="ali-b blue ali-dn" '+((have<o.c||!left)?'disabled ':'')+'onclick="aliDonate(\''+t.id+'\',\''+o.r+'\')"><span>'+o.e+' '+cn(o.c)+'</span><span>+'+o.x+' туршлага</span></button>'; }).join('');
+  h+='<button class="ali-b ali-dn" '+((S.res.alt||0)<10?'disabled ':'')+'onclick="aliDonate(\''+t.id+'\',\'alt\')"><span>'+(typeof RICON!=='undefined'?'<img src="'+RICON.alt+'" style="height:18px;vertical-align:middle">':'💎')+' 10</span><span>+500 туршлага</span></button>';
+  h+='<button class="ali-b red" onclick="aliSubClose()">Хаах</button>';
+  aliSub(h);
+}
+function aliDonate(id,r){
+  const t=ALTN.find(x=>x.id===id); if(!t||S.clan==null||S.clan<0) return; const a=aliMe();
+  if(r==='alt'){ if((S.res.alt||0)<10){ say('Алт хүрэхгүй'); return; } S.res.alt-=10; }
+  else { const o=aliDonOpts().find(x=>x.r===r); if(!o||(S.res[r]||0)<o.c){ say('Нөөц хүрэхгүй'); return; } if(a.don.d!==aliDay()){ a.don.d=aliDay(); a.don.n=0; } if(a.don.n>=20){ say('Өнөөдрийн хандивын хязгаар дууссан'); return; } S.res[r]-=o.c; a.don.n++; }
+  const x=r==='alt'?500:100, l0=aliTL(t);
+  ALI.cx=ALI.cx||{pt:0,te:{}}; ALI.cx.te=ALI.cx.te||{}; ALI.cx.te[id]=(ALI.cx.te[id]||0)+x;
+  const pts=Math.max(1,Math.round(x/4));
+  aliContrib(x,0); aliCoin(x/10);
+  if(ckOn()){ const lo=aliLv(ALI.cx.pt).l; ALD.set(['cx','c'+S.clan],{pt:ALD.inc(pts),te:{[id]:ALD.inc(x)}},true).catch(()=>{}); ALI.cx.pt=(ALI.cx.pt||0)+pts; const ln=aliLv(ALI.cx.pt).l; if(ln>lo) aliLog('lvl',CLN[S.clan].n,ln); }
+  const l1=aliTL(t); if(l1>l0){ aliLog('tech',t.n.slice(0,14),l1); say('🔬 '+t.n+' · '+l1+'-р түвшин!'); try{ sfx('lvl'); }catch(e){} } else { try{ sfx('ok'); }catch(e){} }
+  try{ refresh(); }catch(e){}
+  aliTechOpen(id); aliRender();
+}
+
+/* ---------- ДЭЛГҮҮР ---------- */
+function aliShopItems(){ return [
+  {id:'s1',e:'🧩',n:'Баатрын хэлтэрхий',c:2000,lim:5,give:()=>{ const ids=Object.keys(S.heroes||{}); if(!ids.length){ say('Баатар алга'); return false; } const id=ids[Math.floor(Math.random()*ids.length)]; S.sh=S.sh||{}; S.sh[id]=(S.sh[id]||0)+1; say('🧩 '+HEROES.find(x=>x.id===id).n+' хэлтэрхий +1'); return true; }},
+  {id:'s2',e:'🔮',n:'Ид шидийн чулуу ×10',c:1500,lim:5,give:()=>{ stnGain(10); return true; }},
+  {id:'s3',e:'💎',n:'Алт ×20',c:3000,lim:3,give:()=>{ S.res.alt=(S.res.alt||0)+20; return true; }},
+  {id:'s4',e:'🪙',n:'Зоос ×20,000',c:1200,lim:10,give:()=>{ S.res.gold=(S.res.gold||0)+20000; return true; }},
+  {id:'s5',e:'🪵',n:'Мод ×1,000',c:800,lim:10,give:()=>{ S.res.wood=(S.res.wood||0)+1000; return true; }},
+  {id:'s6',e:'🌾',n:'Тариа ×1,000',c:800,lim:10,give:()=>{ S.res.grain=(S.res.grain||0)+1000; return true; }},
+  {id:'s7',e:'⚡',n:'Барилга хурдасгах 30м',c:1500,lim:5,give:()=>{ const j=aliJobs().find(x=>x.t==='b'); if(!j){ say('Барилгын ажил алга'); return false; } aliJobCut('b:'+j.id,1800); return true; }},
+  {id:'s8',e:'✚',n:'Эмчилгээ хурдасгах 30м',c:1500,lim:5,give:()=>{ const j=aliJobs().find(x=>x.t==='h'); if(!j){ say('Эмчилгээний ажил алга'); return false; } aliJobCut('h:h',1800); return true; }},
+  {id:'s9',e:'⬆',n:'Цэргийн шат хурдасгах 30м',c:1500,lim:5,give:()=>{ const j=aliJobs().find(x=>x.t==='u'); if(!j){ say('Ахиулалтын ажил алга'); return false; } aliJobCut('u:'+j.id,1800); return true; }}
+]; }
+function aliShopDay(){ const a=aliMe(); if(a.shop.d!==aliDay()){ a.shop.d=aliDay(); a.shop.b={}; } return a.shop; }
+ALP.shop=function(){
+  const sh=aliShopDay(), co=aliMe().co;
+  let h='<div class="ali-sm" style="text-align:center;margin-bottom:8px">Тусламж, хандивлаж цуглуулсан кланы зоосоор авна. Өдөр бүр шинэчлэгдэнэ.</div><div class="ali-sg">';
+  aliShopItems().forEach(it=>{ const b=sh.b[it.id]||0, left=it.lim-b;
+    h+='<button class="ali-si" '+((left<=0||co<it.c)?'':'')+'onclick="aliBuy(\''+it.id+'\')"><span class="ali-sie">'+it.e+'</span><b>'+it.n+'</b><em>Үлдсэн: '+left+'</em><span class="ali-sp'+(co<it.c||left<=0?' no':'')+'">🏅 '+cn(it.c)+'</span></button>'; });
+  h+='</div>';
+  return {t:'Кланы дэлгүүр',h:h,hx:aliCoinChip()};
+};
+function aliBuy(id){
+  const it=aliShopItems().find(x=>x.id===id); if(!it) return; const sh=aliShopDay(), a=aliMe();
+  if((sh.b[id]||0)>=it.lim){ say('Өнөөдрийн хязгаар дууссан'); try{ sfx('err'); }catch(e){} return; }
+  if(a.co<it.c){ say('Кланы зоос хүрэхгүй ('+cn(a.co)+'/'+cn(it.c)+')'); try{ sfx('err'); }catch(e){} return; }
+  if(it.give()===false) return;
+  a.co-=it.c; sh.b[id]=(sh.b[id]||0)+1; try{ refresh(); sfx('ok'); }catch(e){} say('✓ '+it.n); aliRender();
+}
+
+(function(){ const st=document.createElement('style'); st.textContent=`
+.ali-cc{background:#2e1d0d;border:2px solid #c9972b;border-radius:12px;padding:3px 10px;font:bold 13px sans-serif;color:#ffe9b0}
+.ali-tree{display:flex;flex-direction:column;align-items:center;gap:4px}.ali-tr{position:relative;display:flex;justify-content:center;gap:16px;width:100%;padding:12px 0 6px}
+.ali-tr+.ali-tr:before{content:"";position:absolute;left:50%;top:-6px;width:5px;height:22px;margin-left:-2px;background:#b99a64;border-radius:3px}
+.ali-nd{position:relative;left:auto;top:auto;right:auto;bottom:auto;transform:none;margin:0;flex:none;width:92px;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:#4a2f10;padding:0}
+.ali-hx6{display:flex;align-items:center;justify-content:center;width:70px;height:78px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(#7ad0e0,#2a8aa8)}.ali-hx6 i{font-style:normal;font-size:34px}.ali-hx6.big{width:60px;height:66px;flex:none}
+.ali-nd.lk .ali-hx6{background:linear-gradient(#b9b3a6,#8a8478);filter:grayscale(1)}.ali-nd.mx .ali-hx6{background:linear-gradient(#ffd24a,#d99a1a)}
+.ali-nd em{margin-top:-14px;background:#4a3016;color:#ffe9b0;border-radius:9px;padding:0 8px;font:bold 12px/18px sans-serif;font-style:normal;z-index:1}.ali-nd b{font-size:12px;text-align:center;line-height:1.15}
+.ali-need{color:#c4402a;font:bold 14px sans-serif;text-align:center;margin:10px 0}
+.ali-dn{display:flex;justify-content:space-between;align-items:center}
+.ali-sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.ali-si{position:relative;border:0;border-radius:10px;background:linear-gradient(#f9edd0,#e2c892);box-shadow:0 2px 0 #9c7a3e;padding:6px 2px 0;display:flex;flex-direction:column;align-items:center;gap:2px;color:#3a2410;overflow:hidden}
+.ali-sie{font-size:34px;width:100%;text-align:center;background:linear-gradient(#e8a04a,#c4701a);padding:6px 0;margin:0 -2px;border-radius:6px}.ali-si b{font-size:11px;line-height:1.1;min-height:24px;text-align:center}.ali-si em{font:11px sans-serif;font-style:normal;color:#7a5a30}
+.ali-sp{width:100%;background:#2e1d0d;color:#ffe9b0;font:bold 12px/24px sans-serif}.ali-sp.no{color:#e88a7a}
+`; document.head.appendChild(st); })();
+
+
+/* p32/alli4.js — Клан: Эрэмбэ (Хүч / Ялалт / Хандив), Түүх (Дайн / Гишүүд / Үйл явдал), Нутаг, Дайн. */
+function aliMedal(i){ return i<3?'<span class="ali-md m'+(i+1)+'">'+(i+1)+'</span>':'<span class="ali-md">'+(i+1)+'</span>'; }
+function aliRankRow(i,x,val,me){ const d=aliDoc(); return '<div class="ali-rr'+(i<3?' t'+(i+1):'')+(me?' me':'')+'">'+aliMedal(i)+aliAv(x.n)+'<span class="ali-rt">R'+aliRankOf(d,x)+'</span><b class="ali-rnm">'+esc2(String(x.n||'Тоглогч').slice(0,14))+'</b><span class="ali-rv">'+val+'</span></div>'; }
+function aliCmRows(mode){
+  const k=ALI.k, rows=ckRows(k), by={}; (ALI.cm||[]).forEach(c=>{ by[c.id]=c; });
+  const day=aliDay(), wk=wmWeek(), me=CL.uid;
+  return rows.map(x=>{ let c=by[x.id]; if(x.id===me){ const m=aliCt(); c=m; } let v=0; if(c){ v=mode==='w'?(c.wk===wk?(c.dw||0):0):(c.dk===day?(c.dd||0):0); } return Object.assign({},x,{val:v}); });
+}
+ALP.rank=function(){
+  const tab=ALI.sub.rank||'p', per=ALI.sub.rankp||'d', me=CL.uid, d=aliDoc(); let rows;
+  if(tab==='p') rows=ckRows(ALI.k).map(x=>Object.assign({},x,{val:x.p||0}));
+  else if(tab==='w') rows=ckRows(ALI.k).map(x=>Object.assign({},x,{val:(x.v&&x.v.w)||0}));
+  else rows=aliCmRows(per);
+  rows.sort((a,b)=>b.val-a.val); const mi=rows.findIndex(x=>x.id===me);
+  const lab={p:'Хүч',w:'Ялалт',c:'Хандив'};
+  let h='<div class="ali-seg">'+[['p','Хүч'],['w','Ялалт'],['c','Хандив']].map(x=>'<button class="'+(tab===x[0]?'on':'')+'" onclick="ALI.sub.rank=\''+x[0]+'\';aliRender()">'+x[1]+'</button>').join('')+'</div>';
+  if(tab==='c') h+='<div class="ali-seg sub"><button class="'+(per==='d'?'on':'')+'" onclick="ALI.sub.rankp=\'d\';aliRender()">Өдөр</button><button class="'+(per==='w'?'on':'')+'" onclick="ALI.sub.rankp=\'w\';aliRender()">7 хоног</button></div>';
+  h+='<div class="ali-rh"><span>№</span><span style="flex:1;margin-left:14px">Нэр</span><span>'+lab[tab]+'</span></div>';
+  h+=rows.length?rows.slice(0,50).map((x,i)=>aliRankRow(i,x,cn(x.val),x.id===me)).join(''):'<div class="ali-em">Мэдээлэл алга</div>';
+  const ft=tab==='c'?'<button class="ali-b ali-fb blue" onclick="aliGo(\'tech\')">🔬 Хандивла</button>':'';
+  return {t:'Эрэмбэ',h:h+(mi>=0?'<div class="ali-meb">'+aliRankRow(mi,rows[mi],cn(rows[mi].val),true)+'</div>':''),ft:ft};
+};
+
+/* ---------- ТҮҮХ ---------- */
+function aliLogTxt(r){
+  const n='<b>'+esc2(String(r.n||'Тоглогч'))+'</b>';
+  switch(r.e){
+    case 'lvl': return 'Клан '+n+' <b>'+r.x+'-р түвшинд</b> хүрлээ!';
+    case 'tech': return n+' технологи <b>'+r.x+'-р түвшинд</b> хүрлээ.';
+    case 'help': return n+' '+r.x+' гишүүнд тусалсан.';
+    case 'war': return n+' кланд <b>+'+cn(r.x)+'</b> дайны оноо авчирлаа.';
+  }
+  try{ return ckLogTxt(r); }catch(e){ return n; }
+}
+const ALLG={w:['war'],m:['join','leave','kick','title'],e:['lvl','tech','help','name','slot','buy','banner','ann','mode']};
+ALP.logs=function(){
+  const tab=ALI.sub.logs||'w', ok=ALLG[tab]; let list=(ALI.lg||[]).filter(r=>ok.indexOf(r.e)>=0).sort((a,b)=>b.t-a.t).slice(0,60);
+  let h='<div class="ali-seg">'+[['w','Дайн'],['m','Гишүүд'],['e','Үйл явдал']].map(x=>'<button class="'+(tab===x[0]?'on':'')+'" onclick="ALI.sub.logs=\''+x[0]+'\';aliRender()">'+x[1]+'</button>').join('')+'</div>';
+  if(!ALI.lg) h+='<div class="ali-em">Ачаалж байна…</div>';
+  else if(!list.length) h+='<div class="ali-em">Түүх хоосон байна</div>';
+  else { let day=''; list.forEach(r=>{ const dt=new Date(r.t+8*36e5).toISOString().slice(0,10); if(dt!==day){ day=dt; h+='<div class="ali-dh"><span>'+dt+'</span></div>'; }
+    const hm=new Date(r.t+8*36e5).toISOString().slice(11,19);
+    h+='<div class="ali-lg"><span class="ali-lgi">'+({war:'⚔',lvl:'🎁',tech:'🔬',help:'🤝',join:'➕',leave:'➖',kick:'🚫',title:'🎖'}[r.e]||'📌')+'</span><div class="ali-mn"><div>'+aliLogTxt(r)+'</div><div class="ali-sm">'+hm+'</div></div></div>'; }); }
+  return {t:'Кланы түүх',h:h};
+};
+/* дайны оноо нэмэгдэх бүрт түүхэнд (минут тутамд ихдээ нэг) */
+(function(){ const _a=wmCsAdd; let last=0,acc=0; wmCsAdd=function(n){ const r=_a.apply(this,arguments); try{ acc+=Math.max(1,Math.round(n)); if(Date.now()-last>60000&&S.clan!=null&&S.clan>=0){ last=Date.now(); aliLog('war',S.prof.name||'',acc); acc=0; } }catch(e){} return r; }; })();
+
+/* ---------- ДАЙН ---------- */
+ALP.war=function(){
+  const k=ALI.k, rows=ckRows(k), w=wmWeek(), CAP=(typeof CWCAP!=='undefined'?CWCAP:10000);
+  const sc=x=>Math.min(CAP,x.cw===w?(x.cs||0):(x.pw===w?(x.ps||0):0));
+  const list=rows.map(x=>Object.assign({},x,{val:sc(x)})).sort((a,b)=>b.val-a.val), top=list.slice(0,20), tot=top.reduce((a,x)=>a+x.val,0);
+  let h='<div class="ali-card" style="text-align:center"><div class="ali-sm">Энэ 7 хоногийн кланы дайны оноо</div><div style="font:bold 30px Georgia,serif;color:#a0521a">'+cn(tot)+'</div><div class="ali-sm">Шилдэг 20 гишүүний оноо нийлбэр</div></div>';
+  h+=aliBtn('🗺 Газрын зураг дээр дайнд орох','aliClose();try{openM(\'wmap\')}catch(e){}','blue')+'<div style="height:8px"></div>';
+  h+=list.length?list.slice(0,30).map((x,i)=>aliRankRow(i,x,cn(x.val),x.id===CL.uid)).join(''):'<div class="ali-em">Мэдээлэл алга</div>';
+  return {t:'Кланы дайн',h:h};
+};
+
+/* ---------- НУТАГ ---------- */
+ALP.terr=function(){
+  const k=ALI.k, q=CLN[k], d=aliDoc(), L=aliLv((ALI.cx&&ALI.cx.pt)||0), rows=ckRows(k);
+  let h='<div class="ali-card"><div class="ali-rq"><div class="ali-bn mini" style="--c:'+q.c+'"><i>⚑</i></div><div class="ali-mn"><b style="font-size:17px">'+esc2(q.n)+' — кланы төв</b><div class="ali-sm">Байрлал: X '+q.x+' · Y '+q.y+'</div><div class="ali-sm">👑 '+esc2(String(d.on||'Эзэнгүй'))+' · 👥 '+rows.length+' · Lv '+L.l+'</div></div></div>'+aliBtn('🗺 Газрын зураг дээр харах','aliClose();try{openM(\'wmap\')}catch(e){}','blue')+'</div>';
+  const act=ALTN.filter(t=>aliTL(t)>0);
+  h+='<div class="ali-sm" style="margin:10px 2px 4px">Кланаас гишүүн бүрт өгөх бонус</div>';
+  h+=act.length?act.map(t=>{ const l=aliTL(t); return '<div class="ali-card"><div class="ali-rq"><span class="ali-hx6 big"><i>'+t.e+'</i></span><div class="ali-mn"><b>'+t.n+' · '+l+'/'+t.mx+'</b><div class="ali-sm" style="color:#3a7a2a;font-weight:bold">'+t.fmt(t.v*l)+'</div></div></div></div>'; }).join(''):'<div class="ali-em">Одоохондоо бонус алга.<br><span class="ali-sm">Технологи хэсэгт хандивлаж эхлээрэй.</span></div>';
+  h+=aliBtn('🔬 Технологи руу','aliGo(\'tech\')');
+  return {t:'Кланы нутаг',h:h};
+};
+
+(function(){ const st=document.createElement('style'); st.textContent=`
+.ali-seg.sub{margin-top:-4px}.ali-seg.sub button{padding:6px;font-size:13px}
+.ali-rh{display:flex;font:bold 12px sans-serif;color:#7a5a30;background:#00000012;border-radius:8px;padding:5px 10px;margin-bottom:6px}
+.ali-rr{display:flex;align-items:center;gap:7px;background:#fff6e0;border-radius:10px;padding:6px 8px;margin-bottom:6px;box-shadow:0 1px 0 #b79a6455}.ali-rr.t1{background:linear-gradient(90deg,#f6d27a,#f0b94a)}.ali-rr.t2{background:linear-gradient(90deg,#d6e0ea,#b4c4d6)}.ali-rr.t3{background:linear-gradient(90deg,#f0cdb4,#e0a888)}.ali-rr.me{outline:2px solid #4a3016}
+.ali-md{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:bold 14px sans-serif;color:#5a3410;flex:none}.ali-md.m1{background:#ffd24a;border:2px solid #b8860b}.ali-md.m2{background:#cfd8e0;border:2px solid #8a98a8}.ali-md.m3{background:#e0a070;border:2px solid #a86a3a}
+.ali-rr .ali-av{width:34px;height:34px;font-size:15px}.ali-rt{background:linear-gradient(#ffd24a,#d99a1a);border-radius:5px 5px 9px 9px;padding:1px 6px;font:bold 12px sans-serif;color:#3a2208}.ali-rnm{flex:1;min-width:0;font-size:14px;color:#3a2410;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ali-rv{font:bold 14px sans-serif;color:#5a3410}
+.ali-meb{position:sticky;bottom:-16px;margin:10px -12px -16px;padding:8px 12px;background:#d8bd88;border-top:2px solid #9c7a3e}.ali-meb .ali-rr{margin:0}
+.ali-dh{text-align:center;margin:10px 0 6px;font:bold 13px sans-serif;color:#7a5a30}.ali-dh span{background:#e2cc9e;padding:0 10px}
+.ali-lg{display:flex;gap:8px;align-items:flex-start;background:#fff6e0;border-radius:10px;padding:8px;margin-bottom:6px;font-size:13px;color:#3a2410}.ali-lgi{font-size:22px;width:34px;text-align:center;flex:none}
+.ali-bn.mini{width:54px;height:66px;border-top-width:4px}.ali-bn.mini i{font-size:28px}
+body:has(#alv) #ckov{z-index:88!important}
+`; document.head.appendChild(st); })();
 
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');

@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='839bbda60f';
+var UPDB='70eac9cf21';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17214,6 +17214,11 @@ body:has(#alv) #ckov{z-index:88!important}
   const TPP=60;
   const alt=()=>Math.floor(S.res.alt||0);
   const gem=()=>{ try{ return ico('ui_gem',16); }catch(e){ return '💎'; } };
+  const im=(k,px)=>{ try{ return ico(k,px)||''; }catch(e){ return ''; } };
+  const IM={b:'m_barilga',r:'ic_res',t:'m_dain'}, RI={gold:'nd_gold',wood:'rs_wood',grain:'rs2_grain',meat:'rs_meat'}, SHI='ic_power';
+  const stoneI=px=>(window.STONEI?'<img src="'+window.STONEI+'" style="height:'+px+'px;vertical-align:middle">':'');
+  const spd=(ty,tg,px)=>'<span class="sh2-ic">'+im(IM[ty],px)+'<i>'+tg+'</i></span>';
+  const shdI=(tg,px)=>'<span class="sh2-ic">'+im(SHI,px)+(tg?'<i>'+tg+'</i>':'')+'</span>';
   const itn=k=>((S.it&&S.it[k])||0);
   const itAdd=(k,n)=>{ S.it=S.it||{}; S.it[k]=(S.it[k]||0)+n; };
   const day=()=>new Date(Date.now()+8*36e5).toISOString().slice(0,10);
@@ -17236,22 +17241,22 @@ body:has(#alv) #ckov{z-index:88!important}
   window.sh2Use=function(jt,jid,k){ const it=IK[k]; if(!it||itn(k)<1){ say('Хурдасгагч алга'); sfx('err'); return; }
     const j=jobs().find(x=>x.t===jt&&String(x.id)===String(jid)); if(!j){ say('Ажил дууссан байна'); rr(); return; }
     S.it[k]--; if(!cut(j,it.s)){ S.it[k]++; say('Ажиллахгүй байна'); return; }
-    sfx('lvl'); say('⚡ '+it.n+' ашиглалаа'); try{ save(); }catch(e){} rr(); };
+    sfx('lvl'); say(it.n+' ашиглалаа'); try{ save(); }catch(e){} rr(); };
 
   /* ---- Худалдан авалт ---- */
   function spend(p){ if(alt()<p){ say('Алт хүрэхгүй байна'); sfx('err'); return false; } S.res.alt-=p; return true; }
   function buyAsk(name,p,fn){ dxAsk('<b>'+name+'</b><br>Үнэ: '+p+' Алт<br><span class="sm">Таны Алт: '+alt()+'</span>','Авах · '+p+' Алт',()=>{ if(!spend(p)) return; const ok=fn(); if(ok===false){ S.res.alt+=p; return; } sfx('coin'); try{ save(); }catch(e){} rr(); },'Болих'); }
   window.sh2Buy=function(k){ const it=IK[k]; if(!it) return; buyAsk(it.n+' хурдасгагч',it.p,()=>{ itAdd(k,1); say('✔ '+it.n+' +1'); }); };
-  window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('🛡 Хамгаалалт '+s.h+' цаг',s.p,()=>{ S.shd=Math.max(Date.now(),S.shd||0)+s.h*3600e3; say('🛡 Хамгаалалт идэвхжлээ: '+s.h+' цаг'); }); };
-  window.sh2TpBuy=function(){ buyAsk('📍 Нүүлгэгч',TPP,()=>{ itAdd('tp',1); say('✔ Нүүлгэгч +1'); }); };
+  window.sh2Shield=function(i){ const s=SHD[i]; buyAsk('Хамгаалалт '+s.h+' цаг',s.p,()=>{ S.shd=Math.max(Date.now(),S.shd||0)+s.h*3600e3; say('Хамгаалалт идэвхжлээ: '+s.h+' цаг'); }); };
+  window.sh2TpBuy=function(){ buyAsk('Нүүлгэгч',TPP,()=>{ itAdd('tp',1); say('✔ Нүүлгэгч +1'); }); };
   window.sh2TpUse=function(){ if(itn('tp')<1){ say('Нүүлгэгч алга'); sfx('err'); return; }
     if(!S.clanT||Date.now()-S.clanT>=3*864e5){ say('Одоо клан солих хүлээлт байхгүй байна'); return; }
-    dxAsk('📍 Нүүлгэгч ашиглах уу?<br><span class="sm">Клан солих хүлээлт арилж, өөр клан руу шууд нүүж болно.</span>','Ашиглах',()=>{ S.it.tp--; S.clanT=0; sfx('win'); say('📍 Одоо клан солих боломжтой боллоо'); try{ save(); }catch(e){} rr(); },'Болих'); };
+    dxAsk('Нүүлгэгч ашиглах уу?<br><span class="sm">Клан солих хүлээлт арилж, өөр клан руу шууд нүүж болно.</span>','Ашиглах',()=>{ S.it.tp--; S.clanT=0; sfx('win'); say('Одоо клан солих боломжтой боллоо'); try{ save(); }catch(e){} rr(); },'Болих'); };
 
   /* Өнөөдрийн баатар: байгаа баатруудаас өдөр бүр ээлжлэн */
   function feat(){ const ids=HEROES.map(h=>h.id).filter(id=>S.heroes&&S.heroes[id]); if(!ids.length) return null; const n=Math.floor((Date.now()+8*36e5)/864e5); return ids[n%ids.length]; }
   const hname=id=>{ try{ return HEROES.find(x=>x.id===id).n; }catch(e){ return id; } };
-  function giveShard(n){ const id=feat(); if(!id){ say('Баатар алга'); return false; } S.sh=S.sh||{}; S.sh[id]=(S.sh[id]||0)+n; say('🧩 '+hname(id)+' хэлтэрхий +'+n); return true; }
+  function giveShard(n){ const id=feat(); if(!id){ say('Баатар алга'); return false; } S.sh=S.sh||{}; S.sh[id]=(S.sh[id]||0)+n; say(hname(id)+' хэлтэрхий +'+n); return true; }
   const giveAll=g=>{ Object.keys(g).forEach(k=>{ if(IK[k]) itAdd(k,g[k]); else if(k==='stn') stnGain(g[k]); else if(k==='gold'||k==='wood'||k==='grain'||k==='meat') S.res[k]=(S.res[k]||0)+g[k]; }); };
 
   /* ---- Багцууд (7 хоногт хязгаартай) ---- */
@@ -17264,15 +17269,15 @@ body:has(#alv) #ckov{z-index:88!important}
   ];
   window.sh2Pack=function(id){ const k=PK.find(x=>x.id===id); if(!k) return; if(used('w',id)>=k.l){ say('Энэ 7 хоногийн хязгаар дууссан'); sfx('err'); return; }
     buyAsk(k.n,k.p,()=>{ if(k.sh&&!giveShard(k.sh)) return false;
-      giveAll(k.g); useOne('w',id); say('🎁 '+k.n+' авлаа'); }); };
+      giveAll(k.g); useOne('w',id); say(k.n+' авлаа'); }); };
 
   /* ---- Өдрийн хямдрал ---- */
   const DL=[
-    {id:'d2',e:'🔮',n:'Ид шидийн чулуу ×10',p:30,o:50,l:5,fn:()=>{ stnGain(10); return true; }},
-    {id:'d3',e:'🏗',n:'Барилга 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('b8',1); return true; }},
-    {id:'d4',e:'📚',n:'Судалгаа 8ц',p:50,o:70,l:2,fn:()=>{ itAdd('r8',1); return true; }},
-    {id:'d5',e:'🛡',n:'Цэрэг 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('t8',1); return true; }},
-    {id:'d6',e:'🛡',n:'Хамгаалалт 24ц',p:50,o:80,l:1,fn:()=>{ S.shd=Math.max(Date.now(),S.shd||0)+24*3600e3; return true; }}
+    {id:'d2',e:()=>stoneI(46),n:'Ид шидийн чулуу ×10',p:30,o:50,l:5,fn:()=>{ stnGain(10); return true; }},
+    {id:'d3',e:()=>spd('b','8ц',46),n:'Барилга 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('b8',1); return true; }},
+    {id:'d4',e:()=>spd('r','8ц',46),n:'Судалгаа 8ц',p:50,o:70,l:2,fn:()=>{ itAdd('r8',1); return true; }},
+    {id:'d5',e:()=>spd('t','8ц',46),n:'Цэрэг 8ц',p:70,o:100,l:2,fn:()=>{ itAdd('t8',1); return true; }},
+    {id:'d6',e:()=>shdI('24ц',46),n:'Хамгаалалт 24ц',p:50,o:80,l:1,fn:()=>{ S.shd=Math.max(Date.now(),S.shd||0)+24*3600e3; return true; }}
   ];
   const HS=[{id:'h2',n:2,p:48,o:60,l:5},{id:'h5',n:5,p:120,o:150,l:3},{id:'h10',n:10,p:240,o:300,l:2}];
   window.sh2Hs=function(id){ const k=HS.find(x=>x.id===id); if(!k) return; if(used('d',id)>=k.l){ say('Өнөөдрийн хязгаар дууссан'); sfx('err'); return; }
@@ -17285,42 +17290,46 @@ body:has(#alv) #ckov{z-index:88!important}
   const chip=()=>'';
   function tile(e,n,sub,price,onclk,off){ return '<button class="sh2-t'+(off?' off':'')+'" onclick="'+onclk+'"><span class="sh2-te">'+e+'</span><b>'+n+'</b><em>'+sub+'</em><span class="sh2-tp">'+gem()+' '+price+'</span></button>'; }
   function tabSp(){
-    const J=jobs(); let h=chip()+'<div class="sh2-h">⚡ Идэвхтэй ажил</div>';
+    const J=jobs(); let h=chip()+'<div class="sh2-h">'+im('q_bolt',20)+' Идэвхтэй ажил</div>';
     if(!J.length) h+='<div class="sh2-em">Одоо идэвхтэй ажил алга. Барилга, судалгаа, эмчилгээ эхлүүлээд ирээрэй.</div>';
     J.forEach(j=>{ const ty=jtype(j), a=IT.filter(x=>x.t===ty);
-      h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+j.lab+'</b><span>⏱ '+fmtT(j.rem)+'</span></div><div class="sh2-jr">'+a.map(x=>'<button class="sh2-ub" '+(itn(x.k)<1?'disabled':'')+' onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+x.k+'\')">'+x.e+' '+x.n.split(' ')[1]+' · ×'+itn(x.k)+'</button>').join('')+'</div></div>'; });
-    h+='<div class="sh2-h">🛒 Хурдасгагч авах</div><div class="sh2-g">'+IT.map(x=>tile(x.e,x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
+      h+='<div class="sh2-jb"><div class="sh2-jl"><b>'+j.lab+'</b><span>⏱ '+fmtT(j.rem)+'</span></div><div class="sh2-jr">'+a.map(x=>'<button class="sh2-ub" '+(itn(x.k)<1?'disabled':'')+' onclick="sh2Use(\''+j.t+'\',\''+j.id+'\',\''+x.k+'\')">'+im(IM[x.t],20)+' '+x.n.split(' ')[1]+' · ×'+itn(x.k)+'</button>').join('')+'</div></div>'; });
+    h+='<div class="sh2-h">'+im('ic_shop',20)+' Хурдасгагч авах</div><div class="sh2-g">'+IT.map(x=>tile(spd(x.t,x.n.split(' ')[1],46),x.n,'Байгаа: '+itn(x.k),x.p,'sh2Buy(\''+x.k+'\')')).join('')+'</div>';
     return h; }
   function tabPr(){
-    const L=shdLeft(); let h=chip()+'<div class="sh2-sb'+(L>0?' on':'')+'">'+(L>0?'🛡 Идэвхтэй · '+fmtT(L)+' үлдсэн':'🛡 Хамгаалалтгүй')+'<div class="sm">Хамгаалалттай үед дээрэмчин, овгийн дайралт ирэхгүй.</div></div>';
-    h+='<div class="sh2-g">'+SHD.map((s,i)=>tile('🛡','Хамгаалалт '+s.h+'ц','Дайралт хориглоно',s.p,'sh2Shield('+i+')')).join('')+'</div>';
+    const L=shdLeft(); let h=chip()+'<div class="sh2-sb'+(L>0?' on':'')+'">'+(L>0?im(SHI,22)+' Идэвхтэй · '+fmtT(L)+' үлдсэн':im(SHI,22)+' Хамгаалалтгүй')+'<div class="sm">Хамгаалалттай үед дээрэмчин, овгийн дайралт ирэхгүй.</div></div>';
+    h+='<div class="sh2-g">'+SHD.map((s,i)=>tile(shdI(s.h+'ц',46),'Хамгаалалт '+s.h+'ц','Дайралт хориглоно',s.p,'sh2Shield('+i+')')).join('')+'</div>';
     const cd=S.clanT&&Date.now()-S.clanT<3*864e5;
-    h+='<div class="sh2-h">📍 Нүүлгэгч</div><div class="sh2-jb"><div class="sh2-jl"><b>Нутаг солих эрх · Байгаа: '+itn('tp')+'</b></div><div class="sm">'+(cd?'Клан солих хүлээлт: '+fmtT((3*864e5-(Date.now()-S.clanT))/1000):'Одоо клан солих хүлээлт байхгүй.')+' Нүүлгэгч нь хүлээлтийг арилгаж, өөр клан руу шууд нүүх боломж олгоно.</div><div class="sh2-jr"><button class="sh2-ub" onclick="sh2TpBuy()">'+gem()+' '+TPP+' · Авах</button><button class="sh2-ub" '+(itn('tp')<1?'disabled':'')+' onclick="sh2TpUse()">Ашиглах</button></div></div>';
+    h+='<div class="sh2-h">'+im('ic_world',20)+' Нүүлгэгч</div><div class="sh2-jb"><div class="sh2-jl"><b>Нутаг солих эрх · Байгаа: '+itn('tp')+'</b></div><div class="sm">'+(cd?'Клан солих хүлээлт: '+fmtT((3*864e5-(Date.now()-S.clanT))/1000):'Одоо клан солих хүлээлт байхгүй.')+' Нүүлгэгч нь хүлээлтийг арилгаж, өөр клан руу шууд нүүх боломж олгоно.</div><div class="sh2-jr"><button class="sh2-ub" onclick="sh2TpBuy()">'+gem()+' '+TPP+' · Авах</button><button class="sh2-ub" '+(itn('tp')<1?'disabled':'')+' onclick="sh2TpUse()">Ашиглах</button></div></div>';
     return h; }
-  const GI={b1:['🔨','Барилга 1ц'],b8:['🏗','Барилга 8ц'],r1:['🔬','Судалгаа 1ц'],r8:['📚','Судалгаа 8ц'],t1:['⚔','Цэрэг 1ц'],t8:['🛡','Цэрэг 8ц'],stn:['🔮','Ид шидийн чулуу'],gold:['🪙','Зоос'],wood:['🪵','Мод'],grain:['🌾','Тариа'],meat:['🥩','Мах'],sh:['🧩','Баатрын хэлтэрхий']};
+  const GN={b1:'Барилга 1ц',b8:'Барилга 8ц',r1:'Судалгаа 1ц',r8:'Судалгаа 8ц',t1:'Цэрэг 1ц',t8:'Цэрэг 8ц',stn:'Ид шидийн чулуу',gold:'Зоос',wood:'Мод',grain:'Тариа',meat:'Мах',sh:'Баатрын хэлтэрхий'};
+  const GO=Object.keys(GN);
+  const shardI=px=>{ let pt=''; try{ const f=feat(); pt=f?hdImg(f,0,'sh2-hi',px):''; }catch(e){} return '<span class="sh2-ic">'+(pt||'')+'<i class="pz">🧩</i></span>'; };
+  function gicon(x,px){ if(IK[x]) return spd(IK[x].t,IK[x].n.split(' ')[1],px); if(x==='stn') return stoneI(px); if(RI[x]) return im(RI[x],px); if(x==='sh') return shardI(px); return ''; }
   const qf=n=>n>=1000?(n%1000?(n/1000).toFixed(1):(n/1000))+'K':String(n);
+  const pkI=id=>id==='pb'?im('m_barilga',34):id==='pr'?im('ic_res',34):id==='pt'?im('m_dain',34):id==='ph'?shardI(34):im('ui2_chest',38);
   function tabPk(){
     let h='<div class="sh2-sm">Багц бүрд юу орсныг доорх нүднүүдээс харна. <b>Хурдасгагч</b> нь ажлын хугацааг богиносгоно (1ц = 1 цаг, 8ц = 8 цаг). 7 хоног бүр шинэчлэгдэнэ.</div>';
     PK.forEach(k=>{ const u=used('w',k.id), left=k.l-u, g=Object.assign({},k.g); if(k.sh) g.sh=k.sh;
-      const tl=Object.keys(g).sort((x,y)=>(GI[x]?Object.keys(GI).indexOf(x):99)-(GI[y]?Object.keys(GI).indexOf(y):99)).map(x=>'<div class="sh2-pi"><div class="sh2-pb"><span>'+GI[x][0]+'</span><b>'+qf(g[x])+'</b></div><em>'+GI[x][1]+'</em></div>').join('');
-      h+='<div class="sh2-pk2"><div class="sh2-pt"><span class="sh2-pe">'+k.e+'</span><b>'+k.n+'</b><span class="sh2-pl">7 хоногт: '+left+'/'+k.l+'</span></div><div class="sh2-pr">'+tl+'</div><button class="sh2-ub big wide" '+(left<1?'disabled':'')+' onclick="sh2Pack(\''+k.id+'\')">'+(left<1?'Дууссан':'Авах · '+gem()+' '+k.p+' Алт')+'</button></div>'; });
+      const tl=Object.keys(g).sort((x,y)=>GO.indexOf(x)-GO.indexOf(y)).map(x=>'<div class="sh2-pi"><div class="sh2-pb"><span>'+gicon(x,40)+'</span><b>'+qf(g[x])+'</b></div><em>'+(x==='sh'&&feat()?hname(feat())+' хэлтэрхий':GN[x])+'</em></div>').join('');
+      h+='<div class="sh2-pk2"><div class="sh2-pt"><span class="sh2-pe">'+pkI(k.id)+'</span><b>'+k.n+'</b><span class="sh2-pl">7 хоногт: '+left+'/'+k.l+'</span></div><div class="sh2-pr">'+tl+'</div><button class="sh2-ub big wide" '+(left<1?'disabled':'')+' onclick="sh2Pack(\''+k.id+'\')">'+(left<1?'Дууссан':'Авах · '+gem()+' '+k.p+' Алт')+'</button></div>'; });
     return h; }
   function banner(){
     const f=feat(); if(!f) return '<div class="sh2-em">Баатар алга. Эхлээд баатар дууд.</div>';
     let st=0,need=0,have=0,mx=false,pt='',row='';
     try{ st=starOf(f); mx=st>=STMAX; need=mx?0:stcOf(f,st); have=shN(f); pt=hdImg(f,0,'sh2-hp',96); row=stRow(st,15); }catch(e){}
-    return '<div class="sh2-fb"><div class="sh2-fh">'+pt+'<i class="sh2-off">-20%</i></div><div class="sh2-fi"><div class="sh2-ft">⭐ Өнөөдрийн баатар</div><b>'+hname(f)+'</b><div>'+row+'</div>'+
+    return '<div class="sh2-fb"><div class="sh2-fh">'+pt+'<i class="sh2-off">-20%</i></div><div class="sh2-fi"><div class="sh2-ft">'+im('vf_star',15)+' Өнөөдрийн баатар</div><b>'+hname(f)+'</b><div>'+row+'</div>'+
       '<div class="sh2-fs">Хэлтэрхий: <b>'+(mx?'MAX':have+'/'+need)+'</b></div><div class="sh2-bar"><i style="width:'+(mx?100:Math.min(100,need?have/need*100:0))+'%"></i></div><div class="sm">Өдөр бүр өөр баатар хямдарна</div></div></div>';
   }
   function tabDl(){
     let h='<div class="sh2-sm">⏱ Дараагийн шинэчлэл: <b>'+fmtT(toNextDay())+'</b></div>'+banner();
-    h+='<div class="sh2-g">'+HS.map(k=>{ const left=k.l-used('d',k.id); return '<div class="sh2-dw"><i class="sh2-off">-20%</i>'+tile('🧩','Хэлтэрхий ×'+k.n,'Үлдсэн: '+left,k.p,'sh2Hs(\''+k.id+'\')',left<1)+'</div>'; }).join('')+'</div>';
-    h+='<div class="sh2-h">🔥 Бусад хямдрал</div><div class="sh2-g">';
+    h+='<div class="sh2-g">'+HS.map(k=>{ const left=k.l-used('d',k.id); return '<div class="sh2-dw"><i class="sh2-off">-20%</i>'+tile(shardI(46),'Хэлтэрхий ×'+k.n,'Үлдсэн: '+left,k.p,'sh2Hs(\''+k.id+'\')',left<1)+'</div>'; }).join('')+'</div>';
+    h+='<div class="sh2-h">'+im('vf_star',20)+' Бусад хямдрал</div><div class="sh2-g">';
     DL.forEach(k=>{ const left=k.l-used('d',k.id), pc=Math.round((1-k.p/k.o)*100);
-      h+='<div class="sh2-dw">'+(pc>0?'<i class="sh2-off">-'+pc+'%</i>':'')+tile(k.e,k.n,'Үлдсэн: '+left,k.p,'sh2Deal(\''+k.id+'\')',left<1)+'</div>'; });
+      h+='<div class="sh2-dw">'+(pc>0?'<i class="sh2-off">-'+pc+'%</i>':'')+tile(typeof k.e==='function'?k.e():k.e,k.n,'Үлдсэн: '+left,k.p,'sh2Deal(\''+k.id+'\')',left<1)+'</div>'; });
     return h+'</div>'; }
 
-  const TABS=[['main','💎','Нүүр'],['sp','⚡','Хурдасгагч'],['pr','🛡','Хамгаалалт'],['pk','🎁','Багц'],['dl','🔥','Хямдрал']];
+  const TABS=[['main','nd_alt','Нүүр'],['sp','q_bolt','Хурдасгагч'],['pr','ic_power','Хамгаалалт'],['pk','ui2_chest','Багц'],['dl','vf_star','Хямдрал']];
   window.sh2Tab=function(k){ S.shTab=k; try{ fillM(); }catch(e){} try{ const m=document.getElementById('mbody'); if(m) m.scrollTop=0; }catch(e){} };
   const _sh=shopHTML;
   shopHTML=function(){
@@ -17338,7 +17347,7 @@ body:has(#alv) #ckov{z-index:88!important}
     if(!bar){ bar=document.createElement('div'); bar.id='sh2bar'; bar.className='sh2-tabs'; box.appendChild(bar); }
     const t=S.shTab||'main';
     hd.innerHTML='<b>Дэлгүүр</b><span class="sh2-al">'+gem()+' '+alt()+' Алт</span>';
-    bar.innerHTML=TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')"><i>'+x[1]+'</i><span>'+x[2]+'</span></button>').join('');
+    bar.innerHTML=TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')"><i>'+im(x[1],30)+'</i><span>'+x[2]+'</span></button>').join('');
   }
   { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ const on=typeof cur!=='undefined'&&cur==='shop'; document.body.classList.toggle('sh2fs',on); chrome(on); }catch(e){ console.error(e); } return r; };
     const _c=closeM; closeM=function(){ document.body.classList.remove('sh2fs'); try{ chrome(false); }catch(e){} return _c.apply(this,arguments); }; }
@@ -17383,6 +17392,10 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 .sh2-fh .sh2-off{left:-2px;top:-2px;font-size:13px}.sh2-fi{flex:1;min-width:0}.sh2-ft{font:bold 12px sans-serif;color:#ffd770}.sh2-fi>b{display:block;font-size:20px;margin:2px 0}.sh2-fs{font-size:13px;margin-top:4px}.sh2-fs b{color:#9ae85a}
 .sh2-bar{height:10px;border-radius:6px;background:#1c1208;margin:4px 0;overflow:hidden}.sh2-bar i{display:block;height:100%;background:linear-gradient(#9ae85a,#4aa82a);border-radius:6px;transform:none;position:static;box-shadow:none}
 .sh2-fi .hstr{display:inline-block}
+
+.sh2-ic{position:relative;display:inline-block;line-height:0}.sh2-ic img{display:block}.sh2-ic i{position:absolute;left:-4px;top:-4px;background:#1c1208;border:1px solid #ffd770;border-radius:8px;padding:0 4px;font:bold 11px/15px sans-serif;font-style:normal;color:#ffe9b0}.sh2-ic i.pz{left:auto;right:-5px;top:auto;bottom:-4px;border:0;background:none;font-size:16px;line-height:1;padding:0}
+.sh2-te{display:flex;align-items:center;justify-content:center;min-height:50px}.sh2-pb span{display:flex;align-items:center;justify-content:center}.sh2-hi{image-rendering:pixelated}
+.sh2-tabs button i{display:flex;align-items:center;justify-content:center;height:32px}
 `; document.head.appendChild(st);
 })();
 

@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='313985f30b';
+var UPDB='cb6ae5c7ac';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18476,6 +18476,150 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 #alsub .flg-c{border:2px solid #5c4020;border-radius:10px;background:#140d06cc;padding:4px 2px;display:flex;justify-content:center}#alsub .flg-c img{width:100%;max-width:50px;height:auto;display:block;pointer-events:none}
 #alsub .flg-c.cur{border-color:#a89570}#alsub .flg-c.on{border-color:#ffd24a;background:#d9a33a33;box-shadow:0 0 0 2px #ffd24a66}
 #alsub .flg-n{text-align:center;font-weight:bold;color:#ffe3a0;margin:8px 0 4px}#alsub .flg-b{display:flex;gap:8px;justify-content:center}
+`; document.head.appendChild(sty);
+})();
+
+
+/* p32/ewar.js — ГҮРНИЙ ДАЙН (2-р шат): Хаан эсвэл эрх бүхий жанжин өөр кланд 24 цагийн дайн зарлана.
+   Дүрэм: клан 7 хоногт 1 дайн (ewar/{долоо хоног}_{клан}); гишүүн бүр 3 үнэгүй дайлт + 2 нэмэлт (дайлт бүр 100 Алт, дайлагч өөрөө төлнө);
+   дайн явж байхад дайсан клан өөр дайнд өртөхгүй, дайн дууссанаас хойш 24 цаг хамгаалалттай. Дайлт нь одоо байгаа газрын зургийн дайны механикаар (wmBattle) явна, оноо нь кланы дайны оноо руу орно. */
+(function(){
+  const HR=36e5, DUR=24*HR, PROT=24*HR, FREE=3, MAXA=5, COST=100;
+  const now=()=>(typeof wmNow==='function'?wmNow():Date.now());
+  const wk=()=>ctState().w;
+  const cn2=v=>{ try{ return cn(v); }catch(e){ return String(Math.round(v)); } };
+  const kOf=()=>{ try{ return wmClanId(); }catch(e){ return -1; } };
+  const ok=()=>typeof CL!=='undefined'&&CL.ok&&typeof FBM!=='undefined'&&FBM;
+  function fmt(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/HR), m=Math.floor(ms%HR/6e4); return h?h+'ц '+m+'м':m+'м'; }
+
+  /* ---------- өгөгдөл ---------- */
+  const EW={rows:[],t:0,busy:0,op:null,opD:-1,opT:0,opBusy:0};
+  window.EW=EW;
+  const act=(r,t)=>t>=r.t&&t<r.t+DUR;
+  function mine(){ const k=kOf(), t=now(); if(k<0) return null; const r=EW.rows.find(x=>x.a===k&&act(x,t)); return r||null; }
+  function incoming(){ const k=kOf(), t=now(); if(k<0) return null; return EW.rows.find(x=>x.d===k&&act(x,t))||null; }
+  function weekDone(k){ return EW.rows.find(x=>x.a===k&&x.w===wk())||null; }
+  /* clan d-г дайлах боломжтой эсэх: null=чөлөөтэй, эсвэл шалтгаан */
+  function lockOf(d){ const t=now();
+    const inWar=EW.rows.find(x=>x.d===d&&act(x,t)); if(inWar) return {why:'Өөр кланд дайрагдаж байна',left:inWar.t+DUR-t};
+    const pr=EW.rows.find(x=>x.d===d&&t>=x.t+DUR&&t<x.t+DUR+PROT); if(pr) return {why:'Хамгаалалттай',left:pr.t+DUR+PROT-t};
+    return null; }
+  async function ewFetch(force){
+    if(EW.busy||!ok()) return; if(!force&&Date.now()-EW.t<90000) return; EW.busy=1;
+    try{ const {F,db}=FBM, w=wk();
+      const get=async x=>{ const s=await F.getDocs(F.query(F.collection(db,'ewar'),F.where('w','==',x),F.limit(30))); return s.docs.map(d=>Object.assign({id:d.id},d.data())); };
+      const [a,b]=await Promise.all([get(w),get(w-1)]); EW.rows=a.concat(b); EW.t=Date.now();
+      const inc=incoming(); if(inc&&S.ewSeen!==inc.id){ S.ewSeen=inc.id; try{ say('Анхаар! '+CLN[inc.a].n+' клан танай клан руу Гүрний дайн зарлалаа (24 цаг)'); sfx('err'); vib([60,40,60]); }catch(e){} try{ save(); }catch(e){} }
+    }catch(e){} EW.busy=0;
+    const m=mine(); if(m) ewFetchOp(m.d); }
+  async function ewFetchOp(d,force){
+    if(EW.opBusy||!ok()) return; if(!force&&EW.opD===d&&Date.now()-EW.opT<240000) return; EW.opBusy=1;
+    try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('cl','==',d),F.limit(60)));
+      EW.op=s.docs.map(x=>Object.assign({id:x.id},x.data())); EW.opD=d; EW.opT=Date.now(); try{ CWD._k=''; }catch(e){} }catch(e){} EW.opBusy=0; }
+  window.ewFetch=ewFetch;
+
+  /* ---------- дайлтын эрх ---------- */
+  const used=A=>{ S.ew=S.ew&&S.ew.id===A.id?S.ew:{id:A.id,n:0}; return S.ew.n|0; };
+  const useOne=A=>{ used(A); S.ew.n++; try{ save(); }catch(e){} };
+
+  /* ---------- газрын зураг: дайны үед дайсны кланы гишүүд зорилт болно ---------- */
+  const _ce=wmCwEnts;
+  wmCwEnts=function(){
+    const A=mine(); if(!A||typeof totalPower!=='function') return _ce.apply(this,arguments);
+    const k=kOf(), op=A.d, z=CLN[op], w=wmWeek(), key='ew_'+A.id+'_'+EW.opT+'_'+(EW.opD===op?1:0);
+    if(CWD._k===key&&CWD._e) return CWD._e;
+    if(EW.opD!==op) ewFetchOp(op);
+    const P=Math.max(150,totalPower()), L=[], TY=['heavy','cav','archer'];
+    const place=id=>{ const h=hsh(String(id)), a=(h%360)*Math.PI/180, rad=120+((h>>>8)%150); return {x:Math.max(80,Math.min(WM_W-80,z.x+Math.cos(a)*rad)),y:Math.max(120,Math.min(WM_H-80,z.y+Math.sin(a)*rad*0.75))}; };
+    const real=(EW.opD===op?EW.op:[]).filter(x=>x.p>0&&!(typeof CL!=='undefined'&&x.id===CL.uid)).sort((a,b)=>b.p-a.p).slice(0,10);
+    real.forEach(x=>{ const q=place(x.id); L.push({id:'cw'+x.id,t:'clan',ew:1,x:q.x,y:q.y,n:esc2(String(x.n||'Тоглогч').slice(0,12)),p:Math.round(x.p),real:1,cl:op,c:z.c,ty:TY[hsh(String(x.id))%3],uid:x.id,act:Math.max(0,(now()-(x.t||0))/HR),rs:x.rs||null}); });
+    for(let i=0;L.length<6;i++){ const id='n'+i+'_'+op+'_'+A.id, q=place(id); L.push({id:'cw'+id,t:'clan',ew:1,x:q.x,y:q.y,n:'Клан цэрэг '+(i+1),p:Math.round(P*(0.65+0.13*i)),real:0,cl:op,c:z.c,ty:TY[hsh(id)%3]}); }
+    CWD._k=key; CWD._e=L; return L; };
+
+  /* дайлтын тоо хязгаарлах: 3 үнэгүй, 4-5-р дайлт 100 Алт (дайлагч төлнө) */
+  const _wb=wmBattle;
+  wmBattle=function(e,tc,mm){
+    if(e&&e.ew){ const A=mine(); if(!A){ say('Гүрний дайн дууссан байна'); return; }
+      const n=used(A); if(n>=MAXA){ say('Дайлтын эрх дууссан ('+MAXA+'/'+MAXA+')'); try{ sfx('err'); }catch(x){} return; }
+      if(n>=FREE){ const self=this, args=arguments;
+        dxAsk('Нэмэлт дайлт '+(n+1)+'/'+MAXA+'. Үнэ: '+COST+' Алт. Дайлах уу?','Дайлах',()=>{
+          if((S.res.alt|0)<COST){ say('Алт хүрэлцэхгүй байна'); try{ sfx('err'); }catch(x){} return; }
+          S.res.alt-=COST; useOne(A); try{ refresh(); }catch(x){} _wb.apply(self,args); },'Болих'); return; }
+      useOne(A); }
+    return _wb.apply(this,arguments); };
+
+  /* ---------- дайн зарлах ---------- */
+  function canDeclare(k){ try{ const d=CKD.docs[k]||{}; return d.ow===CL.uid||(Array.isArray(d.wg)&&d.wg.indexOf(CL.uid)>=0); }catch(e){ return false; } }
+  function ask(d){
+    const k=ALI.k; if(!canDeclare(k)){ say('Дайныг зөвхөн Хаан эсвэл эрх олгосон жанжин зарлана'); return; }
+    if(weekDone(k)){ say('Энэ долоо хоногт дайн хийсэн байна'); return; }
+    const L=lockOf(d); if(L){ say(CLN[d].n+' клан: '+L.why.toLowerCase()); return; }
+    try{ dxAsk(CLN[d].n+' кланд 24 цагийн Гүрний дайн зарлах уу? 7 хоногт нэг л удаа.','Зарлах',()=>ewDeclare(d),'Болих'); }catch(e){ ewDeclare(d); } }
+  async function ewDeclare(d){
+    const k=ALI.k; if(!ok()){ say('Сүлжээгүй байна'); return; }
+    try{ const {F,db}=FBM, w=wk(), id=w+'_'+k, rec={w:w,a:k,d:d,t:now(),by:CL.uid,n:String((S.prof&&S.prof.name)||'Хаан').slice(0,20)};
+      await F.setDoc(F.doc(db,'ewar',id),rec); EW.rows.push(Object.assign({id:id},rec)); EW.t=Date.now();
+      try{ const role=ckRole(k); if(role==='own') await ckPatch(k,{an:'Гүрний дайн: '+CLN[d].n+' кланд 24 цаг. Гишүүн бүр 3 удаа үнэгүй дайлна!',at:now()},role); }catch(e){}
+      say('Гүрний дайн зарлагдлаа: '+CLN[d].n+' клан. 24 цаг!'); try{ sfx('ok'); vib([40,30,60]); }catch(e){}
+      ewFetchOp(d,true);
+    }catch(e){ say('Зарлаж чадсангүй (Энэ долоо хоногт зарласан эсвэл эрх байхгүй)'); try{ sfx('err'); }catch(x){} }
+    try{ aliRender(); }catch(e){} }
+  window.ewAsk=ask;
+
+  /* жанжинд дайн зарлах эрх олгох (зөвхөн Хаан) */
+  async function grant(uid){
+    const k=ALI.k; if(ckRole(k)!=='own'){ say('Эрхийг зөвхөн Хаан олгоно'); return; }
+    const d=CKD.docs[k]||{}, cur=Array.isArray(d.wg)?d.wg.slice():[], i=cur.indexOf(uid);
+    if(i>=0) cur.splice(i,1); else { if(cur.length>=3){ say('Хамгийн ихдээ 3 жанжинд эрх олгоно'); return; } cur.push(uid); }
+    try{ await ckPatch(k,{wg:cur},'own'); try{ sfx('ok'); }catch(e){} }catch(e){ say('Хадгалж чадсангүй'); }
+    try{ aliRender(); }catch(e){} }
+  window.ewGrant=grant;
+
+  function goMap(){ const A=mine(); if(!A) return; const q=CLN[A.d]; try{ aliClose(); }catch(e){} try{ openM('wmap'); }catch(e){}
+    setTimeout(()=>{ try{ const c=$('wmc'); if(!c) return; WMV.z=0.5; WMV.x=q.x-c.clientWidth/WMV.z/2; WMV.y=q.y-c.clientHeight/WMV.z/2; wmClamp(); }catch(e){} },600); }
+  window.ewGoMap=goMap;
+
+  /* ---------- хуудас ---------- */
+  const fl=(k,h)=>window.flgImg?flgImg(k,h):'';
+  ALP.ew=function(){
+    const k=ALI.k, t=now(), A=mine(), I=incoming(), done=weekDone(k), can=canDeclare(k), own=ckRole(k)==='own';
+    let h='<div class="ct-root">';
+    h+='<div class="ct-hero"><div class="ct-st">Гүрний дайн · 24 цаг · 7 хоногт нэг удаа</div>';
+    if(A){ const n=used(A), left=Math.max(0,FREE-n), paid=Math.max(0,MAXA-Math.max(n,FREE));
+      h+='<div class="ct-day">Дайсан</div><div class="ew-vs">'+fl(A.d,64)+'</div><div class="ct-th">'+esc2(CLN[A.d].n)+' клан</div><div class="ct-ds">Дуусахад: '+fmt(A.t+DUR-t)+'</div>'+
+         '<div class="ct-sc"><b>'+n+'/'+MAXA+'</b><span>миний хийсэн дайлт · '+(left?left+' үнэгүй':'үнэгүй дууссан')+(paid&&n<MAXA?' · '+paid+' нэмэлт ('+COST+' Алт)':'')+'</span></div>';
+    } else if(done){ const al=done.a===k; h+='<div class="ct-th">Энэ долоо хоногт дайн хийсэн</div><div class="ct-ds">'+esc2(CLN[done.d].n)+' кланд · '+(t<done.t+DUR?'явагдаж байна':'дууссан')+'. Дараагийн дайныг шинэ тэмцээний долоо хоногт зарлана.</div>'; }
+    else h+='<div class="ct-th">Дайн зарлаагүй байна</div><div class="ct-ds">'+(can?'Доороос дайсан кланаа сонгож зарлана уу.':'Дайныг зөвхөн Хаан эсвэл эрх олгосон жанжин зарлана.')+'</div>';
+    h+='</div>';
+    if(A) h+='<button class="ct-go" onclick="ewGoMap()">Дайсан руу явах</button>';
+    if(I) h+='<div class="ct-w ew-in"><span class="ct-nm"><small>Анхаар</small>'+esc2(CLN[I.a].n)+' клан танай клан руу дайрч байна<small>Дуусахад '+fmt(I.t+DUR-t)+'</small></span>'+fl(I.a,36)+'</div>';
+    if(!A&&!done&&can){
+      h+='<div class="ew-sec">Дайсан клан сонгох</div>';
+      for(let d=0;d<CLN.length;d++){ if(d===k) continue; const L=lockOf(d);
+        h+='<div class="ct-w ew-r'+(L?' off':'')+'"'+(L?'':' onclick="ewAsk('+d+')"')+'>'+fl(d,34)+'<span class="ct-nm">'+esc2(CLN[d].n)+' клан<small>'+(L?L.why+' · '+fmt(L.left):'Чөлөөтэй')+'</small></span>'+(L?'':'<b class="ew-g">Зарлах</b>')+'</div>'; } }
+    if(own){
+      const d=CKD.docs[k]||{}, wg=Array.isArray(d.wg)?d.wg:[], rows=ckRows(k).filter(x=>x.id!==CL.uid&&(d.tt&&d.tt[x.id]>0));
+      h+='<div class="ew-sec">Жанжинд эрх олгох</div><div class="ct-ls">'+(rows.length?rows.map(x=>{ const on=wg.indexOf(x.id)>=0; return '<div class="ct-lo"><span class="ct-nm">'+esc2(String(x.n||'Тоглогч').slice(0,16))+'<small>Цолтой гишүүн</small></span><button class="ew-t'+(on?' on':'')+'" onclick="ewGrant(\''+x.id+'\')">'+(on?'Эрхтэй':'Эрх олгох')+'</button></div>'; }).join(''):'<div class="ct-nt">Цолтой гишүүн алга. Эхлээд «Гишүүд» хуудаснаас цол олгоно уу.</div>')+'</div>'; }
+    h+='<div class="ct-w ct-tp"><b>Дүрэм</b><span>Дайн 24 цаг үргэлжилнэ. Гишүүн бүр 3 удаа үнэгүй дайлна, 4, 5-р дайлт бүр '+COST+' Алт (дайлагч өөрөө төлнө). Дайсан клан дайн явах үед өөр дайнд өртөхгүй, дууссанаас хойш 24 цаг хамгаалалттай. Оноо кланы дайны оноо руу орно.</span></div>';
+    return {t:'Гүрний дайн',h:h+'</div>'};
+  };
+  /* нүүр хуудсанд нэг мөр товч */
+  const _home=ALP.home;
+  ALP.home=function(){ const r=_home.apply(this,arguments); try{ const k=ALI.k, t=now(), A=mine(), I=incoming(), can=canDeclare(k), done=weekDone(k);
+    const sub=A?('Идэвхтэй · '+fmt(A.t+DUR-t)):I?('Анхаар · дайрч байна'):done?'Энэ долоо хоногт хийсэн':can?'Зарлах боломжтой':'Зарлаагүй';
+    const bn='<button class="ct-bn" onclick="aliGo(\'ew\')"><b>Гүрний дайн</b><span>'+sub+'</span>'+((A&&used(A)<MAXA)||I?'<u></u>':'')+'</button>';
+    r.h=r.h.replace('<div class="ali-gr">',bn+'<div class="ali-gr">'); }catch(e){} return r; };
+  const _gf=aliLoadFor;
+  aliLoadFor=function(pg){ const r=_gf.apply(this,arguments); try{ if(pg==='home'||pg==='ew'){ ewFetch(pg==='ew').then(()=>{ if(ALI.pg===pg) aliRender(); }); } }catch(e){} return r; };
+  /* суурь давталт: 60 секунд тутам шинэчилнэ */
+  let tk=0; const _up=update;
+  update=function(dt){ try{ tk+=dt; if(tk>=60){ tk=0; if(kOf()>=0) ewFetch(); } }catch(e){} return _up.apply(this,arguments); };
+
+  const sty=document.createElement('style'); sty.textContent=`
+#alv .ew-vs{margin:6px 0 2px}#alv .ew-sec{font-size:13px;color:#cdb584;margin:12px 4px 4px}
+#alv .ew-r{cursor:pointer}#alv .ew-r.off{opacity:.55}#alv .ew-g{color:#3a2208;background:linear-gradient(#ffe08a,#d79a24);border-radius:12px;padding:4px 10px;font-size:13px}
+#alv .ew-in{background:#a8201a33}#alv .ew-in .ct-nm{color:#ffd0c8}#alv .ew-in small{display:block;color:#e8b8a8}
+#alv .ew-t{border:1px solid #7a5a30;border-radius:12px;background:#2a1b0d;color:#f1dfae;padding:5px 10px;font:bold 12px sans-serif}#alv .ew-t.on{background:linear-gradient(#ffe08a,#d79a24);color:#3a2208;border-color:#fff1c8}
 `; document.head.appendChild(sty);
 })();
 

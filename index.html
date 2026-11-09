@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2a67d4b0e7';
+var UPDB='f2e559dfa8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18256,6 +18256,30 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     a.sort((x,y)=>y.s-x.s||x.k-y.k); a.forEach((x,i)=>{ x.r=i+1; }); return a; }
   window.ctBoard=board;
 
+  /* ---- Шилжин явах цом: сүүлд дууссан тэмцээний 1-р клан хадгална (дараагийн тэмцээний дүн гартал) ---- */
+  const TRL={t:0,busy:0};
+  function trTarget(){ const s=st(); return s.active?s.w-1:s.w; }
+  async function trResolve(tw){
+    if(TRL.busy||Date.now()-TRL.t<60000) return; TRL.busy=1; TRL.t=Date.now();
+    try{ const rows=await fetchW(tw); if(rows){ const b=board(tw); const top=b[0]; S.ctTr={w:tw,k:(top&&top.s>0)?top.k:-1}; try{ save(); }catch(e){} try{ if(typeof wmRedraw==='function') wmRedraw(); }catch(e){} } }catch(e){}
+    TRL.busy=0; }
+  window.ctHolder=function(){ try{ const tw=trTarget(); if(tw<0) return null; const T=S.ctTr;
+    if(!T||T.w<tw){ if(typeof CL!=='undefined'&&CL.ok) trResolve(tw); }
+    return (T&&T.k>=0)?{k:T.k,w:T.w}:null; }catch(e){ return null; } };
+  const TIMG=new Image(); TIMG.src='rts/trophy.webp?v=1'; window.ctTrophyImg=TIMG;
+  /* газрын зураг дээр: ялсан кланы төвийн дээр алтан цом */
+  if(typeof wmClanDraw==='function'){ const _wd=wmClanDraw; wmClanDraw=function(c,D,z,t,vis,items){
+    _wd.apply(this,arguments);
+    try{ const H=ctHolder(); if(!H||!TIMG.complete||!TIMG.naturalWidth) return; const i=H.k, q=CLN[i]; if(!q) return;
+      const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0'), s=ok?wmS('wm_hq'+i):null, isMy=i===my, ww=s?(isMy?0.85:0.78)*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
+      if(!vis(qx,qy,320)) return;
+      const th=110, tw=th*TIMG.naturalWidth/TIMG.naturalHeight, by=qy-(s?hh*0.86:44)-30;
+      items.push({y:1e5+qy+3,f:()=>{ c.save(); const bob=Math.sin(t*2.2)*4, pu=0.5+0.5*Math.sin(t*2.2);
+        c.globalAlpha=0.25+0.2*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.ellipse(qx,by-th*0.45+bob,tw*0.62,th*0.55,0,0,7); c.fill(); c.globalAlpha=1;
+        c.drawImage(TIMG,qx-tw/2,by-th+bob,tw,th);
+        wmLabel(c,'Цомын эзэн',qx,by+16+bob,'#ffe28a',13); c.restore(); }});
+    }catch(e){} }; }
+
   /* ---- оноо цуглуулах дэгээнүүд ---- */
   /* нөөц (0), зоос (2), баатар (4): секунд тутам зөвхөн өсөлтийг тооцно */
   let snap=null, snapR=null, hs0=null, tk=0;
@@ -18313,9 +18337,10 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   const TABS=[['d','Өнөөдөр'],['r','Эрэмбэ'],['p','Шагнал']];
   function shownW(){ return st().w; }
   function myS(w){ const c=me(); return c.w===w?c.s:myWeekPts(w); }
+  const mdlB=r=>r<=3?'<span class="ct-md"><img alt="" draggable="false" src="rts/medal'+r+'.webp?v=1"></span>':'<span class="ct-bd">'+r+'</span>';
   function rowTop(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
     const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
-    return '<div class="ct-w ct-t3'+(mine?' me':'')+'"><span class="ct-bd m'+x.r+'">'+x.r+'</span><span class="ct-nm">'+(window.flgImg?flgImg(x.k,34):'<span style="color:'+q.c+'">&#9873;</span>')+' '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
+    return '<div class="ct-w ct-t3'+(mine?' me':'')+'">'+mdlB(x.r)+'<span class="ct-nm">'+(window.flgImg?flgImg(x.k,34):'<span style="color:'+q.c+'">&#9873;</span>')+' '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
   function rowLow(x,k,mode,P){ const q=CLN[x.k], mine=x.k===k;
     const val=mode==='p'?'<span class="ct-pz">'+prizeText(PRIZE[x.r-1],P)+'</span>':'<b>'+pts(x.s)+'</b>';
     return '<div class="ct-lo'+(mine?' me':'')+'"><i>'+x.r+'</i><span class="ct-nm">'+(window.flgImg?flgImg(x.k,26):'<span style="color:'+q.c+'">&#9873;</span>')+' '+esc2(q.n)+(mine?'<em>миний клан</em>':'')+'<small>'+x.m+' хүн</small></span>'+val+'</div>'; }
@@ -18329,6 +18354,8 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     h+='<div class="ct-wk">'+AB.map((a,i)=>'<div class="ct-c'+(s.active&&i===s.day?' now':'')+'"><i>'+a+'</i><b>'+(c.w===w?pts(c.d[i]):'–')+'</b></div>').join('')+'</div>';
     if(k<0) h+='<div class="ct-ds" style="margin-top:6px">Тэмцээнд оролцохын тулд кланд нэгдэнэ үү.</div>';
     h+='</div>';
+    const H=ctHolder();
+    if(H&&CLN[H.k]) h+='<div class="ct-w ct-tr"><img class="ct-ti" alt="" draggable="false" src="rts/trophy.webp?v=1"><span class="ct-nm"><small>Шилжин явах цом</small>'+esc2(CLN[H.k].n)+' клан'+(H.k===k?'<em>миний клан</em>':'')+'</span>'+(window.flgImg?flgImg(H.k,36):'')+'</div>';
     /* таб */
     h+='<div class="ct-tabs">'+TABS.map(x=>'<button class="'+(tab===x[0]?'on':'')+'" onclick="ALI.sub.ct=\''+x[0]+'\';aliRender()">'+x[1]+'</button>').join('')+'</div>';
     if(tab==='d'){
@@ -18336,7 +18363,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
       h+='<div class="ct-w ct-bx0"><div class="ct-lb">Миний нийт оноо</div><div class="ct-big">'+cn2(mw)+'</div>'+
          '<div class="ct-bar"><u style="width:'+Math.min(100,Math.round(100*mw/top.pt))+'%"></u>'+BOX.map(x=>'<i style="left:'+Math.round(100*x.pt/top.pt)+'%"></i>').join('')+'</div>'+
          '<div class="ct-bxs">'+BOX.map(x=>'<span class="'+(mw>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+' оноо</em></span>').join('')+'</div></div>';
-      if(mine) h+='<div class="ct-w ct-rk"><span class="ct-bd m'+(mine.r<=3?mine.r:0)+'">'+mine.r+'</span><span class="ct-nm">Миний клан · '+esc2(CLN[mine.k].n)+'<small>'+mine.m+' хүн оролцож байна</small></span><b>'+pts(mine.s)+'</b></div>';
+      if(mine) h+='<div class="ct-w ct-rk">'+mdlB(mine.r)+'<span class="ct-nm">Миний клан · '+esc2(CLN[mine.k].n)+'<small>'+mine.m+' хүн оролцож байна</small></span><b>'+pts(mine.s)+'</b></div>';
       if(s.active) h+='<div class="ct-w ct-tp"><b>Яаж оноо авах вэ</b><span>'+TH[s.day].d+'. Өөр сэдвийн үйлдэл өнөөдөр оноо өгөхгүй.</span></div>';
     } else if(tab==='r'){
       h+=b.slice(0,3).map(x=>rowTop(x,k,'r',P)).join('')+'<div class="ct-ls">'+b.slice(3).map(x=>rowLow(x,k,'r',P)).join('')+'</div>';
@@ -18373,6 +18400,8 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 #alv .ct-nm{flex:1;min-width:0;font-size:15px;color:#f1dfae}#alv .ct-nm small{display:block;font-size:11px;color:#a89570}#alv .ct-nm em{font-style:normal;font-size:10px;color:#3a2208;background:#ffd24a;border-radius:6px;padding:1px 5px;margin-left:6px}
 #alv .ct-t3 b{font-size:20px;color:#ffe3a0}#alv .ct-t3 .ct-pz{font-size:11px;color:#ffe3a0;text-align:right;max-width:46%}#alv .ct-t3.me{background:#d9a33a22}
 #alv .ct-bd{flex:none;width:36px;height:36px;box-sizing:border-box;border:0;border-style:solid;border-width:9px;border-image:url(rts/ui_sq.webp?v=1) 90 fill/9px stretch;background:#3a2410;display:flex;align-items:center;justify-content:center;font:bold 15px sans-serif;color:#f1dfae}
+#alv .ct-md{flex:none;width:36px;height:46px;display:flex;align-items:center;justify-content:center;margin:-4px 0}#alv .ct-md img{height:100%;width:auto;filter:drop-shadow(0 2px 2px #0009);pointer-events:none}
+#alv .ct-tr{margin-top:8px}#alv .ct-ti{height:40px;width:auto;flex:none;filter:drop-shadow(0 2px 3px #0009);pointer-events:none}#alv .ct-tr .ct-nm small{display:block;font-size:11px;color:#cdb584}
 #alv .ct-bd.m1{background:#ffd24a;color:#3a2208}#alv .ct-bd.m2{background:#d9dde3;color:#2a2f36}#alv .ct-bd.m3{background:#d08a4e;color:#3a1c06}
 #alv .ct-ls{border-radius:10px;background:#140d06cc;border:1px solid #5c4020;margin:6px 2px 4px}
 #alv .ct-lo{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #5c402066}#alv .ct-lo:last-child{border-bottom:0}
@@ -18406,6 +18435,9 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
 
   /* клан цонхны толгой: хуучин өнгөт туг → зураг */
   function fix(r,k){ try{ r.h=r.h.replace(/<div class="ali-bn( mini)?" style="--c:[^"]*"><i>⚑<\/i><\/div>/g,(m,mi)=>'<div class="ali-bn fl'+(mi||'')+'">'+flgImg(k,mi?70:112)+'</div>'); }catch(e){} return r; }
+  /* кланы цонхны толгой: цомтой клан бол нэрийн дэргэд жижиг цом */
+  const _hh=ALP.home;
+  ALP.home=function(){ const r=_hh.apply(this,arguments); try{ const H=window.ctHolder&&ctHolder(); if(H&&H.k===ALI.k) r.h=r.h.replace('<div class="ali-nm">','<div class="ali-nm"><img class="flg" alt="" style="height:24px;margin-right:6px;vertical-align:-6px" src="rts/trophy.webp?v=1">'); }catch(e){} return r; };
   ['home','terr'].forEach(p=>{ const o=ALP[p]; if(!o) return; ALP[p]=function(){ return fix(o.apply(this,arguments),ALI.k); }; });
 
   /* Удирдах хуудсанд «Туг сонгох» (зөвхөн Хаан) */
@@ -18432,7 +18464,10 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     catch(e){ say('Туг солиж чадсангүй. Дахин оролдоно уу'); try{ sfx('err'); }catch(x){} aliSub(view()); }
     FS.busy=0; };
 
+  /* кланы цонхны эрэмбийн жагсаалт: 1-3-р байранд медаль, бусад нь тоо */
+  if(typeof aliMedal==='function'){ const _am=aliMedal; aliMedal=function(i){ if(i<3) return '<span class="ali-md mdl"><img alt="" draggable="false" src="rts/medal'+(i+1)+'.webp?v=1"></span>'; return _am.apply(this,arguments); }; }
   const sty=document.createElement('style'); sty.textContent=`
+.ali-md.mdl,#alv .ali-md.mdl{background:none!important;border:0!important;box-shadow:none!important;width:30px;height:38px}.ali-md.mdl img{height:100%;width:auto;filter:drop-shadow(0 2px 2px #0009);pointer-events:none}
 .ali-bn.fl{background:none!important;clip-path:none!important;border:0!important;filter:drop-shadow(0 3px 4px #0009);width:auto;min-width:70px}.ali-bn.fl.mini{min-width:44px;height:auto}.ali-bn.fl img{display:block}
 img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);pointer-events:none}
 #alsub .flg-h{font:bold 18px Georgia,serif;color:#ffe3a0;text-align:center;margin:4px 0 2px}#alsub .flg-s{font-size:12px;color:#cdb584;text-align:center;margin-bottom:8px}

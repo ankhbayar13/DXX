@@ -2216,7 +2216,7 @@ function modalContent(k){
   if(k==='dain'){
     const P=totalPower(), fb=facBonus(), rm=relicMul();
     let h='<h2>Дайн</h2><div class="sm" style="text-align:center;margin:-4px 0 6px">⚔ Өнөөдрийн дайралт: <b style="color:#ffd770">'+dnLeft()+'/'+DNMAX+'</b> · шөнө 00:00-д шинэчлэгдэнэ</div>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Дурсгал: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
-    h+='<div class="card"><h3>Миний баг</h3>'+(squad().length?squad().map(id=>{ const d=HEROES.find(x=>x.id===id); return '<div class="hero"><div><span class="s'+d.s+'">'+d.n+'</span></div><div class="sm">'+TNAME[htype(id)]+' · '+TROW[htype(id)]+' · Хүч '+heroPower(id)+'</div></div>'; }).join(''):'<div class="sm">Баатар дуудаарай</div>')+'<div class="sm" style="margin-top:6px">Нум → хүнд морьт, хүнд морьт → морин, морин → нум дээр хүчтэй.</div></div>';
+    h+='<div class="card"><h3>Миний баг</h3>'+(squad().length?squad().map(id=>{ const d=HEROES.find(x=>x.id===id); return '<div class="hero"><div><span class="s'+d.s+'">'+d.n+'</span></div><div class="sm">'+TNAME[hcls(id)]+' · '+TROW[htype(id)]+' · Хүч '+heroPower(id)+'</div></div>'; }).join(''):'<div class="sm">Баатар дуудаарай</div>')+'<div class="sm" style="margin-top:6px">Нум → хүнд морьт, хүнд морьт → морин, морин → нум дээр хүчтэй.</div></div>';
     STAGEZ.forEach((z,zi)=>{
       h+='<h3 style="margin:10px 4px 2px">'+ico(ZTILE[zi],34)+' '+z.n+'</h3>';
       for(let i=z.from;i<=z.to;i++){ const e=ENEMIES[i], locked=i>S.won, done=i<S.won, ratio=P/e.p;
@@ -2658,7 +2658,7 @@ function hdStatsHTML(id){
   else if(HDS.sel&&HDS.sel.t==='r'){ const rq=HDS.sel.k, r=RELICS.find(x=>x.id===L[rq]);
     h+='<div class="hd-sel"><div class="row"><div>'+ico(r.ic,36)+' <b>'+r.n+'</b> <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div><button class="btn" onclick="HDS.sel=null;relUn(\''+id+'\','+rq+')">Тайлах</button></div></div>'; }
   h+='<div class="hd-lv"><div class="row"><b>Түвшин '+l+'/'+HLMAX+'</b><span class="sm">🔮 Ид шидийн чулуу: <b>'+stnN()+'</b></span></div><div class="hd-bar2"><i style="width:'+(l/HLMAX*100)+'%"></i></div>'+(l>=HLMAX?'<div class="sm" style="text-align:center">Дээд түвшин</div>':'<button class="btn" onclick="hlUp(\''+id+'\')">⬆ Түвшин ахиулах · '+f(c.g)+' 🪙 + '+c.s+' 🔮</button>')+'</div>';
-  h+=stnBuyHTML(); h+='<div class="hd-kv"><span>Төрөл</span><b>'+CLSI[htype(id)]+' '+TNAME[htype(id)]+' · '+TROW[htype(id)]+'</b></div>';
+  h+=stnBuyHTML(); h+='<div class="hd-kv"><span>Төрөл</span><b>'+CLSI[hcls(id)]+' '+TNAME[hcls(id)]+' · '+TROW[htype(id)]+'</b></div>';
   h+='<div class="hd-kv"><span>Хүч</span><b>'+f(heroPowerEff(id))+'</b></div>';
   h+='<div class="hd-kv"><span>Цохилтын бонус</span><b>+'+Math.round((rm.a-1-gm.a)*100)+'%</b></div><div class="hd-kv"><span>Биеийн бонус</span><b>+'+Math.round((rm.h-1-gm.h)*100)+'%</b></div>';
   h+='<div class="sm" style="margin-top:6px;text-align:center">Зүүн талд зэвсэг, баруун талд дурсгал. Нүд дээр дарж сайжруулна.</div>';
@@ -10586,7 +10586,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1b70626041';
+var UPDB='94f1e64171';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13504,7 +13504,7 @@ var HSEL=null, HSOP=0;
   function card(x){ const id=x.id, ow=!!S.heroes[id], r=RAR[x.s], d=SPRDATA['hp_'+id], up=ow&&canStar(id);
     let h='<button class="hs-c'+(ow?'':' hn')+(HSEL===id?' sel':'')+'" style="--g:'+r.g+';--c1:'+r.g.split(',')[0]+'" data-id="'+id+'" onclick="hsPick(\''+id+'\')">'+
       (d?'<img class="hsp" src="'+d[0]+'">':'')+'<img class="hs-fr" src="hf/hd_frame'+x.s+'.webp" alt="">'+
-      (ow?'<span class="hs-lv">'+lvOf(id)+'</span>':'')+'<i class="hs-ty">'+(CLSI[htype(id)]||'🗡')+'</i>'+(up?'<i class="hs-up">⬆</i>':'');
+      (ow?'<span class="hs-lv">'+lvOf(id)+'</span>':'')+'<i class="hs-ty">'+(CLSI[hcls(id)]||'🗡')+'</i>'+(up?'<i class="hs-up">⬆</i>':'');
     if(ow&&S.newH&&S.newH[id]) h+='<i class="hc-nw">ШИНЭ</i>';
     h+= ow?'<span class="hs-sr">'+stRow(starOf(id),10)+'</span>':'<span class="hs-x">Эзэмшээгүй</span>';
     return h+'</button>'; }
@@ -18643,6 +18643,133 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 #alv .ew-in{background:#a8201a33}#alv .ew-in .ct-nm{color:#ffd0c8}#alv .ew-in small{display:block;color:#e8b8a8}
 #alv .ew-t{border:1px solid #7a5a30;border-radius:12px;background:#2a1b0d;color:#f1dfae;padding:5px 10px;font:bold 12px sans-serif}#alv .ew-t.on{background:linear-gradient(#ffe08a,#d79a24);color:#3a2208;border-color:#fff1c8}
 `; document.head.appendChild(sty);
+})();
+
+
+/* p32/sk24.js — 24 баатар × 4 өөр чадвар, төлөвүүд (хор, цус алдалт, stun, хуяг, шоолох, таталт),
+   чадварын эффектийн зураг (fx.bin), ангиуд: Хамгаалагч · Довтлогч · Нумтан · Дэмжигч */
+(function(){
+  /* ---------- ангиуд ---------- */
+  const SUPS={oelun:1,borte:1,sorkh:1,hulan:1,yelu:1,haiyun:1};
+  window.hcls=function(id){ return SUPS[id]?'support':htype(id); };
+  Object.assign(TNAME,{heavy:'Хамгаалагч',cav:'Довтлогч',archer:'Нумтан',support:'Дэмжигч'});
+  Object.assign(TROW,{support:'Хойд эгнээ'});
+  try{ CLSI.support='✚'; }catch(e){}
+  ['oelun','borte','sorkh','hulan','yelu','haiyun'].forEach(id=>{ HTYPE[id]='archer'; });
+  try{ delete SUPP.borte; delete SUPP.oelun; }catch(e){}
+
+  /* ---------- эффектийн зураг ---------- */
+  const FXD={slash:[1,'m',72],blood:[0,'m',64],wind:[0,'m',96],slash2:[1,'m',76],rain:[0,'b',96],arrow:[1,'m',50],shock:[0,'b',92],heal:[1,'b',84],glow:[1,'b',84],poison:[0,'b',86],buff:[1,'b',84],armor:[1,'b',96],guard:[1,'m',60],rune:[1,'b',84],orbs:[1,'m',72],tempo:[1,'b',92],chains:[0,'b',86],stun:[1,'h',80],crack:[0,'m',72],revive:[1,'b',96],wolf:[1,'m',150],shadow:[0,'m',92],crown:[1,'m',104],roar:[1,'b',116]};
+  const SFX={}; let FXH=null;
+  (function(){ function ld(n){ try{ fetch('fx.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+      Object.keys(hd).forEach(k=>{ const a=hd[k], im=new Image(); im.onload=()=>{ SFX[k]={img:im,fw:a[2],fh:a[3]}; }; im.src=URL.createObjectURL(new Blob([new Uint8Array(buf,base+a[0],a[1])],{type:'image/webp'})); });
+    }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
+    setTimeout(()=>ld(0),3000); })();
+  /* fx нэмэх: n нэр, x,y хөл, o:{d хугацаа, z хэмжээ×, dl саатал, x1,y1 нисэх, fl эргүүлэх, a чиглэл} */
+  window.fxs=function(n,x,y,o){ try{ if(!BT||!FXD[n]) return; o=o||{}; const L=BT.fs||(BT.fs=[]); if(L.length>60) L.splice(0,L.length-60);
+    L.push({n:n,x:x,y:y,x1:o.x1,y1:o.y1,fl:o.fl?-1:1,d:o.d||0.7,z:o.z||1,t:-(o.dl||0)}); }catch(e){} };
+  const _et=efTick; efTick=function(dt){ try{ if(BT&&BT.fs){ BT.fs.forEach(e=>e.t+=dt/e.d); BT.fs=BT.fs.filter(e=>e.t<1); } }catch(e){} return _et.apply(this,arguments); };
+  const _ed=efDraw; efDraw=function(c){ const r=_ed.apply(this,arguments);
+    try{ (BT.fs||[]).forEach(e=>{ if(e.t<0) return; const s=SFX[e.n]; if(!s) return; const D=FXD[e.n], i=Math.min(5,Math.floor(e.t*6)), w=D[2]*e.z, h=w*s.fh/s.fw;
+        let x=e.x, y=e.y; if(e.x1!=null){ const p=Math.min(1,e.t*1.6); x=e.x+(e.x1-e.x)*p; y=e.y+(e.y1-e.y)*p; }
+        c.save(); if(D[0]) c.globalCompositeOperation='lighter'; c.globalAlpha=0.96;
+        c.translate(x,y); if(D[1]==='b') c.translate(0,4); else if(D[1]==='m') c.translate(0,-22); else c.translate(0,-62); if(e.fl<0) c.scale(-1,1);
+        c.drawImage(s.img,i*s.fw,0,s.fw,s.fh,-w/2,D[1]==='b'?-h:-h/2,w,h); c.restore(); });
+      /* төлвийн жижиг тэмдэг */
+      BT.units.forEach(u=>{ if(u.hp<=0||u.sup) return; const t=BT.t, L=[]; if(u.dot&&u.dot.until>t) L.push(u.dot.c==='b'?'#e23b34':u.dot.c==='f'?'#ff9a2a':'#b45cff'); if(u.cd>1.5&&u.side) L.push('#ffe14a'); if(u.arm&&u.arm.t>t) L.push('#5fb8ff'); if(u.vu&&u.vu.t>t) L.push('#ff6a3a'); if(u.tn&&u.tn>t) L.push('#ffa530'); if(u.bAtk&&u.bAtk.t>t&&u.bAtk.m>1) L.push('#fff07a'); if(u.wk&&u.wk>t) L.push('#9aa4b4'); if(!L.length) return;
+        const y=u.y-STDH-14, x0=u.x-(L.length*7)/2; L.forEach((col,k)=>{ c.fillStyle='#000'; c.fillRect(x0+k*7-1,y-1,7,7); c.fillStyle=col; c.fillRect(x0+k*7,y,5,5); }); });
+    }catch(e){}
+    return r; };
+
+  /* ---------- төлвүүд: хуяг, нэмэгдсэн гэмтэл, таталт ---------- */
+  const _th=turnHit; turnHit=function(u,tg){ const h0=tg.hp, d0=tg.dead; const r=_th.apply(this,arguments);
+    try{ const dmg=h0-tg.hp; if(dmg>0&&!d0){ let f=1; if(tg.arm&&tg.arm.t>BT.t) f*=(1-tg.arm.p); if(tg.vu&&tg.vu.t>BT.t) f*=(1+tg.vu.p); if(f!==1){ const adj=dmg*(f-1); tg.hp=Math.min(tg.max,tg.hp-adj); if(tg.hp>0) tg.dead=null; else if(!tg.dead) tg.dead=BT.t; } }
+      if(!u.side&&u.id&&hcls(u.id)==='support'){ const L=BT.fx; if(L.length&&L[L.length-1].k==='arrow') L.pop(); fxs('orbs',tg.x,tg.y,{d:0.5,z:0.55}); } }catch(e){}
+    return r; };
+  const _tp=turnPick; turnPick=function(u){ try{ if(u.side){ const T=BT.units.filter(a=>!a.side&&a.hp>0&&!a.sup&&a.tn&&a.tn>BT.t); if(T.length) return T[Math.floor(Math.random()*T.length)]; } }catch(e){} return _tp.apply(this,arguments); };
+
+  /* ---------- чадварын тодорхойлолт ---------- */
+  /* e: дайсан ('one' сонгосон, 'all' бүгд, 'three' 3 санамсаргүй); h цохилтын x; hn удаа; ex:[HP%,x]; dash давхин цохих;
+     dot:[төрөл p/b/f, x/с, с]; st stun с; wk с; vu:[p,с] (авах гэмтэл нэмэх);
+     a: өөрийн тал ('self','all','low'); heal; arm:[p,с]; atkb:[p,с]; cl; en; hs; tn с; rv;
+     f: эффектүүд [нэр, хаана: p нисэх, t дайсан, c өөрөө, a холбоотон, нэмэлт саатал] */
+  const SK={
+    /* ===== Нумтан ===== */
+    khasar:[['Хасарын сум',{e:'one',h:5,f:[['arrow','p']]}],['Хуяг цоолох',{e:'one',h:4,vu:[0.3,8],f:[['arrow','p'],['crack','t',0.25]]}],['Борооны сум',{e:'all',h:2.4,f:[['rain','t']]}],['Хасарын мэргэн',{e:'one',h:14,ex:[0.35,26],f:[['arrow','p'],['slash','t',0.25],['shock','t',0.3]]}]],
+    ogodei:[['Хоёр сум',{e:'one',h:2.8,hn:2,f:[['arrow','p'],['arrow','p',0.2]]}],['Борооны сум',{e:'all',h:2.4,f:[['rain','t']]}],['Оддын бороо',{e:'all',h:3,f:[['rain','t'],['glow','t',0.2]]}],['Хааны бороо',{e:'all',h:4.2,a:'all',atkb:[0.2,10],f:[['rain','t'],['crown','t',0.25],['buff','a',0.2]]}]],
+    tolui:[['Хортой сум',{e:'one',h:3.5,dot:['p',0.45,8],f:[['arrow','p'],['poison','t',0.25]]}],['Хорын бороо',{e:'all',h:1.8,dot:['p',0.4,8],f:[['rain','t'],['poison','t',0.25]]}],['Хор дэлгэрэх',{e:'all',h:1.2,dot:['p',0.7,10],f:[['poison','t']]}],['Үхлийн хор',{e:'one',h:7,dot:['p',1.2,10],f:[['arrow','p'],['poison','t',0.2],['shadow','t',0.3]]}]],
+    jochi:[['Нарийн сум',{e:'one',h:5,f:[['arrow','p']]}],['Хол харвалт',{e:'one',h:6.5,f:[['arrow','p'],['shock','t',0.3]]}],['Мэргэн тэмдэг',{e:'one',h:2.5,vu:[0.35,10],f:[['arrow','p'],['rune','t',0.25]]}],['Жочийн сум',{e:'one',h:14,ex:[0.35,24],f:[['arrow','p'],['slash2','t',0.25],['glow','t',0.3]]}]],
+    belgutei:[['Дуут сум',{e:'one',h:3.2,st:4,f:[['arrow','p'],['stun','t',0.25]]}],['Дохио сум',{e:'all',h:1.2,wk:8,f:[['rain','t'],['crack','t',0.2]]}],['Хөнгөн хөл',{a:'self',atkb:[0.35,10],hs:1,f:[['tempo','c']]}],['Дуут бороо',{e:'all',h:3.2,st:5,f:[['rain','t'],['stun','t',0.3]]}]],
+    harvaach:[['Хурдан сум',{e:'one',h:4.5,f:[['arrow','p']]}],['Хоёр сум',{e:'one',h:2.8,hn:2,f:[['arrow','p'],['arrow','p',0.2]]}],['Ухрах харвалт',{e:'one',h:4,a:'self',arm:[0.3,8],f:[['arrow','p'],['guard','c',0.1]]}],['Залуугийн бороо',{e:'all',h:3.6,f:[['rain','t'],['glow','t',0.2]]}]],
+    /* ===== Дэмжигч ===== */
+    oelun:[['Эхийн гар',{a:'low',heal:0.4,f:[['heal','a']]}],['Сүүний ивээл',{a:'all',heal:0.2,f:[['heal','a']]}],['Эхийн даллага',{a:'all',cl:1,heal:0.1,f:[['glow','a']]}],['Эхийн залбирал',{a:'all',heal:0.38,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
+    borte:[['Хатны үг',{a:'all',atkb:[0.25,10],f:[['buff','a']]}],['Хатны тушаал',{a:'all',atkb:[0.3,8],hs:1,f:[['buff','a'],['tempo','a',0.2]]}],['Эрдмийн дуу',{a:'all',atkb:[0.25,10],heal:0.1,f:[['glow','a'],['heal','a',0.2]]}],['Хатны ивээл',{a:'all',atkb:[0.25,12],en:1,heal:0.15,f:[['crown','a'],['orbs','a',0.25]]}]],
+    sorkh:[['Бодлын хэрэм',{a:'all',arm:[0.25,8],f:[['armor','a']]}],['Тосгоны ивээл',{a:'all',arm:[0.3,8],heal:0.1,f:[['armor','a'],['heal','a',0.2]]}],['Хор цэвэрлэх',{a:'all',cl:1,heal:0.15,f:[['heal','a'],['glow','a',0.2]]}],['Эрхмийн хаалт',{a:'all',arm:[0.5,10],cl:1,f:[['guard','a'],['armor','a',0.2]]}]],
+    hulan:[['Хурдан даалга',{a:'all',en:1,f:[['orbs','a']]}],['Салхин хурд',{a:'all',hs:1,f:[['tempo','a']]}],['Мордох дохио',{a:'all',en:2,f:[['orbs','a'],['tempo','a',0.2]]}],['Хуланы тулаан',{a:'all',en:2,hs:1,atkb:[0.2,10],f:[['crown','a'],['orbs','a',0.2],['buff','a',0.3]]}]],
+    yelu:[['Тэмдэглэх',{e:'one',h:1.5,vu:[0.3,10],f:[['rune','t']]}],['Тооны ухаан',{e:'all',vu:[0.3,8],f:[['crack','t']]}],['Бичгийн хууль',{e:'one',h:2,st:6,wk:8,f:[['chains','t']]}],['Түүхийн шийтгэл',{e:'all',h:1.5,wk:8,vu:[0.25,8],st:3,f:[['chains','t'],['rune','t',0.2]]}]],
+    haiyun:[['Амьсгалын мөн',{a:'all',heal:0.2,f:[['heal','a']]}],['Урт наслал',{a:'all',heal:0.25,arm:[0.2,8],f:[['heal','a'],['armor','a',0.2]]}],['Дао',{a:'all',arm:[0.4,8],cl:1,f:[['armor','a'],['glow','a',0.2]]}],['Мөнхийн сэргэл',{a:'all',rv:0.5,heal:0.35,cl:1,f:[['revive','a'],['heal','a',0.25]]}]],
+    /* ===== Хамгаалагч ===== */
+    chinggis:[['Хааны сэлэм',{e:'one',h:4.5,a:'self',arm:[0.25,8],f:[['slash','t'],['guard','c',0.1]]}],['Хааны уриа',{a:'all',atkb:[0.3,10],heal:0.1,f:[['roar','c'],['buff','a',0.2]]}],['Тэнгэрийн мандат',{e:'all',st:4,h:1.2,f:[['crown','t'],['stun','t',0.3]]}],['Дэлхийн эзэн',{e:'all',h:5,a:'all',atkb:[0.4,10],f:[['wolf','t'],['crown','t',0.25],['buff','a',0.2]]}]],
+    khubilai:[['Анхаарал татах',{a:'self',tn:8,arm:[0.4,8],f:[['roar','c'],['guard','c',0.1]]}],['Бэхэлсэн хуяг',{a:'self',arm:[0.55,10],tn:6,f:[['armor','c'],['guard','c',0.2]]}],['Гурван цохилт',{e:'three',h:2.6,st:4,f:[['chains','t'],['slash','t',0.2]]}],['Хубилайн цохилт',{e:'all',h:3.2,a:'self',arm:[0.5,10],tn:8,f:[['crown','t'],['armor','c',0.2],['roar','c',0.3]]}]],
+    jelme:[['Бамбай хаалт',{a:'self',arm:[0.5,8],tn:8,f:[['guard','c'],['roar','c',0.2]]}],['Дундаас хамгаалах',{a:'all',arm:[0.3,8],f:[['armor','a']]}],['Бамбайн цохилт',{e:'one',h:3.8,st:5,f:[['shock','t'],['stun','t',0.25]]}],['Зэлмэгийн хэрэм',{a:'all',arm:[0.45,10],tn:10,f:[['armor','a'],['guard','a',0.25]]}]],
+    arav:[['Жадны цохилт',{e:'one',h:4.5,f:[['slash','t'],['crack','t',0.2]]}],['Эгнээ барих',{a:'all',arm:[0.25,8],f:[['armor','a']]}],['Хамт зогсох',{a:'self',tn:8,arm:[0.4,8],f:[['guard','c'],['roar','c',0.2]]}],['Аравтын тулаан',{e:'all',h:3.2,a:'all',arm:[0.3,10],f:[['slash2','t'],['armor','a',0.25]]}]],
+    khukhchu:[['Бөөгийн хараал',{e:'all',h:1.2,wk:8,f:[['shadow','t']]}],['Сүнсний хуяг',{a:'all',arm:[0.3,8],cl:1,f:[['wolf','c'],['armor','a',0.2]]}],['Тэнгэрийн дуудлага',{e:'three',h:1.6,st:4,f:[['chains','t'],['stun','t',0.25]]}],['Бөөгийн шившлэг',{e:'all',h:2.6,st:4,wk:8,f:[['wolf','t'],['stun','t',0.3]]}]],
+    /* ===== Довтлогч ===== */
+    subeedei:[['Хурц цохилт',{e:'one',h:5,dash:1,f:[['slash','t']]}],['Давхар довтолгоо',{e:'one',h:2.8,hn:2,dash:1,f:[['slash2','t']]}],['Тойрч довтлох',{e:'one',h:5.5,vu:[0.25,8],dash:1,f:[['wind','t'],['crack','t',0.25]]}],['Сүбээдэйн мэх',{e:'one',h:10,dot:['b',0.8,10],dash:1,f:[['slash','t'],['blood','t',0.2],['crown','t',0.3]]}]],
+    mukhulai:[['Жадны цохилт',{e:'one',h:5,dash:1,f:[['slash','t']]}],['Цоолох жад',{e:'one',h:3.5,vu:[0.35,8],dash:1,f:[['slash','t'],['crack','t',0.25]]}],['Жадны шугам',{e:'three',h:3,dash:1,f:[['slash','t']]}],['Мухулайн ширүүн',{e:'all',h:4,vu:[0.3,8],dash:1,f:[['crown','t'],['crack','t',0.25]]}]],
+    boorchu:[['Хурц сэлэм',{e:'one',h:5,dash:1,f:[['slash','t']]}],['Цус алдуулах',{e:'one',h:2.8,dot:['b',0.7,10],dash:1,f:[['slash','t'],['blood','t',0.2]]}],['Давхар зүсэлт',{e:'one',h:2.8,hn:2,dot:['b',0.5,8],dash:1,f:[['slash2','t'],['blood','t',0.25]]}],['Борохулын дайралт',{e:'all',h:3.6,dot:['b',0.6,10],dash:1,f:[['wind','t'],['blood','t',0.25]]}]],
+    borchi:[['Тууштай цохилт',{e:'one',h:5,dash:1,f:[['slash','t']]}],['Хуяг эвдэх',{e:'one',h:3.4,vu:[0.35,8],dash:1,f:[['slash','t'],['crack','t',0.25]]}],['Давхар цохилт',{e:'one',h:3,hn:2,dash:1,f:[['slash2','t']]}],['Боорчийн цохилт',{e:'one',h:11,vu:[0.3,8],dash:1,f:[['slash','t'],['crack','t',0.25],['crown','t',0.3]]}]],
+    zev:[['Хурдан сэлэм',{e:'one',h:4.5,dash:1,f:[['slash','t']]}],['Давхар цохилт',{e:'one',h:2.8,hn:2,dash:1,f:[['slash2','t']]}],['Салхин дайралт',{e:'all',h:2.4,dash:1,f:[['wind','t']]}],['Зэвийн уур',{e:'all',h:3.4,dot:['b',0.5,10],dash:1,f:[['slash2','t'],['blood','t',0.25]]}]],
+    chagadai:[['Хатуу цохилт',{e:'one',h:5,dash:1,f:[['slash','t'],['shock','t',0.2]]}],['Хуяг эвдэх',{e:'one',h:3.4,vu:[0.35,8],dash:1,f:[['slash','t'],['crack','t',0.25]]}],['Хүнд сэлэм',{e:'one',h:4.2,st:5,dash:1,f:[['shock','t'],['stun','t',0.25]]}],['Цагаадайн шийтгэл',{e:'one',h:12,ex:[0.35,20],dash:1,f:[['shadow','t'],['slash','t',0.2],['blood','t',0.3]]}]],
+    jamukha:[['Заль мэх',{e:'one',h:4.2,wk:8,dash:1,f:[['shadow','t']]}],['Хүнд зүслэг',{e:'one',h:3,dot:['b',0.9,10],dash:1,f:[['shadow','t'],['blood','t',0.2]]}],['Давхар цохилт',{e:'one',h:3,hn:2,dash:1,f:[['shadow','t'],['slash2','t',0.15]]}],['Жамухын тавилан',{e:'one',h:11,ex:[0.35,20],dot:['b',0.8,10],dash:1,f:[['shadow','t'],['wolf','t',0.2],['blood','t',0.35]]}]]
+  };
+  const pc=x=>Math.round(x*100);
+  function descOf(sp,m){ const o=[]; const hh=sp.h?(sp.h*m).toFixed(1):''; const hn=sp.hn||1;
+    if(sp.e){ const who=sp.e==='one'?'Сонгосон дайсанд':sp.e==='all'?'Бүх дайсанд':'3 дайсанд'; if(sp.h) o.push(who+' '+hh+' дахин цохилт'+(hn>1?' ×'+hn:'')+(sp.ex?' (HP '+pc(sp.ex[0])+'%-иас доош бол '+(sp.ex[1]*m).toFixed(0)+' дахин)':'')); else o.push(who); }
+    if(sp.dot){ const nm={p:'хорлоно',b:'цус алдуулна',f:'шатаана'}[sp.dot[0]]; o.push(sp.dot[2]+'с '+nm+' (секунд бүр цохилтын '+pc(sp.dot[1]*m)+'%)'); }
+    if(sp.st) o.push(sp.st+'с ээлжээ алгасна'); if(sp.wk) o.push('цохилт -35% ('+sp.wk+'с)'); if(sp.vu) o.push('авах гэмтэл +'+pc(sp.vu[0])+'% ('+sp.vu[1]+'с)');
+    if(sp.a){ const w=sp.a==='all'?'Бүх цэрэгт':sp.a==='self'?'Өөртөө':'Хамгийн шархтайд'; const q=[];
+      if(sp.rv) q.push('унасан баатрыг '+pc(sp.rv)+'% HP-тэй босгоно'); if(sp.heal) q.push(pc(Math.min(0.9,sp.heal*m))+'% эдгээнэ'); if(sp.cl) q.push('хор, сулралыг цэвэрлэнэ'); if(sp.arm) q.push('авах гэмтэл -'+pc(Math.min(0.75,sp.arm[0]*(1+(m-1)*0.5)))+'% ('+sp.arm[1]+'с)'); if(sp.atkb) q.push('цохилт +'+pc(sp.atkb[0]*(1+(m-1)*0.6))+'% ('+sp.atkb[1]+'с)'); if(sp.en) q.push('+'+sp.en+' энерги'); if(sp.hs) q.push('ээлж түргэснэ'); if(sp.tn) q.push('дайсныг өөр рүүгээ татна ('+sp.tn+'с)');
+      if(q.length) o.push(w+' '+q.join(', ')); }
+    return o.join('. '); }
+  const uik=sp=>sp.e==='one'?'snipe':sp.e?(sp.h&&!sp.a?'cleave':'cleave'):(sp.heal||sp.rv||sp.cl)?'heal':(sp.arm||sp.tn)?'guard':'rally';
+  const _hs0=heroSkills;
+  heroSkills=function(id){ const L=SK[id]; if(!L) return _hs0(id);
+    return L.map((e,i)=>{ const sp=e[1], lm=skMul(id,i), m=lm*(1+0.05*i), k=uik(sp), d=descOf(sp,m), cd=14+i*2, arr=[k,e[0],d,cd,m,sp];
+      return {i:i,k:k,n:e[0],d:d,cd:cd,m:m,lm:lm,L:skLv(id,i),cost:SKCOST[i],lv:SKUNL[i],arr:arr}; }); };
+  Object.keys(SK).forEach(id=>{ const sp=SK[id][0][1]; HSK[id]=[uik(sp),SK[id][0][0],descOf(sp,1),14,1,sp]; });
+
+  /* ---------- гүйцэтгэл ---------- */
+  const _cs=castSkill;
+  castSkill=function(u){ const d=HSK[u.id]; if(!d||!d[5]) return _cs.apply(this,arguments); const sp=d[5];
+    const U=BT.units, en=U.filter(x=>x.side&&x.hp>0&&!x.sup), al=U.filter(x=>!x.side&&x.hp>0&&!x.sup);
+    if(sp.e&&!en.length) return false;
+    const lv=Math.max(1,S.heroes[u.id]||1), m=d[4]||1, k=(1+SKB[Math.min(6,lv-1)]/100)*m, t=BT.t;
+    const FX=(f,tg,ws)=>{ if(!f||!tg) return; f.forEach(a=>{ const n=a[0], w=a[1], dl=a[2]||0; if(ws.indexOf(w)<0) return; if(w==='p') fxs(n,u.x,u.y-18,{x1:tg.x,y1:tg.y-18,d:0.55,dl:dl,fl:tg.x<u.x}); else if(w==='c') fxs(n,u.x,u.y,{d:0.7,dl:dl}); else fxs(n,tg.x,tg.y,{d:0.7,dl:dl,fl:tg.x<u.x}); }); };
+    u.atkT=0.5; u.hit=0.25;
+    /* дайсан */
+    let tgs=[];
+    if(sp.e){ if(sp.e==='all') tgs=en.slice(); else if(sp.e==='three') tgs=en.slice().sort(()=>Math.random()-0.5).slice(0,3); else { const f=BT.forceTg&&BT.forceTg.hp>0?BT.forceTg:null; tgs=[f||turnPick(u)||en[0]]; }
+      if(sp.dash&&tgs[0]){ const tg=tgs[0]; u.x+=(tg.x-u.x)*(sp.e==='one'?0.6:0.4); u.y+=(tg.y-u.y)*(sp.e==='one'?0.6:0.4); u.fdir=tg.x>=u.x?1:-1; for(let q=0;q<5;q++) BT.pt.push({x:u.x,y:u.y,vx:(Math.random()-0.5)*30,vy:-6-Math.random()*10,t:0,l:0.6,c:'dust'}); }
+      tgs.forEach(e=>{ if(sp.h){ for(let q=0;q<(sp.hn||1);q++){ let mult=sp.h; if(sp.ex&&e.hp<=e.max*sp.ex[0]) mult=sp.ex[1]; let dm=Math.round(u.atk*mult*k); if(e.vu&&e.vu.t>t) dm=Math.round(dm*(1+e.vu.p)); e.hp-=dm; u.dd=(u.dd||0)+dm; BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:dm,big:true,side:0}); }
+          e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; for(let q=0;q<6;q++) BT.pt.push({x:e.x,y:e.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:'spark'}); }
+        if(e.hp>0){ if(sp.dot){ const dps=u.atk*sp.dot[1]*k, o=e.dot; if(!o||o.until<t||o.dps<=dps) e.dot={until:t+sp.dot[2],dps:dps,acc:0,c:sp.dot[0]}; }
+          if(sp.st) e.cd=(e.cd>0?e.cd:0)+sp.st*Math.min(1.4,1+(k-1)*0.2); if(sp.wk) e.wk=t+sp.wk; if(sp.vu) e.vu={p:sp.vu[0],t:t+sp.vu[1]}; }
+        FX(sp.f,e,'pt'); });
+      BT.shake=Math.min(1,(BT.shake||0)+(sp.h&&sp.h>=8?0.6:0.3)); }
+    /* өөрийн тал */
+    if(sp.a){ let as=[]; if(sp.a==='all') as=al.slice(); else if(sp.a==='self') as=[u]; else as=[al.slice().sort((a,b)=>a.hp/a.max-b.hp/b.max)[0]].filter(Boolean);
+      if(sp.rv){ const dead=U.filter(x=>!x.side&&x.hp<=0&&!x.sup&&x.id).sort((a,b)=>(b.max||0)-(a.max||0))[0]; if(dead){ dead.hp=dead.max*Math.min(1,sp.rv*Math.min(1.3,k)); dead.dead=null; dead.dot=null; dead.cd=0; as.push(dead); } }
+      as.forEach(a=>{ if(sp.heal) a.hp=Math.min(a.max,a.hp+a.max*Math.min(0.9,sp.heal*k)); if(sp.cl){ a.dot=null; a.wk=0; a.vu=null; }
+        if(sp.arm){ const p=Math.min(0.75,sp.arm[0]*(1+(k-1)*0.5)); if(!a.arm||a.arm.t<t||a.arm.p<p) a.arm={p:p,t:t+sp.arm[1]}; else a.arm.t=Math.max(a.arm.t,t+sp.arm[1]); }
+        if(sp.atkb){ const mm=1+sp.atkb[0]*(1+(k-1)*0.6); if(!a.bAtk||a.bAtk.t<t||a.bAtk.m<mm) a.bAtk={m:mm,t:t+sp.atkb[1]}; }
+        if(sp.en) a.en=Math.min(5,(a.en==null?1:a.en)+sp.en);
+        if(sp.hs&&!a.go){ a.cd=0; a.lastGo=-99; }
+        if(sp.tn&&a===u) u.tn=t+sp.tn;
+        FX(sp.f,a,'a'); }); if(sp.tn&&!as.includes(u)) u.tn=t+sp.tn; }
+    FX(sp.f,u,'c');
+    BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true; };
 })();
 
 </script><script>(function(){

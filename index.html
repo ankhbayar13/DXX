@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='77dd0f63fb';
+var UPDB='a4b6a6614c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14931,6 +14931,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     Q={root,cv,ctx:cv.getContext('2d'),hud,ships,en:[],pb:[],pt:[],fx:[],vx:[],cr:[],isl:mkIslands(),t:0,loot:{gold:0,wood:0,alt:0},kills:0,spawn:1.5,boss:0,bossT:60,cd:[0,0,0,0,0],sh:0,run:true,over:false,last:performance.now(),
       joy:null,key:{},dpr:1,W:0,H:0,sc:1,cam:{x:0,y:0},btn:[],alt:0};
     ships.forEach(s=>{ s.spd*=1; });
+    Q.hl=mkHeal();
     SK=SKA.eq().map(id=>SKA.MAP[id]);
     SK.forEach((s,i)=>{ const b=document.createElement('div'); b.style.cssText='position:relative;width:54px;height:54px;border-radius:50%;background:rgba(10,20,35,.72);border:2px solid #ffd770;overflow:hidden;pointer-events:auto;box-shadow:0 2px 8px #000a';
       b.innerHTML='<img src="'+s.ic+'?v=1" style="width:100%;height:100%;object-fit:cover;pointer-events:none" draggable="false"><div class="cdv" style="position:absolute;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;color:#fff;font:800 15px sans-serif;pointer-events:none"></div><span style="position:absolute;left:3px;bottom:0;color:#ffd770;font:800 10px sans-serif;text-shadow:0 1px 2px #000;pointer-events:none">'+SKL(s.id)+'</span>';
@@ -15001,10 +15002,21 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   function collide(s){ for(const o of Q.isl){ const dx=s.x-o.x, dy=s.y-o.y, d=Math.hypot(dx,dy), m=o.r+s.r*.7; if(d<m&&d>0){ s.x=o.x+dx/d*m; s.y=o.y+dy/d*m; } }
     const rr=Math.hypot(s.x,s.y); if(rr>WORLD){ s.x*=WORLD/rr; s.y*=WORLD/rr; } }
 
+  /* ===== Цус нөхөх арлууд: нэг мөчид нэг арал идэвхтэй (60 сек), «+» тэмдэгтэй. Хөлөг 10 сек зогсвол +50% HP, нэг идэвхжилд ганц удаа. Дайрвал 10 сек дахин эхэлнэ ===== */
+  const HEAL_T=60, HEAL_STAY=10, HEAL_NEAR=60;
+  function mkHeal(){ const c=[]; Q.isl.forEach((o,i)=>{ if(o.k<4) c.push(i); }); c.sort((a,b)=>Math.atan2(Q.isl[a].y,Q.isl[a].x)-Math.atan2(Q.isl[b].y,Q.isl[b].x));
+    const n=Math.min(3,c.length), ids=[]; for(let i=0;i<n;i++) ids.push(c[Math.floor(i*c.length/n)]); return {ids:ids,act:0,t:HEAL_T,stay:0,got:false}; }
+  function healUpdate(dt){ const H=Q.hl; if(!H||!H.ids.length) return; H.t-=dt; if(H.t<=0){ H.act=(H.act+1)%H.ids.length; H.t=HEAL_T; H.got=false; H.stay=0; }
+    const o=Q.isl[H.ids[H.act]], L=leader(); if(!L||H.got){ H.stay=0; return; }
+    const kk=Q.key||{}, moving=!!Q.joy||kk.w||kk.a||kk.s||kk.d||kk.arrowup||kk.arrowdown||kk.arrowleft||kk.arrowright, hit=Q.ships.some(s=>s.alive&&s.hitT>0);
+    if(Math.hypot(L.x-o.x,L.y-o.y)<o.r+HEAL_NEAR&&!moving&&!hit){ H.stay+=dt;
+      if(H.stay>=HEAL_STAY){ H.got=true; H.stay=0; Q.ships.forEach(s=>{ if(!s.alive) return; const h=s.max*.5, add=Math.min(h,s.max-s.hp); s.hp+=add; Q.fx.push({x:s.x,y:s.y-s.wid,t:1.1,v:'+'+Math.round(add),c:'#9dff9d'}); Q.vx.push({n:'impact',x:s.x,y:s.y,t:0,d:.5,s:40}); }); try{ sfx('win'); }catch(e){} } }
+    else H.stay=0; }
   function update(dt){
     Q.t+=dt; if(Q.sh>0) Q.sh-=dt; if(Q.windT>0) Q.windT-=dt; if(Q.drumT>0) Q.drumT-=dt; const wm=Q.windT>0?2:1; for(let i=0;i<5;i++) if(Q.cd[i]>0) Q.cd[i]=Math.max(0,Q.cd[i]-dt);
     const L=leader();
     if(!L){ finish(false,true); return; }
+    healUpdate(dt);
     // жойстик/гар
     let ax=0, ay=0, th=0;
     if(Q.joy){ const dx=Q.joy.x-Q.joy.x0, dy=Q.joy.y-Q.joy.y0, m=Math.hypot(dx,dy); if(m>6){ ax=dx/m; ay=dy/m; th=clamp(m/60,.35,1); } }
@@ -15097,6 +15109,14 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       else { c.fillStyle='#caa86a'; c.beginPath(); c.arc(o.x,o.y,o.r*1.04,0,Math.PI*2); c.fill(); c.fillStyle='#4f9d3d'; c.beginPath(); c.arc(o.x,o.y,o.r*.86,0,Math.PI*2); c.fill(); c.fillStyle='#3d7c2e'; c.beginPath(); c.arc(o.x-o.r*.2,o.y-o.r*.15,o.r*.5,0,Math.PI*2); c.fill();
         c.fillStyle='#8a8f98'; c.beginPath(); c.arc(o.x+o.r*.3,o.y+o.r*.25,o.r*.22,0,Math.PI*2); c.fill();
         if(o.k===0){ c.fillStyle='#e7dcc4'; c.beginPath(); c.arc(o.x-o.r*.12,o.y+o.r*.05,o.r*.17,0,Math.PI*2); c.fill(); c.fillStyle='#8c5a2b'; c.beginPath(); c.arc(o.x-o.r*.12,o.y+o.r*.05,o.r*.06,0,Math.PI*2); c.fill(); } } }
+    // цус нөхөх арал: «+» тэмдэг
+    if(Q.hl&&Q.hl.ids.length){ const H=Q.hl, o=Q.isl[H.ids[H.act]], pu=1+Math.sin(Q.t*4)*.06; c.save(); c.translate(o.x,o.y);
+      c.globalAlpha=.9; c.strokeStyle=H.got?'rgba(180,180,180,.7)':'rgba(127,255,160,.95)'; c.lineWidth=4; c.setLineDash([10,8]); c.beginPath(); c.arc(0,0,(o.r+HEAL_NEAR)*pu,0,Math.PI*2); c.stroke(); c.setLineDash([]);
+      const R=Math.max(16,o.r*.42); c.fillStyle=H.got?'rgba(110,110,110,.9)':'rgba(30,150,70,.95)'; c.beginPath(); c.arc(0,-o.r*.2,R,0,Math.PI*2); c.fill(); c.strokeStyle='#fff'; c.lineWidth=3; c.stroke();
+      c.fillStyle='#fff'; c.fillRect(-R*.55,-o.r*.2-R*.14,R*1.1,R*.28); c.fillRect(-R*.14,-o.r*.2-R*.55,R*.28,R*1.1);
+      c.font='bold 14px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.8)'; const tx=H.got?'Нөхсөн · '+Math.ceil(H.t)+'с':'Цус нөхөх · '+Math.ceil(H.t)+'с'; c.strokeText(tx,0,-o.r*.2+R+16); c.fillStyle='#fff'; c.fillText(tx,0,-o.r*.2+R+16);
+      c.restore();
+      if(H.stay>0){ const L=leader(); if(L){ c.save(); c.font='bold 13px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.8)'; const t2='Нөхөж байна '+Math.ceil(HEAL_STAY-H.stay)+'с'; c.strokeText(t2,L.x,L.y-L.len-22); c.fillStyle='#9dff9d'; c.fillText(t2,L.x,L.y-L.len-22); c.restore(); } } }
     // ул
     for(const p of Q.pt){ c.fillStyle='rgba(255,255,255,'+(p.t*.35)+')'; c.beginPath(); c.arc(p.x,p.y,p.r*(1.4-p.t*.3),0,Math.PI*2); c.fill(); }
     // ачаа
@@ -15136,6 +15156,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     Q.isl.forEach(o=>{ c.fillStyle=o.k>=4?'#8a6a4a':'#5da64a'; c.beginPath(); c.arc(cx+o.x*k,cy+o.y*k,Math.max(2,o.r*k),0,Math.PI*2); c.fill(); });
     // харагдах хэсэг
     const vw=Q.W/Q.sc*k, vh=Q.H/Q.sc*k; c.strokeStyle='rgba(255,255,255,.55)'; c.lineWidth=1; c.strokeRect(cx+Q.cam.x*k-vw/2,cy+Q.cam.y*k-vh/2,vw,vh);
+    if(Q.hl&&Q.hl.ids.length){ const o=Q.isl[Q.hl.ids[Q.hl.act]]; c.fillStyle=Q.hl.got?'#9a9a9a':'#7fffa0'; c.beginPath(); c.arc(cx+o.x*k,cy+o.y*k,5,0,Math.PI*2); c.fill(); c.strokeStyle='#fff'; c.lineWidth=1.5; c.stroke(); }
     // авдар
     c.fillStyle='#ffd770'; Q.cr.forEach(o=>{ c.fillRect(cx+o.x*k-1.5,cy+o.y*k-1.5,3,3); });
     // дайсан

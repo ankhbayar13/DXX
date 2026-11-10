@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='294e45b0a7';
+var UPDB='3e0ae7c538';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20159,17 +20159,20 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const myName=()=>String((S.prof&&S.prof.name)||'Хаан').slice(0,14);
   const W=()=>{ const w=S.war=S.war||{k:0,b:0,best:0}; if(!w.m||w.m.mi!==mi()) w.m={mi:mi(),k:0,d:0}; if(!w.dc||w.dc.d!==day()) w.dc={d:day(),m:{}}; return w; };
   const on=()=>{ try{ return typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM&&FBM.F; }catch(e){ return false; } };
+  const DG={w:'—',r:'—',n:-1,e:''};
+  const ec=e=>String((e&&(e.code||e.message))||e||'?').slice(0,40);
   const mname=m=>{ const y=Math.floor(m/12), mm=m%12+1; return y+'-'+(mm<10?'0':'')+mm; };
 
-  function pushMe(){ if(!on()) return Promise.resolve(); const w=W(), {F,db}=FBM;
-    let hp=w.hp||0, fl=0; try{ fl=(S.yard&&S.yard.sh&&S.yard.sh[2])||0; }catch(e){} if(!(hp>0)||fl<1) return Promise.resolve();
+  function pushMe(){ if(!on()){ DG.w='нэвтрээгүй / Firebase холбогдоогүй'; return Promise.resolve(); } const w=W(), {F,db}=FBM;
+    let hp=w.hp||0, fl=0; try{ fl=(S.yard&&S.yard.sh&&S.yard.sh[2])||0; }catch(e){} if(!(hp>0)||fl<1){ DG.w='Флагман/HP алга (эхлээд «Онлайн тулаан» ор)'; return Promise.resolve(); }
     const sk=(window.shSkinSel&&shSkinSel())||0;
-    return F.setDoc(F.doc(db,'duel','w_'+CL.uid),{g:'w',u:CL.uid,n:myName(),hp:Math.round(hp),fl:fl,sk:sk,r:Math.random(),mi:w.m.mi,k:w.m.k,d:w.m.d,sc:w.m.mi*MB+w.m.k,t:Date.now()},{merge:true}).catch(()=>{}); }
+    return F.setDoc(F.doc(db,'duel','w_'+CL.uid),{g:'w',u:CL.uid,n:myName(),hp:Math.round(hp),fl:fl,sk:sk,r:Math.random(),mi:w.m.mi,k:w.m.k,d:w.m.d,sc:w.m.mi*MB+w.m.k,t:Date.now()},{merge:true}).then(()=>{ DG.w='ok'; }).catch(e=>{ DG.w='АЛДАА: '+ec(e); }); }
 
   /* бусад тоглогчдын жагсаалт (сүүдэр хөлөг) */
-  async function loadPool(){ if(!on()) return []; const {F,db}=FBM, x=Math.random(), out=new Map();
+  async function loadPool(){ if(!on()){ DG.r='холбогдоогүй'; DG.n=0; return []; } const {F,db}=FBM, x=Math.random(), out=new Map();
     const take=sn=>sn.docs.forEach(d=>{ const v=d.data(); if(v&&v.g==='w'&&v.u&&v.u!==CL.uid&&v.hp>0&&Date.now()-(v.t||0)<FRESH&&!out.has(v.u)) out.set(v.u,{u:v.u,n:String(v.n||'Тоглогч').slice(0,14),hp:v.hp,fl:v.fl||1,sk:v.sk||0}); });
-    try{ take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','>=',x),F.limit(14)))); if(out.size<4) take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','<',x),F.limit(14)))); }catch(e){}
+    try{ take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','>=',x),F.limit(14)))); if(out.size<4) take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','<',x),F.limit(14)))); DG.r='ok'; }catch(e){ DG.r='АЛДАА: '+ec(e); }
+    DG.n=out.size;
     const a=[...out.values()]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
   /* надад ирсэн «живүүллээ» мэдэгдэл → нас барсан тоо + мэдэгдэл */
@@ -20185,7 +20188,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
 
   window.swarStart=function(Q){ if(!Q||!Q.war) return; const w=W(); try{ if(Q.ships[0]&&Q.ships[0].b) w.hp=Q.ships[0].b.max; }catch(e){}
     Q.gp=[]; Q.gn=0; Q.gt=2; Q.pvp=0; pushMe(); pullEvents();
-    loadPool().then(a=>{ if(!Q||Q.over) return; Q.gp=a; Q.gn=Math.min(a.length,2+Math.floor(Math.random()*4)); }); };
+    loadPool().then(a=>{ try{ say(a.length?'Сүүдэр тоглогч '+a.length+' олдлоо':'Сүүдэр тоглогч олдсонгүй'+(DG.r!=='ok'?' ('+DG.r+')':'')); }catch(e){} if(!Q||Q.over) return; Q.gp=a; Q.gn=Math.min(a.length,2+Math.floor(Math.random()*4)); }); };
   window.swarTick=function(Q,dt){ if(!Q||!Q.war||!Q.gp||!Q.gp.length||Q.over) return; Q.gt-=dt; if(Q.gt>0) return;
     const alive=Q.en.filter(e=>e.alive&&e.gh); if(alive.length>=Q.gn){ Q.gt=3; return; }
     const used={}; alive.forEach(e=>used[e.gh.u]=1); const free=Q.gp.filter(g=>!used[g.u]); if(!free.length){ Q.gt=5; return; }
@@ -20222,7 +20225,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         +(mine>=10||mine<0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;margin:6px 0 3px;border-radius:6px;background:rgba(255,215,112,.12);border:1px solid #ffd770"><span><b>Та энд байна</b>'+(mine>=0?' · '+(mine+1)+'-р байр':'')+'</span><b>'+w.m.k+'</b></div>':''); }
     d.innerHTML='<div class="sci" style="max-width:340px;width:92%;max-height:88vh;overflow:auto"><div class="sch"><div><b>Сарын Топ 10</b><div class="sm">'+mname(mi())+' · Онлайн тулаанд бусад тоглогчийг живүүлсэн тоо</div></div></div>'+body+
       (R.prev?'<div style="margin:8px 0;padding:8px;border-radius:8px;background:rgba(120,200,120,.15);border:1px solid #7fe08a"><div class="sm">Өнгөрсөн сар '+R.prev.rank+'-р байр</div><button class="btn red" data-a="c">Шагнал авах: '+R.prev.prize+' Алт</button></div>':'')+
-      '<div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
+      '<div class="sm" style="margin-top:6px;opacity:.85">Оношлогоо · өөрийн сүүдэр бичих: <b>'+esc(DG.w)+'</b> · бусдыг унших: <b>'+esc(DG.r)+'</b>'+(DG.n>=0?' · олдсон: <b>'+DG.n+'</b>':'')+'</div><div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
   window.swarTop=function(){ load(); };
 })();
 

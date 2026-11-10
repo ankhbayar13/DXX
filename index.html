@@ -6526,7 +6526,7 @@ function isCmd(k){ const R=RT; if(!R||R.done) return; const gs=isGroups(), none=
   else rtsCmd(k); }
 function isOrient(){ const R=RT; if(!R) return; const port=innerHeight>innerWidth*1.02, el=$('isrot'); R.paused=port||!R.ready; if(el) el.style.display=port?'flex':'none'; }
 
-(function(){ const st=document.createElement('style'); st.textContent='#rts.iso #rtu,#rts.iso #rpan{width:min(38vw,330px)}#rts.iso #rpan{left:max(6px,env(safe-area-inset-left,0px));right:auto;transform:none}#rts.iso #rbt,#rts.iso #rhint{top:calc(min(38vw,330px)*0.2178 + 4px)}#rts.iso #rhint{left:76px;right:76px;font-size:12px}#rts.iso #rres{left:25%;right:25%;top:12%}#ilv{position:absolute;left:6px;top:calc(min(38vw,330px)*0.2178 + 4px);display:flex;flex-direction:column;gap:4px;z-index:4}#ilv button{width:58px;height:32px;border-radius:8px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font:700 12px/1 sans-serif;padding:0}#ilv button small{display:block;font:500 9px/1 sans-serif;opacity:.8;margin-top:2px}#ilv button.on{background:#7a5a14;border-color:#ffd24a;color:#fff;box-shadow:0 0 8px #ffd24a99}#isrot{position:absolute;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(14,10,5,.94);color:#ffe9b0;font:700 18px sans-serif;text-align:center;padding:24px}#isrot i{display:block;width:64px;height:38px;border:4px solid #ffd24a;border-radius:8px;animation:isrt 1.8s ease-in-out infinite}@keyframes isrt{0%,25%{transform:rotate(90deg)}75%,100%{transform:rotate(0deg)}}';
+(function(){ const st=document.createElement('style'); st.textContent='#rts.iso #rtu,#rts.iso #rpan{width:min(38vw,330px)}#rts.iso #rpan{left:max(6px,env(safe-area-inset-left,0px));right:auto;transform:none}#rts.iso #rbt,#rts.iso #rhint{top:calc(min(38vw,330px)*0.2178 + 4px)}#rts.iso #rhint{left:76px;right:76px;font-size:12px}#rts.iso #rres{left:25%;right:25%;top:12%}#ilv{position:absolute;left:calc(max(6px,env(safe-area-inset-left,0px)) + min(38vw,330px) + 10px);bottom:calc(6px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:row;gap:6px;z-index:4}#ilv button{width:64px;height:34px;border-radius:8px;background:#3b2815ee;border:2px solid #c9972b;color:#ffd770;font:700 12px/1 sans-serif;padding:0}#ilv button small{display:block;font:500 9px/1 sans-serif;opacity:.8;margin-top:2px}#ilv button.on{background:#7a5a14;border-color:#ffd24a;color:#fff;box-shadow:0 0 8px #ffd24a99}#isrot{position:absolute;inset:0;z-index:8;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(14,10,5,.94);color:#ffe9b0;font:700 18px sans-serif;text-align:center;padding:24px}#isrot i{display:block;width:64px;height:38px;border:4px solid #ffd24a;border-radius:8px;animation:isrt 1.8s ease-in-out infinite}@keyframes isrt{0%,25%{transform:rotate(90deg)}75%,100%{transform:rotate(0deg)}}';
  document.head.appendChild(st); })();
 
 async function isStart(i,E){
@@ -10871,7 +10871,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='32b0d98572';
+var UPDB='8f684ddd37';
 (function(){
   const K='updTry';
   const _go=updGo;

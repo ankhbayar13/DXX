@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='88f8ca0c5e';
+var UPDB='84f0e7e3be';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14623,12 +14623,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     else b+='<div class="sct">✅ Хамгийн дээд түвшин</div>';
     d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+NM[Math.max(l,0)]+'</b><div class="sm">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div></div></div>'+(l>0?'<img src="hf/sq/mb_sail.webp?v=1" style="width:100%;border-radius:8px;margin-top:6px;display:block">':'')+b+
       (open()&&!y.up&&c?'<button class="btn red" id="yup">'+(l?'⬆ Сайжруулах':'🔨 Барих')+'</button> ':'')+
-      (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> <button class="btn" id="ycl">Өнгө</button> <button class="btn" id="ysq">⛵ Далайд явах</button> <button class="btn red" id="ysw">Онлайн тулаан</button> ':'')+
+      (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> <button class="btn" id="ycl">Өнгө</button> <button class="btn" id="ysq">⛵ Далайд явах</button> <button class="btn red" id="ysw">Онлайн тулаан</button> <button class="btn" id="ytp">Топ 10</button> ':'')+
       (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
       '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
     document.body.appendChild(d);
     const q=id=>document.getElementById(id);
-    if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('ycl')) q('ycl').onclick=()=>{ if(window.shSkinCard) shSkinCard(); }; if(q('ysq')) q('ysq').onclick=()=>{ closeCard(); window.seaStart&&seaStart(); }; if(q('ysw')) q('ysw').onclick=()=>{ closeCard(); window.seaStart&&seaStart({war:1}); }; if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
+    if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('ycl')) q('ycl').onclick=()=>{ if(window.shSkinCard) shSkinCard(); }; if(q('ysq')) q('ysq').onclick=()=>{ closeCard(); window.seaStart&&seaStart(); }; if(q('ysw')) q('ysw').onclick=()=>{ closeCard(); window.seaStart&&seaStart({war:1}); }; if(q('ytp')) q('ytp').onclick=()=>{ window.swarTop&&swarTop(); }; if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
     if(y.up) closeCard.iv=setInterval(()=>{ const el=q('ytm'); if(!el){ clearInterval(closeCard.iv); return; } el.textContent=fmt(rem()); },1000); }
   window.yardCard=card; window.yardFleetCard=()=>{ if(document.getElementById('yfl')) fleetCard(); };
 
@@ -14934,6 +14934,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       joy:null,key:{},dpr:1,W:0,H:0,sc:1,cam:{x:0,y:0},btn:[],alt:0};
     ships.forEach(s=>{ s.spd*=1; s.b={max:s.max,len:s.len,wid:s.wid,r:s.r}; });
     Q.hl=mkHeal(); Q.war=WAR; Q.dur=WAR?600:SESSION; Q.lv=1; Q.kf=[]; Q.sk=0;
+    if(WAR&&window.swarStart){ try{ swarStart(Q); }catch(e){} }
     SK=SKA.eq().map(id=>SKA.MAP[id]);
     SK.forEach((s,i)=>{ const b=document.createElement('div'); b.style.cssText='position:relative;width:54px;height:54px;border-radius:50%;background:rgba(10,20,35,.72);border:2px solid #ffd770;overflow:hidden;pointer-events:auto;box-shadow:0 2px 8px #000a';
       b.innerHTML='<img src="'+s.ic+'?v=1" style="width:100%;height:100%;object-fit:cover;pointer-events:none" draggable="false"><div class="cdv" style="position:absolute;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;color:#fff;font:800 15px sans-serif;pointer-events:none"></div><span style="position:absolute;left:3px;bottom:0;color:#ffd770;font:800 10px sans-serif;text-shadow:0 1px 2px #000;pointer-events:none">'+SKL(s.id)+'</span>';
@@ -14978,7 +14979,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
   function hit(s,d,src){ if(!s.alive) return; let dm=d; if(s.mark>0) dm*=Q.markMul||1.4; if(s.team==='e'&&Q.drumT>0) dm*=Q.drumM||1.3; if(s.team==='p'&&Q.sh>0) dm*=1-[.5,.6,.7][SKL('shield')-1];
     dm=Math.max(1,Math.round(dm)); s.hp-=dm; s.hitT=.15; Q.vx.push({n:'impact',f:0,x:s.x+rnd(-6,6),y:s.y+rnd(-6,6),t:0,d:.28,s:24}); Q.fx.push({x:s.x+rnd(-8,8),y:s.y-s.wid,t:.8,v:'-'+dm,c:s.team==='p'?'#ff9a8a':'#fff'});
-    if(s.hp<=0){ s.hp=0; s.alive=false; Q.vx.push({n:'expl',x:s.x,y:s.y,t:0,d:.8,s:Math.max(70,s.len*1.5)}); if(s.kraken) Q.vx.push({n:'splash',x:s.x,y:s.y+10,t:0,d:.8,s:120}); if(s.team==='e'){ Q.kills++; dropLoot(s); if(Q.war) warLevel(); } else { try{ sfx('lose'); }catch(e){} } } else { try{ sfx('hit',.08); }catch(e){} } }
+    if(s.hp<=0){ s.hp=0; s.alive=false; Q.vx.push({n:'expl',x:s.x,y:s.y,t:0,d:.8,s:Math.max(70,s.len*1.5)}); if(s.kraken) Q.vx.push({n:'splash',x:s.x,y:s.y+10,t:0,d:.8,s:120}); if(s.team==='e'){ Q.kills++; dropLoot(s); if(Q.war) warLevel(); if(s.gh&&window.swarKill){ try{ swarKill(Q,s.gh); }catch(e){} } } else { try{ sfx('lose'); }catch(e){} } } else { try{ sfx('hit',.08); }catch(e){} } }
   /* ===== Онлайн тулаан: түвшин = тулаан дахь живүүлсэн тоо. Түвшин бүрд хөлөг бага зэрэг томорч, дээд HP +10% (зөвхөн энэ тулаанд) ===== */
   function warLevel(){ const nl=Math.min(20,1+Q.kills); if(nl===Q.lv) return; Q.lv=nl;
     Q.ships.forEach(s=>{ if(!s.alive||!s.b) return; const f=1+.1*(nl-1), z=1+Math.min(.4,.025*(nl-1)), old=s.max; s.max=Math.round(s.b.max*f); s.hp=Math.min(s.max,s.hp+(s.max-old)); s.len=s.b.len*z; s.wid=s.b.wid*z; s.r=s.b.r*z;
@@ -15044,6 +15045,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       s.trail-=dt; if((s.v||0)>10&&s.trail<=0){ Q.pt.push({x:s.x-Math.cos(s.a)*s.len*.45,y:s.y-Math.sin(s.a)*s.len*.45,t:.9,r:s.wid*.35}); s.trail=.12; } });
     // дайсан
     Q.spawn-=dt; if(Q.spawn<=0&&alive(Q.en).length<MAXE){ spawnEnemy(pickKind()); Q.spawn=rnd(2.5,4.5); }
+    if(Q.war&&window.swarTick){ try{ swarTick(Q,dt); }catch(e){} }
     if(Q.war){ Q.sk-=dt; const shn=Q.en.filter(e=>e.alive&&e.kind==='shark').length; if(shn<2&&Q.sk<=0){ spawnEnemy('shark'); Q.sk=3; } }
     Q.bossT-=dt; if(Q.bossT<=0&&!Q.en.some(e=>e.alive&&e.kind==='boss')){ spawnEnemy('boss'); Q.bossT=100; Fxsay(Q.bossN%2===0?'⚠ Далайн мангас гарлаа!':'⚠ Босс гарлаа!'); }
     Q.en.forEach(e=>{ if(!e.alive) return; e.hitT=Math.max(0,(e.hitT||0)-dt);
@@ -15078,8 +15080,8 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       const ok=SFXA.loop(c,s.mo,Q.t*(s.mo==='mo_ghost'?1.1:2),0,0,H,0); c.restore();
       if(ok){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.75-6,w,4); c.fillStyle='#e0483a'; c.fillRect(s.x-w/2,s.y-s.len*.75-6,w*clamp(s.hp/s.max,0,1),4);
         if(s.stun>0||s.mark>0||s.blind>0){ c.font='11px sans-serif'; c.textAlign='center'; c.fillStyle='#fff'; c.fillText((s.stun>0?'💫':'')+(s.mark>0?'🎯':'')+(s.blind>0?'🌫':''),s.x,s.y-s.len*.75-9); } return; } }
-    let key=s.kraken?'kraken':enemy?(s.kind==='boss'?'e2':s.kind==='merchant'?'e1':'e0'):'p'+s.t, im=img(ART+key+'.webp?v=1');
-    let imS=im; if(!enemy&&!s.mo&&!s.kraken&&im&&window.shSkinImg) imS=shSkinImg(im,'p'+s.t)||im;
+    let key=s.gh?'p2':s.kraken?'kraken':enemy?(s.kind==='boss'?'e2':s.kind==='merchant'?'e1':'e0'):'p'+s.t, im=img(ART+key+'.webp?v=1');
+    let imS=im; if(!enemy&&!s.mo&&!s.kraken&&im&&window.shSkinImg) imS=shSkinImg(im,'p'+s.t)||im; else if(s.gh&&im&&window.shSkinImg) imS=shSkinImg(im,'p2',s.gh.sk)||im;
     c.save(); c.translate(s.x,s.y);
     if(s.kraken) c.rotate(Math.sin(Q.t*.4)*.15); else c.rotate(s.a+Math.PI/2);
     if(s.hitT>0) c.globalAlpha=.55+Math.sin(s.hitT*60)*.3;
@@ -15094,7 +15096,8 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     if(s.burn>0&&window.SFXA) SFXA.loop(c,'fire',Q.t*2.4+s.x*.01,s.x,s.y-s.wid*.2,Math.max(34,s.len*.85));
     // амь
     const isL=!enemy&&Q.ships.find(x=>x.alive)===s;
-    if(s.hp<s.max||s.kind==='boss'||isL){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w,4); c.fillStyle=enemy?'#e0483a':'#49d06b'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w*clamp(s.hp/s.max,0,1),4); }
+    if(s.hp<s.max||s.kind==='boss'||isL||s.gh){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w,4); c.fillStyle=enemy?'#e0483a':'#49d06b'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w*clamp(s.hp/s.max,0,1),4); }
+    if(s.gh){ const nm=String(s.gh.n).slice(0,14)+' · Lv'+(s.gh.fl||1); c.font='bold 11px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.75)'; c.strokeText(nm,s.x,s.y-s.len*.7-10); c.fillStyle='#ffb0a0'; c.fillText(nm,s.x,s.y-s.len*.7-10); }
     if(isL){ const nm=String((S.prof&&S.prof.name)||'Хаан').slice(0,14); c.font='bold 11px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.75)'; c.strokeText(nm,s.x,s.y-s.len*.7-10); c.fillStyle='#fff'; c.fillText(nm,s.x,s.y-s.len*.7-10); }
     if(s.stun>0||s.burn>0||s.mark>0){ c.font='10px sans-serif'; c.textAlign='center'; c.fillText((s.stun>0?'💫':'')+(s.burn>0?'🔥':'')+(s.mark>0?'🎯':''),s.x,s.y-s.len*.7-9); }
     if(!enemy&&Q.sh>0){ c.strokeStyle='rgba(120,200,255,.8)'; c.lineWidth=2; c.beginPath(); c.arc(s.x,s.y,s.len*.62,0,Math.PI*2); c.stroke(); }
@@ -15192,14 +15195,20 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
   function finish(timeUp,dead){
     if(!Q||Q.over) return; Q.over=true;
+    if(Q.war&&window.swarEnd){ try{ swarEnd(Q); }catch(e){} }
     if(Q.war){ try{ const wr=S.war=S.war||{k:0,b:0,best:0}; wr.k+=Q.kills; wr.b++; wr.best=Math.max(wr.best,Q.kills); }catch(e){} }
     let g=Q.loot.gold, w=Q.loot.wood, a=Q.loot.alt; const dd=!!dead; if(dd){ g=Math.floor(g*.5); w=Math.floor(w*.5); a=0; }
     try{ S.res.gold+=g; S.res.wood+=w; if(a) S.res.alt=(S.res.alt||0)+a; save(); updateHUD(); }catch(e){}
     const o=document.createElement('div'); o.style.cssText='position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
-    o.innerHTML='<div class="sci" style="max-width:320px;width:86%"><div class="sch"><div style="font-size:28px">'+(dd?'⚓':'⛵')+'</div><div><b>'+(dd?'Флот живсэн':timeUp?'Аян дууслаа':'Аян төгслөө')+'</b><div class="sm">'+(Q.war?'Түвшин '+Q.lv+' · ':'')+'Живүүлсэн: '+Q.kills+' · '+Math.floor(Q.t)+' сек'+(Q.war&&S.war?' · Нийт: '+S.war.k:'')+'</div></div></div>'+
+    o.innerHTML='<div class="sci" style="max-width:320px;width:86%"><div class="sch"><div style="font-size:28px">'+(dd?'⚓':'⛵')+'</div><div><b>'+(dd?'Флот живсэн':timeUp?'Аян дууслаа':'Аян төгслөө')+'</b><div class="sm">'+(Q.war?'Түвшин '+Q.lv+' · ':'')+'Живүүлсэн: '+Q.kills+(Q.war&&Q.pvp?' (тоглогч '+Q.pvp+')':'')+' · '+Math.floor(Q.t)+' сек'+(Q.war&&S.war?' · Нийт: '+S.war.k:'')+'</div></div></div>'+
       '<div class="sct">Олз:<br><b>🪙 '+g.toLocaleString()+' · 🪵 '+w.toLocaleString()+(a?' · 💎 '+a:'')+'</b>'+(dd?'<br><span class="sm">Флот живсэн тул олзын тал хувийг алдлаа</span>':'')+'</div><button class="btn red" id="sqok">Гэр рүү буцах</button></div>';
     Q.root.appendChild(o); document.getElementById('sqok').onclick=close; }
   function close(){ if(!Q) return; cancelAnimationFrame(Q.raf); unbind(); Q.root.remove(); Q=null; try{ refresh(); }catch(e){} }
+  /* сүүдэр тоглогч: өөр тоглогчийн Флагман (AI удирдана) */
+  window.seaGhost=function(g){ if(!Q||Q.over||!g) return false; const L=leader(); if(!L) return false; const a=Math.random()*Math.PI*2, d=rnd(460,620); let x=L.x+Math.cos(a)*d, y=L.y+Math.sin(a)*d; const rr=Math.hypot(x,y); if(rr>WORLD){ x*=WORLD/rr; y*=WORLD/rr; }
+    const base=(Q.ships[0]&&Q.ships[0].b?Q.ships[0].b.max:400), ratio=clamp((g.hp||base)/base,.6,1.5), grow=1+.06*((Q.lv||1)-1), hp=Math.round(base*ratio*grow);
+    const e={team:'e',kind:'pvp',gh:g,x,y,a:Math.random()*6.28,alive:true,cd:rnd(1,2.5),stun:0,burn:0,mark:0,trail:0,tv:Math.random()<.5?1:-1,t:2,hp:hp,max:hp,spd:64,len:LEN[2],wid:WID[2],r:WID[2]*.9,dmg:Math.round(8*ratio*grow),rate:1.5,rng:230,loot:{gold:260,wood:90,alt:1}};
+    e.b={max:hp}; Q.en.push(e); return true; };
   window.seaState=()=>Q; window.seaSpawn=k=>spawnEnemy(k);
   window.seaClose=close;
 })();
@@ -20101,7 +20110,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         if(t[0]>=185&&t[0]<=265&&t[1]>.22){ const l=Math.max(0,Math.min(1,t[2]*c.lm+c.lo)), s=Math.max(0,Math.min(1,t[1]*c.s>.95?.95:t[1]*c.s)), o=hsl2rgb(c.h,s,l); a[i]=o[0]; a[i+1]=o[1]; a[i+2]=o[2]; } }
       x.putImageData(d,0,0); cache[k]=cv; return cv; }catch(e){ return null; } }
   /* seaquest: тоглогчийн хөлгийн зургийг сонгосон өнгөөр буцаана (canvas) */
-  window.shSkinImg=function(im,key){ const c=sel(); if(!c) return null; return tint(im,key,c); };
+  window.shSkinImg=function(im,key,cid){ const c=cid||sel(); if(!c) return null; return tint(im,key,c); };
   /* зогсоолын хөлгийн жижиг дүрс: sel=0 бол анхны зураг */
   const IC={};
   window.shSkinIcon=function(k){ const u='hf/nv/b'+k+'.webp?v=1', c=sel(); if(!c) return u; const ky='b'+k+'|'+c; if(IC[ky]) return IC[ky];
@@ -20134,6 +20143,86 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     preview(); setTimeout(preview,250); }
   window.shSkinCard=function(){ pv=sel(); card(); };
   window.shSkinList=C;
+})();
+
+
+/* Онлайн тулаан: сүүдэр тоглогч (бусад тоглогчийн Флагман), сарын Топ 10, живүүлсэн мэдэгдэл.
+   Өгөгдөл: Firestore `duel` collection (cards.js-ийн Топ 10-тай ижил):
+   duel/w_<uid> = {g:'w',u,n,hp,fl,sk,r,mi,k,d,sc,t}   duel/wk_<killer>_<victim>_<өдөр>_<n> = {g:'wk',v,k,kn,t} */
+(function(){
+  const MB=1e6, PR=[600,400,300,200,150,100,80,60,50,40], CAP=3, FRESH=21*864e5;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const nowL=()=>new Date(Date.now()+8*36e5);
+  const day=()=>Math.floor((Date.now()+8*36e5)/864e5);
+  const mi=()=>{ const d=nowL(); return d.getUTCFullYear()*12+d.getUTCMonth(); };
+  const myName=()=>String((S.prof&&S.prof.name)||'Хаан').slice(0,14);
+  const W=()=>{ const w=S.war=S.war||{k:0,b:0,best:0}; if(!w.m||w.m.mi!==mi()) w.m={mi:mi(),k:0,d:0}; if(!w.dc||w.dc.d!==day()) w.dc={d:day(),m:{}}; return w; };
+  const on=()=>{ try{ return typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM&&FBM.F; }catch(e){ return false; } };
+  const mname=m=>{ const y=Math.floor(m/12), mm=m%12+1; return y+'-'+(mm<10?'0':'')+mm; };
+
+  function pushMe(){ if(!on()) return Promise.resolve(); const w=W(), {F,db}=FBM;
+    let hp=w.hp||0, fl=0; try{ fl=(S.yard&&S.yard.sh&&S.yard.sh[2])||0; }catch(e){} if(!(hp>0)||fl<1) return Promise.resolve();
+    const sk=(window.shSkinSel&&shSkinSel())||0;
+    return F.setDoc(F.doc(db,'duel','w_'+CL.uid),{g:'w',u:CL.uid,n:myName(),hp:Math.round(hp),fl:fl,sk:sk,r:Math.random(),mi:w.m.mi,k:w.m.k,d:w.m.d,sc:w.m.mi*MB+w.m.k,t:Date.now()},{merge:true}).catch(()=>{}); }
+
+  /* бусад тоглогчдын жагсаалт (сүүдэр хөлөг) */
+  async function loadPool(){ if(!on()) return []; const {F,db}=FBM, x=Math.random(), out=new Map();
+    const take=sn=>sn.docs.forEach(d=>{ const v=d.data(); if(v&&v.g==='w'&&v.u&&v.u!==CL.uid&&v.hp>0&&Date.now()-(v.t||0)<FRESH&&!out.has(v.u)) out.set(v.u,{u:v.u,n:String(v.n||'Тоглогч').slice(0,14),hp:v.hp,fl:v.fl||1,sk:v.sk||0}); });
+    try{ take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','>=',x),F.limit(14)))); if(out.size<4) take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('r','<',x),F.limit(14)))); }catch(e){}
+    const a=[...out.values()]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  /* надад ирсэн «живүүллээ» мэдэгдэл → нас барсан тоо + мэдэгдэл */
+  async function pullEvents(){ if(!on()) return; const {F,db}=FBM, w=W();
+    try{ const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('v','==',CL.uid),F.limit(40)));
+      const ev=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='wk'&&x.t>(w.seen||0)).sort((a,b)=>a.t-b.t); if(!ev.length) return;
+      w.seen=ev[ev.length-1].t; const m0=mi(); let n=0; const who={};
+      ev.forEach(x=>{ n++; who[x.kn||'Тоглогч']=(who[x.kn||'Тоглогч']||0)+1; const dt=new Date(x.t+8*36e5); if(dt.getUTCFullYear()*12+dt.getUTCMonth()===m0) w.m.d++; });
+      const names=Object.keys(who).slice(0,3).map(esc).join(', ');
+      try{ save(); say(names+' таны Флагманыг онлайн тулаанд живүүллээ ('+n+')'); }catch(e){}
+      try{ mailAdd('Онлайн тулаан',Object.keys(who).map(k=>k+' — '+who[k]+' удаа').join(', ')+' таны Флагманыг тулаанд живүүлсэн.'); }catch(e){}
+      pushMe(); }catch(e){} }
+
+  window.swarStart=function(Q){ if(!Q||!Q.war) return; const w=W(); try{ if(Q.ships[0]&&Q.ships[0].b) w.hp=Q.ships[0].b.max; }catch(e){}
+    Q.gp=[]; Q.gn=0; Q.gt=2; Q.pvp=0; pushMe(); pullEvents();
+    loadPool().then(a=>{ if(!Q||Q.over) return; Q.gp=a; Q.gn=Math.min(a.length,2+Math.floor(Math.random()*4)); }); };
+  window.swarTick=function(Q,dt){ if(!Q||!Q.war||!Q.gp||!Q.gp.length||Q.over) return; Q.gt-=dt; if(Q.gt>0) return;
+    const alive=Q.en.filter(e=>e.alive&&e.gh); if(alive.length>=Q.gn){ Q.gt=3; return; }
+    const used={}; alive.forEach(e=>used[e.gh.u]=1); const free=Q.gp.filter(g=>!used[g.u]); if(!free.length){ Q.gt=5; return; }
+    const g=free[Math.floor(Math.random()*free.length)]; if(window.seaGhost&&seaGhost(g)){ try{ Q.fx.push({x:Q.ships[0].x,y:Q.ships[0].y-60,t:1.6,v:esc(g.n)+' ойртож байна',c:'#ff9a8a',big:1}); }catch(e){} } Q.gt=(alive.length+1<Math.min(2,Q.gn))?3:8+Math.random()*12; };
+  window.swarKill=function(Q,g){ if(!Q||!g) return; const w=W(); Q.pvp=(Q.pvp||0)+1; try{ seaKill(myName(),g.n,true); }catch(e){}
+    const c=w.dc.m[g.u]||0, ok=c<CAP;
+    if(ok){ w.dc.m[g.u]=c+1; w.m.k++; try{ Q.fx.push({x:Q.ships[0].x,y:Q.ships[0].y-48,t:1.4,v:'Топ 10 +1',c:'#9be07a'}); }catch(e){}
+      if(on()){ const {F,db}=FBM; F.setDoc(F.doc(db,'duel','wk_'+CL.uid+'_'+g.u+'_'+day()+'_'+(c+1)),{g:'wk',v:g.u,k:CL.uid,kn:myName(),t:Date.now()}).catch(()=>{}); }
+      clearTimeout(window.swarKill._t); window.swarKill._t=setTimeout(pushMe,1500); }
+    else { try{ Q.fx.push({x:Q.ships[0].x,y:Q.ships[0].y-48,t:1.4,v:'Тоологдсонгүй (нэг хүнийг өдөрт '+CAP+')',c:'#bfae8a'}); }catch(e){} } };
+  window.swarEnd=function(Q){ try{ pushMe(); }catch(e){} };
+
+  /* ===== Топ 10 ===== */
+  const R={st:'',rows:[],prev:null,claim:0};
+  const clean=(rows)=>{ // хамгийн их живэгдсэн (≥3) тоглогчийг хасна
+    let mx=null; rows.forEach(x=>{ if((x.d||0)>=3&&(!mx||x.d>mx.d)) mx=x; }); return rows.filter(x=>x!==mx); };
+  async function fetchMonth(m){ const {F,db}=FBM; const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('sc','>=',m*MB),F.orderBy('sc','desc'),F.limit(40)));
+    const rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='w'&&x.sc<(m+1)*MB&&x.k>0); return clean(rows); }
+  async function load(){ R.st='load'; view(); if(!on()){ R.st='off'; view(); return; }
+    try{ await pushMe(); R.rows=await fetchMonth(mi()); const w=W(); R.prev=null; R.pr=0;
+      if(w.pz!==mi()-1){ const pr=await fetchMonth(mi()-1), i=pr.findIndex(x=>x.u===CL.uid); if(i>=0&&i<10) R.prev={rank:i+1,prize:PR[i],mo:mi()-1}; }
+      R.st='ok'; }catch(e){ R.st='err'; } view(); }
+  function claim(){ const w=W(); if(!R.prev||w.pz===R.prev.mo) return; w.pz=R.prev.mo; S.res.alt=(S.res.alt||0)+R.prev.prize;
+    try{ save(); updateHUD(); sfx('win'); say('Шагнал: '+R.prev.prize+' Алт'); }catch(e){} R.prev=null; view(); }
+  function close(){ const e=document.getElementById('swtop'); if(e) e.remove(); }
+  function view(){ let d=document.getElementById('swtop'); if(!d){ d=document.createElement('div'); d.id='swtop'; d.style.cssText='position:fixed;inset:0;z-index:9070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)'; document.body.appendChild(d);
+      d.onclick=e=>{ if(e.target===d){ close(); return; } const t=e.target.closest('[data-a]'); if(!t) return; if(t.dataset.a==='x') close(); else if(t.dataset.a==='c') claim(); }; }
+    const w=W(); let body;
+    if(R.st==='load') body='<div class="sct" style="text-align:center">Ачаалж байна…</div>';
+    else if(R.st==='off') body='<div class="sct">Интернет холбогдоогүй байна.</div>';
+    else if(R.st==='err') body='<div class="sct">Жагсаалтыг ачаалж чадсангүй. Дараа дахин оролдоно уу.</div>';
+    else { const top=R.rows.slice(0,10), mine=R.rows.findIndex(x=>x.u===CL.uid);
+      body=(top.length?top.map((x,i)=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;margin:3px 0;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid '+(x.u===CL.uid?'#ffd770':'transparent')+'"><span><b style="color:#ffd770">'+(i+1)+'.</b> '+esc(x.n)+'</span><span><b>'+x.k+'</b> <span class="sm">· '+PR[i]+' Алт</span></span></div>').join(''):'<div class="sct" style="text-align:center">Энэ сар жагсаалт хоосон байна.</div>')
+        +(mine>=10||mine<0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;margin:6px 0 3px;border-radius:6px;background:rgba(255,215,112,.12);border:1px solid #ffd770"><span><b>Та энд байна</b>'+(mine>=0?' · '+(mine+1)+'-р байр':'')+'</span><b>'+w.m.k+'</b></div>':''); }
+    d.innerHTML='<div class="sci" style="max-width:340px;width:92%;max-height:88vh;overflow:auto"><div class="sch"><div><b>Сарын Топ 10</b><div class="sm">'+mname(mi())+' · Онлайн тулаанд бусад тоглогчийг живүүлсэн тоо</div></div></div>'+body+
+      (R.prev?'<div style="margin:8px 0;padding:8px;border-radius:8px;background:rgba(120,200,120,.15);border:1px solid #7fe08a"><div class="sm">Өнгөрсөн сар '+R.prev.rank+'-р байр</div><button class="btn red" data-a="c">Шагнал авах: '+R.prev.prize+' Алт</button></div>':'')+
+      '<div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
+  window.swarTop=function(){ load(); };
 })();
 
 

@@ -6591,7 +6591,9 @@ function isModeToggle(){ let on=false; try{ on=localStorage.getItem('dxx_iso')==
 })();
 
 
-function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mountain','steppe','lake','forest','lake','mountain','steppe','mountain','desert','desert','farm','arab'][ci]||(CAMP[ci]&&CAMP[ci].bio)||'steppe';
+function cpHb(ci){ const sk=seasonK(), w=sk==='winter';
+  if(ci>=13){ const X={13:['cliff_green','cliff_wi'],14:['lake_peaks','cliff_wi'],15:'arab',16:'china',17:'cliff_desert',18:'rus_wi',19:['steppe_su','steppe_wi'],20:'village_wi',21:['forest_camp','cliff_wi'],22:'forest_wf',23:['forest_camp','cliff_wi'],24:'lake_peaks',25:'cliff_desert',26:['steppe_su','steppe_wi'],27:'arab',28:'china',29:['cliff_green','cliff_wi']}, v=X[ci]; if(v) return Array.isArray(v)?(w?v[1]:v[0]):v; }
+  const t=['steppe','forest','mountain','steppe','lake','forest','lake','mountain','steppe','mountain','desert','desert','farm','arab'][ci]||(CAMP[ci]&&CAMP[ci].bio)||'steppe';
   if(t==='steppe') return w?'steppe_wi':'steppe_su'; if(t==='forest') return w?'cliff_wi':'forest_camp'; if(t==='mountain') return w?'cliff_wi':'cliff_green'; if(t==='lake') return ci%2?'forest_wf':'lake_peaks';
   if(t==='desert') return 'cliff_desert'; if(t==='farm') return 'china'; return 'arab'; }
 
@@ -10874,7 +10876,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='ca4696b8a7';
+var UPDB='192ae25ce1';
 (function(){
   const K='updTry';
   const _go=updGo;

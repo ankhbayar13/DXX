@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='cc1551c45d';
+var UPDB='4da070bb93';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19712,14 +19712,21 @@ function dxxWrapF(F){ try{
   const add=(c,k,n)=>{ try{ const o=R.r[c]||(R.r[c]={d:0,q:0,l:0}); o[k]=(o[k]||0)+n; R.rt+=n; const h=Math.floor(Date.now()/3600000); R.h[h]=(R.h[h]||0)+n; }catch(e){} };
   const addW=(c,n)=>{ try{ R.w[c]=(R.w[c]||0)+n; R.wt+=n; }catch(e){} };
   const G=Object.assign({},F);
-  G.getDoc=async function(ref){ const s=await F.getDoc(ref); add(cat(pathOf(ref)),'d',1); return s; };
-  G.getDocs=async function(q){ const s=await F.getDocs(q); add(cat(pathOf(q)),'q',Math.max(1,s.size||0)); return s; };
-  G.onSnapshot=function(ref,...a){ const c=cat(pathOf(ref)); const i=a.findIndex(x=>typeof x==='function');
+  const raw=x=>String(pathOf(x)).split('/')[0];
+  const hasCl=q=>{ try{ const fl=(q&&q._query&&q._query.filters)||[]; return fl.some(f=>f.field&&f.field.canonicalString&&f.field.canonicalString()==='cl'); }catch(e){ return false; } };
+  const FF_MSG={top:'Топ жагсаалт түр хаалттай байна',clan:'Клан түр хаалттай байна',duel:'Онлайн тоглоом түр хаалттай байна'};
+  const ffKind=(c,q)=>{ try{ const f=window.dxxFF; if(!f||(typeof isAdm==='function'&&isAdm())) return 0; if(f.duel&&c==='duel') return 'duel'; if(f.clan&&(c==='clans'||c==='clanreq'||c==='clanlog'||c==='raid'||c==='ctm'||c==='ewar'||(c==='lb'&&hasCl(q)))) return 'clan'; }catch(e){} return 0; };
+  const ffHit=k=>{ try{ const n=Date.now(); if(!window._ffT||n-window._ffT>8000){ window._ffT=n; say((window.dxxFF&&window.dxxFF.msg)||FF_MSG[k]); } }catch(e){} };
+  const ffErr=()=>Object.assign(new Error('ff-off'),{code:'unavailable'});
+  const ffTx=r=>{ const k=ffKind(raw(r)); if(k){ ffHit(k); throw ffErr(); } };
+  G.getDoc=async function(ref){ { const k=ffKind(raw(ref)); if(k){ ffHit(k); return {exists:()=>false,data:()=>undefined,id:ref&&ref.id,ref:ref}; } } const s=await F.getDoc(ref); add(cat(pathOf(ref)),'d',1); return s; };
+  G.getDocs=async function(q){ { const k=ffKind(raw(q),q); if(k){ ffHit(k); return {size:0,empty:true,docs:[],forEach(){},docChanges:()=>[],metadata:{}}; } } const s=await F.getDocs(q); add(cat(pathOf(q)),'q',Math.max(1,s.size||0)); return s; };
+  G.onSnapshot=function(ref,...a){ { const k=ffKind(raw(ref),ref); if(k){ ffHit(k); const fns=a.filter(x=>typeof x==='function'); if(fns[1]) setTimeout(()=>{ try{ fns[1](ffErr()); }catch(e){} },0); return ()=>{}; } } const c=cat(pathOf(ref)); const i=a.findIndex(x=>typeof x==='function');
     if(i>=0){ const fn=a[i]; let first=1; a[i]=function(s){ try{ if(!(s.metadata&&s.metadata.hasPendingWrites)){ let n=1; if(typeof s.docChanges==='function'){ n=s.docChanges().length; if(first&&n===0) n=1; } if(n>0) add(c,'l',n); } first=0; }catch(e){} return fn.apply(this,arguments); }; }
     return F.onSnapshot(ref,...a); };
-  ['setDoc','addDoc','updateDoc','deleteDoc'].forEach(k=>{ if(typeof F[k]!=='function') return; G[k]=async function(ref,...a){ const r=await F[k](ref,...a); addW(cat(pathOf(ref)),1); return r; }; });
+  ['setDoc','addDoc','updateDoc','deleteDoc'].forEach(k=>{ if(typeof F[k]!=='function') return; G[k]=async function(ref,...a){ { const kk=ffKind(raw(ref)); if(kk){ ffHit(kk); throw ffErr(); } } const r=await F[k](ref,...a); addW(cat(pathOf(ref)),1); return r; }; });
   if(typeof F.runTransaction==='function') G.runTransaction=function(db,fn,o){ return F.runTransaction(db,function(tx){
-    const t2={ get:async r=>{ const s=await tx.get(r); add(cat(pathOf(r)),'d',1); return s; }, set:(r,...a)=>{ addW(cat(pathOf(r)),1); tx.set(r,...a); return t2; }, update:(r,...a)=>{ addW(cat(pathOf(r)),1); tx.update(r,...a); return t2; }, delete:r=>{ addW(cat(pathOf(r)),1); tx.delete(r); return t2; } };
+    const t2={ get:async r=>{ ffTx(r); const s=await tx.get(r); add(cat(pathOf(r)),'d',1); return s; }, set:(r,...a)=>{ ffTx(r); addW(cat(pathOf(r)),1); tx.set(r,...a); return t2; }, update:(r,...a)=>{ ffTx(r); addW(cat(pathOf(r)),1); tx.update(r,...a); return t2; }, delete:r=>{ ffTx(r); addW(cat(pathOf(r)),1); tx.delete(r); return t2; } };
     return fn(t2); },o); };
   if(!window._rcTm){ window._rcTm=setInterval(rcSave,30000); window.addEventListener('pagehide',rcSave); document.addEventListener('visibilitychange',()=>{ if(document.hidden) rcSave(); }); }
   return G;
@@ -19771,8 +19778,8 @@ async function mtLogin(){ const e=(document.getElementById('mtem')||{}).value||'
   try{ const {Au,auth}=FBM; await Au.signInWithEmailAndPassword(auth,e.trim(),p); clUser(); if(typeof isAdm==='function'&&!isAdm()){ if(m) m.textContent='Энэ бүртгэл админ биш'; return; } window._mtAdm=0; window._mtDirty=1; mtRender(); }
   catch(x){ if(m) m.textContent=(typeof clErr==='function'?clErr(x):'Алдаа'); } }
 (function(){ let started=0;
-  setInterval(()=>{ try{ if(!started&&typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); },()=>{}); }catch(e){} } if(MNT.on) mtRender(); }catch(e){} },15000);
-  const _w=setInterval(()=>{ try{ if(typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ clearInterval(_w); if(!started){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); },()=>{}); }catch(e){} } } }catch(e){} },1500);
+  setInterval(()=>{ try{ if(!started&&typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); },()=>{}); }catch(e){} } if(MNT.on) mtRender(); }catch(e){} },15000);
+  const _w=setInterval(()=>{ try{ if(typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ clearInterval(_w); if(!started){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); },()=>{}); }catch(e){} } } }catch(e){} },1500);
 })();
 // хаалттай үед cloud хадгалалт хийхгүй (админаас бусад)
 (function(){ if(typeof clPush==='function'){ const _p=clPush; clPush=function(){ if(window.dxxMaintOn) return Promise.resolve(false); return _p.apply(this,arguments); }; } })();
@@ -19805,7 +19812,21 @@ function cfAdminHTML(){ let h='<div class="card" style="border-color:#ff8a7a"><h
 async function cfSet(off){ if(!isAdm()) return; const msg=((document.getElementById('cf_msg')||{}).value||'').trim().slice(0,120), n=Date.now();
   if(off&&!confirm('Чатыг бүх тоглогчид унтраах уу?')) return;
   try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{cf:{off:off?1:0,msg:msg,t:n}},{merge:true}); say(off?'Чат унтарлаа':'Чат асалаа'); cfApply({off:off,msg:msg,t:n}); try{ fillMA(); }catch(e){} }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
-(function(){ const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ h=mtAdminHTML()+cfAdminHTML()+h+rcHTML(); }catch(e){} return h; }; })();
+
+// ---------- 4) Функц унтраах: Топ жагсаалт, Клан, Онлайн тоглоом (дуэл/карт). ann/main.ff = {top,clan,duel,msg,t} (1 = унтраасан) ----------
+const FFS={top:0,clan:0,duel:0,msg:'',t:0};
+const FF_NAME={top:'Топ жагсаалт',clan:'Клан (кланы мэдээ, дайн, гишүүд)',duel:'Онлайн тоглоом (дуэл, онлайн карт)'};
+function ffApply(c){ c=c||{}; FFS.top=c.top?1:0; FFS.clan=c.clan?1:0; FFS.duel=c.duel?1:0; FFS.msg=String(c.msg||'').slice(0,120); FFS.t=+c.t||0; window.dxxFF=(FFS.top||FFS.clan||FFS.duel)?{top:FFS.top,clan:FFS.clan,duel:FFS.duel,msg:FFS.msg}:null; }
+(function(){ if(typeof clLB==='function'){ const _l=clLB; clLB=function(){ const f=window.dxxFF; if(f&&f.top&&!((typeof isAdm==='function')&&isAdm())){ try{ say(f.msg||'Топ жагсаалт түр хаалттай байна'); }catch(e){} CL.lb=CL.lb||[]; try{ if(cur==='soc') fillM(); }catch(e){} return; } return _l.apply(this,arguments); }; } })();
+function ffAdminHTML(){ let h='<div class="card" style="border-color:#ff8a7a"><h3>Функц унтраах</h3><div class="sm" style="opacity:.8">Унтраасан функц зөвхөн админд нээлттэй. Унтраахад тэр хэсэг Firebase уншихаа зогсооно.</div>';
+  ['top','clan','duel'].forEach(k=>{ h+='<div class="row" style="padding:5px 0;gap:6px"><span class="sm" style="flex:1;min-width:0">'+FF_NAME[k]+': <b style="color:'+(FFS[k]?'#ff8a7a':'#7fe08a')+'">'+(FFS[k]?'УНТАРСАН':'Асаалттай')+'</b></span><button class="btn'+(FFS[k]?'':' red')+'" style="padding:4px 10px" onclick="ffSet(\''+k+'\')">'+(FFS[k]?'Асаах':'Унтраах')+'</button></div>'; });
+  h+='<input id="ff_msg" maxlength="120" placeholder="Мессеж (хоосон бол стандарт мессеж)" value="'+esc2(FFS.msg)+'" style="'+_inp+'"></div>';
+  return h; }
+async function ffSet(k){ if(!isAdm()) return; const n=Date.now(), msg=((document.getElementById('ff_msg')||{}).value||'').trim().slice(0,120), nx={top:FFS.top,clan:FFS.clan,duel:FFS.duel};
+  nx[k]=nx[k]?0:1; if(nx[k]&&!confirm(FF_NAME[k]+' бүх тоглогчид унтраах уу?')) return;
+  const rec={top:nx.top,clan:nx.clan,duel:nx.duel,msg:msg,t:n};
+  try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{ff:rec},{merge:true}); say(nx[k]?'Унтарлаа':'Асалаа'); ffApply(rec); try{ fillMA(); }catch(e){} }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
+(function(){ const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ h=mtAdminHTML()+cfAdminHTML()+ffAdminHTML()+h+rcHTML(); }catch(e){} return h; }; })();
 
 
 /* ===== Админ: тоглогчийн Алт харах + сэжигтэй тэмдэглэх (зөвхөн админд) ===== */

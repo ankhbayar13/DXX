@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5adb42b10b';
+var UPDB='1d2ce8a902';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15960,28 +15960,34 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
     }catch(e){}
   }
   function listen(key,coll,onFlag){
-    if(subs[key]&&subs[key].c===coll) return;
-    if(subs[key]){ try{ subs[key].u(); }catch(e){} }
+    // Нэг удаа нээгээд хэвээр үлдээнэ (өмнө нь 5 сек тутам хаагаад дахин нээж, нээх бүрд унших төлдөг байсан).
+    // Алдаа гарсан суваг (жишээ нь дүрмээр хаагдсан) 5 минутад нэг л дахин оролдоно.
+    const o=subs[key];
+    if(o&&(!o.err||Date.now()-o.err<300000)) return;
+    if(o){ try{ o.u&&o.u(); }catch(e){} delete subs[key]; }
     init(key);
     try{
-      const {F,db}=FBM, ref=coll(F,db);
-      const u=F.onSnapshot(F.query(ref,F.orderBy('t','desc'),F.limit(1)),s=>{
+      const {F,db}=FBM, ref=coll(F,db), me={u:null,c:key,err:0};
+      subs[key]=me;
+      me.u=F.onSnapshot(F.query(ref,F.orderBy('t','desc'),F.limit(1)),s=>{
         const d=s.docs[0]; if(!d){ onFlag(false); paint(); return; }
         const m=d.data(), t=tsOf(m), mine=(m.uid===CL.uid);
         if(curKey()===key){ setSeen(key,t+1); onFlag(false); } else onFlag(!mine&&t>seen(key));
         paint();
-      },()=>{});
-      subs[key]={u,c:coll};
-    }catch(e){}
+      },()=>{ me.err=Date.now(); });
+    }catch(e){ delete subs[key]; }
   }
+  function prune(keep){ try{ Object.keys(subs).forEach(k=>{ if(keep.indexOf(k)<0){ try{ subs[k].u&&subs[k].u(); }catch(e){} delete subs[k]; if(k.indexOf('dm_')===0) delete U.fr[k.slice(3)]; } }); }catch(e){} }
   function ensure(){
     try{
       if(!CL||!CL.ok||!FBM||!CL.uid) return;
+      const keep=['pub'];
       listen('pub',(F,db)=>F.collection(db,'chat'),v=>{ U.pub=v?1:0; });
       const k=myClan();
-      if(k!=null) listen('clan'+k,(F,db)=>F.collection(db,'clanchat','c'+k,'m'),v=>{ U.clan=v?1:0; });
+      if(k!=null){ keep.push('clan'+k); listen('clan'+k,(F,db)=>F.collection(db,'clanchat','c'+k,'m'),v=>{ U.clan=v?1:0; }); }
       else { U.clan=0; }
-      (S.friends||[]).slice(0,10).forEach(fr=>{ if(!fr||!fr.id) return; const key=[CL.uid,fr.id].sort().join('_'); listen('dm_'+key,(F,db)=>F.collection(db,'dm',key,'m'),v=>{ U.fr[key]=v?1:0; }); });
+      (S.friends||[]).slice(0,10).forEach(fr=>{ if(!fr||!fr.id) return; const key=[CL.uid,fr.id].sort().join('_'); keep.push('dm_'+key); listen('dm_'+key,(F,db)=>F.collection(db,'dm',key,'m'),v=>{ U.fr[key]=v?1:0; }); });
+      prune(keep);
       paint();
     }catch(e){}
   }

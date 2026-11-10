@@ -10874,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='aea9bd538b';
+var UPDB='a3f2fe29fc';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19108,10 +19108,37 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   const energy=s=>G.turn+G.bonus[s];
   const spent=()=>G.staged.reduce((a,x)=>a+x.card.d.c,0);
   const locRev=li=>G.turn>=li+1;
+  /* ---------- түүхэн холбоо ---------- */
+  const FAM={
+    hul:{n:'Дөрвөн хүлэг',ids:['mukhulai','borchi','boorchu'],tb:{2:1,3:3}},
+    noh:{n:'Дөрвөн нохой',ids:['jelme','subeedei','zev','khubilai'],tb:{2:1,3:3,4:4}},
+    bor:{n:'Боржигон овог',ids:['chinggis','khasar','belgutei','oelun','ogodei','tolui','jochi','chagadai'],tb:{3:1,4:1}}
+  };
+  const SONS=['chinggis','khasar','belgutei'];
+  function syn(c,li){
+    const ids=G.locs[li].sides[c.side].map(x=>x.id), id=c.id, has=x=>ids.indexOf(x)>=0, out=[]; let v=0;
+    const pair=(a,b,n,lab)=>{ if((id===a&&has(b))||(id===b&&has(a))){ v+=n; out.push(lab+': +'+n); } };
+    pair('chinggis','borte',2,'Чингис + Бөртэ'); pair('khasar','belgutei',2,'Хасар + Бэлгүтэй');
+    if(SONS.indexOf(id)>=0&&has('oelun')){ v+=1; out.push('Өэлүн эхтэй хамт: +1'); }
+    Object.keys(FAM).forEach(k=>{ const F=FAM[k]; if(F.ids.indexOf(id)<0) return; const n=ids.filter(x=>F.ids.indexOf(x)>=0).length, b=F.tb[n]; if(b){ v+=b; out.push(F.n+' ×'+n+': +'+b); } });
+    return {v:v,out:out};
+  }
+  function synInfo(id){
+    const o=[];
+    if(id==='chinggis'||id==='borte') o.push('Чингис + Бөртэ нэг талбарт бол хоёуланд нь +2.');
+    if(id==='khasar'||id==='belgutei') o.push('Хасар + Бэлгүтэй нэг талбарт бол хоёуланд нь +2.');
+    if(id==='oelun') o.push('Өэлүн эх нэг талбарт байхад Чингис, Хасар, Бэлгүтэй тус бүр +1.');
+    else if(SONS.indexOf(id)>=0) o.push('Өэлүн эхтэй нэг талбарт бол +1.');
+    Object.keys(FAM).forEach(k=>{ const F=FAM[k]; if(F.ids.indexOf(id)<0) return;
+      o.push(F.n+': '+Object.keys(F.tb).map(n=>n+' нь хамт бол бүгд +'+F.tb[n]).join(', ')+'.'); });
+    return o;
+  }
+  const locOf=c=>{ for(let i=0;i<G.locs.length;i++) if(G.locs[i].sides[c.side].indexOf(c)>=0) return i; return -1; };
   function pw(c,li){
     const L=G.locs[li]; let p=c.d.p+c.buff;
     L.sides[c.side].forEach(o=>{ if(o!==c){ if(o.id==='borchi') p+=1; if(o.id==='borte') p+=2; } });
     L.sides[1-c.side].forEach(o=>{ if(o.id==='tolui') p-=1; });
+    p+=syn(c,li).v;
     if(L.eff==='altai') p+=1;
     if(L.eff==='gobi'&&c.d.c<=2) p+=2;
     if(L.eff==='khar'&&c.d.c>=4) p+=2;
@@ -19295,7 +19322,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
       +'<b>Ээлж.</b> 1-р ээлжид 1 энерги, дараа нь ээлж бүрт 1-ээр нэмэгдэнэ. Карт бүр өөрийн энергитэй. Картаа сонгоод нээлттэй талбарыг дарж тавина. Талбар бүр 1, 2, 3-р ээлжид дараалан нээгдэнэ.<br><br>'
       +'<b>Нээлт.</b> «Ээлж дуусгах» дарахад хоёр талын карт зэрэг нээгдэнэ. Талбарт илүү ухаж байгаа тал эхэлж нээнэ.<br><br>'
       +'<b>Хан!</b> Бооцоог ×2 болгоно. <b>Ухрах</b> нь одоогийн бооцооны куб алдана. Дайсан «Хан!» гэвэл ухрах эсвэл үргэлжлүүлэх эсэхээ шийд.<br><br>'
-      +'<b>Багц.</b> 12 карттай. 1-4 одтой баатруудын карт бүгдэд нээлттэй. 5 одтой баатар өөрт чинь байвал л карт нь нээгдэнэ.</div>'
+      +'<b>Түүхэн холбоо.</b> Зарим баатар нэг талбарт хамт байвал хүч нэмэгдэнэ: Чингис + Бөртэ (+2), Хасар + Бэлгүтэй (+2), Өэлүн эх хүүгийнхээ хамт (+1), Дөрвөн хүлэг (Мухулай, Боорчи, Борохул), Дөрвөн нохой (Зэлмэ, Сүбээдэй, Зэв, Хубилай), Боржигон овгийн 3 карт. Карт дарахад холбоог нь харуулна.<br><br><b>Багц.</b> 12 карттай. 1-4 одтой баатруудын карт бүгдэд нээлттэй. 5 одтой баатар өөрт чинь байвал л карт нь нээгдэнэ.</div>'
       +'<button class="cgbtn go" data-a="menu">Буцах</button></div>';
     if(V==='deck') return deckView();
     return playView();
@@ -19321,7 +19348,8 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     }).join('')+'</div>';
     h+='<div class="cglog">'+G.log.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>';
     const d=tip;
-    h+='<div class="cgbox" style="min-height:48px">'+(d?'<b>'+esc(cname(d.id))+'</b> · '+star(d.id)+' од · энерги '+d.d.c+' · хүч '+d.d.p+'<br>'+esc(d.d.t):'Картаа дарж сонго, дараа нь нээлттэй талбарыг дар. Тавигдсан картыг дарж чадварыг нь хар.')+'</div>';
+    let sx=''; if(d){ const li0=locOf(d), act=li0>=0?syn(d,li0).out:[], inf=synInfo(d.id); if(act.length) sx+='<br><span style="color:#8fe39a">Ажиллаж байна: '+esc(act.join(' · '))+'</span>'; else if(inf.length) sx+='<br><span style="color:#cdbb97">Холбоо: '+esc(inf.join(' '))+'</span>'; }
+    h+='<div class="cgbox" style="min-height:48px">'+(d?'<b>'+esc(cname(d.id))+'</b> · '+star(d.id)+' од · энерги '+d.d.c+' · хүч '+d.d.p+'<br>'+esc(d.d.t)+sx:'Картаа дарж сонго, дараа нь нээлттэй талбарыг дар. Тавигдсан картыг дарж чадварыг нь хар.')+'</div>';
     h+='<div class="cgrow"><div>Энерги '+Array.from({length:energy(0)},(_,i)=>'<i class="cgpip'+(i<left?' on':'')+'"></i>').join('')+' <b style="color:#ffd770">'+left+'</b></div><span class="cgchip">Багц '+G.deck[0].length+' · Дайсны гар '+G.hand[1].length+'</span></div>';
     h+='<div class="cghand">'+(G.hand[0].map((c,i)=>'<button class="cgc'+(c.uid===sel?' sel':'')+(c.d.c>left?' off':'')+'" style="border-color:'+frame(c.id)+'" data-h="'+i+'"><div class="tp"><span class="cost">'+c.d.c+'</span><span class="pwr">'+c.d.p+'</span></div>'+portrait(c.id,44)+'<div class="nm">'+esc(cname(c.id))+'</div><div class="tx">'+esc(c.d.t)+'</div></button>').join('')||'<div class="cgbox" style="flex:1;text-align:center">Гарт карт алга.</div>')+'</div>';
     h+='<div class="cgbt"><button class="cgbtn" data-a="ret"'+(busy||G.over?' disabled':'')+'>Ухрах</button><button class="cgbtn snap'+(G.snapped[0]?' done':'')+'" data-a="snap"'+(busy||G.over||G.snapped[0]?' disabled':'')+'>Хан!</button><button class="cgbtn go" data-a="end"'+(busy||G.over?' disabled':'')+'>'+(busy?'Нээж байна…':(G.turn>=G.max?'Сүүлийн ээлж':'Ээлж дуусгах'))+'</button></div>';
@@ -19375,7 +19403,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   function close(){ alive=false; G=null; const el=document.getElementById('cgv'); if(el) el.remove(); }
 
   window.cardOpen=open;
-  window.CGT={state:()=>G,view:()=>V,cardClose:close,def:DEF,owned:owned,all:ALL};
+  window.CGT={pw:(c,li)=>pw(c,li),syn:(c,li)=>syn(c,li),state:()=>G,view:()=>V,cardClose:close,def:DEF,owned:owned,all:ALL};
 })();
 
 

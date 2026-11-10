@@ -6393,9 +6393,9 @@ function isStep(dt){ const R=RT; if(!R) return; const U=R.U;
   R.th-=dt; if(R.th<=0){ R.th=0.3; isThink(); }
   for(let i=0;i<U.length;i++) U[i].tc=0; for(let i=0;i<U.length;i++){ const u=U[i]; if(u.tg&&u.tg.hp>0) u.tg.tc=(u.tg.tc||0)+1; }
   if(!R.done) for(const u of U){ if(u.hp>0){ u.px=u.x; u.py=u.y; isUnit(u,dt); } } else U.forEach(u=>{ u.mv=false; if(u.hurt>0) u.hurt-=dt; if(u.atkT>0) u.atkT-=dt; });
-  { const CS=18, Hm=new Map(); for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; A.hi=a; const k=(Math.floor(A.x/CS)+4)*512+Math.floor(A.y/CS)+4; const l=Hm.get(k); if(l) l.push(A); else Hm.set(k,[A]); }
+  { const CS=27, Hm=new Map(); for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; A.hi=a; const k=(Math.floor(A.x/CS)+4)*512+Math.floor(A.y/CS)+4; const l=Hm.get(k); if(l) l.push(A); else Hm.set(k,[A]); }
     for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; const cx=Math.floor(A.x/CS)+4, cy=Math.floor(A.y/CS)+4;
-      for(let ix=cx-1;ix<=cx+1;ix++) for(let iy=cy-1;iy<=cy+1;iy++){ const l=Hm.get(ix*512+iy); if(!l) continue; for(let q=0;q<l.length;q++){ const B=l[q]; if(B.hi<=a) continue; const dx=B.x-A.x, dy=B.y-A.y; if(dx>ISRR||dx<-ISRR||dy>ISRR||dy<-ISRR) continue; const d=Math.hypot(dx,dy); if(d<ISRR&&d>0.01){ const p=(ISRR-d)/2*Math.min(1,dt*8), ux=dx/d*p, uy=dy/d*p; if(isWalk(A.x-ux,A.y-uy)){ A.x-=ux; A.y-=uy; } if(isWalk(B.x+ux,B.y+uy)){ B.x+=ux; B.y+=uy; } } } } } }
+      for(let ix=cx-1;ix<=cx+1;ix++) for(let iy=cy-1;iy<=cy+1;iy++){ const l=Hm.get(ix*512+iy); if(!l) continue; for(let q=0;q<l.length;q++){ const B=l[q]; if(B.hi<=a) continue; const dx=B.x-A.x, dy=B.y-A.y; const RR=(A.g.type==='cav'||B.g.type==='cav')?26:ISRR; if(dx>RR||dx<-RR||dy>RR||dy<-RR) continue; const d=Math.hypot(dx,dy); if(d<RR&&d>0.01){ const p=(RR-d)/2*Math.min(1,dt*8), ux=dx/d*p, uy=dy/d*p; if(isWalk(A.x-ux,A.y-uy)){ A.x-=ux; A.y-=uy; } if(isWalk(B.x+ux,B.y+uy)){ B.x+=ux; B.y+=uy; } } } } } }
   if(R.ban){ R.ban.t+=dt; if(R.ban.t>1.9) R.ban=null; }
   R.pt.forEach(p=>{ p.t+=dt; p.x+=p.vx*dt; p.y+=(p.vy||0)*dt; p.h+=p.vh*dt; p.vh-=(p.c==='smoke'?-6:70)*dt; }); R.pt=R.pt.filter(p=>p.t<p.l);
   R.fx.forEach(f=>f.t+=dt*3.4); R.fx=R.fx.filter(f=>f.t<1);
@@ -6404,7 +6404,7 @@ function isStep(dt){ const R=RT; if(!R) return; const U=R.U;
   else { R.endT+=dt; if(!R.resShown&&R.endT>1.6){ R.resShown=1; rtsResult(); } } }
 
 // ---------- байгуулалт ----------
-function isBlock(g,cx,cy,sg){ const n=g.us.length, cols=Math.max(1,Math.min(n,Math.ceil(Math.sqrt(n*1.7)))), SX=22, SY=17;
+function isBlock(g,cx,cy,sg){ const n=g.us.length, cv=g.type==='cav', cols=Math.max(1,Math.min(n,Math.ceil(Math.sqrt(n*(cv?0.8:1.7))))), SX=cv?36:22, SY=cv?26:17;
   g.us.forEach((u,k)=>{ const r=Math.floor(k/cols), c=k%cols, rn=Math.min(cols,n-r*cols); u.ox=(r%2?5:0)*sg+(c-(rn-1)/2)*SX; u.oy=(r-(Math.ceil(n/cols)-1)/2)*SY; });
   const p=isNear(cx,cy); g.dest={x:p.x,y:p.y}; g.home={x:p.x,y:p.y};
   g.us.forEach(u=>{ const q=isNear(g.dest.x+u.ox,g.dest.y+u.oy); u.x=q.x; u.y=q.y; u.px=u.x; u.py=u.y; }); }
@@ -6432,8 +6432,14 @@ function isLayout(){ const R=RT, cv=$('rcv'); if(!cv) return; R.cw=innerWidth; R
 function isClamp(){ const R=RT, hw=R.cw/2/R.z, hh=R.ch/2/R.z; R.cx=Math.max(hw,Math.min(ISW-hw,R.cx)); R.cy=Math.max(hh,Math.min(ISH-hh,R.cy)); if(hw*2>=ISW) R.cx=ISW/2; if(hh*2>=ISH) R.cy=ISH/2; }
 const isScr=(x,y)=>{ const R=RT; return {x:(x-R.cx)*R.z+R.cw/2,y:(y-R.cy)*R.z+R.ch/2}; };
 const isMap=(px,py)=>{ const R=RT; return {x:(px-R.cw/2)/R.z+R.cx,y:(py-R.ch/2)/R.z+R.cy}; };
+async function isLoadCav(){ const A=RTA; if(!A||!A.U||A.U.t.cav||A.cavTry) return; A.cavTry=1;
+  try{ const im=await new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src='rts/cav8.webp?v=1'; }); if(!im) return;
+    const ec=document.createElement('canvas'); ec.width=im.naturalWidth; ec.height=im.naturalHeight; const x=ec.getContext('2d'); x.drawImage(im,0,0); const id=x.getImageData(0,0,ec.width,ec.height), d=id.data;
+    for(let i=0;i<d.length;i+=4){ const r=d[i],g=d[i+1],bb=d[i+2]; d[i]=Math.min(255,r*1.18+6); d[i+1]=g*0.78; d[i+2]=bb*0.7; } x.putImageData(id,0,0);
+    const row=(q,n)=>Array.from({length:n},(_,k)=>q*11+k), W=row(0,8);
+    A.U.t.cav={a:im,e:ec,cols:11,fx:1,an:{front:{walk:row(0,8),atk:row(3,8),die:row(4,11)},back:{walk:row(1,8),atk:row(3,8),die:row(4,11)},side:{walk:row(2,8),atk:row(3,8),die:row(4,11)}}}; }catch(e){} }
 function isDrawU(c,u,t){ const R=RT, A=RTA, sp=isScr(u.x,u.y), dead=u.hp<=0, z=R.z; if(sp.x<-60||sp.x>R.cw+60||sp.y<-60||sp.y>R.ch+120) return;
-  const ty=RTK[u.type]||'foot', UT=A.U&&A.U.t[ty], mul=ty==='cav'?1.3:ty==='heavy'?1.12:ty==='arch'?1.0:1.04, fig=ISUH*mul*z;
+  const ty=RTK[u.type]||'foot', UT=A.U&&A.U.t[ty], mul=ty==='cav'?1.4:ty==='heavy'?1.12:ty==='arch'?1.0:1.04, fig=ISUH*mul*z;
   const lx=u.lx==null?0:u.lx, ly=u.ly==null?0:u.ly; let dn=(Math.abs(ly)>Math.abs(lx)*1.1)?(ly>0?'front':'back'):'side'; if(u.dn!==dn&&(!u.dnT||t-u.dnT>0.25)){ u.dn=dn; u.dnT=t; } dn=u.dn||dn;
   let age=0; if(dead){ age=R.t-(u.dead==null?R.t:u.dead); if(age>3.4){ return; } }
   let al=1; if(dead&&age>2.2) al=Math.max(0,1-(age-2.2)/1.2);
@@ -6443,7 +6449,7 @@ function isDrawU(c,u,t){ const R=RT, A=RTA, sp=isScr(u.x,u.y), dead=u.hp<=0, z=R
   const bob=(!dead&&u.mv)?Math.abs(Math.sin(t*10+u.x))*z*0.9:0, lunge=(!dead&&u.atkT>0.3)?(u.fd||1)*z*1.4:0;
   c.save(); c.globalAlpha=al; c.translate(sp.x+lunge,sp.y-bob);
   if(UT){ const an=UT.an[dn]; let list,fi=0; if(dead){ list=an.die; fi=Math.min(list.length-1,Math.floor(age*(list.length>4?7:3.5))); } else if(u.atkT>0){ list=an.atk; fi=Math.min(list.length-1,Math.floor((1-u.atkT/0.5)*list.length)); } else { list=an.walk; fi=u.mv?Math.floor(t*8+u.x*0.05)%list.length:0; }
-    const idx=list[fi], col=idx%UT.cols, row=Math.floor(idx/UT.cols), src=u.side?UT.e:UT.a, s=fig/108, S2=A.U.cw*s; if(dn==='side'||dead) c.scale((u.fd||1)>0?1:-1,1);
+    const idx=list[fi], col=idx%UT.cols, row=Math.floor(idx/UT.cols), src=u.side?UT.e:UT.a, s=fig/108, S2=A.U.cw*s; if(dn==='side'||dead||(UT.fx&&u.atkT>0)) c.scale((u.fd||1)>0?1:-1,1);
     c.drawImage(src,col*A.U.cw,row*A.U.ch,A.U.cw,A.U.ch,-S2/2,-A.U.base*s,S2,A.U.ch*s);
     if(u.hurt>0&&!dead){ c.globalAlpha=al*0.45; c.globalCompositeOperation='lighter'; c.drawImage(src,col*A.U.cw,row*A.U.ch,A.U.cw,A.U.ch,-S2/2,-A.U.base*s,S2,A.U.ch*s); c.globalCompositeOperation='source-over'; } }
   else { const set=(dn==='back')?'back':'front', ref=A.spr[set+'_'+ty+'_walk']; let st=null, fi=0;
@@ -6523,7 +6529,7 @@ async function isStart(i,E){
   try{ const o=screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape'); if(o&&o.catch) o.catch(()=>{}); }catch(e){}
   RTA=RTA||{spr:{},bgc:{},ready:false}; const A=RTA, ld=src=>new Promise(r=>{ const im=new Image(); im.onload=()=>r(im); im.onerror=()=>r(null); im.src=src; });
   const names=[]; ['back','front'].forEach(s=>['walk','atk','die'].forEach(k=>names.push(s+'_cav_'+k)));
-  try{ await Promise.race([Promise.all([ld('rts/iso_map.webp?v=1').then(im=>{ R.bgImg=im; }), rtsLoadU(), ...names.map(n=>A.spr[n]?0:ld('rts/'+n+'.webp?v=1').then(im=>{ if(im) A.spr[n]={img:im,n:Math.max(1,Math.round(im.naturalWidth/320)),h:im.naturalHeight}; }))]),new Promise(r=>setTimeout(r,15000))]); }catch(e){}
+  try{ await Promise.race([Promise.all([ld('rts/iso_map.webp?v=1').then(im=>{ R.bgImg=im; }), rtsLoadU().then(isLoadCav), ...names.map(n=>A.spr[n]?0:ld('rts/'+n+'.webp?v=1').then(im=>{ if(im) A.spr[n]={img:im,n:Math.max(1,Math.round(im.naturalWidth/320)),h:im.naturalHeight}; }))]),new Promise(r=>setTimeout(r,15000))]); }catch(e){}
   if(RT!==R) return;
   try{ isGrid(); isLayout(); isBuild(E); }catch(err){ console.error(err); el.remove(); RT=null; startBattle(i,E); return; }
   R.cx=700; R.cy=ISH/2; isClamp();
@@ -10838,7 +10844,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f9a1776ee3';
+var UPDB='0dfb246c61';
 (function(){
   const K='updTry';
   const _go=updGo;

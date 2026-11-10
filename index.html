@@ -3517,7 +3517,7 @@ async function clInit(){ try{
   const V='10.12.2', B='https://www.gstatic.com/firebasejs/'+V+'/';
   const A=await import(B+'firebase-app.js'), Au=await import(B+'firebase-auth.js'), F=await import(B+'firebase-firestore.js');
   const app=A.initializeApp(FBC), auth=Au.getAuth(app), db=F.getFirestore(app);
-  FBM={A,Au,F:(typeof dxxWrapF==='function'?dxxWrapF(F):F),app,auth,db};
+  FBM={A,Au,F:(typeof dxxWrapF==='function'?(typeof dxxSbWrap==='function'?dxxSbWrap(dxxWrapF(F)):dxxWrapF(F)):F),app,auth,db};
   await new Promise(r=>{ const u=Au.onAuthStateChanged(auth,x=>{u();r();}); });
   if(!auth.currentUser) await Au.signInAnonymously(auth);
   clUser(); CL.ok=1; CL.st=CL.email?'Холбогдсон · '+CL.email:'Холбогдсон (бүртгэлгүй)';
@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4da070bb93';
+var UPDB='13e5395610';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19778,8 +19778,8 @@ async function mtLogin(){ const e=(document.getElementById('mtem')||{}).value||'
   try{ const {Au,auth}=FBM; await Au.signInWithEmailAndPassword(auth,e.trim(),p); clUser(); if(typeof isAdm==='function'&&!isAdm()){ if(m) m.textContent='Энэ бүртгэл админ биш'; return; } window._mtAdm=0; window._mtDirty=1; mtRender(); }
   catch(x){ if(m) m.textContent=(typeof clErr==='function'?clErr(x):'Алдаа'); } }
 (function(){ let started=0;
-  setInterval(()=>{ try{ if(!started&&typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); },()=>{}); }catch(e){} } if(MNT.on) mtRender(); }catch(e){} },15000);
-  const _w=setInterval(()=>{ try{ if(typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ clearInterval(_w); if(!started){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); },()=>{}); }catch(e){} } } }catch(e){} },1500);
+  setInterval(()=>{ try{ if(!started&&typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); if(typeof sbApply==='function') sbApply(d&&d.sb); },()=>{}); }catch(e){} } if(MNT.on) mtRender(); }catch(e){} },15000);
+  const _w=setInterval(()=>{ try{ if(typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ clearInterval(_w); if(!started){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); cfApply(d&&d.cf); ffApply(d&&d.ff); if(typeof sbApply==='function') sbApply(d&&d.sb); },()=>{}); }catch(e){} } } }catch(e){} },1500);
 })();
 // хаалттай үед cloud хадгалалт хийхгүй (админаас бусад)
 (function(){ if(typeof clPush==='function'){ const _p=clPush; clPush=function(){ if(window.dxxMaintOn) return Promise.resolve(false); return _p.apply(this,arguments); }; } })();
@@ -19860,6 +19860,120 @@ function admRows(){ const q=(CL.aq||'').replace('#',''); let L=(CL.lbAll||[]).fi
     if(a){ if(a.err) ex='<div class="sm" style="color:#ff8a7a">Татаж чадсангүй: '+esc2(a.err)+'</div>'; else if(a.na) ex='<div class="sm">Хадгалалт алга</div>'; else if(a.bad) ex='<div class="sm" style="color:#ff8a7a">Хадгалалт уншигдсангүй</div>';
       else ex='<div class="sm">Алт <b style="color:#ffd770">'+f(a.al)+'</b> · Зоос '+f(a.gold)+' · Түвшин '+a.pl+' · Баатар '+a.h+' · Төлбөр '+a.paid+' · '+aaAgo(a.t)+' өмнө'+(a.leg?' · хуучин формат':'')+(a.w.length&&!me?'<br><b style="color:#ff8a7a">СЭЖИГТЭЙ: '+a.w.join(', ')+'</b>':'')+(me?' (админ)':'')+'</div>'; }
     return '<div style="padding:3px 0;border-bottom:1px solid #4a3418"><div class="row" style="gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere"><b style="color:#ffd770">#'+p+'</b> '+esc2(x.n)+' · Lv '+(x.l||1)+' · '+f(x.p||0)+' '+(x.r?'✉':'👤')+'</span><button class="btn" style="padding:2px 8px" onclick="aaOne(\''+esc2(x.id)+'\')">Алт</button><button class="btn" style="padding:2px 8px" onclick="admTo('+p+')">🎁</button><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'lb\',\''+esc2(x.id)+'\')">✕</button></div>'+ex+'</div>'; }).join(''); }
+
+
+/* ===== Supabase: чат + найз (Firebase-тэй зэрэгцэн, админ цэснээс сэлгэнэ) ===== */
+/* Firebase-ийн F давхаргыг (chat, clanchat, dm, freq замууд) Supabase руу чиглүүлнэ. Бусад бүх зам Firebase хэвээр. */
+const SBX={url:'https://qdhhfpmzpetclyfrmkrj.supabase.co',key:'sb_publishable_jxek_4QUXyjarC6XiHCueA_ykqtn5gQ',ver:'2.45.4',chat:0,dm:0,fr:0,dead:0,cli:null,pr:null,sid:null,err:'',n:0,subs:[],t:0};
+function sbOn(root){ if(SBX.dead&&Date.now()-SBX.dead<600000) return false; if(root==='chat'||root==='clanchat') return !!SBX.chat; if(root==='dm') return !!SBX.dm; if(root==='freq') return !!SBX.fr; return false; }
+function sbLoad(){ if(SBX.pr) return SBX.pr;
+  SBX.pr=(async()=>{ let M; if(window.__SBFAKE) M=window.__SBFAKE; else M=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@'+SBX.ver+'/+esm');
+    const c=M.createClient(SBX.url,SBX.key,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'dxx-sb'}});
+    let g=await c.auth.getSession(), ss=g&&g.data&&g.data.session;
+    if(!ss){ const r=await c.auth.signInAnonymously(); if(r.error) throw r.error; ss=r.data&&r.data.session; }
+    if(!ss) throw new Error('no-session');
+    SBX.sid=ss.user.id; SBX.cli=c; SBX.dead=0; SBX.err=''; return c; })()
+  .catch(e=>{ SBX.dead=Date.now(); SBX.err=String((e&&(e.message||e.code))||e).slice(0,120); SBX.pr=null; SBX.cli=null; throw e; });
+  return SBX.pr; }
+function sbErr(e){ if(e&&e.sb!==undefined) return e; const s=+(e&&e.status)||0, c=String((e&&e.code)||''); const perm=(s===401||s===403||s===404||c==='42501'||c==='PGRST205'||c==='42P01'||c==='PGRST301');
+  return Object.assign(new Error((e&&e.message)||'sb'),{code:perm?'permission-denied':'unavailable',sb:c||s}); }
+// ---- замын тайлбар ----
+function sbTarget(segs){ const r=segs[0];
+  if(r==='chat') return {tb:'msgs',room:'pub',id:segs[1]};
+  if(r==='clanchat') return {tb:'msgs',room:String(segs[1]),id:segs[3]};
+  if(r==='dm') return {tb:'msgs',room:'dm_'+segs[1],id:segs[3]};
+  return {tb:'freq',id:segs[1]}; }
+const SBF={from:'from_uid',to:'to_uid'};
+const sbFld=(tb,f)=>tb==='freq'?(SBF[f]||f):f;
+function sbTs(v){ const ms=v?new Date(v).getTime():Date.now(); return {toMillis:()=>ms,toDate:()=>new Date(ms),seconds:Math.floor(ms/1000)}; }
+function sbFromRow(tg,r){ if(tg.tb==='freq') return {from:r.from_uid,to:r.to_uid,fn:r.fn,fl:r.fl,fp:r.fp,st:r.st,t:r.t};
+  return {uid:r.uid,n:r.n,lv:r.lv,sp:r.sp,ti:r.ti,tc:r.tc,im:r.im,m:r.m,t:sbTs(r.t)}; }
+function sbToRow(tg,d,id){ d=d||{};
+  if(tg.tb==='freq'){ const o={}; if(id!=null) o.id=id; if('from' in d) o.from_uid=d.from; if('to' in d) o.to_uid=d.to; ['fn','fl','fp','st','t'].forEach(k=>{ if(k in d) o[k]=d[k]; }); return o; }
+  const o={room:tg.room}; ['uid','n','lv','sp','ti','tc','im','m'].forEach(k=>{ if(k in d) o[k]=d[k]; }); if(id!=null) o.id=id; return o; }
+function sbDocOf(tg,segs,r){ const ref={__sb:1,kind:'d',segs:segs.slice(0,-1).concat([r.id]),id:r.id}; return {id:r.id,ref:ref,exists:()=>true,data:()=>sbFromRow(tg,r)}; }
+function sbSnapOf(tg,segs,rows){ const docs=rows.map(r=>sbDocOf(tg,tg.tb==='freq'?['freq',r.id]:segs.concat([r.id]),r));
+  return {docs:docs,size:docs.length,empty:!docs.length,metadata:{hasPendingWrites:false,fromCache:false},forEach:f=>docs.forEach(f),docChanges:()=>docs.map(d=>({type:'added',doc:d}))}; }
+async function sbRows(q){ const c=await sbLoad(), tg=sbTarget(q.segs); let b=c.from(tg.tb).select('*');
+  if(tg.room) b=b.eq('room',tg.room);
+  (q.cs||[]).forEach(x=>{ if(x[0]==='where'&&x[2]==='==') b=b.eq(sbFld(tg.tb,x[1]),x[3]); });
+  const ob=(q.cs||[]).find(x=>x[0]==='orderBy'), lm=(q.cs||[]).find(x=>x[0]==='limit');
+  if(ob) b=b.order(sbFld(tg.tb,ob[1]),{ascending:ob[2]!=='desc'}); if(lm) b=b.limit(lm[1]);
+  const r=await b; if(r.error) throw sbErr(r.error); return r.data||[]; }
+// ---- шууд сувагтай унших (onSnapshot-ийн оронд) ----
+function sbSnap(q,a){ const fns=a.filter(x=>typeof x==='function'), next=fns[0], onErr=fns[1]; const tg=sbTarget(q.segs);
+  const ob=(q.cs||[]).find(x=>x[0]==='orderBy'), lm=(q.cs||[]).find(x=>x[0]==='limit'), lim=lm?lm[1]:50, desc=!ob||ob[2]==='desc';
+  let alive=1, rows=[], ch=null, poll=0, cli=null, first=1;
+  const sort=()=>{ rows.sort((x,y)=>{ const d=new Date(x.t)-new Date(y.t); return desc?-d:d; }); rows=rows.slice(0,lim); };
+  const emit=()=>{ if(alive) try{ next&&next(sbSnapOf(tg,q.segs,rows)); }catch(e){} };
+  const load=async()=>{ try{ const r=await sbRows(q); if(!alive) return; rows=r; first=0; emit(); }catch(e){ if(alive&&first&&onErr){ first=0; onErr(sbErr(e)); } } };
+  const startPoll=()=>{ if(!poll&&alive) poll=setInterval(()=>{ if(!document.hidden) load(); },15000); };
+  const me={room:tg.room,inject:r=>{ if(!alive||r.room!==tg.room||rows.some(x=>x.id===r.id)) return; rows.push(r); sort(); emit(); }};
+  const vis=()=>{ if(!document.hidden) load(); }; document.addEventListener('visibilitychange',vis);
+  SBX.subs.push(me);
+  (async()=>{ try{ cli=await sbLoad(); }catch(e){ if(alive&&onErr) onErr(sbErr(e)); return; }
+    load();
+    if(tg.tb==='msgs'&&cli.channel){ try{
+      ch=cli.channel('m_'+tg.room+'_'+(++SBX.n))
+        .on('postgres_changes',{event:'INSERT',schema:'public',table:'msgs',filter:'room=eq.'+tg.room},p=>{ if(p&&p.new) me.inject(p.new); })
+        .on('postgres_changes',{event:'DELETE',schema:'public',table:'msgs'},p=>{ const id=p&&p.old&&p.old.id; if(id&&rows.some(x=>x.id===id)){ rows=rows.filter(x=>x.id!==id); emit(); } })
+        .subscribe(st=>{ if(st==='SUBSCRIBED'){ if(poll){ clearInterval(poll); poll=0; } load(); } else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED') startPoll(); });
+    }catch(e){ startPoll(); } } else startPoll(); })();
+  return ()=>{ alive=0; document.removeEventListener('visibilitychange',vis); if(poll) clearInterval(poll); SBX.subs=SBX.subs.filter(x=>x!==me); try{ if(ch&&cli) cli.removeChannel(ch); }catch(e){} }; }
+// ---- Firebase F-ийг боож чиглүүлэх ----
+function dxxSbWrap(G){ try{
+  const H=Object.assign({},G), isSb=x=>!!(x&&x.__sb);
+  H.collection=function(db,...s){ if(db&&db.__sb) return G.collection(db,...s); return sbOn(s[0])?{__sb:1,kind:'c',segs:s,cs:[]}:G.collection(db,...s); };
+  H.doc=function(db,...s){ if(isSb(db)) return {__sb:1,kind:'d',segs:db.segs.concat(s),id:s[s.length-1]}; return sbOn(s[0])?{__sb:1,kind:'d',segs:s,id:s[s.length-1]}:G.doc(db,...s); };
+  ['where','orderBy','limit'].forEach(k=>{ if(typeof G[k]!=='function') return; H[k]=function(...a){ const c=G[k](...a); try{ c.__d=[k].concat(a); }catch(e){} return c; }; });
+  H.query=function(ref,...cs){ if(isSb(ref)) return {__sb:1,kind:'q',segs:ref.segs,cs:(ref.cs||[]).concat(cs.map(c=>c&&c.__d).filter(Boolean))}; return G.query(ref,...cs); };
+  H.getDocs=async function(q){ if(!isSb(q)) return G.getDocs(q); try{ const r=await sbRows(q), tg=sbTarget(q.segs); return sbSnapOf(tg,q.segs,r); }catch(e){ throw sbErr(e); } };
+  H.getDoc=async function(ref){ if(!isSb(ref)) return G.getDoc(ref); try{ const tg=sbTarget(ref.segs), c=await sbLoad(); const r=await c.from(tg.tb).select('*').eq('id',tg.id).limit(1); if(r.error) throw r.error; const row=(r.data||[])[0]; if(!row) return {exists:()=>false,data:()=>undefined,id:tg.id,ref:ref}; return sbDocOf(tg,ref.segs,row); }catch(e){ throw sbErr(e); } };
+  H.onSnapshot=function(ref,...a){ if(!isSb(ref)) return G.onSnapshot(ref,...a); return sbSnap(ref,a); };
+  H.addDoc=async function(ref,data){ if(!isSb(ref)) return G.addDoc(ref,data); try{ const tg=sbTarget(ref.segs), c=await sbLoad(), row=sbToRow(tg,data);
+      const r=await c.from(tg.tb).insert(row).select(); if(r.error) throw r.error; const x=(r.data||[])[0]; if(x&&tg.tb==='msgs') SBX.subs.forEach(s=>{ try{ s.inject(x); }catch(e){} }); return {id:x&&x.id}; }catch(e){ throw sbErr(e); } };
+  H.setDoc=async function(ref,data,o){ if(!isSb(ref)){ const r=await G.setDoc(ref,data,o); try{ if(SBX.fr&&ref&&ref.path&&typeof CL!=='undefined'&&CL.uid&&ref.path==='lb/'+CL.uid) Promise.resolve().then(()=>sbProfile(data)).catch(()=>{}); }catch(e){} return r; }
+    try{ const tg=sbTarget(ref.segs), c=await sbLoad(), row=sbToRow(tg,data,tg.id); const r=await c.from(tg.tb).upsert(row); if(r.error) throw r.error; }catch(e){ throw sbErr(e); } };
+  H.updateDoc=async function(ref,data){ if(!isSb(ref)) return G.updateDoc(ref,data); try{ const tg=sbTarget(ref.segs), c=await sbLoad(), row=sbToRow(tg,data); delete row.room; const r=await c.from(tg.tb).update(row).eq('id',tg.id); if(r.error) throw r.error; }catch(e){ throw sbErr(e); } };
+  H.deleteDoc=async function(ref){ if(!isSb(ref)) return G.deleteDoc(ref); try{ const tg=sbTarget(ref.segs), c=await sbLoad(); const r=await c.from(tg.tb).delete().eq('id',tg.id).select(); if(r.error) throw r.error; if(tg.tb==='msgs'&&!(r.data||[]).length) throw Object.assign(new Error('denied'),{code:'42501'}); }catch(e){ throw sbErr(e); } };
+  return H; }catch(e){ return G; } }
+// ---- найзын профайл (Firestore lb-ийн оронд найзуудыг нэг асуулгаар) ----
+async function sbProfile(d){ if(!d||!SBX.fr||(SBX.dead&&Date.now()-SBX.dead<600000)) return; const c=await sbLoad();
+  await c.from('profiles').upsert({uid:CL.uid,n:d.n,l:d.l,p:d.p,pid:d.pid,r:d.r,t:d.t,v:d.v,upd:new Date().toISOString()},{onConflict:'uid,sid'}); }
+if(typeof socFetchFr==='function'){ const _sf=socFetchFr;
+  socFetchFr=async function(){ if(!sbOn('freq')) return _sf.apply(this,arguments);
+    if(!CL.ok||CL.frBusy||!(S.friends||[]).length) return; CL.frBusy=1; CL.fd=CL.fd||{};
+    try{ const c=await sbLoad(); const ids=S.friends.map(x=>x.id); const r=await c.from('profiles').select('uid,n,l,p,pid,r,t,v,upd').in('uid',ids).order('upd',{ascending:false}); if(r.error) throw r.error;
+      const got={}; (r.data||[]).forEach(x=>{ if(!got[x.uid]) got[x.uid]=x; });
+      await Promise.all(S.friends.map(async fr=>{ let d=got[fr.id]; if(d) d={n:d.n,l:d.l,p:d.p,pid:d.pid,r:d.r,t:d.t,v:d.v};
+        else { try{ const {F,db}=FBM; const s=await F.getDoc(F.doc(db,'lb',fr.id)); if(s.exists()) d=s.data(); }catch(e){} }
+        if(d){ CL.fd[fr.id]=d; fr.n=d.n||fr.n; fr.l=d.l||fr.l; fr.p=d.p||fr.p; } }));
+      save(); CL.frBusy=0; if(cur==='soc') fillMA(); }
+    catch(e){ CL.frBusy=0; return _sf.apply(this,arguments); } }; }
+// ---- админ сэлгэгч ----
+function sbApply(c){ c=c||{}; const o=[SBX.chat,SBX.dm,SBX.fr].join();
+  SBX.chat=c.chat?1:0; SBX.dm=c.dm?1:0; SBX.fr=c.fr?1:0; SBX.t=+c.t||0;
+  if(SBX.chat||SBX.dm||SBX.fr){ sbLoad().catch(()=>{}); }
+  if(o!==[SBX.chat,SBX.dm,SBX.fr].join()){ try{ if(typeof CHT!=='undefined'&&CHT.on&&typeof chatClose==='function') chatClose(); }catch(e){} try{ if(CL) { CL.rin=null; CL.fd=null; } }catch(e){} try{ if(typeof cur!=='undefined'&&cur==='cloud') fillMA(); }catch(e){} } }
+async function sbSet(k){ if(!isAdm()) return; const cur2={chat:SBX.chat,dm:SBX.dm,fr:SBX.fr}; cur2[k]=cur2[k]?0:1; cur2.t=Date.now();
+  try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{sb:cur2},{merge:true}); say(cur2[k]?'Supabase асаалаа':'Firebase руу буцлаа'); sbApply(cur2); try{ fillMA(); }catch(e){} }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
+async function sbTest(){ if(!isAdm()) return; SBX.tst='Шалгаж байна…'; try{ fillMA(); }catch(e){}
+  try{ const c=await sbLoad(); const out=[]; for(const tb of ['msgs','freq','profiles']){ const r=await c.from(tb).select('*').limit(1); out.push(tb+': '+(r.error?('АЛДАА '+(r.error.code||r.error.message)):'OK')); }
+    const a=await c.from('admins').select('sid').limit(1); out.push('admins: '+(a.error?('АЛДАА '+(a.error.code||a.error.message)):((a.data||[]).length?'би админ':'админ биш')));
+    SBX.tst=out.join(' · '); }catch(e){ SBX.tst='Холбогдсонгүй: '+SBX.err; }
+  try{ fillMA(); }catch(e){} }
+function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
+  const row=(k,n,d)=>'<div class="row" style="padding:5px 0;gap:6px"><span style="flex:1;min-width:0"><b>'+n+'</b><div class="sm">'+d+'</div></span><button class="btn'+(SBX[k]?' red':'')+'" onclick="sbSet(\''+k+'\')">'+(SBX[k]?'Supabase (унтраах)':'Firebase (асаах)')+'</button></div>';
+  let h='<div class="card" style="border-color:#7fe08a"><h3>Supabase (чат, найз)</h3>';
+  h+='<div class="sm">Төлөв: <b style="color:'+(on?'#7fe08a':'#c9a46a')+'">'+(on?'Зарим нь Supabase дээр':'Бүгд Firebase дээр')+'</b>'+(SBX.dead&&Date.now()-SBX.dead<600000?' · <b style="color:#ff8a7a">холбогдсонгүй ('+esc2(SBX.err)+') — Firebase руу түр буцсан</b>':(SBX.cli?' · холбогдсон':''))+'</div>';
+  h+=row('chat','Нийтийн + клан чат','Firestore унших/бичихээс чөлөөлнө');
+  h+=row('dm','Найзтай чат','Анхаар: Supabase дээр найзын чат Firebase шиг хатуу хаагдаагүй (өрөөний нэрийг мэдсэн хүн уншина)');
+  h+=row('fr','Найзын хүсэлт + найзын мэдээлэл','5 минут тутмын шалгалтыг Firebase-ээс авна');
+  h+='<div style="display:flex;gap:6px;margin-top:6px"><button class="btn" onclick="sbTest()">Шалгах</button></div>';
+  if(SBX.tst) h+='<div class="sm" style="margin-top:6px;overflow-wrap:anywhere">'+esc2(SBX.tst)+'</div>';
+  if(SBX.sid) h+='<div class="sm" style="margin-top:6px;overflow-wrap:anywhere">Админ болгох SQL (нэг удаа): <b>insert into public.admins(sid) values (\''+esc2(SBX.sid)+'\');</b></div>';
+  return h+'</div>'; }
+(function(){ const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ h=sbAdminHTML()+h; }catch(e){} return h; }; })();
 
 
 /* p32/sk24.js — 24 баатар × 4 өөр чадвар, төлөвүүд (хор, цус алдалт, stun, хуяг, шоолох, таталт),

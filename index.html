@@ -10874,18 +10874,17 @@ function actHTML(){
   h+='<div class="row" style="padding:2px 0"><span class="sm">🟢 Одоо онлайн (5 мин)</span><b>'+c(5)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">🟡 Сүүлийн 1 цаг</span><b>'+c(60)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">Сүүлийн 24 цаг</span><b>'+c(1440)+'</b></div><div class="row" style="padding:2px 0"><span class="sm">Сүүлийн 7 хоног</span><b>'+c(10080)+'</b></div>';
   const shown=L.filter(x=>(now-(x.t||0))<=1440*60000).slice(0,40);
   h+='<div style="margin-top:6px;max-height:260px;overflow-y:auto">'+(shown.length?shown.map(x=>{ const p=x.pid||pidOf(x.id); return '<div class="row" style="padding:3px 0;gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere">'+dot(x.t)+' <b style="color:#ffd770">#'+p+'</b> '+esc2(x.n)+(x.id===CL.uid?' (та)':'')+' · Lv '+(x.l||1)+' · ⚔'+f(x.p||0)+' '+(x.r?'✉':'👤')+'</span><span class="sm" style="opacity:.85;white-space:nowrap">'+actAgo(x.t)+'</span></div>'; }).join(''):'<div class="sm">Сүүлийн 24 цагт идэвхтэй тоглогч алга</div>')+'</div>';
-  h+='<div class="sm" style="opacity:.7;margin-top:4px">Сүүлийн 100 тоглогчоос. Тоглоом нээлттэй байхад ~1.5 мин тутам шинэчлэгдэнэ.</div><button class="btn" style="margin-top:6px" onclick="actFetch(true)">🔄 Шинэчлэх</button></div>';
+  h+='<div class="sm" style="opacity:.7;margin-top:4px">Сүүлийн 100 тоглогчоос. Админ цэсийг анх нээхэд нэг удаа татна, дараа нь зөвхөн «Шинэчлэх» товчоор шинэчилнэ.</div><button class="btn" style="margin-top:6px" onclick="actFetch(true)">🔄 Шинэчлэх</button></div>';
   return h; }
 (function(){
   const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ if(!CL.act&&!ACT.busy) setTimeout(()=>actFetch(true),0); h=h.replace('<h3>🛠 Админ</h3>','<h3>🛠 Админ</h3>'+actHTML()); }catch(e){} return h; };
-  setInterval(()=>{ try{ if(!document.hidden&&cur==='cloud'&&isAdm()) actFetch(true); }catch(e){} },60000);
 })();
 
 
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='dd6c0c13a8';
+var UPDB='4e5ecc26ac';
 (function(){
   const K='updTry';
   const _go=updGo;

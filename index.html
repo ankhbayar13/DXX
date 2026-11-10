@@ -2123,7 +2123,7 @@ function profHTML(){
     '<div class="card"><div class="sm" style="margin-bottom:6px">⚔ Миний баатруудаас сонго</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+(HEROES.filter(x=>S.heroes[x.id]&&SPRDATA['hp_'+x.id]).map(x=>'<img src="'+SPRDATA['hp_'+x.id][0]+'" onclick="setSp(\'hp_'+x.id+'\')" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#4a6a2a;border:2px solid '+((!S.prof.img&&S.prof.sp==='hp_'+x.id)?'#ffd770':'#6b4a24')+'">').join('')||'<div class="sm">Баатар дуудаарай</div>')+'</div></div>';
 }
 
-function setSp(k){ S.prof.img=''; S.prof.sp=k; try{ const a=$('avi'); if(a) a.dataset.k=''; }catch(e){} refresh(); try{ const a=$('avi'), d=SPRDATA[k]; if(a&&d){ a.src=d[0]; a.dataset.k=k; a.className=''; } say('Хөрөг солигдлоо ✓'); save(); setTimeout(()=>{ try{ clPush(true); }catch(e){} },2500); }catch(e){} }
+function setSp(k){ S.prof.img=''; S.prof.sp=k; try{ const a=$('avi'); if(a) a.dataset.k=''; }catch(e){} refresh(); try{ const a=$('avi'), d=SPRDATA[k]; if(a&&d){ a.src=d[0]; a.dataset.k=k; a.className=''; } say('Хөрөг солигдлоо ✓'); save(); setTimeout(()=>{ try{ clPushL(true); }catch(e){} },2500); }catch(e){} }
 function pickImg(inp){
   const fl=inp.files&&inp.files[0]; if(!fl) return;
   const rd=new FileReader();
@@ -3521,9 +3521,9 @@ async function clInit(){ try{
   await new Promise(r=>{ const u=Au.onAuthStateChanged(auth,x=>{u();r();}); });
   if(!auth.currentUser) await Au.signInAnonymously(auth);
   clUser(); CL.ok=1; CL.st=CL.email?'Холбогдсон · '+CL.email:'Холбогдсон (бүртгэлгүй)';
-  setInterval(()=>{ if(!document.hidden) clPush(true); },90000);
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden) clPush(true); });
-  setTimeout(()=>clPush(true),8000);
+  setInterval(()=>{ if(!document.hidden) clPushL(true); },90000);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) clPushL(true); });
+  setTimeout(()=>clPushL(true),8000);
   if(cur==='cloud') fillMA();
 }catch(e){ CL.st='Интернет холбогдсонгүй'; CL.err=(e&&(e.code||e.message))||''; if(cur==='cloud') fillMA(); } }
 function clUser(){ const u=FBM&&FBM.auth.currentUser; CL.uid=u?u.uid:null; CL.email=u&&!u.isAnonymous?u.email:null; }
@@ -3559,7 +3559,7 @@ async function clFetch(){ if(!CL.ok) return; try{ const {F,db}=FBM;
 function giftOpen(g){ S.gcl=S.gcl||{}; return !S.gcl[g.id]&&(g.exp||0)>Date.now()&&(!g.to||String(g.to)===String(myPid())); }
 function giftClaim(id,q){ const g=(CL.gifts||[]).find(x=>x.id===id); if(!g||!giftOpen(g)) return; S.gcl=S.gcl||{}; S.gcl[id]=1;
   const au=Math.min(1e6,Math.max(0,+g.gold||0)), aa=Math.min(1e4,Math.max(0,+g.alt||0)), as=Math.min(1e4,Math.max(0,+g.st||0));
-  S.res.gold+=au; S.res.alt+=aa; if(as>0) stnGain(as); save(); if(!q) say('🎁 Авлаа: '+(au?'+'+f(au)+' 🪙 ':'')+(aa?'+'+aa+' Алт ':'')+(as?'+'+as+' 🔮':'')); clPush(true); refresh(); fillM(); }
+  S.res.gold+=au; S.res.alt+=aa; if(as>0) stnGain(as); save(); if(!q) say('🎁 Авлаа: '+(au?'+'+f(au)+' 🪙 ':'')+(aa?'+'+aa+' Алт ':'')+(as?'+'+as+' 🔮':'')); clPushL(true); refresh(); fillM(); }
 function giftsHTML(){ if(!CL.ok) return ''; if(!CL.fetched){ CL.fetched=1; clFetch(); }
   let h='<div class="card"><h3>🎁 Бэлэг, зарлал</h3>';
   if(CL.ann&&CL.ann.text) h+='<div class="sm" style="margin-bottom:8px"><b>'+esc2(CL.ann.title||'Зарлал')+':</b> '+esc2(CL.ann.text)+'</div>';
@@ -3665,7 +3665,7 @@ async function clPush(quiet){ if(!CL.ok||CL.busy||window._clR) return false;
     const {F,db}=FBM; const d=acPack(JSON.stringify(S));
     try{ await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1,s:S.src||''}); }catch(e1){ if(!S.src) throw e1; await F.setDoc(F.doc(db,'saves',CL.uid),{d:d,t:Date.now(),v:1}); } lsSet('dxx_own',CL.uid);
     let nm=(S.prof&&S.prof.name)||'Хаан'; nm=String(nm).slice(0,14);
-    await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:wmNow(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap(),na:ndMine().na,nr:ndMine().nr,nw:ndMine().nw,wt:wsPush().wt,wp:wsPush().wp,wk:wsPush().wk,cl:wmClanId(),cs:wmCsGet().s,cw:wmCsGet().w,ps:wmCsGet().ps,pw:wmCsGet().pw,hs:wmHuntGet().s,hw:wmHuntGet().w,rs:[Math.floor(S.res.gold||0),Math.floor(S.res.meat||0),Math.floor(S.res.wood||0),Math.floor(S.res.grain||0)]});
+    { const _lk=nm+'|'+(S.pl||1)+'|'+(typeof wmClanId==='function'?wmClanId():''); if(!(quiet&&CL.lbT&&CL.lbK===_lk&&Date.now()-CL.lbT<1800000)){ CL.lbT=Date.now(); CL.lbK=_lk; await F.setDoc(F.doc(db,'lb',CL.uid),{n:nm,p:Math.floor(totalPower()),l:S.pl||1,t:wmNow(),r:CL.email?1:0,pid:pidOf(CL.uid),v:socSnap(),na:ndMine().na,nr:ndMine().nr,nw:ndMine().nw,wt:wsPush().wt,wp:wsPush().wp,wk:wsPush().wk,cl:wmClanId(),cs:wmCsGet().s,cw:wmCsGet().w,ps:wmCsGet().ps,pw:wmCsGet().pw,hs:wmHuntGet().s,hw:wmHuntGet().w,rs:[Math.floor(S.res.gold||0),Math.floor(S.res.meat||0),Math.floor(S.res.wood||0),Math.floor(S.res.grain||0)]}); } }
     CL.last=Date.now(); if(!quiet) say('☁ Хадгалагдлаа'); ok=true;
   }catch(e){ if(!quiet) say('Хадгалж чадсангүй'); CL.err=(e&&(e.code||e.message))||''; }
   CL.busy=0; if(cur==='cloud') fillMA(); try{ nameSync(); }catch(e){} return ok; }
@@ -3707,7 +3707,7 @@ async function setName(v){ v=String(v||'').replace(/\s+/g,' ').trim().slice(0,14
   if(!/^[\p{L}\p{N} _.\-]+$/u.test(v)){ say('Нэрэнд зөвхөн үсэг, тоо ашигла'); return false; }
   if(nameKey(v)==='хаан'){ say('Энэ нэрийг авах боломжгүй. Өөр нэр сонго'); return false; }
   if(!CL.ok){ S.prof.name=v; S.prof.nameKey=''; say('Нэр хадгалагдлаа. Интернет холбогдсоны дараа баталгаажна'); refresh(); return true; }
-  try{ await clClaim(v); S.prof.name=v; S.prof.nameKey=nameKey(v); S.prof.dup=0; say('Нэр: '+v+' ✓'); refresh(); clPush(true); return true; }
+  try{ await clClaim(v); S.prof.name=v; S.prof.nameKey=nameKey(v); S.prof.dup=0; say('Нэр: '+v+' ✓'); refresh(); clPushL(true); return true; }
   catch(e){ const c=String((e&&(e.code||e.message))||''); if(c.includes('taken')){ say('"'+v+'" нэрийг өөр хүн авсан байна. Өөр нэр сонго'); return false; }
     if(c.includes('permission')){ S.prof.name=v; S.prof.nameKey='local'; S.prof.dup=0; CL.nameRules=0; say('Нэр: '+v); refresh(); return true; }
     say('Интернет алдаа. Дахин оролд'); return false; } }
@@ -3956,7 +3956,7 @@ function archDrawOld(t){ const A=ARC, c=A.c, dp=A.dp, w=A.w, h=A.h; c.setTransfo
   if(A.st==='pop'){ c.font='bold 34px sans-serif'; const y=ty-R-20-A.pt*18; c.fillStyle=A.sc[A.sc.length-1]>=8?'#ffd35a':A.sc[A.sc.length-1]>0?'#fff':'#ff9a7a'; c.strokeText(A.pop,w/2,y); c.fillText(A.pop,w/2,y); } }
 function archFinish(){ const A=ARC, a=archInfo(), tot=A.sc.reduce((x,y)=>x+y,0), nr=S.bld.naadamring||0;
   const gold=Math.round(tot*10*(1+0.2*nr)*(1+0.05*A.lv)); S.res.gold+=gold; let alt=0; if(tot>=45&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; }
-  const nb=tot>(a.best||0); if(nb) a.best=tot; qh('nd',1); try{ rkAdd(2,'Сур харваа'); }catch(e){} save(); try{ clPush(true); }catch(e){} sfx(tot>=30?'win':'lvl');
+  const nb=tot>(a.best||0); if(nb) a.best=tot; qh('nd',1); try{ rkAdd(2,'Сур харваа'); }catch(e){} save(); try{ clPushL(true); }catch(e){} sfx(tot>=30?'win':'lvl');
   const grade=tot>=45?'Мэргэн!':tot>=35?'Гайхалтай!':tot>=25?'Сайн!':tot>=12?'Дунд':'Дахин оролд';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
   r.innerHTML=icRes('a',tot>=40?3:tot>=25?2:tot>=12?1:0)+'<h2>🏹 '+grade+'</h2><div class="big">'+tot+' / 50</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb&&tot>0?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
@@ -4065,7 +4065,7 @@ function raceDrawOld(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h; c.setTransfo
   if(R.st==='fin'&&!R.done){ c.font='bold 40px sans-serif'; c.fillStyle=R.place<=3?'#ffd35a':'#fff'; const tx=R.place+'-р байр'; c.lineWidth=5; c.strokeText(tx,w/2,h*0.5); c.fillText(tx,w/2,h*0.5); } }
 function raceFinish(){ const R=RCE, a=raceInfo(), pl=R.place, tm=R.hs[R.me].fin, nr=S.bld.naadamring||0;
   const gold=Math.round([180,110,70,40,20][pl-1]*(1+0.2*nr)*(1+0.05*R.lvS)); S.res.gold+=gold; let alt=0; if(pl===1&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; }
-  const nb=(!a.best||tm<a.best); if(nb) a.best=tm; qh('nd',1); try{ rkAdd(2,'Морин уралдаа'); }catch(e){} save(); try{ clPush(true); }catch(e){}
+  const nb=(!a.best||tm<a.best); if(nb) a.best=tm; qh('nd',1); try{ rkAdd(2,'Морин уралдаа'); }catch(e){} save(); try{ clPushL(true); }catch(e){}
   const title=pl===1?'Түрүү!':pl===2?'Шүүс!':pl===3?'Гуравдугаар':pl+'-р байр';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
   r.innerHTML=icRes('r',pl===1?3:pl===2?2:pl===3?1:0)+'<h2>🐎 '+title+'</h2><div class="big">'+pl+' / 5</div><div>Хугацаа '+tm.toFixed(1)+'с</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+(nb?' · 🏆 Шинэ рекорд':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
@@ -4268,7 +4268,7 @@ function wrestDrawN(t){ const R=WRS, c=R.c, dp=R.dp, w=R.w, h=R.h, G=wrestGeo(),
   if(R.mt>0&&R.msg&&R.st!=='count'){ c.font='bold '+(R.st==='fall'?46:30)+'px sans-serif'; c.fillStyle=R.fcol||'#fff'; c.lineWidth=5; c.strokeStyle='#000a'; const my=R.st==='fall'?acy0+12:ay-ar*0.45; c.strokeText(R.msg,w/2,my); c.fillText(R.msg,w/2,my); } }
 function wrestFinish(){ const R=WRS, a=wrestInfo(), W=R.sc[0], L=R.sc[1], nr=S.bld.naadamring||0, win=W>=2;
   const base=win?(L===0?300:200):(W===1?100:40), gold=Math.round(base*(1+0.2*nr)*(1+0.05*R.lv)); S.res.gold+=gold; let alt=0; if(win&&L===0&&!a.alt){ a.alt=1; alt=1; S.res.alt+=1; } if(win) a.tw=(a.tw||0)+1;
-  qh('nd',1); try{ rkAdd(2,'Бөхийн барилдаан'); }catch(e){} save(); try{ clPush(true); }catch(e){}
+  qh('nd',1); try{ rkAdd(2,'Бөхийн барилдаан'); }catch(e){} save(); try{ clPushL(true); }catch(e){}
   const title=win?(L===0?'Аварга!':'Ялав!'):'Ялагдлаа';
   const r=document.createElement('div'); r.id='archres'; const left=Math.max(0,3-a.n);
   r.innerHTML=icRes('w',win?(L===0?3:2):(W===1?1:0))+'<h2>🤼 '+title+'</h2><div class="big">'+W+' – '+L+'</div><div>'+(win?'Та '+R.foe+'-г ялав':R.foe+' ялав')+'</div><div>+'+gold+' 🪙'+(alt?' · +1 Алт':'')+'</div><div class="sm" style="margin-top:4px">Өнөөдөр '+left+' оролдлого үлдсэн</div><div class="row2">'+(left?'<button class="btn" id="archagain">Дахин</button>':'')+'<button class="btn red" id="archexit">Гарах</button></div>';
@@ -4580,7 +4580,7 @@ function socTab(t){ CL.stab=t; CL.sv=null; if(t==='rq') socPoll(); if(t==='lb'&&
 function socOpen(id){ const pools=[CL.lbAll||[],CL.pfr&&CL.pfr!=='...'?CL.pfr:[],Object.keys(CL.fd||{}).map(k=>Object.assign({id:k},CL.fd[k]))]; let r=null; pools.forEach(a=>{ a.forEach(x=>{ if(!r&&x.id===id) r=x; }); }); if(!r) return; CL.sv=r; fillM(); const mb=$('mbody'); if(mb) mb.scrollTop=0; }
 function socBack(){ CL.sv=null; fillM(); }
 function socFr(id){ S.friends=S.friends||[]; const i=S.friends.findIndex(x=>x.id===id);
-  if(i>=0){ S.friends.splice(i,1); say('Найзын жагсаалтаас хаслаа'); save(); try{ clPush(true); }catch(e){} fillM(); return; }
+  if(i>=0){ S.friends.splice(i,1); say('Найзын жагсаалтаас хаслаа'); save(); try{ clPushL(true); }catch(e){} fillM(); return; }
   socReq(id); }
 const frKey=(a,b)=>a+'_'+b;
 async function socReq(id){ if(id===CL.uid){ say('Энэ чи өөрөө шүү 🙂'); return; } if((S.friends||[]).length>=30){ say('Найз 30 хүртэл байна'); return; }
@@ -4592,7 +4592,7 @@ async function socCancel(id){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,
 async function socAcc(from){ const q=(CL.rin||[]).find(x=>x.from===from); if(!q) return; S.friends=S.friends||[];
   if(S.friends.length>=30){ say('Найз 30 хүртэл байна'); return; }
   try{ const {F,db}=FBM; await F.updateDoc(F.doc(db,'freq',frKey(from,CL.uid)),{st:'ok'});
-    if(!isFr(from)) S.friends.push({id:from,n:q.fn||'',l:q.fl||1,p:q.fp||0}); CL.rin=CL.rin.filter(x=>x.from!==from); save(); try{ clPush(true); }catch(e){} say('🤝 '+(q.fn||'Тоглогч')+' найз боллоо!'); socBadge(); fillM(); }
+    if(!isFr(from)) S.friends.push({id:from,n:q.fn||'',l:q.fl||1,p:q.fp||0}); CL.rin=CL.rin.filter(x=>x.from!==from); save(); try{ clPushL(true); }catch(e){} say('🤝 '+(q.fn||'Тоглогч')+' найз боллоо!'); socBadge(); fillM(); }
   catch(e){ say('Зөвшөөрч чадсангүй. Дахин оролд'); } }
 async function socDec(from){ try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,'freq',frKey(from,CL.uid))); CL.rin=(CL.rin||[]).filter(x=>x.from!==from); say('Татгалзлаа'); socBadge(); fillM(); }catch(e){ say('Алдаа гарлаа'); } }
 function socBadge(){ const e=$('socb'); if(!e) return; const n=(CL.rin||[]).length; e.textContent=n||''; e.style.display=n?'block':'none'; }
@@ -4601,10 +4601,10 @@ async function socPoll(){ if(!CL.ok||!CL.email||CL.rpoll) return; CL.rpoll=1;
     const b=await F.getDocs(F.query(F.collection(db,'freq'),F.where('from','==',CL.uid))); const out=b.docs.map(d=>d.data()); CL.rout=out.filter(x=>x.st==='p');
     let ch=0; for(const x of out.filter(x=>x.st==='ok')){ S.friends=S.friends||[]; if(!isFr(x.to)&&S.friends.length<30){ let n='',l=1,p=0; try{ const s=await F.getDoc(F.doc(db,'lb',x.to)); if(s.exists()){ n=s.data().n; l=s.data().l; p=s.data().p; } }catch(e){} S.friends.push({id:x.to,n:n,l:l,p:p}); ch++; try{ say('🤝 '+(n||'Тоглогч')+' найзын хүсэлтийг чинь зөвшөөрлөө!'); }catch(e){} }
       try{ await F.deleteDoc(F.doc(db,'freq',frKey(CL.uid,x.to))); }catch(e){} }
-    if(ch){ save(); try{ clPush(true); }catch(e){} }
+    if(ch){ save(); try{ clPushL(true); }catch(e){} }
     socBadge(); if(cur==='soc') fillMA(); }catch(e){}
   CL.rpoll=0; }
-setInterval(()=>{ if(!document.hidden) socPoll(); },45000); setTimeout(socPoll,9000);
+setInterval(()=>{ if(!document.hidden) socPoll(); },300000); setTimeout(socPoll,9000);
 async function socFetchFr(){ if(!CL.ok||CL.frBusy||!(S.friends||[]).length) return; CL.frBusy=1; CL.fd=CL.fd||{};
   try{ const {F,db}=FBM; await Promise.all(S.friends.map(async fr=>{ try{ const s=await F.getDoc(F.doc(db,'lb',fr.id)); if(s.exists()){ const d=s.data(); CL.fd[fr.id]=d; fr.n=d.n||fr.n; fr.l=d.l||fr.l; fr.p=d.p||fr.p; } }catch(e){} })); save(); }catch(e){}
   CL.frBusy=0; if(cur==='soc') fillMA(); }
@@ -4654,7 +4654,7 @@ async function giftPoll(){ if(!CL.ok||!CL.email||CL.gpb) return; CL.gpb=1;
     CL.gifts=CL.gifts||[]; let mx=S.gseen||0; s.docs.forEach(d=>{ const g=Object.assign({id:d.id},d.data()); if(!CL.gifts.some(x=>x.id===g.id)) CL.gifts.unshift(g); mx=Math.max(mx,g.t||0); });
     S.gseen=mx; giftAuto(); }catch(e){}
   CL.gpb=0; }
-setInterval(()=>{ if(!document.hidden) giftPoll(); },120000); setTimeout(giftPoll,7000);
+setInterval(()=>{ if(!document.hidden) giftPoll(); },600000); setTimeout(giftPoll,7000);
 
 
 /* p32/menuimg.js — 88: цэсийн зурагтай товчнууд (menu.bin) */
@@ -5503,7 +5503,7 @@ function payShow(id,d){ payClose(); const o=document.createElement('div'); o.id=
   document.body.appendChild(o); PAY.t={id:id,inv:d.invoice_id,t0:Date.now()}; PAY.iv=setInterval(payCheck,3500); }
 async function payCheck(){ const T=PAY.t; if(!T||PAY.chk) return; if(Date.now()-T.t0>6*60000){ const s=document.getElementById('pqs'); if(s) s.textContent='Хугацаа дууслаа. Төлсөн бол «Төлсөн, шалгах» дарна уу'; clearInterval(PAY.iv); return; }
   PAY.chk=1; try{ const d=await payPost('/check',{invoice_id:T.inv,item:T.id}); PAY.chk=0;
-    if(d.ok&&d.paid){ clearInterval(PAY.iv); PAY.t=null; payInit(); S.paidInv=S.paidInv||[]; if(S.paidInv.indexOf(T.inv)<0){ S.paidInv.push(T.inv); grantPack(T.id); try{ clPush(true); }catch(e){} try{ payPost('/check',{invoice_id:T.inv,item:T.id,ack:1}); }catch(e){} sfx('coin'); } payClose(); say('Төлбөр амжилттай! Баярлалаа'); } else if(d.used){ clearInterval(PAY.iv); payClose(); say('Энэ нэхэмжлэх ашиглагдсан'); } }
+    if(d.ok&&d.paid){ clearInterval(PAY.iv); PAY.t=null; payInit(); S.paidInv=S.paidInv||[]; if(S.paidInv.indexOf(T.inv)<0){ S.paidInv.push(T.inv); grantPack(T.id); try{ clPushL(true); }catch(e){} try{ payPost('/check',{invoice_id:T.inv,item:T.id,ack:1}); }catch(e){} sfx('coin'); } payClose(); say('Төлбөр амжилттай! Баярлалаа'); } else if(d.used){ clearInterval(PAY.iv); payClose(); say('Энэ нэхэмжлэх ашиглагдсан'); } }
   catch(e){ PAY.chk=0; } }
 (function(){ const _b=buyReal; buyReal=function(id){ payInit(); if(S.testPay){ grantPack(id); return; } if(!PAY.ready){ openPayInfo(id); return; } payStart(id); }; })();
 (function(){ const st=document.createElement('style'); st.textContent='#payq{position:fixed;inset:0;z-index:400;background:#000d;display:flex;align-items:center;justify-content:center;padding:12px}.pqb{background:linear-gradient(#3b2815,#241709);border:3px solid #c9972b;border-radius:14px;padding:14px;max-width:360px;width:100%;max-height:92vh;overflow:auto;color:#f3e4bd;text-align:center}.pqb h3{margin:0 0 4px}.pqp{font-size:22px;font-weight:900;color:#ffd24a;margin-bottom:8px}.pqw{background:#5a2a10;border:1px solid #e8a24a;border-radius:8px;padding:6px 8px;margin:6px 0;font-size:12px;color:#ffe2b0}.pqr{width:170px;height:170px;background:#fff;padding:6px;border-radius:8px;margin:4px auto}.pqk{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.pql{display:flex;align-items:center;gap:6px;background:#2b1d12;border:1px solid #6b4a24;border-radius:8px;padding:5px;color:#f3e4bd;text-decoration:none;font-size:11px;text-align:left}.pql img{width:24px;height:24px;border-radius:5px}#pqs{margin:6px 0}'; document.head.appendChild(st); })();
@@ -5559,10 +5559,10 @@ function wmWeek(t){ return Math.floor(((t==null?wmNow():t)+8*3600e3)/(7*864e5));
 function wmWeekLeft(){ const w=wmWeek(); return Math.max(0,(w+1)*7*864e5-8*3600e3-wmNow()); }
 function wmOpp(cl,w){ const r=((w%9)+9)%9; if(cl===9) return (r*5)%9; const y=(((r-cl)%9)+9)%9; return y===cl?9:y; }
 function wmCsGet(){ S.cwk=S.cwk||{w:0,s:0,pw:0,ps:0}; const w=wmWeek(), K=S.cwk; if(K.w!==w){ if(K.w===w-1){ K.pw=K.w; K.ps=K.s; } else { K.pw=0; K.ps=0; } K.w=w; K.s=0; } return K; }
-function wmCsAdd(n){ const K=wmCsGet(); K.s+=n; try{ clPush(true); }catch(e){} }
+function wmCsAdd(n){ const K=wmCsGet(); K.s+=n; try{ clPushL(true); }catch(e){} }
 function cwScore(rows,w,skip){ let s=0; rows.forEach(x=>{ if(skip&&x.id===skip) return; s+=(x.cw===w?(x.cs||0):(x.pw===w?(x.ps||0):0)); }); return s; }
 var CWD={t:0,my:[],op:[],busy:0,off:0,w:-1,opId:-1,prev:null};
-async function cwFetch(force){ if(CWD.busy) return; if(!force&&Date.now()-CWD.t<240000) return; if(typeof CL==='undefined'||!CL.ok||typeof FBM==='undefined'){ CWD.off=1; return; } const k=wmClanId(); if(k<0) return; CWD.busy=1;
+async function cwFetch(force){ if(CWD.busy) return; if(!force&&Date.now()-CWD.t<600000) return; if(typeof CL==='undefined'||!CL.ok||typeof FBM==='undefined'){ CWD.off=1; return; } const k=wmClanId(); if(k<0) return; CWD.busy=1;
   try{ const {F,db}=FBM, w=wmWeek(), op=wmOpp(k,w); const get=async c=>{ const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('cl','==',c),F.limit(101))); return s.docs.map(d=>Object.assign({id:d.id},d.data())); };
     const [a,b]=await Promise.all([get(k),get(op)]); CWD.my=a; CWD.op=b; CWD.t=Date.now(); CWD.off=0; CWD.w=w; CWD.opId=op; CWD._k=''; }catch(e){ CWD.err=1; } CWD.busy=0; try{ if(WMV&&WMV.on) wmRefreshBar(); }catch(e){} }
 function wmCwEnts(){ const k=wmClanId(); if(k<0||typeof totalPower!=='function') return []; const w=wmWeek(), key=k+'_'+w+'_'+CWD.t; if(CWD._k===key&&CWD._e) return CWD._e;
@@ -5664,7 +5664,7 @@ function cwRender(){ const p=$('cwp'); if(!p) return; const k=wmClanId(), w=wmWe
 function cwOpen(){ const p=$('cwp'); if(!p) return; if(p.style.display==='block'){ p.style.display='none'; return; } cwRender(); p.style.display='block'; cwFetch(true).then(()=>{ if(p.style.display==='block') cwRender(); }); cwPrev(); }
 function cwClose(){ const p=$('cwp'); if(p) p.style.display='none'; }
 function cwChange(){ const k=wmClanId(); if(k<0) return; if(Date.now()-(S.clanT||0)<3*864e5){ say('Клан солих: '+Math.ceil((3*864e5-(Date.now()-S.clanT))/36e5)+' цагийн дараа'); return; } CWD.pick=1; cwRender(); }
-function cwJoin(i){ const st=wmSt(); if(st.m.length){ say('Эхлээд цуваа буцаж ирэхийг хүлээнэ үү'); return; } if(S.clan===i){ CWD.pick=0; cwRender(); return; } CWD.pick=0; S.clan=i; S.clanT=Date.now(); S.cwk={w:wmWeek(),s:0,pw:0,ps:0}; WMD=null; CWD.t=0; CWD._k=''; CWD.my=[]; CWD.op=[]; CWD.prev=null; CWD.pv=0; wmGen(); wmHome(); cwRender(); cwFetch(true); try{ clPush(true); }catch(e){} say('⚑ '+CLN[i].n+' клан руу нэгдлээ'); try{ save(); }catch(e){} }
+function cwJoin(i){ const st=wmSt(); if(st.m.length){ say('Эхлээд цуваа буцаж ирэхийг хүлээнэ үү'); return; } if(S.clan===i){ CWD.pick=0; cwRender(); return; } CWD.pick=0; S.clan=i; S.clanT=Date.now(); S.cwk={w:wmWeek(),s:0,pw:0,ps:0}; WMD=null; CWD.t=0; CWD._k=''; CWD.my=[]; CWD.op=[]; CWD.prev=null; CWD.pv=0; wmGen(); wmHome(); cwRender(); cwFetch(true); try{ clPushL(true); }catch(e){} say('⚑ '+CLN[i].n+' клан руу нэгдлээ'); try{ save(); }catch(e){} }
 function cwGoOp(){ const k=wmClanId(); if(k<0) return; const q=CLN[wmOpp(k,wmWeek())], c=$('wmc'); if(!c) return; WMV.z=0.5; WMV.x=q.x-c.clientWidth/WMV.z/2; WMV.y=q.y-c.clientHeight/WMV.z/2; wmClamp(); cwClose(); }
 async function cwPrev(){ const k=wmClanId(); if(k<0||typeof CL==='undefined'||!CL.ok||CWD.pv) return; const w=wmWeek()-1; if(S.cwClaim===w) return; CWD.pv=1;
   try{ const {F,db}=FBM, op=wmOpp(k,w), get=async c=>{ const s=await F.getDocs(F.query(F.collection(db,'lb'),F.where('cl','==',c),F.limit(101))); return s.docs.map(d=>Object.assign({id:d.id},d.data())); };
@@ -5691,7 +5691,7 @@ function wmHuntGet(){ S.hunt=S.hunt||{w:0,s:0,cd:0}; const w=wmWeek(); if(S.hunt
 function cwHuntTot(){ const w=wmWeek(), H=wmHuntGet(), me=(typeof CL!=='undefined'&&CL.uid)||''; let s=H.s, n=1; (CWD.w===w?CWD.my:[]).forEach(x=>{ if(x.id===me) return; n++; if(x.hw===w) s+=(x.hs||0); }); n=Math.max(3,Math.min(20,n)); return {s:s,n:n,T:[30*n,70*n,130*n]}; }
 function cwHunt(){ const H=wmHuntGet(), left=H.cd-Date.now(); if(left>0){ say('Дараагийн агнуур '+Math.ceil(left/60000)+' минутын дараа'); return; } if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   const P=Math.max(150,totalPower()), bonus=Math.min(12,P/4000); let sum=0; const W=HUNT_ANI.map((a,i)=>{ const w=a[3]+(i>=2?bonus:-bonus*0.6); sum+=Math.max(1,w); return Math.max(1,w); }); let r=Math.random()*sum, a=HUNT_ANI[0]; for(let i=0;i<W.length;i++){ r-=W[i]; if(r<=0){ a=HUNT_ANI[i]; break; } }
-  H.s+=a[2]; H.cd=Date.now()+20*60000; const meat=Math.round((20+P*0.02)*a[2]); S.res.meat=Math.min(cap(),(S.res.meat||0)+meat); passAdd(2); sfx('coin'); say(a[0]+' '+a[1]+' агналаа! +'+meat+' мах · клан агнуур +'+a[2]); try{ clPush(true); }catch(e){} refresh(); cwRender(); }
+  H.s+=a[2]; H.cd=Date.now()+20*60000; const meat=Math.round((20+P*0.02)*a[2]); S.res.meat=Math.min(cap(),(S.res.meat||0)+meat); passAdd(2); sfx('coin'); say(a[0]+' '+a[1]+' агналаа! +'+meat+' мах · клан агнуур +'+a[2]); try{ clPushL(true); }catch(e){} refresh(); cwRender(); }
 function cwHuntClaim(){ const H=wmHuntGet(), T=cwHuntTot(); S.hClaim=S.hClaim||{w:0,t:0}; if(S.hClaim.w!==H.w){ S.hClaim.w=H.w; S.hClaim.t=0; } let t=0; T.T.forEach((v,i)=>{ if(T.s>=v) t=i+1; }); if(H.s<5){ say('Шагнал авахад 5+ агнуурын оноо хэрэгтэй'); return; } if(t<=S.hClaim.t){ say('Шагнал авах зүйл алга'); return; }
   const P=Math.max(500,totalPower()); let g=0, al=0, rt=''; for(let i=S.hClaim.t+1;i<=t;i++){ g+=Math.round(P*[0.3,0.5,0.8][i-1]); al+=[2,4,6][i-1]; if(i===3&&Math.random()<0.5) rt=' + '+wmRelicGrant(); } S.hClaim.t=t; S.res.gold+=g; S.res.alt+=al; passAdd(10*t); sfx('coin'); vib([40,30,40]); say('🏹 Нэрэн агнуурын шагнал: +'+f(g)+' 🪙, +'+al+' Алт'+rt); refresh(); cwRender(); try{ save(); }catch(e){} }
 function cwHuntHTML(){ const H=wmHuntGet(), T=cwHuntTot(); S.hClaim=S.hClaim||{w:0,t:0}; const ct=S.hClaim.w===H.w?S.hClaim.t:0, left=Math.max(0,H.cd-Date.now()); let t=0; T.T.forEach((v,i)=>{ if(T.s>=v) t=i+1; }); const pct=Math.min(100,Math.round(T.s/T.T[2]*100));
@@ -6790,7 +6790,7 @@ async function ckBuy(k){
     say('👑 Та '+CLN[k].n+' кланы Хаан боллоо!'); try{ sfx('ok'); vib([30,20,60]); }catch(e){} try{ ckLog(k,'buy',nm); }catch(e){}
     if(S.clan!==k){ if(typeof wmSt==='function'&&wmSt().m.length) say('Цуваа буцаж ирсний дараа өөрийн клан руугаа нэгдээрэй'); else CK_JOIN(k); }
     try{ refresh(); }catch(e){}
-    try{ clPush(true); }catch(e){}
+    try{ clPushL(true); }catch(e){}
     setTimeout(()=>{ try{ ckNameOpen(k); }catch(e){} },900);
   }catch(e){
     const m=e&&e.message; say(m==='taken'?'Энэ клан аль хэдийн эзэнтэй болсон':'Клан авч чадсангүй. Алт хасагдаагүй.');
@@ -6864,7 +6864,7 @@ async function ckKickPoll(){
     const now=Date.now(); if(S.ckPoll&&now-S.ckPoll<600e3) return; S.ckPoll=now;
     const {F,db}=FBM, s=await F.getDoc(F.doc(db,'clans','c'+S.clan)); if(!s.exists()) return;
     const d=s.data(); CKD.docs[S.clan]=d;
-    if(ckKicked(d,CL.uid)&&ckOwnerK()!==S.clan){ const nm=CLN[S.clan]&&CLN[S.clan].n; S.clan=-1; S.clanT=0; try{ save(); }catch(e){} say('Таныг '+(nm||'')+' кланаас хаслаа'); try{ clPush(true); }catch(e){} try{ refresh(); }catch(e){} }
+    if(ckKicked(d,CL.uid)&&ckOwnerK()!==S.clan){ const nm=CLN[S.clan]&&CLN[S.clan].n; S.clan=-1; S.clanT=0; try{ save(); }catch(e){} say('Таныг '+(nm||'')+' кланаас хаслаа'); try{ clPushL(true); }catch(e){} try{ refresh(); }catch(e){} }
   }catch(e){}
 }
 setTimeout(ckKickPoll,12000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) setTimeout(ckKickPoll,1500); });
@@ -7298,7 +7298,7 @@ function cwMyDoc(){ const k=wmClanId(); return (k>=0&&typeof CKD!=='undefined')?
 function cwBannerLeft(d){ if(!d||!d.wb||!d.wb.t) return 0; const n=wmNow(), t=d.wb.t; return (n>=t-120000&&n-t<24*3600e3)?(24*3600e3-(n-t)):0; }
 function cwRole(){ const d=cwMyDoc(), me=(typeof CL!=='undefined'&&CL.uid)||''; if(!d||!me) return 0; if(d.ow===me) return 2; return (d.tt&&d.tt[me]===1)?1:0; }
 function cwMul(){ return 1+(cwBannerLeft(cwMyDoc())>0?0.5:0)+(cwRole()>0?0.1:0); }
-wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s=Math.min(CWCAP,K.s+n); try{ clPush(true); }catch(e){} };
+wmCsAdd=function(n){ const K=wmCsGet(); n=Math.max(1,Math.round(n*cwMul())); K.s=Math.min(CWCAP,K.s+n); try{ clPushL(true); }catch(e){} };
 (function(){
   const _cr=cwRender, _co=cwOpen;
   cwRender=function(){
@@ -8033,7 +8033,7 @@ function jamSpin(){
   setTimeout(()=>{ JAMX.sp=0; try{ sfx('lvl'); }catch(e){} try{ say(msg); }catch(e){} try{ if(hero){ jamClose(); jamReveal(); jamBtnUpd(); } else jamRender(); }catch(e){} try{ jamBtnUpd(); }catch(e){} },el?4400:100);
 }
 function jamStar(){ const id=JAM.id; if(!S.heroes[id]) return; const st=starOf(id); if(st>=STMAX){ say('Дээд од хүрсэн'); return; } const c=stcOf(id,st); if(shN(id)<c){ say('Хэлтэрхий хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; }
-  S.sh[id]-=c; S.heroes[id]=st+2; try{ sfx('lvl'); }catch(e){} say('Жамуха '+(st+1)+' одтой боллоо!'); try{ save(); refresh(); }catch(e){} setTimeout(()=>{ try{ clPush(true); }catch(e){} },3000); try{ jamBtnUpd(); }catch(e){} jamRender(); }
+  S.sh[id]-=c; S.heroes[id]=st+2; try{ sfx('lvl'); }catch(e){} say('Жамуха '+(st+1)+' одтой боллоо!'); try{ save(); refresh(); }catch(e){} setTimeout(()=>{ try{ clPushL(true); }catch(e){} },3000); try{ jamBtnUpd(); }catch(e){} jamRender(); }
 function jamInfo(){ try{ heroInfo(JAM.id); const h=document.getElementById('hd'); if(h) h.style.zIndex=80; }catch(e){} }
 
 // ---- цонх ----
@@ -9549,7 +9549,7 @@ function wevBout(){ const s=wsSt(); if(!s.run) return; window.WEVB=1; try{ wrest
         if(sm) sm.textContent=over?'🏟 '+WKN[run.k]+' дууслаа':'🏟 '+WKN[run.k]+' үргэлжилж байна';
         if(!over){ let b=ag; if(!b){ b=document.createElement('button'); b.className='btn'; b.id='archagain'; const row=r.querySelector('.row2'); if(row) row.insertBefore(b,row.firstChild); } b.textContent='▶ Дараагийн тулаан'; b.onclick=()=>{ cancelAnimationFrame(R.raf); const o=R.o; WRS=null; o.remove(); wevBout(); }; }
         else if(ag) ag.remove(); }
-      try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPush(true); }catch(e){} if(newT.length) setTimeout(()=>{ try{ clPush(true); }catch(e){} },4000); }catch(e){} };
+      try{ refresh(); }catch(e){} try{ save(); }catch(e){} try{ clPushL(true); }catch(e){} if(newT.length) setTimeout(()=>{ try{ clPushL(true); }catch(e){} },4000); }catch(e){} };
 })();
 (function(){ function chk(){ try{ if(!wsReg()) return; const s=wsSt(), t=wevT(); s.nt=s.nt||{}; ['s','a','u'].forEach(k=>{ if(!wevGoal(k)) return; const w=wevWin(k,t); if(w&&w.open&&s.last[k]!==w.d&&s.nt[k]!==w.d){ s.nt[k]=w.d; try{ say('🏟 '+WKN[k]+' нээгдлээ! Наадам цэсээс оролц ('+wtTm(w.en-t)+' үлдсэн)'); }catch(e){} } }); }catch(e){} }
   setTimeout(chk,8000); setInterval(chk,60000); })();
@@ -9701,7 +9701,7 @@ window.WRB=["data:image/webp;base64,UklGRiRQAABXRUJQVlA4WAoAAAAQAAAA4AAADgEAQUxQ
       if(!CL.ok||!FBM) return; const {F,db}=FBM;
       F.getDoc(F.doc(db,'lb',id)).then(s=>{ if(s.exists()&&CL.sv&&CL.sv.id===id&&CL.stab!==undefined&&CL.sv){ CL.sv=Object.assign({},CL.sv,s.data(),{id:id}); if(cur==='soc') fillM(); } }).catch(()=>{});
     }catch(e){} };
-  let tm=0; const kick=()=>{ try{ clearTimeout(tm); tm=setTimeout(()=>{ try{ clPush(true); }catch(e){} },4000); }catch(e){} };
+  let tm=0; const kick=()=>{ try{ clearTimeout(tm); tm=setTimeout(()=>{ try{ clPushL(true); }catch(e){} },4000); }catch(e){} };
   try{ const _su=starUp; starUp=function(id){ const r=_su(id); kick(); return r; }; }catch(e){}
   try{ const _gh=giveHero; giveHero=function(){ const r=_gh.apply(this,arguments); kick(); return r; }; }catch(e){}
 })();
@@ -10732,7 +10732,7 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
     S.relics={}; S.heq={}; S.equip=[]; S.rlReset1=1;
     if(n>0){ try{ mailAdd('Дурсгал шинэчлэгдлээ','Дурсгалын шинэ дүрмийн дагуу бүх дурсгал 0 болсон ('+n+' ширхэг). 4★ ба 5★ дурсгал одоо зөвхөн хайрцгаас олдоно. Тулаанд ялах, аймаг нэгдэх, өдрийн даалгавраар 1–3★ дурсгал авна.'); }catch(e){} }
     try{ refresh(); }catch(e){}
-    try{ clPush(true); }catch(e){}
+    try{ clPushL(true); }catch(e){}
   }catch(e){} },3000);
 })();
 
@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bc235de4cf';
+var UPDB='691a7d7bb0';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14043,7 +14043,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     FR.forEach(f=>{ const lock=rkLv()<f.min; h+=card(f.id,f.nm,comp(av,64,f.src,GEO),lock,lock?'🔒 Хааны зэрэг Lv '+f.min:(cur===f.id?'✓ Сонгосон':'Сонгох')); });
     h+='</div><button class="btn" style="margin-top:10px" onclick="document.getElementById(\'pfxo\').remove()">Хаах</button>';
     const o=document.createElement('div'); o.id='pfxo'; o.onclick=e=>{ if(e.target===o) o.remove(); }; o.innerHTML='<div class="pfxP">'+h+'</div>'; document.body.appendChild(o); };
-  window.pfxPick=function(id){ S.pfx=id||''; try{ save(); }catch(e){} const o=document.getElementById('pfxo'); if(o) o.remove(); try{ sfx('ok'); }catch(e){} try{ fillM(); }catch(e){} try{ if(typeof clPush==='function') clPush(true); }catch(e){} };
+  window.pfxPick=function(id){ S.pfx=id||''; try{ save(); }catch(e){} const o=document.getElementById('pfxo'); if(o) o.remove(); try{ sfx('ok'); }catch(e){} try{ fillM(); }catch(e){} try{ if(typeof clPush==='function') clPushL(true); }catch(e){} };
 
   /* 3) Чат: бусдын хүрээг lb/{uid}-ээс нэг удаа уншиж кэшлэнэ */
   const PXC={}; let pxBusy=0;
@@ -15921,7 +15921,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   window.ttlCol=function(){ const c=cur(); return (c&&/^#[0-9a-fA-F]{3,8}$/.test(c.c||''))?c.c:''; };
   window.setTitle=function(id){
     try{ S.prof.ti=id||''; save(); refresh(); say(id?'Цол тэмдэг солигдлоо ✓':'Цол тэмдэг авлаа'); }catch(e){}
-    setTimeout(()=>{ try{ clPush(true); }catch(e){} },2000);
+    setTimeout(()=>{ try{ clPushL(true); }catch(e){} },2000);
   };
   const _ph=profHTML;
   profHTML=function(){
@@ -17077,7 +17077,7 @@ async function aliReqAns(uid,ok){ try{ await ckReqAnswer(ALI.k,uid,ok); }catch(e
 function aliLeaveAsk(){
   const k=ALI.k, d=aliDoc();
   if(d.ow===CL.uid){ say('Хаан клангаасаа гарж болохгүй'); try{ sfx('err'); }catch(e){} return; }
-  try{ dxAsk('Клангаас гарах уу? Кланы оноо, хандив хуучин клан дээрээ үлдэнэ.','Гарах',()=>{ const nm=S.prof.name||'Тоглогч'; aliLog('leave',nm,0); S.clan=-1; S.clanT=0; try{ save(); clPush(true); }catch(e){} try{ WMD=null; }catch(e){} aliClose(); say('Клангаас гарлаа'); },'Үлдэх'); }catch(e){}
+  try{ dxAsk('Клангаас гарах уу? Кланы оноо, хандив хуучин клан дээрээ үлдэнэ.','Гарах',()=>{ const nm=S.prof.name||'Тоглогч'; aliLog('leave',nm,0); S.clan=-1; S.clanT=0; try{ save(); clPushL(true); }catch(e){} try{ WMD=null; }catch(e){} aliClose(); say('Клангаас гарлаа'); },'Үлдэх'); }catch(e){}
 }
 
 /* ---------- онцлох: хуучин цонхны оронд шинийг нээх ---------- */
@@ -18007,7 +18007,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     const g=S.prof&&S.prof.g;
     pop('<h3>Хүйс</h3><div class="av2b" style="margin:6px 0 4px"><button class="btn'+(g==='m'?' on':'')+'" onclick="avGset(\'m\')">Эрэгтэй</button><button class="btn'+(g==='f'?' on':'')+'" onclick="avGset(\'f\')">Эмэгтэй</button></div>','avg');
   };
-  window.avGset=function(g){ S.prof.g=g; try{ save(); }catch(e){} const d=document.getElementById('avg'); if(d) d.remove(); try{ refresh(); }catch(e){} try{ say('Хүйс: '+G[g]); }catch(e){} setTimeout(()=>{ try{ clPush(true); }catch(e){} },2500); };
+  window.avGset=function(g){ S.prof.g=g; try{ save(); }catch(e){} const d=document.getElementById('avg'); if(d) d.remove(); try{ refresh(); }catch(e){} try{ say('Хүйс: '+G[g]); }catch(e){} setTimeout(()=>{ try{ clPushL(true); }catch(e){} },2500); };
 
   /* Зураг солих цонх */
   function tile(key,src,name,on,pos){
@@ -19836,6 +19836,10 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,4000+n*2500)); }); }catch(e){} }
   setTimeout(()=>ld(0),1500); })();
 
+
+function clPushL(q){ try{ const now=Date.now(), sg=[Math.floor((S.res&&S.res.alt)||0),Object.keys(S.heroes||{}).length,(S.paidInv||[]).length,(S.friends||[]).length,S.pl||1,S.clan,(S.prof&&S.prof.name)||''].join('|'); const key=(window._clSg!==sg); if(key) window._clSg=sg;
+    if(key||document.hidden||!CL.last||now-CL.last>=900000) return clPush(q);
+    if(!window._clTm){ window._clTm=setTimeout(()=>{ window._clTm=0; try{ clPush(true); }catch(e){} },Math.max(1500,900000-(now-CL.last))); } return true; }catch(e){ try{ return clPush(q); }catch(e2){} } }
 </script><script>(function(){
  var F=[["e1.js", "4aaef25b", 5965689], ["e2.js", "f1c089e1", 5855676], ["e3.js", "39bde75b", 5877972], ["e4.js", "a2280f43", 2555564]],TOT=0,i,tries=0,failed=0,done=0,tS=0,live=1,bar=document.createElement('div'),pill=document.createElement('div'),stl=document.createElement('style');
  for(i=0;i<F.length;i++) TOT+=F[i][2]; i=0;

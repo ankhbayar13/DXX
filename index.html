@@ -10874,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='65d5c7edbb';
+var UPDB='fcdd938de9';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19060,7 +19060,12 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     {eff:'gobi',n:'Говь',t:'Энд 1-2 энергийн карт +2 хүч авна.'},
     {eff:'hukh',n:'Хөх нуур',t:'Энд карт нээгдэх бүрт эзэн нь нэг карт татна.'},
     {eff:'herlen',n:'Хэрлэн гол',t:'Энд нэг тал 3 карт л тавина.'},
-    {eff:'khangai',n:'Хангай',t:'Нөлөөгүй, энгийн талбар.'}
+    {eff:'khangai',n:'Хангай',t:'Нөлөөгүй, энгийн талбар.'},
+    {eff:'khar',n:'Хархорум',t:'Энд 4 ба түүнээс дээш энергийн карт +2 хүч авна.'},
+    {eff:'bkh',n:'Бурхан Халдун',t:'Энд ганц карттай тал нийт хүчэндээ +3 нэмж авна.'},
+    {eff:'onon',n:'Онон гол',t:'Энд нээгдсэн эхний карт эзэндээ дараагийн ээлжид +1 энерги өгнө.'},
+    {eff:'tengr',n:'Хөх Мөнх Тэнгэр',t:'Энд хожсон тал 2 оноо авна.'},
+    {eff:'ordon',n:'Алтан ордон',t:'Энд өөрийн хамгийн хүчтэй карт +3 хүч авна.'}
   ];
   const SC={1:'#9a9a9a',2:'#6fbf6f',3:'#5aa0e8',4:'#b777e6',5:'#ffcf4a'};
   const NAME=['Та','Дайсан'];
@@ -19109,10 +19114,13 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     L.sides[1-c.side].forEach(o=>{ if(o.id==='tolui') p-=1; });
     if(L.eff==='altai') p+=1;
     if(L.eff==='gobi'&&c.d.c<=2) p+=2;
+    if(L.eff==='khar'&&c.d.c>=4) p+=2;
+    if(L.eff==='ordon'){ const m=x=>x.d.p+x.buff; let top=null; L.sides[c.side].forEach(x=>{ if(!top||m(x)>m(top)) top=x; }); if(top===c) p+=3; }
     return Math.max(0,p);
   }
-  const total=(li,s)=>G.locs[li].sides[s].reduce((a,c)=>a+pw(c,li),0);
-  const wins=()=>{ let a=0,b=0; G.locs.forEach((L,i)=>{ if(!locRev(i)) return; const x=total(i,0),y=total(i,1); if(x>y)a++; else if(y>x)b++; }); return [a,b]; };
+  const total=(li,s)=>G.locs[li].sides[s].reduce((a,c)=>a+pw(c,li),0)+(G.locs[li].eff==='bkh'&&G.locs[li].sides[s].length===1?3:0);
+  const lw=li=>G.locs[li].eff==='tengr'?2:1;
+  const wins=()=>{ let a=0,b=0; G.locs.forEach((L,i)=>{ if(!locRev(i)) return; const x=total(i,0),y=total(i,1); if(x>y)a+=lw(i); else if(y>x)b+=lw(i); }); return [a,b]; };
   const sumAll=s=>G.locs.reduce((a,L,i)=>a+total(i,s),0);
   const capLeft=(li,s)=>G.locs[li].cap-G.locs[li].sides[s].length-(s===0?G.staged:G.aiStaged).filter(x=>x.li===li).length;
 
@@ -19139,6 +19147,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     else if(id==='chinggis'){ G.locs.forEach(M=>M.sides[s].forEach(x=>{ x.buff+=1; })); log(who+' → бүх талбарт +1'); }
     else log(who+' нээгдлээ');
     if(L.eff==='hukh') draw(s);
+    if(L.eff==='onon'&&!L.used){ L.used=true; G.bonusNext[s]+=1; log('Онон гол → дараагийн ээлжид '+NAME[s]+' +1 энерги'); }
   }
 
   /* тоглогчийн үйлдэл */
@@ -19195,7 +19204,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   function retreat(){ if(busy||G.over) return; endGame('lose','Та ухарлаа',G.retLoss); }
   function finish(){
     let a=0,b=0; const ln=[];
-    G.locs.forEach((L,i)=>{ const x=total(i,0),y=total(i,1); if(x>y)a++; else if(y>x)b++; ln.push(L.d.n+': '+x+' - '+y); });
+    G.locs.forEach((L,i)=>{ const x=total(i,0),y=total(i,1); if(x>y)a+=lw(i); else if(y>x)b+=lw(i); ln.push(L.d.n+': '+x+' - '+y); });
     let res; if(a>b) res='win'; else if(b>a) res='lose'; else { const s0=sumAll(0),s1=sumAll(1); res=s0>s1?'win':s1>s0?'lose':'draw'; }
     endGame(res,'Та - Дайсан · '+ln.join(' | ')+(a===b?' (талбар тэнцсэн тул нийт хүчээр)':''),G.stake);
   }
@@ -19276,10 +19285,10 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   function view(){
     const g=CG();
     if(V==='menu') return '<div class="cgw"><div class="cgh"><h1>Картын тулаан</h1><span class="cgchip">Куб <b>'+(g.cubes||0)+'</b></span></div>'
-      +'<div class="cgbox">Баатар бүр нэг карт. Гурван талбарт карт тавьж, <b>3 талбарын 2-ыг нь</b> хожсон нь ялна. Ээлж бүрт 1 энерги нэмэгдэнэ (6 ээлж).<br><br>Карт тавигдсаны дараа нээгдэж, чадвар нь ажиллана. Ялалт '+(g.w||0)+' · Ялагдал '+(g.l||0)+'.</div>'
+      +'<div class="cgbox">Баатар бүр нэг карт. Гурван талбарт карт тавьж, <b>3 талбарын 2-ыг нь</b> хожсон нь ялна (оноотой талбар байвал оноогоор). Ээлж бүрт 1 энерги нэмэгдэнэ (6 ээлж).<br><br>Карт тавигдсаны дараа нээгдэж, чадвар нь ажиллана. Ялалт '+(g.w||0)+' · Ялагдал '+(g.l||0)+'.</div>'
       +'<div class="cgmn"><button class="cgbtn go" data-a="play">Тулаан эхлэх</button><button class="cgbtn" data-a="deck">Миний багц ('+deckOk().length+'/'+STK+')</button><button class="cgbtn" data-a="rules">Дүрэм ба заавар</button><button class="cgbtn" data-a="exit">Гарах</button></div></div>';
     if(V==='rules') return '<div class="cgw"><div class="cgh"><h1>Дүрэм</h1></div><div class="cgbox">'
-      +'<b>Зорилго.</b> 3 талбарын 2-т нь дайснаас илүү нийт хүч цуглуул.<br><br>'
+      +'<b>Зорилго.</b> 3 талбарын 2-т нь дайснаас илүү нийт хүч цуглуул. Талбар бүр өөрийн нөлөөтэй, нийт 10 төрөл байна.<br><br>'
       +'<b>Ээлж.</b> 1-р ээлжид 1 энерги, дараа нь ээлж бүрт 1-ээр нэмэгдэнэ. Карт бүр өөрийн энергитэй. Картаа сонгоод нээлттэй талбарыг дарж тавина. Талбар бүр 1, 2, 3-р ээлжид дараалан нээгдэнэ.<br><br>'
       +'<b>Нээлт.</b> «Ээлж дуусгах» дарахад хоёр талын карт зэрэг нээгдэнэ. Талбарт илүү ухаж байгаа тал эхэлж нээнэ.<br><br>'
       +'<b>Хан!</b> Бооцоог ×2 болгоно. <b>Ухрах</b> нь одоогийн бооцооны куб алдана. Дайсан «Хан!» гэвэл ухрах эсвэл үргэлжлүүлэх эсэхээ шийд.<br><br>'

@@ -8487,6 +8487,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
   const inClan=()=>typeof S!=='undefined'&&S.clan!=null&&typeof CLN!=='undefined'&&!!CLN[S.clan];
   const canNet=()=>typeof CL!=='undefined'&&CL.ok&&typeof FBM!=='undefined';
   async function rsHFetch(force){
+    return; // Кланы судалгааны тусламж хасагдсан
     if(RSH.busy) return; if(!force&&Date.now()-RSH.t<20000) return; if(!canNet()||!inClan()) return;
     RSH.busy=1;
     try{ const {F,db}=FBM; const s=await F.getDocs(F.query(F.collection(db,'rshelp'),F.where('c','==',S.clan),F.limit(20)));
@@ -8497,6 +8498,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     RSH.busy=0;
   }
   window.rsHReq=async function(sl){
+    say('Кланы судалгааны тусламж хасагдсан'); return;
     rsInit(); const c=S.rs[sl]; if(!c) return;
     if(!inClan()){ say('Эхлээд клан руу нэгдээрэй'); return; }
     if(!canNet()){ say('Сүлжээнд холбогдоогүй байна'); return; }
@@ -8507,6 +8509,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     catch(e){ say('Тусламж хүсэх түр боломжгүй байна'); }
   };
   window.rsHelp=async function(id){
+    return;
     if(!canNet()) return;
     try{ const {F,db}=FBM; await F.updateDoc(F.doc(db,'rshelp',id),{h:F.arrayUnion(CL.uid)});
       RSH.list=RSH.list.filter(x=>x.id!==id); RSH.key=RSH.list.map(x=>x.id).join(',');
@@ -8514,17 +8517,18 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     catch(e){ say('Тусалж чадсангүй'); RSH.list=RSH.list.filter(x=>x.id!==id); if(cur==='res') fillM(); }
   };
   async function rsHPoll(){
+    return; // Кланы судалгааны тусламж хасагдсан
     try{ rsInit(); const act=slots().filter(s=>S.rs[s].rq); if(!act.length||!canNet()) return;
       const {F,db}=FBM; const d=await F.getDoc(F.doc(db,'rshelp',CL.uid)); if(!d.exists()) return; const v=d.data();
       act.forEach(sl=>{ const c=S.rs[sl]; if(!c||c.id!==v.id) return; const n=Math.min(6,(v.h||[]).length), add=n-(c.hc||0);
         if(add>0){ c.left-=c.tot*0.04*add; c.hc=n; sfx('coin'); say('🤝 Клан тусаллаа: -'+(add*4)+'% хугацаа'); if(cur==='res') fillM(); } }); }
     catch(e){}
   }
-  window.rsHPoll=rsHPoll; setInterval(rsHPoll,25000);
+  window.rsHPoll=rsHPoll;
 
   /* ---------- 4) Шинэ дэлгэц ---------- */
   resHTML=function(){
-    rsInit(); try{ rsHFetch(); }catch(e){}
+    rsInit();
     const a=ageIdx(), A=AGES[a], nx=a<3?TECH.filter(t=>t.age===a+1).length:0;
     let h='<h2>'+qa('🔬',28)+' Судалгаа'+(S.rs.sage?' <span style="font-size:13px;color:#ffd770">🎓 Мэргэн Хаан</span>':'')+'</h2><div class="card row"><div>'+qa(A.e,30,'age'+a)+' <b>'+A.s+' үе · '+A.n+'</b></div><div class="sm">'+(a<3?'Дараагийн үе: гол гэр '+AGES[a+1].min+'-р түвшин'+(nx?' · '+nx+' шинэ судалгаа':''):'Дээд үе')+'</div></div>';
     h+='<div style="display:flex;gap:5px;margin-bottom:8px">'+['🔬 Судалгаа','🏯 Хархорум','🏆 Ялалт'].map((x,i)=>'<button class="btn'+(RTAB===i?' red':'')+'" style="flex:1;padding:6px 2px;font-size:12px" onclick="rsTab('+i+')">'+x+'</button>').join('')+'</div>';
@@ -8532,11 +8536,11 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; s
     // идэвхтэй судалгаа
     slots().forEach(sl=>{ const c=S.rs[sl], t=TECH.find(x=>x.id===c.id); if(!t) return; const left=c.left, g=Math.max(1,Math.ceil(Math.max(0,left)/300)), s2=sl==='c2';
       h+='<div class="card"><div class="row"><div>'+qa(t.e,26,'rsi_'+t.id)+' <b>'+t.n+'</b><div class="sm">Үлдсэн: <b id="'+(s2?'rsrem2':'rsrem')+'">'+fmtT(left)+'</b></div></div><button class="btn red" onclick="rsRush(\''+sl+'\')">⚡ '+g+' Алт</button></div><div class="bar" style="height:8px;margin-top:6px"><i id="'+(s2?'rsbar2':'rsbar')+'" style="width:'+Math.min(100,100-left/c.tot*100)+'%;background:#ffd24a"></i></div>'
-        +(c.rq?'<div class="sm" style="margin-top:6px">🤝 Клан тусламж: '+(c.hc||0)+'/6 хүн тусалсан (-'+((c.hc||0)*4)+'%)</div>':(inClan()?'<button class="btn" style="width:100%;margin-top:6px" onclick="rsHReq(\''+sl+'\')">🤝 Клантаа тусламж хүсэх</button>':'<div class="sm" style="margin-top:6px">🤝 Клантай бол гишүүд тусалж хугацааг багасгана (6 хүн × 4%)</div>'))+'</div>'; });
+        +'</div>'; });
     // 2-р суваг
     if(!S.rs.s2) h+='<div class="card row"><div style="flex:1"><b>🔓 2-р судалгааны суваг</b><div class="sm">Хоёр судалгааг нэг дор явуулна. Нэг удаа авна.</div></div><button class="btn'+(S2C?' red':'')+'" onclick="rsSlot2()">'+(S2C?'Батлах · 200 Алт':'200 Алт')+'</button></div>';
     // клангийн хүсэлтүүд
-    if(RSH.list.length){ h+='<div class="card"><h3 style="color:#ffd770">🤝 Клангийн тусламж</h3><div class="sm">Гишүүддээ тусалбал +3 Шагналын оноо</div>'+RSH.list.map(x=>{ const tt=TECH.find(y=>y.id===x.id); return '<div class="row" style="margin-top:6px"><div style="flex:1"><b>'+String(x.n||'Хаан').replace(/[<>&]/g,'')+'</b><div class="sm">'+(tt?tt.n:'Судалгаа')+' · '+(x.h||[]).length+'/6</div></div><button class="btn" onclick="rsHelp(\''+x.id+'\')">Тусалах</button></div>'; }).join('')+'</div>'; }
+    if(false&&RSH.list.length){ h+='<div class="card"><h3 style="color:#ffd770">🤝 Клангийн тусламж</h3><div class="sm">Гишүүддээ тусалбал +3 Шагналын оноо</div>'+RSH.list.map(x=>{ const tt=TECH.find(y=>y.id===x.id); return '<div class="row" style="margin-top:6px"><div style="flex:1"><b>'+String(x.n||'Хаан').replace(/[<>&]/g,'')+'</b><div class="sm">'+(tt?tt.n:'Судалгаа')+' · '+(x.h||[]).length+'/6</div></div><button class="btn" onclick="rsHelp(\''+x.id+'\')">Тусалах</button></div>'; }).join('')+'</div>'; }
     // салбарууд
     const free=rsFree();
     ['e','m','c'].forEach(b=>{
@@ -10884,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e966f6200d';
+var UPDB='cc1551c45d';
 (function(){
   const K='updTry';
   const _go=updGo;

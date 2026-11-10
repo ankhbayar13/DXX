@@ -7994,7 +7994,7 @@ function jamGet(){
   JAMX.busy=1; giveHero(JAM.id); jamS().got=1; try{ save(); }catch(e){} JAMX.busy=0;
   jamClose(); try{ refresh(); }catch(e){} jamReveal(); try{ jamBtnUpd(); }catch(e){}
 }
-// ---- Spin (шорон) ----
+// ---- Spin (хүрд) ----
 const JSW=[{t:'s',n:2,w:22,e:'🗡',c:'#2e8b57'},{t:'a',n:10,w:18,e:'💎',c:'#2a6fb5'},{t:'s',n:5,w:18,e:'🗡',c:'#c9772a'},{t:'a',n:30,w:12,e:'💎',c:'#1f4f94'},{t:'t',n:10,w:10,e:'🔮',c:'#7a3fb0'},{t:'s',n:10,w:12,e:'🗡',c:'#d65a2a'},{t:'s',n:20,w:6,e:'🗡',c:'#b3262e'},{t:'h',n:50,w:2,e:'⭐',c:'#d4a017'}];
 function jamSpinLbl(w){ if(w.t==='h') return jamOwn()?String(w.n):''; return String(w.n); }
 function jamNumSvg(str,cy2,DH){ const D=window.JDG; if(!D) return '<text x="0" y="'+(cy2+DH/2-2)+'" font-size="'+DH+'" font-weight="900" fill="#fff" stroke="#000a" stroke-width=".8" text-anchor="middle">'+str+'</text>';
@@ -8012,7 +8012,7 @@ function jamWheelHTML(){ const o=jamSpinInfo(); let b;
   else if(o.free) b='<button class="btn" onclick="jamSpin()">🎡 Эргүүлэх · Үнэгүй</button>';
   else if(JAMX.cs) b='<button class="btn warn" onclick="jamSpin()">⚠ Дахин дар · '+JAM.spPrice+' 💎</button>';
   else b='<button class="btn" onclick="jamSpin()">🎡 Эргүүлэх · '+JAM.spPrice+' 💎</button>';
-  return '<div class="jh">🎡 ӨДРИЙН ШОРОН</div><div class="jwh"><div class="jpt"'+(window.JWB?' style="background:url('+JWB.p+') center/contain no-repeat;width:26px;height:46px;border:0;top:-14px;filter:drop-shadow(0 2px 3px #000a)"':'')+'></div>'+jamWheelSvg()+'</div><div style="text-align:center;margin-top:6px">'+b+'</div>'
+  return '<div class="jh">🎡 ӨДРИЙН ХҮРД</div><div class="jwh"><div class="jpt"'+(window.JWB?' style="background:url('+JWB.p+') center/contain no-repeat;width:26px;height:46px;border:0;top:-14px;filter:drop-shadow(0 2px 3px #000a)"':'')+'></div>'+jamWheelSvg()+'</div><div style="text-align:center;margin-top:6px">'+b+'</div>'
    +'<div class="jft" style="padding:3px 12px 0">Өдөрт эхний эргүүлэлт үнэгүй, дараагийнх '+JAM.spPrice+' · хязгааргүй · Жамуха унах боломж 2%'+(jamOwn()?' (Жамуха чамд байгаа тул '+JSW[7].n+' хэлтэрхий өгнө)':'')+'</div>'; }
 function jamPickSpin(){ let r=Math.random()*100, a=0; for(let i=0;i<JSW.length;i++){ a+=JSW[i].w; if(r<a) return i; } return 0; }
 function jamSpin(){
@@ -8021,10 +8021,10 @@ function jamSpin(){
   if(J.sn>0){ if(!JAMX.cs){ JAMX.cs=1; jamRender(); setTimeout(()=>{ if(JAMX.cs){ JAMX.cs=0; try{ jamRender(); }catch(e){} } },4500); return; }
     JAMX.cs=0; if((S.res.alt||0)<JAM.spPrice){ say('Алт хүрэхгүй байна ('+JAM.spPrice+' хэрэгтэй)'); try{ sfx('err'); }catch(e){} jamRender(); return; } S.res.alt-=JAM.spPrice; }
   J.sn++; const k=jamPickSpin(), w=JSW[k]; let msg='', hero=false;
-  if(w.t==='s') jamAdd(w.n,'шорон',true);
+  if(w.t==='s') jamAdd(w.n,'хүрд',true);
   else if(w.t==='a'){ S.res.alt=(S.res.alt||0)+w.n; }
   else if(w.t==='t'){ try{ stnGain(w.n); }catch(e){} }
-  else if(w.t==='h'){ if(jamOwn()) jamAdd(w.n,'шорон',true); else { giveHero(JAM.id); J.got=1; hero=true; } }
+  else if(w.t==='h'){ if(jamOwn()) jamAdd(w.n,'хүрд',true); else { giveHero(JAM.id); J.got=1; hero=true; } }
   msg=w.t==='s'?'🗡 Жамухын хэлтэрхий +'+w.n:w.t==='a'?'💎 +'+w.n+' Алт':w.t==='t'?'🔮 +'+w.n+' Ид шидийн чулуу':(hero?'⭐ Жамуха баатар чинийх боллоо!':'🗡 Жамухын хэлтэрхий +'+w.n);
   try{ save(); }catch(e){} try{ refresh(); }catch(e){}
   JAMX.sp=1; const el=document.getElementById('jwr'); const cur=JAMX.rot||0; const need=((-k*45+(Math.random()*24-12))-cur)%360; const tgt=cur+360*5+((need+360)%360); JAMX.rot=tgt;
@@ -8082,7 +8082,7 @@ function jamRender(){
     h+='<div class="jsh"><span>⭐ Жамухагийн од</span><b style="color:#ffd770">'+st+' / '+STMAX+'</b></div>'
      +(mx?'':'<div class="jsh" style="padding-top:2px"><span>🗡 Хэлтэрхий (дараагийн од)</span><b style="color:#ffd770">'+Math.min(hv,c)+' / '+c+'</b></div><div class="jbar"><i style="width:'+Math.min(100,hv/c*100)+'%"></i></div>'
      +'<div style="margin:6px 12px 0"><button class="btn'+(jamCanStar()?'':' dis')+'" style="width:100%'+(jamCanStar()?'':';filter:grayscale(.7) brightness(.8)')+'" onclick="jamStar()">⭐ Од нэмэх ('+c+' хэлтэрхий)</button></div>'
-     +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхийг доорх үүрэг болон шороноор цуглуулна · Нийт '+jamNeed()+' хэлтэрхий дутуу</div>');
+     +'<div class="jft" style="padding:3px 12px 0">Хэлтэрхийг доорх үүрэг болон хүрдээр цуглуулна · Нийт '+jamNeed()+' хэлтэрхий дутуу</div>');
     if(on&&more){
       h+=jamWheelHTML();
       h+='<div class="jh">📋 ӨДРИЙН ҮҮРЭГ</div>'
@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='81991d6a12';
+var UPDB='bc235de4cf';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='74b1c0be92';
+var UPDB='4a9b70135d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14743,38 +14743,62 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   let ftab='s';
   function fleetCard(tab){
     if(tab) ftab=tab; const y=Y(); let d=document.getElementById('yfl'); const keep=d?d.querySelector('.ybx'):null, sc=keep?keep.scrollTop:0; if(d) d.remove();
+    if(!document.getElementById('yflcss')){ const st=document.createElement('style'); st.id='yflcss'; const U=n=>'url(hf/sq/w_'+n+'.webp?v=1)';
+      st.textContent='#yfl .fw{--w:min(94vw,380px);position:relative;width:var(--w);container-type:inline-size;font-family:Georgia,"Times New Roman",serif;color:#f1e3bf}'
+      +'#yfl .ft{position:relative;width:100%;background:center/100% 100% no-repeat}#yfl .ft>*{position:absolute}'
+      +'#yfl .fm{width:100%;background:'+U('fl_l')+' left top/4cqw 19cqw repeat-y,'+U('fl_r')+' right top/3.4cqw 19cqw repeat-y,#1a1008}'
+      +'#yfl .ybx{overflow-y:auto;scrollbar-width:none;padding:.6cqw 0}#yfl .ybx::-webkit-scrollbar{display:none}'
+      +'#yfl .fb2{position:relative;width:100%;aspect-ratio:1045/250;background:'+U('fl_bot')+' center/100% 100% no-repeat}#yfl .fb2>*{position:absolute}'
+      +'#yfl .yt{text-align:center;font-weight:bold;color:#ffd98a;text-shadow:0 2px 3px #2a1204,0 0 6px #000;display:flex;align-items:center;justify-content:center;line-height:1.05;white-space:nowrap}'
+      +'#yfl .ytab{border:0;background:none;padding:0;display:flex;align-items:center;justify-content:flex-end;font:bold 4.2cqw Georgia,serif;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}'
+      +'#yfl .ytab span{display:block;width:66%;text-align:center}#yfl .ytab.on{color:#2a1706;text-shadow:0 1px 0 rgba(255,235,170,.6)}#yfl .ytab.of{color:#fff;text-shadow:0 1px 3px #000}'
+      +'#yfl .yinf{display:flex;align-items:center;color:#f6e7c6;text-shadow:0 1px 3px #000;font-size:2.6cqw;line-height:1.2}#yfl .yinf b{color:#ffd98a}'
+      +'#yfl .fr{display:flex;gap:2.2cqw;align-items:center;margin:1.5cqw 4.8cqw;padding:2cqw;border:.5cqw solid #a9771f;border-radius:2.4cqw;background:linear-gradient(#281a0b,#170d05);box-shadow:inset 0 0 0 .3cqw rgba(255,200,90,.14)}'
+      +'#yfl .fi{flex:0 0 17cqw;height:15cqw;border:.5cqw solid #c28a2c;border-radius:1.6cqw;overflow:hidden;background:#0b2238;display:flex;align-items:center;justify-content:center}#yfl .fi img{width:100%;height:100%;object-fit:contain}'
+      +'#yfl .fb{flex:1;min-width:0;font-size:2.8cqw;line-height:1.2;color:#eadcb8}#yfl .fb b{color:#ffd98a;font-size:3.5cqw}#yfl .fb .sm{font-size:2.6cqw;color:#e8d8b2;margin:0}#yfl .fb .lv{color:#ffd98a}'
+      +'#yfl .fk{flex:0 0 24cqw;display:flex;flex-direction:column;gap:1cqw}'
+      +'#yfl .fk .btn,#yfl .bt{box-sizing:border-box;width:100%;height:9.2cqw;border:0!important;border-radius:0;padding:0 .6cqw 0 8.5cqw!important;margin:0;background:'+U('btn_grey')+' center/100% 100% no-repeat!important;color:#fff;font:bold 2.5cqw Georgia,serif;white-space:nowrap;text-shadow:0 1px 3px #000;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.05;cursor:pointer;-webkit-tap-highlight-color:transparent}'
+      +'#yfl .fk .btn.red,#yfl .bt.red{background-image:'+U('btn_redh')+'!important;color:#ffe9c8}#yfl .bt.up{background-image:'+U('btn_red')+'!important;color:#ffe9c8}#yfl .bt.go{background-image:'+U('btn_gold')+'!important;color:#2a1706;text-shadow:0 1px 0 rgba(255,235,170,.6)}'
+      +'#yfl .fk .btn:active,#yfl .bt:active{filter:brightness(1.25)}'
+      +'#yfl .fbld{display:flex;align-items:center;gap:2cqw;margin:1.5cqw 4.8cqw;padding:2cqw;border:.5cqw solid #7fe08a;border-radius:2.4cqw;background:rgba(60,110,50,.25);font-size:2.9cqw}#yfl .fbld .bt{flex:0 0 26cqw}'
+      +'#yfl .ring{width:11cqw;height:11cqw;border-radius:50%;object-fit:cover}';
+      document.head.appendChild(st); }
     d=document.createElement('div'); d.id='yfl'; d.style.cssText='position:fixed;inset:0;z-index:9050;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
-    const tb=(id,t)=>'<button class="btn" data-a="tab" data-v="'+id+'" style="'+(ftab===id?'':'background:#5b3d1e;')+'padding:6px 10px">'+t+'</button> ';
-    let b='';
-    if(ftab==='s'){
-      if(y.sb) b+='<div class="sct">🔨 <b>'+SHN[y.sb.k]+'</b> (Lv '+y.sb.lv+') баригдаж байна · <b id="yft">'+fmt(shRem())+'</b> <button class="btn" data-a="ssp" style="padding:4px 8px">⚡ '+Math.max(1,Math.ceil(shRem()/SEC_PER_ALT))+' Алт</button></div>';
-      b+='<div class="sm" style="margin:4px 0">Зогсоолын түвшин: <b>Lv '+(y.lv||0)+'</b> · хөлгийн түвшин зогсоолоос өндөр байж болохгүй</div>';
+    const isS=ftab==='s', TH=isS?468:641, TW=1045;
+    const P=(x,yy,w,h)=>'left:'+(x/TW*100).toFixed(2)+'%;top:'+(yy/TH*100).toFixed(2)+'%;width:'+(w/TW*100).toFixed(2)+'%;height:'+(h/TH*100).toFixed(2)+'%';
+    let b='', info='';
+    if(isS){
+      if(y.sb) b+='<div class="fbld"><div style="flex:1"><b>'+SHN[y.sb.k]+'</b> (Lv '+y.sb.lv+') баригдаж байна<br>Үлдсэн: <b id="yft">'+fmt(shRem())+'</b></div><button class="bt up" data-a="ssp"><span>'+Math.max(1,Math.ceil(shRem()/SEC_PER_ALT))+' Алт</span></button></div>';
+      info='Зогсоолын түвшин: <b>Lv '+(y.lv||0)+'</b> · хөлгийн түвшин зогсоолоос өндөр байж болохгүй';
       for(let k=0;k<5;k++){ const lv=y.sh[k]||0, n=lv+1, c=n<=3?SHC[k][n]:null, on=lv>0&&y.eq[k]!==0, busy=y.sb&&y.sb.k===k;
-        b+='<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,215,112,.18)">'+
-          '<img src="'+(window.shSkinIcon?shSkinIcon(k):'hf/nv/b'+k+'.webp?v=1')+'" style="width:56px;height:44px;object-fit:contain;'+(lv?'':'filter:grayscale(1) brightness(.6);')+'" draggable="false">'+
-          '<div style="flex:1;min-width:0"><b>'+SHN[k]+'</b> '+(lv?'<span style="color:#ffd770">Lv '+lv+'</span>':'<span style="color:#aaa">барьсангүй</span>')+'<div class="sm">'+SHD[k]+(lv?' · амь +'+Math.round((HL[lv]-1)*100)+'% · хүч +'+Math.round((AL[lv]-1)*100)+'%':'')+'</div>'+
+        b+='<div class="fr"><div class="fi"><img src="'+(window.shSkinIcon?shSkinIcon(k):'hf/nv/b'+k+'.webp?v=1')+'" style="'+(lv?'':'filter:grayscale(1) brightness(.6);')+'" draggable="false"></div>'+
+          '<div class="fb"><b>'+SHN[k]+'</b> '+(lv?'<span class="lv">Lv '+lv+'</span>':'<span style="color:#aaa">барьсангүй</span>')+'<div class="sm">'+SHD[k]+(lv?' · амь +'+Math.round((HL[lv]-1)*100)+'% · хүч +'+Math.round((AL[lv]-1)*100)+'%':'')+'</div>'+
           (c&&!busy?'<div class="sm">Lv '+n+': '+cs(c)+'· '+fmt(c.t)+'</div>':'')+(lv>0&&window.shHpHtml?shHpHtml(k):'')+'</div>'+
-          '<div style="display:flex;flex-direction:column;gap:4px">'+(lv>0&&window.shHpBtn?shHpBtn(k):'')+
-          (lv>0?'<button class="btn" data-a="eq" data-v="'+k+'" style="padding:4px 8px;'+(on?'':'background:#5b3d1e;')+'">'+(on?'⚔ Тулаанд':'💤 Амарна')+'</button>':'')+
-          (c&&!busy&&!y.sb?'<button class="btn red" data-a="sb" data-v="'+k+'" style="padding:4px 8px">'+(lv?'⬆ Lv '+n:'🔨 Барих')+'</button>':'')+
+          '<div class="fk">'+((lv>0&&window.shHpBtn&&shHpBtn(k))||'')+
+          (lv>0?'<button class="bt'+(on?' go':'')+'" data-a="eq" data-v="'+k+'"><span>'+(on?'Тулаанд':'Амарна')+'</span></button>':'')+
+          (c&&!busy&&!y.sb?'<button class="bt up" data-a="sb" data-v="'+k+'"><span>'+(lv?'Lv '+n:'Барих')+'</span></button>':'')+
           '</div></div>'; }
     } else {
       const eqs=SKA.eq();
-      b+='<div class="sm" style="margin:4px 0">Тулаанд <b>5 ур чадвар</b> тоноглоно ('+eqs.length+'/5). Шинэ ур чадвар: Зогсоол Lv 2 + '+cs(UNL)+'. Түвшин нь зогсоолын түвшнээс өндөр байж болохгүй (Зогсоол Lv '+(y.lv||0)+').</div>';
-      b+='<div style="display:flex;gap:6px;justify-content:center;margin:6px 0">'+[0,1,2,3,4].map(k=>{ const id=eqs[k]; return id?'<img src="'+SKA.MAP[id].ic+'?v=1" style="width:46px;height:46px;border-radius:50%;border:2px solid #6fff6f" draggable="false">':'<div style="width:46px;height:46px;border-radius:50%;border:2px dashed #888;display:flex;align-items:center;justify-content:center;color:#888">+</div>'; }).join('')+'</div>';
-      SKA.DEF.forEach(D=>{ const id=D.id, i=SKI[id], lv=SKA.lv(id), owned=lv>0, n=lv+1, c=owned&&n<=3?SKC[n]:null, on=eqs.indexOf(id)>=0;
-        b+='<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,215,112,.18)">'+
-          '<img src="'+D.ic+'?v=1" style="width:44px;height:44px;object-fit:contain;'+(owned?'':'filter:grayscale(1) brightness(.55);')+'" draggable="false">'+
-          '<div style="flex:1;min-width:0"><b>'+D.n+'</b> '+(owned?'<span style="color:#ffd770">Lv '+lv+'</span>':'<span style="color:#aaa">худалдаагүй</span>')+'<div class="sm">'+D.d+'</div>'+
+      info='Тулаанд <b>5 ур чадвар</b> тоноглоно ('+eqs.length+'/5). Шинэ ур чадвар: Зогсоол Lv 2 + '+cs(UNL)+'. Түвшин нь зогсоолын түвшнээс өндөр байж болохгүй (Зогсоол Lv '+(y.lv||0)+').';
+      SKA.DEF.forEach(D=>{ const id=D.id, lv=SKA.lv(id), owned=lv>0, n=lv+1, c=owned&&n<=3?SKC[n]:null, on=eqs.indexOf(id)>=0;
+        b+='<div class="fr"><div class="fi" style="background:#10151f"><img src="'+D.ic+'?v=1" style="'+(owned?'':'filter:grayscale(1) brightness(.55);')+'" draggable="false"></div>'+
+          '<div class="fb"><b>'+D.n+'</b> '+(owned?'<span class="lv">Lv '+lv+'</span>':'<span style="color:#aaa">худалдаагүй</span>')+'<div class="sm">'+D.d+'</div>'+
           (owned?'<div class="sm">Одоо: '+D.t[lv-1]+(c?' → Lv '+n+': '+D.t[n-1]:' (дээд түвшин)')+'</div>'+(c?'<div class="sm">Үнэ: '+cs(c)+'</div>':''):'<div class="sm">Үнэ: '+cs(UNL)+'· Зогсоол Lv 2</div>')+'</div>'+
-          '<div style="display:flex;flex-direction:column;gap:4px">'+
-          (owned?'<button class="btn" data-a="se" data-v="'+id+'" style="padding:4px 8px;'+(on?'':'background:#5b3d1e;')+'">'+(on?'✅ Тоноглосон':'Тоноглох')+'</button>':'')+
-          (!owned?'<button class="btn red" data-a="sk" data-v="'+id+'" style="padding:4px 8px">🛒 Авах</button>':(c?'<button class="btn red" data-a="sk" data-v="'+id+'" style="padding:4px 8px">⬆ Lv '+n+'</button>':''))+
+          '<div class="fk">'+(owned?'<button class="bt'+(on?' go':'')+'" data-a="se" data-v="'+id+'"><span>'+(on?'Тоноглосон':'Тоноглох')+'</span></button>':'')+
+          (!owned?'<button class="bt up" data-a="sk" data-v="'+id+'"><span>Авах</span></button>':(c?'<button class="bt up" data-a="sk" data-v="'+id+'"><span>Lv '+n+'</span></button>':''))+
           '</div></div>'; });
     }
-    d.innerHTML='<div class="sci" style="max-width:380px;width:92%"><div class="sch"><div style="font-size:28px">🚢</div><div><b>Усан онгоцны зогсоол</b><div class="sm">Флот, ур чадвар</div></div></div>'+
-      '<div style="margin:4px 0">'+tb('s','🚢 Хөлөг')+tb('k','🎯 Ур чадвар')+'</div><div class="ybx" style="max-height:50vh;overflow-y:auto">'+b+'</div>'+
-      '<div style="margin-top:6px"><button class="btn" style="background:#5b3d1e" data-a="x">Хаах</button></div></div>';
+    const T=(id,x,yy,w,h,t,act)=>'<button class="ytab '+(act?'on':'of')+'" data-a="tab" data-v="'+id+'" style="'+P(x,yy,w,h)+'"><span>'+t+'</span></button>';
+    let top;
+    if(isS){ top='<div class="yt" style="'+P(245,78,640,80)+';font-size:5.4cqw">Усан онгоцны зогсоол</div><div class="yt" style="'+P(300,158,500,50)+';font-size:3.4cqw;color:#f6e7c6;font-weight:normal">Флот, ур чадвар</div>'
+      +T('s',60,232,300,106,'Хөлөг',1)+T('k',395,232,332,106,'Ур чадвар',0)+'<div class="yinf" style="'+P(125,362,850,92)+'">'+'<div>'+info+'</div></div>'; }
+    else { top='<div class="yt" style="'+P(245,70,640,80)+';font-size:5.4cqw">Усан онгоцны зогсоол</div><div class="yt" style="'+P(300,148,500,50)+';font-size:3.4cqw;color:#f6e7c6;font-weight:normal">Флот, ур чадвар</div>'
+      +T('s',62,205,290,106,'Хөлөг',0)+T('k',372,205,356,106,'Ур чадвар',1)+'<div class="yinf" style="'+P(150,334,780,118)+'"><div>'+info+'</div></div>';
+      const eqs=SKA.eq(); [187,355,522,690,857].forEach((cx,k)=>{ const id=eqs[k]; top+=id?'<img class="ring" src="'+SKA.MAP[id].ic+'?v=1" style="position:absolute;'+P(cx-56,545-56,112,112)+'" draggable="false">':''; }); }
+    d.innerHTML='<div class="fw"><div class="ft" style="aspect-ratio:'+TW+'/'+TH+';background-image:url(hf/sq/w_fl_top_'+(isS?'s':'k')+'.webp?v=1)">'+top+'</div>'
+      +'<div class="fm"><div class="ybx" style="max-height:calc(100vh - 24px - var(--w)*'+(isS?'.69':'.86')+')">'+b+'</div></div>'
+      +'<div class="fb2"><button class="bt g" data-a="x" style="left:4.8%;top:18%;width:33%;height:44%;padding:0 0 0 11cqw!important;background:none!important;font-size:4.4cqw"><span>Хаах</span></button></div></div>';
     document.body.appendChild(d); const nb=d.querySelector('.ybx'); if(nb) nb.scrollTop=sc;
     d.onclick=e=>{ if(e.target===d){ d.remove(); return; } const t=e.target.closest('[data-a]'); if(!t) return; const a=t.dataset.a, v=t.dataset.v;
       if(a==='x') d.remove(); else if(a==='tab') fleetCard(v); else if(a==='eq') shEq(+v); else if(a==='sb') shBuild(+v); else if(a==='ssp') shSpeed(); else if(a==='rp'&&window.shRepair) shRepair(+v); else if(a==='rps'&&window.shRepSpeed) shRepSpeed(+v); else if(a==='sk') skUp(v); else if(a==='se') skEq(v); };
@@ -20166,16 +20190,32 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       if(!o.img.src){ o.img.onload=()=>{ o.ok=1; draw(); }; o.img.src='hf/sq/p'+k+'.webp?v=1'; } else if(o.ok) draw(); else { const f=o.img.onload; o.img.onload=()=>{ o.ok=1; draw(); }; } }); }
   function card(){
     close(); const s=St(), d=document.createElement('div'); d.id='yskin'; d.style.cssText='position:fixed;inset:0;z-index:9060;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
-    const cur=sel(), has=id=>id===0||s.own.indexOf(id)>=0, pc=pv?BY[pv]:null;
-    let g='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:8px 0">'+
-      '<div data-a="p" data-v="0" style="text-align:center;cursor:pointer"><div style="width:100%;aspect-ratio:1;border-radius:50%;background:#244a8c;border:3px solid '+(pv===0?'#ffd770':(cur===0?'#7fe08a':'#5b3d1e'))+'"></div><div class="sm" style="font-size:10px">Анхны</div></div>'+
-      C.map(c=>'<div data-a="p" data-v="'+c.id+'" style="text-align:center;cursor:pointer"><div style="position:relative;width:100%;aspect-ratio:1;border-radius:50%;background:'+c.sw+';border:3px solid '+(pv===c.id?'#ffd770':(cur===c.id?'#7fe08a':'#5b3d1e'))+'">'+(has(c.id)?'':'<span style="position:absolute;right:-2px;bottom:-4px;font:700 9px sans-serif;background:#000b;color:#ffd770;border-radius:6px;padding:0 3px">'+PRICE+'</span>')+'</div><div class="sm" style="font-size:10px">'+c.n+'</div></div>').join('')+'</div>';
+    if(!document.getElementById('yskcss')){ const st=document.createElement('style'); st.id='yskcss';
+      st.textContent='#yskin .sksw{position:relative;width:min(92vw,360px,calc((100vh - 16px)/1.796));aspect-ratio:936/1681;container-type:inline-size;background:url(hf/sq/w_skin_bg.webp?v=1) center/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#f1e3bf}#yskin .sksw>*{position:absolute}'
+      +'#yskin .skc{border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:50%}#yskin .skc i{position:absolute;inset:3%;border-radius:50%;pointer-events:none}'
+      +'#yskin .skp{display:flex;align-items:center;justify-content:center;font:bold 2.1cqw Georgia,serif;color:#ffd98a;text-shadow:0 1px 2px #000;pointer-events:none}'
+      +'#yskin .skab{border:.5cqw solid #ffe29a;border-radius:2cqw;background:linear-gradient(#f3c14a,#b9801c);color:#2a1706;font:bold 3.6cqw Georgia,serif;cursor:pointer;text-shadow:0 1px 0 rgba(255,235,170,.6)}#yskin .skab.red{background:linear-gradient(#d9443a,#8a1710);color:#fff0d8;border-color:#ffc98a;text-shadow:0 1px 3px #300}'
+      +'#yskin .skxt{border:0;background:none;color:#fff;font:bold 4.4cqw Georgia,serif;text-shadow:0 1px 3px #000;padding:0 0 0 12cqw;cursor:pointer;display:flex;align-items:center;justify-content:center}'
+      +'#yskin .skix{font-size:2.9cqw;line-height:1.25;text-shadow:0 1px 3px #000;display:flex;flex-direction:column;justify-content:center;gap:1cqw}#yskin .skix b{color:#ffd98a;font-size:3.6cqw}';
+      document.head.appendChild(st); }
+    const cur=sel(), has=id=>id===0||s.own.indexOf(id)>=0, W=936, H=1681;
+    const P=(x,y,w,h)=>'left:'+(x/W*100).toFixed(2)+'%;top:'+(y/H*100).toFixed(2)+'%;width:'+(w/W*100).toFixed(2)+'%;height:'+(h/H*100).toFixed(2)+'%';
+    const XS=[118,287,457,625,794], YS=[665,850,1035,1215];
+    let g='';
+    for(let i=0;i<16;i++){ const cx=XS[i%5], cy=YS[Math.floor(i/5)], id=i, ow=has(id);
+      const ring=pv===id?'#ffd770':(cur===id?'#7fe08a':'');
+      g+='<button class="skc" data-a="p" data-v="'+id+'" style="'+P(cx-78,cy-78,156,156)+'">'+(ring?'<i style="border:.9cqw solid '+ring+';box-shadow:0 0 1.6cqw '+ring+'"></i>':'')+'</button>'
+        +'<div class="skp" style="'+P(cx+14,cy+44,62,30)+'">'+(ow?(cur===id?'✓':''):PRICE)+'</div>'; }
     let act='';
-    if(pv===0) act=cur===0?'<div class="sm">Анхны өнгө сонгогдсон</div>':'';
-    else if(has(pv)) act=cur===pv?'<div class="sm">Энэ өнгө сонгогдсон (5 хөлөгт бүгдэд)</div>':'<button class="btn" data-a="u" data-v="'+pv+'">Сонгох</button>';
-    else act='<button class="btn red" data-a="b" data-v="'+pv+'">Худалдаж авах ('+PRICE+' Алт)</button> <span class="sm">Таны Алт: '+(S.res.alt||0)+'</span>';
-    d.innerHTML='<div class="sci" style="max-width:360px;width:92%"><div class="sch"><div><b>Хөлгийн өнгө</b><div class="sm">Дарвуул, туг. Нэг өнгө 5 хөлөгт бүгдэд. Өнгө бүр '+PRICE+' Алт</div></div></div>'+
-      '<canvas id="yskcv" width="330" height="150" style="width:100%;background:#0b3d66;border-radius:8px;display:block"></canvas>'+g+'<div style="min-height:34px">'+act+'</div><button class="btn" style="background:#5b3d1e;margin-top:6px" data-a="x">Хаах</button></div>';
+    const nm=pv?BY[pv].n:'Анхны';
+    if(pv===0) act=cur===0?'Анхны өнгө сонгогдсон':'';
+    else if(has(pv)) act=cur===pv?'Энэ өнгө сонгогдсон (5 хөлөгт бүгдэд)':'';
+    const btn=pv===0?(cur===0?'':'<button class="skab" data-a="u" data-v="0" style="'+P(270,1290,330,80)+'">Сонгох</button>')
+      :has(pv)?(cur===pv?'':'<button class="skab" data-a="u" data-v="'+pv+'" style="'+P(270,1290,330,80)+'">Сонгох</button>')
+      :'<button class="skab red" data-a="b" data-v="'+pv+'" style="'+P(270,1290,430,80)+'">Худалдаж авах ('+PRICE+' Алт)</button>';
+    d.innerHTML='<div class="sksw"><canvas id="yskcv" width="800" height="345" style="'+P(64,196,800,345)+'"></canvas>'+g
+      +'<div class="skix" style="'+P(250,1135,600,140)+'"><b>'+nm+'</b><div>'+(act||('Таны Алт: '+(S.res.alt||0)))+'</div><div style="opacity:.85">Нэг өнгө 5 хөлөгт бүгдэд · өнгө бүр '+PRICE+' Алт</div></div>'+btn
+      +'<button class="skxt" data-a="x" style="'+P(55,1478,250,112)+'">Хаах</button></div>';
     document.body.appendChild(d);
     d.onclick=e=>{ if(e.target===d){ close(); return; } const t=e.target.closest('[data-a]'); if(!t) return; const a=t.dataset.a, v=+t.dataset.v; if(a==='x') close(); else if(a==='p') pick(v); else if(a==='u') pick(v); else if(a==='b') buy(v); };
     preview(); setTimeout(preview,250); }
@@ -20257,16 +20297,36 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   function close(){ const e=document.getElementById('swtop'); if(e) e.remove(); }
   function view(){ let d=document.getElementById('swtop'); if(!d){ d=document.createElement('div'); d.id='swtop'; d.style.cssText='position:fixed;inset:0;z-index:9070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)'; document.body.appendChild(d);
       d.onclick=e=>{ if(e.target===d){ close(); return; } const t=e.target.closest('[data-a]'); if(!t) return; if(t.dataset.a==='x') close(); else if(t.dataset.a==='c') claim(); }; }
-    const w=W(); let body;
-    if(R.st==='load') body='<div class="sct" style="text-align:center">Ачаалж байна…</div>';
-    else if(R.st==='off') body='<div class="sct">Интернет холбогдоогүй байна.</div>';
-    else if(R.st==='err') body='<div class="sct">Жагсаалтыг ачаалж чадсангүй. Дараа дахин оролдоно уу.</div>';
-    else { const top=R.rows.slice(0,10), mine=R.rows.findIndex(x=>x.u===CL.uid);
-      body=(top.length?top.map((x,i)=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;margin:3px 0;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid '+(x.u===CL.uid?'#ffd770':'transparent')+'"><span><b style="color:#ffd770">'+(i+1)+'.</b> '+esc(x.n)+'</span><span><b>'+x.k+'</b> <span class="sm">· '+PR[i]+' Алт</span></span></div>').join(''):'<div class="sct" style="text-align:center">Энэ сар жагсаалт хоосон байна.</div>')
-        +(mine>=10||mine<0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;margin:6px 0 3px;border-radius:6px;background:rgba(255,215,112,.12);border:1px solid #ffd770"><span><b>Та энд байна</b>'+(mine>=0?' · '+(mine+1)+'-р байр':'')+'</span><b>'+w.m.k+'</b></div>':''); }
-    d.innerHTML='<div class="sci" style="max-width:340px;width:92%;max-height:88vh;overflow:auto"><div class="sch"><div><b>Сарын Топ 10</b><div class="sm">'+mname(mi())+' · Онлайн тулаанд бусад тоглогчийг живүүлсэн тоо</div></div></div>'+body+
-      (R.prev?'<div style="margin:8px 0;padding:8px;border-radius:8px;background:rgba(120,200,120,.15);border:1px solid #7fe08a"><div class="sm">Өнгөрсөн сар '+R.prev.rank+'-р байр</div><button class="btn red" data-a="c">Шагнал авах: '+R.prev.prize+' Алт</button></div>':'')+
-      '<div class="sm" style="margin-top:6px;opacity:.85">'+(window.dxxFF&&dxxFF.duel?'<b style="color:#ff9a8a">Админ «Онлайн тоглоом» унтраасан байна!</b><br>':'')+'Оношлогоо · өөрийн сүүдэр бичих: <b>'+esc(DG.w)+'</b> · бусдыг унших: <b>'+esc(DG.r)+'</b>'+(DG.n>=0?' · олдсон: <b>'+DG.n+'</b>':'')+'</div><div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
+    if(!document.getElementById('swcss')){ const st=document.createElement('style'); st.id='swcss'; const U=n=>'url(hf/sq/w_'+n+'.webp?v=1)';
+      st.textContent='#swtop .tw{--w:min(94vw,420px);position:relative;width:var(--w);container-type:inline-size;font-family:Georgia,"Times New Roman",serif;color:#f1e3bf}'
+      +'#swtop .tt{position:relative;width:100%;aspect-ratio:1354/438;background:'+U('t10_top')+' center/100% 100% no-repeat}#swtop .tb{position:relative;width:100%;aspect-ratio:1354/723;background:'+U('t10_bot')+' center/100% 100% no-repeat}#swtop .tt>*,#swtop .tb>*{position:absolute}'
+      +'#swtop .tm{width:100%;background:'+U('t10_l')+' left top/2.8cqw 11.8cqw repeat-y,'+U('t10_r')+' right top/2.8cqw 11.8cqw repeat-y,#1a1008;max-height:calc(100vh - 24px - var(--w)*1.04);overflow-y:auto;scrollbar-width:none;padding:.4cqw 0}#swtop .tm::-webkit-scrollbar{display:none}'
+      +'#swtop .tr{display:flex;align-items:center;justify-content:space-between;gap:2cqw;margin:1.1cqw 4cqw;padding:1.4cqw 2.6cqw;border:.4cqw solid #a9771f;border-radius:1.8cqw;background:linear-gradient(#281a0b,#170d05);font-size:3.2cqw}#swtop .tr.me{border-color:#ffd770;background:linear-gradient(#3a2a0d,#22160a)}#swtop .tr b.n{color:#ffd98a;display:inline-block;min-width:5cqw}'
+      +'#swtop .xx{text-align:center;font-weight:bold;color:#ffd98a;text-shadow:0 2px 3px #2a1204,0 0 6px #000;display:flex;align-items:center;justify-content:center;line-height:1.1}'
+      +'#swtop .tx{display:flex;align-items:center;color:#f1e3bf;text-shadow:0 1px 3px #000;line-height:1.2}#swtop .tx b{color:#ffd98a}'
+      +'#swtop .cb{border:0;background:rgba(80,130,60,.55);color:#fff;font:bold 2.6cqw Georgia,serif;border:.4cqw solid #7fe08a;border-radius:1.6cqw;cursor:pointer;text-shadow:0 1px 2px #000}'
+      +'#swtop .xb{border:0;background:none;color:#fff;font:bold 4.4cqw Georgia,serif;text-shadow:0 1px 3px #000;padding:0 0 0 17cqw;cursor:pointer;display:flex;align-items:center;justify-content:center}';
+      document.head.appendChild(st); }
+    const w=W(), TW=1354, PT=(x,y,ww,h)=>'left:'+(x/TW*100).toFixed(2)+'%;top:'+(y/438*100).toFixed(2)+'%;width:'+(ww/TW*100).toFixed(2)+'%;height:'+(h/438*100).toFixed(2)+'%', PB=(x,y,ww,h)=>'left:'+(x/TW*100).toFixed(2)+'%;top:'+(y/723*100).toFixed(2)+'%;width:'+(ww/TW*100).toFixed(2)+'%;height:'+(h/723*100).toFixed(2)+'%';
+    let bar, rows='', mine=-1;
+    if(R.st==='load') bar='Ачаалж байна…';
+    else if(R.st==='off') bar='Интернет холбогдоогүй байна.';
+    else if(R.st==='err') bar='Жагсаалтыг ачаалж чадсангүй.';
+    else { const top=R.rows.slice(0,10); mine=R.rows.findIndex(x=>x.u===CL.uid);
+      bar=top.length?'Шилдэг '+top.length+' · живүүлсэн тоо':'Энэ сар жагсаалт хоосон байна.';
+      rows=top.map((x,i)=>'<div class="tr'+(x.u===CL.uid?' me':'')+'"><span><b class="n">'+(i+1)+'.</b> '+esc(x.n)+'</span><span><b style="color:#fff">'+x.k+'</b> <span style="color:#e8d8b2;font-size:2.6cqw">· '+PR[i]+' Алт</span></span></div>').join(''); }
+    const adm=(window.dxxFF&&dxxFF.duel)?'<b style="color:#ff9a8a">Админ «Онлайн тоглоом» унтраасан!</b> ':'';
+    const diag=adm+'Оношлогоо: бичих <b>'+esc(DG.w)+'</b> · унших <b>'+esc(DG.r)+'</b>'+(DG.n>=0?' · олдсон <b>'+DG.n+'</b>':'');
+    const info=R.prev?'<div style="flex:1">Өнгөрсөн сар <b>'+R.prev.rank+'-р байр</b></div>':'<div>'+diag+'</div>';
+    d.innerHTML='<div class="tw"><div class="tt"><div class="xx" style="'+PT(330,88,650,100)+';font-size:5.6cqw;white-space:nowrap">Сарын Топ 10</div>'
+      +'<div class="tx" style="'+PT(370,192,570,60)+';font-size:2.6cqw;justify-content:center;text-align:center;color:#ffe9c8">'+mname(mi())+' · живүүлсэн тоо</div>'
+      +'<div class="xx" style="'+PT(195,322,960,100)+';font-size:3.5cqw">'+bar+'</div></div>'
+      +'<div class="tm">'+rows+'</div>'
+      +'<div class="tb"><div class="tx" style="'+PB(270,12,780,130)+';font-size:4.6cqw;font-weight:bold;color:#ffd98a">Та энд байна'+(mine>=0?' · '+(mine+1)+'-р байр':'')+'</div>'
+      +'<div class="xx" style="'+PB(1085,12,150,130)+';font-size:5cqw;color:#fff">'+w.m.k+'</div>'
+      +'<div class="tx" style="'+PB(215,172,1050,118)+';font-size:2.5cqw;gap:2cqw">'+info+(R.prev?'<button class="cb" data-a="c" style="width:34cqw;height:9cqw">Шагнал авах: '+R.prev.prize+' Алт</button>':'')+'</div>'
+      +'<div class="tx" style="'+PB(255,322,1030,120)+';font-size:2.5cqw">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div>'
+      +'<button class="xb" data-a="x" style="'+PB(450,487,455,150)+'">Хаах</button></div></div>'; }
   window.swarTop=function(){ load(); };
 })();
 

@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2d9874b256';
+var UPDB='5adb42b10b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19781,6 +19781,39 @@ async function mtSet(on){ if(!isAdm()) return; const v=i=>(document.getElementBy
     if(!confirm('Сервер хаах уу? '+(from>n?'Эхлэх: '+mtFmt(from)+'. ':'Тоглогчид одоо орж чадахгүй болно. ')+(until?'Нээгдэх: '+mtFmt(until)+'.':'Цаг заагаагүй, гараар нээнэ.'))) return; }
   try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{mt:{on:on?1:0,msg:msg,from:from,until:until,t:n}},{merge:true}); say(on?'Сервер хаагдлаа ✓':'Сервер нээгдлээ ✓'); mtApply({on:on,msg:msg,from:from,until:until,t:n}); try{ fillMA(); }catch(e){} }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 (function(){ const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ h=mtAdminHTML()+h+rcHTML(); }catch(e){} return h; }; })();
+
+
+/* ===== Админ: тоглогчийн Алт харах + сэжигтэй тэмдэглэх (зөвхөн админд) ===== */
+const AA_MIN=3000, AA_PER=400, AA_BIG=100000;   // сэжигтэй босго: Алт >= AA_MIN + түвшин*AA_PER (төлбөргүй) | Алт >= AA_BIG
+CL.aa=CL.aa||{};
+function aaAgo(t){ if(!t) return ''; const m=Math.max(0,Math.round((Date.now()-t)/60000)); return m<60?m+' мин':m<1440?Math.round(m/60)+' цаг':Math.round(m/1440)+' өдөр'; }
+function aaCalc(o,sigOk,legacy){ const al=Math.floor((o.res&&o.res.alt)||0), pl=o.pl||1, paid=(o.paidInv||[]).length, w=[];
+  if(!sigOk) w.push('гарын үсэг буруу');
+  if(al>=AA_BIG) w.push('Алт хэт их'); else if(!paid&&al>=AA_MIN+pl*AA_PER) w.push('Алт их, төлбөргүй');
+  return {al:al,gold:Math.floor((o.res&&o.res.gold)||0),pl:pl,h:Object.keys(o.heroes||{}).length,paid:paid,w:w,leg:!!legacy}; }
+async function aaGet(id){ const {F,db}=FBM; const s=await F.getDoc(F.doc(db,'saves',id)); if(!s.exists()) return {na:1};
+  const dd=s.data(), r=dd.d; let u=null, sig=true, leg=false, o=null; try{ u=acUnpack(r); }catch(e){}
+  if(u){ o=u.o; leg=!!u.legacy; } else { sig=false; try{ const i=String(r).indexOf('.',3); o=JSON.parse(decodeURIComponent(escape(acXor(atob(String(r).slice(i+1)))))); }catch(e){} }
+  if(!o) return {bad:1,t:dd.t||0}; const c=aaCalc(o,sig,leg); c.t=dd.t||0; return c; }
+function aaShow(){ const el=$('adl'); if(el) el.innerHTML=admRows(); const b=$('aast'); if(b) b.innerHTML=aaBarIn(); }
+async function aaOne(id){ if(!isAdm()) return; window._rcAdm=(window._rcAdm|0)+1; try{ CL.aa[id]=await aaGet(id); }catch(e){ CL.aa[id]={err:(e&&e.code)||'алдаа'}; } finally{ window._rcAdm--; } aaShow(); }
+async function aaAll(){ if(!isAdm()) return; const ids=(CL.lbAll||[]).map(x=>x.id).filter(id=>!CL.aa[id]); if(!ids.length){ say('Бүгд татагдсан'); return; }
+  if(!confirm(ids.length+' тоглогчийн хадгалалтыг татна ('+ids.length+' унших). Үргэлжлүүлэх үү?')) return;
+  window._rcAdm=(window._rcAdm|0)+1; CL.aaBusy=1; aaShow();
+  try{ for(let i=0;i<ids.length;i+=8){ await Promise.all(ids.slice(i,i+8).map(async id=>{ try{ CL.aa[id]=await aaGet(id); }catch(e){ CL.aa[id]={err:(e&&e.code)||'алдаа'}; } })); } CL.aaSort=1; }
+  finally{ window._rcAdm--; CL.aaBusy=0; } aaShow(); say('Татаж дууслаа'); }
+function aaFlt(){ CL.aaF=CL.aaF?0:1; aaShow(); }
+function aaBarIn(){ const n=Object.keys(CL.aa).length, s=Object.keys(CL.aa).filter(k=>CL.aa[k].w&&CL.aa[k].w.length&&k!==CL.uid).length;
+  return '<div class="sm">Татсан: '+n+' · Сэжигтэй: <b style="color:'+(s?'#ff8a7a':'#7fe08a')+'">'+s+'</b></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><button class="btn" '+(CL.aaBusy?'disabled ':'')+'onclick="aaAll()">'+(CL.aaBusy?'Татаж байна…':'Бүх Алтыг татах')+'</button><button class="btn'+(CL.aaF?' red':'')+'" onclick="aaFlt()">Зөвхөн сэжигтэй</button></div>'; }
+(function(){ const _l=admList; admList=function(){ return '<div class="sm" style="margin-top:12px"><b>Алтны шалгалт (зөвхөн админ)</b></div><div id="aast">'+aaBarIn()+'</div>'+_l.apply(this,arguments); }; })();
+function admRows(){ const q=(CL.aq||'').replace('#',''); let L=(CL.lbAll||[]).filter(x=>!q||String(x.n||'').toLowerCase().includes(q)||String(x.pid||pidOf(x.id)).includes(q));
+  if(CL.aaF) L=L.filter(x=>CL.aa[x.id]&&CL.aa[x.id].w&&CL.aa[x.id].w.length&&x.id!==CL.uid);
+  if(CL.aaSort) L=L.slice().sort((a,b)=>((CL.aa[b.id]&&CL.aa[b.id].al)||-1)-((CL.aa[a.id]&&CL.aa[a.id].al)||-1));
+  if(!L.length) return '<div class="sm">Олдсонгүй</div>';
+  return L.map(x=>{ const p=x.pid||pidOf(x.id), a=CL.aa[x.id], me=x.id===CL.uid; let ex='';
+    if(a){ if(a.err) ex='<div class="sm" style="color:#ff8a7a">Татаж чадсангүй: '+esc2(a.err)+'</div>'; else if(a.na) ex='<div class="sm">Хадгалалт алга</div>'; else if(a.bad) ex='<div class="sm" style="color:#ff8a7a">Хадгалалт уншигдсангүй</div>';
+      else ex='<div class="sm">Алт <b style="color:#ffd770">'+f(a.al)+'</b> · Зоос '+f(a.gold)+' · Түвшин '+a.pl+' · Баатар '+a.h+' · Төлбөр '+a.paid+' · '+aaAgo(a.t)+' өмнө'+(a.leg?' · хуучин формат':'')+(a.w.length&&!me?'<br><b style="color:#ff8a7a">СЭЖИГТЭЙ: '+a.w.join(', ')+'</b>':'')+(me?' (админ)':'')+'</div>'; }
+    return '<div style="padding:3px 0;border-bottom:1px solid #4a3418"><div class="row" style="gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere"><b style="color:#ffd770">#'+p+'</b> '+esc2(x.n)+' · Lv '+(x.l||1)+' · '+f(x.p||0)+' '+(x.r?'✉':'👤')+'</span><button class="btn" style="padding:2px 8px" onclick="aaOne(\''+esc2(x.id)+'\')">Алт</button><button class="btn" style="padding:2px 8px" onclick="admTo('+p+')">🎁</button><button class="btn red" style="padding:2px 8px" onclick="adminDel(\'lb\',\''+esc2(x.id)+'\')">✕</button></div>'+ex+'</div>'; }).join(''); }
 
 
 /* p32/sk24.js — 24 баатар × 4 өөр чадвар, төлөвүүд (хор, цус алдалт, stun, хуяг, шоолох, таталт),

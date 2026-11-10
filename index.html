@@ -3517,7 +3517,7 @@ async function clInit(){ try{
   const V='10.12.2', B='https://www.gstatic.com/firebasejs/'+V+'/';
   const A=await import(B+'firebase-app.js'), Au=await import(B+'firebase-auth.js'), F=await import(B+'firebase-firestore.js');
   const app=A.initializeApp(FBC), auth=Au.getAuth(app), db=F.getFirestore(app);
-  FBM={A,Au,F,app,auth,db};
+  FBM={A,Au,F:(typeof dxxWrapF==='function'?dxxWrapF(F):F),app,auth,db};
   await new Promise(r=>{ const u=Au.onAuthStateChanged(auth,x=>{u();r();}); });
   if(!auth.currentUser) await Au.signInAnonymously(auth);
   clUser(); CL.ok=1; CL.st=CL.email?'Холбогдсон · '+CL.email:'Холбогдсон (бүртгэлгүй)';
@@ -3582,7 +3582,7 @@ async function adminGift(){ if(!isAdm()) return; const v=i=>($(i)||{}).value||''
   if(!t||(!g&&!a&&!s)){ say('Гарчиг, дор хаяж нэг шагнал бич'); return; }
   try{ const {F,db}=FBM; await F.addDoc(F.collection(db,'gifts'),{title:t,gold:g,alt:a,st:s,to:to?+to:0,exp:Date.now()+d*864e5,t:Date.now()}); say('Бэлэг илгээгдлээ ✓'); clFetch(); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 async function adminAnn(){ if(!isAdm()) return; const t=(($('an_t')||{}).value||'').trim().slice(0,40)||'Зарлал', x=(($('an_x')||{}).value||'').trim().slice(0,300); if(!x){ say('Текст бич'); return; }
-  try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{title:t,text:x,t:Date.now()}); say('Зарлал нийтлэгдлээ ✓'); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
+  try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{title:t,text:x,t:Date.now()},{merge:true}); say('Зарлал нийтлэгдлээ ✓'); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 async function adminDel(col,id){ if(!isAdm()||!confirm('Устгах уу?')) return; try{ const {F,db}=FBM; await F.deleteDoc(F.doc(db,col,id)); say('Устгагдлаа'); if(col==='lb') clLB(); else clFetch(); }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
 setTimeout(()=>{ if(CL.ok&&!CL.fetched){ CL.fetched=1; clFetch(); } },6000);
 
@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='691a7d7bb0';
+var UPDB='2d9874b256';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19687,6 +19687,100 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   window.cardOpen=open;
   window.CGT={on:()=>ON,pw:(c,li)=>pw(c,li),syn:(c,li)=>syn(c,li),state:()=>G,view:()=>V,cardClose:close,def:DEF,owned:owned,all:ALL};
 })();
+
+
+/* ===== Firebase тоолуур (админ) + Сервер хаах (засварын горим) ===== */
+// ---------- 1) Унших/бичих тоолуур ----------
+const RC_KEY='dxxrc1';
+function rcLoad(){ try{ const o=JSON.parse(localStorage.getItem(RC_KEY)||'null'); if(o&&o.r&&o.w) return o; }catch(e){} return {t0:Date.now(),r:{},w:{},rt:0,wt:0,h:{}}; }
+function rcSave(){ try{ const R=window.DXXRC; if(!R) return; const k=Math.floor(Date.now()/3600000)-48; Object.keys(R.h||{}).forEach(x=>{ if(+x<k) delete R.h[x]; }); localStorage.setItem(RC_KEY,JSON.stringify(R)); }catch(e){} }
+function rcReset(){ window.DXXRC={t0:Date.now(),r:{},w:{},rt:0,wt:0,h:{}}; rcSave(); try{ if(cur==='cloud') fillMA(); }catch(e){} }
+function dxxWrapF(F){ try{
+  const R=window.DXXRC=window.DXXRC||rcLoad();
+  const pathOf=x=>{ try{ if(!x) return '?'; if(typeof x.path==='string'&&x.path) return x.path; const q=x._query; if(q&&q.path&&typeof q.path.canonicalString==='function'){ const p=q.path.canonicalString(); if(p) return p; } if(q&&q.collectionGroup) return 'cg:'+q.collectionGroup; }catch(e){} return '?'; };
+  const cat=p=>{ p=String(p||'?'); let c=p.split('/')[0]||'?'; if((window._rcAdm|0)>0) c='АДМ '+c; return c; };
+  const add=(c,k,n)=>{ try{ const o=R.r[c]||(R.r[c]={d:0,q:0,l:0}); o[k]=(o[k]||0)+n; R.rt+=n; const h=Math.floor(Date.now()/3600000); R.h[h]=(R.h[h]||0)+n; }catch(e){} };
+  const addW=(c,n)=>{ try{ R.w[c]=(R.w[c]||0)+n; R.wt+=n; }catch(e){} };
+  const G=Object.assign({},F);
+  G.getDoc=async function(ref){ const s=await F.getDoc(ref); add(cat(pathOf(ref)),'d',1); return s; };
+  G.getDocs=async function(q){ const s=await F.getDocs(q); add(cat(pathOf(q)),'q',Math.max(1,s.size||0)); return s; };
+  G.onSnapshot=function(ref,...a){ const c=cat(pathOf(ref)); const i=a.findIndex(x=>typeof x==='function');
+    if(i>=0){ const fn=a[i]; let first=1; a[i]=function(s){ try{ if(!(s.metadata&&s.metadata.hasPendingWrites)){ let n=1; if(typeof s.docChanges==='function'){ n=s.docChanges().length; if(first&&n===0) n=1; } if(n>0) add(c,'l',n); } first=0; }catch(e){} return fn.apply(this,arguments); }; }
+    return F.onSnapshot(ref,...a); };
+  ['setDoc','addDoc','updateDoc','deleteDoc'].forEach(k=>{ if(typeof F[k]!=='function') return; G[k]=async function(ref,...a){ const r=await F[k](ref,...a); addW(cat(pathOf(ref)),1); return r; }; });
+  if(typeof F.runTransaction==='function') G.runTransaction=function(db,fn,o){ return F.runTransaction(db,function(tx){
+    const t2={ get:async r=>{ const s=await tx.get(r); add(cat(pathOf(r)),'d',1); return s; }, set:(r,...a)=>{ addW(cat(pathOf(r)),1); tx.set(r,...a); return t2; }, update:(r,...a)=>{ addW(cat(pathOf(r)),1); tx.update(r,...a); return t2; }, delete:r=>{ addW(cat(pathOf(r)),1); tx.delete(r); return t2; } };
+    return fn(t2); },o); };
+  if(!window._rcTm){ window._rcTm=setInterval(rcSave,30000); window.addEventListener('pagehide',rcSave); document.addEventListener('visibilitychange',()=>{ if(document.hidden) rcSave(); }); }
+  return G;
+}catch(e){ return F; } }
+function rcHTML(){ const R=window.DXXRC; if(!R) return '<div class="card"><h3>Firebase тоолуур</h3><div class="sm">Холбогдоогүй байна</div></div>';
+  const hrs=Math.max(0.05,(Date.now()-R.t0)/3600000), rows=Object.keys(R.r).map(k=>{ const o=R.r[k]; return {k,d:o.d||0,q:o.q||0,l:o.l||0,t:(o.d||0)+(o.q||0)+(o.l||0)}; }).sort((a,b)=>b.t-a.t);
+  const wk=Object.keys(R.w).map(k=>({k,n:R.w[k]})).sort((a,b)=>b.n-a.n);
+  const pc=n=>R.rt?Math.round(n/R.rt*100)+'%':'';
+  let h='<div class="card" style="border-color:#7ab8ff"><h3>Firebase тоолуур</h3><div class="sm">Зөвхөн <b>энэ төхөөрөмжийн</b> тоо ('+hrs.toFixed(1)+' цагаас хойш). «АДМ» гэсэн мөр нь админы хэрэгслийн унших.</div>';
+  h+='<div class="row" style="padding:3px 0"><span class="sm">Нийт унших</span><b>'+f(R.rt)+' <span class="sm">(≈'+f(Math.round(R.rt/hrs))+'/цаг)</span></b></div><div class="row" style="padding:3px 0"><span class="sm">Нийт бичих</span><b>'+f(R.wt)+' <span class="sm">(≈'+f(Math.round(R.wt/hrs))+'/цаг)</span></b></div>';
+  h+='<div class="sm" style="margin-top:8px"><b>Унших (цуглуулгаар)</b> · баримт / асуулга / шууд суваг</div>';
+  h+=rows.length?rows.slice(0,14).map(x=>'<div class="row" style="padding:2px 0;gap:4px"><span class="sm" style="flex:1;min-width:0;overflow-wrap:anywhere"><b style="color:#ffd770">'+esc2(x.k)+'</b> '+f(x.d)+' / '+f(x.q)+' / '+f(x.l)+'</span><b>'+f(x.t)+' <span class="sm">'+pc(x.t)+'</span></b></div>').join(''):'<div class="sm">Одоохондоо унших алга</div>';
+  h+='<div class="sm" style="margin-top:8px"><b>Бичих</b></div>'+(wk.length?wk.slice(0,8).map(x=>'<div class="row" style="padding:2px 0"><span class="sm">'+esc2(x.k)+'</span><b>'+f(x.n)+'</b></div>').join(''):'<div class="sm">Алга</div>');
+  const hn=Math.floor(Date.now()/3600000); let hh=''; for(let i=5;i>=0;i--){ const k=hn-i; hh+='<div class="row" style="padding:1px 0"><span class="sm">'+(i===0?'Энэ цаг':i+' цагийн өмнө')+'</span><b>'+f(R.h[k]||0)+'</b></div>'; }
+  h+='<div class="sm" style="margin-top:8px"><b>Сүүлийн цагуудын унших</b></div>'+hh;
+  h+='<div style="display:flex;gap:6px;margin-top:8px"><button class="btn" onclick="rcSave();fillMA()">Шинэчлэх</button><button class="btn red" onclick="rcReset()">Тэглэх</button></div></div>';
+  return h; }
+(function(){ if(typeof actFetch==='function'){ const _a=actFetch; actFetch=function(){ window._rcAdm=(window._rcAdm|0)+1; let r; try{ r=_a.apply(this,arguments); }catch(e){ window._rcAdm--; throw e; } if(r&&typeof r.then==='function') return r.then(v=>{ window._rcAdm--; return v; },e=>{ window._rcAdm--; throw e; }); window._rcAdm--; return r; }; } })();
+
+// ---------- 2) Сервер хаах (засварын горим) ----------
+// ann/main баримтын mt талбарт: {on,msg,from,until,t}. Бүх тоглогч шууд сувгаар (1 унших + өөрчлөлт бүрд 1) хүлээн авна.
+const MNT={on:0,msg:'',from:0,until:0,t:0};
+function mtTime(ts){ const d=new Date(ts+8*3600000), p=n=>(n<10?'0':'')+n; return p(d.getUTCHours())+':'+p(d.getUTCMinutes()); }
+function mtDay(ts){ const d=new Date(ts+8*3600000), p=n=>(n<10?'0':'')+n; return p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate()); }
+function mtFmt(ts){ const n=Date.now(); return (mtDay(ts)!==mtDay(n)?mtDay(ts)+' ':'')+mtTime(ts); }
+function mtRange(){ if(MNT.until) return mtFmt(MNT.from||MNT.t||Date.now())+' – '+mtFmt(MNT.until)+' (Улаанбаатарын цаг)'; return 'Нээх хугацааг удахгүй мэдэгдэнэ'; }
+function mtState(){ const n=Date.now(); if(!MNT.on) return 0; if(MNT.until&&n>=MNT.until) return 0; if(MNT.from&&n<MNT.from) return 1; return 2; }
+function mtApply(m){ m=m||{}; MNT.on=m.on?1:0; MNT.msg=String(m.msg||'').slice(0,160); MNT.from=+m.from||0; MNT.until=+m.until||0; MNT.t=+m.t||0; mtRender(); }
+function mtLeft(ms){ ms=Math.max(0,ms); const h=Math.floor(ms/3600000), m=Math.ceil((ms%3600000)/60000); return h?h+' цаг '+(m%60)+' мин':m+' мин'; }
+function mtRender(){ try{
+  const st=mtState(), adm=(typeof isAdm==='function')&&isAdm(); window.dxxMaintOn=(st===2)&&!adm;
+  let ov=document.getElementById('mtov'), bar=document.getElementById('mtbar');
+  if(st===2&&!adm){ if(bar) bar.remove();
+    if(!ov){ ov=document.createElement('div'); ov.id='mtov'; ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#120a04;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto;-webkit-overflow-scrolling:touch'; document.body.appendChild(ov); }
+    const key=[MNT.msg,MNT.from,MNT.until,mtState(),window._mtAdm?1:0].join('|');
+    if(ov._k!==key||window._mtDirty){ ov._k=key; window._mtDirty=0;
+      ov.innerHTML='<div style="max-width:380px;width:100%;text-align:center;color:#ffe9b0;border:3px solid #c9972b;border-radius:14px;background:#2b1d12;padding:22px 18px;box-sizing:border-box"><div style="font-size:20px;font-weight:bold;color:#ffd770;margin:6px 0">Шинэчлэл хийж байна</div><div style="font-size:15px;line-height:1.45;overflow-wrap:anywhere">'+esc2(MNT.msg||'Тоглоомыг сайжруулж, алдааг засаж байна. Түр хүлээнэ үү.')+'</div><div style="margin-top:12px;font-size:14px;color:#ffd770"><b>Хаагдах хугацаа:</b><br>'+mtRange()+'</div><div id="mtleft" style="margin-top:8px;font-size:13px"></div><div style="margin-top:12px;font-size:12px;opacity:.75">Таны дэвшил хадгалагдсан. Нээгдмэгц тоглоом өөрөө үргэлжилнэ.</div>'
+        +(window._mtAdm?'<div style="margin-top:14px"><input id="mtem" placeholder="Админ имэйл" autocomplete="username" style="width:100%;font-size:16px;padding:8px;margin-top:4px;border-radius:8px;border:2px solid #c9972b;background:#1a0f06;color:#fff;box-sizing:border-box"><input id="mtpw" type="password" placeholder="Нууц үг" autocomplete="current-password" style="width:100%;font-size:16px;padding:8px;margin-top:6px;border-radius:8px;border:2px solid #c9972b;background:#1a0f06;color:#fff;box-sizing:border-box"><button id="mtgo" style="margin-top:8px;width:100%;padding:9px;font-size:15px;border-radius:8px;border:2px solid #c9972b;background:#5b3d1e;color:#ffe9b0">Нэвтрэх</button><div id="mtme" style="margin-top:6px;font-size:12px;color:#ff9a8a"></div></div>':'<div style="margin-top:14px"><a id="mta" style="font-size:11px;opacity:.5;color:#ffe9b0;text-decoration:underline;cursor:pointer">Админ</a></div>')+'</div>';
+      const a=document.getElementById('mta'); if(a) a.onclick=()=>{ window._mtAdm=1; window._mtDirty=1; mtRender(); };
+      const g=document.getElementById('mtgo'); if(g) g.onclick=mtLogin; }
+    const l=document.getElementById('mtleft'); if(l) l.textContent=MNT.until?('Нээгдэх хүртэл ойролцоогоор: '+mtLeft(MNT.until-Date.now())):'';
+  } else { if(ov) ov.remove();
+    if(st>=1&&MNT.on){ if(!bar){ bar=document.createElement('div'); bar.id='mtbar'; bar.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99990;text-align:center;font-size:12px;font-weight:bold;padding:3px 6px;pointer-events:none'; document.body.appendChild(bar); }
+      bar.style.background=st===2?'#a01c1c':'#c9972b'; bar.style.color=st===2?'#fff':'#2b1706';
+      bar.textContent=st===2?'Сервер хаалттай (зөвхөн админ) · '+mtRange():'Шинэчлэлийн улмаас сервер '+mtRange()+' хаагдана'; }
+    else if(bar) bar.remove(); }
+}catch(e){} }
+async function mtLogin(){ const e=(document.getElementById('mtem')||{}).value||'', p=(document.getElementById('mtpw')||{}).value||'', m=document.getElementById('mtme'); if(!e||!p){ if(m) m.textContent='Имэйл, нууц үгээ бичнэ үү'; return; }
+  try{ const {Au,auth}=FBM; await Au.signInWithEmailAndPassword(auth,e.trim(),p); clUser(); if(typeof isAdm==='function'&&!isAdm()){ if(m) m.textContent='Энэ бүртгэл админ биш'; return; } window._mtAdm=0; window._mtDirty=1; mtRender(); }
+  catch(x){ if(m) m.textContent=(typeof clErr==='function'?clErr(x):'Алдаа'); } }
+(function(){ let started=0;
+  setInterval(()=>{ try{ if(!started&&typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); },()=>{}); }catch(e){} } if(MNT.on) mtRender(); }catch(e){} },15000);
+  const _w=setInterval(()=>{ try{ if(typeof FBM!=='undefined'&&FBM&&FBM.db&&typeof CL!=='undefined'&&CL.ok){ clearInterval(_w); if(!started){ started=1; const {F,db}=FBM; try{ F.onSnapshot(F.doc(db,'ann','main'),s=>{ const d=s.exists()?s.data():null; mtApply(d&&d.mt); },()=>{}); }catch(e){} } } }catch(e){} },1500);
+})();
+// хаалттай үед cloud хадгалалт хийхгүй (админаас бусад)
+(function(){ if(typeof clPush==='function'){ const _p=clPush; clPush=function(){ if(window.dxxMaintOn) return Promise.resolve(false); return _p.apply(this,arguments); }; } })();
+// админ харагдац
+function mtAdminHTML(){ const st=mtState(); let h='<div class="card" style="border-color:#ff8a7a"><h3>Сервер хаах (засвар)</h3>';
+  h+='<div class="sm">Төлөв: <b style="color:'+(st===2?'#ff8a7a':st===1?'#ffd770':'#7fe08a')+'">'+(st===2?'ХААЛТТАЙ (зөвхөн админ орно)':st===1?'Хаагдахаар товлосон':'Нээлттэй')+'</b>'+(MNT.on&&st?' · '+mtRange():'')+'</div>';
+  h+='<input id="mt_msg" maxlength="160" placeholder="Мессеж (жишээ: Шинэ шинэчлэл, алдаа засвар хийж байна)" value="'+esc2(MNT.msg)+'" style="'+_inp+'">';
+  h+='<div style="display:flex;gap:6px"><div style="flex:1"><div class="sm" style="margin-top:6px">Хэдэн цагаас (хоосон = одоо)</div><input id="mt_f" type="time" style="'+_inp+'"></div><div style="flex:1"><div class="sm" style="margin-top:6px">Хэдэн цаг хүртэл</div><input id="mt_u" type="time" style="'+_inp+'"></div></div>';
+  h+='<div class="sm" style="margin-top:4px;opacity:.8">Цаг нь Улаанбаатарын цагаар. «Хүртэл» цаг дуусмагц сервер өөрөө нээгдэнэ. Цагийг одооноос хойших ойрын цаг гэж ойлгоно (өнгөрсөн бол маргааш). Эхлэх цаг ирэх хүртэл тоглогчид урьдчилсан сануулга харна.</div>';
+  h+='<div style="display:flex;gap:6px;margin-top:8px"><button class="btn red" onclick="mtSet(1)">Сервер хаах</button><button class="btn" onclick="mtSet(0)">Сервер нээх</button></div></div>';
+  return h; }
+function mtAt(hhmm,after){ const m=/^(\d{1,2}):(\d{2})$/.exec(hhmm||''); if(!m) return 0; const n=Date.now(), d=new Date(n+8*3600000); let t=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),+m[1]-8,+m[2]); while(t<=after) t+=86400000; return t; }
+async function mtSet(on){ if(!isAdm()) return; const v=i=>(document.getElementById(i)||{}).value||'', n=Date.now();
+  const msg=v('mt_msg').trim().slice(0,160); let from=0, until=0;
+  if(on){ const fs=v('mt_f'), us=v('mt_u'); from=fs?mtAt(fs,n):n; if(us){ until=mtAt(us,Math.max(from,n)); } else until=0;
+    if(!confirm('Сервер хаах уу? '+(from>n?'Эхлэх: '+mtFmt(from)+'. ':'Тоглогчид одоо орж чадахгүй болно. ')+(until?'Нээгдэх: '+mtFmt(until)+'.':'Цаг заагаагүй, гараар нээнэ.'))) return; }
+  try{ const {F,db}=FBM; await F.setDoc(F.doc(db,'ann','main'),{mt:{on:on?1:0,msg:msg,from:from,until:until,t:n}},{merge:true}); say(on?'Сервер хаагдлаа ✓':'Сервер нээгдлээ ✓'); mtApply({on:on,msg:msg,from:from,until:until,t:n}); try{ fillMA(); }catch(e){} }catch(e){ say('Алдаа: '+((e&&e.code)||'')); } }
+(function(){ const _a=adminHTML; adminHTML=function(){ let h=_a.apply(this,arguments); try{ h=mtAdminHTML()+h+rcHTML(); }catch(e){} return h; }; })();
 
 
 /* p32/sk24.js — 24 баатар × 4 өөр чадвар, төлөвүүд (хор, цус алдалт, stun, хуяг, шоолох, таталт),

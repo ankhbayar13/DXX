@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='3e0ae7c538';
+var UPDB='e55c7ee3f3';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20225,7 +20225,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         +(mine>=10||mine<0?'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;margin:6px 0 3px;border-radius:6px;background:rgba(255,215,112,.12);border:1px solid #ffd770"><span><b>Та энд байна</b>'+(mine>=0?' · '+(mine+1)+'-р байр':'')+'</span><b>'+w.m.k+'</b></div>':''); }
     d.innerHTML='<div class="sci" style="max-width:340px;width:92%;max-height:88vh;overflow:auto"><div class="sch"><div><b>Сарын Топ 10</b><div class="sm">'+mname(mi())+' · Онлайн тулаанд бусад тоглогчийг живүүлсэн тоо</div></div></div>'+body+
       (R.prev?'<div style="margin:8px 0;padding:8px;border-radius:8px;background:rgba(120,200,120,.15);border:1px solid #7fe08a"><div class="sm">Өнгөрсөн сар '+R.prev.rank+'-р байр</div><button class="btn red" data-a="c">Шагнал авах: '+R.prev.prize+' Алт</button></div>':'')+
-      '<div class="sm" style="margin-top:6px;opacity:.85">Оношлогоо · өөрийн сүүдэр бичих: <b>'+esc(DG.w)+'</b> · бусдыг унших: <b>'+esc(DG.r)+'</b>'+(DG.n>=0?' · олдсон: <b>'+DG.n+'</b>':'')+'</div><div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
+      '<div class="sm" style="margin-top:6px;opacity:.85">'+(window.dxxFF&&dxxFF.duel?'<b style="color:#ff9a8a">Админ «Онлайн тоглоом» унтраасан байна!</b><br>':'')+'Оношлогоо · өөрийн сүүдэр бичих: <b>'+esc(DG.w)+'</b> · бусдыг унших: <b>'+esc(DG.r)+'</b>'+(DG.n>=0?' · олдсон: <b>'+DG.n+'</b>':'')+'</div><div class="sm" style="margin-top:6px">Нэг тоглогчийг өдөрт '+CAP+' удаа л тооцно. Сард хамгийн их живэгдсэн тоглогч жагсаалтад орохгүй.</div><button class="btn" style="background:#5b3d1e;margin-top:8px" data-a="x">Хаах</button></div>'; }
   window.swarTop=function(){ load(); };
 })();
 

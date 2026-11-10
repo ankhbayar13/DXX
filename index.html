@@ -6347,7 +6347,7 @@ const isWalk=(x,y)=>{ if(x<0||y<0||x>=ISW||y>=ISH) return false; return isGrid()
 function isNear(x,y){ if(isWalk(x,y)) return {x:x,y:y}; for(let r=8;r<260;r+=8) for(let k=0;k<16;k++){ const a=k/16*6.2832, px=x+Math.cos(a)*r, py=y+Math.sin(a)*r; if(isWalk(px,py)) return {x:px,y:py}; } return {x:x,y:y}; }
 const isSide=x=>x<ISRX?0:1;
 function isRoute(u,tx,ty){ const sd=isSide(u.x), td=isSide(tx), px=u.x, py=u.y;
-  for(const b of ISBR){ if(px>b.x0-10&&px<b.x1+10&&Math.abs(py-b.y)<34){ if(sd===td&&Math.abs(px-tx)<400&&Math.abs(py-ty)<80) return null; return [td?b.x1+34:b.x0-34,b.y]; } }
+  for(const b of ISBR){ const lo=td?b.x0-46:b.x0-10, hi=td?b.x1+10:b.x1+46; if(px>lo&&px<hi&&Math.abs(py-b.y)<34){ if(sd===td&&Math.abs(px-tx)<400&&Math.abs(py-ty)<80) return null; return [td?b.x1+34:b.x0-34,b.y]; } }
   if(sd===td) return null;
   let best=null,bs=1e9; ISBR.forEach(b=>{ const s=Math.abs(py-b.y)+Math.abs(ty-b.y)*0.8; if(s<bs){ bs=s; best=b; } });
   return [sd?best.x1+30:best.x0-30,best.y]; }
@@ -6395,7 +6395,7 @@ function isStep(dt){ const R=RT; if(!R) return; const U=R.U;
   if(!R.done) for(const u of U){ if(u.hp>0){ u.px=u.x; u.py=u.y; isUnit(u,dt); } } else U.forEach(u=>{ u.mv=false; if(u.hurt>0) u.hurt-=dt; if(u.atkT>0) u.atkT-=dt; });
   { const CS=27, Hm=new Map(); for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; A.hi=a; const k=(Math.floor(A.x/CS)+4)*512+Math.floor(A.y/CS)+4; const l=Hm.get(k); if(l) l.push(A); else Hm.set(k,[A]); }
     for(let a=0;a<U.length;a++){ const A=U[a]; if(A.hp<=0) continue; const cx=Math.floor(A.x/CS)+4, cy=Math.floor(A.y/CS)+4;
-      for(let ix=cx-1;ix<=cx+1;ix++) for(let iy=cy-1;iy<=cy+1;iy++){ const l=Hm.get(ix*512+iy); if(!l) continue; for(let q=0;q<l.length;q++){ const B=l[q]; if(B.hi<=a) continue; const dx=B.x-A.x, dy=B.y-A.y; const RR=(A.g.type==='cav'||B.g.type==='cav')?26:ISRR; if(dx>RR||dx<-RR||dy>RR||dy<-RR) continue; const d=Math.hypot(dx,dy); if(d<RR&&d>0.01){ const p=(RR-d)/2*Math.min(1,dt*8), ux=dx/d*p, uy=dy/d*p; if(isWalk(A.x-ux,A.y-uy)){ A.x-=ux; A.y-=uy; } if(isWalk(B.x+ux,B.y+uy)){ B.x+=ux; B.y+=uy; } } } } } }
+      for(let ix=cx-1;ix<=cx+1;ix++) for(let iy=cy-1;iy<=cy+1;iy++){ const l=Hm.get(ix*512+iy); if(!l) continue; for(let q=0;q<l.length;q++){ const B=l[q]; if(B.hi<=a) continue; const dx=B.x-A.x, dy=B.y-A.y; const cv2=(A.g.type==='cav'||B.g.type==='cav'), RR=(A.side===B.side)?(cv2?17:11):(cv2?24:ISRR); if(dx>RR||dx<-RR||dy>RR||dy<-RR) continue; const d=Math.hypot(dx,dy); if(d<RR&&d>0.01){ const p=(RR-d)/2*Math.min(1,dt*8), ux=dx/d*p, uy=dy/d*p; if(isWalk(A.x-ux,A.y-uy)){ A.x-=ux; A.y-=uy; } if(isWalk(B.x+ux,B.y+uy)){ B.x+=ux; B.y+=uy; } } } } } }
   if(R.ban){ R.ban.t+=dt; if(R.ban.t>1.9) R.ban=null; }
   R.pt.forEach(p=>{ p.t+=dt; p.x+=p.vx*dt; p.y+=(p.vy||0)*dt; p.h+=p.vh*dt; p.vh-=(p.c==='smoke'?-6:70)*dt; }); R.pt=R.pt.filter(p=>p.t<p.l);
   R.fx.forEach(f=>f.t+=dt*3.4); R.fx=R.fx.filter(f=>f.t<1);
@@ -10844,7 +10844,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='0dfb246c61';
+var UPDB='7626a6a337';
 (function(){
   const K='updTry';
   const _go=updGo;

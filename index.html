@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='483fb77da0';
+var UPDB='765d9eef97';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14626,6 +14626,30 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> <button class="btn" id="ycl">Өнгө</button> <button class="btn" id="ysq">⛵ Далайд явах</button> <button class="btn red" id="ysw">Онлайн тулаан</button> <button class="btn" id="ytp">Топ 10</button> ':'')+
       (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
       '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
+    if(l>0){ /* зурган дэвсгэртэй шинэ цонх (1093×1439) */
+      const P=(x,y,w,h)=>'left:'+(x/10.93).toFixed(2)+'%;top:'+(y/14.39).toFixed(2)+'%;width:'+(w/10.93).toFixed(2)+'%;height:'+(h/14.39).toFixed(2)+'%';
+      const B=(id,x,y,w,h,t,cl)=>'<button id="'+id+'" class="ya '+(cl||'')+'" style="'+P(x,y,w,h)+'"><span>'+t+'</span></button>';
+      let bar;
+      if(y.up) bar='<button id="ysp" class="yb" style="'+P(330,640,520,74)+'"><b>Барилга: Lv '+y.up+'</b><i>Үлдсэн <u id="ytm">'+fmt(rem())+'</u> · Хурдасгах '+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт</i></button>';
+      else if(c) bar='<button id="yup" class="yb" style="'+P(330,640,520,74)+'"><b>Сайжруулах · Lv '+n+'</b><i>'+cs(c)+'· '+fmt(c.t)+'</i></button>';
+      else bar='<div class="yb" style="'+P(330,640,520,74)+'"><b>Хамгийн дээд түвшин</b></div>';
+      d.innerHTML='<style>#ycard .yw{position:relative;width:min(92vw,360px,calc((100vh - 24px)/1.3166));aspect-ratio:1093/1439;container-type:inline-size;background:url(hf/sq/yard_bg.webp?v=1) center/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif}'
+        +'#ycard .yw>*{position:absolute}#ycard .yt{text-align:center;font-weight:bold;color:#ffd98a;text-shadow:0 2px 3px #2a1204,0 0 6px #000;display:flex;align-items:center;justify-content:center;line-height:1.1}'
+        +'#ycard .ya{border:0;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#2a1706;font:bold 4.5cqw Georgia,serif;text-shadow:0 1px 0 rgba(255,235,170,.6);-webkit-tap-highlight-color:transparent}'
+        +'#ycard .ya span{display:block;padding-left:12cqw;text-align:center;line-height:1.05}#ycard .ya.r{color:#ffe9c8;text-shadow:0 1px 3px #300}#ycard .ya.g{color:#fff;text-shadow:0 1px 3px #000}'
+        +'#ycard .ya:active,#ycard .yb:active{filter:brightness(1.25)}'
+        +'#ycard .yb{border:0;background:none;padding:0 1cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#eaffd0;text-shadow:0 1px 3px #031200,0 0 5px #031200;cursor:pointer;font-family:Georgia,serif;line-height:1.15}'
+        +'#ycard .yb b{font-size:3.2cqw}#ycard .yb i{font-style:normal;font-size:2.4cqw;white-space:nowrap;color:#f6ffd8}#ycard .yb u{text-decoration:none}<\/style>'
+        +'<div class="yw">'
+        +'<div class="yt" style="'+P(230,80,640,100)+';font-size:4.9cqw;white-space:nowrap">'+NM[l]+'</div>'
+        +'<div class="yt" style="'+P(260,172,580,58)+';font-size:2.9cqw;color:#f6e7c6;font-weight:normal">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div>'
+        +'<div style="'+P(105,488,900,120)+';display:flex;flex-direction:column;justify-content:center;gap:1cqw;color:#f6e7c6;text-shadow:0 1px 3px #000;font-size:3.2cqw;line-height:1.15"><div style="font-weight:bold;font-size:3.6cqw;color:#ffd98a">Одоо: '+NM[l]+' (Lv '+l+')</div><div>'+ef(l)+'</div></div>'
+        +bar
+        +B('yfs',60,740,472,112,'Хөлөг')+B('yfk',560,740,474,112,'Ур чадвар')
+        +B('ycl',60,876,472,118,'Өнгө')+B('ysq',560,876,474,118,'Далайд явах')
+        +B('ysw',58,1024,522,130,'Онлайн тулаан','r')+B('ytp',604,1026,432,128,'Топ 10')
+        +B('yno',60,1188,350,114,'Хаах','g')
+        +'</div>'; }
     document.body.appendChild(d);
     const q=id=>document.getElementById(id);
     if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('ycl')) q('ycl').onclick=()=>{ if(window.shSkinCard) shSkinCard(); }; if(q('ysq')) q('ysq').onclick=()=>{ closeCard(); window.seaStart&&seaStart(); }; if(q('ysw')) q('ysw').onclick=()=>{ closeCard(); window.seaStart&&seaStart({war:1}); }; if(q('ytp')) q('ytp').onclick=()=>{ window.swarTop&&swarTop(); }; if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };

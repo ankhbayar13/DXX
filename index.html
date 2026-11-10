@@ -10885,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1d2ce8a902';
+var UPDB='dd6c0c13a8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -15981,8 +15981,8 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   function ensure(){
     try{
       if(!CL||!CL.ok||!FBM||!CL.uid) return;
-      const keep=['pub'];
-      listen('pub',(F,db)=>F.collection(db,'chat'),v=>{ U.pub=v?1:0; });
+      const keep=[];
+      U.pub=0;   // нийтийн чатын улаан цэгийг авсан (мессеж бүрийг хүн бүр уншдаг тул унших ихтэй)
       const k=myClan();
       if(k!=null){ keep.push('clan'+k); listen('clan'+k,(F,db)=>F.collection(db,'clanchat','c'+k,'m'),v=>{ U.clan=v?1:0; }); }
       else { U.clan=0; }

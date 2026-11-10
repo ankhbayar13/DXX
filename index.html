@@ -6609,6 +6609,15 @@ function cpHb(ci){ const sk=seasonK(), w=sk==='winter';
   iv=setInterval(()=>{ if(innerWidth>innerHeight){ clearInterval(iv); setTimeout(go,350); } else if(Date.now()-t0>(ok?30000:2500)){ go(); } },150);
 }; const _be=btEnd; btEnd=function(f){ const r=_be(f); if(!BT){ window.BT_LAND=0; try{ screen.orientation.unlock(); }catch(e){} } return r; }; })();
 
+(function(){ const rz=()=>{ try{ if(typeof cv==='undefined'||!cv) return; const vw=innerWidth, vh=innerHeight, cw=parseFloat(cv.style.width)||0, ch=parseFloat(cv.style.height)||0;
+    if(Math.abs(cw-vw)>SC+1||Math.abs(ch-vh)>SC+1) resize(); }catch(e){} };
+  window.dxxRz=()=>{ [80,350,900,1800].forEach(t=>setTimeout(rz,t)); };
+  addEventListener('orientationchange',window.dxxRz); addEventListener('pageshow',window.dxxRz);
+  try{ if(window.visualViewport) visualViewport.addEventListener('resize',()=>{ clearTimeout(window._vvRz); window._vvRz=setTimeout(rz,150); }); }catch(e){}
+  setInterval(()=>{ if(!document.hidden) rz(); },2500);
+  const _b2=btEnd; btEnd=function(f){ const r=_b2(f); try{ window.dxxRz(); }catch(e){} return r; };
+})();
+
 // ===== цэргийн тоо HUD дээр =====
 (function(){
   const _u=updateHUD;
@@ -10876,7 +10885,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='6e62d97bc9';
+var UPDB='81991d6a12';
 (function(){
   const K='updTry';
   const _go=updGo;

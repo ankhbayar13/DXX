@@ -10858,7 +10858,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c71024088e';
+var UPDB='0b62a9e2e1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18916,6 +18916,38 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 #alv .ew-in{background:#a8201a33}#alv .ew-in .ct-nm{color:#ffd0c8}#alv .ew-in small{display:block;color:#e8b8a8}
 #alv .ew-t{border:1px solid #7a5a30;border-radius:12px;background:#2a1b0d;color:#f1dfae;padding:5px 10px;font:bold 12px sans-serif}#alv .ew-t.on{background:linear-gradient(#ffe08a,#d79a24);color:#3a2208;border-color:#fff1c8}
 `; document.head.appendChild(sty);
+})();
+
+
+/* p32/grazing.js — Мал өглөө (ажлын цагт) хашаанаас гарч бэлчээрт явна, орой хашаандаа буцаж орно. Тоглоомын өдрийн хуваарьтай (dayPhase) нэг. Зөвхөн хөдөлгөөн, тооцоонд нөлөөгүй. */
+(function(){
+  const GZ={act:false,out:false};
+  const penR=()=>{ try{ return obList().find(R=>R.k==='hashaa')||null; }catch(e){ return null; } };
+  function pasture(){ const R=penR(); if(!R) return null; const L=obList().filter(o=>o.k!=='hashaa');
+    for(let i=0;i<12;i++){ const x=R.x0-70+Math.random()*((R.x1-R.x0)+140), y=R.y1+10+Math.random()*58; if(x<8||y<50||x>WW-30||y>WH-26) continue;
+      const P={x:x+7,y:y+12}; if(L.some(o=>obIn(P,{x0:o.x0-7,y0:o.y0-7,x1:o.x1+7,y1:o.y1+7}))) continue; return {x:x,y:y}; }
+    return null; }
+  const _az=animalZone;
+  animalZone=function(k){
+    if(GZ.act&&GZ.out&&k&&S.bld&&S.bld.hashaa>0){ const p=pasture(); if(p) return {x:p.x,y:p.y,w:16,h:14}; }
+    return _az.apply(this,arguments); };
+  function gates(){
+    const R=penR(); if(!R) return; const gx=(R.x0+R.x1)/2, gy=R.y1+3;
+    ents.forEach(e=>{ if(e.kind!=='animal'||e.def||e.hold) return;
+      const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h}, T={x:e.tx+cx,y:e.ty+h};
+      if(e._pass){ if(obIn(P,R)===obIn(T,R)) e._pass=0; return; }
+      if(e._gate){ if(Math.hypot(P.x-gx,P.y-gy)<4){ e._gate=0; e._pass=1; GZ.act=true; try{ const z=animalZone(e.type); e.tx=z.x+Math.random()*Math.max(1,z.w-14); e.ty=z.y+Math.random()*Math.max(1,z.h-12); }finally{ GZ.act=false; } e.wait=0; } else { e.tx=gx-cx; e.ty=gy-h; } return; }
+      if(obIn(P,R)!==obIn(T,R)){ e._gate=1; e.tx=gx-cx; e.ty=gy-h; e.wait=0; } }); }
+  const _up=update;
+  update=function(){
+    try{ const ph=(typeof dayPhase==='function')?dayPhase():'work'; GZ.out=(ph==='work'||ph==='meal')&&!raid&&!(S.sites&&S.sites.hashaa); }catch(x){ GZ.out=false; }
+    if(GZ.prev!==undefined&&GZ.prev!==GZ.out){ try{ const R=penR(); if(R){ ents.forEach(e=>{ if(e.kind!=='animal'||e.def||e.hold) return; const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h};
+        if(GZ.out){ if(obIn(P,R)) e.wait=Math.random()*6; } else if(!obIn(P,R)&&!e._gate){ e._gate=1; e.wait=0; } }); } }catch(x){} }
+    GZ.prev=GZ.out;
+    GZ.act=true; let r; try{ r=_up.apply(this,arguments); } finally{ GZ.act=false; }
+    try{ gates(); }catch(x){}
+    return r; };
+  window.GZ=GZ;
 })();
 
 

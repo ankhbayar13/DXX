@@ -3423,7 +3423,7 @@ const MENU=[
  {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
- {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['⚔','Шинэ байлдаан',"isModeToggle()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
+ {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
 const MIC={'Түүхэн аян':'ic_camp','Тэмцээн':'ic_arena','Наадам':'ic_naadam','Дэлхий':'ic_world','Судалгаа':'ic_res','Дайн':'ic_cup','Даалгавар':'ic_quest','Захиалга':'ic_orders','Цүнх':'ic_bag','Агуулах':'ic_agh','Дэлгүүр':'ic_shop','Нөөц нэмэх':'ic_sup','Шуудан':'ic_mail','Хөгжим':'ic_music','Хөрөг':'ic_prof','Cloud':'ic_cloud','Хүч':'ic_power'};
 const MSEC={'Тулалдаан':'sec_battle','Хөгжил':'sec_grow','Хөрөнгө':'ic_sup','Бусад':'sec_other'};
 function menuHTMLold(){ const mb=(S.mail||[]).filter(m=>!m.r).length, qb=(typeof qBadge==='function')?qBadge():0;
@@ -6308,7 +6308,7 @@ function rtsLayout(){ const R=RT, cv=$('rcv'); R.cw=innerWidth; R.ch=innerHeight
  document.head.appendChild(st); })();
 
 async function rtsStart(i,E){
-  { let _iso=true; try{ if(localStorage.getItem('dxx_iso')==='0'||/[?&]oldbattle\b/.test(location.search)) _iso=false; }catch(e){} if(_iso&&typeof isStart==='function') return isStart(i,E); }
+  { let _iso=true; try{ if(/[?&]oldbattle\b/.test(location.search)) _iso=false; localStorage.removeItem('dxx_iso'); }catch(e){} if(_iso&&typeof isStart==='function') return isStart(i,E); }
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   if(RT) return;
   try{ if(typeof WMV!=='undefined'&&WMV&&WMV.on&&typeof wmShut==='function') wmShut(); }catch(e){}
@@ -10858,7 +10858,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='0b62a9e2e1';
+var UPDB='c4aa07d46e';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='765d9eef97';
+var UPDB='74b1c0be92';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20200,10 +20200,14 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const ec=e=>String((e&&(e.code||e.message))||e||'?').slice(0,40);
   const mname=m=>{ const y=Math.floor(m/12), mm=m%12+1; return y+'-'+(mm<10?'0':'')+mm; };
 
+  /* Firestore дүрэм: duel/{id} үүсгэхэд a == өөрийн uid шаардана, шинэчлэхийг хориглосон → устгаад дахин үүсгэнэ (дарааллаар) */
+  let pq=Promise.resolve();
   function pushMe(){ if(!on()){ DG.w='нэвтрээгүй / Firebase холбогдоогүй'; return Promise.resolve(); } const w=W(), {F,db}=FBM;
     let hp=w.hp||0, fl=0; try{ fl=(S.yard&&S.yard.sh&&S.yard.sh[2])||0; }catch(e){} if(!(hp>0)||fl<1){ DG.w='Флагман/HP алга (эхлээд «Онлайн тулаан» ор)'; return Promise.resolve(); }
-    const sk=(window.shSkinSel&&shSkinSel())||0;
-    return F.setDoc(F.doc(db,'duel','w_'+CL.uid),{g:'w',u:CL.uid,n:myName(),hp:Math.round(hp),fl:fl,sk:sk,r:Math.random(),mi:w.m.mi,k:w.m.k,d:w.m.d,sc:w.m.mi*MB+w.m.k,t:Date.now()},{merge:true}).then(()=>{ DG.w='ok'; }).catch(e=>{ DG.w='АЛДАА: '+ec(e); }); }
+    const sk=(window.shSkinSel&&shSkinSel())||0, uid=CL.uid;
+    const rec={a:uid,g:'w',u:uid,n:myName(),hp:Math.round(hp),fl:fl,sk:sk,r:Math.random(),mi:w.m.mi,k:w.m.k,d:w.m.d,sc:w.m.mi*MB+w.m.k,t:Date.now()};
+    pq=pq.then(async()=>{ const ref=F.doc(db,'duel','w_'+uid); try{ await F.deleteDoc(ref); }catch(e){} await F.setDoc(ref,rec); DG.w='ok'; }).catch(e=>{ DG.w='АЛДАА: '+ec(e); });
+    return pq; }
 
   /* бусад тоглогчдын жагсаалт (сүүдэр хөлөг) */
   async function loadPool(){ if(!on()){ DG.r='холбогдоогүй'; DG.n=0; return []; } const {F,db}=FBM, x=Math.random(), out=new Map();
@@ -20233,7 +20237,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.swarKill=function(Q,g){ if(!Q||!g) return; const w=W(); Q.pvp=(Q.pvp||0)+1; try{ seaKill(myName(),g.n,true); }catch(e){}
     const c=w.dc.m[g.u]||0, ok=c<CAP;
     if(ok){ w.dc.m[g.u]=c+1; w.m.k++; try{ Q.fx.push({x:Q.ships[0].x,y:Q.ships[0].y-48,t:1.4,v:'Топ 10 +1',c:'#9be07a'}); }catch(e){}
-      if(on()){ const {F,db}=FBM; F.setDoc(F.doc(db,'duel','wk_'+CL.uid+'_'+g.u+'_'+day()+'_'+(c+1)),{g:'wk',v:g.u,k:CL.uid,kn:myName(),t:Date.now()}).catch(()=>{}); }
+      if(on()){ const {F,db}=FBM; F.setDoc(F.doc(db,'duel','wk_'+CL.uid+'_'+g.u+'_'+day()+'_'+(c+1)),{a:CL.uid,g:'wk',v:g.u,k:CL.uid,kn:myName(),t:Date.now()}).catch(()=>{}); }
       clearTimeout(window.swarKill._t); window.swarKill._t=setTimeout(pushMe,1500); }
     else { try{ Q.fx.push({x:Q.ships[0].x,y:Q.ships[0].y-48,t:1.4,v:'Тоологдсонгүй (нэг хүнийг өдөрт '+CAP+')',c:'#bfae8a'}); }catch(e){} } };
   window.swarEnd=function(Q){ try{ pushMe(); }catch(e){} };

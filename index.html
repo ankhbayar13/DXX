@@ -3420,7 +3420,7 @@ function gerCard(){ const nx=gerNext(), have=1+GK.filter(k=>S.bld[k]>0||S.sites[
 
 // ================= Нэгдсэн Цэс =================
 const MENU=[
- {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"]]},
+ {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"],['','Картын тулаан',"cardOpen()"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
  {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
@@ -10874,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='601114fb66';
+var UPDB='65d5c7edbb';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19022,6 +19022,348 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     try{ gates(); }catch(x){}
     return r; };
   window.GZ=GZ;
+})();
+
+
+/* p32/cards.js — Картын тулаан (Цэс → Тулалдаан → Картын тулаан).
+   Баатар бүр нэг карт. 3 талбар, 6 ээлж, 12 картын багц. Компьютертэй тоглоно.
+   Хадгалалт: S.cg = {cubes,w,l,deck:[id...]}  (S бүхэлдээ хадгалагддаг тул тусдаа хадгалалт хэрэггүй). */
+(function(){
+  /* id = HEROES-ийн id. c = энерги, p = хүч. */
+  const DEF={
+    arav:    {c:1,p:2,t:'Энгийн цэрэг.'},
+    harvaach:{c:1,p:1,t:'Дуудахад: энд байгаа хамгийн хүчтэй өөрийн картад +2.'},
+    haiyun:  {c:1,p:1,t:'Дуудахад: дараагийн ээлжид +1 энерги.'},
+    khukhchu:{c:2,p:2,t:'Дуудахад: нэг карт татна.'},
+    ogodei:  {c:2,p:2,t:'Дуудахад: энд дайсны хамгийн сул картад -2.'},
+    jochi:   {c:2,p:2,t:'Дуудахад: энд өөр өөрийн карт байхгүй бол +3.'},
+    borchi:  {c:2,p:1,t:'Үргэлж: энд байгаа өөрийн бусад картууд +1.'},
+    yelu:    {c:2,p:2,t:'Дуудахад: өөрийн хамгийн сул картад (аль ч талбар) +3.'},
+    boorchu: {c:3,p:4,t:'Энгийн цэрэг.'},
+    belgutei:{c:3,p:2,t:'Дуудахад: энд дайсны хамгийн сул картад -3.'},
+    zev:     {c:3,p:3,t:'Дуудахад: энд байгаа өөрийн бүх картад +1.'},
+    oelun:   {c:3,p:2,t:'Дуудахад: дараагийн ээлжид +2 энерги.'},
+    tolui:   {c:3,p:3,t:'Үргэлж: энд байгаа дайсны бүх картад -1.'},
+    chagadai:{c:3,p:3,t:'Дуудахад: энд дайсны нийт хүч илүү бол өөртөө +3.'},
+    hulan:   {c:3,p:2,t:'Дуудахад: бусад талбар дахь өөрийн картууд бүрт +1.'},
+    jelme:   {c:4,p:6,t:'Энгийн цэрэг.'},
+    khasar:  {c:4,p:4,t:'Дуудахад: энд дайсны хамгийн хүчтэй картад -3.'},
+    borte:   {c:4,p:3,t:'Үргэлж: энд байгаа өөрийн бусад картууд +2.'},
+    sorkh:   {c:4,p:3,t:'Дуудахад: нэг карт татна, дараагийн ээлжид +1 энерги.'},
+    mukhulai:{c:5,p:8,t:'Энгийн цэрэг.'},
+    khubilai:{c:5,p:5,t:'Дуудахад: энэ талбараас бусад талбар дахь өөрийн картууд бүрт +2.'},
+    subeedei:{c:6,p:9,t:'Дуудахад: энд дайсны бүх картад -1.'},
+    chinggis:{c:6,p:10,t:'Дуудахад: бүх талбар дахь өөрийн картуудад +1.'}
+  };
+  const LOCS=[
+    {eff:'altai',n:'Алтай уул',t:'Энд бүх карт +1 хүч авна.'},
+    {eff:'gobi',n:'Говь',t:'Энд 1-2 энергийн карт +2 хүч авна.'},
+    {eff:'hukh',n:'Хөх нуур',t:'Энд карт нээгдэх бүрт эзэн нь нэг карт татна.'},
+    {eff:'herlen',n:'Хэрлэн гол',t:'Энд нэг тал 3 карт л тавина.'},
+    {eff:'khangai',n:'Хангай',t:'Нөлөөгүй, энгийн талбар.'}
+  ];
+  const SC={1:'#9a9a9a',2:'#6fbf6f',3:'#5aa0e8',4:'#b777e6',5:'#ffcf4a'};
+  const NAME=['Та','Дайсан'];
+  const STK=12;
+  const hero=id=>{ try{ return HEROES.find(x=>x.id===id); }catch(e){ return null; } };
+  const ALL=()=>Object.keys(DEF).filter(id=>hero(id));
+  const cname=id=>{ const h=hero(id); return h?h.n:id; };
+  const star=id=>{ const h=hero(id); return h?h.s:1; };
+  const owned=id=>star(id)<=4||!!(S.heroes&&S.heroes[id]);
+  const CG=()=>{ if(!S.cg) S.cg={cubes:0,w:0,l:0,deck:[]}; if(!Array.isArray(S.cg.deck)) S.cg.deck=[]; return S.cg; };
+  const rnd=n=>Math.floor(Math.random()*n);
+  const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=rnd(i+1); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; };
+  const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const portrait=(id,h)=>{ try{ return hpi(id,h,true); }catch(e){ return ''; } };
+
+  /* ---------- багц ---------- */
+  function autoDeck(){
+    const pool=ALL().filter(owned), cheap=shuffle(pool.filter(id=>DEF[id].c<=2)), out=cheap.slice(0,4);
+    shuffle(pool.filter(id=>out.indexOf(id)<0)).slice(0,STK-out.length).forEach(id=>out.push(id));
+    return out;
+  }
+  function deckOk(){ const g=CG(); g.deck=g.deck.filter((id,i)=>DEF[id]&&owned(id)&&g.deck.indexOf(id)===i); if(g.deck.length!==STK) g.deck=autoDeck(); return g.deck; }
+
+  /* ---------- тулааны төлөв ---------- */
+  let G=null, sel=null, busy=false, tip=null, uid=0, V='menu', alive=false, dMsg='';
+  const $=s=>document.querySelector('#cgv '+s);
+  const mk=(id,s)=>({uid:++uid,id:id,d:DEF[id],side:s,buff:0});
+  const log=t=>{ G.log.push(t); if(G.log.length>3) G.log.shift(); };
+
+  function newGame(){
+    const locs=shuffle(LOCS.slice()).slice(0,3).map(d=>({d:d,eff:d.eff,cap:d.eff==='herlen'?3:4,sides:[[],[]]}));
+    G={turn:1,max:6,stake:1,retLoss:1,snapped:[false,false],over:false,locs:locs,
+       deck:[shuffle(deckOk().slice()).map(id=>mk(id,0)),shuffle(ALL().slice()).slice(0,STK).map(id=>mk(id,1))],
+       hand:[[],[]],bonus:[0,0],bonusNext:[0,0],staged:[],aiStaged:[],
+       log:['Картаа сонгоод, дараа нь нээлттэй талбарыг дар. Бэлэн болмогц «Ээлж дуусгах».']};
+    for(let s=0;s<2;s++) for(let i=0;i<3;i++) draw(s);
+    sel=null; tip=null; busy=false; V='play'; render();
+  }
+  function draw(s){ if(G.deck[s].length&&G.hand[s].length<7){ const c=G.deck[s].shift(); G.hand[s].push(c); return c; } return null; }
+  const energy=s=>G.turn+G.bonus[s];
+  const spent=()=>G.staged.reduce((a,x)=>a+x.card.d.c,0);
+  const locRev=li=>G.turn>=li+1;
+  function pw(c,li){
+    const L=G.locs[li]; let p=c.d.p+c.buff;
+    L.sides[c.side].forEach(o=>{ if(o!==c){ if(o.id==='borchi') p+=1; if(o.id==='borte') p+=2; } });
+    L.sides[1-c.side].forEach(o=>{ if(o.id==='tolui') p-=1; });
+    if(L.eff==='altai') p+=1;
+    if(L.eff==='gobi'&&c.d.c<=2) p+=2;
+    return Math.max(0,p);
+  }
+  const total=(li,s)=>G.locs[li].sides[s].reduce((a,c)=>a+pw(c,li),0);
+  const wins=()=>{ let a=0,b=0; G.locs.forEach((L,i)=>{ if(!locRev(i)) return; const x=total(i,0),y=total(i,1); if(x>y)a++; else if(y>x)b++; }); return [a,b]; };
+  const sumAll=s=>G.locs.reduce((a,L,i)=>a+total(i,s),0);
+  const capLeft=(li,s)=>G.locs[li].cap-G.locs[li].sides[s].length-(s===0?G.staged:G.aiStaged).filter(x=>x.li===li).length;
+
+  /* карт нээгдэх үеийн чадвар */
+  function ability(c,li){
+    const s=c.side,o=1-s,L=G.locs[li],mine=L.sides[s].filter(x=>x!==c),foe=L.sides[o],id=c.id,who=NAME[s]+': '+cname(id);
+    const strongest=a=>a.reduce((x,y)=>pw(y,li)>pw(x,li)?y:x), weakest=a=>a.reduce((x,y)=>pw(y,li)<pw(x,li)?y:x);
+    const weakAny=()=>{ let b=null,bp=1e9; G.locs.forEach((M,j)=>M.sides[s].forEach(x=>{ if(x===c) return; const p=pw(x,j); if(p<bp){ bp=p; b=x; } })); return b; };
+    if(id==='harvaach'&&mine.length){ const t=strongest(mine); t.buff+=2; log(who+' → '+cname(t.id)+' +2'); }
+    else if(id==='haiyun'){ G.bonusNext[s]+=1; log(who+' → дараагийн ээлжид +1 энерги'); }
+    else if(id==='khukhchu'){ const d=draw(s); log(who+(d?' нэг карт татлаа':' карт татах боломжгүй')); }
+    else if(id==='ogodei'&&foe.length){ const t=weakest(foe); t.buff-=2; log(who+' → '+cname(t.id)+' -2'); }
+    else if(id==='jochi'&&!mine.length){ c.buff+=3; log(who+' ганцаараа тул +3'); }
+    else if(id==='yelu'){ const t=weakAny(); if(t){ t.buff+=3; log(who+' → '+cname(t.id)+' +3'); } else log(who+' нээгдлээ'); }
+    else if(id==='belgutei'&&foe.length){ const t=weakest(foe); t.buff-=3; log(who+' → '+cname(t.id)+' -3'); }
+    else if(id==='zev'){ L.sides[s].forEach(x=>{ x.buff+=1; }); log(who+' → энд бүгд +1'); }
+    else if(id==='oelun'){ G.bonusNext[s]+=2; log(who+' → дараагийн ээлжид +2 энерги'); }
+    else if(id==='chagadai'){ if(total(li,o)>total(li,s)){ c.buff+=3; log(who+' → +3 (дайсан давуу байсан)'); } else log(who+' нээгдлээ'); }
+    else if(id==='hulan'){ G.locs.forEach((M,j)=>{ if(j!==li) M.sides[s].forEach(x=>{ x.buff+=1; }); }); log(who+' → бусад талбарт +1'); }
+    else if(id==='khasar'&&foe.length){ const t=strongest(foe); t.buff-=3; log(who+' → '+cname(t.id)+' -3'); }
+    else if(id==='sorkh'){ const d=draw(s); G.bonusNext[s]+=1; log(who+(d?' нэг карт татаж,':'')+' дараагийн ээлжид +1 энерги'); }
+    else if(id==='khubilai'){ G.locs.forEach((M,j)=>{ if(j!==li) M.sides[s].forEach(x=>{ x.buff+=2; }); }); log(who+' → бусад талбарт +2'); }
+    else if(id==='subeedei'){ foe.forEach(x=>{ x.buff-=1; }); log(who+' → дайсны бүх карт -1'); }
+    else if(id==='chinggis'){ G.locs.forEach(M=>M.sides[s].forEach(x=>{ x.buff+=1; })); log(who+' → бүх талбарт +1'); }
+    else log(who+' нээгдлээ');
+    if(L.eff==='hukh') draw(s);
+  }
+
+  /* тоглогчийн үйлдэл */
+  function select(i){ if(busy||G.over) return; const c=G.hand[0][i]; if(!c) return; sel=(sel===c.uid)?null:c.uid; tip=c; render(); }
+  function place(li){
+    if(busy||G.over||sel==null) return;
+    const c=G.hand[0].find(x=>x.uid===sel); if(!c) return;
+    if(!locRev(li)){ note('Энэ талбар '+(li+1)+'-р ээлжид нээгдэнэ.'); return; }
+    if(c.d.c>energy(0)-spent()){ note('Энерги хүрэхгүй.'); return; }
+    if(capLeft(li,0)<=0){ note('Энэ талбар дүүрсэн.'); return; }
+    G.hand[0].splice(G.hand[0].indexOf(c),1); G.staged.push({card:c,li:li}); sel=null; tip=null; render();
+  }
+  function unstage(u){ if(busy||G.over) return; const k=G.staged.findIndex(x=>x.card.uid===u); if(k<0) return; G.hand[0].push(G.staged[k].card); G.staged.splice(k,1); render(); }
+  function note(t){ G.log.push(t); if(G.log.length>3) G.log.shift(); render(); }
+
+  /* дайсны (AI) тоглолт */
+  function aiPlay(){
+    let left=energy(1); const hand=shuffle(G.hand[1].slice()).sort((a,b)=>b.d.c-a.d.c);
+    hand.forEach(c=>{ if(c.d.c>left) return;
+      const cand=[0,1,2].filter(li=>locRev(li)&&capLeft(li,1)>0); if(!cand.length) return;
+      let best=cand[0],bs=-1e9; cand.forEach(li=>{ const sc=Math.random()*2+(total(li,0)-total(li,1))*0.25; if(sc>bs){ bs=sc; best=li; } });
+      G.hand[1].splice(G.hand[1].indexOf(c),1); G.aiStaged.push({card:c,li:best}); left-=c.d.c; });
+  }
+  function leader(){ const w=wins(); if(w[0]!==w[1]) return w[0]>w[1]?0:1; const a=sumAll(0),b=sumAll(1); if(a!==b) return a>b?0:1; return rnd(2); }
+
+  function endTurn(){
+    if(busy||G.over) return; busy=true; sel=null; tip=null;
+    aiPlay();
+    const first=leader(), order=first===0?G.staged.concat(G.aiStaged):G.aiStaged.concat(G.staged);
+    G.staged=[]; G.aiStaged=[]; render();
+    let i=0;
+    (function step(){
+      if(!alive||!G) return;
+      if(i>=order.length){ setTimeout(afterTurn,350); return; }
+      const x=order[i++], c=x.card; G.locs[x.li].sides[c.side].push(c); ability(c,x.li); render();
+      setTimeout(step,560);
+    })();
+  }
+  const evalPos=()=>sumAll(1)-sumAll(0);
+  function afterTurn(){
+    if(!alive||!G) return;
+    if(G.turn>=G.max){ finish(); return; }
+    G.turn++; G.bonus=G.bonusNext.slice(); G.bonusNext=[0,0];
+    draw(0); draw(1); G.retLoss=G.stake;
+    if(G.turn>=3&&!G.snapped[1]&&evalPos()>=4&&Math.random()<0.45){ G.snapped[1]=true; G.stake*=2; log('Дайсан «Хан!» гэв. Бооцоо ×'+G.stake+'. Ухрахаа сана.'); }
+    busy=false; render();
+  }
+  function snap(){
+    if(busy||G.over||G.snapped[0]) return;
+    G.snapped[0]=true; G.stake*=2; G.retLoss=G.stake; log('Та «Хан!» гэв. Бооцоо ×'+G.stake+'.');
+    if(evalPos()<-6&&Math.random()<0.5){ const gain=G.stake/2; log('Дайсан ухарлаа.'); render(); endGame('win','Дайсан ухарлаа',gain); return; }
+    render();
+  }
+  function retreat(){ if(busy||G.over) return; endGame('lose','Та ухарлаа',G.retLoss); }
+  function finish(){
+    let a=0,b=0; const ln=[];
+    G.locs.forEach((L,i)=>{ const x=total(i,0),y=total(i,1); if(x>y)a++; else if(y>x)b++; ln.push(L.d.n+': '+x+' - '+y); });
+    let res; if(a>b) res='win'; else if(b>a) res='lose'; else { const s0=sumAll(0),s1=sumAll(1); res=s0>s1?'win':s1>s0?'lose':'draw'; }
+    endGame(res,'Та - Дайсан · '+ln.join(' | ')+(a===b?' (талбар тэнцсэн тул нийт хүчээр)':''),G.stake);
+  }
+  function endGame(res,why,amt){
+    G.over=true; busy=false;
+    const g=CG(); amt=Math.max(1,Math.round(amt));
+    let d=0; if(res==='win'){ d=amt; g.w=(g.w||0)+1; } else if(res==='lose'){ d=-Math.min(amt,g.cubes||0); g.l=(g.l||0)+1; }
+    g.cubes=Math.max(0,(g.cubes||0)+d);
+    try{ save(); }catch(e){}
+    G.res={res:res,why:why,d:d};
+    render();
+  }
+
+  /* ---------- дүрслэл ---------- */
+  const css=document.createElement('style');
+  css.textContent='#cgv{position:fixed;inset:0;z-index:310;background:#241810;color:#f3e6c8;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:inherit;padding:calc(8px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}'
+  +'#cgv *{box-sizing:border-box}'
+  +'#cgv .cgw{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:9px}'
+  +'#cgv h1{margin:0;font-size:19px;color:#ffd770;text-shadow:0 1px 0 #000}'
+  +'#cgv .cgh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}'
+  +'#cgv .cgchip{background:#46301a;border:1px solid #6b4a24;border-radius:999px;padding:3px 10px;font-size:12px;white-space:nowrap}'
+  +'#cgv .cgchip b{color:#ffd770}'
+  +'#cgv .cgbtn{border:2px solid #6b4a24;background:#46301a;color:#f3e6c8;border-radius:10px;padding:11px 8px;font-weight:bold;font-size:14px;min-height:44px;font-family:inherit}'
+  +'#cgv .cgbtn.go{background:#c9972b;border-color:#c9972b;color:#2b1d12}'
+  +'#cgv .cgbtn.snap{border-color:#b3402c;color:#ff9a86}'
+  +'#cgv .cgbtn.snap.done{opacity:.45}'
+  +'#cgv .cgbtn:disabled{opacity:.4}'
+  +'#cgv .cgbox{background:#3a2818;border:2px solid #6b4a24;border-radius:10px;padding:10px;font-size:13px;line-height:1.4}'
+  +'#cgv .cgbox b{color:#ffd770}'
+  +'#cgv .cgbd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}'
+  +'#cgv .cgl{background:#3a2818;border:2px solid #5a3f22;border-radius:10px;padding:5px;display:flex;flex-direction:column;gap:4px;min-width:0}'
+  +'#cgv .cgl.w0{border-color:#5b8fe8}#cgv .cgl.w1{border-color:#d4564a}'
+  +'#cgv .cglh{min-height:50px}'
+  +'#cgv .cgln{font-weight:bold;font-size:12px;line-height:1.15;color:#ffd770;overflow-wrap:anywhere}'
+  +'#cgv .cgle{font-size:10px;line-height:1.25;color:#bfae8a;margin-top:2px}'
+  +'#cgv .cgsc{text-align:center;font-weight:bold;font-size:20px;line-height:1.1;font-variant-numeric:tabular-nums}'
+  +'#cgv .cgsc.s1{color:#ff8c7d}#cgv .cgsc.s0{color:#8fb6ff}'
+  +'#cgv .cgg{display:grid;grid-template-columns:1fr 1fr;gap:4px;min-height:104px;align-content:start;border-radius:6px}'
+  +'#cgv .cgg.can{outline:1px dashed #ffd770;background:rgba(255,215,112,.1)}'
+  +'#cgv .cgs{aspect-ratio:1/1.1;border-radius:6px;background:rgba(255,255,255,.04);border:1px dashed #5a3f22}'
+  +'#cgv .cgm{aspect-ratio:1/1.1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:1px;min-width:0;overflow:hidden;border:2px solid;background:#4d3720;color:inherit;font-family:inherit;position:relative}'
+  +'#cgv .cgm.me{border-color:#5b8fe8}#cgv .cgm.foe{border-color:#d4564a}#cgv .cgm.ghost{opacity:.55;border-style:dashed}'
+  +'#cgv .cgm img{width:50%;height:auto;aspect-ratio:1;pointer-events:none}'
+  +'#cgv .cgm b{font-size:16px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #000}'
+  +'#cgv .cgm b.up{color:#8fe39a}#cgv .cgm b.dn{color:#ff8c7d}'
+  +'#cgv .cgm span{font-size:8.5px;line-height:1.1;color:#cdbb97;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  +'#cgv .cglog{min-height:36px;background:#3a2818;border:1px solid #5a3f22;border-radius:8px;padding:5px 8px;font-size:11.5px;color:#bfae8a}'
+  +'#cgv .cglog div:last-child{color:#f3e6c8}'
+  +'#cgv .cgrow{display:flex;align-items:center;justify-content:space-between;gap:8px}'
+  +'#cgv .cgpip{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #8a6a1f;margin-right:3px;vertical-align:middle}'
+  +'#cgv .cgpip.on{background:#ffd770;border-color:#ffd770}'
+  +'#cgv .cghand{display:flex;gap:6px;overflow-x:auto;padding:5px 2px 6px;scroll-snap-type:x proximity}'
+  +'#cgv .cgc{flex:0 0 96px;height:158px;scroll-snap-align:start;background:linear-gradient(180deg,#4d3720,#33220f);border:2px solid;border-radius:10px;padding:5px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;position:relative;color:inherit;font-family:inherit}'
+  +'#cgv .cgc.sel{box-shadow:0 0 0 3px #ffd770;transform:translateY(-3px)}'
+  +'#cgv .cgc.off{opacity:.45}#cgv .cgc.lk{filter:grayscale(1);opacity:.4}'
+  +'#cgv .cgc .tp{display:flex;justify-content:space-between;align-items:center;width:100%}'
+  +'#cgv .cgc .cost{width:22px;height:22px;border-radius:50%;background:#c9972b;color:#2b1d12;font-weight:bold;font-size:13px;line-height:22px}'
+  +'#cgv .cgc .pwr{font-weight:bold;font-size:20px;line-height:1;color:#fff}'
+  +'#cgv .cgc img{width:44px;height:44px;pointer-events:none}'
+  +'#cgv .cgc .nm{font-weight:bold;font-size:11.5px;line-height:1.1;overflow-wrap:anywhere;color:#ffd770}'
+  +'#cgv .cgc .tx{font-size:9px;line-height:1.2;color:#cdbb97;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}'
+  +'#cgv .cgbt{display:grid;grid-template-columns:1fr 1.3fr 1.6fr;gap:8px}'
+  +'#cgv .cgmn{display:grid;grid-template-columns:1fr;gap:9px}'
+  +'#cgv .cgdk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}'
+  +'#cgv .cgdk .cgc{flex:none;width:100%;height:150px}'
+  +'#cgv .cgdk .cgc.in{box-shadow:0 0 0 3px #7fd08a}'
+  +'#cgv .cgres{position:fixed;inset:0;background:rgba(8,5,2,.82);display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}'
+  +'#cgv .cgrb{background:#3a2818;border:3px solid #c9972b;border-radius:14px;padding:18px;max-width:340px;width:100%;text-align:center;display:flex;flex-direction:column;gap:10px}'
+  +'#cgv .cgrb h2{margin:0;font-size:26px;color:#ffd770}'
+  +'#cgv .cgrb p{margin:0;color:#cdbb97;font-size:13px;line-height:1.4}'
+  +'@media(max-width:360px){#cgv .cgc{flex-basis:88px}#cgv .cgm b{font-size:14px}}';
+  document.head.appendChild(css);
+
+  const frame=(id)=>SC[star(id)]||'#9a9a9a';
+  const cardBtn=(id,cls,attrs,costOver)=>{ const d=DEF[id]; return '<button class="cgc '+cls+'" style="border-color:'+frame(id)+'" '+attrs+'><div class="tp"><span class="cost">'+d.c+'</span><span class="pwr">'+d.p+'</span></div>'+portrait(id,44)+'<div class="nm">'+esc(cname(id))+'</div><div class="tx">'+esc(d.t)+'</div></button>'; };
+  const mcHtml=(c,li,cls)=>{ const p=pw(c,li), b=c.d.p; return '<button class="cgm '+cls+'" data-u="'+c.uid+'" style="border-color:'+frame(c.id)+'">'+portrait(c.id,34)+'<b class="'+(p>b?'up':p<b?'dn':'')+'">'+p+'</b><span>'+esc(cname(c.id).split(' ')[0])+'</span></button>'; };
+
+  function view(){
+    const g=CG();
+    if(V==='menu') return '<div class="cgw"><div class="cgh"><h1>Картын тулаан</h1><span class="cgchip">Куб <b>'+(g.cubes||0)+'</b></span></div>'
+      +'<div class="cgbox">Баатар бүр нэг карт. Гурван талбарт карт тавьж, <b>3 талбарын 2-ыг нь</b> хожсон нь ялна. Ээлж бүрт 1 энерги нэмэгдэнэ (6 ээлж).<br><br>Карт тавигдсаны дараа нээгдэж, чадвар нь ажиллана. Ялалт '+(g.w||0)+' · Ялагдал '+(g.l||0)+'.</div>'
+      +'<div class="cgmn"><button class="cgbtn go" data-a="play">Тулаан эхлэх</button><button class="cgbtn" data-a="deck">Миний багц ('+deckOk().length+'/'+STK+')</button><button class="cgbtn" data-a="rules">Дүрэм ба заавар</button><button class="cgbtn" data-a="exit">Гарах</button></div></div>';
+    if(V==='rules') return '<div class="cgw"><div class="cgh"><h1>Дүрэм</h1></div><div class="cgbox">'
+      +'<b>Зорилго.</b> 3 талбарын 2-т нь дайснаас илүү нийт хүч цуглуул.<br><br>'
+      +'<b>Ээлж.</b> 1-р ээлжид 1 энерги, дараа нь ээлж бүрт 1-ээр нэмэгдэнэ. Карт бүр өөрийн энергитэй. Картаа сонгоод нээлттэй талбарыг дарж тавина. Талбар бүр 1, 2, 3-р ээлжид дараалан нээгдэнэ.<br><br>'
+      +'<b>Нээлт.</b> «Ээлж дуусгах» дарахад хоёр талын карт зэрэг нээгдэнэ. Талбарт илүү ухаж байгаа тал эхэлж нээнэ.<br><br>'
+      +'<b>Хан!</b> Бооцоог ×2 болгоно. <b>Ухрах</b> нь одоогийн бооцооны куб алдана. Дайсан «Хан!» гэвэл ухрах эсвэл үргэлжлүүлэх эсэхээ шийд.<br><br>'
+      +'<b>Багц.</b> 12 карттай. 1-4 одтой баатруудын карт бүгдэд нээлттэй. 5 одтой баатар өөрт чинь байвал л карт нь нээгдэнэ.</div>'
+      +'<button class="cgbtn go" data-a="menu">Буцах</button></div>';
+    if(V==='deck') return deckView();
+    return playView();
+  }
+  function deckView(){
+    const g=CG(), dk=g.deck, ids=ALL().sort((a,b)=>star(b)-star(a)||DEF[b].c-DEF[a].c);
+    return '<div class="cgw"><div class="cgh"><h1>Миний багц</h1><span class="cgchip">Сонгосон <b>'+dk.length+'</b>/'+STK+'</span></div>'
+      +'<div class="cgbox">Карт дарж багцад нэмнэ эсвэл хасна. Багц яг '+STK+' карттай байх ёстой. Түгжигдсэн карт нь тухайн 5 одтой баатрыг авсны дараа нээгдэнэ.'+(dMsg?'<br><b>'+esc(dMsg)+'</b>':'')+'</div>'
+      +'<div class="cgdk">'+ids.map(id=>owned(id)?cardBtn(id,dk.indexOf(id)>=0?'in':'','data-d="'+id+'"'):cardBtn(id,'lk','data-lock="'+id+'"')).join('')+'</div>'
+      +'<div class="cgbt" style="grid-template-columns:1fr 1fr"><button class="cgbtn" data-a="auto">Автомат</button><button class="cgbtn go" data-a="menu">Болсон</button></div></div>';
+  }
+  function playView(){
+    const left=energy(0)-spent(), sc=sel!=null&&!busy&&!G.over;
+    let h='<div class="cgw"><div class="cgh"><h1>Картын тулаан</h1><div class="cgrow"><span class="cgchip">Ээлж <b>'+G.turn+'</b>/'+G.max+'</span><span class="cgchip">Бооцоо <b>×'+G.stake+'</b></span><span class="cgchip">Куб <b>'+(CG().cubes||0)+'</b></span></div></div>';
+    h+='<div class="cgbd">'+G.locs.map((L,li)=>{
+      const rev=locRev(li), x=rev?total(li,0):0, y=rev?total(li,1):0, cl=rev?(x>y?' w0':y>x?' w1':''):'';
+      const es=L.sides[1].map(c=>mcHtml(c,li,'foe')).join('')+Array(Math.max(0,L.cap-L.sides[1].length)).fill('<div class="cgs"></div>').join('');
+      const gh=G.staged.filter(s=>s.li===li).map(s=>'<button class="cgm me ghost" data-g="'+s.card.uid+'" style="border-color:'+frame(s.card.id)+'">'+portrait(s.card.id,34)+'<b>'+s.card.d.p+'</b><span>'+esc(cname(s.card.id).split(' ')[0])+'</span></button>').join('');
+      const ms=L.sides[0].map(c=>mcHtml(c,li,'me')).join('')+gh+Array(Math.max(0,L.cap-L.sides[0].length-G.staged.filter(s=>s.li===li).length)).fill('<div class="cgs"></div>').join('');
+      const can=sc&&rev&&capLeft(li,0)>0;
+      return '<div class="cgl'+cl+'"><div class="cglh"><div class="cgln">'+(rev?esc(L.d.n):'Талбар '+(li+1))+'</div><div class="cgle">'+(rev?esc(L.d.t):(li+1)+'-р ээлжид нээгдэнэ')+'</div></div>'
+        +'<div class="cgsc s1">'+(rev?y:'·')+'</div><div class="cgg">'+es+'</div><div class="cgg'+(can?' can':'')+'" data-place="'+li+'">'+ms+'</div><div class="cgsc s0">'+(rev?x:'·')+'</div></div>';
+    }).join('')+'</div>';
+    h+='<div class="cglog">'+G.log.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>';
+    const d=tip;
+    h+='<div class="cgbox" style="min-height:48px">'+(d?'<b>'+esc(cname(d.id))+'</b> · '+star(d.id)+' од · энерги '+d.d.c+' · хүч '+d.d.p+'<br>'+esc(d.d.t):'Картаа дарж сонго, дараа нь нээлттэй талбарыг дар. Тавигдсан картыг дарж чадварыг нь хар.')+'</div>';
+    h+='<div class="cgrow"><div>Энерги '+Array.from({length:energy(0)},(_,i)=>'<i class="cgpip'+(i<left?' on':'')+'"></i>').join('')+' <b style="color:#ffd770">'+left+'</b></div><span class="cgchip">Багц '+G.deck[0].length+' · Дайсны гар '+G.hand[1].length+'</span></div>';
+    h+='<div class="cghand">'+(G.hand[0].map((c,i)=>'<button class="cgc'+(c.uid===sel?' sel':'')+(c.d.c>left?' off':'')+'" style="border-color:'+frame(c.id)+'" data-h="'+i+'"><div class="tp"><span class="cost">'+c.d.c+'</span><span class="pwr">'+c.d.p+'</span></div>'+portrait(c.id,44)+'<div class="nm">'+esc(cname(c.id))+'</div><div class="tx">'+esc(c.d.t)+'</div></button>').join('')||'<div class="cgbox" style="flex:1;text-align:center">Гарт карт алга.</div>')+'</div>';
+    h+='<div class="cgbt"><button class="cgbtn" data-a="ret"'+(busy||G.over?' disabled':'')+'>Ухрах</button><button class="cgbtn snap'+(G.snapped[0]?' done':'')+'" data-a="snap"'+(busy||G.over||G.snapped[0]?' disabled':'')+'>Хан!</button><button class="cgbtn go" data-a="end"'+(busy||G.over?' disabled':'')+'>'+(busy?'Нээж байна…':(G.turn>=G.max?'Сүүлийн ээлж':'Ээлж дуусгах'))+'</button></div>';
+    if(G.over&&G.res){ const R=G.res, T={win:'Ялалт',lose:'Ялагдал',draw:'Тэнцлээ'}[R.res], dl=R.res==='draw'?'0 куб':(R.d>0?'+':'')+R.d+' куб';
+      h+='<div class="cgres"><div class="cgrb"><h2>'+T+'</h2><p>'+esc(R.why)+'</p><p><b style="color:#ffd770">'+dl+'</b> · нийт '+(CG().cubes||0)+'</p><button class="cgbtn go" data-a="play">Дахин тоглох</button><button class="cgbtn" data-a="menu">Цэс</button></div></div>'; }
+    return h+'</div>';
+  }
+  function render(){
+    const el=document.getElementById('cgv'); if(!el) return;
+    const keep=el.scrollTop, hand=el.querySelector('.cghand'), hs=hand?hand.scrollLeft:0;
+    el.innerHTML=view();
+    el.scrollTop=keep; const nh=el.querySelector('.cghand'); if(nh) nh.scrollLeft=hs;
+  }
+
+  function onClick(e){
+    const t=e.target.closest('button,[data-place]'); if(!t||!alive) return;
+    const a=t.dataset.a;
+    if(a){
+      if(a==='play'){ dMsg=''; newGame(); return; }
+      if(a==='menu'){ if(V==='deck'&&CG().deck.length!==STK){ dMsg='Багц '+STK+' карттай байх ёстой.'; render(); return; } dMsg=''; G=null; V='menu'; render(); return; }
+      if(a==='deck'){ V='deck'; deckOk(); dMsg=''; render(); return; }
+      if(a==='rules'){ V='rules'; render(); return; }
+      if(a==='auto'){ CG().deck=autoDeck(); dMsg=''; render(); return; }
+      if(a==='exit'){ close(); return; }
+      if(a==='end') return endTurn();
+      if(a==='snap') return snap();
+      if(a==='ret') return retreat();
+    }
+    if(V==='deck'){
+      if(t.dataset.lock){ dMsg=cname(t.dataset.lock)+' ('+star(t.dataset.lock)+' од) баатар өөрт байвал нээгдэнэ.'; render(); return; }
+      if(t.dataset.d){ const g=CG(), id=t.dataset.d, i=g.deck.indexOf(id);
+        if(i>=0) g.deck.splice(i,1); else if(g.deck.length>=STK){ dMsg='Багц дүүрсэн. Эхлээд өөр картыг хас.'; render(); return; } else g.deck.push(id);
+        dMsg=''; render(); return; }
+      return;
+    }
+    if(V!=='play'||!G) return;
+    if(t.dataset.h!==undefined) return select(+t.dataset.h);
+    if(t.dataset.g!==undefined) return unstage(+t.dataset.g);
+    if(t.classList.contains('cgm')&&sel!=null&&t.closest('[data-place]')) return place(+t.closest('[data-place]').dataset.place);
+    if(t.dataset.u!==undefined&&t.classList.contains('cgm')){ const u=+t.dataset.u; let f=null; G.locs.forEach(L=>L.sides.forEach(s=>s.forEach(c=>{ if(c.uid===u) f=c; }))); if(f){ tip=f; render(); } return; }
+    if(t.dataset.place!==undefined) return place(+t.dataset.place);
+  }
+
+  function open(){
+    try{ closeM(); }catch(e){}
+    let el=document.getElementById('cgv'); if(el) el.remove();
+    el=document.createElement('div'); el.id='cgv'; document.body.appendChild(el);
+    el.addEventListener('click',onClick);
+    alive=true; G=null; V='menu'; sel=null; tip=null; busy=false; dMsg=''; CG(); deckOk(); render();
+  }
+  function close(){ alive=false; G=null; const el=document.getElementById('cgv'); if(el) el.remove(); }
+
+  window.cardOpen=open;
+  window.CGT={state:()=>G,view:()=>V,cardClose:close,def:DEF,owned:owned,all:ALL};
 })();
 
 

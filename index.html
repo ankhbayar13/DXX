@@ -10874,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fcdd938de9';
+var UPDB='aea9bd538b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19244,6 +19244,9 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   +'#cgv .cgsc.s1{color:#ff8c7d}#cgv .cgsc.s0{color:#8fb6ff}'
   +'#cgv .cgg{display:grid;grid-template-columns:1fr 1fr;gap:4px;min-height:104px;align-content:start;border-radius:6px}'
   +'#cgv .cgg.can{outline:1px dashed #ffd770;background:rgba(255,215,112,.1)}'
+  +'#cgv .cgdv{height:16px;margin:1px -3px;position:relative;flex:none;background:var(--cgdiv,linear-gradient(90deg,transparent 0,#c9972b 14%,#ffd770 50%,#c9972b 86%,transparent 100%) center/100% 2px no-repeat);background-size:100% 100%}'
+  +'#cgv .cgdv::after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-5px 0 0 -5px;transform:rotate(45deg);background:#3a2818;border:2px solid #ffd770}'
+  +'#cgv .cgl.w0 .cgdv::after{border-color:#5b8fe8}#cgv .cgl.w1 .cgdv::after{border-color:#d4564a}'
   +'#cgv .cgs{aspect-ratio:1/1.1;border-radius:6px;background:rgba(255,255,255,.04);border:1px dashed #5a3f22}'
   +'#cgv .cgm{aspect-ratio:1/1.1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:1px;min-width:0;overflow:hidden;border:2px solid;background:#4d3720;color:inherit;font-family:inherit;position:relative}'
   +'#cgv .cgm.me{border-color:#5b8fe8}#cgv .cgm.foe{border-color:#d4564a}#cgv .cgm.ghost{opacity:.55;border-style:dashed}'
@@ -19314,7 +19317,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
       const ms=L.sides[0].map(c=>mcHtml(c,li,'me')).join('')+gh+Array(Math.max(0,L.cap-L.sides[0].length-G.staged.filter(s=>s.li===li).length)).fill('<div class="cgs"></div>').join('');
       const can=sc&&rev&&capLeft(li,0)>0;
       return '<div class="cgl'+cl+'"><div class="cglh"><div class="cgln">'+(rev?esc(L.d.n):'Талбар '+(li+1))+'</div><div class="cgle">'+(rev?esc(L.d.t):(li+1)+'-р ээлжид нээгдэнэ')+'</div></div>'
-        +'<div class="cgsc s1">'+(rev?y:'·')+'</div><div class="cgg">'+es+'</div><div class="cgg'+(can?' can':'')+'" data-place="'+li+'">'+ms+'</div><div class="cgsc s0">'+(rev?x:'·')+'</div></div>';
+        +'<div class="cgsc s1">'+(rev?y:'·')+'</div><div class="cgg">'+es+'</div><div class="cgdv"></div><div class="cgg'+(can?' can':'')+'" data-place="'+li+'">'+ms+'</div><div class="cgsc s0">'+(rev?x:'·')+'</div></div>';
     }).join('')+'</div>';
     h+='<div class="cglog">'+G.log.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>';
     const d=tip;

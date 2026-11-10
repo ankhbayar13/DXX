@@ -9634,11 +9634,14 @@ window.WRB=["data:image/webp;base64,UklGRiRQAABXRUJQVlA4WAoAAAAQAAAA4AAADgEAQUxQ
   const WK=['modcex','modcex2','modcex3','modcex4','modcex5'];
   function blds(){
     const out=[], g=S.pos&&S.pos.ger;
-    const herd=Math.max(1,Math.min(7,1+Math.floor((S.bld.ger||1)/3)));
+    const TY=(window.GZ&&GZ.types)?GZ.types():[], herd=Math.max(1,Math.min(7,Math.max(1+Math.floor((S.bld.ger||1)/3),TY.length)));
     let c=null;
     try{ const pk=(S.bld.hashaa>0&&S.pos.hashaa&&!(S.sites&&S.sites.hashaa))?'hashaa':'ger'; const r=brect(pk); c={x:r.x+r.w/2,y:r.y+r.sh*0.6}; }catch(e){}
     if(!c&&g) c={x:g.x+20,y:g.y+30}; if(!c) return out;
-    for(let i=0;i<herd;i++){ const a=i*6.2832/herd+0.5; out.push({k:'mal'+(i+1),x:c.x+Math.cos(a)*50,y:c.y+Math.sin(a)*30,herd:1}); }
+    const gOut=!!(window.GZ&&GZ.out&&GZ.out());
+    for(let i=0;i<herd;i++){ const a=i*6.2832/herd+0.5; let px=c.x+Math.cos(a)*50, py=c.y+Math.sin(a)*30;
+      if(gOut&&TY[i]){ const an=GZ.anchor(TY[i]); if(an){ px=an.x+16; py=an.y+9; } }
+      out.push({k:'mal'+(i+1),x:px,y:py,herd:1}); }
     WK.forEach(k=>{ if(!BUILD[k]||!(S.bld[k]>0)||!(S.pos||{})[k]||(S.sites&&S.sites[k])) return; let r=null; try{ r=brect(k); }catch(e){} if(!r) return; out.push({k:k,x:r.x+r.w+7,y:r.y+r.sh+2}); });
     return out; }
   const _eg=ensureGuards; ensureGuards=function(){ _eg.apply(this,arguments);
@@ -10871,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='07180965ab';
+var UPDB='61be6f110d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18932,32 +18935,80 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 })();
 
 
-/* p32/grazing.js — Мал өглөө (ажлын цагт) хашаанаас гарч бэлчээрт явна, орой хашаандаа буцаж орно. Тоглоомын өдрийн хуваарьтай (dayPhase) нэг. Зөвхөн хөдөлгөөн, тооцоонд нөлөөгүй. */
+/* p32/grazing.js — мал өдөр бэлчээрт (төрөл бүр өөр бэлчээр, суурь хэсгээс хол), шөнө хашаандаа; малчин (Мал хамгаалагч) төрөл бүрийн бэлчээрт; зэрлэг амьтан цөөрнө */
 (function(){
-  const GZ={act:false,out:false};
+  const GZ={};
+  const ph=()=>{ try{ return typeof window.dayPhase==='function'?window.dayPhase():'work'; }catch(e){ return 'work'; } };
+  const isOut=()=>{ try{ const q=ph(); return q!=='sleep'&&q!=='evening'&&!(S.sites&&S.sites.hashaa); }catch(e){ return true; } };
   const penR=()=>{ try{ return obList().find(R=>R.k==='hashaa')||null; }catch(e){ return null; } };
-  function pasture(){ const R=penR(); if(!R) return null; const L=obList().filter(o=>o.k!=='hashaa');
-    for(let i=0;i<12;i++){ const x=R.x0-70+Math.random()*((R.x1-R.x0)+140), y=R.y1+10+Math.random()*58; if(x<8||y<50||x>WW-30||y>WH-26) continue;
-      const P={x:x+7,y:y+12}; if(L.some(o=>obIn(P,{x0:o.x0-7,y0:o.y0-7,x1:o.x1+7,y1:o.y1+7}))) continue; return {x:x,y:y}; }
-    return null; }
+  const types=()=>{ try{ return STALL.filter(k=>(S.animals&&S.animals[k]||0)>0); }catch(e){ return []; } };
+
+  /* ---- төрөл бүрийн бэлчээрийн төв ---- */
+  let AC={sig:'',A:{}};
+  function compute(){
+    const T=types(); if(!T.length) return {};
+    const Z=[]; for(let c=0;c<ZC;c++) for(let r=0;r<ZR;r++) if(zoneOpen(c,r)) Z.push({x0:c*ZW,y0:r*ZH,x1:(c+1)*ZW,y1:(r+1)*ZH});
+    if(!Z.length) return {};
+    const g=brect('ger'), C={x:g.x+g.w/2,y:g.y+g.sh*0.6};
+    const O=obList().map(o=>({x0:o.x0-12,y0:o.y0-12,x1:o.x1+12,y1:o.y1+12}));
+    const pn=(L.ponds||[]).map(p=>({x0:p.x-8,y0:p.y-8,x1:p.x+p.w+8,y1:p.y+p.h+8}));
+    const TR=L.trees||[], PK=L.peaks||[], cand=[];
+    Z.forEach(z=>{ for(let x=z.x0+24;x<=z.x1-24;x+=12) for(let y=z.y0+30;y<=z.y1-24;y+=12){
+      if(x<10||x>WW-10||y<50||y>WH-30) continue; const P={x:x,y:y};
+      if(O.some(o=>obIn(P,o))||pn.some(o=>obIn(P,o))) continue;
+      const d=Math.hypot(x-C.x,y-C.y); let tb=0; for(let i=0;i<TR.length&&tb<36;i++){ const t=TR[i]; if(Math.abs(t.x-x)<70&&Math.abs(t.y-y)<70) tb+=3; }
+      const pk=PK.some(q=>Math.abs(q.x+q.w/2-x)<130&&Math.abs(q.y+q.h/2-y)<130)?25:0;
+      const up=Math.max(-80,Math.min(120,C.y-y))*0.5;
+      cand.push({x:x,y:y,d:d,s:Math.min(d,170)+tb+pk+up}); } });
+    const out={}, chosen=[];
+    T.forEach(k=>{ let best=null; for(let pass=0;pass<4&&!best;pass++){ const sp=60*(1-pass*0.25), md=70*(1-pass*0.3);
+        cand.forEach(c=>{ if(c.d<md) return; if(chosen.some(a=>Math.hypot(a.x-c.x,a.y-c.y)<sp)) return; if(!best||c.s>best.s) best=c; }); }
+      if(best){ out[k]={x:best.x,y:best.y}; chosen.push(best); } });
+    return out; }
+  function anchors(){ try{
+    const sig=types().join()+'|'+obList().map(o=>o.k+Math.round(o.x0)+','+Math.round(o.y0)).join(';')+'|'+Object.keys(S.zones||{}).join(',');
+    if(AC.sig!==sig){ AC={sig:sig,A:compute()}; } return AC.A; }catch(e){ return {}; } }
+  GZ.anchor=k=>anchors()[k]||null;
+  GZ.types=types;
+  GZ.out=isOut;
+  function pasture(k,a){ const L0=obList();
+    for(let i=0;i<10;i++){ const x=a.x+(Math.random()*2-1)*26, y=a.y+(Math.random()*2-1)*17; const P={x:x+7,y:y+12};
+      if(x<8||y<50||x>WW-30||y>WH-26) continue; if(L0.some(o=>obIn(P,{x0:o.x0-7,y0:o.y0-7,x1:o.x1+7,y1:o.y1+7}))) continue; return {x:x,y:y}; }
+    return {x:a.x,y:a.y}; }
+
   const _az=animalZone;
-  animalZone=function(k){
-    if(GZ.act&&GZ.out&&k&&S.bld&&S.bld.hashaa>0){ const p=pasture(); if(p) return {x:p.x,y:p.y,w:16,h:14}; }
-    return _az.apply(this,arguments); };
-  function gates(){
-    const R=penR(); if(!R) return; const gx=(R.x0+R.x1)/2, gy=R.y1+3;
+  animalZone=function(k){ if(k&&isOut()){ const a=GZ.anchor(k); if(a){ const p=pasture(k,a); return {x:p.x,y:p.y,w:16,h:14}; } } return _az.apply(this,arguments); };
+
+  /* ---- хашааны хаалгаар нэвтрэх ---- */
+  function gates(){ const R=penR(); if(!R) return; const gx=(R.x0+R.x1)/2, gy=R.y1+3;
     ents.forEach(e=>{ if(e.kind!=='animal'||e.def||e.hold) return;
       const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h}, T={x:e.tx+cx,y:e.ty+h};
       if(e._pass){ if(obIn(P,R)===obIn(T,R)) e._pass=0; return; }
-      if(e._gate){ if(Math.hypot(P.x-gx,P.y-gy)<4){ e._gate=0; e._pass=1; GZ.act=true; try{ const z=animalZone(e.type); e.tx=z.x+Math.random()*Math.max(1,z.w-14); e.ty=z.y+Math.random()*Math.max(1,z.h-12); }finally{ GZ.act=false; } e.wait=0; } else { e.tx=gx-cx; e.ty=gy-h; } return; }
+      if(e._gate){ if(Math.hypot(P.x-gx,P.y-gy)<4){ e._gate=0; e._pass=1; const z=animalZone(e.type); e.tx=z.x+Math.random()*Math.max(1,z.w-14); e.ty=z.y+Math.random()*Math.max(1,z.h-12); e.wait=0; } else { e.tx=gx-cx; e.ty=gy-h; } return; }
       if(obIn(P,R)!==obIn(T,R)){ e._gate=1; e.tx=gx-cx; e.ty=gy-h; e.wait=0; } }); }
+
+  /* ---- зэрлэг амьтан цөөрүүлэх ---- */
+  const CAP={wolf:12,bear:6,fox:7,deer:8,gazelle:6,lynx:5,marmot:4};
+  /* төрөл бүрийг дээд хязгаар хүртэл цөөрүүлнэ */
+  function trimWild2(){ try{ const g=S.pos&&S.pos.ger; if(!g) return; const by={};
+    ents.forEach(e=>{ if(e.kind==='wild'&&!e.friend&&!e.raid&&CAP[e.type]) (by[e.type]=by[e.type]||[]).push(e); });
+    for(const t in by){ const A=by[t]; if(A.length<=CAP[t]) continue; A.slice(CAP[t]).forEach(e=>{ const i=ents.indexOf(e); if(i>=0) ents.splice(i,1); }); } }catch(x){} }
+  if(typeof initWild==='function'){ const _iw=initWild; initWild=function(){ const r=_iw.apply(this,arguments); trimWild2(); return r; }; }
+  trimWild2();
+
+  /* ---- цикл ---- */
+  let prev;
   const _up=update;
   update=function(){
-    try{ const ph=(typeof dayPhase==='function')?dayPhase():'work'; GZ.out=(ph==='work'||ph==='meal')&&!raid&&!(S.sites&&S.sites.hashaa); }catch(x){ GZ.out=false; }
-    if(GZ.prev!==undefined&&GZ.prev!==GZ.out){ try{ const R=penR(); if(R){ ents.forEach(e=>{ if(e.kind!=='animal'||e.def||e.hold) return; const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h};
-        if(GZ.out){ if(obIn(P,R)) e.wait=Math.random()*6; } else if(!obIn(P,R)&&!e._gate){ e._gate=1; e.wait=0; } }); } }catch(x){} }
-    GZ.prev=GZ.out;
-    GZ.act=true; let r; try{ r=_up.apply(this,arguments); } finally{ GZ.act=false; }
+    const now=isOut();
+    if(prev!==undefined&&prev!==now){ try{ const R=penR();
+      ents.forEach(e=>{ if(e.kind!=='animal'||e.def||e.hold) return; const cx=entCx(e), h=entH(e), P={x:e.x+cx,y:e.y+h};
+        e._sp0=e._sp0||e.speed; e.speed=e._sp0*3.2; e._bt=performance.now()+24000;
+        if(now){ e.wait=Math.random()*6; }
+        else if(R&&!obIn(P,R)&&!e._gate){ e._gate=1; e.wait=0; } else if(!R){ e.wait=Math.random()*3; } }); }catch(x){} }
+    prev=now;
+    try{ const t=performance.now(); ents.forEach(e=>{ if(e._bt&&t>e._bt){ e.speed=e._sp0||e.speed; e._bt=0; e._sp0=0; } }); }catch(x){}
+    const r=_up.apply(this,arguments);
     try{ gates(); }catch(x){}
     return r; };
   window.GZ=GZ;

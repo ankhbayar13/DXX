@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e55c7ee3f3';
+var UPDB='483fb77da0';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14963,7 +14963,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   const leader=()=>Q.ships.find(s=>s.alive);
   function nearest(from,list,range){ let b=null,bd=range||1e9; for(const s of list){ if(!s.alive) continue; const d=dist(from,s); if(d<bd){ bd=d; b=s; } } return b; }
 
-  function pickKind(){ const r=Math.random(); if(r<.16) return 'merchant'; if(Q.t>30&&r<.28&&!Q.war) return 'shark'; if(Q.t>75&&r<.36) return 'crab'; if(Q.t>105&&r<.46) return 'ghost'; return 'pirate'; }
+  function pickKind(){ const r=Math.random(); if(Q.war) return r<.2?'merchant':'pirate'; if(r<.16) return 'merchant'; if(Q.t>30&&r<.28&&!Q.war) return 'shark'; if(Q.t>75&&r<.36) return 'crab'; if(Q.t>105&&r<.46) return 'ghost'; return 'pirate'; }
   function spawnEnemy(kind){ const L=leader(); if(!L) return; const a=Math.random()*Math.PI*2, d=rnd(420,620); let x=L.x+Math.cos(a)*d, y=L.y+Math.sin(a)*d; const rr=Math.hypot(x,y); if(rr>WORLD){ x*=WORLD/rr; y*=WORLD/rr; }
     const sc=1+Q.t/220; const e={team:'e',kind,x,y,a:Math.random()*6.28,alive:true,cd:rnd(0.5,2),stun:0,burn:0,mark:0,trail:0,tv:0};
     if(kind==='merchant'){ Object.assign(e,{t:3,hp:55*sc,max:55*sc,spd:56,len:50,wid:20,r:18,loot:{gold:140,wood:60}}); }
@@ -15012,6 +15012,18 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
 
   function steer(s,dt,tx,ty,speed){ const da=Math.atan2(ty-s.y,tx-s.x); let d=da-s.a; while(d>Math.PI) d-=Math.PI*2; while(d<-Math.PI) d+=Math.PI*2; s.a+=clamp(d,-TURN[s.t]*dt,TURN[s.t]*dt);
     const sp=speed; s.x+=Math.cos(s.a)*sp*dt; s.y+=Math.sin(s.a)*sp*dt; s.v=sp; }
+  /* ===== Хөлөг хоорондын мөргөлдөөн: нэвт гарахгүй, түлхэлцэнэ. Хохирол = мөргөсөн хөлгийн масс (урт×өргөн, түвшингээр томорно) ба хурдаас. Өөрийн флот бие биедээ хохирол өгөхгүй ===== */
+  function ramUpdate(dt){
+    const all=[]; Q.ships.forEach(s=>{ if(s.alive) all.push(s); }); Q.en.forEach(e=>{ if(e.alive) all.push(e); });
+    all.forEach(s=>{ if(s.rmT>0) s.rmT-=dt; });
+    for(let i=0;i<all.length;i++) for(let j=i+1;j<all.length;j++){ const a=all[i], b=all[j]; if(a.team==='p'&&b.team==='p') continue;
+      const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy), m=(a.r+b.r)*.8; if(d>=m||d<.01) continue;
+      const ma=a.len*a.wid, mb=b.len*b.wid, tot=ma+mb, ov=m-d, nx=dx/d, ny=dy/d;
+      a.x-=nx*ov*(mb/tot); a.y-=ny*ov*(mb/tot); b.x+=nx*ov*(ma/tot); b.y+=ny*ov*(ma/tot);
+      if(a.team===b.team) continue;
+      const sf=clamp(((a.v||0)+(b.v||0))/90,.5,1.5);
+      const dm=(X,Y,mx,my)=>{ if(X.rmT>0||!X.alive) return; let v=(4+my/60)*Math.sqrt(my/mx)*sf; v=Math.min(v,X.max*(X.team==='p'?.08:.35)); X.rmT=1.5; hit(X,v,Y); };
+      dm(a,b,ma,mb); dm(b,a,mb,ma); } }
   function collide(s){ for(const o of Q.isl){ const dx=s.x-o.x, dy=s.y-o.y, d=Math.hypot(dx,dy), m=o.r+s.r*.7; if(d<m&&d>0){ s.x=o.x+dx/d*m; s.y=o.y+dy/d*m; } }
     const rr=Math.hypot(s.x,s.y); if(rr>WORLD){ s.x*=WORLD/rr; s.y*=WORLD/rr; } }
 
@@ -15047,7 +15059,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     // дайсан
     Q.spawn-=dt; if(Q.spawn<=0&&alive(Q.en).length<MAXE){ spawnEnemy(pickKind()); Q.spawn=rnd(2.5,4.5); }
     if(Q.war&&window.swarTick){ try{ swarTick(Q,dt); }catch(e){} }
-    Q.bossT-=dt; if(Q.bossT<=0&&!Q.en.some(e=>e.alive&&e.kind==='boss')){ spawnEnemy('boss'); Q.bossT=100; Fxsay(Q.bossN%2===0?'⚠ Далайн мангас гарлаа!':'⚠ Босс гарлаа!'); }
+    Q.bossT-=dt; if(!Q.war&&Q.bossT<=0&&!Q.en.some(e=>e.alive&&e.kind==='boss')){ spawnEnemy('boss'); Q.bossT=100; Fxsay(Q.bossN%2===0?'⚠ Далайн мангас гарлаа!':'⚠ Босс гарлаа!'); }
     Q.en.forEach(e=>{ if(!e.alive) return; e.hitT=Math.max(0,(e.hitT||0)-dt);
       if(e.burn>0){ e.burn-=dt; e.bt=(e.bt||0)-dt; if(e.bt<=0){ hit(e,e.bd||3); e.bt=1; } }
       if(e.mark>0) e.mark-=dt; if(e.blind>0) e.blind-=dt;
@@ -15061,6 +15073,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
         e.cd-=dt; if(e.cd<=0&&d<e.rng+30&&!(e.blind>0)){ if(e.kraken){ for(let k=-2;k<=2;k++) shot(e,T,e.dmg,'e',250,{spread:k*.2,r:6,pz:1}); } else if(e.kind==='boss'){ for(let k=-1;k<=1;k++) shot(e,T,e.dmg,'e',260,{spread:k*.16}); } else shot(e,T,e.dmg,'e',260); e.cd=e.rate*rnd(.85,1.15); } }
       collide(e);
       e.trail-=dt; if((e.v||0)>10&&e.trail<=0){ Q.pt.push({x:e.x-Math.cos(e.a)*e.len*.45,y:e.y-Math.sin(e.a)*e.len*.45,t:.9,r:e.wid*.35}); e.trail=.14; } });
+    ramUpdate(dt);
     // сумнууд
     for(const b of Q.pb){ b.x+=b.vx*dt; b.y+=b.vy*dt; b.ttl-=dt; if(b.ttl<=0){ b.dead=1; Q.vx.push({n:'splash',x:b.x,y:b.y,t:0,d:.6,s:b.big?44:30}); continue; }
       for(const o of Q.isl){ if(Math.hypot(b.x-o.x,b.y-o.y)<o.r*.8){ b.dead=1; Q.vx.push({n:'impact',f:4,x:b.x,y:b.y,t:0,d:.4,s:26}); break; } } if(b.dead) continue;

@@ -6577,6 +6577,19 @@ function isLoop(now){ const R=RT; if(!R) return; const dt=Math.min(0.05,(now-R.l
 function isModeToggle(){ let on=false; try{ on=localStorage.getItem('dxx_iso')==='1'; localStorage.setItem('dxx_iso',on?'0':'1'); }catch(e){}
   const msg=on?'Шинэ байлдаан УНТАРЛАА. Хуучин босоо байлдаан явна.':'Шинэ байлдаан АСЛАА. Байлдахдаа утсаа хажуу болго.'; try{ say(msg); }catch(e){} }
 
+/* Самбарын товчийг заавал ажиллуулах хамгаалалт: дарсан цэг товч дотор байвал (дээр нь юм давхарласан ч, click алдагдсан ч) тушаал биелнэ */
+(function(){
+  let clk=0, clT=null, dn=new Map();
+  const SEL='#rcmd .b.cm,#rchips .b[id^="rs_"],#rpsw,#rpg,#ilv button';
+  const hit=(x,y)=>{ const r=document.getElementById('rts'); if(!r||!window.RT||!RT.iso||RT.done) return null; let best=null,bd=1e9;
+    r.querySelectorAll(SEL).forEach(e=>{ const b=e.getBoundingClientRect(); if(!b.width||!b.height) return; const m=5; if(x>=b.left-m&&x<=b.right+m&&y>=b.top-m&&y<=b.bottom+m){ const d=Math.hypot(x-(b.left+b.right)/2,y-(b.top+b.bottom)/2); if(d<bd){ bd=d; best=e; } } }); return best; };
+  document.addEventListener('click',ev=>{ clk=performance.now(); clT=ev.target; },true);
+  document.addEventListener('pointerdown',ev=>{ try{ const t=ev.target; if(!t||!t.closest||!t.closest('#rts')) return; dn.set(ev.pointerId,hit(ev.clientX,ev.clientY)); }catch(e){} },true);
+  document.addEventListener('pointerup',ev=>{ try{ const a=dn.get(ev.pointerId); dn.delete(ev.pointerId); if(!a) return; const b=hit(ev.clientX,ev.clientY); if(b!==a) return; const t0=performance.now();
+    setTimeout(()=>{ if(!(clk>=t0&&clT&&a.contains(clT))&&document.contains(a)&&window.RT&&RT.iso&&!RT.done){ try{ a.click(); }catch(e){} } },260); }catch(e){} },true);
+  document.addEventListener('pointercancel',ev=>{ dn.delete(ev.pointerId); },true);
+})();
+
 
 function cpHb(ci){ const sk=seasonK(), w=sk==='winter', t=['steppe','forest','mountain','steppe','lake','forest','lake','mountain','steppe','mountain','desert','desert','farm','arab'][ci]||(CAMP[ci]&&CAMP[ci].bio)||'steppe';
   if(t==='steppe') return w?'steppe_wi':'steppe_su'; if(t==='forest') return w?'cliff_wi':'forest_camp'; if(t==='mountain') return w?'cliff_wi':'cliff_green'; if(t==='lake') return ci%2?'forest_wf':'lake_peaks';
@@ -10858,7 +10871,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c4aa07d46e';
+var UPDB='e455326494';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='affc11e527';
+var UPDB='77dd0f63fb';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14623,12 +14623,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     else b+='<div class="sct">✅ Хамгийн дээд түвшин</div>';
     d.innerHTML='<div class="sci" style="max-width:340px;width:88%"><div class="sch"><div style="font-size:30px">⚓</div><div><b>'+NM[Math.max(l,0)]+'</b><div class="sm">Усан тулаанд (23–25-р бүлэг) флотыг хүчирхэгжүүлнэ</div></div></div>'+(l>0?'<img src="hf/sq/mb_sail.webp?v=1" style="width:100%;border-radius:8px;margin-top:6px;display:block">':'')+b+
       (open()&&!y.up&&c?'<button class="btn red" id="yup">'+(l?'⬆ Сайжруулах':'🔨 Барих')+'</button> ':'')+
-      (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> <button class="btn" id="ysq">⛵ Далайд явах</button> ':'')+
+      (l>0?'<button class="btn" id="yfs">🚢 Хөлөг</button> <button class="btn" id="yfk">🎯 Ур чадвар</button> <button class="btn" id="ycl">Өнгө</button> <button class="btn" id="ysq">⛵ Далайд явах</button> ':'')+
       (y.up?'<button class="btn" id="ysp">⚡ Хурдасгах ('+Math.max(1,Math.ceil(rem()/SEC_PER_ALT))+' Алт)</button> ':'')+
       '<button class="btn" style="background:#5b3d1e" id="yno">Хаах</button></div>';
     document.body.appendChild(d);
     const q=id=>document.getElementById(id);
-    if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('ysq')) q('ysq').onclick=()=>{ closeCard(); window.seaStart&&seaStart(); }; if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
+    if(q('yfs')) q('yfs').onclick=()=>fleetCard('s'); if(q('yfk')) q('yfk').onclick=()=>fleetCard('k'); if(q('ycl')) q('ycl').onclick=()=>{ if(window.shSkinCard) shSkinCard(); }; if(q('ysq')) q('ysq').onclick=()=>{ closeCard(); window.seaStart&&seaStart(); }; if(q('yup')) q('yup').onclick=upgrade; if(q('ysp')) q('ysp').onclick=speed; q('yno').onclick=closeCard; d.onclick=e=>{ if(e.target===d) closeCard(); };
     if(y.up) closeCard.iv=setInterval(()=>{ const el=q('ytm'); if(!el){ clearInterval(closeCard.iv); return; } el.textContent=fmt(rem()); },1000); }
   window.yardCard=card; window.yardFleetCard=()=>{ if(document.getElementById('yfl')) fleetCard(); };
 
@@ -14727,7 +14727,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       b+='<div class="sm" style="margin:4px 0">Зогсоолын түвшин: <b>Lv '+(y.lv||0)+'</b> · хөлгийн түвшин зогсоолоос өндөр байж болохгүй</div>';
       for(let k=0;k<5;k++){ const lv=y.sh[k]||0, n=lv+1, c=n<=3?SHC[k][n]:null, on=lv>0&&y.eq[k]!==0, busy=y.sb&&y.sb.k===k;
         b+='<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,215,112,.18)">'+
-          '<img src="hf/nv/b'+k+'.webp?v=1" style="width:56px;height:44px;object-fit:contain;'+(lv?'':'filter:grayscale(1) brightness(.6);')+'" draggable="false">'+
+          '<img src="'+(window.shSkinIcon?shSkinIcon(k):'hf/nv/b'+k+'.webp?v=1')+'" style="width:56px;height:44px;object-fit:contain;'+(lv?'':'filter:grayscale(1) brightness(.6);')+'" draggable="false">'+
           '<div style="flex:1;min-width:0"><b>'+SHN[k]+'</b> '+(lv?'<span style="color:#ffd770">Lv '+lv+'</span>':'<span style="color:#aaa">барьсангүй</span>')+'<div class="sm">'+SHD[k]+(lv?' · амь +'+Math.round((HL[lv]-1)*100)+'% · хүч +'+Math.round((AL[lv]-1)*100)+'%':'')+'</div>'+
           (c&&!busy?'<div class="sm">Lv '+n+': '+cs(c)+'· '+fmt(c.t)+'</div>':'')+(lv>0&&window.shHpHtml?shHpHtml(k):'')+'</div>'+
           '<div style="display:flex;flex-direction:column;gap:4px">'+(lv>0&&window.shHpBtn?shHpBtn(k):'')+
@@ -14925,8 +14925,8 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     const root=document.createElement('div'); root.id='sq'; root.style.cssText='position:fixed;inset:0;z-index:9500;background:#0b3d66;touch-action:none;user-select:none;-webkit-user-select:none';
     const cv=document.createElement('canvas'); cv.style.cssText='position:absolute;inset:0;width:100%;height:100%'; root.appendChild(cv);
     const hud=document.createElement('div'); hud.style.cssText='position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 0;display:flex;gap:8px;align-items:flex-start;pointer-events:none;color:#fff;font:700 14px sans-serif;text-shadow:0 1px 3px #000'; root.appendChild(hud);
-    const bt=document.createElement('div'); bt.style.cssText='position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;flex-direction:column;gap:8px;align-items:flex-end'; root.appendChild(bt);
-    const back=document.createElement('button'); back.className='btn red'; back.textContent='⬅ Буцах'; back.style.cssText='position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:3;padding:6px 12px'; root.appendChild(back);
+    const bt=document.createElement('div'); bt.style.cssText='position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;flex-direction:column;gap:8px;align-items:flex-start'; root.appendChild(bt);
+    const back=document.createElement('button'); back.textContent='Буцах'; back.style.cssText='position:absolute;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:3;padding:3px 9px;font:700 11px sans-serif;background:rgba(122,31,26,.85);color:#fff;border:1px solid #ffd770;border-radius:6px;opacity:.85'; root.appendChild(back);
     document.body.appendChild(root);
     Q={root,cv,ctx:cv.getContext('2d'),hud,ships,en:[],pb:[],pt:[],fx:[],vx:[],cr:[],isl:mkIslands(),t:0,loot:{gold:0,wood:0,alt:0},kills:0,spawn:1.5,boss:0,bossT:60,cd:[0,0,0,0,0],sh:0,run:true,over:false,last:performance.now(),
       joy:null,key:{},dpr:1,W:0,H:0,sc:1,cam:{x:0,y:0},btn:[],alt:0};
@@ -14935,7 +14935,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     SK.forEach((s,i)=>{ const b=document.createElement('div'); b.style.cssText='position:relative;width:54px;height:54px;border-radius:50%;background:rgba(10,20,35,.72);border:2px solid #ffd770;overflow:hidden;pointer-events:auto;box-shadow:0 2px 8px #000a';
       b.innerHTML='<img src="'+s.ic+'?v=1" style="width:100%;height:100%;object-fit:cover;pointer-events:none" draggable="false"><div class="cdv" style="position:absolute;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;color:#fff;font:800 15px sans-serif;pointer-events:none"></div><span style="position:absolute;left:3px;bottom:0;color:#ffd770;font:800 10px sans-serif;text-shadow:0 1px 2px #000;pointer-events:none">'+SKL(s.id)+'</span>';
       b.onpointerdown=e=>{ e.stopPropagation(); e.preventDefault(); useSkill(i); }; bt.appendChild(b); Q.btn.push(b); });
-    back.onclick=()=>finish(false);
+    back.onclick=()=>{ if(back._c){ clearTimeout(back._t); finish(false); return; } back._c=1; back.textContent='Буцах уу? Дахин дар'; back.style.opacity='1'; clearTimeout(back._t); back._t=setTimeout(()=>{ back._c=0; back.textContent='Буцах'; back.style.opacity='.85'; },3000); };
     bindInput(); fit(); Q.raf=requestAnimationFrame(loop);
   };
 
@@ -14943,7 +14943,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
   let bound=null;
   function bindInput(){
     const r=Q.root, st={id:null};
-    const down=e=>{ if(Q.over) return; if(e.target.closest&&e.target.closest('button')) return; if(st.id!=null) return; st.id=e.pointerId; Q.joy={x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY}; try{ r.setPointerCapture(e.pointerId); }catch(x){} };
+    const down=e=>{ if(Q.over) return; if(e.target.closest&&e.target.closest('button')) return; if(e.clientX<innerWidth*.4) return; if(st.id!=null) return; st.id=e.pointerId; Q.joy={x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY}; try{ r.setPointerCapture(e.pointerId); }catch(x){} };
     const move=e=>{ if(e.pointerId===st.id&&Q.joy){ Q.joy.x=e.clientX; Q.joy.y=e.clientY; } };
     const up=e=>{ if(e.pointerId===st.id){ st.id=null; Q.joy=null; } };
     r.addEventListener('pointerdown',down); r.addEventListener('pointermove',move); r.addEventListener('pointerup',up); r.addEventListener('pointercancel',up);
@@ -15054,11 +15054,12 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       const ok=SFXA.loop(c,s.mo,Q.t*(s.mo==='mo_ghost'?1.1:2),0,0,H,0); c.restore();
       if(ok){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.75-6,w,4); c.fillStyle='#e0483a'; c.fillRect(s.x-w/2,s.y-s.len*.75-6,w*clamp(s.hp/s.max,0,1),4);
         if(s.stun>0||s.mark>0||s.blind>0){ c.font='11px sans-serif'; c.textAlign='center'; c.fillStyle='#fff'; c.fillText((s.stun>0?'💫':'')+(s.mark>0?'🎯':'')+(s.blind>0?'🌫':''),s.x,s.y-s.len*.75-9); } return; } }
-    const key=s.kraken?'kraken':enemy?(s.kind==='boss'?'e2':s.kind==='merchant'?'e1':'e0'):'p'+s.t, im=img(ART+key+'.webp?v=1');
+    let key=s.kraken?'kraken':enemy?(s.kind==='boss'?'e2':s.kind==='merchant'?'e1':'e0'):'p'+s.t, im=img(ART+key+'.webp?v=1');
+    let imS=im; if(!enemy&&!s.mo&&!s.kraken&&im&&window.shSkinImg) imS=shSkinImg(im,'p'+s.t)||im;
     c.save(); c.translate(s.x,s.y);
     if(s.kraken) c.rotate(Math.sin(Q.t*.4)*.15); else c.rotate(s.a+Math.PI/2);
     if(s.hitT>0) c.globalAlpha=.55+Math.sin(s.hitT*60)*.3;
-    if(im){ let w,h; if(s.kraken){ w=h=s.len*2.1; } else { h=s.len*2.4; w=h*im.naturalWidth/im.naturalHeight; } c.drawImage(im,-w/2,-h/2,w,h); }
+    if(im){ let w,h; if(s.kraken){ w=h=s.len*2.1; } else { h=s.len*2.4; w=h*im.naturalWidth/im.naturalHeight; } c.drawImage(imS,-w/2,-h/2,w,h); }
     else { const L=s.len, W=s.wid; const hull=enemy?'#7a1f1a':'#7a5230', deck=enemy?'#a8362c':'#b98b55', sail=enemy?'#f0d3c8':'#f2eadb';
       c.fillStyle='#0004'; c.beginPath(); c.ellipse(2,3,W*.62,L*.58,0,0,Math.PI*2); c.fill();
       c.fillStyle=hull; c.beginPath(); c.moveTo(0,-L/2); c.quadraticCurveTo(W*.75,-L*.15,W*.5,L*.42); c.lineTo(-W*.5,L*.42); c.quadraticCurveTo(-W*.75,-L*.15,0,-L/2); c.fill();
@@ -15068,7 +15069,9 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     c.restore();
     if(s.burn>0&&window.SFXA) SFXA.loop(c,'fire',Q.t*2.4+s.x*.01,s.x,s.y-s.wid*.2,Math.max(34,s.len*.85));
     // амь
-    if(s.hp<s.max||s.kind==='boss'){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w,4); c.fillStyle=enemy?'#e0483a':'#49d06b'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w*clamp(s.hp/s.max,0,1),4); }
+    const isL=!enemy&&Q.ships.find(x=>x.alive)===s;
+    if(s.hp<s.max||s.kind==='boss'||isL){ const w=Math.max(26,s.wid*1.5); c.fillStyle='#000a'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w,4); c.fillStyle=enemy?'#e0483a':'#49d06b'; c.fillRect(s.x-w/2,s.y-s.len*.7-6,w*clamp(s.hp/s.max,0,1),4); }
+    if(isL){ const nm=String((S.prof&&S.prof.name)||'Хаан').slice(0,14); c.font='bold 11px sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.75)'; c.strokeText(nm,s.x,s.y-s.len*.7-10); c.fillStyle='#fff'; c.fillText(nm,s.x,s.y-s.len*.7-10); }
     if(s.stun>0||s.burn>0||s.mark>0){ c.font='10px sans-serif'; c.textAlign='center'; c.fillText((s.stun>0?'💫':'')+(s.burn>0?'🔥':'')+(s.mark>0?'🎯':''),s.x,s.y-s.len*.7-9); }
     if(!enemy&&Q.sh>0){ c.strokeStyle='rgba(120,200,255,.8)'; c.lineWidth=2; c.beginPath(); c.arc(s.x,s.y,s.len*.62,0,Math.PI*2); c.stroke(); }
   }
@@ -15115,10 +15118,10 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
     c.setTransform(d,0,0,d,0,0);
     try{ drawMini(c,L); }catch(e){ console.log('seamini',e); }
     if(Q.joy){ c.strokeStyle='rgba(255,255,255,.45)'; c.lineWidth=3; c.beginPath(); c.arc(Q.joy.x0,Q.joy.y0,48,0,Math.PI*2); c.stroke(); const dx=Q.joy.x-Q.joy.x0, dy=Q.joy.y-Q.joy.y0, m=Math.hypot(dx,dy), k=m>48?48/m:1; c.fillStyle='rgba(255,255,255,.55)'; c.beginPath(); c.arc(Q.joy.x0+dx*k,Q.joy.y0+dy*k,20,0,Math.PI*2); c.fill(); }
-    else if(Q.t<8){ c.fillStyle='rgba(255,255,255,.8)'; c.font='bold 14px sans-serif'; c.textAlign='center'; c.fillText('Дэлгэцийг дарж чирээд хөлгөө удирд',W/2,H*.78); }
+    else if(Q.t<8){ c.fillStyle='rgba(255,255,255,.8)'; c.font='bold 14px sans-serif'; c.textAlign='center'; c.fillText('Баруун гараараа чирж удирд',W/2,H*.78); }
     // HUD
     const rem=Math.max(0,SESSION-Q.t), ml=Math.floor(rem/60), ss=String(Math.floor(rem%60)).padStart(2,'0');
-    let sh=''; Q.ships.forEach(s=>{ const p=s.alive?Math.round(s.hp/s.max*100):0; sh+='<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;width:56px;opacity:.9">'+NM[s.t]+'</span><div style="width:62px;height:6px;background:#0008;border-radius:3px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:'+(p>40?'#49d06b':'#e0483a')+'"></div></div></div>'; });
+    let sh=''; Q.ships.forEach(s=>{ const p=s.alive?Math.round(s.hp/s.max*100):0; sh+='<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;width:34px;opacity:.9">'+p+'%</span><div style="width:62px;height:6px;background:#0008;border-radius:3px;overflow:hidden"><div style="width:'+p+'%;height:100%;background:'+(p>40?'#49d06b':'#e0483a')+'"></div></div></div>'; });
     Q.hud.innerHTML='<div style="display:flex;flex-direction:column;gap:2px">'+sh+'</div><div style="flex:1;text-align:center;padding-right:84px">⏱ '+ml+':'+ss+'<br>🪙 '+Q.loot.gold+' · 🪵 '+Q.loot.wood+(Q.loot.alt?' · 💎 '+Q.loot.alt:'')+'<br><span style="font-size:11px;opacity:.85">Живүүлсэн: '+Q.kills+'</span></div>';
     Q.btn.forEach((b,i)=>{ const v=b.querySelector('.cdv'); const cd=Q.cd[i]; v.style.display=cd>0?'flex':'none'; if(cd>0) v.textContent=Math.ceil(cd); });
   }
@@ -20025,6 +20028,77 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   setInterval(()=>{ try{ const q=window.seaState&&seaState(); if(!q||!q.over||q._hs) return; q._hs=1; const y=Y();
     (q.ships||[]).forEach(s=>{ if(s.team!=='p'||!(s.t>=0)) return; const p=s.alive?Math.min(1,Math.max(.02,s.hp/s.max)):.01; y.hp[s.t]=p; });
     try{ save(); }catch(e){} }catch(e){} },400);
+})();
+
+
+/* p32/shskin.js — Хөлгийн өнгө (дарвуул, туг). 15 өнгө, тус бүр 50 Алт, 5 хөлөгт бүгдэд нэг өнгө.
+   Анхны хөх дарвууг пикселээр өнгө хувиргана (алтан сар, мод хэвээр). S.yard.sk3={own:[өнгөний id],sel:id}. Онлайн тулаанд бусдад харагдахад sel-ийг явуулна. */
+(function(){
+  const PRICE=50;
+  /* h: хүрэх өнгөний цайвар (0-360), s: ханалтын үржвэр, lm/lo: гэрлийн үржвэр/нэмэлт, sw: жишээ өнгө (товчинд) */
+  const C=[
+    {id:1,n:'Улаан',h:2,s:1.15,lm:1,lo:0,sw:'#d93a2b'},
+    {id:2,n:'Час улаан',h:350,s:1.0,lm:.8,lo:0,sw:'#9e1b32'},
+    {id:3,n:'Улбар шар',h:24,s:1.2,lm:1.05,lo:.02,sw:'#ea7a1c'},
+    {id:4,n:'Шар',h:48,s:1.2,lm:1.25,lo:.04,sw:'#e6c32a'},
+    {id:5,n:'Шаргал ногоон',h:85,s:1.1,lm:1.05,lo:0,sw:'#8fc23a'},
+    {id:6,n:'Ногоон',h:128,s:1.0,lm:.9,lo:0,sw:'#2f9e44'},
+    {id:7,n:'Хөх ногоон',h:172,s:1.0,lm:.9,lo:0,sw:'#1f9c8e'},
+    {id:8,n:'Цэнхэр',h:195,s:1.05,lm:1.15,lo:.03,sw:'#2fb4e0'},
+    {id:9,n:'Нил ягаан',h:268,s:1.0,lm:1,lo:0,sw:'#7c4fd0'},
+    {id:10,n:'Ягаан',h:305,s:1.0,lm:1.05,lo:0,sw:'#b24fc0'},
+    {id:11,n:'Час ягаан',h:330,s:1.1,lm:1.05,lo:0,sw:'#e0408f'},
+    {id:12,n:'Хүрэн',h:26,s:.6,lm:.75,lo:0,sw:'#7a4a28'},
+    {id:13,n:'Цагаан',h:0,s:.06,lm:2.1,lo:.12,sw:'#f1efe6'},
+    {id:14,n:'Хар',h:0,s:.08,lm:.42,lo:0,sw:'#2a2a2e'},
+    {id:15,n:'Мөнгөн',h:215,s:.1,lm:1.55,lo:.06,sw:'#b9c1c8'}];
+  const BY={}; C.forEach(c=>BY[c.id]=c);
+  const St=()=>{ const y=S.yard=S.yard||{lv:0,up:0,end:0}; if(!y.sk3||typeof y.sk3!=='object') y.sk3={own:[],sel:0}; if(!Array.isArray(y.sk3.own)) y.sk3.own=[]; return y.sk3; };
+  const sel=()=>{ const s=St(); return (s.sel&&BY[s.sel]&&s.own.indexOf(s.sel)>=0)?s.sel:0; };
+  window.shSkinSel=sel;
+  function rgb2hsl(r,g,b){ r/=255; g/=255; b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2; let h=0,s=0; if(mx!==mn){ const d=mx-mn; s=l>.5?d/(2-mx-mn):d/(mx+mn); h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4); h*=60; } return [h,s,l]; }
+  function hsl2rgb(h,s,l){ h/=360; const f=(p,q,t)=>{ if(t<0) t+=1; if(t>1) t-=1; return t<1/6?p+(q-p)*6*t:t<1/2?q:t<2/3?p+(q-p)*(2/3-t)*6:p; };
+    if(s===0){ const v=Math.round(l*255); return [v,v,v]; } const q=l<.5?l*(1+s):l+s-l*s, p=2*l-q; return [Math.round(f(p,q,h+1/3)*255),Math.round(f(p,q,h)*255),Math.round(f(p,q,h-1/3)*255)]; }
+  const cache={};
+  function tint(im,key,cid){ const k=key+'|'+cid; if(cache[k]) return cache[k]; const c=BY[cid]; if(!c||!im||!im.naturalWidth) return null;
+    try{ const w=im.naturalWidth, h=im.naturalHeight, cv=document.createElement('canvas'); cv.width=w; cv.height=h; const x=cv.getContext('2d'); x.drawImage(im,0,0); const d=x.getImageData(0,0,w,h), a=d.data;
+      for(let i=0;i<a.length;i+=4){ if(a[i+3]<8) continue; const t=rgb2hsl(a[i],a[i+1],a[i+2]);
+        if(t[0]>=185&&t[0]<=265&&t[1]>.22){ const l=Math.max(0,Math.min(1,t[2]*c.lm+c.lo)), s=Math.max(0,Math.min(1,t[1]*c.s>.95?.95:t[1]*c.s)), o=hsl2rgb(c.h,s,l); a[i]=o[0]; a[i+1]=o[1]; a[i+2]=o[2]; } }
+      x.putImageData(d,0,0); cache[k]=cv; return cv; }catch(e){ return null; } }
+  /* seaquest: тоглогчийн хөлгийн зургийг сонгосон өнгөөр буцаана (canvas) */
+  window.shSkinImg=function(im,key){ const c=sel(); if(!c) return null; return tint(im,key,c); };
+  /* зогсоолын хөлгийн жижиг дүрс: sel=0 бол анхны зураг */
+  const IC={};
+  window.shSkinIcon=function(k){ const u='hf/nv/b'+k+'.webp?v=1', c=sel(); if(!c) return u; const ky='b'+k+'|'+c; if(IC[ky]) return IC[ky];
+    let o=IC['i'+k]; if(!o){ o=IC['i'+k]={img:new Image(),ok:0}; o.img.onload=()=>{ o.ok=1; try{ const cv=tint(o.img,'b'+k,sel()); if(cv){ IC['b'+k+'|'+sel()]=cv.toDataURL(); window.yardFleetCard&&yardFleetCard(); } }catch(e){} }; o.img.src=u; }
+    else if(o.ok){ const cv=tint(o.img,'b'+k,c); if(cv){ IC[ky]=cv.toDataURL(); return IC[ky]; } }
+    return u; };
+  /* цонх */
+  let pv=0;
+  function close(){ const e=document.getElementById('yskin'); if(e) e.remove(); }
+  function buy(id){ const c=BY[id], s=St(); if(!c||s.own.indexOf(id)>=0) return; if((S.res.alt||0)<PRICE){ try{ say('Алт хүрэлцэхгүй (хэрэгтэй: '+PRICE+')'); sfx('err'); }catch(e){} return; }
+    S.res.alt-=PRICE; s.own.push(id); s.sel=id; try{ save(); updateHUD(); sfx('win'); say(c.n+' өнгө худалдан авлаа'); }catch(e){} pv=id; card(); }
+  function pick(id){ const s=St(); if(id===0||s.own.indexOf(id)>=0){ s.sel=id; try{ save(); }catch(e){} } pv=id; card(); try{ window.yardFleetCard&&yardFleetCard(); }catch(e){} }
+  function preview(){ const cv=document.getElementById('yskcv'); if(!cv) return; const x=cv.getContext('2d'); x.clearRect(0,0,cv.width,cv.height);
+    const ks=[2,0,3], W=cv.width/ks.length; ks.forEach((k,i)=>{ const o=IC['p'+k]||(IC['p'+k]={img:new Image(),ok:0}); const draw=()=>{ const im=o.img, c=pv; const src=c?tint(im,'p'+k,c):im; if(!src) return; const h=cv.height-8, w=h*im.naturalWidth/im.naturalHeight; x.drawImage(src,W*i+(W-w)/2,4,w,h); };
+      if(!o.img.src){ o.img.onload=()=>{ o.ok=1; draw(); }; o.img.src='hf/sq/p'+k+'.webp?v=1'; } else if(o.ok) draw(); else { const f=o.img.onload; o.img.onload=()=>{ o.ok=1; draw(); }; } }); }
+  function card(){
+    close(); const s=St(), d=document.createElement('div'); d.id='yskin'; d.style.cssText='position:fixed;inset:0;z-index:9060;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
+    const cur=sel(), has=id=>id===0||s.own.indexOf(id)>=0, pc=pv?BY[pv]:null;
+    let g='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:8px 0">'+
+      '<div data-a="p" data-v="0" style="text-align:center;cursor:pointer"><div style="width:100%;aspect-ratio:1;border-radius:50%;background:#244a8c;border:3px solid '+(pv===0?'#ffd770':(cur===0?'#7fe08a':'#5b3d1e'))+'"></div><div class="sm" style="font-size:10px">Анхны</div></div>'+
+      C.map(c=>'<div data-a="p" data-v="'+c.id+'" style="text-align:center;cursor:pointer"><div style="position:relative;width:100%;aspect-ratio:1;border-radius:50%;background:'+c.sw+';border:3px solid '+(pv===c.id?'#ffd770':(cur===c.id?'#7fe08a':'#5b3d1e'))+'">'+(has(c.id)?'':'<span style="position:absolute;right:-2px;bottom:-4px;font:700 9px sans-serif;background:#000b;color:#ffd770;border-radius:6px;padding:0 3px">'+PRICE+'</span>')+'</div><div class="sm" style="font-size:10px">'+c.n+'</div></div>').join('')+'</div>';
+    let act='';
+    if(pv===0) act=cur===0?'<div class="sm">Анхны өнгө сонгогдсон</div>':'';
+    else if(has(pv)) act=cur===pv?'<div class="sm">Энэ өнгө сонгогдсон (5 хөлөгт бүгдэд)</div>':'<button class="btn" data-a="u" data-v="'+pv+'">Сонгох</button>';
+    else act='<button class="btn red" data-a="b" data-v="'+pv+'">Худалдаж авах ('+PRICE+' Алт)</button> <span class="sm">Таны Алт: '+(S.res.alt||0)+'</span>';
+    d.innerHTML='<div class="sci" style="max-width:360px;width:92%"><div class="sch"><div><b>Хөлгийн өнгө</b><div class="sm">Дарвуул, туг. Нэг өнгө 5 хөлөгт бүгдэд. Өнгө бүр '+PRICE+' Алт</div></div></div>'+
+      '<canvas id="yskcv" width="330" height="150" style="width:100%;background:#0b3d66;border-radius:8px;display:block"></canvas>'+g+'<div style="min-height:34px">'+act+'</div><button class="btn" style="background:#5b3d1e;margin-top:6px" data-a="x">Хаах</button></div>';
+    document.body.appendChild(d);
+    d.onclick=e=>{ if(e.target===d){ close(); return; } const t=e.target.closest('[data-a]'); if(!t) return; const a=t.dataset.a, v=+t.dataset.v; if(a==='x') close(); else if(a==='p') pick(v); else if(a==='u') pick(v); else if(a==='b') buy(v); };
+    preview(); setTimeout(preview,250); }
+  window.shSkinCard=function(){ pv=sel(); card(); };
+  window.shSkinList=C;
 })();
 
 

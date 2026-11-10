@@ -10874,7 +10874,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='006acd73cc';
+var UPDB='ca4696b8a7';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19115,8 +19115,9 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
        log:['Картаа сонгоод, дараа нь нээлттэй талбарыг дар. Бэлэн болмогц «Ээлж дуусгах».'],on:!!ON,opName:ON?ON.opName:'Дайсан'};
     for(let s=0;s<2;s++) for(let i=0;i<3;i++) draw(s);
     if(ON){ ON.left=45; ON.sub=false; ON.waiting=false; ON.mySnap=false; ON.done={}; ON.hbAt=Date.now(); }
-    sel=null; tip=null; busy=false; V='play'; render();
+    sel=null; tip=null; busy=false; if(V!=='play') doorOpen(); V='play'; render();
   }
+  function doorOpen(){ try{ const o=document.getElementById('cgdr'); if(o) o.remove(); const d=document.createElement('div'); d.id='cgdr'; d.innerHTML='<i></i><i></i>'; document.body.appendChild(d); setTimeout(()=>{ try{ d.remove(); }catch(e){} },1500); }catch(e){} }
   function draw(s){ if(s===1&&ON) return null; if(G.deck[s].length&&G.hand[s].length<7){ const c=G.deck[s].shift(); G.hand[s].push(c); return c; } return null; }
   const energy=s=>G.turn+G.bonus[s];
   const spent=()=>G.staged.reduce((a,x)=>a+x.card.d.c,0);
@@ -19401,7 +19402,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   +'#cgv .cghand{display:flex;gap:6px;overflow-x:auto;padding:5px 2px 6px;scroll-snap-type:x proximity}'
   +'#cgv .cgc{flex:0 0 96px;height:158px;scroll-snap-align:start;background:linear-gradient(180deg,#4d3720,#33220f);border:2px solid;border-radius:10px;padding:5px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;position:relative;color:inherit;font-family:inherit}'
   +'#cgv .cgc.sel{box-shadow:0 0 0 3px #ffd770;transform:translateY(-3px)}'
-  +'#cgv .cgc.off{opacity:.45}#cgv .cgc.lk{filter:grayscale(1);opacity:.4}'
+  +'#cgv .cgc.off{opacity:.45}#cgv .cgc.lkc{filter:grayscale(1);opacity:.4}'
   +'#cgv .cgc .tp{display:flex;justify-content:space-between;align-items:center;width:100%}'
   +'#cgv .cgc .lvt{font-size:9px;line-height:1;color:#ffd770;margin:-1px 0 0}'
   +'#cgv .cgc .cost{width:22px;height:22px;border-radius:50%;background:#c9972b;color:#2b1d12;font-weight:bold;font-size:13px;line-height:22px}'
@@ -19419,6 +19420,53 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   +'#cgv .cgrb h2{margin:0;font-size:26px;color:#ffd770}'
   +'#cgv .cgrb p{margin:0;color:#cdbb97;font-size:13px;line-height:1.4}'
   +'@media(max-width:360px){#cgv .cgc{flex-basis:88px}#cgv .cgm b{font-size:14px}}';
+  css.textContent+='#cgv.lob{background:linear-gradient(rgba(18,10,4,.8),rgba(18,10,4,.84)),url(hf/cg/door.webp) center/cover #241810}'
+  +'#cgv.cgp{background:#0d0703;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);overflow:hidden;display:flex;justify-content:center;align-items:flex-start}'
+  +'#cgv .cgst{position:relative;flex:none;width:min(100vw,calc((100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.48119));aspect-ratio:870/1808;background:url(hf/cg/board.webp) center/100% 100% no-repeat #1a0f07;container-type:inline-size;font-size:2.6cqw;line-height:1.2}'
+  +'@supports(height:100dvh){#cgv .cgst{width:min(100vw,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.48119))}}'
+  +'#cgv .cgst>*{position:absolute}'
+  +'#cgv .cgt{display:flex;align-items:center;justify-content:center;font-size:2.8cqw;font-weight:bold;color:#f3e6c8;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 1cqw}'
+  +'#cgv .cgt b{color:#ffd770;margin:0 .6cqw}#cgv .cgt.n{font-size:4.2cqw}'
+  +'#cgv .cgcol{pointer-events:none;border-radius:4cqw}'
+  +'#cgv .cgcol.w0{box-shadow:inset 0 0 0 .7cqw #5b8fe8,0 0 2.4cqw #5b8fe8}#cgv .cgcol.w1{box-shadow:inset 0 0 0 .7cqw #d4564a,0 0 2.4cqw #d4564a}'
+  +'#cgv .cghd{border-radius:2.4cqw;overflow:hidden;background:#1b110a center/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;padding:1.2cqw 1.6cqw;box-shadow:inset 0 -9cqw 6cqw -3cqw rgba(8,4,0,.92);pointer-events:none}'
+  +'#cgv .cghd.lkd{justify-content:center;align-items:center;text-align:center;box-shadow:none;background:linear-gradient(#1b110a,#2a1a0d);border:1px dashed #6b4a24}'
+  +'#cgv .cgln{font-weight:bold;font-size:2.9cqw;line-height:1.1;color:#ffd770;text-shadow:0 1px 3px #000,0 0 6px #000}'
+  +'#cgv .cgle{font-size:2cqw;line-height:1.15;color:#f0e2c2;text-shadow:0 1px 3px #000,0 0 5px #000}'
+  +'#cgv .cghd.lkd .cgle{color:#a89878}'
+  +'#cgv .cgfs{display:flex;align-items:center;justify-content:flex-start;padding-left:2cqw;font-weight:bold;font-size:4.8cqw;color:#7a1410;text-shadow:0 0 .8cqw #ffe9a8,0 0 .8cqw #ffe9a8;pointer-events:none}'
+  +'#cgv .cgx{background:rgba(10,5,2,.72);border-radius:1.6cqw;pointer-events:none}'
+  +'#cgv .cgpz{border-radius:2cqw}#cgv .cgpz.can{outline:.4cqw dashed #ffd770;background:rgba(255,215,112,.1)}'
+  +'#cgv .cgst .cgm{aspect-ratio:auto;border-width:.5cqw;border-radius:1.8cqw;padding:.4cqw;background:#4d3720;gap:0}'
+  +'#cgv .cgst .cgm img{width:56%!important;height:auto!important}'
+  +'#cgv .cgst .cgm b{font-size:4.6cqw}#cgv .cgst .cgm span{font-size:1.9cqw}'
+  +'#cgv .cgsb{display:flex;align-items:center;justify-content:center;font-size:5.4cqw;font-weight:bold;color:#e8dcc0;text-shadow:0 1px 3px #000;pointer-events:none}'
+  +'#cgv .cgsb.w0{color:#8fb6ff}#cgv .cgsb.w1{color:#ff8c7d}'
+  +'#cgv .cgst .cglog{background:none;border:0;padding:0;font-size:2.7cqw;line-height:1.25;display:flex;flex-direction:column;justify-content:center;overflow:hidden;color:#bfae8a;min-height:0}'
+  +'#cgv .cgdt{font-size:2.55cqw;line-height:1.25;color:#f3e6c8;text-shadow:0 1px 3px #000,0 0 6px #000;overflow-y:auto;scrollbar-width:none}#cgv .cgdt b{color:#ffd770}'
+  +'#cgv .cgen{display:flex;align-items:center;gap:.8cqw;font-size:3.4cqw;font-weight:bold;color:#ffd770;padding-left:1cqw}'
+  +'#cgv .cgen .cgpip{width:3.6cqw;height:3.6cqw;margin:0;border-width:.4cqw}'
+  +'#cgv .cgst .cghand{display:flex;gap:1.3%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x proximity}'
+  +'#cgv .cgst .cgc{flex:0 0 23.9%;height:100%;border-width:.5cqw;border-radius:3cqw;padding:1.6cqw;gap:.6cqw;background:linear-gradient(180deg,rgba(77,55,32,.92),rgba(40,26,12,.94))}'
+  +'#cgv .cgst .cgc .cost{width:5.6cqw;height:5.6cqw;line-height:5.6cqw;font-size:3.4cqw}'
+  +'#cgv .cgst .cgc .pwr{font-size:5.2cqw}#cgv .cgst .cgc .lvt{font-size:1.9cqw;margin:0}'
+  +'#cgv .cgst .cgc img{width:56%!important;height:auto!important}'
+  +'#cgv .cgst .cgc .nm{font-size:2.8cqw}#cgv .cgst .cgc .tx{font-size:2.1cqw;-webkit-line-clamp:5}'
+  +'#cgv .cgst .cgc.sel{transform:translateY(-1.2cqw)}'
+  +'#cgv .cgbb{border:0;background:none;color:#fff;font-weight:bold;font-size:3.7cqw;line-height:1.1;font-family:inherit;text-shadow:0 1px 3px #000;padding:0 1cqw;display:flex;align-items:center;justify-content:center;text-align:center}'
+  +'#cgv .cgbb.g{color:#2b1d12;text-shadow:0 1px 0 rgba(255,255,255,.35)}#cgv .cgbb:disabled{opacity:.45}#cgv .cgbb.done{opacity:.5}'
+  +'#cgv .cgbb:active:not(:disabled){filter:brightness(1.25)}'
+  +'#cgv .cgst .cgres{position:fixed}'
+  +'#cgdr{position:fixed;inset:0;z-index:330;pointer-events:none;display:flex;overflow:hidden}'
+  +'#cgdr i{flex:0 0 50%;height:100%;background:url(hf/cg/door.webp) no-repeat #1a0f07;background-size:100vw 100%;box-shadow:0 0 30px #000;animation:cgdl .9s .35s cubic-bezier(.6,0,.3,1) forwards}'
+  +'#cgdr i+i{background-position:right center;animation-name:cgdrr}'
+  +'@keyframes cgdl{to{transform:translateX(-102%)}}@keyframes cgdrr{to{transform:translateX(102%)}}';
+  css.textContent+='#cgv .cgst.lb{width:min(100vw,calc((100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.5));aspect-ratio:887/1774;background-image:url(hf/cg/lobby.webp);font-size:3.3cqw}'
+  +'@supports(height:100dvh){#cgv .cgst.lb{width:min(100vw,calc((100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))*.5))}}'
+  +'#cgv .cgpt{display:flex;align-items:center;justify-content:flex-start;font-weight:bold;color:#f3e6c8;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:3.4cqw;pointer-events:none}'
+  +'#cgv .cgpt.gd{color:#ffd770}#cgv .cgpt.nm{font-size:3.2cqw}'
+  +'#cgv .cghs{border:0;background:none;border-radius:3cqw;padding:0}#cgv .cghs:active{background:rgba(255,215,112,.2)}'
+  +'#cgv .cgdm{display:flex;align-items:center;justify-content:center;text-align:center;color:#ff9a86;font-weight:bold;font-size:2.9cqw;text-shadow:0 1px 3px #000;pointer-events:none}';
   document.head.appendChild(css);
 
   const frame=(id)=>SC[star(id)]||'#9a9a9a';
@@ -19437,7 +19485,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
         +(nx?'<br>Дараагийн түвшин: хүч '+(d.p+LB[l+1])+'<br>Үнэ: <b>'+nx.sh+'</b> хэлтэрхий + <b>'+nx.gold+'</b> зоос<br><span style="color:#bfae8a">Танд: '+g.sh+' хэлтэрхий, '+coins()+' зоос</span>':'<br><b>Дээд түвшин</b>')
         +(nx?'<button class="cgbtn go" style="width:100%;margin-top:8px" data-a="up"'+(g.sh>=nx.sh&&coins()>=nx.gold?'':' disabled')+'>Сайжруулах</button>':'')+'</div>'; }
     return '<div class="cgw"><div class="cgh"><h1>Миний карт</h1><span class="cgchip">Хэлтэрхий <b>'+g.sh+'</b></span></div>'+'<div style="position:sticky;top:0;z-index:3;background:#241810;padding:2px 0 4px;display:flex;flex-direction:column;gap:6px">'+(dMsg?'<div class="cgbox" style="border-color:#b3402c"><b>'+esc(dMsg)+'</b></div>':'')+det+'</div>'
-      +'<div class="cgdk">'+ids.map(id=>owned(id)?cardBtn(id,id===cSel?'in':'','data-cs="'+id+'"'):cardBtn(id,'lk','data-lock="'+id+'"')).join('')+'</div>'
+      +'<div class="cgdk">'+ids.map(id=>owned(id)?cardBtn(id,id===cSel?'in':'','data-cs="'+id+'"'):cardBtn(id,'lkc','data-lock="'+id+'"')).join('')+'</div>'
       +'<button class="cgbtn go" data-a="menu">Буцах</button></div>';
   }
   function doUp(){
@@ -19490,13 +19538,16 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 
   function view(){
     const g=CG();
-    if(V==='menu'){ const q=dq(), cl=QS.some((x,i)=>q[x.k]>=x.need&&!q.c[i]);
-      return '<div class="cgw"><div class="cgh"><h1>Картын тулаан</h1><span class="cgchip">Куб <b>'+(g.cubes||0)+'</b></span></div>'
-      +'<div class="cgbox" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span><b>'+esc(myName())+'</b></span><span>Ялалт <b>'+(g.w||0)+'</b> · Ялагдал <b>'+(g.l||0)+'</b></span><span>Хэлтэрхий <b>'+g.sh+'</b></span></div>'
-      +(dMsg?'<div class="cgbox" style="border-color:#b3402c"><b>'+esc(dMsg)+'</b></div>':'')
-      +'<button class="cgbtn go" style="padding:20px 8px;font-size:20px" data-a="mode">Тулаан</button>'
-      +'<div class="cgmn" style="grid-template-columns:1fr 1fr"><button class="cgbtn" data-a="cards">Миний карт</button><button class="cgbtn" data-a="deck">Багц ('+deckOk().length+'/'+STK+')</button><button class="cgbtn" data-a="top">Топ 10</button><button class="cgbtn" data-a="daily">Өдрийн даалгавар'+(cl?' (!)':'')+'</button></div>'
-      +'<div class="cgmn" style="grid-template-columns:1fr 1fr"><button class="cgbtn" data-a="rules">Дүрэм</button><button class="cgbtn" data-a="exit">Гарах</button></div></div>'; }
+    if(V==='menu'){ const q=dq(), cl=QS.some((x,i)=>q[x.k]>=x.need&&!q.c[i]), O=[0,0,887,1774], B=(x,y,w,h)=>bx(x,y,w,h,O);
+      const PT={cube:[800,290,40,28,'#170803','#683e18'],name:[112,358,108,34,'#110702','#120701'],w:[380,358,48,34,'#411602','#4b1704'],l:[588,358,44,34,'#240e03','#320f02'],sh:[822,358,40,34,'#190903','#170a05'],deck:[712,798,110,40,'#1c191a','#160a04']};
+      const pt=(k,txt,cls)=>{ const v=PT[k]; return '<div class="cgpt '+(cls||'')+'" style="'+B(v[0],v[1],v[2],v[3])+';background:linear-gradient('+v[4]+','+v[5]+')">'+txt+'</div>'; };
+      const hs=(a,x,y,w,h)=>'<button class="cghs" data-a="'+a+'" style="'+B(x,y,w,h)+'"></button>';
+      let h2='<div class="cgst lb">';
+      h2+=pt('cube',(g.cubes||0),'gd')+pt('name',esc(myName()),'nm')+pt('w',(g.w||0))+pt('l',(g.l||0))+pt('sh',g.sh)+pt('deck','('+deckOk().length+'/'+STK+')','gd');
+      if(!cl) h2+='<div class="cgpt" style="'+B(815,895,53,55)+';background:url(hf/cg/lobby.webp) no-repeat;background-size:'+(887/53*100).toFixed(2)+'% auto;background-position:'+(815/(887-53)*100).toFixed(2)+'% '+(1047/(1774-55)*100).toFixed(2)+'%"></div>';
+      if(dMsg) h2+='<div class="cgdm" style="'+B(40,696,810,44)+'">'+esc(dMsg)+'</div>';
+      h2+=hs('mode',40,540,805,150)+hs('cards',30,750,402,130)+hs('deck',456,750,402,130)+hs('top',30,903,402,130)+hs('daily',456,903,402,130)+hs('rules',30,1056,402,130)+hs('exit',456,1056,402,130);
+      return h2+'</div>'; }
     if(V==='mode') return '<div class="cgw"><div class="cgh"><h1>Тулаан сонгох</h1></div><div class="cgmn"><button class="cgbtn go" data-a="online">Онлайн тулаан (жинхэнэ тоглогчтой)</button><button class="cgbtn go" data-a="play">Ботын эсрэг</button><button class="cgbtn" data-a="menu">Буцах</button></div></div>';
     if(V==='cards') return cardsView();
     if(V==='daily') return dailyView();
@@ -19517,36 +19568,57 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     const g=CG(), dk=g.deck, ids=ALL().sort((a,b)=>star(b)-star(a)||DEF[b].c-DEF[a].c);
     return '<div class="cgw"><div class="cgh"><h1>Миний багц</h1><span class="cgchip">Сонгосон <b>'+dk.length+'</b>/'+STK+'</span></div>'
       +'<div class="cgbox">Карт дарж багцад нэмнэ эсвэл хасна. Багц яг '+STK+' карттай байх ёстой. Түгжигдсэн карт нь тухайн 5 одтой баатрыг авсны дараа нээгдэнэ.'+(dMsg?'<br><b>'+esc(dMsg)+'</b>':'')+'</div>'
-      +'<div class="cgdk">'+ids.map(id=>owned(id)?cardBtn(id,dk.indexOf(id)>=0?'in':'','data-d="'+id+'"'):cardBtn(id,'lk','data-lock="'+id+'"')).join('')+'</div>'
+      +'<div class="cgdk">'+ids.map(id=>owned(id)?cardBtn(id,dk.indexOf(id)>=0?'in':'','data-d="'+id+'"'):cardBtn(id,'lkc','data-lock="'+id+'"')).join('')+'</div>'
       +'<div class="cgbt" style="grid-template-columns:1fr 1fr"><button class="cgbtn" data-a="auto">Автомат</button><button class="cgbtn go" data-a="menu">Болсон</button></div></div>';
   }
+  const BW=870,BH=1808;
+  const bx=(x,y,w,h,o)=>{ o=o||[0,0,BW,BH]; return 'left:'+((x-o[0])/o[2]*100).toFixed(3)+'%;top:'+((y-o[1])/o[3]*100).toFixed(3)+'%;width:'+(w/o[2]*100).toFixed(3)+'%;height:'+(h/o[3]*100).toFixed(3)+'%'; };
+  const COLX=[17,303,583], COLW=[273,269,272], SLX=[[36,160],[321,443],[602,724]], FY=[358,482], MY=[657,780], SW=112;
+  const mcAt=(c,li,cls,i,mine,ghost)=>{ const p=ghost?cpw(c):pw(c,li), bb=cpw(c), x=SLX[li][i%2], y=(mine?MY:FY)[(i/2)|0];
+    return '<button class="cgm '+cls+'" '+(ghost?'data-g="':'data-u="')+c.uid+'"'+(mine?' data-place="'+li+'"':'')+' style="'+bx(x,y,SW,SW)+';border-color:'+frame(c.id)+'">'+portrait(c.id,34)+'<b class="'+(p>bb?'up':p<bb?'dn':'')+'">'+p+'</b><span>'+esc(cname(c.id).split(' ')[0])+'</span></button>'; };
   function playView(){
     const left=energy(0)-spent(), sc=sel!=null&&!busy&&!G.over;
-    let h='<div class="cgw"><div class="cgh"><h1>Картын тулаан</h1><div class="cgrow"><span class="cgchip">Ээлж <b>'+G.turn+'</b>/'+G.max+'</span><span class="cgchip">Бооцоо <b>×'+G.stake+'</b></span><span class="cgchip">Куб <b>'+(CG().cubes||0)+'</b></span>'+(G.on&&ON?'<span class="cgchip">Хугацаа <b id="cgt">'+Math.max(0,ON.left)+'</b>с</span>':'')+'</div></div>'+(G.on?'<div class="cgchip" style="align-self:flex-start">Өрсөлдөгч: <b>'+esc(G.opName)+'</b></div>':'');
-    h+='<div class="cgbd">'+G.locs.map((L,li)=>{
+    let lead=[0,0]; G.locs.forEach((L,li)=>{ if(locRev(li)){ const x=total(li,0), y=total(li,1); if(x>y) lead[0]++; else if(y>x) lead[1]++; } });
+    const wait=busy&&ON&&ON.waiting;
+    let h='<div class="cgst">';
+    h+='<div class="cgt" style="'+bx(125,84,180,38)+';justify-content:flex-start">'+esc(myName())+'</div>';
+    h+='<div class="cgt" style="'+bx(560,84,190,38)+';justify-content:flex-end">'+esc(G.opName)+'</div>';
+    h+='<div class="cgt n" style="'+bx(122,146,86,48)+';color:#cfe0ff">'+lead[0]+'</div>';
+    h+='<div class="cgt n" style="'+bx(745,146,57,48)+';color:#ffc9c0">'+lead[1]+'</div>';
+    h+='<div class="cgt" style="'+bx(250,146,160,48)+'">Ээлж <b>'+G.turn+'</b>/'+G.max+' · ×<b>'+G.stake+'</b></div>';
+    h+='<div class="cgt" style="'+bx(488,141,130,55)+'">'+(G.on&&ON?'<b id="cgt">'+Math.max(0,ON.left)+'</b>с':'Куб <b>'+(CG().cubes||0)+'</b>')+'</div>';
+    G.locs.forEach((L,li)=>{
       const rev=locRev(li), x=rev?total(li,0):0, y=rev?total(li,1):0, cl=rev?(x>y?' w0':y>x?' w1':''):'';
-      const es=L.sides[1].map(c=>mcHtml(c,li,'foe')).join('')+Array(Math.max(0,L.cap-L.sides[1].length)).fill('<div class="cgs"></div>').join('');
-      const gh=G.staged.filter(s=>s.li===li).map(s=>'<button class="cgm me ghost" data-g="'+s.card.uid+'" style="border-color:'+frame(s.card.id)+'">'+portrait(s.card.id,34)+'<b>'+cpw(s.card)+'</b><span>'+esc(cname(s.card.id).split(' ')[0])+'</span></button>').join('');
-      const ms=L.sides[0].map(c=>mcHtml(c,li,'me')).join('')+gh+Array(Math.max(0,L.cap-L.sides[0].length-G.staged.filter(s=>s.li===li).length)).fill('<div class="cgs"></div>').join('');
+      const cx=COLX[li], cw=COLW[li], cap=L.cap;
+      h+='<div class="cgcol'+cl+'" style="'+bx(cx,215,cw,753)+'"></div>';
+      h+='<div class="cghd'+(rev?'':' lkd')+'" style="'+bx(cx+9,224,cw-18,128)+(rev?';background-image:url(hf/cg/loc_'+L.eff+'.webp)':'')+'"><div class="cgln">'+(rev?esc(L.d.n):'Талбар '+(li+1))+'</div><div class="cgle">'+(rev?esc(L.d.t):(li+1)+'-р ээлжид нээгдэнэ')+'</div>'+'</div>'+(rev?'<div class="cgfs" style="'+bx(SLX[li][0]-8,611,90,38)+'">'+y+'</div>':'');
+      for(let i=cap;i<4;i++){ const sx=SLX[li][i%2]; h+='<div class="cgx" style="'+bx(sx,FY[(i/2)|0],SW,SW)+'"></div><div class="cgx" style="'+bx(sx,MY[(i/2)|0],SW,SW)+'"></div>'; }
+      L.sides[1].forEach((c,i)=>{ h+=mcAt(c,li,'foe',i,false,false); });
       const can=sc&&rev&&capLeft(li,0)>0;
-      return '<div class="cgl'+cl+'"><div class="cglh"><div class="cgln">'+(rev?esc(L.d.n):'Талбар '+(li+1))+'</div><div class="cgle">'+(rev?esc(L.d.t):(li+1)+'-р ээлжид нээгдэнэ')+'</div></div>'
-        +'<div class="cgsc s1">'+(rev?y:'·')+'</div><div class="cgg">'+es+'</div><div class="cgdv"></div><div class="cgg'+(can?' can':'')+'" data-place="'+li+'">'+ms+'</div><div class="cgsc s0">'+(rev?x:'·')+'</div></div>';
-    }).join('')+'</div>';
-    h+='<div class="cglog">'+G.log.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>';
+      h+='<div class="cgpz'+(can?' can':'')+'" data-place="'+li+'" style="'+bx(cx+8,650,cw-16,252)+'"></div>';
+      L.sides[0].forEach((c,i)=>{ h+=mcAt(c,li,'me',i,true,false); });
+      G.staged.filter(s=>s.li===li).forEach((s,k)=>{ h+=mcAt(s.card,li,'me ghost',L.sides[0].length+k,true,true); });
+      h+='<div class="cgsb'+cl+'" style="'+bx([72,358,640][li],909,166,53)+'">'+(rev?x:'·')+'</div>';
+    });
+    h+='<div class="cglog" style="'+bx(36,996,798,84)+'">'+G.log.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>';
     const d=tip;
-    let sx=''; if(d){ const li0=locOf(d), act=li0>=0?syn(d,li0).out:[], inf=synInfo(d.id); if(act.length) sx+='<br><span style="color:#8fe39a">Ажиллаж байна: '+esc(act.join(' · '))+'</span>'; else if(inf.length) sx+='<br><span style="color:#cdbb97">Холбоо: '+esc(inf.join(' '))+'</span>'; }
-    h+='<div class="cgbox" style="min-height:48px">'+(d?'<b>'+esc(cname(d.id))+'</b> · '+star(d.id)+' од · энерги '+d.d.c+' · хүч '+cpw(d)+((d.lv||1)>1?' ('+(d.lv)+'-р түвшин)':'')+'<br>'+esc(d.d.t)+sx:'Картаа дарж сонго, дараа нь нээлттэй талбарыг дар. Тавигдсан картыг дарж чадварыг нь хар.')+'</div>';
-    h+='<div class="cgrow"><div>Энерги '+Array.from({length:energy(0)},(_,i)=>'<i class="cgpip'+(i<left?' on':'')+'"></i>').join('')+' <b style="color:#ffd770">'+left+'</b></div><span class="cgchip">Багц '+G.deck[0].length+(G.on?'':' · Дайсны гар '+G.hand[1].length)+'</span></div>';
-    h+='<div class="cghand">'+(G.hand[0].map((c,i)=>'<button class="cgc'+(c.uid===sel?' sel':'')+(c.d.c>left?' off':'')+'" style="border-color:'+frame(c.id)+'" data-h="'+i+'"><div class="tp"><span class="cost">'+c.d.c+'</span><span class="pwr">'+cpw(c)+'</span></div>'+lvTag(c.lv||1)+portrait(c.id,44)+'<div class="nm">'+esc(cname(c.id))+'</div><div class="tx">'+esc(c.d.t)+'</div></button>').join('')||'<div class="cgbox" style="flex:1;text-align:center">Гарт карт алга.</div>')+'</div>';
-    h+='<div class="cgbt"><button class="cgbtn" data-a="ret"'+(G.over||(busy&&!(ON&&ON.waiting))?' disabled':'')+'>Ухрах</button><button class="cgbtn snap'+(G.snapped[0]||(ON&&ON.mySnap)?' done':'')+'" data-a="snap"'+(busy||G.over||G.snapped[0]||(ON&&ON.mySnap)?' disabled':'')+'>Хан!</button><button class="cgbtn go" data-a="end"'+(busy||G.over?' disabled':'')+'>'+(busy?(ON&&ON.waiting?'Өрсөлдөгчийг хүлээж байна…':'Нээж байна…'):(G.turn>=G.max?'Сүүлийн ээлж':'Ээлж дуусгах'))+'</button></div>';
+    let sx=''; if(d){ const li0=locOf(d), act=li0>=0?syn(d,li0).out:[], inf=synInfo(d.id); if(act.length) sx+='<br><span style="color:#8fe39a">Ажиллаж байна: '+esc(act.join(' · '))+'</span>'; else if(inf.length) sx+='<br><span style="color:#e3d2a8">Холбоо: '+esc(inf.join(' '))+'</span>'; }
+    h+='<div class="cgdt" style="'+bx(34,1110,480,100)+'">'+(d?'<b>'+esc(cname(d.id))+'</b> · '+star(d.id)+' од · энерги '+d.d.c+' · хүч '+cpw(d)+((d.lv||1)>1?' ('+(d.lv)+'-р түвшин)':'')+'<br>'+esc(d.d.t)+sx:'Картаа дарж сонго, дараа нь нээлттэй талбарыг дар. Тавигдсан картыг дарж чадварыг нь хар.')+'</div>';
+    h+='<div class="cgen" style="'+bx(58,1237,450,50)+'">'+Array.from({length:energy(0)},(_,i)=>'<i class="cgpip'+(i<left?' on':'')+'"></i>').join('')+' <b>'+left+'</b></div>';
+    h+='<div class="cgt" style="'+bx(534,1237,312,50)+'">Багц <b>'+G.deck[0].length+'</b>'+(G.on?'':' · Дайсны гар <b>'+G.hand[1].length+'</b>')+'</div>';
+    h+='<div class="cghand" style="'+bx(18,1310,837,315)+'">'+(G.hand[0].map((c,i)=>'<button class="cgc'+(c.uid===sel?' sel':'')+(c.d.c>left?' off':'')+'" style="border-color:'+frame(c.id)+'" data-h="'+i+'"><div class="tp"><span class="cost">'+c.d.c+'</span><span class="pwr">'+cpw(c)+'</span></div>'+lvTag(c.lv||1)+portrait(c.id,44)+'<div class="nm">'+esc(cname(c.id))+'</div><div class="tx">'+esc(c.d.t)+'</div></button>').join('')||'<div class="cgbox" style="flex:1;text-align:center;align-self:center">Гарт карт алга.</div>')+'</div>';
+    h+='<button class="cgbb b" data-a="ret" style="'+bx(30,1665,223,87)+'"'+(G.over||(busy&&!wait)?' disabled':'')+'>Ухрах</button>'
+      +'<button class="cgbb r'+(G.snapped[0]||(ON&&ON.mySnap)?' done':'')+'" data-a="snap" style="'+bx(274,1665,263,87)+'"'+(busy||G.over||G.snapped[0]||(ON&&ON.mySnap)?' disabled':'')+'>Хан!</button>'
+      +'<button class="cgbb g" data-a="end" style="'+bx(556,1665,286,87)+'"'+(busy||G.over?' disabled':'')+'>'+(busy?(wait?'Хүлээж байна…':'Нээж байна…'):(G.turn>=G.max?'Сүүлийн ээлж':'Ээлж дуусгах'))+'</button>';
+    h+='</div>';
     if(G.over&&G.res){ const R=G.res, T={win:'Ялалт',lose:'Ялагдал',draw:'Тэнцлээ'}[R.res], dl=R.res==='draw'?'0 куб':(R.d>0?'+':'')+R.d+' куб';
       h+='<div class="cgres"><div class="cgrb"><h2>'+T+'</h2><p>'+esc(R.why)+'</p><p><b style="color:#ffd770">'+dl+'</b> · нийт '+(CG().cubes||0)+'</p>'+(R.sh?'<p>Картын хэлтэрхий <b style="color:#ffd770">+'+R.sh+'</b></p>':'')+'<button class="cgbtn go" data-a="'+(G.on?'online':'play')+'">Дахин тоглох</button><button class="cgbtn" data-a="menu">Цэс</button></div></div>'; }
-    return h+'</div>';
+    return h;
   }
   function render(){
     const el=document.getElementById('cgv'); if(!el) return;
     const keep=el.scrollTop, hand=el.querySelector('.cghand'), hs=hand?hand.scrollLeft:0;
-    el.innerHTML=view();
+    el.className=((V==='play'&&G)||V==='menu')?'cgp':'lob'; el.innerHTML=view();
     el.scrollTop=keep; const nh=el.querySelector('.cghand'); if(nh) nh.scrollLeft=hs;
   }
 

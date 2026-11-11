@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='29ed6c7662';
+var UPDB='b700f808c8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20894,6 +20894,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       if(E&&E.hbf){ let n=0, lw=0, lh=0;
         const step=()=>{ if(!(BT&&BT.e===E)) return false;
           const el=document.getElementById('btl');
+          if(el){ el.dataset.ar='1'; try{ const bu=document.getElementById('bu'), bi=bu&&bu.querySelector('.bu-in'); if(bi) bu.style.setProperty('--ox',((bu.offsetWidth-bi.offsetWidth)/2).toFixed(1)+'px'); }catch(e){} }
           if(el){ if(el.dataset.tar&&innerWidth>innerHeight){ UNROT(el); try{ btResize(); }catch(e){} } else if(!el.dataset.tar&&innerHeight>innerWidth){ ROT(el); try{ btResize(); }catch(e){} } }
           if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
           if(BT.tmax!==90) BT.tmax=90;   /* арена: 90 секунд, дуусахад үлдсэн HP-ийн хувиар шийднэ */
@@ -21021,6 +21022,11 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   document.head.appendChild(st2);
   const stp=document.createElement('style'); stp.textContent=
    '#askov{z-index:9700!important}#tapk.tpkp{position:absolute;left:50%;bottom:1.5%;width:clamp(380px,44%,760px);max-width:96%;aspect-ratio:1672/884;transform:translateX(-50%);container-type:inline-size;z-index:60;pointer-events:auto;overflow:hidden;border-radius:'+PW(26)+'}'
+  +'/* Арена: самбар зүүн булан, чадлууд доод ирмэг дээр самбарын хажууд, товчнууд баруун ирмэгт */'
+  +'#btl[data-ar] #bu-pan{left:calc(var(--ox,0px)*-1 + calc(var(--k)*2px))!important;bottom:calc(var(--k)*4px)!important}'
+  +'#btl[data-ar] .bu-sks{left:calc(var(--ox,0px)*-1 + calc(var(--k)*308px))!important;right:calc(var(--ox,0px)*-1 + calc(var(--k)*96px))!important;bottom:calc(var(--k)*10px)!important}'
+  +'#btl[data-ar] #bu-ctl{right:calc(var(--ox,0px)*-1 + calc(var(--k)*3px))!important}'
+  +'#btl[data-ar] .bu-go{right:calc(var(--ox,0px)*-1 + calc(var(--k)*4px))!important}'
   +'#btl[data-prep] #btpan,#btl[data-prep] #bmatch,#btl[data-prep] #bstart{display:none!important}'
   +'#btl[data-prep] #bu-pan,#btl[data-prep] #bu-sks,#btl[data-prep] #bu-ctl,#btl[data-prep] #bu-go,#btl[data-prep] #bu-hint{display:none!important}'
   +'#tapk .tpkw{position:absolute;left:0;top:-'+PW(28)+';width:100%;height:'+PW(941)+';background:url(hf/sq/tapk_bg.webp?v=1) 0 0/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#fff}'

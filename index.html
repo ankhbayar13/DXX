@@ -3998,18 +3998,19 @@ function raceOpen(){ const a=raceInfo(); if(a.n>=3){ say('Өнөөдрийн 3 �
   const o=document.createElement('div'); o.id='raceov'; o.innerHTML='<canvas></canvas><button id="racex" class="btn red">✕ Гарах</button>'; document.body.appendChild(o);
   const cv=o.querySelector('canvas'), dp=Math.min(2,window.devicePixelRatio||1), w=window.innerWidth, h=window.innerHeight; cv.width=Math.round(w*dp); cv.height=Math.round(h*dp); cv.style.width=w+'px'; cv.style.height=h+'px';
   const lvS=ntL('horseS'), lvL=ntL('horseL'), hs=Math.min(5,(S.animals&&S.animals.aduu)||0), me=2, ch=mgDiff();
+  const HZR=window.HZRUN||null; window.HZRUN=null; let oi=0;
   const bases=[0.0345,0.0372,0.0398,0.0425].map(b=>b*(1+0.012*ch)*(0.97+Math.random()*0.06)).sort(()=>Math.random()-0.5);
-  const hs_=[]; let bi=0; for(let i=0;i<5;i++){ if(i===me) hs_.push({me:1,x:0,v:0,ph:0,fin:null,lane:i}); else { hs_.push({me:0,x:0,v:0,ph:Math.random()*6,fin:null,lane:i,b:bases[bi++],sp:0.76+Math.random()*0.1,wp:Math.random()*6}); } }
-  RCE={o:o,cv:cv,c:cv.getContext('2d'),dp:dp,w:w,h:h,hs:hs_,me:me,st:'ready',t:0,cd:0,s:1,ex:0,lock:0,sc:0,lvS:lvS,lvL:lvL,hr:hs,last:performance.now(),raf:0,dust:[],tapN:0,tps:[],msg:'',mt:0,place:0,endT:0,done:0};
+  const hs_=[]; let bi=0; for(let i=0;i<5;i++){ if(i===me) hs_.push({me:1,x:0,v:0,ph:0,fin:null,lane:i}); else { const O=HZR?HZR.f[oi++]:null; hs_.push({me:0,x:0,v:0,ph:Math.random()*6,fin:null,lane:i,b:O?O.b:bases[bi++],sp:O?O.spf:0.76+Math.random()*0.1,sty:O?O.sty:0,wp:Math.random()*6}); } }
+  RCE={o:o,cv:cv,c:cv.getContext('2d'),dp:dp,w:w,h:h,hs:hs_,me:me,st:'ready',t:0,cd:0,s:1,ex:0,lock:0,sc:0,lvS:lvS,lvL:lvL,hr:hs,last:performance.now(),raf:0,dust:[],hz:HZR?HZR.h:null,hcls:HZR?HZR.cls:0,spx:HZR?(0.78-0.004*(HZR.h.se-5)):0.78,tapN:0,tps:[],msg:'',mt:0,place:0,endT:0,done:0};
   cv.addEventListener('pointerdown',raceTap); o.querySelector('#racex').onclick=raceClose;
   const g=document.createElement('div'); g.id='racego'; g.innerHTML='<h2>🐎 Морин уралдаа</h2><div class="sm">Дэлгэцийг <b>хурдан хурдан товш</b>. Товшсон бүр морийг түлхэнэ.</div><div class="sm">⚡ Эрч дуусвал удаашрана, тиймээс жигд товш. <b>Төгсгөлд</b> бүх хүчээ гарга!</div><button class="btn" id="racestart">▶ Эхлэх</button>'; o.appendChild(g);
   g.querySelector('#racestart').onclick=()=>{ g.remove(); if(!RCE) return; RCE.st='count'; RCE.cd=3.2; sfx('horn'); };
   RCE.raf=requestAnimationFrame(raceLoop); }
 function raceClose(){ if(!RCE) return; cancelAnimationFrame(RCE.raf); const o=RCE.o; RCE=null; o.remove(); refresh(); openM('naadam'); }
 function raceTap(e){ if(e&&e.preventDefault) e.preventDefault(); const R=RCE; if(!R||R.st!=='run') return; const m=R.hs[R.me]; if(m.fin!=null) return;
-  const sprint=m.x>0.78, cost=0.04*(1-0.04*R.lvL)*(sprint?0.3:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(sprint?1.2:1);
+  const hz=R.hz||{sp:5,st:5,se:5}, sprint=m.x>R.spx, cost=0.04*(1-0.04*R.lvL)*(1-0.011*(hz.st-5))*(sprint?0.3:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(1+0.012*(hz.sp-5))*(sprint?1.2:1), lk=Math.max(0.5,0.8-0.008*(hz.se-5));
   if(R.lock>0){ R.lock=Math.max(R.lock,0.5); R.ex=R.lock; return; }
-  if(R.s>=cost){ m.v+=kick; R.s-=cost; } else { R.lock=0.8; R.ex=0.8; }
+  if(R.s>=cost){ m.v+=kick; R.s-=cost; } else { R.lock=lk; R.ex=lk; }
   R.tapN++; R.tp=performance.now(); try{ snV({f:[190,95],d:0.07,ty:'square',fl:'lowpass',fc:650,q:0.7,v:0.22,at:0.003}); }catch(x){} if(window.vib) vib(6); }
 // нэг алхам (дүрслэлгүй, тест хийхэд ч ашиглана)
 function raceStep(dt){ const R=RCE; if(!R) return;
@@ -4018,14 +4019,15 @@ function raceStep(dt){ const R=RCE; if(!R) return;
   R.t+=dt; R.mt=Math.max(0,R.mt-dt); R.lock=Math.max(0,R.lock-dt); R.ex=Math.max(0,R.ex-dt);
   const m=R.hs[R.me];
   R.hs.forEach((q,i)=>{
-    if(q.me){ q.v+=((R.lock>0?0.011:0.017)-q.v)*Math.min(1,1.2*dt); if(q.fin!=null) q.v*=Math.max(0,1-1.5*dt); R.s=Math.min(1,R.s+0.09*(1+0.05*R.lvL)*dt); }
-    else { const tg=q.b*(1+0.10*Math.sin(R.t*1.7+q.wp))*(q.x>q.sp?1.12:1); q.v+=(tg-q.v)*Math.min(1,4*dt); if(q.fin!=null) q.v*=Math.max(0,1-1.5*dt); }
+    if(q.me){ q.v+=((R.lock>0?0.011:0.017)-q.v)*Math.min(1,1.2*dt); if(q.fin!=null) q.v*=Math.max(0,1-1.5*dt); R.s=Math.min(1,R.s+0.09*(1+0.05*R.lvL)*(1+0.015*((R.hz?R.hz.st:5)-5))*dt); }
+    else { const tg=q.b*(1+0.10*Math.sin(R.t*1.7+q.wp))*(q.x>q.sp?1.12:1)*raceSty(q); q.v+=(tg-q.v)*Math.min(1,4*dt); if(q.fin!=null) q.v*=Math.max(0,1-1.5*dt); }
     q.x+=q.v*dt; q.ph+=q.v*dt*320; if(q.x>=1&&q.fin==null){ q.fin=R.t; if(q.me){ R.st='fin'; R.endT=0; R.place=R.hs.filter(z=>z.fin!=null).length; R.msg=''; sfx(R.place<=3?'win':'lose'); } } });
   if(R.st==='run'&&R.t>=40&&m.fin==null){ m.fin=R.t; R.place=1+R.hs.filter(z=>!z.me&&z.x>m.x).length; R.st='fin'; R.endT=0; sfx('lose'); }
   if(R.st==='fin'){ R.endT+=dt; if(R.endT>1.4&&!R.done){ R.done=1; raceFinish(); } }
   R.sc+=(70+m.v*1500)*dt;
   if(Math.random()<dt*14*Math.min(1,m.v*30)) R.dust.push({x:m.x,l:m.lane,t:0}); R.dust.forEach(d=>d.t+=dt); R.dust=R.dust.filter(d=>d.t<0.6);
 }
+function raceSty(q){ const s=q.sty; if(!s) return 1; const x=q.x; if(s==='lead') return x<0.35?1.06:(x<0.7?1.0:0.97); if(s==='close') return x<0.55?0.96:1.0; return 1; }
 function raceLoop(now){ if(!RCE) return; const R=RCE, dt=Math.min(0.05,(now-R.last)/1000); R.last=now; raceStep(dt); raceDraw(now/1000); if(RCE) R.raf=requestAnimationFrame(raceLoop); }
 function racePos(){ const R=RCE; const m=R.hs[R.me]; let n=1; R.hs.forEach(q=>{ if(!q.me&&q.x>m.x) n++; }); return m.fin!=null?R.place:n; }
 function raceDrawOld(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h; c.setTransform(dp,0,0,dp,0,0);
@@ -4055,11 +4057,11 @@ function raceDrawOld(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h; c.setTransfo
   const sp=R.s, col=sp>0.5?'#5fd04a':sp>0.2?'#e8c23a':'#e0483a'; c.fillStyle=(R.ex>0&&Math.floor(t*10)%2)?'#fff':col; c.fillRect(bx2,by2,bw*sp,18);
   c.font='bold 13px sans-serif'; c.fillStyle='#fff'; c.lineWidth=3; c.strokeText('⚡ Эрч',w/2,by2+14); c.fillText('⚡ Эрч',w/2,by2+14);
   const m=R.hs[R.me];
-  if(!sh&&R.st==='run'&&m.x>0.78&&m.fin==null){ c.font='bold 22px sans-serif'; c.fillStyle='#ffd35a'; c.strokeText('ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2+44); c.fillText('ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2+44); }
+  if(!sh&&R.st==='run'&&m.x>(R.spx||0.78)&&m.fin==null){ c.font='bold 22px sans-serif'; c.fillStyle='#ffd35a'; c.strokeText('ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2+44); c.fillText('ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2+44); }
   else if(!sh&&R.st==='run'&&R.t<6&&m.fin==null){ c.font='bold 20px sans-serif'; c.fillStyle='#fff'; const m2=R.ex>0?'Ядарлаа! Түр зогсоод эрчээ авна':'👆 Хурдан хурдан ТОВШ!'; c.strokeText(m2,w/2,by2+44); c.fillText(m2,w/2,by2+44); }
   else if(!sh&&R.st==='run'&&R.ex>0&&m.fin==null){ c.font='bold 20px sans-serif'; c.fillStyle='#ff9a7a'; c.strokeText('Ядарлаа! Түр зогс',w/2,by2+44); c.fillText('Ядарлаа! Түр зогс',w/2,by2+44); }
   if(!sh&&R.st==='run'&&m.fin==null){ const pu=Math.max(0,1-(performance.now()-(R.tp||0))/160), pr=30+7*pu, pcx=w/2, pcy=Math.min(h-44,by2+96);
-    c.fillStyle=R.lock>0?'#7a2a20':(m.x>0.78?'#e8a21a':'#2f7d32'); c.globalAlpha=0.92; c.beginPath(); c.arc(pcx,pcy,pr,0,6.3); c.fill(); c.globalAlpha=1; c.lineWidth=4; c.strokeStyle='#fff'; c.stroke();
+    c.fillStyle=R.lock>0?'#7a2a20':(m.x>(R.spx||0.78)?'#e8a21a':'#2f7d32'); c.globalAlpha=0.92; c.beginPath(); c.arc(pcx,pcy,pr,0,6.3); c.fill(); c.globalAlpha=1; c.lineWidth=4; c.strokeStyle='#fff'; c.stroke();
     c.font='bold 18px sans-serif'; c.fillStyle='#fff'; c.lineWidth=3; c.strokeStyle='#000a'; const pt=R.lock>0?'ЗОГС':'ДАР'; c.strokeText(pt,pcx,pcy+6); c.fillText(pt,pcx,pcy+6); }
   if(R.st==='count'){ c.font='bold 90px sans-serif'; c.fillStyle='#ffd35a'; const n=Math.ceil(R.cd-0.2); const tx=n>0?String(n):'ГАР'; c.lineWidth=6; c.strokeText(tx,w/2,h*0.5); c.fillText(tx,w/2,h*0.5); }
   if(R.mt>0&&R.msg){ c.font='bold 54px sans-serif'; c.fillStyle='#ffd35a'; c.lineWidth=5; c.strokeText(R.msg,w/2,h*0.5); c.fillText(R.msg,w/2,h*0.5); }
@@ -4809,7 +4811,7 @@ function raceDrawN(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h, N=NDR; c.setTr
   const sp=R.s, col=sp>0.5?'#5fd04a':sp>0.2?'#e8c23a':'#e0483a'; c.fillStyle=(R.ex>0&&Math.floor(t*10)%2)?'#fff':col; c.fillRect(bx2,by2,bw*sp,18);
   c.font='bold 13px sans-serif'; c.fillStyle='#fff'; c.lineWidth=3; ndTxt(c,'⚡ Эрч',w/2,by2+14);
   const m=R.hs[R.me];
-  if(R.st==='run'&&m.x>0.78&&m.fin==null){ c.font='bold 22px sans-serif'; c.fillStyle='#ffd35a'; ndTxt(c,'ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2-14); }
+  if(R.st==='run'&&m.x>(R.spx||0.78)&&m.fin==null){ c.font='bold 22px sans-serif'; c.fillStyle='#ffd35a'; ndTxt(c,'ХУРДАЛ! ДАР ДАР ДАР!',w/2,by2-14); }
   else if(R.st==='run'&&R.t<6&&m.fin==null){ c.font='bold 20px sans-serif'; c.fillStyle='#fff'; ndTxt(c,R.ex>0?'Ядарлаа! Түр зогсоод эрчээ авна':'👆 Хурдан хурдан ТОВШ!',w/2,by2-14); }
   else if(R.st==='run'&&R.ex>0&&m.fin==null){ c.font='bold 20px sans-serif'; c.fillStyle='#ff9a7a'; ndTxt(c,'Ядарлаа! Түр зогс',w/2,by2-14); }
   if(R.st==='count'){ c.font='bold 90px sans-serif'; c.fillStyle='#ffd35a'; const n=Math.ceil(R.cd-0.2); c.lineWidth=6; ndTxt(c,n>0?String(n):'ГАР',w/2,h*0.5); }
@@ -10889,7 +10891,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e729ae50f9';
+var UPDB='03b5617910';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21228,6 +21230,147 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   function ndxScr(){ try{ const sc=document.getElementById('ndx-ls'), c=sc&&sc.querySelector('.ndx-li.cur'); if(sc&&c) sc.scrollLeft=c.offsetLeft-sc.clientWidth/2+c.offsetWidth/2; }catch(e){} }
   const _om2=openM; openM=function(k){ if(k==='ndbokh'){ window.NDXT=null; } const r=_om2.apply(this,arguments); if(k==='ndbokh') setTimeout(ndxScr,60); return r; };
   window.ndxMain=()=>openM('naadam'); window.ndxBokh=()=>openM('ndbokh');
+})();
+
+
+/* p32/hzstable.js — Морин уралдаа: морины чадвар (Хурд/Тэсвэр/Мэдрэмж), Алтаар морь авах, 5 морьтой хүснэгт, насны ангилал */
+(function(){
+  if(typeof raceOpen!=='function'||typeof raceFinish!=='function') return;
+  const CLS=['Даага','Шүдлэн','Хязаалан','Соёолон','Их нас','Азарга'];
+  const TYPES={
+    e:{nm:'Энгийн морь',cap:25,flt:'none'},
+    sp:{nm:'Хурдан морь',cap:32,flt:'brightness(1.55) saturate(.6)'},
+    st:{nm:'Тэсвэртэй морь',cap:32,flt:'brightness(.55) saturate(.9)'},
+    bd:{nm:'Бүрэн морь',cap:40,flt:'grayscale(1) brightness(1.55)'}};
+  const SHOP=[
+    {t:'sp',d:'Хурд өндөр, тэсвэр бага. Эхэндээ хурдан давхина.',s:[16,6,8],alt:20},
+    {t:'st',d:'Тэсвэр өндөр, хурд бага. Эрч бага зарцуулна.',s:[7,16,8],alt:20},
+    {t:'bd',d:'Гурван чадвар тэнцүү, хамгийн өндөр дээд хязгаартай.',s:[14,14,14],alt:50}];
+  const STY={lead:'Тэргүүлэх',mid:'Дунд',close:'Хойноос'};
+  const ONM=['Хангайн бор','Говийн зээрд','Алтан хул','Сүлд цагаан','Хөлгийн хар','Тал нутгийн шарга','Хурдан хээр','Салхин халзан','Цагаан дагцалт','Мөнгөн цавьдар'];
+  const LC=['#e0483a','#3a7bd5','#e8c23a','#9c5bd6','#45b36b'];
+  const PTS=[4,3,2,1,1];
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fm=n=>{ try{ return f(n); }catch(e){ return String(n); } };
+  function hz(){ if(!S.hz||!S.hz.h||!S.hz.h.length) S.hz={h:[{id:1,nm:'Хээр',t:'e',sp:5,st:5,se:5}],sel:0,cls:0,pt:3,nid:2};
+    const z=S.hz; if(z.sel>=z.h.length||z.sel<0) z.sel=0; return z; }
+  const cur=()=>{ const z=hz(); return z.h[z.sel]; };
+  const capOf=h=>(TYPES[h.t]||TYPES.e).cap;
+  let TAB='rc', FLD=null, PEND={sp:0,st:0,se:0}, OV=null;
+  const TT=[25.4,22.9,20.4,18.3,17.7,17.2,16.6,16.0];   // чадвар 5,10,...,40 үед жирийн тоглогчийн дуусгах хугацаа + 1.5с
+  function bOf(e){ const x=Math.max(0,Math.min(7,(e-5)/5)), i=Math.min(6,Math.floor(x)), t=TT[i]+(TT[i+1]-TT[i])*(x-i); return 1/t; }
+  function genField(cls){
+    const m=5+cls*5, rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), nm=ONM.slice().sort(()=>Math.random()-0.5), ks=['lead','mid','close'];
+    let ch=0; try{ ch=mgDiff(); }catch(e){}
+    const o=[]; for(let i=0;i<4;i++){ const sp=Math.min(40,m+rnd(-2,4)), st=Math.min(40,m+rnd(-2,4)), se=Math.min(40,m+rnd(-2,4));
+      o.push({nm:nm[i],sp:sp,st:st,se:se,sty:ks[Math.floor(Math.random()*3)],
+        b:bOf(0.5*sp+0.35*st+0.15*se)*(0.985+Math.random()*0.03), spf:Math.max(0.62,0.80-0.005*(se-5)) }); }
+    return o; }
+  function grade(v,arr){ const r=arr.filter(x=>x>v).length; return ['A','B','C','D','D'][Math.min(4,r)]; }
+  function css(){ if(document.getElementById('hzcss')) return; const st=document.createElement('style'); st.id='hzcss';
+    st.textContent='#hzov{position:fixed;inset:0;z-index:130;background:#1a110a;color:#ffe9b0;display:flex;flex-direction:column;font-family:inherit;overflow:hidden}'+
+    '#hzov .hz-top{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#2c1d0f;border-bottom:3px solid #c9972b}'+
+    '#hzov .hz-top h2{flex:1;margin:0;font-size:18px;color:#ffd770}'+
+    '#hzov .hz-res{font-size:13px;white-space:nowrap}'+
+    '#hzov .hz-x{background:#7a2a20;border:2px solid #ffd770;color:#fff;border-radius:8px;padding:6px 12px;font-weight:bold}'+
+    '#hzov .hz-tabs{display:flex;gap:6px;padding:8px 10px;background:#241709}'+
+    '#hzov .hz-tab{flex:1;padding:9px 4px;text-align:center;border:2px solid #7a5a22;border-radius:9px;background:#3a2815;color:#e9d29a;font-weight:bold;font-size:14px}'+
+    '#hzov .hz-tab.on{background:linear-gradient(#f3c14a,#c9972b);color:#3a2200;border-color:#ffe9a0}'+
+    '#hzov .hz-body{flex:1;overflow-y:auto;padding:10px 12px 20px;-webkit-overflow-scrolling:touch}'+
+    '#hzov .hz-box{background:#33210f;border:2px solid #8a6424;border-radius:12px;padding:10px;margin-bottom:10px}'+
+    '#hzov .hz-h{font-size:15px;font-weight:bold;color:#ffd770;margin-bottom:6px}'+
+    '#hzov .sm{font-size:13px;line-height:1.35;color:#e6d3a3}'+
+    '#hzov table{width:100%;border-collapse:collapse;font-size:13px}'+
+    '#hzov th{background:#4a3318;color:#ffd770;padding:5px 3px;text-align:center;font-size:12px}'+
+    '#hzov td{padding:6px 3px;text-align:center;border-bottom:1px solid #5a4222}'+
+    '#hzov td.nm{text-align:left;font-weight:bold;padding-left:6px}'+
+    '#hzov tr.me td{background:#7a4a1d;color:#fff4cf}'+
+    '#hzov .hz-n{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;color:#fff;font-weight:bold;font-size:12px;border:2px solid #0008}'+
+    '#hzov .g-A{color:#ffd35a;font-weight:bold}#hzov .g-B{color:#9fe89a;font-weight:bold}#hzov .g-C{color:#e6d3a3}#hzov .g-D{color:#b78a6a}'+
+    '#hzov .hz-btn{display:block;width:100%;padding:13px 8px;margin-top:8px;border:3px solid #ffe9a0;border-radius:12px;background:linear-gradient(#f3c14a,#c9972b);color:#3a2200;font-weight:bold;font-size:17px}'+
+    '#hzov .hz-btn[disabled]{filter:grayscale(.8) brightness(.6);border-color:#6a5a3a}'+
+    '#hzov .hz-btn.sm2{display:inline-block;width:auto;padding:8px 14px;margin:0;font-size:14px}'+
+    '#hzov .hz-row{display:flex;align-items:center;gap:8px}'+
+    '#hzov .hz-sr{display:flex;align-items:center;gap:6px;margin:8px 0}'+
+    '#hzov .hz-sn{width:74px;font-weight:bold;font-size:14px}'+
+    '#hzov .hz-bar{flex:1;height:14px;background:#1a110a;border:2px solid #6a4a1c;border-radius:8px;position:relative;overflow:hidden}'+
+    '#hzov .hz-bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#7be06a,#3d9b32)}'+
+    '#hzov .hz-bar b{position:absolute;top:0;bottom:0;background:#ffd35a}'+
+    '#hzov .hz-v{width:58px;text-align:right;font-size:14px;font-weight:bold}'+
+    '#hzov .hz-pm{width:34px;height:34px;border-radius:8px;border:2px solid #ffe9a0;background:#3d7a2e;color:#fff;font-size:20px;font-weight:bold;line-height:1}'+
+    '#hzov .hz-pm[disabled]{filter:grayscale(1) brightness(.55)}'+
+    '#hzov .hz-pic{display:block;margin:0 auto 6px;width:220px;max-width:70%;height:auto;background:linear-gradient(#8fc4e6,#9ccd62 60%,#6c9a3a);border:3px solid #c9972b;border-radius:10px}'+
+    '#hzov input.hz-in{flex:1;min-width:0;padding:8px;border-radius:8px;border:2px solid #8a6424;background:#1a110a;color:#ffe9b0;font-size:15px}'+
+    '#hzov .hz-coin{display:inline-block;width:1.1em;height:1.1em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#c9ccd2 45%,#7d838c);border:.1em solid #565b63;vertical-align:-.2em;box-sizing:border-box}'+
+    '#hzov .hz-own{color:#9fe89a;font-weight:bold;font-size:13px}';
+    document.head.appendChild(st); }
+  const coin='<i class="hz-coin"></i>', gem=()=>{ try{ return ico('ui_gem',16); }catch(e){ return ''; } };
+  function close(){ if(OV){ OV.remove(); OV=null; } try{ refresh(); openM('naadam'); }catch(e){} }
+  function pic(h,cv){ if(!cv) return; try{ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); const s=SPR['an_rider_r2']; if(!s||!s.img||!s.img.complete){ if(!cv._r){ cv._r=1; setTimeout(()=>pic(h,cv),500); } return; }
+      c.filter=(TYPES[h.t]||TYPES.e).flt; const dh=cv.height*0.92, dw=dh*s.iw/s.ih; c.drawImage(s.img,s.sx,s.sy,s.iw,s.ih,(cv.width-dw)/2,cv.height-dh-4,dw,dh); c.filter='none'; }catch(e){} }
+  function rcTab(){ const z=hz(), h=cur(), a=raceInfo(), left=Math.max(0,3-a.n), cls=Math.min(5,z.cls);
+    if(!FLD||FLD.cls!==cls) FLD={cls:cls,f:genField(cls)};
+    const me={nm:h.nm,sp:h.sp,st:h.st,se:h.se,me:1}, rows=[]; let oi=0; for(let l=0;l<5;l++){ if(l===2) rows.push(me); else rows.push(FLD.f[oi++]); }
+    const col=k=>rows.map(r=>r[k]), fee=(typeof nfeeOf==='function')?nfeeOf('race'):0;
+    let t='<div class="hz-box"><div class="hz-h">'+CLS[cls]+' ангилал</div><table><tr><th>№</th><th>Морь</th><th>Хэв</th><th>Хурд</th><th>Тэсвэр</th><th>Мэдр.</th></tr>';
+    rows.forEach((r,i)=>{ t+='<tr'+(r.me?' class="me"':'')+'><td><span class="hz-n" style="background:'+LC[i]+'">'+(i+1)+'</span></td><td class="nm">'+esc(r.nm)+(r.me?' (Таны)':'')+'</td><td>'+(r.me?'Өөрөө':STY[r.sty])+'</td>'+
+      ['sp','st','se'].map(k=>{ const g=grade(r[k],col(k)); return '<td class="g-'+g+'">'+g+'</td>'; }).join('')+'</tr>'; });
+    t+='</table><div class="sm" style="margin-top:8px">'+(cls<5?'Эхний 3-т орвол <b>'+CLS[cls+1]+'</b> ангилалд ахина.':'Энэ бол дээд ангилал. Эхний 3-т орвол нэмэгдэл шагнал авна.')+' Дуусахад онооноос чадвартаа нэмнэ.</div></div>';
+    if(z.pt>0) t+='<div class="hz-box" style="border-color:#ffd35a"><div class="sm">Танд <b>'+z.pt+'</b> оноо байна. «Морь» хэсгээс чадвараа нэмээрэй.</div></div>';
+    t+='<div class="sm" style="text-align:center">Өнөөдөр: <b>'+left+'/3</b> оролдлого · Таны морь: <b>'+esc(h.nm)+'</b></div>';
+    t+='<button class="hz-btn" onclick="hzStart()" '+(left?'':'disabled')+'>'+(left?'Уралдаан эхлэх'+(fee?' · '+fee+' '+coin:''):'Маргааш дахин')+'</button>';
+    return t; }
+  function statRow(k,nm,h,cap){ const p=PEND[k], v=h[k]+p, z=hz(), used=PEND.sp+PEND.st+PEND.se, can=used<z.pt&&v<cap;
+    return '<div class="hz-sr"><div class="hz-sn">'+nm+'</div><div class="hz-bar"><i style="width:'+(h[k]/cap*100)+'%"></i><b style="left:'+(h[k]/cap*100)+'%;width:'+(p/cap*100)+'%"></b></div><div class="hz-v">'+v+'/'+cap+'</div>'+
+      '<button class="hz-pm" onclick="hzPm(\''+k+'\',-1)" '+(p>0?'':'disabled')+'>-</button><button class="hz-pm" onclick="hzPm(\''+k+'\',1)" '+(can?'':'disabled')+'>+</button></div>'; }
+  function hsTab(){ const z=hz(), h=cur(), cap=capOf(h), used=PEND.sp+PEND.st+PEND.se, ty=TYPES[h.t]||TYPES.e;
+    let t='<div class="hz-box"><canvas id="hzpic" class="hz-pic" width="440" height="220"></canvas>'+
+      '<div class="hz-row" style="justify-content:center;gap:14px"><button class="hz-btn sm2" onclick="hzSel(-1)" '+(z.h.length>1?'':'disabled')+'>&lt;</button><div style="text-align:center"><div class="hz-h" style="margin:0">'+esc(h.nm)+'</div><div class="sm">'+ty.nm+' · '+(z.sel+1)+'/'+z.h.length+'</div></div><button class="hz-btn sm2" onclick="hzSel(1)" '+(z.h.length>1?'':'disabled')+'>&gt;</button></div>'+
+      '<div class="hz-row" style="margin-top:8px"><input id="hzname" class="hz-in" maxlength="14" value="'+esc(h.nm)+'"><button class="hz-btn sm2" onclick="hzRen()">Нэр солих</button></div></div>';
+    t+='<div class="hz-box"><div class="hz-row"><div class="hz-h" style="margin:0;flex:1">Чадвар</div><div class="sm">Оноо: <b style="color:#ffd35a;font-size:17px">'+(z.pt-used)+'</b></div></div>'+
+      statRow('sp','Хурд',h,cap)+statRow('st','Тэсвэр',h,cap)+statRow('se','Мэдрэмж',h,cap)+
+      '<div class="sm">Хурд: давхих хүч. Тэсвэр: эрч бага зарцуулж, хурдан сэргэнэ. Мэдрэмж: төгсгөлийн хурдалд эрт орно, ядрахад бага зогсоно.</div>'+
+      '<button class="hz-btn" onclick="hzOk()" '+(used?'':'disabled')+'>Баталгаажуулах</button></div>';
+    return t; }
+  function shTab(){ const z=hz(); let t='<div class="hz-box"><div class="hz-row"><div class="hz-h" style="margin:0;flex:1">Морь авах</div><div class="sm">'+gem()+' <b>'+(S.res.alt||0)+' Алт</b></div></div><div class="sm" style="margin-top:6px">Алтаар сайн морь авч болно. Эхний чадвар өндөр, дээд хязгаар нь энгийн морьноос илүү (энгийн: 25).</div></div>';
+    SHOP.forEach(s=>{ const own=z.h.some(h=>h.t===s.t), ty=TYPES[s.t], ok=(S.res.alt||0)>=s.alt;
+      t+='<div class="hz-box"><div class="hz-row"><div style="flex:1"><div class="hz-h" style="margin:0">'+ty.nm+'</div><div class="sm">'+s.d+'</div></div></div>'+
+        '<div class="sm" style="margin-top:6px">Эхний чадвар: Хурд <b>'+s.s[0]+'</b> · Тэсвэр <b>'+s.s[1]+'</b> · Мэдрэмж <b>'+s.s[2]+'</b><br>Дээд хязгаар: <b>'+ty.cap+'</b></div>'+
+        (own?'<div class="hz-own" style="margin-top:8px">Эзэмшиж байна</div>':'<button class="hz-btn" onclick="hzBuy(\''+s.t+'\')" '+(ok?'':'disabled')+'>'+s.alt+' Алт'+(ok?' · Авах':' · Алт хүрэхгүй')+'</button>')+'</div>'; });
+    return t; }
+  function render(){ if(!OV) return; const z=hz(), top='<div class="hz-top"><h2>Морин уралдаа</h2><div class="hz-res">'+fm(S.res.gold||0)+' '+coin+' &nbsp; '+gem()+' '+(S.res.alt||0)+'</div><button class="hz-x" onclick="hzClose()">Гарах</button></div>',
+      tabs='<div class="hz-tabs">'+[['rc','Уралдаан'],['hs','Морь'],['sh','Дэлгүүр']].map(x=>'<div class="hz-tab'+(TAB===x[0]?' on':'')+'" onclick="hzTab(\''+x[0]+'\')">'+x[1]+'</div>').join('')+'</div>';
+    const st=OV.querySelector('.hz-body'), sc=st?st.scrollTop:0;
+    OV.innerHTML=top+tabs+'<div class="hz-body">'+(TAB==='rc'?rcTab():TAB==='hs'?hsTab():shTab())+'</div>';
+    const b=OV.querySelector('.hz-body'); if(b) b.scrollTop=sc; if(TAB==='hs') pic(cur(),document.getElementById('hzpic')); }
+  window.hzTab=k=>{ TAB=k; PEND={sp:0,st:0,se:0}; render(); };
+  window.hzClose=close;
+  window.hzSel=d=>{ const z=hz(); z.sel=(z.sel+d+z.h.length)%z.h.length; PEND={sp:0,st:0,se:0}; try{ save(); }catch(e){} render(); };
+  window.hzRen=()=>{ const i=document.getElementById('hzname'); if(!i) return; const v=i.value.trim().slice(0,14); if(!v){ try{ say('Нэр хоосон байна'); }catch(e){} return; } cur().nm=v; try{ save(); say('Нэр солигдлоо'); }catch(e){} render(); };
+  window.hzPm=(k,d)=>{ const h=cur(), z=hz(), used=PEND.sp+PEND.st+PEND.se;
+    if(d>0){ if(used>=z.pt||h[k]+PEND[k]>=capOf(h)) return; PEND[k]++; } else { if(PEND[k]<=0) return; PEND[k]--; } try{ sfx('tap'); }catch(e){} render(); };
+  window.hzOk=()=>{ const h=cur(), z=hz(), used=PEND.sp+PEND.st+PEND.se; if(!used||used>z.pt) return;
+    ['sp','st','se'].forEach(k=>{ h[k]=Math.min(capOf(h),h[k]+PEND[k]); }); z.pt-=used; PEND={sp:0,st:0,se:0}; FLD=null; try{ save(); sfx('lvl'); say('Чадвар нэмэгдлээ'); }catch(e){} render(); };
+  window.hzBuy=t=>{ const z=hz(), s=SHOP.find(x=>x.t===t); if(!s||z.h.some(h=>h.t===t)) return; if((S.res.alt||0)<s.alt){ try{ say('Алт хүрэхгүй байна'); sfx('err'); }catch(e){} return; }
+    S.res.alt-=s.alt; z.h.push({id:z.nid++,nm:({sp:'Шарга',st:'Хар',bd:'Цагаан'})[t],t:t,sp:s.s[0],st:s.s[1],se:s.s[2]}); z.sel=z.h.length-1; FLD=null; PEND={sp:0,st:0,se:0}; TAB='hs';
+    try{ save(); sfx('lvl'); say(TYPES[t].nm+' авлаа. Нэрийг нь солиж болно'); refresh(); }catch(e){} render(); };
+  const _inner=raceOpen;
+  window.hzStart=()=>{ const z=hz(), h=cur(), a=raceInfo(); if(a.n>=3){ try{ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); }catch(e){} return; }
+    const fee=(typeof nfeeOf==='function')?nfeeOf('race'):0; if(!window.WEVB&&(S.res.gold||0)<fee){ try{ say('Оролцооны төлбөр '+fee+' хүрэхгүй байна'); sfx('err'); }catch(e){} return; }
+    const cls=Math.min(5,z.cls); if(!FLD||FLD.cls!==cls) FLD={cls:cls,f:genField(cls)};
+    window.HZRUN={h:{sp:h.sp,st:h.st,se:h.se,nm:h.nm},f:FLD.f,cls:cls}; const fld=FLD; FLD=null; if(OV){ OV.remove(); OV=null; }
+    _inner(); if(typeof RCE!=='undefined'&&!RCE){ window.HZRUN=null; FLD=fld; open(); } };
+  function open(){ css(); hz(); PEND={sp:0,st:0,se:0}; if(OV) OV.remove(); try{ closeM(); }catch(e){} OV=document.createElement('div'); OV.id='hzov'; document.body.appendChild(OV); render(); }
+  raceOpen=function(){ open(); };
+  const _fin=raceFinish;
+  raceFinish=function(){ const R=RCE, z=hz(), pl=R&&R.place||5, hasHz=!!(R&&R.hz); let up='', pts=0, bonus=0;
+    if(hasHz){ const cls=Math.min(5,R.hcls||0); bonus=Math.round([180,110,70,40,20][pl-1]*0.25*cls); if(bonus) S.res.gold+=bonus; pts=PTS[pl-1]||1; z.pt+=pts;
+      if(pl<=3&&z.cls<5&&cls===z.cls){ z.cls=cls+1; up=CLS[z.cls]; } }
+    _fin.apply(this,arguments);
+    try{ const r=document.getElementById('archres'); if(r&&hasHz){ const d=document.createElement('div'); d.className='sm'; d.style.cssText='margin:4px 0;color:#ffe9b0';
+      d.innerHTML='+'+pts+' оноо'+(bonus?' · +'+bonus+' '+coin.replace('hz-coin','ndx-coin'):'')+(up?'<br><b style="color:#9fe89a">Ангилал ахилаа: '+up+'</b>':''); const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } save(); }catch(e){} };
+  window.raceOpenInner=function(){ return _inner.apply(this,arguments); };
+  window.HZ={hz:hz,CLS:CLS,genField:genField,open:open};
 })();
 
 

@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='79bdf328a6';
+var UPDB='54067d2237';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20589,12 +20589,17 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   css.textContent='#dqbar{transition:transform .25s ease}#dqbar.dqc{transform:translateX(-215px)}'+
    '#dqh{position:fixed;z-index:4;left:0;width:28px;height:44px;background:#3b2815f2;border:2px solid #c9972b;border-left:none;border-radius:0 10px 10px 0;color:#ffe9b0;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #1a0f06;padding:0;touch-action:manipulation}'+
    '#dqh i{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#d33;color:#fff;font:bold 10px/16px sans-serif;text-align:center;font-style:normal;padding:0 3px;box-sizing:border-box}'+
-   '#dqh img{width:20px;height:20px}';
+   '#dqh img{width:20px;height:20px}'+
+   '#plvn{position:absolute;transform:translate(-50%,-50%);width:17px;height:17px;display:flex;align-items:center;justify-content:center;color:#ffe9a8;font:bold 10px/1 sans-serif;text-shadow:0 1px 1px #000,0 0 3px #000;pointer-events:none;z-index:3;letter-spacing:-.3px}#plvn.l3{font-size:8px}';
   document.head.appendChild(css);
   window.dqCol=function(){ DC.col=!DC.col; try{ localStorage.setItem('dxx_dqc',DC.col?'1':'0'); }catch(e){} sync(); };
   const shown=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden';
   let last='';
   function sync(){ try{
+    /* профайлын зургийн баруун доорх дугуйд тоглогчийн түвшин */
+    const av=document.querySelector('#pcard .av'), pcd=document.getElementById('pcard'); if(av&&pcd){ let n=document.getElementById('plvn'); if(!n){ n=document.createElement('span'); n.id='plvn'; pcd.appendChild(n); }
+      const v=String(Math.max(1,(typeof S!=='undefined'&&S&&S.pl)||1)); if(n.textContent!==v){ n.textContent=v; n.className=v.length>=3?'l3':''; }
+      n.style.left=(av.offsetLeft+av.offsetWidth)+'px'; n.style.top=(av.offsetTop+av.offsetHeight)+'px'; }
     /* хүч / цэргийн тоо мөрийг нуух */
     const w=document.getElementById('pw'); if(w&&w.parentNode&&w.parentNode.id!=='pcard'&&w.parentNode.style.display!=='none') w.parentNode.style.setProperty('display','none','important');
     const d=document.getElementById('dqbar'); if(!d) return; let b=document.getElementById('dqh');

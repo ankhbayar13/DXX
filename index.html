@@ -10892,7 +10892,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='30441a4071';
+var UPDB='4b0ea58dab';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21379,7 +21379,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     _fin.apply(this,arguments);
     try{ const r=document.getElementById('archres'); if(r&&hasHz){ const d=document.createElement('div'); d.className='sm'; d.style.cssText='margin:4px 0;color:#ffe9b0';
       d.innerHTML=(R.rc?esc(R.rc.nm)+' · '+R.rc.dist+'м<br>':'')+'+'+pts+' оноо'+(bonus?' · +'+bonus+' '+coin.replace('hz-coin','ndx-coin'):'')+(up?'<br><b style="color:#9fe89a">Ангилал ахилаа: '+up+'</b>':''); const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } save(); }catch(e){} }
-  raceFinish=function(){ const R=RCE; if(R&&R.rc&&R.rec&&R.rec.length>20&&!R.rpd){ R.rpd=1; try{ startReplay(R,fin2); return; }catch(e){} } fin2(); };
+  raceFinish=function(){ fin2(); };
   // ---- уралдааны HUD (3 зурвас, зай, мини зам, Хурдал товч) ----
   function css2(){ if(document.getElementById('hzcss2')) return; const st=document.createElement('style'); st.id='hzcss2';
     st.textContent='#hzhud{position:absolute;inset:0;pointer-events:none;z-index:2;font-family:inherit}'+
@@ -21393,10 +21393,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     '#hzhud .hh-m small{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#ffe9b0}'+
     '#hzhud .hh-s{position:absolute;right:14px;bottom:62px;width:84px;height:84px;border-radius:50%;pointer-events:auto;border:4px solid #fff;background:radial-gradient(#e0483a,#8a2218);color:#fff;font-weight:bold;font-size:14px;box-shadow:0 0 14px #000a}'+
     '#hzhud .hh-s.rd{animation:hzp .6s infinite alternate;background:radial-gradient(#ffd35a,#d4801a);color:#3a2200}#hzhud .hh-s[disabled]{filter:grayscale(1) brightness(.55);animation:none}'+
-    '@keyframes hzp{from{transform:scale(1)}to{transform:scale(1.1)}}'+
-    '#hzrp{position:fixed;inset:0;z-index:150;background:#000}#hzrp canvas{display:block}'+
-    '#hzrp .rp-t{position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font-weight:bold;font-size:20px;text-shadow:0 2px 4px #000}'+
-    '#hzrp .rp-s{position:absolute;right:10px;top:10px;padding:8px 14px;border:2px solid #ffe9a0;border-radius:9px;background:#7a2a20;color:#fff;font-weight:bold;font-size:14px}';
+    '@keyframes hzp{from{transform:scale(1)}to{transform:scale(1.1)}}';
     document.head.appendChild(st); }
   function hudStart(){ const R=RCE; if(!R||!R.rc) return; css2(); const d=document.createElement('div'); d.id='hzhud';
     d.innerHTML='<div class="hh-bars">'+[['Хурд','#3a8be0'],['Тэсвэр','#5fd04a'],['Хурдал','#b060e0']].map((n,i)=>'<div class="hh-r"><span>'+n[0]+'</span><div class="hh-b"><i id="hhb'+i+'" style="background:'+n[1]+'"></i></div></div>').join('')+'</div>'+
@@ -21411,30 +21408,6 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const b=g('hhs'); if(b){ const ok=R.st==='run'&&!R.sbU&&m.x>=0.45&&m.fin==null; b.disabled=!ok&&!R.sb; b.className='hh-s'+(ok?' rd':''); b.textContent=R.sb>0?'ХУРДАЛ '+R.sb.toFixed(1):(R.sbU?'АШИГЛАСАН':'ХУРДАЛ'); } }
   window.hzSpurt=()=>{ const R=RCE; if(!R||!R.rc||R.st!=='run'||R.sbU) return; const m=R.hs[R.me]; if(m.x<0.45||m.fin!=null) return;
     R.sbU=1; R.sb=3+0.05*((R.hz?R.hz.se:5)-5); R.msg='ХУРДАЛ!'; R.mt=0.8; try{ sfx('big'); }catch(e){} if(window.vib) vib(20); };
-  // ---- байрлал бичих, дахин үзүүлэх ----
-  const _rs=raceStep;
-  raceStep=function(dt){ _rs.apply(this,arguments); const R=RCE; if(R&&R.rc&&R.rec&&(R.st==='run'||R.st==='fin')){ R.rt+=dt; while(R.rt>=0.1){ R.rt-=0.1; R.rec.push(R.hs.map(q=>Math.min(1,q.x))); } } };
-  function startReplay(R,done){ css2(); const o=document.createElement('div'); o.id='hzrp'; o.innerHTML='<canvas></canvas><div class="rp-t">Дахин үзүүлэх</div><button class="rp-s" id="rps">Алгасах</button>'; document.body.appendChild(o);
-    const cv=o.querySelector('canvas'), dp=Math.min(2,window.devicePixelRatio||1), w=window.innerWidth, h=window.innerHeight; cv.width=Math.round(w*dp); cv.height=Math.round(h*dp); cv.style.width=w+'px'; cv.style.height=h+'px'; const c=cv.getContext('2d');
-    const rec=R.rec, SP=2.4, T=rec.length*0.1/SP; let t=0, last=performance.now(), raf=0, fin=0, hold=0; const me=R.me;
-    function end(){ if(fin) return; fin=1; cancelAnimationFrame(raf); o.remove(); try{ done(); }catch(e){ console.error(e); } }
-    o.querySelector('#rps').onclick=end;
-    function frame(now){ if(fin) return; const dt=Math.min(0.05,(now-last)/1000); last=now; t+=dt; if(t>=T){ hold+=dt; if(hold>1.2){ end(); return; } }
-      const k=Math.min(rec.length-1,t*SP/0.1), i0=Math.floor(k), i1=Math.min(rec.length-1,i0+1), fr=k-i0, X=n=>rec[i0][n]+(rec[i1][n]-rec[i0][n])*fr;
-      const g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#6fb0e0'); g.addColorStop(0.22,'#cfe8f5'); g.addColorStop(0.23,'#7fae45'); g.addColorStop(0.3,'#5f9a35'); g.addColorStop(1,'#4f7f2a');
-      c.setTransform(dp,0,0,dp,0,0); c.fillStyle=g; c.fillRect(0,0,w,h);
-      const LH=Math.min(86,(h*0.5)/5), y0=Math.round(h*0.3), sx=30, fx=w-62, span=fx-sx-110;
-      for(let i=0;i<5;i++){ c.fillStyle=i%2?'#c39255':'#b98a4f'; c.fillRect(0,y0+i*LH,w,LH); c.fillStyle='#ffffff55'; c.fillRect(0,y0+i*LH,w,2); }
-      c.fillStyle='#fff'; c.fillRect(sx+4,y0,3,5*LH); for(let i=0;i<5*LH/9;i++){ c.fillStyle=i%2?'#111':'#fff'; c.fillRect(fx,y0+i*9,9,9); c.fillStyle=i%2?'#fff':'#111'; c.fillRect(fx+9,y0+i*9,9,9); }
-      const order=[0,1,2,3,4]; let pos=1; for(let n=0;n<5;n++) if(n!==me&&X(n)>X(me)) pos++;
-      order.forEach(n=>{ const x=X(n), s=SPR['an_rider_r'+(((Math.floor(t*16+n*2))%8+8)%8)], dh=LH*1.0, dw=dh*344/202, px=sx+x*span, py=y0+n*LH+LH-4;
-        if(s&&s.img&&s.img.complete){ c.save(); if(n!==me){ try{ c.filter='hue-rotate('+((n*67)%360)+'deg)'; }catch(e){} } c.drawImage(s.img,s.sx,s.sy,s.iw,s.ih,px,py-dh,dw,dh); c.restore(); c.filter='none'; }
-        const bx=px+dw*0.42, by=py-dh-2; c.fillStyle=n===me?'#ffd35a':LC[n]; c.beginPath(); c.arc(bx,by+4,n===me?10:8,0,6.3); c.fill(); c.strokeStyle='#000a'; c.lineWidth=2; c.stroke();
-        c.fillStyle=n===me?'#3a2200':'#fff'; c.font='bold 10px sans-serif'; c.textAlign='center'; c.fillText(n===me?'ТА':String(n+1),bx,by+8); });
-      c.font='bold 16px sans-serif'; c.fillStyle='#fff'; c.strokeStyle='#000a'; c.lineWidth=4; c.textAlign='center'; const tx='Байр '+pos+'/5';
-      c.strokeText(tx,w/2,y0+5*LH+34); c.fillText(tx,w/2,y0+5*LH+34);
-      raf=requestAnimationFrame(frame); }
-    raf=requestAnimationFrame(frame); }
   window.raceOpenInner=function(){ return _inner.apply(this,arguments); };
   window.HZ={hz:hz,CLS:CLS,genField:genField,open:open};
 })();

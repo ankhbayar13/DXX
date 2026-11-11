@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='54067d2237';
+var UPDB='941458812d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19255,7 +19255,10 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
   const shuffleR=(a,R)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; };
   const $=s=>document.querySelector('#cgv '+s);
   const mk=(id,s,lv)=>({uid:++uid,id:id,d:DEF[id],side:s,buff:0,lv:lv||1});
-  const botLv=()=>{ const q=Math.random(); return q<0.6?1:q<0.9?2:3; };
+  /* Ботын хүндрэлийн түвшин: easy (амархан), mid (дунд), hard (хэцүү = урьдын бот). Онлайн тулаанд нөлөөлөхгүй. */
+  const DIFFN={easy:'Амархан',mid:'Дунд',hard:'Хэцүү'};
+  const DIFF=()=>{ try{ const d=CG().diff; return DIFFN[d]?d:'mid'; }catch(e){ return 'mid'; } };
+  const botLv=()=>{ if(DIFF()==='easy') return 1; const q=Math.random(); return q<0.6?1:q<0.9?2:3; };
   const cpw=c=>c.d.p+LB[c.lv||1];
   const log=t=>{ G.log.push(t); if(G.log.length>3) G.log.shift(); };
 
@@ -19358,10 +19361,11 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
 
   /* дайсны (AI) тоглолт */
   function aiPlay(){
-    let left=energy(1); const hand=shuffle(G.hand[1].slice()).sort((a,b)=>b.d.c-a.d.c);
-    hand.forEach(c=>{ if(c.d.c>left) return;
+    const D=DIFF(), skipP=D==='easy'?0.4:D==='mid'?0.18:0, noise=D==='easy'?12:D==='mid'?4:2;
+    let left=energy(1); let hand=shuffle(G.hand[1].slice()); if(D!=='easy') hand=hand.sort((a,b)=>b.d.c-a.d.c);
+    hand.forEach(c=>{ if(c.d.c>left) return; if(skipP&&Math.random()<skipP) return;
       const cand=[0,1,2].filter(li=>locRev(li)&&capLeft(li,1)>0); if(!cand.length) return;
-      let best=cand[0],bs=-1e9; cand.forEach(li=>{ const sc=Math.random()*2+(total(li,0)-total(li,1))*0.25; if(sc>bs){ bs=sc; best=li; } });
+      let best=cand[0],bs=-1e9; cand.forEach(li=>{ const sc=Math.random()*noise+(total(li,0)-total(li,1))*0.25; if(sc>bs){ bs=sc; best=li; } });
       G.hand[1].splice(G.hand[1].indexOf(c),1); G.aiStaged.push({card:c,li:best}); left-=c.d.c; });
   }
   function leader(){ const w=wins(); if(w[0]!==w[1]) return w[0]>w[1]?0:1; const a=sumAll(0),b=sumAll(1); if(a!==b) return a>b?0:1; if(ON){ const q=mkRng((ON.seed+G.turn*7919)>>>0)()<0.5; return (ON.role==='a')===q?0:1; } return rnd(2); }
@@ -19392,7 +19396,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     G.turn++; G.bonus=G.bonusNext.slice(); G.bonusNext=[0,0];
     draw(0); draw(1); G.retLoss=G.stake;
     if(ON){ ON.sub=false; ON.waiting=false; ON.mySnap=false; ON.left=45; busy=false; render(); return; }
-    if(G.turn>=3&&!G.snapped[1]&&evalPos()>=4&&Math.random()<0.45){ G.snapped[1]=true; G.stake*=2; log('Дайсан «Хан!» гэв. Бооцоо ×'+G.stake+'. Ухрахаа сана.'); }
+    if(G.turn>=3&&!G.snapped[1]&&evalPos()>=4&&Math.random()<({easy:0.08,mid:0.25,hard:0.45})[DIFF()]){ G.snapped[1]=true; G.stake*=2; log('Дайсан «Хан!» гэв. Бооцоо ×'+G.stake+'. Ухрахаа сана.'); }
     busy=false; render();
   }
   function snap(){
@@ -19700,7 +19704,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
       if(dMsg) h2+='<div class="cgdm" style="'+B(40,696,810,44)+'">'+esc(dMsg)+'</div>';
       h2+=hs('mode',40,540,805,150)+hs('cards',30,750,402,130)+hs('deck',456,750,402,130)+hs('top',30,903,402,130)+hs('daily',456,903,402,130)+hs('rules',30,1056,402,130)+hs('exit',456,1056,402,130);
       return h2+'</div>'; }
-    if(V==='mode') return '<div class="cgw"><div class="cgh"><h1>Тулаан сонгох</h1></div><div class="cgmn"><button class="cgbtn go" data-a="online">Онлайн тулаан (жинхэнэ тоглогчтой)</button><button class="cgbtn go" data-a="play">Ботын эсрэг</button><button class="cgbtn" data-a="menu">Буцах</button></div></div>';
+    if(V==='mode') return '<div class="cgw"><div class="cgh"><h1>Тулаан сонгох</h1></div><div class="cgmn"><button class="cgbtn go" data-a="online">Онлайн тулаан (жинхэнэ тоглогчтой)</button><button class="cgbtn go" data-a="play">Ботын эсрэг</button><div class="cgbox" style="text-align:center;margin:0"><b>Ботын хүндрэл</b><div style="display:flex;gap:6px;margin-top:6px">'+['easy','mid','hard'].map(k=>'<button class="cgbtn'+(DIFF()===k?' go':'')+'" style="padding:9px 2px;flex:1 1 0;min-width:0" data-a="df:'+k+'">'+DIFFN[k]+'</button>').join('')+'</div><span style="color:#bfae8a;font-size:12px;display:block;margin-top:6px">'+({easy:'Бот заримдаа картаа хаяж, санамсаргүй тавина.',mid:'Бот бага зэрэг алдана.',hard:'Бот бүрэн хүчээрээ тоглоно.'})[DIFF()]+'</span></div><button class="cgbtn" data-a="menu">Буцах</button></div></div>';
     if(V==='cards') return cardsView();
     if(V==='daily') return dailyView();
     if(V==='top') return topView();
@@ -19778,6 +19782,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     const t=e.target.closest('button,[data-place]'); if(!t||!alive) return;
     const a=t.dataset.a;
     if(a){
+      if(a&&a.indexOf('df:')===0){ const k=a.slice(3); if(DIFFN[k]){ CG().diff=k; render(); } return; }
       if(a==='play'){ if(V==='find'){ onAbort(''); } dMsg=''; ON=null; newGame(); return; }
       if(a==='online'){ if(ON) onClean(); G=null; onFind(); return; }
       if(a==='cancel'){ onAbort(''); return; }

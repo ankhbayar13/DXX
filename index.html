@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5386846640';
+var UPDB='c410367ded';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -17658,7 +17658,7 @@ body:has(#alv) #ckov{z-index:88!important}
     }
     const nx=brNext(), camp=nx!=null;
     const cont=camp?(win&&nx!==B.i?'Дараагийн шат ▶':'Дахин оролдох ↻'):'Үргэлжлүүлэх';
-    o.className='br2'; o.style.display='flex';
+    o.className='br2'+((B.H&&B.H<520)?' sm':''); o.style.display='flex';
     o.innerHTML='<div class="br2-hd '+(win?'w':'l')+'"><div class="br2-bg"></div>'+art+'<h1>'+(win?'Ялалт':'Ялагдал')+'</h1><div class="br2-st">'+String((B.e&&B.e.n)||'')+'</div></div>'+
       '<div class="br2-tb">'+['🎁 Шагнал','⚔ Өгсөн хохирол','🛡 Авсан хохирол'].map((t,i)=>'<button class="'+(R.tab===i?'on':'')+'" onclick="brTabSet('+i+')">'+t+'</button>').join('')+'</div>'+
       '<div class="br2-bx">'+bd+'</div>'+
@@ -17686,6 +17686,13 @@ body:has(#alv) #ckov{z-index:88!important}
 .br2-ba{height:15px;border-radius:8px;background:#3a2c20;margin-top:5px;overflow:hidden;box-shadow:inset 0 1px 3px #000}.br2-ba i{display:block;height:100%;border-radius:8px}
 .br2-bt{display:flex;gap:12px;padding:6px 14px 4px;flex:0 0 auto}.br2-b{flex:1;border:0;border-radius:12px;background:linear-gradient(#6fd6c4,#2a9d8f);border-bottom:4px solid #1c6a60;color:#fff;font:bold 18px Georgia,serif;padding:13px 4px;text-shadow:0 2px 2px #0a4a42;box-shadow:0 3px 8px #000a}
 .br2-au{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 calc(12px + env(safe-area-inset-bottom));font:bold 14px sans-serif;color:#e8d6a8;flex:0 0 auto}.br2-ck{width:24px;height:24px;border-radius:6px;border:2px solid #d9a83a;background:#2a1a0c;display:inline-flex;align-items:center;justify-content:center;color:#9ae85a;font-size:18px}.br2-ck.on{background:#2a5a1a}
+/* Нам (хэвтээ/эргүүлсэн) дэлгэц: бага өндөр → шахсан байршил */
+.br2.sm .br2-hd{height:84px;min-height:0;flex-direction:row;justify-content:center;align-items:center;gap:14px;padding:0}
+.br2.sm .br2-art{height:70px!important;width:70px!important;max-height:70px!important;margin:0!important;flex:none;align-self:center}.br2.sm .br2-hd h1{font-size:32px}.br2.sm .br2-st{display:none}
+.br2.sm .br2-tb{margin:4px 10px 0}.br2.sm .br2-tb button{padding:6px 2px}.br2.sm .br2-bx{padding:6px 14px}
+.br2.sm .br2-tl{gap:8px;padding-top:2px}.br2.sm .br2-t{width:62px;height:62px}.br2.sm .br2-t span{font-size:28px}
+.br2.sm .br2-hr{margin-bottom:6px}.br2.sm .br2-pt{width:44px;height:44px}.br2.sm .br2-pi{width:46px;height:46px}.br2.sm .br2-ba{height:11px;margin-top:3px}.br2.sm .br2-nm{font-size:14px}
+.br2.sm .br2-bt{padding:4px 14px 2px}.br2.sm .br2-b{padding:7px 4px;font-size:16px}.br2.sm .br2-au{padding:4px 0 6px}
 `; document.head.appendChild(st);
 })();
 

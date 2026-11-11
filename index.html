@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='36ec2a88c4';
+var UPDB='23edb50073';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18086,6 +18086,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     h+='<div class="sm" style="text-align:center;margin-top:6px">Тулаанд зөвхөн таны сонгосон 3 баатар оролцоно. Цэргүүд баатруудад нэмэгдэнэ.</div>';
     return h; }
   window.tarenaHTML=tarenaHTML;
+  window.TAX={tInit:tInit,teamPow:teamPow,fighters:fighters,portrait:portrait,hn:hn,rk:rk,dk:dk,NAMES:NAMES};
   const _mc=modalContent;
   modalContent=function(k){ if(k==='tarena') return tarenaHTML(); return _mc.apply(this,arguments); };
   try{ const g=MENU.find(x=>/Тулалдаан/.test(x.t)); if(g&&!g.i.some(x=>x[2]==="openM('tarena')")) g.i.push([{toString(){ return im('ic_arena',22); }},'Багийн арена',"openM('tarena')"]); MIC['Багийн арена']='ic_arena'; }catch(e){}
@@ -20631,6 +20632,181 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     try{ h=h.replace(/<button[^>]*onclick="cardOpen\(\)"[^>]*>[\s\S]*?<\/button>/,'<button onclick="cardOpen()" aria-label="Картын тулаан" style="grid-column:1/3;display:block;width:100%;padding:0;margin:2px 0 0;border:0;background:none;box-shadow:none;cursor:pointer;touch-action:manipulation"><img src="'+IMG+'" alt="Картын тулаан" style="display:block;width:100%;height:auto;filter:drop-shadow(0 3px 4px #0009)"></button>'); }catch(e){}
     return h;
   };
+})();
+
+
+/* p32/tashadow.js — Багийн арена 3vs3: жинхэнэ тоглогчдын «сүүдэр баг».
+   Тоглогч бүрийн сонгосон 3 баатар (түвшин, ур чадвар, зэр зэвсэг орсон хүчээрээ) Firestore `duel/ta_<uid>` дээр хадгалагдана.
+   Эсрэгч нь онлайн байх шаардлагагүй — хүч нь ойролцоо 3 сүүдэр багтай тулна. Дутвал «Бот» нөхнө.
+   Оноо: эсрэгчийн хүч / миний хүч харьцаагаар. Сар бүр Топ 10, 1-3-р байранд шагнал. Мэдэгдэлгүй.
+   Firestore дүрэм: duel/{id} үүсгэхэд a == өөрийн uid, шинэчлэхийг хориглосон → устгаад дахин үүсгэнэ (swar.js-тэй ижил). */
+(function(){
+  const X=window.TAX; if(!X) return;
+  const MB=1e6, FRESH=21*864e5, MAXA=3;
+  /* ---- Тохиргоо: шагнал/оноог эндээс солино ---- */
+  const CFG=window.TA_CFG=window.TA_CFG||{
+    /* харьцаа r = эсрэгчийн хүч / миний хүч → [ялвал, ялагдвал] */
+    pts:r=>r<0.9?[15,15]:(r<=1.1?[22,11]:[30,7]),
+    /* сарын шагнал: 1-р, 2-р, 3-р байр. tier = зэр зэвсгийн түвшин. give нь шагналыг олгоно (зэр зэвсгийн систем шинэчлэгдэхэд зөвхөн энийг солино) */
+    prize:[{alt:1000,tier:3},{alt:600,tier:3},{alt:300,tier:2}],
+    give:function(pz){
+      S.res.alt=(S.res.alt||0)+pz.alt; let gtxt='';
+      try{ S.gear=S.gear||{}; const open=GEAR.filter(g=>(S.gear[g.id]||0)<pz.tier);
+        if(open.length){ const g=open[Math.floor(Math.random()*open.length)]; S.gear[g.id]=pz.tier; gtxt=g.n+' ('+pz.tier+'-р түвшин)'; }
+        else { S.res.alt+=150; gtxt='зэр зэвсэг бүгд дээд түвшинд тул +150 Алт'; } }catch(e){}
+      return gtxt; }
+  };
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const nowL=()=>new Date(Date.now()+8*36e5);
+  const mi=()=>{ const d=nowL(); return d.getUTCFullYear()*12+d.getUTCMonth(); };
+  const mname=m=>{ const y=Math.floor(m/12), mm=m%12+1; return y+'-'+(mm<10?'0':'')+mm; };
+  const myName=()=>String((S.prof&&S.prof.name)||'Хаан').slice(0,14);
+  const f=n=>{ try{ return window.f?window.f(n):String(n); }catch(e){ return String(n); } };
+  const on=()=>{ try{ return typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM&&FBM.F; }catch(e){ return false; } };
+  const ec=e=>String((e&&(e.code||e.message))||e||'?').slice(0,40);
+  const DG={w:'—',r:'—',n:-1};
+  const TS={opp:[],t:0,busy:false,tpk:0,lb:null,lbSt:'',prev:null};
+  const M=()=>{ const A=S.ta; if(!A.m||A.m.mi!==mi()) A.m={mi:mi(),p:0}; return A.m; };
+
+  /* ---------- Сүүдэр багаа Firestore руу хадгалах ---------- */
+  let pq=Promise.resolve();
+  function pushMe(){
+    try{ X.tInit(); }catch(e){}
+    if(!on()){ DG.w='нэвтрээгүй / Firebase холбогдоогүй'; return Promise.resolve(); }
+    const A=S.ta, ids=(A.team||[]).filter(id=>S.heroes[id]);
+    if(ids.length<3){ DG.w='баг дутуу'; return Promise.resolve(); }
+    const {F,db}=FBM, uid=CL.uid, m=M();
+    const h=ids.map(id=>({id:id,lv:(typeof hlv==='function'?hlv(id):1),p:Math.round(heroPower(id))}));
+    const rec={a:uid,g:'t',u:uid,n:myName(),tp:Math.round(X.teamPow()),h:h,r:Math.random(),mi:m.mi,mp:m.p,w:A.w||0,l:A.l||0,sc:m.mi*MB+m.p,t:Date.now()};
+    pq=pq.then(async()=>{ const ref=F.doc(db,'duel','ta_'+uid); try{ await F.deleteDoc(ref); }catch(e){} await F.setDoc(ref,rec); DG.w='ok'; }).catch(e=>{ DG.w='АЛДАА: '+ec(e); });
+    return pq; }
+
+  /* ---------- Эсрэгч олох: хүч нь ойролцоо 3 сүүдэр баг ---------- */
+  const BN=['Залуу баг','Мэргэн баг','Жанжин баг'], BM=[0.85,1.05,1.25];
+  function bots(P,k,used){ const out=[]; for(let i=0;out.length<k&&i<3;i++){ if(used.has(i)) continue; out.push({bot:1,i:i,u:'bot'+i,n:'Бот · '+BN[i],tp:Math.round(P*BM[i])}); } return out; }
+  async function find(){
+    if(TS.busy) return; TS.busy=true; X.tInit(); const P=Math.max(120,X.teamPow()); let real=[];
+    if(on()){ const {F,db}=FBM, pick=new Map();
+      const take=sn=>sn.docs.forEach(d=>{ const v=d.data(); if(v&&v.g==='t'&&v.u&&v.u!==CL.uid&&v.tp>0&&Array.isArray(v.h)&&v.h.length&&Date.now()-(v.t||0)<FRESH&&!pick.has(v.u)) pick.set(v.u,{u:v.u,n:String(v.n||'Тоглогч').slice(0,14),tp:v.tp,h:v.h.slice(0,3)}); });
+      try{
+        take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('tp','>=',Math.round(P*0.6)),F.where('tp','<=',Math.round(P*1.6)),F.limit(30))));
+        if(pick.size<3) take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('tp','>=',Math.round(P*0.3)),F.where('tp','<=',Math.round(P*3)),F.limit(30))));
+        DG.r='ok'; }catch(e){ DG.r='АЛДАА: '+ec(e); }
+      DG.n=pick.size;
+      let a=[...pick.values()].sort((x,y)=>Math.abs(x.tp-P)-Math.abs(y.tp-P)).slice(0,6);
+      for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+      real=a.slice(0,3).sort((x,y)=>x.tp-y.tp); }
+    else { DG.r='холбогдоогүй'; DG.n=0; }
+    const used=new Set(); const need=3-real.length; let fill=[]; if(need>0){ /* дутсан хэсгийг ботоор: хүчний дарааллыг хадгална */ fill=bots(P,need,used); }
+    TS.opp=real.concat(fill).sort((x,y)=>x.tp-y.tp); TS.t=Date.now(); TS.tpk=Math.round(P); TS.busy=false;
+    try{ if(typeof cur!=='undefined'&&cur==='tarena') fillM(); }catch(e){} }
+
+  /* ---------- Сарын Топ 10 + шагнал ---------- */
+  async function fetchMonth(m){ const {F,db}=FBM;
+    const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('sc','>=',m*MB),F.orderBy('sc','desc'),F.limit(40)));
+    return sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='t'&&x.sc<(m+1)*MB&&x.mp>0); }
+  async function loadLb(){ TS.lbSt='load'; TS.lb=null; lbView(); if(!on()){ TS.lbSt='off'; lbView(); return; }
+    try{ await pushMe(); TS.lb=await fetchMonth(mi()); TS.lbSt='ok'; }catch(e){ TS.lbSt='err'; DG.r='АЛДАА: '+ec(e); } lbView(); }
+  async function checkPrev(){ X.tInit(); const A=S.ta; if(!on()||A.pz===mi()-1||TS.prevBusy) return; TS.prevBusy=true;
+    try{ const pm=mi()-1, rows=await fetchMonth(pm), i=rows.findIndex(x=>x.u===CL.uid);
+      if(i>=0&&i<CFG.prize.length) TS.prev={rank:i+1,mo:pm}; else { A.pz=pm; try{ save(); }catch(e){} }
+      try{ if(typeof cur!=='undefined'&&cur==='tarena') fillM(); }catch(e){} }catch(e){}
+    TS.prevBusy=false; }
+  window.taClaim=function(){ X.tInit(); const A=S.ta, p=TS.prev; if(!p||A.pz===p.mo) return; const pz=CFG.prize[p.rank-1]; A.pz=p.mo; let g=''; try{ g=CFG.give(pz); }catch(e){}
+    try{ save(); updateHUD(); sfx('win'); }catch(e){} say('Шагнал: '+pz.alt+' Алт'+(g?' + '+g:'')); TS.prev=null; try{ fillM(); }catch(e){} };
+  function lbClose(){ const e=document.getElementById('txtop'); if(e) e.remove(); }
+  function lbView(){ let d=document.getElementById('txtop');
+    if(!d){ d=document.createElement('div'); d.id='txtop'; d.onclick=e=>{ if(e.target===d||e.target.closest('[data-x]')) lbClose(); }; document.body.appendChild(d); }
+    const rows=(TS.lb||[]).slice(0,10), me=(TS.lb||[]).findIndex(x=>x.u===(CL&&CL.uid)); let body;
+    if(TS.lbSt==='load') body='<div class="txm">Ачаалж байна…</div>';
+    else if(TS.lbSt==='off') body='<div class="txm">Интернет холбогдоогүй байна.</div>';
+    else if(TS.lbSt==='err') body='<div class="txm">Жагсаалтыг ачаалж чадсангүй.</div>';
+    else if(!rows.length) body='<div class="txm">Энэ сар жагсаалт хоосон байна. Тулаанд орж оноо цуглуул.</div>';
+    else body=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="txr'+(x.u===CL.uid?' me':'')+'"><span><b class="txn">'+(i+1)+'.</b> '+esc(x.n)+'</span><span><b>'+x.mp+'</b>'+(pz?' <i>· '+pz.alt+' Алт + '+pz.tier+'-р зэр зэвсэг</i>':'')+'</span></div>'; }).join('');
+    const mp=M().p;
+    d.innerHTML='<div class="txw"><h3>Сарын Топ 10</h3><div class="txs">'+mname(mi())+' · Багийн арена оноо</div><div class="txb">'+body+'</div>'
+      +'<div class="txf">Таны сарын оноо: <b>'+mp+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div>'
+      +'<div class="txs">Шагнал: 1-р '+CFG.prize[0].alt+' Алт + '+CFG.prize[0].tier+'-р зэр зэвсэг · 2-р '+CFG.prize[1].alt+' Алт + '+CFG.prize[1].tier+'-р · 3-р '+CFG.prize[2].alt+' Алт + '+CFG.prize[2].tier+'-р. Сар шинэчлэгдэхэд арена руу ороод авна.</div>'
+      +'<button class="btn" data-x="1" style="width:100%;margin-top:8px">Хаах</button></div>'; }
+  window.taTop=function(){ loadLb(); };
+
+  /* ---------- Дэлгэц ---------- */
+  function oppCard(o,i,free){
+    const P=Math.max(120,X.teamPow()), r=o.tp/P, pt=CFG.pts(r), pr=o.h?o.h.map(h=>X.portrait(h.id,34)).join(''):'';
+    return '<div class="card"><div class="row"><div style="min-width:0"><b>'+esc(o.n)+'</b>'+(o.bot?'':' <span class="sm">· тоглогч</span>')
+      +'<div class="sm">Хүч '+f(o.tp)+' · Ялвал <b style="color:#8fe39a">+'+pt[0]+'</b> · Ялагдвал <b style="color:#ff9a8a">−'+pt[1]+'</b></div>'
+      +(pr?'<div class="tx-pr">'+pr+'</div>':'')+'</div><button class="btn" onclick="taFight('+i+')">'+(free>0?'Тулах':'Тулах · 5 Алт')+'</button></div></div>'; }
+  function arenaHTML(){
+    X.tInit(); const A=S.ta, F=X.fighters(), r=X.rk(A.r), free=Math.max(0,5-A.n), m=M();
+    let h='<h2>'+(typeof ico==='function'?ico('ic_arena',34):'')+' Багийн арена</h2>';
+    if(F.length<3) return h+'<div class="card"><div class="sm" style="text-align:center;padding:8px">3 баатартай болбол 3 vs 3 тулаанд орно. Одоо '+F.length+' баатар байна.</div></div>';
+    /* өгөгдлийг шинэчлэх (нэг удаа) */
+    const stale=!TS.t||Date.now()-TS.t>120000||Math.abs(TS.tpk-X.teamPow())>Math.max(30,TS.tpk*0.05);
+    if(stale&&!TS.busy) setTimeout(find,0);
+    if(!TS.pk){ TS.pk=1; setTimeout(()=>{ pushMe(); checkPrev(); },0); }
+    h+='<div class="card row"><div><b>'+r[0]+'</b><div class="sm">Оноо: '+A.r+' · Ялалт '+A.w+' · Ялагдал '+A.l+'</div><div class="sm">Сарын оноо: <b>'+m.p+'</b> · '+mname(m.mi)+'</div></div><div style="text-align:right"><div class="sm">Өнөөдөр үнэгүй: <b>'+free+'</b>/5</div><button class="btn" style="margin-top:4px" onclick="taTop()">Топ 10</button></div></div>';
+    if(TS.prev){ const pz=CFG.prize[TS.prev.rank-1]; h+='<div class="card row" style="border-color:#ffd770"><div><b>Өнгөрсөн сар '+TS.prev.rank+'-р байр</b><div class="sm">'+pz.alt+' Алт + '+pz.tier+'-р түвшний зэр зэвсэг</div></div><button class="btn" onclick="taClaim()">Шагнал авах</button></div>'; }
+    h+='<div class="card"><div class="row"><b>Миний баг (3)</b><button class="btn" onclick="taPickToggle()">'+(S.taPick?'Дуусгах':'Баг сонгох')+'</button></div><div class="ta-team">'+
+      [0,1,2].map(i=>{ const id=A.team[i]; return id?'<div class="ta-s">'+X.portrait(id,56)+'<b>'+X.hn(id).split(' ')[0]+'</b><span class="sm">'+f(heroPower(id))+'</span></div>':'<div class="ta-s emp">+</div>'; }).join('')+'</div><div class="sm" style="text-align:center">Багийн хүч: <b>'+f(X.teamPow())+'</b></div></div>';
+    if(S.taPick){
+      h+='<div class="card"><b>Баатраа сонго</b> <span class="sm">('+A.team.length+'/3 · дарж сонгоно, дахин дарвал хасна)</span><div class="ta-grid">'+F.slice().sort((a,b)=>heroPower(b)-heroPower(a)).map(id=>{ const on2=A.team.indexOf(id)>=0; return '<div class="ta-c'+(on2?' on':'')+'" onclick="taTog(\''+id+'\')">'+X.portrait(id,46)+'<b>'+X.hn(id).split(' ')[0]+'</b><span class="sm">'+f(heroPower(id))+'</span></div>'; }).join('')+'</div></div>'; }
+    h+='<div class="row" style="margin:6px 2px"><b>Эсрэгчид</b><button class="btn" onclick="taRef()">Шинэчлэх</button></div>';
+    if(TS.busy&&!TS.opp.length) h+='<div class="card"><div class="sm" style="text-align:center;padding:8px">Эсрэгч хайж байна…</div></div>';
+    else TS.opp.forEach((o,i)=>{ h+=oppCard(o,i,free); });
+    const real=TS.opp.filter(o=>!o.bot).length;
+    h+='<div class="sm" style="text-align:center;margin-top:6px">Эсрэгч нь бусад тоглогчийн сонгосон 3 баатар (тэд онлайн байх шаардлагагүй). '+(TS.opp.length&&real<TS.opp.length?'Тоглогч дутсан тул «Бот» нөхсөн. ':'')+'Хүч ойролцоо багтай тулахад оноо багагүй авна.</div>';
+    h+='<div class="sm" style="text-align:center;opacity:.55;margin-top:4px">Оношлогоо: бичих '+esc(DG.w)+' · унших '+esc(DG.r)+(DG.n>=0?' · олдсон '+DG.n:'')+'</div>';
+    return h; }
+  window.taRef=function(){ TS.t=0; TS.opp=[]; try{ fillM(); }catch(e){} };
+
+  /* ---------- Тулаан ---------- */
+  window.taFight=function(i){
+    X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
+    const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
+    if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=5; } A.n++; S.taPick=false;
+    const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
+    if(!o.bot){ const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
+      E.fr=1; E.eh=L.map(h=>({id:h.id,p:Math.max(1,(h.p||1)*k)})); }
+    else { E.bi=Math.min(6,o.i*2); }
+    const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
+      if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' оноо'); try{ save(); }catch(e){} TS.t=0; pushMe(); };
+    E.cb=()=>apply(true); E.cbl=()=>apply(false);
+    E.hb='tarena'; E.hbf=1;
+    closeM(); startBattle(0,E); };
+
+  /* ---------- Талбар: зурагны цэнхэр (миний) / улаан (эсрэг) дугуйнууд дээр байрлуулна ---------- */
+  const CB=[[430,455],[357,547],[310,665]], CR=[[1243,455],[1315,547],[1360,665]], IW=1672, IH=941;
+  /* Талбар босоо горимд эргүүлэх асуулттай (hb) үед тулаан хоцорч эхэлдэг → BT үүсэхийг хүлээж байгаад хэрэглэнэ */
+  function layout(E){
+    const W=BT.W, H=BT.H, pt=H>W, sc=Math.max(W/IW,H/IH), ox=(W-IW*sc)/2, oy=pt?0:-(IH*sc-H)*0.3;
+    /* жинхэнэ тоглогчийн баатруудаар эсрэг талыг зохионо (frduel.js-ийн ижил арга; нэг удаа) */
+    if(E.fr&&E.eh){ const en=BT.units.filter(u=>u.side===1), names=new Set(E.eh.map(h=>{ const he=HEROES.find(x=>x.id===h.id); return he&&he.n; }));
+      if(en.length&&!en.every(u=>names.has(u.name))){ const n=en.length||1, ep=E.p/n;
+        en.forEach((u,k)=>{ const h=E.eh[k]; if(!h){ u.hp=0; u.max=0; u.dead=true; return; } const m=Math.max(0.2,Math.min(4,h.p/ep)); u.hp*=m; u.max*=m; u.atk*=m; const he=HEROES.find(x=>x.id===h.id); if(he) u.name=he.n; });
+        BT.units=BT.units.filter(u=>!(u.side===1&&u.dead)); BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0); } }
+    if(pt) return; /* босоо горимд зураг тайрагддаг тул анхны байрлалыг хэвээр үлдээнэ */
+    [0,1].forEach(sd=>{ BT.units.filter(u=>(u.side?1:0)===sd).forEach((u,k)=>{ const c=(sd?CR:CB)[Math.min(2,k)]; u.x=u.hx=ox+c[0]*sc; u.y=u.hy=oy+c[1]*sc; u.fdir=sd?-1:1; }); }); }
+  (function(){ const _sb=startBattle;
+    startBattle=function(i,E){
+      const r=_sb.apply(this,arguments);
+      if(E&&E.hbf){ let n=0; const iv=setInterval(()=>{ n++; try{ if(BT&&BT.e===E){ clearInterval(iv); layout(E); } else if(n>200) clearInterval(iv); }catch(e){ clearInterval(iv); } },100); }
+      return r; }; })();
+
+  /* ---------- Холболт ---------- */
+  window.taPickToggle=(function(_o){ return function(){ _o.apply(this,arguments); try{ if(!S.taPick) pushMe(); }catch(e){} }; })(window.taPickToggle);
+  const _mc=modalContent;
+  modalContent=function(k){ if(k==='tarena'){ try{ return arenaHTML(); }catch(e){ return '<h2>Багийн арена</h2><div class="card"><div class="sm">Алдаа: '+esc(ec(e))+'</div></div>'; } } return _mc.apply(this,arguments); };
+  const st=document.createElement('style'); st.textContent=
+   '.tx-pr{display:flex;gap:5px;margin-top:5px}'
+  +'#txtop{position:fixed;inset:0;z-index:9070;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62)}'
+  +'#txtop .txw{width:min(92vw,400px);max-height:88vh;overflow-y:auto;background:linear-gradient(#2d1d0c,#1a0f06);border:2px solid #a9771f;border-radius:14px;padding:14px;color:#f1e3bf}'
+  +'#txtop h3{margin:0;text-align:center;color:#ffd98a;font-size:20px}#txtop .txs{font-size:11px;text-align:center;color:#d9c79a;margin:4px 0}'
+  +'#txtop .txb{margin:8px 0}#txtop .txm{text-align:center;padding:14px;font-size:13px;color:#e8d8b2}'
+  +'#txtop .txr{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:5px 0;padding:7px 10px;border:1px solid #6b4a1f;border-radius:9px;background:#22160a;font-size:13px}'
+  +'#txtop .txr.me{border-color:#ffd770;background:#3a2a0d}#txtop .txn{display:inline-block;min-width:22px;color:#ffd98a}#txtop .txr i{font-style:normal;font-size:10px;color:#cdbb8e}'
+  +'#txtop .txf{text-align:center;font-size:13px;color:#ffe9b0;margin:6px 0}';
+  document.head.appendChild(st);
+  window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG};
 })();
 
 

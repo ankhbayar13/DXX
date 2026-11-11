@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='017feb7413';
+var UPDB='29ed6c7662';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20780,7 +20780,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const rows=(TS.lb||[]).slice(0,10), me=(TS.lb||[]).findIndex(x=>x.u===(CL&&CL.uid)); let b;
     if(TS.lbSt==='load') b='<div class="t2em">Ачаалж байна…</div>'; else if(TS.lbSt==='off') b='<div class="t2em">Интернет холбогдоогүй байна.</div>'; else if(TS.lbSt==='err') b='<div class="t2em">Жагсаалтыг ачаалж чадсангүй.</div>';
     else if(!rows.length) b='<div class="t2em">Энэ сар жагсаалт хоосон байна. Тулаанд орж оноо цуглуул.</div>';
-    else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2pr'+(x.u===(CL&&CL.uid)?' me':'')+'"><b>'+(i+1)+'. '+esc(x.n)+'</b><span><em>'+x.mp+'</em>'+(pz?' · '+pz.alt+' Алт':'')+'</span></div>'; }).join('');
+    else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2lr'+(x.u===(CL&&CL.uid)?' me':'')+'"><div class="t2lk">'+(i<3?'<i class="t2md" style="background-image:'+SL('tas_md'+(i+1))+'"></i>':'<i class="t2rk" style="background-image:'+SL('tas_rk')+'"><u>'+(i+1)+'</u></i>')+'</div><b class="t2ln">'+esc(x.n)+'</b><span class="t2lp"><em>'+x.mp+' оноо</em>'+(pz?'<small>'+pz.alt+' Алт</small>':'')+'</span></div>'; }).join('');
     return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+b+'<div class="t2dg">Таны сарын оноо: <b>'+M().p+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
   function arenaHTML(){
     X.tInit(); const F=X.fighters(); const tb=TS.tab||'fight'; let body;
@@ -20985,6 +20985,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#tascr .t2dg{margin:'+D(12)+' '+D(40)+' 0;text-align:center;font-size:'+D(21)+';color:#8f7e58;line-height:1.35}#tascr .t2dg b{color:#ffd98a}'
   +'#tascr .t2sp{height:'+D(40)+'}#tascr .t2sp{height:calc('+D(40)+' + env(safe-area-inset-bottom,0px))}'
   +'#tascr .t2pn{margin:0 '+D(28)+'}#tascr .t2pr{position:relative;display:flex;justify-content:space-between;gap:'+D(10)+';align-items:center;margin:'+D(10)+' '+D(6)+';padding:'+D(18)+' '+D(22)+';border:'+D(3)+' solid #6b4616;border-radius:'+D(12)+';background:linear-gradient(#21160b,#150d06);font-size:'+D(28)+';flex-wrap:wrap}'
+  +'#tascr .t2lr{position:relative;display:flex;align-items:center;gap:'+D(14)+';height:'+D(124)+';margin:'+D(8)+' 0;padding:0 '+D(74)+' 0 '+D(50)+';background:url(hf/sq/tas_row.webp?v=1) 100% 100%/100% 100% no-repeat}'
+  +'#tascr .t2lk{flex:none;width:'+D(92)+';height:'+D(124)+';display:flex;align-items:center;justify-content:center}#tascr .t2md{display:block;width:'+D(88)+';height:'+D(116)+';background:center/contain no-repeat;filter:drop-shadow(0 '+D(3)+' '+D(4)+' #000a)}'
+  +'#tascr .t2rk{position:relative;display:flex;align-items:center;justify-content:center;width:'+D(80)+';height:'+D(80)+';background:center/contain no-repeat}#tascr .t2rk u{text-decoration:none;font:bold '+D(36)+' Georgia,serif;color:#ffe7a8;text-shadow:0 '+D(2)+' '+D(3)+' #000}'
+  +'#tascr .t2ln{flex:1;min-width:0;font:bold '+D(33)+' sans-serif;color:#ffe7a8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 '+D(2)+' '+D(3)+' #000}'
+  +'#tascr .t2lp{flex:none;display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}#tascr .t2lp em{font:bold '+D(30)+' sans-serif;font-style:normal;color:#fff}#tascr .t2lp small{font:'+D(23)+' sans-serif;color:#ffd24a}'
+  +'#tascr .t2lr.me{filter:drop-shadow(0 0 '+D(7)+' #ffd770) brightness(1.18)}'
   +'#tascr .t2pr b{color:#ffe7a8}#tascr .t2pr span{color:#d9c79a;font-size:'+D(25)+'}#tascr .t2pr em{font-style:normal;color:#fff;font-weight:bold}#tascr .t2pr.me{border-color:#ffd770;background:#3a2a0d}#tascr .t2pr.cl{border-color:#ffd770}'
   +'#tascr .t2cb{border:'+D(3)+' solid #ffd770;border-radius:'+D(10)+';background:linear-gradient(#f0b53a,#b9751a);color:#2b1700;font-weight:bold;font-size:'+D(26)+';padding:'+D(10)+' '+D(20)+'}';
   const st=document.createElement('style'); st.textContent=css2; document.head.appendChild(st);

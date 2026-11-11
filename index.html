@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4efd3a1032';
+var UPDB='757ac6713f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20802,15 +20802,16 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     sw:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>',
     door:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5H6v22h7M13 16h14M22 10l5 6-5 6"/></svg>',
     team:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round"><circle cx="16" cy="11" r="4.5"/><circle cx="6.5" cy="13" r="3.2"/><circle cx="25.5" cy="13" r="3.2"/><path d="M8 25c0-5 3.6-8 8-8s8 3 8 8M1.5 23c0-3.4 2-5.2 5-5.2M30.5 23c0-3.4-2-5.2-5-5.2"/></svg>'};
-  function pkPlace(){ const o=document.getElementById('tapk'); if(!o) return; const s=o.firstChild, vw=innerWidth, vh=innerHeight, port=vh>vw, fw=port?vh:vw, fh=port?vw:vh, sw=Math.min(fw,fh*1672/941), sh=sw*941/1672;
-    s.style.width=sw+'px'; s.style.height=sh+'px';
-    if(port){ s.style.left=((vw+sh)/2)+'px'; s.style.top=((vh-sw)/2)+'px'; s.style.transform='rotate(90deg)'; }
-    else { s.style.left=((vw-sw)/2)+'px'; s.style.top=((vh-sh)/2)+'px'; s.style.transform='none'; } }
-  window.tpkClose=function(){ const o=document.getElementById('tapk'); if(o) o.remove(); window.removeEventListener('resize',pkPlace); };
-  window.tpkTeam=function(){ tpkClose(); try{ taGoGrid(); }catch(e){} };
+  window.tpkClose=function(){ const o=document.getElementById('tapk'); if(o) o.remove(); const el=document.getElementById('btl'); if(el) delete el.dataset.prep; };
+  /* «Гарах» / «Баг»: тулаанаас үнэгүй буцна (оноо, алт, тулааны тоо хасахгүй) */
+  function tpkLeave(){ try{ const E=BT&&BT.e; if(E){ E.cb=null; E.cbl=null; E.prep=0; } TS.fromBt=1; tpkClose(); btEnd(true); }catch(e){} }
+  window.tpkExit=function(){ tpkLeave(); };
+  window.tpkTeam=function(){ tpkLeave(); setTimeout(()=>{ try{ taGoGrid(); }catch(e){} },500); };
+  /* Тулааны талбайн доод төвд жижиг самбар (тулаан эхлээгүй, баатрууд тойрог дээрээ зогсож байна) */
   function pkShow(i){
+    const el=document.getElementById('btl'); if(!el||!BT) return;
     tpkClose(); const A=S.ta, paid=A.n>=5, LX=[40,372,705];
-    let h='<div class="tpk"><div class="tpkt">Баатраа сонго</div><div class="tpkn">'+A.team.length+' / 3</div>';
+    let h='<div class="tpk"><div class="tpkt">Миний баатар</div><div class="tpkn">'+A.team.length+' / 3</div>';
     A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const lv=(S.heroes&&S.heroes[id])||1;
       h+='<div class="tpki" style="left:'+PW(x+14)+'">'+pimg(id,'tpkp')+'</div>'
         +'<div class="tpkb" style="left:'+PW(x+211)+'">'+lv+'</div>'
@@ -20821,30 +20822,29 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       const tg=ad>ds?['Давуу','#9dff7a']:ad<ds?['Сул','#ff8a7a']:['Адил','#ffd770'];
       h+='<div class="tpke"><div class="tpkh2">Дайсан · '+esc(o&&o.bot?'Бот':(o?o.n:''))+'</div><div class="tpkr">'+eh.map(e=>'<div>'+pimg(e.id,'tpkq')+'<b>'+esc(fst(e.id))+'</b><small>'+esc(RN(grp(e.id)))+'</small></div>').join('')+'</div>'
         +'<div class="tpkf">Ангийн давуу: <b style="color:'+tg[1]+'">'+tg[0]+'</b></div><div class="tpkf">Дайсны хүч: <b>'+f(o?o.tp:0)+'</b></div></div>'; }
-    h+='<button class="tpkB" style="left:'+PW(38)+';width:'+PW(420)+'" onclick="tpkClose()"><i>'+IC.door+'</i>Гарах</button>'
+    h+='<button class="tpkB" style="left:'+PW(38)+';width:'+PW(420)+'" onclick="tpkExit()"><i>'+IC.door+'</i>Гарах</button>'
       +'<button class="tpkB" style="left:'+PW(488)+';width:'+PW(410)+'" onclick="tpkTeam()"><i>'+IC.team+'</i>Баг</button>'
-      +'<button class="tpkG" onclick="taGo('+i+')"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>'+CFG.cost+' Алт</small>':'')+'</span></button></div>';
-    const o=document.createElement('div'); o.id='tapk'; o.innerHTML='<div class="tpkw">'+h+'</div>'; document.body.appendChild(o);
-    pkPlace(); window.addEventListener('resize',pkPlace); try{ sfx('ok'); }catch(e){} }
+      +'<button class="tpkG" onclick="taGo()"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>'+CFG.cost+' Алт</small>':'')+'</span></button></div>';
+    const o=document.createElement('div'); o.id='tapk'; o.className='tpkp'; o.innerHTML='<div class="tpkw">'+h+'</div>'; el.appendChild(o); el.dataset.prep='1'; try{ sfx('ok'); }catch(e){} }
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
-    if(!TS.opp[i]){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
-    pkShow(i); };
-  window.taGo=function(i,ok){ if(i==null) i=(TS.sel==null?1:TS.sel);
-    if(S.ta.n>=5&&!ok){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна · '+CFG.cost+' Алт хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
-      try{ dxAsk('<b>Нэмэлт тулаан</b><br><span class="sm">Өнөөдрийн 5 үнэгүй тулаан дууссан. '+CFG.cost+' Алтаар 1 тулаан авах уу?</span>','Авах',()=>taGo(i,1),'Болих'); }catch(e){ taGo(i,1); } return; }
-    tpkClose();
-    X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
-    if(A.n>=5){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=CFG.cost; } A.n++;
     const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
     { const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
       E.fr=1; E.eh=L.map(h=>({id:h.id,p:Math.max(1,(h.p||1)*k)})); }
     const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
       if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' оноо'); try{ save(); }catch(e){} TS.t=0; pushMe(); };
     E.cb=()=>apply(true); E.cbl=()=>apply(false);
-    TS.fromBt=1; E.hb='tarena'; E.hbf=1;
-    closeM(); startBattle(0,E); };
+    TS.fromBt=1; E.hb='tarena'; E.hbf=1; E.prep=1;
+    closeM(); startBattle(0,E); pkShow(i); };
+  /* «Эхлэх»: тулааны тоо / Алт энд л хасагдана, самбар алга болж тулаан шууд эхэлнэ */
+  window.taGo=function(ok){ const E=BT&&BT.e; if(!E||!E.prep) return; const A=S.ta, paid=A.n>=5;
+    if(paid&&!ok){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна · '+CFG.cost+' Алт хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
+      try{ dxAsk('<b>Нэмэлт тулаан</b><br><span class="sm">Өнөөдрийн 5 үнэгүй тулаан дууссан. '+CFG.cost+' Алтаар 1 тулаан авах уу?</span>','Авах',()=>taGo(1),'Болих'); }catch(e){ taGo(1); } return; }
+    if(paid){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=CFG.cost; }
+    A.n++; try{ save(); updateHUD(); }catch(e){}
+    E.prep=0; tpkClose();
+    if(BT.wait&&!BT.vs&&!E._ag){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } } };
 
   /* ---------- Талбар: зурагны цэнхэр (миний) / улаан (эсрэг) дугуйнууд дээр байрлуулна ---------- */
   const CB=[[430,455],[357,547],[310,665]], CR=[[1243,455],[1315,547],[1360,665]], IW=1672, IH=941;
@@ -20881,6 +20881,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const ne=new PointerEvent('pointerdown',{clientX:r.left+gx*r.width/BT.W,clientY:r.top+gy*r.height/BT.H,bubbles:true,pointerId:ev.pointerId}); ne._tar=1; t.dispatchEvent(ne); }catch(e){} },true);
   (function(){ const _sb=startBattle;
     startBattle=function(i,E){
+      if(E&&E.hbf) tpkClose();   /* тулаан эхлэхэд «Баатраа сонго» дэлгэц заавал алга болно */
       const hb=E&&E.hbf?E.hb:null; if(hb){ E.hb=null; window.BT_LAND=1; }   /* «утсаа эргүүл» асуултыг алгасна */
       let r; try{ r=_sb.apply(this,arguments); } finally { if(hb) E.hb=hb; }
       if(E&&E.hbf){ let n=0, lw=0, lh=0;
@@ -20890,7 +20891,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
           if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
           if(BT.tmax!==90) BT.tmax=90;   /* арена: 90 секунд, дуусахад үлдсэн HP-ийн хувиар шийднэ */
           /* Арена: хуучин «Баатраа сонго» самбар байхгүй. Шинэ дэлгэцээс «Эхлэх» дарсан тул шууд 3-2-1 → тулаан */
-          if(BT.wait&&!BT.vs&&!E._ag){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } }
+          if(BT.wait&&!BT.vs&&!E._ag&&!E.prep){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } }
           return true; };
         try{ step(); }catch(e){}
         const iv=setInterval(()=>{ n++; try{ if(!step()){ if(n>3||!BT) clearInterval(iv); } }catch(e){ clearInterval(iv); } },150); }
@@ -21006,10 +21007,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   st2.textContent+=P+'#btpan{padding:4px 8px;gap:3px}'+P+'#btpan #bmatch{display:none!important}'+P+'.bc{min-height:68px;width:58px;padding:3px 2px}'+P+'.bc img{max-width:30px!important;max-height:30px!important}'+P+'#bact button{min-height:38px;padding:4px 6px}'+P+'#bthd small{display:none}'+P+'#btray{padding:6px 3px 2px!important}'+P+'#bsq{font-size:10px;flex-wrap:nowrap;overflow-x:auto}'+P+'#bsq span{padding:1px 5px}';
   document.head.appendChild(st2);
   const stp=document.createElement('style'); stp.textContent=
-   '#askov{z-index:9700!important}#tapk{position:fixed;inset:0;z-index:9300;background:#0a0603;overflow:hidden}'
-  +'#tapk .tpkw{position:absolute;transform-origin:0 0;container-type:inline-size;background:url(hf/sq/tapk_bg.webp?v=1) 0 0/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#fff}'
+   '#askov{z-index:9700!important}#tapk.tpkp{position:absolute;left:50%;bottom:1.5%;width:clamp(380px,44%,760px);max-width:96%;aspect-ratio:1672/884;transform:translateX(-50%);container-type:inline-size;z-index:60;pointer-events:auto;overflow:hidden;border-radius:'+PW(26)+'}'
+  +'#btl[data-prep] #btpan,#btl[data-prep] #bmatch,#btl[data-prep] #bstart{display:none!important}'
+  +'#btl[data-prep] #bu-pan,#btl[data-prep] #bu-sks,#btl[data-prep] #bu-ctl,#btl[data-prep] #bu-go,#btl[data-prep] #bu-hint{display:none!important}'
+  +'#tapk .tpkw{position:absolute;left:0;top:-'+PW(28)+';width:100%;height:'+PW(941)+';background:url(hf/sq/tapk_bg.webp?v=1) 0 0/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#fff}'
   +'#tapk button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:0;background:transparent;padding:0}'
-  +'#tapk .tpk,#tapk .tpkw{width:100%;height:100%}'
+  +'#tapk .tpk{position:relative;width:100%;height:100%}'
   +'#tapk .tpk{position:relative}#tapk .tpk>*{position:absolute}'
   +'#tapk .tpkt{left:'+PW(120)+';top:'+PW(52)+';width:'+PW(700)+';height:'+PW(126)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(68)+';font-weight:bold;color:#ffe7a8;text-shadow:0 '+PW(3)+' '+PW(4)+' #000,0 0 '+PW(14)+' #3a0a05;white-space:nowrap}'
   +'#tapk .tpkn{left:'+PW(1405)+';top:'+PW(40)+';width:'+PW(225)+';height:'+PW(90)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(60)+';font-weight:bold;color:#9dff5a;text-shadow:0 '+PW(3)+' '+PW(4)+' #000}'

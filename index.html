@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e11df1a65d';
+var UPDB='4efd3a1032';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20648,6 +20648,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const MB=1e6, FRESH=21*864e5, MAXA=3;
   /* ---- Тохиргоо: шагнал/оноог эндээс солино ---- */
   const CFG=window.TA_CFG=window.TA_CFG||{
+    /* өдрийн 5 үнэгүй тулаанаас хойших нэмэлт тулаан бүрийн үнэ (Алт) */
+    cost:100,
     /* харьцаа r = эсрэгчийн хүч / миний хүч → [ялвал, ялагдвал] */
     pts:r=>r<0.9?[15,15]:(r<=1.1?[22,11]:[30,7]),
     /* сарын шагнал: 1-р, 2-р, 3-р байр. tier = зэр зэвсгийн түвшин. give нь шагналыг олгоно (зэр зэвсгийн систем шинэчлэгдэхэд зөвхөн энийг солино) */
@@ -20758,7 +20760,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       +'<div class="t2bo"><div class="t2bt">Өрсөлдөгч сонго <button class="t2rf2" onclick="taRef()">Шинэчлэх</button></div><div class="t2os">'
       +(TS.opp.length?TS.opp.map((q,i)=>{ const tg=tag(q.tp/P), top=(q.h&&q.h[0])?q.h.slice().sort((a,b)=>(b.p||0)-(a.p||0))[0].id:null;
         return '<div class="t2o'+((TS.sel==null?1:TS.sel)===i?' on':'')+'" onclick="taSel('+i+')"><small style="color:'+tg[1]+'">'+tg[0]+'</small>'+(top?pimg(top,'t2op'):'<span class="t2op q">?</span>')+'<b>'+esc(q.bot?'Бот':q.n)+'</b><span>'+f(q.tp)+'</span></div>'; }).join(''):'<div class="t2em">'+(TS.busy?'Хайж байна…':'Эсрэгч алга')+'</div>')+'</div></div></div>';
-    h+='<button class="t2go" onclick="taFight()"><span>'+(free>0?'Тулалдах':'Тулалдах · 5 Алт')+'</span></button>';
+    h+='<button class="t2go" onclick="taFight()"><span>'+(free>0?'Тулалдах':'Тулалдах · '+CFG.cost+' Алт')+'</span></button>';
     h+='<div class="t2dg">Эсрэгч нь бусад тоглогчийн сонгосон 3 баатар (онлайн байх шаардлагагүй). '+(TS.opp.some(x=>x.bot)?'Тохирох тоглогч олдоогүй газар «Бот» орсон. ':'')+'<br>Оношлогоо: бичих '+esc(DG.w)+' · унших '+esc(DG.r)+(DG.n>=0?' · олдсон '+DG.n:'')+'</div>';
     return h; }
   function prizeView(){
@@ -20783,8 +20785,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       body=tb==='prize'?prizeView():tb==='top'?topView():fightView(); }
     return '<div id="tascr"><div class="tas">'+head()+tabs()+body+'<div class="t2sp"></div></div></div>'; }
   window.taClose=function(){ try{ closeM(); }catch(e){} };
-  window.taHelp=function(){ try{ dxAsk('<b>Багийн арена</b><br><span class="sm">Өөрийн 3 баатраа сонгоод, хүч нь ойролцоо бусад тоглогчийн багтай тулна. Сул багийг ялбал +15, адил +22, хүчтэй +30 оноо. Ялагдвал −15 / −11 / −7. Сар бүрийн Топ 3 шагнал авна. Өдөрт 5 үнэгүй тулаан, дараа нь 5 Алт.</span>','Ойлголоо',()=>{}); }catch(e){ say('Сул ялбал +15, адил +22, хүчтэй +30'); } };
-  window.taPlus=function(){ say('Өдөрт 5 үнэгүй тулаан. Дараа нь тулаан бүр 5 Алт'); };
+  window.taHelp=function(){ try{ dxAsk('<b>Багийн арена</b><br><span class="sm">Өөрийн 3 баатраа сонгоод, хүч нь ойролцоо бусад тоглогчийн багтай тулна. Сул багийг ялбал +15, адил +22, хүчтэй +30 оноо. Ялагдвал −15 / −11 / −7. Сар бүрийн Топ 3 шагнал авна. Өдөрт 5 үнэгүй тулаан, дараа нь тулаан бүр 100 Алт.</span>','Ойлголоо',()=>{}); }catch(e){ say('Сул ялбал +15, адил +22, хүчтэй +30'); } };
+  window.taPlus=function(){ say('Өдөрт 5 үнэгүй тулаан. Дараа нь тулаан бүр '+CFG.cost+' Алт'); };
   window.taTab=function(k){ if(k==='league'){ say('Лиг удахгүй'); return; } TS.tab=k; if(k==='top') loadLb(); else rr(); };
   window.taSel=function(i){ TS.sel=i; rr(); };
   window.taFlt=function(k){ TS.flt=k; rr(); };
@@ -20821,17 +20823,20 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         +'<div class="tpkf">Ангийн давуу: <b style="color:'+tg[1]+'">'+tg[0]+'</b></div><div class="tpkf">Дайсны хүч: <b>'+f(o?o.tp:0)+'</b></div></div>'; }
     h+='<button class="tpkB" style="left:'+PW(38)+';width:'+PW(420)+'" onclick="tpkClose()"><i>'+IC.door+'</i>Гарах</button>'
       +'<button class="tpkB" style="left:'+PW(488)+';width:'+PW(410)+'" onclick="tpkTeam()"><i>'+IC.team+'</i>Баг</button>'
-      +'<button class="tpkG" onclick="taGo('+i+')"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>5 Алт</small>':'')+'</span></button></div>';
+      +'<button class="tpkG" onclick="taGo('+i+')"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>'+CFG.cost+' Алт</small>':'')+'</span></button></div>';
     const o=document.createElement('div'); o.id='tapk'; o.innerHTML='<div class="tpkw">'+h+'</div>'; document.body.appendChild(o);
     pkPlace(); window.addEventListener('resize',pkPlace); try{ sfx('ok'); }catch(e){} }
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     if(!TS.opp[i]){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
     pkShow(i); };
-  window.taGo=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel); tpkClose();
+  window.taGo=function(i,ok){ if(i==null) i=(TS.sel==null?1:TS.sel);
+    if(S.ta.n>=5&&!ok){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна · '+CFG.cost+' Алт хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
+      try{ dxAsk('<b>Нэмэлт тулаан</b><br><span class="sm">Өнөөдрийн 5 үнэгүй тулаан дууссан. '+CFG.cost+' Алтаар 1 тулаан авах уу?</span>','Авах',()=>taGo(i,1),'Болих'); }catch(e){ taGo(i,1); } return; }
+    tpkClose();
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
-    if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=5; } A.n++;
+    if(A.n>=5){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=CFG.cost; } A.n++;
     const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
     { const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
       E.fr=1; E.eh=L.map(h=>({id:h.id,p:Math.max(1,(h.p||1)*k)})); }
@@ -21001,7 +21006,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   st2.textContent+=P+'#btpan{padding:4px 8px;gap:3px}'+P+'#btpan #bmatch{display:none!important}'+P+'.bc{min-height:68px;width:58px;padding:3px 2px}'+P+'.bc img{max-width:30px!important;max-height:30px!important}'+P+'#bact button{min-height:38px;padding:4px 6px}'+P+'#bthd small{display:none}'+P+'#btray{padding:6px 3px 2px!important}'+P+'#bsq{font-size:10px;flex-wrap:nowrap;overflow-x:auto}'+P+'#bsq span{padding:1px 5px}';
   document.head.appendChild(st2);
   const stp=document.createElement('style'); stp.textContent=
-   '#tapk{position:fixed;inset:0;z-index:9300;background:#0a0603;overflow:hidden}'
+   '#askov{z-index:9700!important}#tapk{position:fixed;inset:0;z-index:9300;background:#0a0603;overflow:hidden}'
   +'#tapk .tpkw{position:absolute;transform-origin:0 0;container-type:inline-size;background:url(hf/sq/tapk_bg.webp?v=1) 0 0/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#fff}'
   +'#tapk button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:0;background:transparent;padding:0}'
   +'#tapk .tpk,#tapk .tpkw{width:100%;height:100%}'

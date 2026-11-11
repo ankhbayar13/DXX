@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d5982576c1';
+var UPDB='21cb1f058b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20718,14 +20718,15 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   /* ---------- Шинэ дэлгэц (загвар: hf/sq/tas_*.webp) ---------- */
   const K=100/941, d=n=>(n*K).toFixed(3)+'cqw';
   const SL=n=>'url(hf/sq/'+n+'.webp?v=1)';
-  const grp=id=>{ const t=(typeof htype==='function')?htype(id):'cav'; return t==='cav'?'cav':t==='archer'?'arc':'inf'; };
+  const grp=id=>{ try{ return typeof hcls==='function'?hcls(id):htype(id); }catch(e){ return 'cav'; } };   /* тоглоомын 4 анги: heavy / cav / archer / support */
+  const RN=k=>{ const fb={heavy:'Хамгаалагч',cav:'Довтлогч',archer:'Нумтан',support:'Дэмжигч'}; try{ return (TNAME&&TNAME[k])||fb[k]||k; }catch(e){ return fb[k]||k; } };
   const pimg=(id,cls)=>'<span class="'+cls+'">'+(typeof hdImg==='function'?hdImg(id,0,'ta-img',120):'')+'</span>';
   const fst=id=>X.hn(id).split(' ')[0];
-  const CFGT=['fight','league','prize','top'], TNAME={fight:'Тулалдах',league:'Лиг',prize:'Шагнал',top:'Топ 10'};
+  const CFGT=['fight','league','prize','top'], TABN={fight:'Тулалдах',league:'Лиг',prize:'Шагнал',top:'Топ 10'};
   function rankPct(r){ const R=window.ARR||null; try{ const a=ARR, c=arRank(r), i=a.indexOf(c), n=a[i+1]; if(!n) return 100; return Math.max(3,Math.min(100,100*(r-c[1])/(n[1]-c[1]))); }catch(e){ return 5; } }
   function tag(r){ return r<0.96?['Сул','#8fe39a']:(r<1.06?['Адил','#ffd770']:['Хүчтэй','#ff8a7a']); }
   function head(){ return '<div class="t2h"><button class="t2bk" onclick="taClose()">‹ Буцах</button><div class="t2tt">Багийн арена</div><button class="t2hq" onclick="taHelp()">?</button></div>'; }
-  function tabs(){ return '<div class="t2tabs">'+CFGT.map(k=>'<button class="t2tb'+((TS.tab||'fight')===k?' on':'')+(k==='league'?' tlg':'')+'" onclick="taTab(\''+k+'\')">'+TNAME[k]+'</button>').join('')+'</div>'; }
+  function tabs(){ return '<div class="t2tabs">'+CFGT.map(k=>'<button class="t2tb'+((TS.tab||'fight')===k?' on':'')+(k==='league'?' tlg':'')+'" onclick="taTab(\''+k+'\')">'+TABN[k]+'</button>').join('')+'</div>'; }
   function fightView(){
     const A=S.ta, F=X.fighters(), r=X.rk(A.r), free=Math.max(0,5-A.n), m=M(), P=Math.max(120,X.teamPow()), flt=TS.flt||'all';
     let h='<div class="t2r"><div class="t2rn">'+esc(r[0])+'</div><div class="t2rs">Оноо <b>'+A.r+'</b> · Ялалт <b>'+A.w+'</b> · Ялагдал <b>'+A.l+'</b></div>'
@@ -20734,7 +20735,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     [0,1,2].forEach(i=>{ const id=A.team[i]; h+=id?'<div class="t2c">'+pimg(id,'t2cp')+'<button class="t2x" onclick="taTog(\''+id+'\')">✕</button><div class="t2cn"><b>'+esc(fst(id))+'</b><span>'+f(heroPower(id))+'</span></div></div>':'<div class="t2c emp" onclick="taGoGrid()"><div class="t2pl">+</div><div class="t2ps">Дайчин сонгох</div></div>'; });
     h+='</div>';
     const list=F.slice().sort((a,b)=>heroPower(b)-heroPower(a)).filter(id=>flt==='all'||grp(id)===flt);
-    const FL=[['all','Бүх дайчин'],['cav','Морин цэрэг'],['inf','Явган цэрэг'],['arc','Нумт цэрэг']];
+    const FL=[['all','Бүх дайчин'],['heavy',RN('heavy')],['cav',RN('cav')],['archer',RN('archer')],['support',RN('support')]];
     h+='<div class="t2pk" id="t2pk"><div class="t2fl">'+FL.map(x=>'<button class="'+(flt===x[0]?'on':'')+'" onclick="taFlt(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div><div class="t2g" id="t2g">'
       +(list.length?list.map(id=>{ const on2=A.team.indexOf(id)>=0; return '<div class="t2gc'+(on2?' on':'')+'" onclick="taTog(\''+id+'\')">'+pimg(id,'t2gp')+(on2?'<i class="t2ck">✓</i>':'')+'<span class="t2gv">'+f(heroPower(id))+'</span></div>'; }).join(''):'<div class="t2em">Энэ төрлийн баатар алга</div>')+'</div></div>';
     /* VS */

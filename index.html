@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1264a3434e';
+var UPDB='e9617b5b93';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20869,12 +20869,16 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     startBattle=function(i,E){
       const hb=E&&E.hbf?E.hb:null; if(hb){ E.hb=null; window.BT_LAND=1; }   /* «утсаа эргүүл» асуултыг алгасна */
       let r; try{ r=_sb.apply(this,arguments); } finally { if(hb) E.hb=hb; }
-      if(E&&E.hbf){ let n=0, lw=0, lh=0; const iv=setInterval(()=>{ n++; try{
-          if(!(BT&&BT.e===E)){ if(n>3||!BT) clearInterval(iv); return; }
+      if(E&&E.hbf){ let n=0, lw=0, lh=0;
+        const step=()=>{ if(!(BT&&BT.e===E)) return false;
           const el=document.getElementById('btl');
           if(el){ if(el.dataset.tar&&innerWidth>innerHeight){ UNROT(el); try{ btResize(); }catch(e){} } else if(!el.dataset.tar&&innerHeight>innerWidth){ ROT(el); try{ btResize(); }catch(e){} } }
           if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
-        }catch(e){ clearInterval(iv); } },150); }
+          /* Арена: хуучин «Баатраа сонго» самбар байхгүй. Шинэ дэлгэцээс «Эхлэх» дарсан тул шууд 3-2-1 → тулаан */
+          if(BT.wait&&!BT.vs&&!E._ag){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } }
+          return true; };
+        try{ step(); }catch(e){}
+        const iv=setInterval(()=>{ n++; try{ if(!step()){ if(n>3||!BT) clearInterval(iv); } }catch(e){ clearInterval(iv); } },150); }
       return r; }; })();
 
   /* ---------- Холболт ---------- */

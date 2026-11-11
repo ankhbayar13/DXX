@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d391538d0c';
+var UPDB='b376eaf58e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13733,18 +13733,29 @@ heroListHTML=function(){
 })();
 
 
-/* p32/tkdock.js — Зүүн талын «Бүлэг» (#tasks) самбарыг «Өдрийн даалгавар» (#dqbar) ба «Захиалга» (#oqp) самбарын яг доор нааж байрлуулна.
-   Доор нь багтахгүй бага дэлгэц дээр хуучин байрлалдаа (доод зүүн) үлдэнэ. */
+/* p32/tkdock.js — Зүүн талын самбаруудыг дээрээс доош давхцахгүй байрлуулна: «Өдрийн даалгавар» (#dqbar) → «Захиалга» (#oqp) → «Бүлэг» (#tasks).
+   Доод цэс хүртэл багтахгүй бол эхлээд Захиалга, дараа нь Бүлэг самбарыг намсгаж (дотроо гүйлгэнэ) бие биенийхээ товчийг дарахгүй болгоно. */
 (function(){
-  function clear(t){ if(t.dataset.dk){ t.style.top=''; t.style.bottom=''; delete t.dataset.dk; } }
   const shown=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).display!=='none';
+  const nat=e=>{ const sv=e.style.maxHeight; e.style.maxHeight='none'; const h=e.scrollHeight+(e.offsetHeight-e.clientHeight); e.style.maxHeight=sv; return h; };
+  function clear(t){ if(t.dataset.dk){ t.style.top=''; t.style.bottom=''; t.style.maxHeight=''; t.style.overflowY=''; delete t.dataset.dk; } }
   function dock(){ try{
     const t=document.getElementById('tasks'), d=document.getElementById('dqbar'), o=document.getElementById('oqp'), m=document.getElementById('menu'); if(!t) return;
-    const oq=shown(o)&&!o.classList.contains('oqc'), base=oq?o:(shown(d)?d:null);
-    if(!base||getComputedStyle(t).display==='none'){ clear(t); return; }
-    const dr=base.getBoundingClientRect(); if(!dr.height){ clear(t); return; }
-    const top=Math.round(dr.bottom+8), mt=m?m.getBoundingClientRect().top:innerHeight;
-    if(top+t.offsetHeight<=mt-6){ t.style.bottom='auto'; t.style.top=top+'px'; t.dataset.dk='1'; } else clear(t);
+    const ov=shown(o), oc=ov&&o.classList.contains('oqc'), dv=shown(d), tv=getComputedStyle(t).display!=='none';
+    const menuTop=(m&&m.getClientRects().length)?m.getBoundingClientRect().top:innerHeight-96, limit=menuTop-6;
+    let y=null;                       // дараагийн самбарын дээд ирмэг
+    if(dv){ const r=d.getBoundingClientRect(); if(r.height) y=Math.round(r.bottom+8); }
+    /* Захиалга самбар */
+    let oBottom=y;
+    if(ov){ if(y==null){ const pc=document.getElementById('pcard'); y=Math.round((pc?pc.getBoundingClientRect().bottom:112)+8); }
+      const oTop=y, oNat=Math.min(260,nat(o)), tNat=(tv&&!t.classList.contains('tkc')&&t.innerHTML)?nat(t)+8:0;
+      let oh=oNat; if(!oc&&oTop+oh+tNat>limit) oh=Math.max(Math.min(oNat,130),limit-oTop-tNat);
+      o.style.maxHeight=Math.round(oh)+'px'; o.style.overflowY='auto'; o.style.top=oTop+'px';
+      oBottom=oc?y:Math.round(oTop+Math.min(oh,nat(o)))+8; if(oc) oBottom=y; y=oBottom; }
+    if(y==null||!tv){ clear(t); return; }
+    const tn=nat(t), th=Math.max(80,Math.min(tn,limit-y));
+    t.style.bottom='auto'; t.style.top=y+'px'; t.dataset.dk='1';
+    if(!t.classList.contains('tkc')&&y+tn>limit){ t.style.maxHeight=Math.round(th)+'px'; t.style.overflowY='auto'; } else { t.style.maxHeight=''; t.style.overflowY=''; }
   }catch(e){} }
   setInterval(dock,300); window.addEventListener('resize',dock); window.addEventListener('orientationchange',()=>setTimeout(dock,300));
 })();
@@ -20510,7 +20521,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const dq=document.getElementById('dqbar'), dv=vis(dq)&&getComputedStyle(dq).display!=='none', pc=document.getElementById('pcard'), mn=document.getElementById('menu');
     const top0=Math.round((dv?dq.getBoundingClientRect().bottom:(pc?pc.getBoundingClientRect().bottom:112))+8), menuTop=mn&&vis(mn)?mn.getBoundingClientRect().top:innerHeight-96;
     const tasksH=(tv&&!t.classList.contains('tkc'))?t.offsetHeight+8:0;
-    p.style.top=top0+'px'; p.style.bottom='auto'; p.style.maxHeight=Math.max(90,Math.min(260,menuTop-6-top0-tasksH))+'px';
+    p.style.top=top0+'px'; p.style.bottom='auto'; /* өндрийг p32/tkdock.js тохируулна */
     p.classList.toggle('oqc',OQ.col);
     const ready=ordReady();
     b.innerHTML=OQ.col?ico('or_scroll',20)+(ready?'<i>'+ready+'</i>':''):'◀';

@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='8112a89dd6';
+var UPDB='1264a3434e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20792,7 +20792,36 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.taRef=function(){ TS.t=0; TS.opp=[]; rr(); };
 
   /* ---------- Тулаан ---------- */
+  /* ---------- «Баатраа сонго» дэлгэц (Тулалдах дарахад гарна) ---------- */
+  const PW=n=>(n*100/1672).toFixed(3)+'cqw';
+  const IC={
+    sw:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>',
+    door:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5H6v22h7M13 16h14M22 10l5 6-5 6"/></svg>',
+    team:'<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.6" stroke-linecap="round"><circle cx="16" cy="11" r="4.5"/><circle cx="6.5" cy="13" r="3.2"/><circle cx="25.5" cy="13" r="3.2"/><path d="M8 25c0-5 3.6-8 8-8s8 3 8 8M1.5 23c0-3.4 2-5.2 5-5.2M30.5 23c0-3.4-2-5.2-5-5.2"/></svg>'};
+  function pkPlace(){ const o=document.getElementById('tapk'); if(!o) return; const s=o.firstChild, vw=innerWidth, vh=innerHeight, port=vh>vw, fw=port?vh:vw, fh=port?vw:vh, sw=Math.min(fw,fh*1672/941), sh=sw*941/1672;
+    s.style.width=sw+'px'; s.style.height=sh+'px';
+    if(port){ s.style.left=((vw+sh)/2)+'px'; s.style.top=((vh-sw)/2)+'px'; s.style.transform='rotate(90deg)'; }
+    else { s.style.left=((vw-sw)/2)+'px'; s.style.top=((vh-sh)/2)+'px'; s.style.transform='none'; } }
+  window.tpkClose=function(){ const o=document.getElementById('tapk'); if(o) o.remove(); window.removeEventListener('resize',pkPlace); };
+  window.tpkTeam=function(){ tpkClose(); try{ taGoGrid(); }catch(e){} };
+  function pkShow(i){
+    tpkClose(); const A=S.ta, paid=A.n>=5, LX=[40,372,705];
+    let h='<div class="tpk"><div class="tpkt">Баатраа сонго</div><div class="tpkn">'+A.team.length+' / 3</div>';
+    A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const lv=(S.heroes&&S.heroes[id])||1;
+      h+='<div class="tpki" style="left:'+PW(x+14)+'">'+pimg(id,'tpkp')+'</div>'
+        +'<div class="tpkb" style="left:'+PW(x+211)+'">'+lv+'</div>'
+        +'<div class="tpkh" style="left:'+PW(x+14)+'">'+esc(fst(id))+'</div>'
+        +'<div class="tpkv" style="left:'+PW(x+14)+'"><i>'+IC.sw+'</i>'+f(heroPower(id))+'</div>'; });
+    h+='<button class="tpkB" style="left:'+PW(38)+';width:'+PW(420)+'" onclick="tpkClose()"><i>'+IC.door+'</i>Гарах</button>'
+      +'<button class="tpkB" style="left:'+PW(488)+';width:'+PW(410)+'" onclick="tpkTeam()"><i>'+IC.team+'</i>Баг</button>'
+      +'<button class="tpkG" onclick="taGo('+i+')"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>5 Алт</small>':'')+'</span></button></div>';
+    const o=document.createElement('div'); o.id='tapk'; o.innerHTML='<div class="tpkw">'+h+'</div>'; document.body.appendChild(o);
+    pkPlace(); window.addEventListener('resize',pkPlace); try{ sfx('ok'); }catch(e){} }
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
+    X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
+    if(!TS.opp[i]){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
+    pkShow(i); };
+  window.taGo=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel); tpkClose();
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
     if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=5; } A.n++;
@@ -20941,6 +20970,26 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const P='#btl[data-tar] ';
   st2.textContent+=P+'#btpan{padding:4px 8px;gap:3px}'+P+'#btpan #bmatch{display:none!important}'+P+'.bc{min-height:68px;width:58px;padding:3px 2px}'+P+'.bc img{max-width:30px!important;max-height:30px!important}'+P+'#bact button{min-height:38px;padding:4px 6px}'+P+'#bthd small{display:none}'+P+'#btray{padding:6px 3px 2px!important}'+P+'#bsq{font-size:10px;flex-wrap:nowrap;overflow-x:auto}'+P+'#bsq span{padding:1px 5px}';
   document.head.appendChild(st2);
+  const stp=document.createElement('style'); stp.textContent=
+   '#tapk{position:fixed;inset:0;z-index:9300;background:#0a0603;overflow:hidden}'
+  +'#tapk .tpkw{position:absolute;transform-origin:0 0;container-type:inline-size;background:url(hf/sq/tapk_bg.webp?v=1) 0 0/100% 100% no-repeat;font-family:Georgia,"Times New Roman",serif;color:#fff}'
+  +'#tapk button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:0;background:transparent;padding:0}'
+  +'#tapk .tpk,#tapk .tpkw{width:100%;height:100%}'
+  +'#tapk .tpk{position:relative}#tapk .tpk>*{position:absolute}'
+  +'#tapk .tpkt{left:'+PW(120)+';top:'+PW(52)+';width:'+PW(700)+';height:'+PW(126)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(68)+';font-weight:bold;color:#ffe7a8;text-shadow:0 '+PW(3)+' '+PW(4)+' #000,0 0 '+PW(14)+' #3a0a05;white-space:nowrap}'
+  +'#tapk .tpkn{left:'+PW(1405)+';top:'+PW(40)+';width:'+PW(225)+';height:'+PW(90)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(60)+';font-weight:bold;color:#9dff5a;text-shadow:0 '+PW(3)+' '+PW(4)+' #000}'
+  +'#tapk .tpki{top:'+PW(252)+';width:'+PW(274)+';height:'+PW(208)+';overflow:hidden;border-radius:'+PW(10)+'}'
+  +'#tapk .tpkp{display:block;width:100%;height:100%}#tapk .ta-img{width:100%!important;height:100%!important;object-fit:cover;object-position:50% 20%;display:block}'
+  +'#tapk .tpkb{top:'+PW(226)+';width:'+PW(86)+';height:'+PW(86)+';border-radius:50%;background:radial-gradient(circle at 35% 30%,#7df04a,#25a10f 70%,#157008);border:'+PW(4)+' solid #d4ffb0;box-shadow:0 '+PW(3)+' '+PW(6)+' #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:'+PW(50)+';font-weight:bold;color:#fff;text-shadow:0 '+PW(3)+' '+PW(3)+' #063a08}'
+  +'#tapk .tpkh{top:'+PW(462)+';width:'+PW(274)+';height:'+PW(54)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(46)+';font-weight:bold;text-shadow:0 '+PW(3)+' '+PW(3)+' #000;white-space:nowrap;overflow:hidden}'
+  +'#tapk .tpkv{top:'+PW(520)+';width:'+PW(274)+';height:'+PW(56)+';display:flex;align-items:center;justify-content:center;gap:'+PW(14)+';font-size:'+PW(44)+';font-weight:bold;color:#ffd770;text-shadow:0 '+PW(3)+' '+PW(3)+' #000}'
+  +'#tapk .tpkv i,#tapk .tpkB i,#tapk .tpkG i{display:block;width:'+PW(46)+';height:'+PW(46)+'}#tapk i svg{display:block;width:100%;height:100%}'
+  +'#tapk .tpkB{top:'+PW(650)+';height:'+PW(205)+';display:flex;align-items:center;justify-content:center;gap:'+PW(18)+';font-size:'+PW(60)+';font-weight:bold;color:#ffe7a8;text-shadow:0 '+PW(3)+' '+PW(4)+' #000}'
+  +'#tapk .tpkB i{width:'+PW(70)+';height:'+PW(70)+'}'
+  +'#tapk .tpkG{left:'+PW(928)+';top:'+PW(650)+';width:'+PW(707)+';height:'+PW(210)+';display:flex;align-items:center;justify-content:center;gap:'+PW(26)+';font-size:'+PW(88)+';font-weight:bold;color:#fff0c8;text-shadow:0 '+PW(4)+' '+PW(5)+' #4a0a00,0 0 '+PW(16)+' #ff7a00}'
+  +'#tapk .tpkG i{width:'+PW(110)+';height:'+PW(110)+'}#tapk .tpkG span{display:flex;flex-direction:column;align-items:center;line-height:1}#tapk .tpkG small{font-size:'+PW(34)+';color:#ffd98a;margin-top:'+PW(4)+'}'
+  +'#tapk .tpkB:active,#tapk .tpkG:active{filter:brightness(1.25)}';
+  document.head.appendChild(stp);
   window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG};
 })();
 

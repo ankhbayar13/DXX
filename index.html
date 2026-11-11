@@ -5398,18 +5398,18 @@ function turnHit(u,tg){
   efAdd(u.type==='archer'?0:(u.type==='heavy'?6:1),tg.x,tg.y-16,u.type==='archer'?32:36,0.4); }
 function turnPick(u){ const U=BT.units; let best=null,bs=1e9;
   U.forEach(o=>{ if(o.side===u.side||o.hp<=0||o.sup) return; const n=U.filter(q=>q.go&&q.go.tg===o).length, d=Math.hypot(o.x-u.x,o.y-u.y);
-    const sc=((u.type==='archer'||(BT.e&&BT.e.hbf))?0:d)+n*70+Math.random()*60; if(sc<bs){ bs=sc; best=o; } }); return best; }
+    const sc=(u.type==='archer'?0:d)+n*70+Math.random()*60; if(sc<bs){ bs=sc; best=o; } }); return best; }
 function turnSched(dt){ BT.tq=(BT.tq||0)-dt; if(BT.tq>0) return; const U=BT.units;
   for(let k=0;k<2;k++){ const sd=((BT.ts||0)+k)&1; const c=U.filter(u=>u.side===sd&&u.hp>0&&!u.sup&&!u.go&&u.cd<=0); if(!c.length) continue;
     c.sort((a,b)=>(a.lastGo||0)-(b.lastGo||0)); const u=c[0], tg=turnPick(u); if(!tg) continue;
-    u.lastGo=BT.t; u.go={ph:(u.type==='archer'||(BT.e&&BT.e.hbf))?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
+    u.lastGo=BT.t; u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
   BT.tq=0.15; }
 function turnAct(u,dt){
   const g=u.go; const home=()=>{ u.x=u.hx; u.y=u.hy; u.mv=false; u.fdir=u.side?-1:1; };
   if(!g){ if(Math.abs(u.x-u.hx)+Math.abs(u.y-u.hy)>1){ u.x+=(u.hx-u.x)*Math.min(1,dt*10); u.y+=(u.hy-u.y)*Math.min(1,dt*10); } u.mv=false; u.fdir=u.side?-1:1; return; }
   if(g.tg.hp<=0&&g.ph!=='back'){ const n=turnPick(u); if(n&&g.ph!=='hit'&&g.ph!=='shoot'){ g.tg=n; } else if(!n){ g.ph='back'; } }
   g.t+=dt; const spd=Math.max(170,u.d.spd*5.5);
-  if(g.ph==='shoot'){ u.mv=false; u.fdir=g.tg.x>=u.x?1:-1; if(BT.e&&BT.e.hbf){ u.x=u.hx+u.fdir*Math.sin(Math.min(1,g.t/0.62)*Math.PI)*22; u.y=u.hy; } if(!g.did){ u.atkT=0.5; g.did=1; } if(g.did===1&&g.t>=0.28){ g.did=2; if(g.tg.hp>0) turnHit(u,g.tg); } if(g.t>=0.62){ u.go=null; u.cd=u.d.cd*0.3; } return; }
+  if(g.ph==='shoot'){ u.mv=false; u.fdir=g.tg.x>=u.x?1:-1; if(!g.did){ u.atkT=0.5; g.did=1; } if(g.did===1&&g.t>=0.28){ g.did=2; if(g.tg.hp>0) turnHit(u,g.tg); } if(g.t>=0.62){ u.go=null; u.cd=u.d.cd*0.3; } return; }
   if(g.ph==='out'){ const t=g.tg, ex=t.x+(u.hx<t.x?-38:38), ey=t.y+2, dx=ex-u.x, dy=ey-u.y, L=Math.hypot(dx,dy);
     if(L<=Math.max(6,spd*dt)){ u.x=ex; u.y=ey; u.mv=false; g.ph='hit'; g.t=0; g.did=0; u.fdir=t.x>=u.x?1:-1; }
     else { u.x+=dx/L*spd*dt; u.y+=dy/L*spd*dt; u.mv=true; if(Math.abs(dx)>6) u.fdir=dx>0?1:-1; }
@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='757ac6713f';
+var UPDB='b3cace2e88';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16552,7 +16552,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     doSkill(su,sk,null); };
   window.buTgt=function(tg){ const P=BT&&BT.pick; if(!P||!tg||tg.hp<=0||!tg.side) return; const u=P.u;
     if(BT.mode){ const sk=heroSkills(u.id)[BT.mode.i]; doSkill(u,sk,tg); return; }
-    u.go={ph:(u.type==='archer'||(BT.e&&BT.e.hbf))?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; try{ sfx('tap'); }catch(e){} tick(true); };
+    u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; try{ sfx('tap'); }catch(e){} tick(true); };
   /* АВТО: өөрийн баатрын ээлж ирэхэд хамгийн сайн чадварыг (энерги хүрвэл) өөрөө ашиглаж, үгүй бол ердийн довтолгоо хийнэ */
   window.taAutoAct=function(u){ return autoAct(u); };
   function autoAct(u){ try{
@@ -16561,7 +16561,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     let best=null; (heroSkills(u.id)||[]).forEach(sk=>{ if(!skOpen(u.id,sk.i)||sk.cost>en) return; if(sk.k==='heal'&&!hurt) return; if(!best||sk.cost>best.cost) best=sk; });
     const tg=turnPick(u)||E[0];
     if(best){ const need=SKTG.indexOf(best.k)>=0; if(castWith(u,best,need?tg:null)){ u.en=en-best.cost; u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; return true; } }
-    u.go={ph:(u.type==='archer'||(BT.e&&BT.e.hbf))?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; return true;
+    u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; return true;
   }catch(e){ return false; } }
   window.buTg=i=>{ if(!BT) return; buTgt(foes()[i]); };
   window.buAtkBtn=function(){ if(!BT||!BT.pick) return; if(BT.mode){ BT.mode=null; tick(true); return; } const E=E0(); if(E.length===1) buTgt(E[0]); else say('Дайсан дээр дарж сонго'); };
@@ -16702,7 +16702,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
       if(sd===0){ u.lastGo=BT.t; BT.ts=1; BT.tq=0.26; u.en=Math.min(5,(u.en==null?1:u.en)+1); BT.pick={u}; BT.mode=null; BT.bselM=0; BT.bsel=u.id; if(!skManual()){ autoAct(u); BT.tq=0.4; } else { try{ sfx('tap'); }catch(e){} } return; }
       if(BT.e&&BT.e.hbf&&window.taEnAct&&window.taEnAct(u)) return;
       const tg=turnPick(u); if(!tg) continue;
-      u.lastGo=BT.t; u.go={ph:(u.type==='archer'||(BT.e&&BT.e.hbf))?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
+      u.lastGo=BT.t; u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
     BT.tq=0.15; };
 })();
 

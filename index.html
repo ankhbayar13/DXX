@@ -1991,7 +1991,7 @@ function draw(t){
   ctx.clearRect(cam.x,cam.y,vw,vh);
   ctx.imageSmoothingEnabled=true; groundDraw();
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(bgFor(),0,0,WW,WH); try{ panoDraw(); }catch(e){}
+  if(bg) ctx.drawImage(bgFor(),0,0,WW,WH); try{ panoDraw(); }catch(e){}
   ctx.imageSmoothingEnabled=true; roadDraw();
   ctx.imageSmoothingEnabled=true;
   const vis=(x,y,w,h)=>x+w>cam.x-6&&x<cam.x+vw+6&&y+h>cam.y-6&&y<cam.y+vh+6;
@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='515832163c';
+var UPDB='d391538d0c';
 (function(){
   const K='updTry';
   const _go=updGo;

@@ -10892,7 +10892,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c6611633fa';
+var UPDB='7750604bd6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21257,6 +21257,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const z=S.hz; if(z.sel>=z.h.length||z.sel<0) z.sel=0; return z; }
   const cur=()=>{ const z=hz(); return z.h[z.sel]; };
   const capOf=h=>(TYPES[h.t]||TYPES.e).cap;
+  let HIMG=null; const HTY=['e','sp','st','bd'];
   let TAB='rc', FLD=null, PEND={sp:0,st:0,se:0}, OV=null;
   const TT=[32.8,30.3,28.0,25.9,23.9,22.6,21.9,21.2];   // чадвар 5,10,...,40 үед жирийн тоглогчийн дуусгах хугацаа + 1.5с
   function bOf(e){ const x=Math.max(0,Math.min(7,(e-5)/5)), i=Math.min(6,Math.floor(x)), t=TT[i]+(TT[i+1]-TT[i])*(x-i); return 1/t; }
@@ -21308,8 +21309,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     document.head.appendChild(st); }
   const coin='<i class="hz-coin"></i>', gem=()=>{ try{ return ico('ui_gem',16); }catch(e){ return ''; } };
   function close(){ if(OV){ OV.remove(); OV=null; } try{ refresh(); openM('naadam'); }catch(e){} }
-  function pic(h,cv){ if(!cv) return; try{ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); const s=SPR['an_rider_r2']; if(!s||!s.img||!s.img.complete){ if(!cv._r){ cv._r=1; setTimeout(()=>pic(h,cv),500); } return; }
-      c.filter=(TYPES[h.t]||TYPES.e).flt; const dh=cv.height*0.92, dw=dh*s.iw/s.ih; c.drawImage(s.img,s.sx,s.sy,s.iw,s.ih,(cv.width-dw)/2,cv.height-dh-4,dw,dh); c.filter='none'; }catch(e){} }
+  function pic(h,cv){ if(!cv) return; try{ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); if(!HIMG||!HIMG.complete||!HIMG.naturalWidth){ if(!cv._r){ cv._r=1; setTimeout(()=>{ cv._r=0; pic(h,cv); },400); } return; }
+      const ro=4+Math.max(0,HTY.indexOf(h.t)), dh=cv.height*0.96, dw=dh*160/310; [0,3,5].forEach((fr,i)=>{ c.drawImage(HIMG,fr*160,ro*310,160,310,cv.width/2+(i-1)*dw*1.15-dw/2,cv.height-dh-2,dw,dh); }); }catch(e){} }
   const RACES=[{nm:'Тал нутгийн цом',dist:1000,pm:1},{nm:'Хангайн цом',dist:1600,pm:1.3},{nm:'Говийн холын цом',dist:2400,pm:1.7}], RCOL=['linear-gradient(#2a56b8,#173a80)','linear-gradient(#7a3cc0,#4a2080)','linear-gradient(#b4501c,#7a3010)'];
   let RI=0;
   window.hzRi=i=>{ RI=i; render(); };
@@ -21367,9 +21368,9 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.hzStart=()=>{ const z=hz(), h=cur(), a=raceInfo(); if(a.n>=3){ try{ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); }catch(e){} return; }
     const fee=(typeof nfeeOf==='function')?nfeeOf('race'):0; if(!window.WEVB&&(S.res.gold||0)<fee){ try{ say('Оролцооны төлбөр '+fee+' хүрэхгүй байна'); sfx('err'); }catch(e){} return; }
     const cls=Math.min(5,z.cls); if(!FLD||FLD.cls!==cls) FLD={cls:cls,f:genField(cls)};
-    window.HZRUN={h:{sp:h.sp,st:h.st,se:h.se,nm:h.nm},f:FLD.f,cls:cls,race:{i:RI,dist:RACES[RI].dist,pm:RACES[RI].pm,nm:RACES[RI].nm}}; const fld=FLD; FLD=null; if(OV){ OV.remove(); OV=null; }
+    window.HZRUN={h:{sp:h.sp,st:h.st,se:h.se,nm:h.nm,t:h.t},f:FLD.f,cls:cls,race:{i:RI,dist:RACES[RI].dist,pm:RACES[RI].pm,nm:RACES[RI].nm}}; const fld=FLD; FLD=null; if(OV){ OV.remove(); OV=null; }
     _inner(); if(typeof RCE!=='undefined'&&!RCE){ window.HZRUN=null; FLD=fld; open(); } else hudStart(); };
-  function open(){ css(); hz(); PEND={sp:0,st:0,se:0}; if(OV) OV.remove(); try{ closeM(); }catch(e){} OV=document.createElement('div'); OV.id='hzov'; document.body.appendChild(OV); render(); }
+  function open(){ css(); hz(); if(!HIMG){ HIMG=new Image(); HIMG.src='hf/sq/hz_horses.webp?v=1'; } PEND={sp:0,st:0,se:0}; if(OV) OV.remove(); try{ closeM(); }catch(e){} OV=document.createElement('div'); OV.id='hzov'; document.body.appendChild(OV); render(); }
   raceOpen=function(){ open(); };
   const _fin=raceFinish;
   function fin2(){ try{ const hd=document.getElementById('hzhud'); if(hd) hd.remove(); }catch(e){} const R=RCE, z=hz(), pl=R&&R.place||5, hasHz=!!(R&&R.hz); let up='', pts=0, bonus=0, nrec=0;
@@ -21442,9 +21443,10 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       if(q.me){ s=1; y=bot-6; cxm=W/2+xm*W*0.46*0.25; }
       else { if(n>=0){ const nf=Math.min(D-1,n), i0=Math.floor(nf), f=nf-i0; s=P[i0].s+(P[i0+1].s-P[i0].s)*f; y=hy+(bot-hy)*s-6*s; hw=W*0.46*s; const c0=cb(i0), c1=cb(i0+1); cxm=(c0+(c1-c0)*f)+(q.lane-2)*0.4*hw*0.7; }
         else { s=1/(1+n*k); y=hy+(bot-hy)*s-6*s; hw=W*0.46*s; cxm=W/2-xm*hw*0.7+(q.lane-2)*0.4*hw*0.7; } }
-      let im=null; if(N){ const fr=((Math.floor(q.ph)%4)+4)%4; im=q.me?N['hP'+fr]:N['hA'+(q.lane<R.me?q.lane:q.lane-1)+'_'+fr]; }
-      const bh=H*0.215*s;
-      if(im&&im.complete&&im.width){ const bw=bh*im.width/im.height; c.drawImage(im,cxm-bw/2,y-bh,bw,bh); }
+      const HI=(HIMG&&HIMG.complete&&HIMG.naturalWidth)?HIMG:null; let im=null; if(!HI&&N){ const fr=((Math.floor(q.ph)%4)+4)%4; im=q.me?N['hP'+fr]:N['hA'+(q.lane<R.me?q.lane:q.lane-1)+'_'+fr]; }
+      const bh=H*(HI?0.25:0.215)*s;
+      if(HI){ const ro=q.me?4+Math.max(0,HTY.indexOf((R.hz&&R.hz.t)||'e')):(q.lane<R.me?q.lane:q.lane-1), fr=((Math.floor(q.ph*0.8)%7)+7)%7, bw=bh*160/310; c.drawImage(HI,fr*160,ro*310,160,310,cxm-bw/2,y-bh,bw,bh); }
+      else if(im&&im.complete&&im.width){ const bw=bh*im.width/im.height; c.drawImage(im,cxm-bw/2,y-bh,bw,bh); }
       else { c.fillStyle='#0003'; c.beginPath(); c.ellipse(cxm,y,bh*0.3,bh*0.06,0,0,6.3); c.fill(); c.fillStyle='#8a4a1c'; c.beginPath(); c.ellipse(cxm,y-bh*0.4,bh*0.24,bh*0.3,0,0,6.3); c.fill(); c.fillStyle=q.me?'#ffd35a':RCEC[q.lane]; c.fillRect(cxm-bh*0.1,y-bh*0.95,bh*0.2,bh*0.4); }
       const br=(q.me?11:8.5)*Math.max(0.7,Math.min(1.15,s*1.1)), by=y-bh-br*0.4; c.fillStyle=q.me?'#ffd35a':RCEC[q.lane]; c.beginPath(); c.arc(cxm,by,br,0,6.3); c.fill(); c.strokeStyle='#000a'; c.lineWidth=2; c.stroke();
       c.fillStyle=q.me?'#3a2200':'#fff'; c.font='bold '+Math.round(br*1.05)+'px sans-serif'; c.textAlign='center'; c.fillText(q.me?'ТА':String(q.lane+1),cxm,by+br*0.36); });

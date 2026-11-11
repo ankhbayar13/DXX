@@ -4000,15 +4000,15 @@ function raceOpen(){ const a=raceInfo(); if(a.n>=3){ say('Өнөөдрийн 3 �
   const lvS=ntL('horseS'), lvL=ntL('horseL'), hs=Math.min(5,(S.animals&&S.animals.aduu)||0), me=2, ch=mgDiff();
   const HZR=window.HZRUN||null; window.HZRUN=null; let oi=0;
   const bases=[0.0345,0.0372,0.0398,0.0425].map(b=>b*(1+0.012*ch)*(0.97+Math.random()*0.06)).sort(()=>Math.random()-0.5);
-  const hs_=[]; let bi=0; for(let i=0;i<5;i++){ if(i===me) hs_.push({me:1,x:0,v:0,ph:0,fin:null,lane:i}); else { const O=HZR?HZR.f[oi++]:null; hs_.push({me:0,x:0,v:0,ph:Math.random()*6,fin:null,lane:i,b:O?O.b:bases[bi++],sp:O?O.spf:0.76+Math.random()*0.1,sty:O?O.sty:0,wp:Math.random()*6}); } }
-  RCE={o:o,cv:cv,c:cv.getContext('2d'),dp:dp,w:w,h:h,hs:hs_,me:me,st:'ready',t:0,cd:0,s:1,ex:0,lock:0,sc:0,lvS:lvS,lvL:lvL,hr:hs,last:performance.now(),raf:0,dust:[],hz:HZR?HZR.h:null,hcls:HZR?HZR.cls:0,spx:HZR?(0.78-0.004*(HZR.h.se-5)):0.78,tapN:0,tps:[],msg:'',mt:0,place:0,endT:0,done:0};
+  const hs_=[]; let bi=0; for(let i=0;i<5;i++){ if(i===me) hs_.push({me:1,x:0,v:0,ph:0,fin:null,lane:i}); else { const O=HZR?HZR.f[oi++]:null; hs_.push({me:0,x:0,v:0,ph:Math.random()*6,fin:null,lane:i,b:O?O.b:bases[bi++],sp:O?O.spf:0.76+Math.random()*0.1,sty:O?O.sty:0,stt:O?O.st:20,wp:Math.random()*6}); } }
+  RCE={o:o,cv:cv,c:cv.getContext('2d'),dp:dp,w:w,h:h,hs:hs_,me:me,st:'ready',t:0,cd:0,s:1,ex:0,lock:0,sc:0,lvS:lvS,lvL:lvL,hr:hs,last:performance.now(),raf:0,dust:[],hz:HZR?HZR.h:null,rc:HZR?HZR.race:null,df:HZR&&HZR.race?(1+0.4*(HZR.race.dist-1000)/1000):1,sb:0,sbU:0,rec:[],rt:0,hcls:HZR?HZR.cls:0,spx:HZR?(0.78-0.004*(HZR.h.se-5)):0.78,tapN:0,tps:[],msg:'',mt:0,place:0,endT:0,done:0};
   cv.addEventListener('pointerdown',raceTap); o.querySelector('#racex').onclick=raceClose;
   const g=document.createElement('div'); g.id='racego'; g.innerHTML='<h2>🐎 Морин уралдаа</h2><div class="sm">Дэлгэцийг <b>хурдан хурдан товш</b>. Товшсон бүр морийг түлхэнэ.</div><div class="sm">⚡ Эрч дуусвал удаашрана, тиймээс жигд товш. <b>Төгсгөлд</b> бүх хүчээ гарга!</div><button class="btn" id="racestart">▶ Эхлэх</button>'; o.appendChild(g);
   g.querySelector('#racestart').onclick=()=>{ g.remove(); if(!RCE) return; RCE.st='count'; RCE.cd=3.2; sfx('horn'); };
   RCE.raf=requestAnimationFrame(raceLoop); }
 function raceClose(){ if(!RCE) return; cancelAnimationFrame(RCE.raf); const o=RCE.o; RCE=null; o.remove(); refresh(); openM('naadam'); }
 function raceTap(e){ if(e&&e.preventDefault) e.preventDefault(); const R=RCE; if(!R||R.st!=='run') return; const m=R.hs[R.me]; if(m.fin!=null) return;
-  const hz=R.hz||{sp:5,st:5,se:5}, sprint=m.x>R.spx, cost=0.04*(1-0.04*R.lvL)*(1-0.011*(hz.st-5))*(sprint?0.3:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(1+0.012*(hz.sp-5))*(sprint?1.2:1), lk=Math.max(0.5,0.8-0.008*(hz.se-5));
+  const hz=R.hz||{sp:5,st:5,se:5}, sprint=m.x>R.spx, cost=0.04*(1-0.04*R.lvL)*(1-0.011*(hz.st-5))*(sprint?0.3:1)*(R.df||1)*(R.sb>0?0.4:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(1+0.012*(hz.sp-5))*(sprint?1.2:1)*(R.sb>0?1.35:1), lk=Math.max(0.5,0.8-0.008*(hz.se-5));
   if(R.lock>0){ R.lock=Math.max(R.lock,0.5); R.ex=R.lock; return; }
   if(R.s>=cost){ m.v+=kick; R.s-=cost; } else { R.lock=lk; R.ex=lk; }
   R.tapN++; R.tp=performance.now(); try{ snV({f:[190,95],d:0.07,ty:'square',fl:'lowpass',fc:650,q:0.7,v:0.22,at:0.003}); }catch(x){} if(window.vib) vib(6); }
@@ -4016,7 +4016,7 @@ function raceTap(e){ if(e&&e.preventDefault) e.preventDefault(); const R=RCE; if
 function raceStep(dt){ const R=RCE; if(!R) return;
   if(R.st==='count'){ R.cd-=dt; if(R.cd<=0){ R.st='run'; R.t=0; R.msg='ГАР!'; R.mt=0.9; sfx('big'); } return; }
   if(R.st!=='run'&&R.st!=='fin') return;
-  R.t+=dt; R.mt=Math.max(0,R.mt-dt); R.lock=Math.max(0,R.lock-dt); R.ex=Math.max(0,R.ex-dt);
+  R.t+=dt; R.sb=Math.max(0,(R.sb||0)-dt); R.mt=Math.max(0,R.mt-dt); R.lock=Math.max(0,R.lock-dt); R.ex=Math.max(0,R.ex-dt);
   const m=R.hs[R.me];
   R.hs.forEach((q,i)=>{
     if(q.me){ q.v+=((R.lock>0?0.011:0.017)-q.v)*Math.min(1,1.2*dt); if(q.fin!=null) q.v*=Math.max(0,1-1.5*dt); R.s=Math.min(1,R.s+0.09*(1+0.05*R.lvL)*(1+0.015*((R.hz?R.hz.st:5)-5))*dt); }
@@ -4027,7 +4027,8 @@ function raceStep(dt){ const R=RCE; if(!R) return;
   R.sc+=(70+m.v*1500)*dt;
   if(Math.random()<dt*14*Math.min(1,m.v*30)) R.dust.push({x:m.x,l:m.lane,t:0}); R.dust.forEach(d=>d.t+=dt); R.dust=R.dust.filter(d=>d.t<0.6);
 }
-function raceSty(q){ const s=q.sty; if(!s) return 1; const x=q.x; if(s==='lead') return x<0.35?1.06:(x<0.7?1.0:0.97); if(s==='close') return x<0.55?0.96:1.0; return 1; }
+function raceSty(q){ const s=q.sty; if(!s) return 1; const x=q.x, R=RCE, dpn=R&&R.df>1?(1-(R.df-1)*0.15*(1-(q.stt||20)/40)*x):1; return dpn*raceSty0(s,x,q); }
+function raceSty0(s,x,q){ if(s==='lead') return x<0.35?1.06:(x<0.7?1.0:0.97); if(s==='close') return x<0.55?0.96:1.0; return 1; }
 function raceLoop(now){ if(!RCE) return; const R=RCE, dt=Math.min(0.05,(now-R.last)/1000); R.last=now; raceStep(dt); raceDraw(now/1000); if(RCE) R.raf=requestAnimationFrame(raceLoop); }
 function racePos(){ const R=RCE; const m=R.hs[R.me]; let n=1; R.hs.forEach(q=>{ if(!q.me&&q.x>m.x) n++; }); return m.fin!=null?R.place:n; }
 function raceDrawOld(t){ const R=RCE, c=R.c, dp=R.dp, w=R.w, h=R.h; c.setTransform(dp,0,0,dp,0,0);
@@ -10891,7 +10892,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='03b5617910';
+var UPDB='30441a4071';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21302,17 +21303,25 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     '#hzov .hz-pic{display:block;margin:0 auto 6px;width:220px;max-width:70%;height:auto;background:linear-gradient(#8fc4e6,#9ccd62 60%,#6c9a3a);border:3px solid #c9972b;border-radius:10px}'+
     '#hzov input.hz-in{flex:1;min-width:0;padding:8px;border-radius:8px;border:2px solid #8a6424;background:#1a110a;color:#ffe9b0;font-size:15px}'+
     '#hzov .hz-coin{display:inline-block;width:1.1em;height:1.1em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#c9ccd2 45%,#7d838c);border:.1em solid #565b63;vertical-align:-.2em;box-sizing:border-box}'+
-    '#hzov .hz-own{color:#9fe89a;font-weight:bold;font-size:13px}';
+    '#hzov .hz-own{color:#9fe89a;font-weight:bold;font-size:13px}'+
+    '#hzov .hz-rc{display:flex;flex-direction:column;gap:2px;padding:8px 10px;margin:6px 0;border:3px solid #0006;border-radius:9px;color:#fff}#hzov .hz-rc b{font-size:15px}#hzov .hz-rc span{font-size:12px;opacity:.9}#hzov .hz-rc.on{border-color:#ffe9a0;box-shadow:0 0 10px #ffd35a88}';
     document.head.appendChild(st); }
   const coin='<i class="hz-coin"></i>', gem=()=>{ try{ return ico('ui_gem',16); }catch(e){ return ''; } };
   function close(){ if(OV){ OV.remove(); OV=null; } try{ refresh(); openM('naadam'); }catch(e){} }
   function pic(h,cv){ if(!cv) return; try{ const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); const s=SPR['an_rider_r2']; if(!s||!s.img||!s.img.complete){ if(!cv._r){ cv._r=1; setTimeout(()=>pic(h,cv),500); } return; }
       c.filter=(TYPES[h.t]||TYPES.e).flt; const dh=cv.height*0.92, dw=dh*s.iw/s.ih; c.drawImage(s.img,s.sx,s.sy,s.iw,s.ih,(cv.width-dw)/2,cv.height-dh-4,dw,dh); c.filter='none'; }catch(e){} }
-  function rcTab(){ const z=hz(), h=cur(), a=raceInfo(), left=Math.max(0,3-a.n), cls=Math.min(5,z.cls);
+  const RACES=[{nm:'Тал нутгийн цом',dist:1000,pm:1},{nm:'Хангайн цом',dist:1600,pm:1.3},{nm:'Говийн холын цом',dist:2400,pm:1.7}], RCOL=['linear-gradient(#2a56b8,#173a80)','linear-gradient(#7a3cc0,#4a2080)','linear-gradient(#b4501c,#7a3010)'];
+  let RI=0;
+  window.hzRi=i=>{ RI=i; render(); };
+  function rcTab(){ const z=hz(), h=cur(), a=raceInfo(), left=Math.max(0,3-a.n), cls=Math.min(5,z.cls), rc=RACES[RI];
     if(!FLD||FLD.cls!==cls) FLD={cls:cls,f:genField(cls)};
     const me={nm:h.nm,sp:h.sp,st:h.st,se:h.se,me:1}, rows=[]; let oi=0; for(let l=0;l<5;l++){ if(l===2) rows.push(me); else rows.push(FLD.f[oi++]); }
-    const col=k=>rows.map(r=>r[k]), fee=(typeof nfeeOf==='function')?nfeeOf('race'):0;
-    let t='<div class="hz-box"><div class="hz-h">'+CLS[cls]+' ангилал</div><table><tr><th>№</th><th>Морь</th><th>Хэв</th><th>Хурд</th><th>Тэсвэр</th><th>Мэдр.</th></tr>';
+    const col=k=>rows.map(r=>r[k]), fee=(typeof nfeeOf==='function')?nfeeOf('race'):0, rec=(z.rec||{})[cls+'_'+RI];
+    let t='<div class="hz-box"><div class="hz-h">'+CLS[cls]+' ангилал · уралдаанууд</div>';
+    RACES.forEach((r,i)=>{ const rr=(z.rec||{})[cls+'_'+i]; t+='<div class="hz-rc'+(RI===i?' on':'')+'" style="background:'+RCOL[i]+'" onclick="hzRi('+i+')"><b>'+r.nm+'</b><span>'+r.dist+'м · шагнал x'+r.pm+(rr?' · рекорд '+rr.toFixed(1)+'с':'')+'</span></div>'; });
+    t+='</div><div class="hz-box"><div class="hz-row"><div style="flex:1"><div class="hz-h" style="margin:0">'+rc.nm+'</div><div class="sm">Зай '+rc.dist+'м · '+CLS[cls]+' · Рекорд '+(rec?rec.toFixed(1)+'с':'-')+'</div><div class="sm">Урт зайд эрч илүү хурдан дуусна, тэсвэр чухал.</div></div>'+
+      '<svg viewBox="0 0 120 56" width="96" height="45"><rect x="4" y="4" width="112" height="48" rx="24" fill="#4f8f3a" stroke="#c9972b" stroke-width="3"/><rect x="26" y="14" width="68" height="28" rx="14" fill="#a8774a"/><text x="60" y="32" fill="#fff" font-size="9" text-anchor="middle" font-weight="bold">'+rc.dist+'м</text></svg></div></div>'+
+      '<div class="hz-box"><table><tr><th>№</th><th>Морь</th><th>Хэв</th><th>Хурд</th><th>Тэсвэр</th><th>Мэдр.</th></tr>';
     rows.forEach((r,i)=>{ t+='<tr'+(r.me?' class="me"':'')+'><td><span class="hz-n" style="background:'+LC[i]+'">'+(i+1)+'</span></td><td class="nm">'+esc(r.nm)+(r.me?' (Таны)':'')+'</td><td>'+(r.me?'Өөрөө':STY[r.sty])+'</td>'+
       ['sp','st','se'].map(k=>{ const g=grade(r[k],col(k)); return '<td class="g-'+g+'">'+g+'</td>'; }).join('')+'</tr>'; });
     t+='</table><div class="sm" style="margin-top:8px">'+(cls<5?'Эхний 3-т орвол <b>'+CLS[cls+1]+'</b> ангилалд ахина.':'Энэ бол дээд ангилал. Эхний 3-т орвол нэмэгдэл шагнал авна.')+' Дуусахад онооноос чадвартаа нэмнэ.</div></div>';
@@ -21358,17 +21367,74 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.hzStart=()=>{ const z=hz(), h=cur(), a=raceInfo(); if(a.n>=3){ try{ say('Өнөөдрийн 3 оролдлого дууссан. Маргааш дахин'); }catch(e){} return; }
     const fee=(typeof nfeeOf==='function')?nfeeOf('race'):0; if(!window.WEVB&&(S.res.gold||0)<fee){ try{ say('Оролцооны төлбөр '+fee+' хүрэхгүй байна'); sfx('err'); }catch(e){} return; }
     const cls=Math.min(5,z.cls); if(!FLD||FLD.cls!==cls) FLD={cls:cls,f:genField(cls)};
-    window.HZRUN={h:{sp:h.sp,st:h.st,se:h.se,nm:h.nm},f:FLD.f,cls:cls}; const fld=FLD; FLD=null; if(OV){ OV.remove(); OV=null; }
-    _inner(); if(typeof RCE!=='undefined'&&!RCE){ window.HZRUN=null; FLD=fld; open(); } };
+    window.HZRUN={h:{sp:h.sp,st:h.st,se:h.se,nm:h.nm},f:FLD.f,cls:cls,race:{i:RI,dist:RACES[RI].dist,pm:RACES[RI].pm,nm:RACES[RI].nm}}; const fld=FLD; FLD=null; if(OV){ OV.remove(); OV=null; }
+    _inner(); if(typeof RCE!=='undefined'&&!RCE){ window.HZRUN=null; FLD=fld; open(); } else hudStart(); };
   function open(){ css(); hz(); PEND={sp:0,st:0,se:0}; if(OV) OV.remove(); try{ closeM(); }catch(e){} OV=document.createElement('div'); OV.id='hzov'; document.body.appendChild(OV); render(); }
   raceOpen=function(){ open(); };
   const _fin=raceFinish;
-  raceFinish=function(){ const R=RCE, z=hz(), pl=R&&R.place||5, hasHz=!!(R&&R.hz); let up='', pts=0, bonus=0;
-    if(hasHz){ const cls=Math.min(5,R.hcls||0); bonus=Math.round([180,110,70,40,20][pl-1]*0.25*cls); if(bonus) S.res.gold+=bonus; pts=PTS[pl-1]||1; z.pt+=pts;
-      if(pl<=3&&z.cls<5&&cls===z.cls){ z.cls=cls+1; up=CLS[z.cls]; } }
+  function fin2(){ try{ const hd=document.getElementById('hzhud'); if(hd) hd.remove(); }catch(e){} const R=RCE, z=hz(), pl=R&&R.place||5, hasHz=!!(R&&R.hz); let up='', pts=0, bonus=0, nrec=0;
+    if(hasHz){ const cls=Math.min(5,R.hcls||0), pm=(R.rc&&R.rc.pm)||1; bonus=Math.round([180,110,70,40,20][pl-1]*(0.25*cls+(pm-1))); if(bonus) S.res.gold+=bonus; pts=PTS[pl-1]||1; z.pt+=pts;
+      if(pl<=3&&z.cls<5&&cls===z.cls){ z.cls=cls+1; up=CLS[z.cls]; }
+      try{ const tm=R.hs[R.me].fin, k=cls+'_'+((R.rc&&R.rc.i)||0); z.rec=z.rec||{}; if(tm&&(!z.rec[k]||tm<z.rec[k])){ z.rec[k]=tm; nrec=1; } }catch(e){} }
     _fin.apply(this,arguments);
     try{ const r=document.getElementById('archres'); if(r&&hasHz){ const d=document.createElement('div'); d.className='sm'; d.style.cssText='margin:4px 0;color:#ffe9b0';
-      d.innerHTML='+'+pts+' оноо'+(bonus?' · +'+bonus+' '+coin.replace('hz-coin','ndx-coin'):'')+(up?'<br><b style="color:#9fe89a">Ангилал ахилаа: '+up+'</b>':''); const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } save(); }catch(e){} };
+      d.innerHTML=(R.rc?esc(R.rc.nm)+' · '+R.rc.dist+'м<br>':'')+'+'+pts+' оноо'+(bonus?' · +'+bonus+' '+coin.replace('hz-coin','ndx-coin'):'')+(up?'<br><b style="color:#9fe89a">Ангилал ахилаа: '+up+'</b>':''); const row=r.querySelector('.row2'); if(row) r.insertBefore(d,row); else r.appendChild(d); } save(); }catch(e){} }
+  raceFinish=function(){ const R=RCE; if(R&&R.rc&&R.rec&&R.rec.length>20&&!R.rpd){ R.rpd=1; try{ startReplay(R,fin2); return; }catch(e){} } fin2(); };
+  // ---- уралдааны HUD (3 зурвас, зай, мини зам, Хурдал товч) ----
+  function css2(){ if(document.getElementById('hzcss2')) return; const st=document.createElement('style'); st.id='hzcss2';
+    st.textContent='#hzhud{position:absolute;inset:0;pointer-events:none;z-index:2;font-family:inherit}'+
+    '#hzhud .hh-bars{position:absolute;left:8px;top:48px;width:150px;background:#000a;border:2px solid #c9972b;border-radius:9px;padding:5px 7px}'+
+    '#hzhud .hh-r{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:11px;font-weight:bold;color:#ffe9b0}#hzhud .hh-r span{width:46px}'+
+    '#hzhud .hh-b{flex:1;height:9px;background:#1a110a;border-radius:5px;overflow:hidden;border:1px solid #6a4a1c}#hzhud .hh-b i{display:block;height:100%;width:0;background:#3a8be0}'+
+    '#hzhud .hh-d{position:absolute;left:50%;transform:translateX(-50%);top:46px;background:#000a;border:2px solid #c9972b;border-radius:9px;padding:3px 10px;color:#fff;font-weight:bold;font-size:13px;white-space:nowrap}'+
+    '#hzhud .hh-m{position:absolute;right:8px;top:54px;width:112px;height:46px;background:#000a;border:2px solid #c9972b;border-radius:9px}'+
+    '#hzhud .hh-m em{position:absolute;left:8px;right:8px;top:21px;height:4px;background:#a8774a;border-radius:2px}'+
+    '#hzhud .hh-m u{position:absolute;top:15px;width:14px;height:14px;border-radius:50%;border:2px solid #000a;margin-left:-7px;box-sizing:border-box}'+
+    '#hzhud .hh-m small{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#ffe9b0}'+
+    '#hzhud .hh-s{position:absolute;right:14px;bottom:62px;width:84px;height:84px;border-radius:50%;pointer-events:auto;border:4px solid #fff;background:radial-gradient(#e0483a,#8a2218);color:#fff;font-weight:bold;font-size:14px;box-shadow:0 0 14px #000a}'+
+    '#hzhud .hh-s.rd{animation:hzp .6s infinite alternate;background:radial-gradient(#ffd35a,#d4801a);color:#3a2200}#hzhud .hh-s[disabled]{filter:grayscale(1) brightness(.55);animation:none}'+
+    '@keyframes hzp{from{transform:scale(1)}to{transform:scale(1.1)}}'+
+    '#hzrp{position:fixed;inset:0;z-index:150;background:#000}#hzrp canvas{display:block}'+
+    '#hzrp .rp-t{position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font-weight:bold;font-size:20px;text-shadow:0 2px 4px #000}'+
+    '#hzrp .rp-s{position:absolute;right:10px;top:10px;padding:8px 14px;border:2px solid #ffe9a0;border-radius:9px;background:#7a2a20;color:#fff;font-weight:bold;font-size:14px}';
+    document.head.appendChild(st); }
+  function hudStart(){ const R=RCE; if(!R||!R.rc) return; css2(); const d=document.createElement('div'); d.id='hzhud';
+    d.innerHTML='<div class="hh-bars">'+[['Хурд','#3a8be0'],['Тэсвэр','#5fd04a'],['Хурдал','#b060e0']].map((n,i)=>'<div class="hh-r"><span>'+n[0]+'</span><div class="hh-b"><i id="hhb'+i+'" style="background:'+n[1]+'"></i></div></div>').join('')+'</div>'+
+      '<div class="hh-d" id="hhd"></div><div class="hh-m"><em></em>'+[0,1,2,3,4].map(i=>'<u id="hhm'+i+'" style="background:'+LC[i]+'"></u>').join('')+'<small>'+R.rc.dist+'м</small></div>'+
+      '<button class="hh-s" id="hhs" onclick="hzSpurt()">ХУРДАЛ</button>';
+    R.o.appendChild(d); R.hudT=setInterval(()=>{ if(RCE!==R||!document.body.contains(d)){ clearInterval(R.hudT); return; } hudUpd(R); },90); hudUpd(R); }
+  function hudUpd(R){ const m=R.hs[R.me], g=id=>document.getElementById(id); if(!g('hhd')) return; const dist=R.rc.dist;
+    g('hhd').textContent=Math.min(dist,Math.round(Math.max(0,m.x)*dist))+'м / '+dist+'м';
+    g('hhb0').style.width=Math.min(100,m.v/0.05*100)+'%'; g('hhb1').style.width=Math.min(100,R.s*100)+'%';
+    const dur=3+0.05*((R.hz?R.hz.se:5)-5), sp=R.sbU?(R.sb>0?R.sb/dur:0):Math.min(1,m.x/0.45); g('hhb2').style.width=(sp*100)+'%';
+    R.hs.forEach((q,i)=>{ const u=g('hhm'+i); if(u) u.style.left=(8+Math.min(1,Math.max(0,q.x))*96)+'px'; });
+    const b=g('hhs'); if(b){ const ok=R.st==='run'&&!R.sbU&&m.x>=0.45&&m.fin==null; b.disabled=!ok&&!R.sb; b.className='hh-s'+(ok?' rd':''); b.textContent=R.sb>0?'ХУРДАЛ '+R.sb.toFixed(1):(R.sbU?'АШИГЛАСАН':'ХУРДАЛ'); } }
+  window.hzSpurt=()=>{ const R=RCE; if(!R||!R.rc||R.st!=='run'||R.sbU) return; const m=R.hs[R.me]; if(m.x<0.45||m.fin!=null) return;
+    R.sbU=1; R.sb=3+0.05*((R.hz?R.hz.se:5)-5); R.msg='ХУРДАЛ!'; R.mt=0.8; try{ sfx('big'); }catch(e){} if(window.vib) vib(20); };
+  // ---- байрлал бичих, дахин үзүүлэх ----
+  const _rs=raceStep;
+  raceStep=function(dt){ _rs.apply(this,arguments); const R=RCE; if(R&&R.rc&&R.rec&&(R.st==='run'||R.st==='fin')){ R.rt+=dt; while(R.rt>=0.1){ R.rt-=0.1; R.rec.push(R.hs.map(q=>Math.min(1,q.x))); } } };
+  function startReplay(R,done){ css2(); const o=document.createElement('div'); o.id='hzrp'; o.innerHTML='<canvas></canvas><div class="rp-t">Дахин үзүүлэх</div><button class="rp-s" id="rps">Алгасах</button>'; document.body.appendChild(o);
+    const cv=o.querySelector('canvas'), dp=Math.min(2,window.devicePixelRatio||1), w=window.innerWidth, h=window.innerHeight; cv.width=Math.round(w*dp); cv.height=Math.round(h*dp); cv.style.width=w+'px'; cv.style.height=h+'px'; const c=cv.getContext('2d');
+    const rec=R.rec, SP=2.4, T=rec.length*0.1/SP; let t=0, last=performance.now(), raf=0, fin=0, hold=0; const me=R.me;
+    function end(){ if(fin) return; fin=1; cancelAnimationFrame(raf); o.remove(); try{ done(); }catch(e){ console.error(e); } }
+    o.querySelector('#rps').onclick=end;
+    function frame(now){ if(fin) return; const dt=Math.min(0.05,(now-last)/1000); last=now; t+=dt; if(t>=T){ hold+=dt; if(hold>1.2){ end(); return; } }
+      const k=Math.min(rec.length-1,t*SP/0.1), i0=Math.floor(k), i1=Math.min(rec.length-1,i0+1), fr=k-i0, X=n=>rec[i0][n]+(rec[i1][n]-rec[i0][n])*fr;
+      const g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,'#6fb0e0'); g.addColorStop(0.22,'#cfe8f5'); g.addColorStop(0.23,'#7fae45'); g.addColorStop(0.3,'#5f9a35'); g.addColorStop(1,'#4f7f2a');
+      c.setTransform(dp,0,0,dp,0,0); c.fillStyle=g; c.fillRect(0,0,w,h);
+      const LH=Math.min(86,(h*0.5)/5), y0=Math.round(h*0.3), sx=30, fx=w-62, span=fx-sx-110;
+      for(let i=0;i<5;i++){ c.fillStyle=i%2?'#c39255':'#b98a4f'; c.fillRect(0,y0+i*LH,w,LH); c.fillStyle='#ffffff55'; c.fillRect(0,y0+i*LH,w,2); }
+      c.fillStyle='#fff'; c.fillRect(sx+4,y0,3,5*LH); for(let i=0;i<5*LH/9;i++){ c.fillStyle=i%2?'#111':'#fff'; c.fillRect(fx,y0+i*9,9,9); c.fillStyle=i%2?'#fff':'#111'; c.fillRect(fx+9,y0+i*9,9,9); }
+      const order=[0,1,2,3,4]; let pos=1; for(let n=0;n<5;n++) if(n!==me&&X(n)>X(me)) pos++;
+      order.forEach(n=>{ const x=X(n), s=SPR['an_rider_r'+(((Math.floor(t*16+n*2))%8+8)%8)], dh=LH*1.0, dw=dh*344/202, px=sx+x*span, py=y0+n*LH+LH-4;
+        if(s&&s.img&&s.img.complete){ c.save(); if(n!==me){ try{ c.filter='hue-rotate('+((n*67)%360)+'deg)'; }catch(e){} } c.drawImage(s.img,s.sx,s.sy,s.iw,s.ih,px,py-dh,dw,dh); c.restore(); c.filter='none'; }
+        const bx=px+dw*0.42, by=py-dh-2; c.fillStyle=n===me?'#ffd35a':LC[n]; c.beginPath(); c.arc(bx,by+4,n===me?10:8,0,6.3); c.fill(); c.strokeStyle='#000a'; c.lineWidth=2; c.stroke();
+        c.fillStyle=n===me?'#3a2200':'#fff'; c.font='bold 10px sans-serif'; c.textAlign='center'; c.fillText(n===me?'ТА':String(n+1),bx,by+8); });
+      c.font='bold 16px sans-serif'; c.fillStyle='#fff'; c.strokeStyle='#000a'; c.lineWidth=4; c.textAlign='center'; const tx='Байр '+pos+'/5';
+      c.strokeText(tx,w/2,y0+5*LH+34); c.fillText(tx,w/2,y0+5*LH+34);
+      raf=requestAnimationFrame(frame); }
+    raf=requestAnimationFrame(frame); }
   window.raceOpenInner=function(){ return _inner.apply(this,arguments); };
   window.HZ={hz:hz,CLS:CLS,genField:genField,open:open};
 })();

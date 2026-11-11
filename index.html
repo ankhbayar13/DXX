@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='23edb50073';
+var UPDB='1a99fb722b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20771,7 +20771,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
       if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' оноо'); try{ save(); }catch(e){} TS.t=0; pushMe(); };
     E.cb=()=>apply(true); E.cbl=()=>apply(false);
-    E.hb='tarena'; E.hbf=1;
+    TS.fromBt=1; E.hb='tarena'; E.hbf=1;
     closeM(); startBattle(0,E); };
 
   /* ---------- Талбар: зурагны цэнхэр (миний) / улаан (эсрэг) дугуйнууд дээр байрлуулна ---------- */
@@ -20806,6 +20806,29 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#txtop .txr.me{border-color:#ffd770;background:#3a2a0d}#txtop .txn{display:inline-block;min-width:22px;color:#ffd98a}#txtop .txr i{font-style:normal;font-size:10px;color:#cdbb8e}'
   +'#txtop .txf{text-align:center;font-size:13px;color:#ffe9b0;margin:6px 0}';
   document.head.appendChild(st);
+  /* ---------- Арены хаалга: орохдоо онгойдог үзүүлбэр ---------- */
+  function door(){
+    try{ const old=document.getElementById('tadoor'); if(old) old.remove();
+      const h=Math.min(innerHeight*0.8,innerWidth*0.94*1.5), w=h*2/3, d=document.createElement('div'); d.id='tadoor';
+      const U='url(hf/sq/door_arena.webp?v=1)';
+      d.innerHTML='<div class="tdbg"></div><div class="tdw" style="width:'+w+'px;height:'+h+'px"><div class="tdh tdl" style="background-image:'+U+'"></div><div class="tdh tdr" style="background-image:'+U+'"></div></div>';
+      document.body.appendChild(d); try{ sfx('ok'); }catch(e){}
+      setTimeout(()=>{ d.classList.add('go'); },420); setTimeout(()=>{ d.classList.add('fade'); },1050); setTimeout(()=>{ d.remove(); },1700);
+    }catch(e){} }
+  const _om=openM;
+  openM=function(k){
+    const r=_om.apply(this,arguments);
+    try{ if(k==='tarena'){ const skip=TS.fromBt; TS.fromBt=0; if(!skip&&typeof cur!=='undefined'&&cur==='tarena') door(); } }catch(e){}
+    return r; };
+  window.taDoor=door;
+  const st2=document.createElement('style'); st2.textContent=
+   '#tadoor{position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;perspective:1400px;pointer-events:none}'
+  +'#tadoor .tdbg{position:absolute;inset:0;background:rgba(8,4,2,.94);transition:opacity .65s ease .15s}#tadoor.go .tdbg{opacity:0}'
+  +'#tadoor .tdw{position:relative;display:flex;filter:drop-shadow(0 6px 22px #000);transition:opacity .5s}#tadoor.fade .tdw{opacity:0}'
+  +'#tadoor .tdh{width:50%;height:100%;background-size:200% 100%;background-repeat:no-repeat;transition:transform 1s cubic-bezier(.5,0,.2,1);backface-visibility:hidden}'
+  +'#tadoor .tdl{background-position:left center;transform-origin:left center}#tadoor .tdr{background-position:right center;transform-origin:right center}'
+  +'#tadoor.go .tdl{transform:rotateY(-105deg)}#tadoor.go .tdr{transform:rotateY(105deg)}';
+  document.head.appendChild(st2);
   window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG};
 })();
 

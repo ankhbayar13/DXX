@@ -4008,7 +4008,7 @@ function raceOpen(){ const a=raceInfo(); if(a.n>=3){ say('Өнөөдрийн 3 �
   RCE.raf=requestAnimationFrame(raceLoop); }
 function raceClose(){ if(!RCE) return; cancelAnimationFrame(RCE.raf); const o=RCE.o; RCE=null; o.remove(); refresh(); openM('naadam'); }
 function raceTap(e){ if(e&&e.preventDefault) e.preventDefault(); const R=RCE; if(!R||R.st!=='run') return; const m=R.hs[R.me]; if(m.fin!=null) return;
-  const hz=R.hz||{sp:5,st:5,se:5}, sprint=m.x>R.spx, cost=0.04*(1-0.04*R.lvL)*(1-0.011*(hz.st-5))*(sprint?0.3:1)*(R.df||1)*(R.sb>0?0.4:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(1+0.012*(hz.sp-5))*(sprint?1.2:1)*(R.sb>0?1.35:1), lk=Math.max(0.5,0.8-0.008*(hz.se-5));
+  const hz=R.hz||{sp:5,st:5,se:5}, sprint=m.x>R.spx, cost=0.04*(1-0.04*R.lvL)*(1-0.011*(hz.st-5))*(sprint?0.3:1)*(R.df||1)*(R.sb>0?0.4:1), kick=0.0085*(1+0.05*R.lvS)*(1+0.02*R.hr)*(1+0.012*(hz.sp-5))*(sprint?1.2:1)*(R.sb>0?1.35:1)*(R.hz?Math.max(0.2,1-m.v/(0.075*(1+0.012*(hz.sp-5)))):1), lk=Math.max(0.5,0.8-0.008*(hz.se-5));
   if(R.lock>0){ R.lock=Math.max(R.lock,0.5); R.ex=R.lock; return; }
   if(R.s>=cost){ m.v+=kick; R.s-=cost; } else { R.lock=lk; R.ex=lk; }
   R.tapN++; R.tp=performance.now(); try{ snV({f:[190,95],d:0.07,ty:'square',fl:'lowpass',fc:650,q:0.7,v:0.22,at:0.003}); }catch(x){} if(window.vib) vib(6); }
@@ -10892,7 +10892,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4b0ea58dab';
+var UPDB='c6611633fa';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21258,7 +21258,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const cur=()=>{ const z=hz(); return z.h[z.sel]; };
   const capOf=h=>(TYPES[h.t]||TYPES.e).cap;
   let TAB='rc', FLD=null, PEND={sp:0,st:0,se:0}, OV=null;
-  const TT=[25.4,22.9,20.4,18.3,17.7,17.2,16.6,16.0];   // чадвар 5,10,...,40 үед жирийн тоглогчийн дуусгах хугацаа + 1.5с
+  const TT=[32.8,30.3,28.0,25.9,23.9,22.6,21.9,21.2];   // чадвар 5,10,...,40 үед жирийн тоглогчийн дуусгах хугацаа + 1.5с
   function bOf(e){ const x=Math.max(0,Math.min(7,(e-5)/5)), i=Math.min(6,Math.floor(x)), t=TT[i]+(TT[i+1]-TT[i])*(x-i); return 1/t; }
   function genField(cls){
     const m=5+cls*5, rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)), nm=ONM.slice().sort(()=>Math.random()-0.5), ks=['lead','mid','close'];
@@ -21387,19 +21387,17 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     '#hzhud .hh-r{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:11px;font-weight:bold;color:#ffe9b0}#hzhud .hh-r span{width:46px}'+
     '#hzhud .hh-b{flex:1;height:9px;background:#1a110a;border-radius:5px;overflow:hidden;border:1px solid #6a4a1c}#hzhud .hh-b i{display:block;height:100%;width:0;background:#3a8be0}'+
     '#hzhud .hh-d{position:absolute;left:50%;transform:translateX(-50%);top:46px;background:#000a;border:2px solid #c9972b;border-radius:9px;padding:3px 10px;color:#fff;font-weight:bold;font-size:13px;white-space:nowrap}'+
-    '#hzhud .hh-m{position:absolute;right:8px;top:54px;width:112px;height:46px;background:#000a;border:2px solid #c9972b;border-radius:9px}'+
-    '#hzhud .hh-m em{position:absolute;left:8px;right:8px;top:21px;height:4px;background:#a8774a;border-radius:2px}'+
-    '#hzhud .hh-m u{position:absolute;top:15px;width:14px;height:14px;border-radius:50%;border:2px solid #000a;margin-left:-7px;box-sizing:border-box}'+
-    '#hzhud .hh-m small{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#ffe9b0}'+
+    '#hzhud .hh-st{position:absolute;left:12px;bottom:62px;display:flex;gap:8px}#hzhud .hh-b2{pointer-events:auto;width:66px;height:66px;border-radius:50%;border:3px solid #fff;background:radial-gradient(#4a6fb0,#243a70);color:#fff;font-weight:bold;font-size:12px;box-shadow:0 0 12px #000a;touch-action:none}'+
     '#hzhud .hh-s{position:absolute;right:14px;bottom:62px;width:84px;height:84px;border-radius:50%;pointer-events:auto;border:4px solid #fff;background:radial-gradient(#e0483a,#8a2218);color:#fff;font-weight:bold;font-size:14px;box-shadow:0 0 14px #000a}'+
     '#hzhud .hh-s.rd{animation:hzp .6s infinite alternate;background:radial-gradient(#ffd35a,#d4801a);color:#3a2200}#hzhud .hh-s[disabled]{filter:grayscale(1) brightness(.55);animation:none}'+
     '@keyframes hzp{from{transform:scale(1)}to{transform:scale(1.1)}}';
     document.head.appendChild(st); }
   function hudStart(){ const R=RCE; if(!R||!R.rc) return; css2(); const d=document.createElement('div'); d.id='hzhud';
     d.innerHTML='<div class="hh-bars">'+[['Хурд','#3a8be0'],['Тэсвэр','#5fd04a'],['Хурдал','#b060e0']].map((n,i)=>'<div class="hh-r"><span>'+n[0]+'</span><div class="hh-b"><i id="hhb'+i+'" style="background:'+n[1]+'"></i></div></div>').join('')+'</div>'+
-      '<div class="hh-d" id="hhd"></div><div class="hh-m"><em></em>'+[0,1,2,3,4].map(i=>'<u id="hhm'+i+'" style="background:'+LC[i]+'"></u>').join('')+'<small>'+R.rc.dist+'м</small></div>'+
+      '<div class="hh-d" id="hhd"></div><div class="hh-st"><button class="hh-b2" id="hhl">Зүүн</button><button class="hh-b2" id="hhr">Баруун</button></div>'+
       '<button class="hh-s" id="hhs" onclick="hzSpurt()">ХУРДАЛ</button>';
-    R.o.appendChild(d); R.hudT=setInterval(()=>{ if(RCE!==R||!document.body.contains(d)){ clearInterval(R.hudT); return; } hudUpd(R); },90); hudUpd(R); }
+    R.o.appendChild(d); R.chase=1; R.px=2; R.hoff=0; STEER.l=STEER.r=0; [['hhl','l'],['hhr','r']].forEach(([id,k])=>{ const b=d.querySelector('#'+id); const on=e=>{ e.preventDefault(); STEER[k]=1; }, off=()=>{ STEER[k]=0; }; b.addEventListener('pointerdown',on); ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off)); });
+    R.hudT=setInterval(()=>{ if(RCE!==R||!document.body.contains(d)){ clearInterval(R.hudT); return; } hudUpd(R); },90); hudUpd(R); }
   function hudUpd(R){ const m=R.hs[R.me], g=id=>document.getElementById(id); if(!g('hhd')) return; const dist=R.rc.dist;
     g('hhd').textContent=Math.min(dist,Math.round(Math.max(0,m.x)*dist))+'м / '+dist+'м';
     g('hhb0').style.width=Math.min(100,m.v/0.05*100)+'%'; g('hhb1').style.width=Math.min(100,R.s*100)+'%';
@@ -21408,6 +21406,64 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const b=g('hhs'); if(b){ const ok=R.st==='run'&&!R.sbU&&m.x>=0.45&&m.fin==null; b.disabled=!ok&&!R.sb; b.className='hh-s'+(ok?' rd':''); b.textContent=R.sb>0?'ХУРДАЛ '+R.sb.toFixed(1):(R.sbU?'АШИГЛАСАН':'ХУРДАЛ'); } }
   window.hzSpurt=()=>{ const R=RCE; if(!R||!R.rc||R.st!=='run'||R.sbU) return; const m=R.hs[R.me]; if(m.x<0.45||m.fin!=null) return;
     R.sbU=1; R.sb=3+0.05*((R.hz?R.hz.se:5)-5); R.msg='ХУРДАЛ!'; R.mt=0.8; try{ sfx('big'); }catch(e){} if(window.vib) vib(20); };
+  // ---- хойноос дагах камер, эргэлттэй зам ----
+  const STEER={l:0,r:0}, LENS=1200, TURNS=[[0.098,0.404],[0.596,0.902]];
+  window.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft') STEER.l=1; if(e.key==='ArrowRight') STEER.r=1; });
+  window.addEventListener('keyup',e=>{ if(e.key==='ArrowLeft') STEER.l=0; if(e.key==='ArrowRight') STEER.r=0; });
+  function cuAt(f){ for(let i=0;i<2;i++){ const T=TURNS[i]; if(f>=T[0]&&f<=T[1]) return -Math.sin((f-T[0])/(T[1]-T[0])*Math.PI); } return 0; }
+  const _rs=raceStep;
+  raceStep=function(dt){ _rs.apply(this,arguments); const R=RCE; if(!R||!R.chase||R.st==='count'||R.st==='ready') return; const m=R.hs[R.me];
+    if(m.fin==null&&R.st==='run'){ const cu=cuAt(m.x), vz=m.v*LENS; let x=(R.px-2)*0.4;
+      x+=((STEER.r-STEER.l)*1.5-cu*vz*0.0055)*dt; if(Math.abs(x)>1){ m.v*=Math.max(0,1-0.6*dt); } x=Math.max(-1.18,Math.min(1.18,x)); R.px=2+x/0.4;
+      m.x+=m.v*dt*(0.03*(-x)*Math.abs(cu)); R.hoff=(R.hoff||0)-cu*vz*0.05*dt; }
+    R.hs.forEach(q=>{ if(q.me||q.fin!=null||R.st!=='run') return; const cu=cuAt(q.x), xl=(q.lane-2)*0.4; q.x+=q.v*dt*(0.03*(-xl)*Math.abs(cu)); }); };
+  const _rd=raceDraw;
+  raceDraw=function(t){ if(RCE&&RCE.chase) return chaseDraw(t); return _rd.apply(this,arguments); };
+  function ovPos(u,i,r0,lw,cx,cy,Ls){ const r=r0+i*lw+lw/2, P=2*Ls+2*Math.PI*r, top=cy-Ls/2, bot=cy+Ls/2; let d=((((u+(Ls/2)/P)%1)+1)%1)*P;
+    if(d<Ls) return [cx+r,bot-d]; d-=Ls; if(d<Math.PI*r){ const a=-d/r; return [cx+r*Math.cos(a),top+r*Math.sin(a)]; } d-=Math.PI*r;
+    if(d<Ls) return [cx-r,top+d]; d-=Ls; const a=Math.PI-d/r; return [cx+r*Math.cos(a),bot+r*Math.sin(a)]; }
+  function chaseDraw(t){ const R=RCE, c=R.c, dp=R.dp, W=R.w, H=R.h; c.setTransform(dp,0,0,dp,0,0); let N=null; try{ N=(typeof NDR!=='undefined')?NDR:null; if(!N&&typeof ndLoad==='function') ndLoad(); }catch(e){}
+    const m=R.hs[R.me], pos=m.x*LENS, hy=Math.round(H*0.27), bot=Math.round(H*0.90), D=100, k=0.07, U=W/390, xm=(R.px-2)*0.4;
+    const yh=Math.round(hy+(bot-hy)/(1+D*k)); const g=c.createLinearGradient(0,0,0,yh); g.addColorStop(0,'#4c93d6'); g.addColorStop(1,'#cfe8f5'); c.fillStyle=g; c.fillRect(0,0,W,yh);
+    const ho=R.hoff||0; c.fillStyle='#8fa9bd'; c.beginPath(); c.moveTo(0,yh); for(let x=0;x<=W+15;x+=15) c.lineTo(x,yh-30*U-16*U*Math.sin((x+ho)*0.02)-9*U*Math.sin((x+ho)*0.065)); c.lineTo(W,yh); c.fill();
+    c.fillStyle='#5f9a35'; c.fillRect(0,yh,W,H-yh);
+    const P=[]; let dx=0, xo=0; for(let n=0;n<=D;n++){ const cu=cuAt((pos+n)/LENS), s=1/(1+n*k); P.push({s:s,y:hy+(bot-hy)*s,xo:xo,hw:W*0.46*s}); dx+=cu*0.085; xo+=dx; }
+    const off=n=>P[n].xo*P[n].s*W*0.012, cb=n=>W/2+off(n)-xm*P[n].hw*0.7;
+    for(let n=D-1;n>=0;n--){ const a=P[n+1], b=P[n], seg=(pos|0)+n, band=(Math.floor(seg/6)%2)===0, ca=cb(n+1), cc=cb(n);
+      c.fillStyle=band?'#6aa83c':'#5f9a35'; c.fillRect(0,a.y,W,b.y-a.y+1);
+      c.fillStyle=band?'#b0804f':'#a8774a'; c.beginPath(); c.moveTo(ca-a.hw,a.y); c.lineTo(ca+a.hw,a.y); c.lineTo(cc+b.hw,b.y); c.lineTo(cc-b.hw,b.y); c.fill();
+      c.fillStyle='#e8e1c8'; c.beginPath(); c.moveTo(ca-a.hw-3*a.s,a.y); c.lineTo(ca-a.hw,a.y); c.lineTo(cc-b.hw,b.y); c.lineTo(cc-b.hw-3*b.s,b.y); c.fill(); c.beginPath(); c.moveTo(ca+a.hw,a.y); c.lineTo(ca+a.hw+3*a.s,a.y); c.lineTo(cc+b.hw+3*b.s,b.y); c.lineTo(cc+b.hw,b.y); c.fill();
+      if(!band){ c.fillStyle='#ffffff66'; for(let l=1;l<5;l++){ const f=-1+l*0.4; c.beginPath(); c.moveTo(ca+f*a.hw-0.6*a.s,a.y); c.lineTo(ca+f*a.hw+0.6*a.s,a.y); c.lineTo(cc+f*b.hw+0.9*b.s,b.y); c.lineTo(cc+f*b.hw-0.9*b.s,b.y); c.fill(); } }
+      if(seg%4===0){ const cs=['#d9423a','#3a7bd5','#e8c23a','#3aa86b','#e8e1c8'][((seg/4)|0)%5], r=Math.max(1,6*b.s*U); for(let sd=-1;sd<=1;sd+=2){ for(let j=0;j<3;j++){ c.fillStyle=cs; c.fillRect(cc+sd*(b.hw+r*(5+j*2.2))-r*0.8,b.y-16*b.s*U*(1+(j%2)*0.2),r*1.6,16*b.s*U); } } }
+      if(seg%12===0){ c.fillStyle='#fff'; c.fillRect(cc-b.hw-10*b.s*U,b.y-34*b.s*U,2.5*b.s*U,34*b.s*U); c.fillRect(cc+b.hw+8*b.s*U,b.y-34*b.s*U,2.5*b.s*U,34*b.s*U); } }
+    const fn=LENS-pos; if(fn>0&&fn<D){ const n=fn|0, b=P[n], x0=cb(n); for(let i=0;i<10;i++){ c.fillStyle=i%2?'#111':'#fff'; c.fillRect(x0-b.hw+i*b.hw*0.2,b.y-8*b.s*U,b.hw*0.2,8*b.s*U); } c.fillStyle='#ffd35a'; c.fillRect(x0-b.hw,b.y-70*b.s*U,b.hw*2,12*b.s*U); c.fillStyle='#fff'; c.fillRect(x0-b.hw,b.y-70*b.s*U,5*b.s*U,70*b.s*U); c.fillRect(x0+b.hw-5*b.s*U,b.y-70*b.s*U,5*b.s*U,70*b.s*U); c.font='bold '+Math.max(8,34*b.s*U)+'px sans-serif'; c.textAlign='center'; c.fillStyle='#7a2a20'; c.fillText('ХҮРЭЭ',x0,b.y-60*b.s*U); }
+    const list=R.hs.map(q=>({q:q,n:(q.x-m.x)*LENS})).filter(o=>o.q.me||(o.n>-3&&o.n<D)).sort((a,b)=>b.n-a.n);
+    list.forEach(o=>{ const q=o.q; let n=o.n, s, y, hw, cxm;
+      if(q.me){ s=1; y=bot-6; cxm=W/2+xm*W*0.46*0.25; }
+      else { if(n>=0){ const nf=Math.min(D-1,n), i0=Math.floor(nf), f=nf-i0; s=P[i0].s+(P[i0+1].s-P[i0].s)*f; y=hy+(bot-hy)*s-6*s; hw=W*0.46*s; const c0=cb(i0), c1=cb(i0+1); cxm=(c0+(c1-c0)*f)+(q.lane-2)*0.4*hw*0.7; }
+        else { s=1/(1+n*k); y=hy+(bot-hy)*s-6*s; hw=W*0.46*s; cxm=W/2-xm*hw*0.7+(q.lane-2)*0.4*hw*0.7; } }
+      let im=null; if(N){ const fr=((Math.floor(q.ph)%4)+4)%4; im=q.me?N['hP'+fr]:N['hA'+(q.lane<R.me?q.lane:q.lane-1)+'_'+fr]; }
+      const bh=H*0.215*s;
+      if(im&&im.complete&&im.width){ const bw=bh*im.width/im.height; c.drawImage(im,cxm-bw/2,y-bh,bw,bh); }
+      else { c.fillStyle='#0003'; c.beginPath(); c.ellipse(cxm,y,bh*0.3,bh*0.06,0,0,6.3); c.fill(); c.fillStyle='#8a4a1c'; c.beginPath(); c.ellipse(cxm,y-bh*0.4,bh*0.24,bh*0.3,0,0,6.3); c.fill(); c.fillStyle=q.me?'#ffd35a':RCEC[q.lane]; c.fillRect(cxm-bh*0.1,y-bh*0.95,bh*0.2,bh*0.4); }
+      const br=(q.me?11:8.5)*Math.max(0.7,Math.min(1.15,s*1.1)), by=y-bh-br*0.4; c.fillStyle=q.me?'#ffd35a':RCEC[q.lane]; c.beginPath(); c.arc(cxm,by,br,0,6.3); c.fill(); c.strokeStyle='#000a'; c.lineWidth=2; c.stroke();
+      c.fillStyle=q.me?'#3a2200':'#fff'; c.font='bold '+Math.round(br*1.05)+'px sans-serif'; c.textAlign='center'; c.fillText(q.me?'ТА':String(q.lane+1),cxm,by+br*0.36); });
+    // жижиг зууван зам (баруун дээр)
+    { const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='#000a'; c.fillRect(ox-ro-8*U,oy-Ls/2-ro-8*U,2*ro+16*U,Ls+2*ro+16*U);
+      c.fillStyle='#a8774a'; c.beginPath(); c.roundRect(ox-ro,oy-Ls/2-ro,2*ro,Ls+2*ro,ro); c.fill(); c.fillStyle='#3d6b2a'; c.beginPath(); c.roundRect(ox-r0,oy-Ls/2-r0,2*r0,Ls+2*r0,r0); c.fill();
+      c.strokeStyle='#fff'; c.lineWidth=2; c.beginPath(); c.moveTo(ox+r0,oy); c.lineTo(ox+ro,oy); c.stroke();
+      R.hs.slice().sort((a,b)=>(a.me?1:0)-(b.me?1:0)).forEach(q=>{ const lane=q.me?Math.max(0,Math.min(4,R.px)):q.lane, pt=ovPos(Math.min(1,q.x),lane-0.5,r0,lw,ox,oy,Ls); c.fillStyle=q.me?'#ffd35a':RCEC[q.lane]; c.beginPath(); c.arc(pt[0],pt[1],q.me?4.2*U:3.2*U,0,6.3); c.fill(); if(q.me){ c.strokeStyle='#fff'; c.lineWidth=1.5; c.stroke(); } }); }
+    // сүүдэр, HUD бичиг
+    const tx=(s,x,y,sz,col)=>{ c.font='bold '+sz+'px sans-serif'; c.textAlign='center'; c.lineWidth=4; c.strokeStyle='#000b'; c.lineJoin='round'; c.strokeText(s,x,y); c.fillStyle=col||'#fff'; c.fillText(s,x,y); };
+    const pos2=racePos(), hd=(R.st==='ready'||R.st==='count')?'Эхлэхэд бэлэн':'Байр '+pos2+'/5  ·  '+(m.fin!=null?m.fin:R.t).toFixed(1)+'с'; tx(hd,W/2,34,18);
+    const bw=Math.min(W-40,320), bx2=(W-bw)/2, by2=H-30; c.fillStyle='#000a'; c.fillRect(bx2-2,by2-2,bw+4,22); const sp=R.s, col=sp>0.5?'#5fd04a':sp>0.2?'#e8c23a':'#e0483a'; c.fillStyle=(R.ex>0&&Math.floor(t*10)%2)?'#fff':col; c.fillRect(bx2,by2,bw*sp,18); tx('Эрч',W/2,by2+14,13);
+    if(R.st==='run'&&m.x>(R.spx||0.78)&&m.fin==null) tx('ХУРДАЛ! ДАР ДАР ДАР!',W/2,by2-14,21,'#ffd35a');
+    else if(R.st==='run'&&R.t<7&&m.fin==null) tx(R.ex>0?'Ядарлаа! Түр зогсоод эрчээ авна':'Товш: хурд · Зүүн/Баруун: эгнээ',W/2,by2-14,17);
+    else if(R.st==='run'&&R.ex>0&&m.fin==null) tx('Ядарлаа! Түр зогс',W/2,by2-14,19,'#ff9a7a');
+    else if(R.st==='run'&&m.fin==null&&Math.abs(cuAt(m.x))>0.25&&Math.abs(xm)>0.5) tx(xm>0?'Зам хазайлаа: Зүүн товчийг барь':'Зам хазайлаа: Баруун товчийг барь',W/2,by2-14,17,'#ffd35a');
+    if(R.st==='count'){ const n=Math.ceil(R.cd-0.2); tx(n>0?String(n):'ГАР',W/2,H*0.45,90,'#ffd35a'); }
+    if(R.mt>0&&R.msg) tx(R.msg,W/2,H*0.5,54,'#ffd35a');
+    if(R.st==='fin'&&!R.done) tx(R.place+'-р байр',W/2,H*0.45,42,R.place<=3?'#ffd35a':'#fff'); }
   window.raceOpenInner=function(){ return _inner.apply(this,arguments); };
   window.HZ={hz:hz,CLS:CLS,genField:genField,open:open};
 })();

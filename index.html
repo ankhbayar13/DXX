@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='16ef1ebe4d';
+var UPDB='e729ae50f9';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21152,16 +21152,18 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       /* Энэ наадмын шатанд тоглогчийн одоо байгаа цолны тэмдэг (Сум: 0-1, Аймаг: 2-7, Улс: 8-15) */
       const rg=r[0]==='s'?[0,1]:r[0]==='a'?[2,3,4,5,6,7]:[8,9,10,11,12,13,14,15], have=rg.filter(x=>o[x]&&wsReg()), bi2=have.length?Math.max.apply(null,have):rg[0], cx=r[1]+165;
       h+=el(T,'ndx-lad'+(have.length?'':' lock'),cx-70,584,140,92,window.WRB?'<img src="'+WRB[bi2]+'">':'','',null);
-      h+=el(T,'ndx-lp ndx-lp2'+(have.length?' cur':''),cx-92,668,184,26,have.length?WRT[bi2][0]:'Цолгүй','',null);
+      h+=el(T,'ndx-lp ndx-lp2'+(have.length?' cur':''),cx-120,668,240,27,have.length?WRT[bi2][0]:'Цолгүй','',null);
       h+=el(T,'ndx-ec',r[1]+14,698,302,102,t,'',null);
       h+=el(T,'ndx-bt'+(e.act?' ndx-g':' off'),r[1]+30,800,270,48,(e.fn&&e.fn.indexOf('wevStart')===0&&fe)?('Эхлэх · '+fmt(fe)+coin):e.btn,'',e.act?e.fn:''); });
     h+=el(T,'ndx-sh',330,886,540,56,'Бөхийн цолны шат','',null);
-    /* ранг тус бүрийн хамгийн өндөр авсан тэмдэг, одоогийн дээд цолыг тодруулна */
-    const topRank=ti>=0?RANKS.findIndex(r=>r[1].indexOf(ti)>=0):-1;
-    RANKS.forEach((r,i)=>{ const got=r[1].filter(x=>o[x]&&wsReg()), best=got.length?Math.max.apply(null,got):-1, bi=best>=0?best:RREP[i], cx=[195,400,600,800,1005][i], cur=(i===topRank);
-      h+=el(T,'ndx-lad'+(best>=0?'':' lock')+(cur?' cur':''),cx-62,945,124,134,window.WRB?'<img src="'+WRB[bi]+'">':'','',null);
-      h+=el(T,'ndx-lp'+(cur?' cur':''),cx-80,1076,160,40,r[0],'',null);
-      if(i<4) h+=el(T,'ndx-ar',cx+82,1010,36,36,'','',null); });
+    /* Цолны шат: Сум / Аймаг / Улс таб, жинхэнэ цолууд (авсан нь өнгөтэй, одоогийн дээд цол тодорно) */
+    const STG={s:[0,1],a:[2,3,4,5,6,7],u:[8,9,10,11,12,13,14,15]}, stOf=i=>i<=1?'s':i<=7?'a':'u';
+    if(!window.NDXT) window.NDXT=ti>=0?stOf(ti):'s';
+    const tk=window.NDXT, tabsH=[['s','Сум'],['a','Аймаг'],['u','Улс']];
+    tabsH.forEach((x,i)=>{ h+=el(T,'ndx-tb2'+(tk===x[0]?' on':''),170+i*300,952,270,32,x[1],'',"ndxTab('"+x[0]+"')"); });
+    let it=''; STG[tk].forEach((idx,j)=>{ const own=!!(o[idx]&&wsReg()), cur=(idx===ti&&own), nm=WRT[idx][0].replace(/^(Сумын|Аймгийн|Улсын) /,'');
+      it+=(j?'<i class="ndx-ar"></i>':'')+'<div class="ndx-li'+(own?'':' lock')+(cur?' cur':'')+'"><div class="ndx-lb">'+(window.WRB?'<img src="'+WRB[idx]+'">':'')+'</div><div class="ndx-lq">'+nm+'</div></div>'; });
+    h+='<div class="ndx-e ndx-ls" id="ndx-ls" style="'+pc(T,70,990,1060,136)+'"><div class="ndx-lr">'+it+'</div></div>';
     const off=(s.run&&0);
     h+=el(T,'ndx-bt ndx-g ndx-big',335,1146,530,102,'Дадлага'+(fe?' · '+fmt(fe)+coin:''),'',"WCH=0;wrestOpen()");
     return h+'</div>'; }
@@ -21202,8 +21204,17 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#ndx .ndx-ec{justify-content:flex-start;align-items:center;text-align:center;padding-top:.6cqw}#ndx .ndx-b .ndx-en{font-size:1.1em}#ndx .ndx-ec .ndx-dm{font-size:.92em}'
   +'#ndx .ndx-lad{align-items:center;justify-content:center}#ndx .ndx-lad.lock img{filter:grayscale(1) brightness(.55)}#ndx .ndx-lad.cur img{filter:drop-shadow(0 0 1.2cqw #7dffa0) drop-shadow(0 0 .6cqw #fff8)}'
   +'#ndx .ndx-lp{align-items:center;text-align:center;font-weight:bold;font-size:2.9cqw!important;color:#e9d9ae;border-radius:3cqw;background:rgba(30,16,8,.8);border:.35cqw solid #7a5320;text-shadow:0 .2cqw .3cqw #000}'
-  +'#ndx .ndx-lp2{font-size:1.95cqw!important;border-width:.3cqw}#ndx .ndx-lp.cur{background:#1d5a2a;border-color:#7be08a;color:#fff}'
-  +'#ndx .ndx-ar{background:linear-gradient(90deg,transparent 0,transparent 20%,#e8923a 20%,#e8923a 55%,transparent 55%);clip-path:polygon(0 35%,55% 35%,55% 12%,100% 50%,55% 88%,55% 65%,0 65%);background:#e8923a}';
+  +'#ndx .ndx-lp2{font-size:1.8cqw!important;border-width:.3cqw;white-space:nowrap}#ndx .ndx-lp2 .ndx-i{white-space:nowrap}#ndx .ndx-lp.cur{background:#1d5a2a;border-color:#7be08a;color:#fff}'
+  +'#ndx .ndx-tb2{align-items:center;text-align:center;font-weight:bold;font-size:2.1cqw!important;line-height:1;color:#c9b58a;border-radius:3cqw;background:rgba(30,16,8,.75);border:.3cqw solid #6b4616;cursor:pointer;text-shadow:0 .2cqw .3cqw #000}'
+  +'#ndx .ndx-tb2.on{color:#3a1f08;background:linear-gradient(#ffd877,#d9942a);border-color:#8a5a16;text-shadow:0 .15cqw 0 #ffeeb0}'
+  +'#ndx .ndx-ls{display:block!important;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}#ndx .ndx-ls::-webkit-scrollbar{display:none}'
+  +'#ndx .ndx-lr{display:flex;align-items:flex-start;gap:0;height:100%;min-width:100%;width:max-content;justify-content:center}'
+  +'#ndx .ndx-li{flex:none;width:'+(212/1199*100).toFixed(2)+'cqw;height:100%;display:flex;flex-direction:column;align-items:center}'
+  +'#ndx .ndx-lb{height:'+(88/1199*100).toFixed(2)+'cqw;display:flex;align-items:center;justify-content:center}#ndx .ndx-lb img{height:100%;width:auto;display:block;filter:drop-shadow(0 .4cqw .5cqw #000a)}'
+  +'#ndx .ndx-li.lock img{filter:grayscale(1) brightness(.55)}#ndx .ndx-li.cur img{filter:drop-shadow(0 0 1.2cqw #7dffa0) drop-shadow(0 0 .6cqw #fff8)}'
+  +'#ndx .ndx-lq{margin-top:.6cqw;width:94%;min-height:'+(34/1199*100).toFixed(2)+'cqw;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:bold;font-size:1.95cqw;line-height:1.1;color:#e9d9ae;border-radius:3cqw;background:rgba(30,16,8,.85);border:.3cqw solid #7a5320;text-shadow:0 .2cqw .3cqw #000;padding:.2cqw .6cqw;box-sizing:border-box}'
+  +'#ndx .ndx-li.cur .ndx-lq{background:#1d5a2a;border-color:#7be08a;color:#fff}'
+  +'#ndx .ndx-ar{flex:none;width:'+(30/1199*100).toFixed(2)+'cqw;height:'+(30/1199*100).toFixed(2)+'cqw;margin-top:'+(30/1199*100).toFixed(2)+'cqw;background:#e8923a;clip-path:polygon(0 35%,55% 35%,55% 12%,100% 50%,55% 88%,55% 65%,0 65%)}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
 
   const _mc=modalContent;
@@ -21213,6 +21224,9 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     return _mc.apply(this,arguments); };
   /* Бөхийн наадмын «Цол, шагнал» цонх дэлгэцийн дээр харагдана */
   const sp=document.createElement('style'); sp.textContent='#ndx~*{}';
+  window.ndxTab=function(k){ window.NDXT=k; try{ fillM(); }catch(e){} setTimeout(ndxScr,30); };
+  function ndxScr(){ try{ const sc=document.getElementById('ndx-ls'), c=sc&&sc.querySelector('.ndx-li.cur'); if(sc&&c) sc.scrollLeft=c.offsetLeft-sc.clientWidth/2+c.offsetWidth/2; }catch(e){} }
+  const _om2=openM; openM=function(k){ if(k==='ndbokh'){ window.NDXT=null; } const r=_om2.apply(this,arguments); if(k==='ndbokh') setTimeout(ndxScr,60); return r; };
   window.ndxMain=()=>openM('naadam'); window.ndxBokh=()=>openM('ndbokh');
 })();
 

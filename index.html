@@ -2858,7 +2858,7 @@ const NLK=/^(en\d_[ac]|bd_)/;
 function startBattle(i,E){
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   const e=E||Object.assign({},ENEMIES[i],{rep:i<S.won}), fb=facBonus().m, rm=relicMul(), el=document.createElement('div'); el.id='btl';
-  el.className='wt'; el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bbtn"><button onclick="btSpeed()" id="bsp">×1</button><button onclick="skToggle()" id="bauto">Авто</button><button onclick="btEnd(true)">Гарах</button></div><div id="bres"></div><div id="btpan"><div id="bthd"></div><div id="btray"></div><div id="bact"><button id="bexit" onclick="btEnd(true)">Гарах</button><button id="bq" onclick="btQuick()">⚡ Шилдэг</button><button id="bstart" onclick="btGo()">⚔ ЭХЛЭХ</button></div></div></div>';
+  el.className='wt'; try{ if(e.hbf) window.taRotBt(el); }catch(x){} el.innerHTML='<div id="bti"><canvas id="bc"></canvas><div id="btop"></div><div id="bbtn"><button onclick="btSpeed()" id="bsp">×1</button><button onclick="skToggle()" id="bauto">Авто</button><button onclick="btEnd(true)">Гарах</button></div><div id="bres"></div><div id="btpan"><div id="bthd"></div><div id="btray"></div><div id="bact"><button id="bexit" onclick="btEnd(true)">Гарах</button><button id="bq" onclick="btQuick()">⚡ Шилдэг</button><button id="bstart" onclick="btGo()">⚔ ЭХЛЭХ</button></div></div></div>';
   document.body.appendChild(el);
   const BW=el.clientWidth||innerWidth, BH=el.clientHeight||innerHeight, port=BH>BW, VW=port?380:Math.max(560,Math.min(BW,820)), SC=BW/VW, W2=VW, H2=BH/SC;
   const cv2=$('bc'), dp=Math.min(3,(devicePixelRatio||1)*SC); cv2.width=Math.round(W2*dp); cv2.height=Math.round(H2*dp); cv2.style.cssText='width:100%;height:100%;display:block';
@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1a99fb722b';
+var UPDB='a20c70f7f2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20786,10 +20786,24 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         BT.units=BT.units.filter(u=>!(u.side===1&&u.dead)); BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0); } }
     if(pt) return; /* босоо горимд зураг тайрагддаг тул анхны байрлалыг хэвээр үлдээнэ */
     [0,1].forEach(sd=>{ BT.units.filter(u=>(u.side?1:0)===sd).forEach((u,k)=>{ const c=(sd?CR:CB)[Math.min(2,k)]; u.x=u.hx=ox+c[0]*sc; u.y=u.hy=oy+c[1]*sc; u.fdir=sd?-1:1; }); }); }
+  /* Босоо утсан дээр арены тулааныг 90° эргүүлж хэвтээ харуулна (утас эргэхийг хүлээхгүй) */
+  const ROT=el=>{ el.dataset.tar='1'; el.style.inset='auto'; el.style.left=innerWidth+'px'; el.style.top='0'; el.style.width=innerHeight+'px'; el.style.height=innerWidth+'px'; el.style.transformOrigin='0 0'; el.style.transform='rotate(90deg)'; };
+  const UNROT=el=>{ delete el.dataset.tar; ['left','top','width','height','transformOrigin','transform'].forEach(k=>{ el.style[k]=''; }); el.style.inset='0'; };
+  window.taRotBt=function(el){ if(innerHeight>innerWidth) ROT(el); };
+  /* хэвтээ харагдац дээр дарсан цэгийг (зорилт сонгох) буцаан хөрвүүлнэ */
+  document.addEventListener('pointerdown',ev=>{ try{ const t=ev.target; if(ev._tar||!t||t.id!=='bc') return; const l=document.getElementById('btl'); if(!l||!l.dataset.tar||!BT) return;
+    ev.stopImmediatePropagation(); const r=t.getBoundingClientRect(); const gx=(ev.clientY-r.top)*(BT.W/r.height), gy=(r.right-ev.clientX)*(BT.H/r.width);
+    const ne=new PointerEvent('pointerdown',{clientX:r.left+gx*r.width/BT.W,clientY:r.top+gy*r.height/BT.H,bubbles:true,pointerId:ev.pointerId}); ne._tar=1; t.dispatchEvent(ne); }catch(e){} },true);
   (function(){ const _sb=startBattle;
     startBattle=function(i,E){
-      const r=_sb.apply(this,arguments);
-      if(E&&E.hbf){ let n=0; const iv=setInterval(()=>{ n++; try{ if(BT&&BT.e===E){ clearInterval(iv); layout(E); } else if(n>200) clearInterval(iv); }catch(e){ clearInterval(iv); } },100); }
+      const hb=E&&E.hbf?E.hb:null; if(hb){ E.hb=null; window.BT_LAND=1; }   /* «утсаа эргүүл» асуултыг алгасна */
+      let r; try{ r=_sb.apply(this,arguments); } finally { if(hb) E.hb=hb; }
+      if(E&&E.hbf){ let n=0, lw=0, lh=0; const iv=setInterval(()=>{ n++; try{
+          if(!(BT&&BT.e===E)){ if(n>3||!BT) clearInterval(iv); return; }
+          const el=document.getElementById('btl');
+          if(el){ if(el.dataset.tar&&innerWidth>innerHeight){ UNROT(el); try{ btResize(); }catch(e){} } else if(!el.dataset.tar&&innerHeight>innerWidth){ ROT(el); try{ btResize(); }catch(e){} } }
+          if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
+        }catch(e){ clearInterval(iv); } },150); }
       return r; }; })();
 
   /* ---------- Холболт ---------- */
@@ -20828,6 +20842,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#tadoor .tdh{width:50%;height:100%;background-size:200% 100%;background-repeat:no-repeat;transition:transform 1s cubic-bezier(.5,0,.2,1);backface-visibility:hidden}'
   +'#tadoor .tdl{background-position:left center;transform-origin:left center}#tadoor .tdr{background-position:right center;transform-origin:right center}'
   +'#tadoor.go .tdl{transform:rotateY(-105deg)}#tadoor.go .tdr{transform:rotateY(105deg)}';
+  const P='#btl[data-tar] ';
+  st2.textContent+=P+'#btpan{padding:4px 8px;gap:3px}'+P+'#btpan #bmatch{display:none!important}'+P+'.bc{min-height:68px;width:58px;padding:3px 2px}'+P+'.bc img{max-width:30px!important;max-height:30px!important}'+P+'#bact button{min-height:38px;padding:4px 6px}'+P+'#bthd small{display:none}'+P+'#btray{padding:6px 3px 2px!important}'+P+'#bsq{font-size:10px;flex-wrap:nowrap;overflow-x:auto}'+P+'#bsq span{padding:1px 5px}';
   document.head.appendChild(st2);
   window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG};
 })();

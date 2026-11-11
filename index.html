@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b283658ebf';
+var UPDB='10d03c8167';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20367,12 +20367,22 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const mm=s=>{ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
   const esc=t=>String(t).replace(/</g,'');
 
+  /* ---------- 0) Зургууд (hf/sq/ord_*.webp) ---------- */
+  const AV='?v=1', ART={ // нэр: [файл, өргөн, өндөр, кадр]
+    ord_b1:['hf/sq/ord_b1.webp',314,198,1], ord_b2:['hf/sq/ord_b2.webp',388,292,1], ord_b3:['hf/sq/ord_b3.webp',458,352,1],
+    ord_ox:['hf/sq/ord_ox.webp',1304,186,4], ord_horse:['hf/sq/ord_horse.webp',1316,200,4], ord_camel:['hf/sq/ord_camel.webp',1056,122,4]};
+  const CW={ox:26,horse:27,camel:42};   // дэлхийн нэгжээр өргөн
+  const CIMG={};
+  (function(){ try{ for(const k in ART){ const a=ART[k], im=new Image(); im.src=a[0]+AV; CIMG[k]=im;
+      if(a[3]===1){ SPRDATA[k]=[a[0]+AV,a[1],a[2]]; SPR[k]={img:im,iw:a[1],ih:a[2]}; } } }catch(e){} })();
+  const cartThumb=(type,h)=>{ const a=ART['ord_'+type]; const fw=a[1]/a[3], w=Math.round(h*fw/a[2]); return '<span class="oqi" style="width:'+w+'px;height:'+h+'px;background:url('+a[0]+AV+') 0 0/'+(a[3]*100)+'% 100% no-repeat"></span>'; };
+
   /* ---------- 1) Барилга бүртгэх ---------- */
   function reg(){ try{
     if(typeof BUILD==='undefined'||BUILD.orders) { if(S&&S.bld&&S.bld.orders==null) S.bld.orders=0; return; }
-    BUILD.orders={n:'Захиалгын байр',spr:'mk1',w:26,cost:600,up:300,desc:'Гадаад пүүсүүдийн захиалгыг тэргээр хүргэнэ. Түвшин ахих тусам тэрэг сайжирч (үхэр → морь → тэмээ), захиалгын бараа, тэрэгний тоо нэмэгдэнэ.'};
+    BUILD.orders={n:'Захиалгын байр',spr:'ord_b1',w:30,cost:600,up:300,desc:'Гадаад пүүсүүдийн захиалгыг тэргээр хүргэнэ. Түвшин ахих тусам тэрэг сайжирч (үхэр → морь → тэмээ), захиалгын бараа, тэрэгний тоо нэмэгдэнэ.'};
     if(BKEYS.indexOf('orders')<0) BKEYS.push('orders');
-    try{ TSET.orders=['mk1','mk2','mk3']; TW2.orders=[24,33,42]; }catch(e){}
+    try{ TSET.orders=['ord_b1','ord_b2','ord_b3']; TW2.orders=[30,37,44]; }catch(e){}
     try{ BREQ.orders=2; BRAR.orders='blue'; }catch(e){}
     try{ const t=BTABS[0][2]; if(t.indexOf('orders')<0){ const i=t.indexOf('market'); t.splice(i>=0?i+1:t.length,0,'orders'); } }catch(e){}
     try{ UPEFF.orders=L=>cartName(L)+' · захиалгад '+(1+(L>=6?1:0)+(L>=13?1:0))+' төрлийн бараа · тэрэг '+(1+(L>=10?1:0)+(L>=20?1:0)); }catch(e){}
@@ -20445,7 +20455,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const L=lv(); let h='<h2>'+ico('or_scroll',32)+' Захиалга</h2>';
     if(L<1){ h+='<div class="card"><h3>Захиалгын байр</h3><div class="sm" style="margin:4px 0 6px">Гадаад пүүсүүдийн захиалгыг тэргээр хүргэвэл Караванаас <b>илүү үнэтэй</b> төлнө. Барилгаа барьж, сайжруулах тусам тэрэг сайжирна: үхэр тэрэг → морин тэрэг → тэмээн жин.</div>'+
       '<button class="btn" onclick="closeM();openM(\'barilga\')">Барилга руу</button></div>'+'<div class="sm" style="margin:6px 2px">Одоохондоо гараар хүргэж болно (шагнал бага):</div>'; }
-    else { const q=S_oq(); h+='<div class="card"><div class="row"><div><h3>'+cartName(L)+' · Lv '+L+'</h3><div class="sm">Тэрэг '+q.trips.length+'/'+maxCart()+' · зам '+mm(dur())+' · захиалгад '+nGoods()+' төрлийн бараа</div></div><button class="btn" onclick="closeM();openM(\'bld:orders\')">Сайжруул</button></div>'+tripsHTML()+'</div>'; }
+    else { const q=S_oq(); h+='<div class="card"><div class="row"><div style="display:flex;gap:8px;align-items:center">'+cartThumb(cartOf(L),54)+'<div><h3>'+cartName(L)+'</h3><div class="sm">Lv '+L+' · Тэрэг '+q.trips.length+'/'+maxCart()+' · зам '+mm(dur())+' · захиалгад '+nGoods()+' төрлийн бараа</div></div></div><button class="btn" onclick="closeM();openM(\'bld:orders\')">Сайжруул</button></div>'+tripsHTML()+'</div>'; }
     (S.orders||[]).forEach((o,i)=>{ h+=rowHTML(o,i,true); });
     if(!(S.orders||[]).length) h+='<div class="card sm">Шинэ захиалга удахгүй ирнэ...</div>';
     return h;
@@ -20453,7 +20463,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const _bh=bldHTML;
   bldHTML=function(k){ let h=_bh.apply(this,arguments); if(k!=='orders') return h;
     const L=lv(), q=S_oq();
-    return h+'<div class="card"><h3>'+cartName(L||1)+'</h3><div class="sm">Тэрэг '+q.trips.length+'/'+maxCart()+' · зам '+mm(dur())+' · хамгийн ихдээ '+maxOrd()+' захиалга</div>'+tripsHTML()+'<button class="btn" style="margin-top:6px" onclick="openM(\'orders\')">Захиалга харах</button></div>'; };
+    return h+'<div class="card"><div style="display:flex;gap:8px;align-items:center">'+cartThumb(cartOf(L||1),54)+'<h3>'+cartName(L||1)+'</h3></div><div class="sm">Тэрэг '+q.trips.length+'/'+maxCart()+' · зам '+mm(dur())+' · хамгийн ихдээ '+maxOrd()+' захиалга</div>'+tripsHTML()+'<button class="btn" style="margin-top:6px" onclick="openM(\'orders\')">Захиалга харах</button></div>'; };
 
   /* ---------- 4) Үндсэн дэлгэцийн самбар ---------- */
   const css=document.createElement('style'); css.id='oqcss';
@@ -20476,13 +20486,13 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
    '.oqt{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px;padding:3px 5px;background:#2a1a0e99;border-radius:6px}.oqt>span:not(.oqd){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.oqt b{color:#ffd770}'+
    '#oqh{position:fixed;z-index:4;left:0;width:28px;height:44px;background:#3b2815f2;border:2px solid #c9972b;border-left:none;border-radius:0 10px 10px 0;color:#ffe9b0;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #1a0f06;padding:0;touch-action:manipulation}'+
    '#oqh i{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#d33;color:#fff;font:bold 10px/16px sans-serif;text-align:center;font-style:normal;padding:0 3px;box-sizing:border-box}'+
-   '#oqh img{width:20px;height:20px}';
+   '#oqh img{width:20px;height:20px}.oqi{display:inline-block;flex:none;image-rendering:auto}';
   document.head.appendChild(css);
   let SIG='';
   function oqRender(force){ try{
     let p=document.getElementById('oqp'); if(!p){ p=document.createElement('div'); p.id='oqp'; p.className='panel'; document.body.appendChild(p); }
     const L=lv(), q=S_oq(), ors=S.orders||[], now=Date.now();
-    let h='<div class="oqT" onclick="openM(\'orders\')" style="cursor:pointer">'+ico('or_scroll',18)+'Захиалга<small>'+(L>0?cartName(L)+' '+q.trips.length+'/'+maxCart():'гараар')+'</small></div>';
+    let h='<div class="oqT" onclick="openM(\'orders\')" style="cursor:pointer">'+(L>0?cartThumb(cartOf(L),22):ico('or_scroll',18))+'Захиалга<small>'+(L>0?cartName(L)+' '+q.trips.length+'/'+maxCart():'гараар')+'</small></div>';
     ors.forEach((o,i)=>{ h+=rowHTML(o,i,false); });
     if(L>0) h+=tripsHTML(); else h+='<div class="oqt" style="cursor:pointer" onclick="closeM();openM(\'barilga\')"><span>Захиалгын байр барь</span><b>›</b></div>';
     const sig=h.replace(/>\d+:\d\d</g,'><'); // цагийн өөрчлөлтөөр сигнал өөрчлөхгүй
@@ -20508,6 +20518,13 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
 
   /* ---------- 5) Тэрэг дэлгэц дээр ---------- */
   function cartPix(x,y,type,dir,t){
+    const im=CIMG['ord_'+type], A=ART['ord_'+type];
+    if(im&&im.complete&&im.naturalWidth){
+      const fw=A[1]/A[3], fh=A[2], dw=CW[type], dh=dw*fh/fw, fi=Math.floor(performance.now()/(type==='camel'?180:type==='horse'?170:160))%A[3];
+      const sm=ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled=true; shadow(x,y-0.4,dw*0.75);
+      ctx.save(); ctx.translate(x,y); if(dir<0) ctx.scale(-1,1); ctx.drawImage(im,fi*fw,0,fw,fh,-dw/2,-dh,dw,dh); ctx.restore(); ctx.imageSmoothingEnabled=sm; return; }
+    cartPix0(x,y,type,dir,t); }
+  function cartPix0(x,y,type,dir,t){
     const c=ctx, f=dir<0?-1:1, wob=Math.sin(t*9)*0.25;
     c.save(); c.translate(x,y); c.scale(f,1);
     if(type==='camel'&&SPR.tr_caravan&&SPR.tr_caravan.img.complete&&SPR.tr_caravan.img.naturalWidth){ c.restore(); const s=SPR.tr_caravan, w=34, h=w*s.ih/s.iw; shadow(x,y,w*0.6); spr('tr_caravan',x-w/2,y-h+wob,w,dir<0); return; }

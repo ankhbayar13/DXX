@@ -10889,7 +10889,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='95a9fa8b4b';
+var UPDB='16ef1ebe4d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21147,9 +21147,13 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     h+=el(T,'ndx-sh',320,528,560,56,'Бөхийн наадмын хэсгүүд','',null);
     [['s',92],['a',435],['u',778]].forEach(r=>{ const e=ev[r[0]];
       let t='<div class="ndx-ln ndx-en">'+WKN[r[0]]+'</div><div class="ndx-ln ndx-dm">'+e.per+' · 19–23 цаг</div>';
-      if(e.goal) t+='<div class="ndx-ln ndx-dm ndx-sm">'+e.goal+'</div>';
-      if(e.btn!=='Түгжээтэй') t+='<div class="ndx-ln '+e.cls+' ndx-sm">'+e.stat+'</div>';
-      h+=el(T,'ndx-ec',r[1]+14,662,302,138,t,'',null);
+      if(e.btn==='Түгжээтэй') t+='<div class="ndx-ln ndx-wr ndx-sm">'+e.goal+'</div>';
+      else t+='<div class="ndx-ln '+e.cls+' ndx-sm">'+e.stat+'</div>';
+      /* Энэ наадмын шатанд тоглогчийн одоо байгаа цолны тэмдэг (Сум: 0-1, Аймаг: 2-7, Улс: 8-15) */
+      const rg=r[0]==='s'?[0,1]:r[0]==='a'?[2,3,4,5,6,7]:[8,9,10,11,12,13,14,15], have=rg.filter(x=>o[x]&&wsReg()), bi2=have.length?Math.max.apply(null,have):rg[0], cx=r[1]+165;
+      h+=el(T,'ndx-lad'+(have.length?'':' lock'),cx-70,584,140,92,window.WRB?'<img src="'+WRB[bi2]+'">':'','',null);
+      h+=el(T,'ndx-lp ndx-lp2'+(have.length?' cur':''),cx-92,668,184,26,have.length?WRT[bi2][0]:'Цолгүй','',null);
+      h+=el(T,'ndx-ec',r[1]+14,698,302,102,t,'',null);
       h+=el(T,'ndx-bt'+(e.act?' ndx-g':' off'),r[1]+30,800,270,48,(e.fn&&e.fn.indexOf('wevStart')===0&&fe)?('Эхлэх · '+fmt(fe)+coin):e.btn,'',e.act?e.fn:''); });
     h+=el(T,'ndx-sh',330,886,540,56,'Бөхийн цолны шат','',null);
     /* ранг тус бүрийн хамгийн өндөр авсан тэмдэг, одоогийн дээд цолыг тодруулна */
@@ -21195,10 +21199,10 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#ndx .ndx-bi{align-items:center;justify-content:center}#ndx .ndx-bi img,#ndx .ndx-lad img{height:100%;width:auto;display:block;filter:drop-shadow(0 .4cqw .5cqw #000a)}'
   +'#ndx .ndx-ct{font-size:2.9cqw!important;justify-content:center}#ndx .ndx-ln{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.28}#ndx .ndx-bi .ndx-i,#ndx .ndx-lad .ndx-i{height:100%;display:flex;align-items:center;justify-content:center}'
   +'#ndx .ndx-btn{align-items:center;text-align:center;font-weight:bold;color:#f1e3bf;font-size:3.1cqw!important;cursor:pointer;text-shadow:0 .2cqw .3cqw #000}'
-  +'#ndx .ndx-ec{justify-content:flex-start;align-items:center;text-align:center;padding-top:.6cqw}#ndx .ndx-b .ndx-en{font-size:1.2em}'
+  +'#ndx .ndx-ec{justify-content:flex-start;align-items:center;text-align:center;padding-top:.6cqw}#ndx .ndx-b .ndx-en{font-size:1.1em}#ndx .ndx-ec .ndx-dm{font-size:.92em}'
   +'#ndx .ndx-lad{align-items:center;justify-content:center}#ndx .ndx-lad.lock img{filter:grayscale(1) brightness(.55)}#ndx .ndx-lad.cur img{filter:drop-shadow(0 0 1.2cqw #7dffa0) drop-shadow(0 0 .6cqw #fff8)}'
   +'#ndx .ndx-lp{align-items:center;text-align:center;font-weight:bold;font-size:2.9cqw!important;color:#e9d9ae;border-radius:3cqw;background:rgba(30,16,8,.8);border:.35cqw solid #7a5320;text-shadow:0 .2cqw .3cqw #000}'
-  +'#ndx .ndx-lp.cur{background:#1d5a2a;border-color:#7be08a;color:#fff}'
+  +'#ndx .ndx-lp2{font-size:1.95cqw!important;border-width:.3cqw}#ndx .ndx-lp.cur{background:#1d5a2a;border-color:#7be08a;color:#fff}'
   +'#ndx .ndx-ar{background:linear-gradient(90deg,transparent 0,transparent 20%,#e8923a 20%,#e8923a 55%,transparent 55%);clip-path:polygon(0 35%,55% 35%,55% 12%,100% 50%,55% 88%,55% 65%,0 65%);background:#e8923a}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
 

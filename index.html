@@ -10888,7 +10888,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='10d03c8167';
+var UPDB='515832163c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -13733,14 +13733,16 @@ heroListHTML=function(){
 })();
 
 
-/* p32/tkdock.js — Зүүн талын «Бүлэг» (#tasks) самбарыг «Өдрийн даалгавар» (#dqbar, жишээ нь «1 захиалга хүргэ 0/1»)
-   самбарын яг доор нааж байрлуулна. Доор нь багтахгүй бага дэлгэц дээр хуучин байрлалдаа (доод зүүн) үлдэнэ. */
+/* p32/tkdock.js — Зүүн талын «Бүлэг» (#tasks) самбарыг «Өдрийн даалгавар» (#dqbar) ба «Захиалга» (#oqp) самбарын яг доор нааж байрлуулна.
+   Доор нь багтахгүй бага дэлгэц дээр хуучин байрлалдаа (доод зүүн) үлдэнэ. */
 (function(){
   function clear(t){ if(t.dataset.dk){ t.style.top=''; t.style.bottom=''; delete t.dataset.dk; } }
+  const shown=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).display!=='none';
   function dock(){ try{
-    const t=document.getElementById('tasks'), d=document.getElementById('dqbar'), m=document.getElementById('menu'); if(!t) return;
-    if(!d||getComputedStyle(d).display==='none'||getComputedStyle(t).display==='none'){ clear(t); return; }
-    const dr=d.getBoundingClientRect(); if(!dr.height){ clear(t); return; }
+    const t=document.getElementById('tasks'), d=document.getElementById('dqbar'), o=document.getElementById('oqp'), m=document.getElementById('menu'); if(!t) return;
+    const oq=shown(o)&&!o.classList.contains('oqc'), base=oq?o:(shown(d)?d:null);
+    if(!base||getComputedStyle(t).display==='none'){ clear(t); return; }
+    const dr=base.getBoundingClientRect(); if(!dr.height){ clear(t); return; }
     const top=Math.round(dr.bottom+8), mt=m?m.getBoundingClientRect().top:innerHeight;
     if(top+t.offsetHeight<=mt-6){ t.style.bottom='auto'; t.style.top=top+'px'; t.dataset.dk='1'; } else clear(t);
   }catch(e){} }
@@ -20383,7 +20385,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     BUILD.orders={n:'Захиалгын байр',spr:'ord_b1',w:30,cost:600,up:300,desc:'Гадаад пүүсүүдийн захиалгыг тэргээр хүргэнэ. Түвшин ахих тусам тэрэг сайжирч (үхэр → морь → тэмээ), захиалгын бараа, тэрэгний тоо нэмэгдэнэ.'};
     if(BKEYS.indexOf('orders')<0) BKEYS.push('orders');
     try{ TSET.orders=['ord_b1','ord_b2','ord_b3']; TW2.orders=[30,37,44]; }catch(e){}
-    try{ BREQ.orders=2; BRAR.orders='blue'; }catch(e){}
+    try{ BREQ.orders=4; BRAR.orders='blue'; }catch(e){}
     try{ const t=BTABS[0][2]; if(t.indexOf('orders')<0){ const i=t.indexOf('market'); t.splice(i>=0?i+1:t.length,0,'orders'); } }catch(e){}
     try{ UPEFF.orders=L=>cartName(L)+' · захиалгад '+(1+(L>=6?1:0)+(L>=13?1:0))+' төрлийн бараа · тэрэг '+(1+(L>=10?1:0)+(L>=20?1:0)); }catch(e){}
     if(S&&S.bld&&S.bld.orders==null) S.bld.orders=0;
@@ -20503,12 +20505,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const p=document.getElementById('oqp'); if(!p) return; let b=document.getElementById('oqh');
     if(!b){ b=document.createElement('button'); b.id='oqh'; b.setAttribute('onclick','oqCol()'); b.setAttribute('aria-label','Захиалга'); document.body.appendChild(b); }
     const vis=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden'; const t=document.getElementById('tasks'), tv=vis(t)&&!!t.innerHTML;
-    const hud=document.getElementById('res'), on=!!(S&&S.pl>=1&&(S.bld.ger||1)>=2)&&vis(hud)&&!document.body.classList.contains('decOn')&&!document.getElementById('modal').style.display.match(/flex/);
+    const hud=document.getElementById('res'), on=!!(S&&S.pl>=1&&((S.bld.ger||1)>=(BREQ.orders||4)||(S.bld.orders||0)>0))&&vis(hud)&&!document.body.classList.contains('decOn')&&!document.getElementById('modal').style.display.match(/flex/);
     p.style.display=on?'block':'none'; b.style.display=on?'flex':'none'; if(!on) return;
-    const tt=tv?t.getBoundingClientRect().top:innerHeight-96;
-    const tTop=Math.max(0,tt-(t&&t.classList.contains('tkc')?0:0));
-    const bottom=innerHeight-tTop+8; p.style.bottom=bottom+'px'; p.style.top='auto';
-    const pc=document.getElementById('pcard'), minTop=pc?pc.getBoundingClientRect().bottom+8:120; p.style.maxHeight=Math.max(60,Math.min(260,innerHeight-bottom-minTop))+'px';
+    const dq=document.getElementById('dqbar'), dv=vis(dq)&&getComputedStyle(dq).display!=='none', pc=document.getElementById('pcard'), mn=document.getElementById('menu');
+    const top0=Math.round((dv?dq.getBoundingClientRect().bottom:(pc?pc.getBoundingClientRect().bottom:112))+8), menuTop=mn&&vis(mn)?mn.getBoundingClientRect().top:innerHeight-96;
+    const tasksH=(tv&&!t.classList.contains('tkc'))?t.offsetHeight+8:0;
+    p.style.top=top0+'px'; p.style.bottom='auto'; p.style.maxHeight=Math.max(90,Math.min(260,menuTop-6-top0-tasksH))+'px';
     p.classList.toggle('oqc',OQ.col);
     const ready=ordReady();
     b.innerHTML=OQ.col?ico('or_scroll',20)+(ready?'<i>'+ready+'</i>':''):'◀';
@@ -20561,6 +20563,34 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       nameTag(r.x+r.w/2,r.y-9,'Тэрэг · '+mm(soon/1000),true);
     }catch(e){}
   };
+})();
+
+
+/* p32/dqcol.js — «Өдрийн даалгавар» (#dqbar, жишээ нь «1 захиалга хүргэ 0/1») самбарыг хажуу тийш хураадаг болгоно
+   (Захиалга, Бүлэг самбар шиг: ◀ товч / хураасан үед дүрс + улаан тоо). Мөн профайлын доорх «⚔ хүч / 🛡 цэргийн тоо» мөрийг нууна. */
+(function(){
+  const DC={col:false}; try{ DC.col=localStorage.getItem('dxx_dqc')==='1'; }catch(e){}
+  const css=document.createElement('style'); css.id='dqcss';
+  css.textContent='#dqbar{transition:transform .25s ease}#dqbar.dqc{transform:translateX(-215px)}'+
+   '#dqh{position:fixed;z-index:4;left:0;width:28px;height:44px;background:#3b2815f2;border:2px solid #c9972b;border-left:none;border-radius:0 10px 10px 0;color:#ffe9b0;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #1a0f06;padding:0;touch-action:manipulation}'+
+   '#dqh i{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:#d33;color:#fff;font:bold 10px/16px sans-serif;text-align:center;font-style:normal;padding:0 3px;box-sizing:border-box}'+
+   '#dqh img{width:20px;height:20px}';
+  document.head.appendChild(css);
+  window.dqCol=function(){ DC.col=!DC.col; try{ localStorage.setItem('dxx_dqc',DC.col?'1':'0'); }catch(e){} sync(); };
+  const shown=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden';
+  let last='';
+  function sync(){ try{
+    /* хүч / цэргийн тоо мөрийг нуух */
+    const w=document.getElementById('pw'); if(w&&w.parentNode&&w.parentNode.id!=='pcard'&&w.parentNode.style.display!=='none') w.parentNode.style.setProperty('display','none','important');
+    const d=document.getElementById('dqbar'); if(!d) return; let b=document.getElementById('dqh');
+    if(!b){ b=document.createElement('button'); b.id='dqh'; b.setAttribute('onclick','dqCol()'); b.setAttribute('aria-label','Өдрийн даалгавар'); document.body.appendChild(b); }
+    const hud=document.getElementById('res'), md=document.getElementById('modal'), on=shown(d)&&shown(hud)&&!document.body.classList.contains('decOn')&&!(md&&md.style.display.match(/flex/));
+    b.style.display=on?'flex':'none'; d.classList.toggle('dqc',DC.col); if(!on) return;
+    let n=0; try{ n=(typeof qBadge==='function')?qBadge():0; }catch(e){}
+    const h=DC.col?'c'+n:'o'; if(h!==last){ last=h; b.innerHTML=DC.col?ico('q_letter',20)+(n?'<i>'+n+'</i>':''):'◀'; }
+    const r=d.getBoundingClientRect(); b.style.left=(DC.col?0:(Math.round(r.right)-1))+'px'; b.style.top=Math.round(r.top+r.height/2-22)+'px';
+  }catch(e){} }
+  setInterval(sync,500); setTimeout(sync,400);
 })();
 
 

@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c1e36a4af4';
+var UPDB='dc6f3c3444';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21851,7 +21851,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
 })();
 
 
-/* p32/wmquest.js — Газрын зураг: Түүхэн даалгавар (Мэргидийн түүх) + нуугдсан баазууд. Даалгаврыг доорх MQ жагсаалтаас нэмнэ/засна. */
+/* p32/wmquest.js — Газрын зураг: Чингис хааны зарлиг (Мэргидийн түүх) + нуугдсан баазууд. Даалгаврыг доорх MQ жагсаалтаас нэмнэ/засна. */
 (function(){
   const g=n=>{ try{ return _g().ks.find(k=>k.n===n); }catch(e){ return null; } };
   /* ---- Даалгаврын жагсаалт ---- */
@@ -21906,13 +21906,13 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     try{ save(); refresh(); }catch(e){}
     return tx;
   }
-  function done(m){ const q=Q(); if(q[m.id]&&q[m.id].done) return; q[m.id]={done:Date.now()}; const tx=reward(m); try{ sfx('win'); }catch(e){} say('Түүхэн даалгавар биелэв: '+m.t+' · '+tx); try{ WMD&&wmGen(); }catch(e){} }
+  function done(m){ const q=Q(); if(q[m.id]&&q[m.id].done) return; q[m.id]={done:Date.now()}; const tx=reward(m); try{ sfx('win'); }catch(e){} say('Чингис хааны зарлиг биелэв: '+m.t+' · '+tx); try{ WMD&&wmGen(); }catch(e){} }
   /* Улс ялсан үед (wmlogi.js дуудна) */
   const _kw=window.wmOnKingWin;
   window.wmOnKingWin=function(id){
     try{ if(_kw) _kw(id); }catch(e){}
     try{ const k=wmEnt(id); MQ.forEach(m=>{ if(isDone(m)) return; const s=m.steps; if(s.length===1&&s[0].k==='win'&&k&&k.n===s[0].n) done(m);
-      else if(s.length>1&&k&&k.n===s[0].n&&!(Q()[m.id]&&Q()[m.id].un)){ Q()[m.id]=Object.assign(Q()[m.id]||{},{un:1}); const c=campOf(m); wmGen(); say('Түүхэн даалгавар: «'+c.n+'» газрын зураг дээр гарч ирлээ'); } }); }catch(e){}
+      else if(s.length>1&&k&&k.n===s[0].n&&!(Q()[m.id]&&Q()[m.id].un)){ Q()[m.id]=Object.assign(Q()[m.id]||{},{un:1}); const c=campOf(m); wmGen(); say('Чингис хааны зарлиг: «'+c.n+'» газрын зураг дээр гарч ирлээ'); } }); }catch(e){}
   };
   /* Нуугдсан баазыг устгасан үед */
   let CUR=null;
@@ -21944,7 +21944,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   window.wmFocus=function(x,y,id){ try{ const c=document.getElementById('wmc'); WMV.z=0.55; WMV.x=x-c.clientWidth/WMV.z/2; WMV.y=y-c.clientHeight/WMV.z/2; wmClamp(); if(id){ WMS=id; wmSheet(); } wmPanelX(); }catch(e){} };
 
   window.wmQuestOpen=function(){
-    let h='<h3>Түүхэн даалгавар</h3><div class="qd" style="text-align:center">Түүхийн дагуу улс, нуугдсан баазыг ял.</div>';
+    let h='<h3>Чингис хааны зарлиг</h3><div class="qd" style="text-align:center">Хааны зарлигаар улс, нуугдсан баазыг ял.</div>';
     MQ.forEach(m=>{ const dn=isDone(m), c=campOf(m);
       h+='<div class="qc'+(dn?' dn':'')+'"><div class="qt">'+m.t+(dn?' · ✓ Биелсэн':'')+'</div><div class="qd">'+m.d+'</div>';
       m.steps.forEach((s,i)=>{ const ok=stepDone(m,i); h+='<div class="qs" style="color:'+(ok?'#9fe08a':'#f3e4bd')+'">'+(ok?'✓ ':(i+1)+'. ')+s.txt+'</div>'; });
@@ -21961,7 +21961,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     const r=_o.apply(this,arguments);
     try{ const w=document.getElementById('wmap'); if(w&&!document.getElementById('wmqb1')){
       const mk=(id,top,tx,fn)=>{ const b=document.createElement('button'); b.id=id; b.className='wmq'; b.style.top=top+'px'; b.textContent=tx; b.onclick=fn; w.appendChild(b); };
-      mk('wmqb1',188,'Түүх',()=>wmQuestOpen()); mk('wmqb2',244,'Топ',()=>{ if(typeof wmTopOpen==='function') wmTopOpen(); });
+      mk('wmqb1',188,'Зарлиг',()=>wmQuestOpen()); mk('wmqb2',244,'Топ',()=>{ if(typeof wmTopOpen==='function') wmTopOpen(); });
     } }catch(e){}
     return r;
   };

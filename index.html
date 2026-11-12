@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5613cdb674';
+var UPDB='d1203c1a3f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22163,6 +22163,24 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   setInterval(()=>{ if(!document.hidden) fix(); },1200);
   if(typeof rtsEnd==='function'){ const _e=rtsEnd; rtsEnd=function(){ const r=_e.apply(this,arguments); kick(); return r; }; }
   if(typeof btEnd==='function'){ const _b=btEnd; btEnd=function(){ const r=_b.apply(this,arguments); kick(); return r; }; }
+})();
+
+
+/* p32/wmvis.js — Газрын зураг дээр буцаж яваа цэрэг ба тагнуулыг харуулна */
+(function(){
+  const _n=wmNodes;
+  wmNodes=function(c,D,vis,items,t){
+    try{ const s=wmSt(), now=Date.now(), z=(typeof WMV!=='undefined'&&WMV&&WMV.z)||1;
+      const line=(e,col)=>{ c.save(); c.strokeStyle=col; c.lineWidth=2/z+1; c.setLineDash([8,6]); c.beginPath(); c.moveTo(D.C.x,D.C.y-10); c.lineTo(e.x,e.y-10); c.stroke(); c.restore(); };
+      (s.rt||[]).forEach(q=>{ const e=wmEnt(q.tid); if(!e) return; const p=Math.min(1,Math.max(0,(now-q.t0)/1000/q.d)), mx=e.x+(D.C.x-e.x)*p, my=e.y+(D.C.y-e.y)*p;
+        line(e,'rgba(140,220,120,.75)');
+        items.push({y:my+999,f:()=>{ try{ wmArmyDraw(c,{id:q.id,ty:'attack',hs:q.hs,pc:q.pc,tid:q.tid,t0:q.t0,d:q.d},mx,my,t,true,e); }catch(x){ try{ wmDrawS(c,'u_lightcav',mx,my,26); }catch(y){} } }}); });
+      (s.sct||[]).forEach(q=>{ const e=wmEnt(q.tid); if(!e) return; const el=(now-q.t0)/1000, p=el<=q.d?el/q.d:Math.max(0,1-(el-q.d)/q.d), mx=D.C.x+(e.x-D.C.x)*Math.min(1,p), my=D.C.y+(e.y-D.C.y)*Math.min(1,p);
+        line(e,'rgba(130,200,255,.8)');
+        items.push({y:my+999,f:()=>{ try{ wmDrawS(c,'u_lightcav',mx,my,46); wmLabel(c,'Тагнуул',mx,my+14,'#9fe0ff',10); }catch(x){} }}); });
+    }catch(x){}
+    return _n.apply(this,arguments);
+  };
 })();
 
 

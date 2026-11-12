@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='dc6f3c3444';
+var UPDB='b19bee5e62';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21864,9 +21864,16 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
       steps:[{k:'win',n:'Найман',txt:'Найман улсыг ял'},{k:'camp',n:'Мэргидийн үлдэгдэл',near:'Найман',dx:150,dy:110,lv:4,p:1400,txt:'Найманы нутагт нуугдсан Мэргидийн үлдэгдлийг устга'}],
       rw:{alt:10,relic:1,grain:600,wood:600,meat:400,mal:{honi:3,uher:2}} },
     { id:'khoo', t:'Тоохто бэхийн хөвгүүд',
-      d:'1208 онд Тоохто бэхи алагдсаны дараа хөвгүүд нь Кыпчак нутаг руу дүрвэжээ. Жочи, Сүбээдэй нар мөшгөж, 1216 онд сүүлчийн үлдэгдлийг дарсан гэдэг.',
-      steps:[{k:'win',n:'Дорнод Кыпчак',txt:'Дорнод Кыпчак улсыг ял'},{k:'camp',n:'Мэргидийн сүүлчийн бааз',near:'Дорнод Кыпчак',dx:-160,dy:120,lv:5,p:2600,txt:'Кыпчакт нуугдсан Мэргидийн сүүлчийн баазыг устга'}],
-      rw:{alt:15,relic:1,grain:1000,wood:1000,meat:600,mal:{uher:2,aduu:2}} }
+      d:'1208 онд Тоохто бэхи алагдсаны дараа хөвгүүд нь Кипчак нутаг руу дүрвэжээ. Жочи, Сүбээдэй нар мөшгөж, 1216 онд сүүлчийн үлдэгдлийг дарсан гэдэг.',
+      steps:[{k:'win',n:'Дорнод Кипчак',txt:'Дорнод Кипчак улсыг ял'},{k:'camp',n:'Мэргидийн сүүлчийн бааз',near:'Дорнод Кипчак',dx:-160,dy:120,lv:5,p:2600,txt:'Кипчакт нуугдсан Мэргидийн сүүлчийн баазыг устга'}],
+      rw:{alt:15,relic:1,grain:1000,wood:1000,meat:600,mal:{uher:2,aduu:2}} },
+    { id:'khir', t:'Хиргисийн нутаг дахь Мэргид',
+      d:'Мэргидийн зарим бүлэг умард Енисейн ойт нутаг, Хиргисийн хөрш рүү дүрвэж нуугдсан гэдэг. 1207 онд Жочи Ойрад, Хиргисийг дагаар оруулсан. Умард Югра улсыг ялж, ойд нуугдсан баазыг ол.',
+      steps:[{k:'win',n:'Югра',txt:'Югра улсыг ял'},{k:'camp',n:'Мэргидийн ойн бааз',near:'Югра',dx:120,dy:150,lv:5,p:2200,txt:'Умард ойд нуугдсан Мэргидийн баазыг устга'}],
+      rw:{alt:20,relic:1,grain:1500,wood:1500,meat:800,mal:{honi:4,yamaa:3,uher:2}} },
+    { id:'khwar', t:'Отрарын өшөө',
+      d:'1218 онд Хорезмын шахын захирагч Отрарт Монголын худалдаачдын караваныг үргэж, элчийг доромжилсон. Чингис хаан 1219 онд Хорезм руу их аян дайн хийв. Хорезм улсыг ял.',
+      steps:[{k:'win',n:'Хорезм',txt:'Хорезм улсыг ял'}], rw:{alt:30,relic:1,grain:2500,wood:2500,meat:1500,mal:{temee:3,aduu:3,uher:2}} }
   ];
   const Q=()=>{ const s=wmSt(); if(!s.q) s.q={}; return s.q; };
   const wins=n=>{ const k=g(n); return k?((wmSt().st['w'+k.id])||0):0; };
@@ -21881,7 +21888,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     const D=_g.apply(this,arguments);
     try{
       MQ.forEach(m=>{ const c=campOf(m); if(!c) return; const id='q_'+m.id, i=D.camps.findIndex(x=>x.id===id), show=unlocked(m)&&!isDone(m);
-        if(show&&i<0){ const k=D.ks.find(q=>q.n===c.near); if(!k) return; D.camps.push({id:id,t:'camp',x:Math.max(150,Math.min(WM_W-150,k.x+c.dx)),y:Math.max(250,Math.min(WM_H-250,k.y+c.dy)),lv:c.lv,p:c.p,hq:m.id,n:c.n,ty:['heavy','cav','archer'][m.id.length%3]}); }
+        if(show&&i<0){ const k=D.ks.find(q=>q.n===c.near); if(!k) return; D.camps.push({id:id,t:'camp',x:Math.max(-9600,Math.min(6000,k.x+c.dx)),y:Math.max(-2400,Math.min(7000,k.y+c.dy)),lv:c.lv,p:c.p,hq:m.id,n:c.n,ty:['heavy','cav','archer'][m.id.length%3]}); }
         else if(!show&&i>=0) D.camps.splice(i,1); });
     }catch(e){}
     return D;

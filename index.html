@@ -9396,10 +9396,39 @@ function mhImg(id){
 })();
 
 
-/* p32/fastmarch.js — 206: дайралтын цуваа 20% хурдан (дайрах бааз/улс/клан) */
+/* p32/fastmarch.js — 206: дайралтын цуваа 20% хурдан (дайрах бааз/улс/клан).
+   Хол улс: зай 2300-аас дээш бол хугацаа үргэлжлэн өснө (хамгийн хол нь 25 минут). Замын хугацаагаар шагнал нэмэгдэнэ (+1%/минут, +5%, дээд 30%). */
 (function(){
   const _t=wmTrip, K=0.8;
-  wmTrip=function(e){ const r=_t(e); if(e&&(e.t==='kingdom'||e.t==='clan'||e.t==='camp')) return typeof r==='number'?Math.max(1,r*K):r; return r; };
+  wmTrip=function(e){
+    let r=_t(e);
+    if(e&&(e.t==='kingdom'||e.t==='clan')){
+      try{ const dd=wmDist(e); if(dd>2300){ const yf=wmYamF(e); r=(600+Math.min(1,Math.pow((dd-2300)/9300,0.9))*1275)*yf; } }catch(x){}
+      return typeof r==='number'?Math.max(1,r*K):r;
+    }
+    if(e&&e.t==='camp') return typeof r==='number'?Math.max(1,r*K):r;
+    return r;
+  };
+
+  /* ---- хол замын шагналын нэмэгдэл ---- */
+  const bonPct=d=>Math.min(30,Math.round(d/60)+5);
+  let BON=null;
+  const wb=wmBattle;
+  wmBattle=function(e,tc,mm){
+    BON=null;
+    try{ if(mm&&mm.d>0&&e&&(e.t==='kingdom'||e.t==='clan'||e.t==='bandit'||e.t==='camp'||e.lv)&&mm.ty!=='camp') BON={pct:bonPct(mm.d),t:Date.now()}; }catch(x){}
+    return wb.apply(this,arguments);
+  };
+  function apply(E){
+    try{
+      if(!BON||!E||E.back!=='wmap') return; const b=BON; BON=null; if(Date.now()-b.t>60000) return;
+      const m=1+b.pct/100, g0=E.g|0, g1=Math.round(g0*m), cb=E.cb;
+      E.g=g1; E.m=Math.round((E.m|0)*m);
+      E.cb=function(){ const r=cb&&cb.apply(this,arguments); try{ if(g1>g0) say('Замын нэмэгдэл +'+b.pct+'%: +'+f(g1-g0)+' 🪙'); }catch(x){} return r; };
+    }catch(x){}
+  }
+  const sb=startBattle; startBattle=function(i,E){ apply(E); return sb.apply(this,arguments); };
+  if(typeof rtsStart==='function'){ const rs=rtsStart; rtsStart=function(i,E){ apply(E); return rs.apply(this,arguments); }; }
 })();
 
 
@@ -10893,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7cc9b6ae04';
+var UPDB='254b274186';
 (function(){
   const K='updTry';
   const _go=updGo;

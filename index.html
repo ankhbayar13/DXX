@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d10b58bcca';
+var UPDB='f7f64938e2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21557,7 +21557,6 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   '#wmhome img{display:none!important}'+
   '#wmcl{width:46px!important;height:80px!important;top:74px!important;background:'+U('wm_cl')+' center/contain no-repeat!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important}'+
   '#wmcl>*{opacity:0!important}'+
-  '#wmcll{display:none!important}'+
   /* цуваа самбар (дээд) */
   '#wmbar{position:relative;isolation:isolate;background:none!important;border:0!important;box-shadow:none!important;top:30px!important;width:184px!important;right:auto!important;padding:0 14px!important;display:flex;align-items:center;height:34px!important}'+
   '#wmbar::before{content:"";position:absolute;left:-2.7%;width:105.4%;top:-57%;height:164%;background:'+U('wm_hdr')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}'+
@@ -21565,8 +21564,9 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   '#wmheroes{isolation:isolate;background:none!important;border:0!important;box-shadow:none!important;top:80px!important;padding:12px 8px 14px!important;overflow:visible!important}'+
   '#wmheroes::before{content:"";position:absolute;left:-4.3%;width:108.6%;top:-5.4%;height:119%;background:'+U('wm_pan')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
-  const tag=()=>{ try{ document.querySelectorAll('#wmap .wmz').forEach(b=>{ const t=b.textContent.trim(); const k=t==='+'?'k-pl':t==='−'?'k-mn':(t==='Бүх'||/^Бүх/.test(t))?'k-bl':''; if(k&&!b.classList.contains(k)) b.classList.add(k); }); }catch(e){} };
-  if(typeof wmOpen==='function'){ const _o=wmOpen; wmOpen=function(){ const r=_o.apply(this,arguments); tag(); setTimeout(tag,300); return r; }; }
+  const flg=()=>{ try{ const b=document.getElementById('wmcl'); if(!b||typeof flgSrc!=='function'||typeof wmClanId!=='function') return; const k=wmClanId(); if(k>=0){ b.style.setProperty('background-image','url('+flgSrc(flgOf(k))+')','important'); } else b.style.removeProperty('background-image'); }catch(e){} };
+  const tag=()=>{ flg(); try{ document.querySelectorAll('#wmap .wmz').forEach(b=>{ const t=b.textContent.trim(); const k=t==='+'?'k-pl':t==='−'?'k-mn':(t==='Бүх'||/^Бүх/.test(t))?'k-bl':''; if(k&&!b.classList.contains(k)) b.classList.add(k); }); }catch(e){} };
+  if(typeof wmOpen==='function'){ const _o=wmOpen; wmOpen=function(){ const r=_o.apply(this,arguments); tag(); setTimeout(tag,300); setTimeout(tag,1500); setTimeout(tag,4000); return r; }; }
 })();
 
 

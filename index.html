@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c35aedaf66';
+var UPDB='c7bf0782f4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22075,7 +22075,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     else scH='<div class="wu-sc no">Тагнаагүй тул дайсны хүч мэдэгдэхгүй. Тагнуул явуулбал харагдана.</div>';
     const q=(a,b)=>'<div class="l">'+a+'</div><div class="v">'+(b[0])+'</div><div class="v">'+(b[1])+'</div>';
     const F=known?fe:['?','?','?'], ep=known?pm[1]:'?';
-    let tb='<div class="wu-t"><div class="h l"></div><div class="h">Дайсан</div><div class="h">Та</div>'+
+    let tb='<div class="wu-t"><div class="h l">Хүч</div><div class="h">Дайсан</div><div class="h">Та</div>'+
       '<div class="l tot">Нийт хүч</div><div class="v tot">'+ep+'</div><div class="v tot" style="color:'+col+'">'+pm[2]+'</div>'+
       q('Явган',[F[0],m[0]])+q('Харваач',[F[1],m[1]])+q('Морьт',[F[2],m[2]])+
       '<div class="l last">Баатар</div><div class="v last">'+(known?'—':'?')+'</div><div class="v last">'+m[3]+'</div></div>';
@@ -22086,8 +22086,70 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     const wb=[...sh.querySelectorAll(':scope > div')].find(x=>/хүрэлцэхгүй/.test(T(x))&&x.querySelectorAll('.sm').length>=2);
     if(wb){ const r=wb.querySelectorAll('.sm'); if(r.length>=3){ r[1].innerHTML='Цэрэг үйлдвэрлэж хүчээ нэмээд дайр. Морины бааз, Харваачдын талбай, Явган цэргийн талбай барь.'; r[1].style.fontSize='11px'; r[2].remove(); } wb.style.margin='4px 0'; wb.style.padding='4px 8px'; }
   }
+  /* самбар өндөр үед дээрх баатар/цэргийн самбар, товчнууд самбарыг дарахгүй байхаар түр нууна */
+  window.wmFitUI=function(){ try{ const sh=document.getElementById('wmsheet'), open=!!(sh&&sh.style.display!=='none'&&sh.innerHTML.trim()); const top=open?sh.getBoundingClientRect().top:1e9;
+    document.querySelectorAll('#wmheroes,#wmmr,#wmcl,.wmz,.wmq').forEach(el=>{ const r=el.getBoundingClientRect(); el.style.visibility=(open&&r.height>0&&r.bottom>top)?'hidden':''; }); }catch(e){} };
   const _s=wmSheet;
-  wmSheet=function(){ const r=_s.apply(this,arguments); try{ const sh=document.getElementById('wmsheet'), open=!!(sh&&sh.style.display!=='none'&&sh.innerHTML.trim()); document.querySelectorAll('.wmq').forEach(b=>{ b.style.visibility=open?'hidden':''; }); if(open) build(sh); }catch(e){ console.log('wmsheetui',e); } return r; };
+  wmSheet=function(){ const r=_s.apply(this,arguments); try{ const sh=document.getElementById('wmsheet'), open=!!(sh&&sh.style.display!=='none'&&sh.innerHTML.trim()); if(open) build(sh); wmFitUI(); }catch(e){ console.log('wmsheetui',e); } return r; };
+})();
+
+
+/* p32/wmtroops.js — «Цэрэг сонго»: цэргийг % биш ТООгоор сонгоно (тоо бичих + гулсуур + хурдан товч), үлдэх тоог шууд харуулна */
+(function(){
+  const css='#wmsheet .wt{margin:4px 0;border:1px solid #7a5a22;border-radius:8px;overflow:hidden;font-size:13px}'+
+  '#wmsheet .wt-g{display:grid;grid-template-columns:1.2fr 1fr 1fr;align-items:center;gap:4px 8px;padding:4px 8px}'+
+  '#wmsheet .wt-hd{background:rgba(201,151,43,.22);color:#ffd770;font-weight:bold;font-size:12px}'+
+  '#wmsheet .wt-hd span:nth-child(n+2){text-align:right}'+
+  '#wmsheet .wt-row{border-top:1px solid rgba(122,90,34,.45)}'+
+  '#wmsheet .wt-nm b{color:#ffe9b0}#wmsheet .wt-nm small{display:block;font-size:11px;color:#d8c8a0}'+
+  '#wmsheet .wt-in{width:100%;box-sizing:border-box;text-align:right;font-size:15px;font-weight:bold;padding:4px 6px;border-radius:6px;border:1px solid #8a6a3a;background:#1f1409;color:#ffe9b0}'+
+  '#wmsheet .wt-in:disabled{opacity:.4}'+
+  '#wmsheet .wt-lf{text-align:right;color:#cfeec0;font-variant-numeric:tabular-nums}'+
+  '#wmsheet .wt-sl{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding-bottom:2px}'+
+  '#wmsheet .wt-sl input[type=range]{flex:1;min-width:0}'+
+  '#wmsheet .wt-sl button{background:#5b3d1e;border:1px solid #8a6a3a;color:#ffe9b0;border-radius:7px;padding:3px 8px;font-size:12px}';
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  const NM={foot:'Явган',archer:'Харваач',cav:'Морьт'};
+  const total=T=>Math.floor(S.res[T.k]||0);
+  const availN=T=>{ const A=wmAway(); return Math.max(0,Math.floor(total(T)*Math.max(0,1-(A.pc[T.ty]||0))+1e-6)); };
+  const fm=n=>{ try{ return f(n); }catch(e){ return String(n); } };
+  /* тоог хэсэгчид шилжүүлэх: wmSelEff-ийн pc нь нийт цэргийн хэсэг (0..1) */
+  const _e=wmSelEff;
+  wmSelEff=function(){ const r=_e.apply(this,arguments);
+    try{ const sel=wmSelGet(), A=wmAway(); if(sel.cnt) TR.forEach(T=>{ const c=sel.cnt[T.ty]; if(c==null) return; const tot=total(T); if(tot<1){ r.pc[T.ty]=0; return; }
+      const av=Math.max(0,1-(A.pc[T.ty]||0)); r.pc[T.ty]=c<=0?0:Math.min(av,(Math.min(c,availN(T))+0.01)/tot); }); }catch(e){}
+    return r; };
+  const nOf=(T,eff)=>Math.max(0,Math.min(availN(T),Math.floor(total(T)*(eff.pc[T.ty]||0)+1e-6)));
+  function live(id){
+    try{ const sh=document.getElementById('wmsheet'); if(!sh) return; const eff=wmSelEff();
+      TR.forEach(T=>{ const n=nOf(T,eff), av=availN(T), row=sh.querySelector('[data-ty="'+T.ty+'"]'); if(!row) return;
+        const lf=row.querySelector('.wt-lf'); if(lf) lf.textContent=fm(av-n); const ip=row.querySelector('.wt-in'); if(ip&&document.activeElement!==ip) ip.value=n; const sl=row.querySelector('input[type=range]'); if(sl) sl.value=n; });
+      const hd=[...sh.querySelectorAll('div.sm')].find(x=>/Илгээх хүч/.test(x.textContent)); if(hd){ const bs=hd.querySelectorAll('b'); if(bs.length>=2){ const sp=wmSentPow(eff), ep=parseInt((bs[0].textContent||'').replace(/\D/g,''),10); bs[1].textContent=fm(sp); bs[1].style.color=isNaN(ep)?'#ffe9b0':(sp>=ep?'#8fe07a':'#ff8a7a'); } }
+    }catch(e){}
+  }
+  window.wmTrSet=function(ty,v,id,fin){
+    try{ const T=TR.find(x=>x.ty===ty); if(!T) return; const sel=wmSelGet(); if(!sel.cnt) sel.cnt={}; let n=parseInt(String(v).replace(/\D/g,''),10); if(isNaN(n)) n=0; n=Math.max(0,Math.min(availN(T),n)); sel.cnt[ty]=n; sel.pc[ty]=total(T)?n/total(T):0;
+      if(fin) wmSelSheet(id); else live(id); }catch(e){ console.log('wmTrSet',e); }
+  };
+  window.wmTrMode=function(ty,mode,id){ const T=TR.find(x=>x.ty===ty); if(!T) return; wmTrSet(ty,mode==='all'?availN(T):mode==='half'?Math.floor(availN(T)/2):0,id,true); };
+  const _s=wmSelSheet;
+  wmSelSheet=function(id){
+    _s.apply(this,arguments);
+    try{ const sh=document.getElementById('wmsheet'); if(!sh||sh.querySelector('.wt')) return;
+      const lab=[...sh.querySelectorAll(':scope > div.sm')].find(x=>/^Цэрэг \(хувь\)/.test(x.textContent.trim())); if(!lab) return;
+      const rows=[...sh.querySelectorAll(':scope > .wsr2')]; const eff=wmSelEff();
+      let h='<div class="wt"><div class="wt-g wt-hd"><span>Цэрэг</span><span>Явах</span><span>Үлдэнэ</span></div>';
+      TR.forEach(T=>{ const av=availN(T), n=nOf(T,eff);
+        h+='<div class="wt-g wt-row" data-ty="'+T.ty+'"><div class="wt-nm"><b>'+(NM[T.ty]||T.n)+'</b><small>Нийт '+fm(av)+' · хүч '+fm(trPow(T))+'</small></div>'+
+          '<input class="wt-in" type="text" inputmode="numeric" value="'+n+'" '+(av<1?'disabled':'')+' onfocus="this.select()" oninput="wmTrSet(\''+T.ty+'\',this.value,\''+id+'\',false)" onchange="wmTrSet(\''+T.ty+'\',this.value,\''+id+'\',true)">'+
+          '<div class="wt-lf">'+fm(av-n)+'</div>'+
+          '<div class="wt-sl"><input type="range" min="0" max="'+av+'" step="1" value="'+n+'" '+(av<1?'disabled':'')+' oninput="wmTrSet(\''+T.ty+'\',this.value,\''+id+'\',false)" onchange="wmTrSet(\''+T.ty+'\',this.value,\''+id+'\',true)">'+
+          '<button onclick="wmTrMode(\''+T.ty+'\',\'none\',\''+id+'\')">0</button><button onclick="wmTrMode(\''+T.ty+'\',\'half\',\''+id+'\')">Тал</button><button onclick="wmTrMode(\''+T.ty+'\',\'all\',\''+id+'\')">Бүгд</button></div></div>'; });
+      h+='</div>';
+      lab.insertAdjacentHTML('afterend',h); lab.textContent='Цэрэг · явуулах тоогоо бич:'; rows.forEach(r=>r.remove());
+    }catch(e){ console.log('wmtroops',e); }
+    try{ wmFitUI(); }catch(e){}
+  };
 })();
 
 

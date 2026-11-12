@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b19bee5e62';
+var UPDB='c35aedaf66';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22037,6 +22037,57 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     }catch(e){ ST.st='err'; }
     if(document.getElementById('wmpn')) wmPanel(html());
   };
+})();
+
+
+/* p32/wmsheetui.js — Дайсны (улс) самбарыг цэгцтэй, ойлгомжтой болгох: хүснэгтээр харьцуулна */
+(function(){
+  const css='#wmsheet .wu-tag{display:inline-block;margin:0 0 4px;padding:1px 8px;border-radius:9px;background:rgba(201,151,43,.18);border:1px solid #7a5a22;color:#ffe9b0;font-size:12px}'+
+  '#wmsheet .wu-sc{font-size:12px;margin:2px 0;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.25);border-left:3px solid #9fe08a;color:#cfeec0}'+
+  '#wmsheet .wu-sc.old{border-left-color:#ffd770;color:#ffe3a0}#wmsheet .wu-sc.no{border-left-color:#8a7a5a;color:#d8c8a0}'+
+  '#wmsheet .wu-sc small{display:block;font-size:11px;color:#e0b070;margin-top:2px}'+
+  '#wmsheet .wu-t{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:0;margin:6px 0;border:1px solid #7a5a22;border-radius:8px;overflow:hidden;font-size:13px}'+
+  '#wmsheet .wu-t div{padding:3px 8px;border-bottom:1px solid rgba(122,90,34,.45)}'+
+  '#wmsheet .wu-t .h{background:rgba(201,151,43,.22);font-weight:bold;color:#ffd770;text-align:right}#wmsheet .wu-t .h.l{text-align:left}'+
+  '#wmsheet .wu-t .l{color:#d8c8a0}#wmsheet .wu-t .v{text-align:right;font-variant-numeric:tabular-nums}'+
+  '#wmsheet .wu-t .tot{font-weight:bold;background:rgba(0,0,0,.2);font-size:14px}#wmsheet .wu-t .last{border-bottom:0}'+
+  '#wmsheet .wu-in{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin:4px 0 6px;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.25)}'+
+  '#wmsheet .wu-in b{color:#ffe9b0}';
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  const T=el=>(el.textContent||'').replace(/\s+/g,' ').trim();
+  function build(sh){
+    const sms=[...sh.querySelectorAll(':scope > div.sm')]; const h3=sh.querySelector(':scope > h3');
+    const mine=sms.find(x=>/^Таны цэрэг:/.test(T(x))), foe=sms.find(x=>/^Дайсны бүрэлдэхүүн:/.test(T(x)));
+    const pw=sms.find(x=>/Зам\s/.test(T(x))&&/Хүч/.test(T(x))), ty=sms.find(x=>/^Дайсан:/.test(T(x)));
+    if(!h3||!mine||!foe||!pw||sh.querySelector('.wu-t')) return;
+    const scEl=sms.find(x=>/Тагнуулын мэдээ/.test(T(x))), stale=sms.find(x=>/Улс 2 цаг/.test(T(x)));
+    const nums=(x,pre)=>T(x).replace(pre,'').split('·').map(s=>s.trim().replace(/^[^\d?❓]+/,'').replace(/^❓.*/,'?'));
+    const m=nums(mine,/^Таны цэрэг:/); if(m.length<4) return;
+    const fe=nums(foe,/^Дайсны бүрэлдэхүүн:/), known=fe.length>=3&&/\d/.test(fe[0]);
+    const pm=T(pw).match(/Хүч\s*(\S+)\s*·\s*(?:Таны|Илгээх) хүч\s*(\S+)\s*·\s*Зам\s*(.+)$/); if(!pm) return;
+    const mb=pw.querySelectorAll('b')[1], col=mb&&mb.style.color?mb.style.color:'#ffe9b0';
+    const tm=ty?T(ty).match(/^Дайсан:\s*(.+?)\s*·/):null, tyTxt=tm?tm[1]:'';
+    let rw=''; if(ty){ const hh=ty.innerHTML, i=hh.indexOf('Ялбал:'); if(i>=0) rw=hh.slice(i+6).replace(/,\s*Алт,\s*оноо\s*$/,'').trim(); }
+    h3.innerHTML=h3.innerHTML.replace(/(улс)\s+улс(?=\s*<|\s*$)/i,'$1');
+    let scH='';
+    if(scEl){ const mm=T(scEl).match(/\((\d+) мин өмнөх\)(?::\s*(.*))?/), ago=mm?+mm[1]:0, old=/Хуучирч/.test(T(scEl))||ago>=30;
+      scH='<div class="wu-sc'+(old?' old':'')+'">Тагнуул · '+(ago<1?'дөнгөж сая':ago+' мин өмнө')+(mm&&mm[2]?' · '+mm[2].replace(/\s*·\s*Хуучирч байна/,''):'')+(old?' · хуучирч байна':'')+(stale?'<small>Улс 2 цаг тутам цэргээ өөрчилдөг тул мэдээ хуучирсан байж болно.</small>':'')+'</div>'; }
+    else scH='<div class="wu-sc no">Тагнаагүй тул дайсны хүч мэдэгдэхгүй. Тагнуул явуулбал харагдана.</div>';
+    const q=(a,b)=>'<div class="l">'+a+'</div><div class="v">'+(b[0])+'</div><div class="v">'+(b[1])+'</div>';
+    const F=known?fe:['?','?','?'], ep=known?pm[1]:'?';
+    let tb='<div class="wu-t"><div class="h l"></div><div class="h">Дайсан</div><div class="h">Та</div>'+
+      '<div class="l tot">Нийт хүч</div><div class="v tot">'+ep+'</div><div class="v tot" style="color:'+col+'">'+pm[2]+'</div>'+
+      q('Явган',[F[0],m[0]])+q('Харваач',[F[1],m[1]])+q('Морьт',[F[2],m[2]])+
+      '<div class="l last">Баатар</div><div class="v last">'+(known?'—':'?')+'</div><div class="v last">'+m[3]+'</div></div>';
+    const info='<div class="wu-in"><span>Зам: <b>'+pm[3]+'</b></span>'+(rw?'<span>Ялбал: <b>'+rw+'</b></span>':'')+'</div>';
+    const tag=(tyTxt&&!/❓|тагнаагүй/.test(tyTxt))?' <small style="font-size:12px;color:#d8c8a0;font-weight:normal">· '+tyTxt+'</small>':'';
+    [scEl,stale,mine,foe,pw,ty].forEach(x=>{ if(x) x.remove(); });
+    h3.insertAdjacentHTML('beforeend',tag); h3.insertAdjacentHTML('afterend',scH+tb+info);
+    const wb=[...sh.querySelectorAll(':scope > div')].find(x=>/хүрэлцэхгүй/.test(T(x))&&x.querySelectorAll('.sm').length>=2);
+    if(wb){ const r=wb.querySelectorAll('.sm'); if(r.length>=3){ r[1].innerHTML='Цэрэг үйлдвэрлэж хүчээ нэмээд дайр. Морины бааз, Харваачдын талбай, Явган цэргийн талбай барь.'; r[1].style.fontSize='11px'; r[2].remove(); } wb.style.margin='4px 0'; wb.style.padding='4px 8px'; }
+  }
+  const _s=wmSheet;
+  wmSheet=function(){ const r=_s.apply(this,arguments); try{ const sh=document.getElementById('wmsheet'), open=!!(sh&&sh.style.display!=='none'&&sh.innerHTML.trim()); document.querySelectorAll('.wmq').forEach(b=>{ b.style.visibility=open?'hidden':''; }); if(open) build(sh); }catch(e){ console.log('wmsheetui',e); } return r; };
 })();
 
 

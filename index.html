@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='699a3d9be4';
+var UPDB='461ddad4c6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20660,10 +20660,11 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const MB=1e6, FRESH=21*864e5, MAXA=3;
   /* Арена: баатрын хүч p → амь (HP) ба цохилт (ATK) тусдаа. Хүч = HP/14*0.5 + ATK (хүчний тоо өөрчлөгдөхгүй).
      Анги бүр хүчний хэдэн хувийг амьд (s), үлдсэнийг цохилтод өгнө: Хамгаалагч 65%, Явган 55%, Довтлогч 50%, Нумтан 35%. */
-  const HSH={heavy:0.65,foot:0.55,cav:0.5,archer:0.35};
+  const HSH={heavy:0.65,foot:0.55,cav:0.5,archer:0.35,support:0.6};
+  const cls=id=>{ try{ return typeof hcls==='function'?hcls(id):htype(id); }catch(e){ return 'cav'; } };
   const stat=(type,p)=>{ const s=HSH[type]!=null?HSH[type]:0.5; return {hp:28*s*p,atk:(1-s)*p,pw:p}; };
   window.taStat=stat;
-  const teamStat=()=>{ let hp=0,atk=0; try{ (S.ta.team||[]).forEach(id=>{ const t=(typeof htype==='function')?htype(id):'cav', st=stat(t,heroPower(id)); hp+=st.hp; atk+=st.atk; }); }catch(e){} return {hp:hp,atk:atk}; };
+  const teamStat=()=>{ let hp=0,atk=0; try{ (S.ta.team||[]).forEach(id=>{ const st=stat(cls(id),heroPower(id)); hp+=st.hp; atk+=st.atk; }); }catch(e){} return {hp:hp,atk:atk}; };
   /* ---- Тохиргоо: шагнал/оноог эндээс солино ---- */
   const CFG=window.TA_CFG=window.TA_CFG||{
     /* өдрийн 5 үнэгүй тулаанаас хойших нэмэлт тулаан бүрийн үнэ (Алт) */
@@ -20760,8 +20761,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     let h='<div class="t2r"><div class="t2rn">'+esc(r[0])+'</div><div class="t2rs">Оноо <b>'+A.r+'</b> · Ялалт <b>'+A.w+'</b> · Ялагдал <b>'+A.l+'</b></div>'
       +'<div class="t2rb"><i style="width:'+rankPct(A.r).toFixed(0)+'%"></i></div><div class="t2rf">Өнөөдөр үлдсэн <b>'+free+'/5</b></div><div class="t2rm">Сарын оноо <b>'+m.p+'</b></div><button class="t2rp" onclick="taPlus()" aria-label="info"></button></div>';
     h+='<div class="t2sec"><b>Миний баг ('+A.team.length+'/3)</b><span>Багийн хүч <b>'+f(X.teamPow())+'</b> · Амь <b>'+f(Math.round(teamStat().hp))+'</b> · Цохилт <b>'+f(Math.round(teamStat().atk))+'</b></span></div><div class="t2tm">';
-    [0,1,2].forEach(i=>{ const id=A.team[i]; h+=id?'<div class="t2c">'+pimg(id,'t2cp')+'<button class="t2x" onclick="taTog(\''+id+'\')">✕</button><div class="t2cn"><b>'+esc(fst(id))+'</b><span>'+f(heroPower(id))+'</span></div></div>':'<div class="t2c emp" onclick="taGoGrid()"><div class="t2pl">+</div><div class="t2ps">Дайчин сонгох</div></div>'; });
+    [0,1,2].forEach(i=>{ const id=A.team[i]; h+=id?'<div class="t2c">'+pimg(id,'t2cp')+'<button class="t2x" onclick="taTog(\''+id+'\')">✕</button><div class="t2cn"><b>'+esc(fst(id))+'</b><span>'+f(heroPower(id))+'</span><small style="display:block;font-size:9px;opacity:.85;font-weight:normal">'+esc(RN(grp(id)))+'</small></div></div>':'<div class="t2c emp" onclick="taGoGrid()"><div class="t2pl">+</div><div class="t2ps">Дайчин сонгох</div></div>'; });
     h+='</div>';
+    { const o2=TS.opp[TS.sel==null?1:TS.sel], eh2=((o2&&o2.h)||[]).slice(0,3), BE={archer:'heavy',heavy:'cav',cav:'archer'}; let ad=0, ds=0;
+      A.team.slice(0,3).forEach(mm=>eh2.forEach(e=>{ const x=htype(mm), y=htype(e.id); if(BE[x]===y) ad++; if(BE[y]===x) ds++; }));
+      const tg=!eh2.length?null:(ad>ds?['Давуутай','#9dff7a']:ad<ds?['Сул талтай','#ff8a7a']:['Адил','#ffd770']);
+      h+='<div class="t2lg" style="margin:4px 2px 6px;padding:5px 8px;border-radius:8px;background:#00000055;font-size:11px;line-height:1.4;text-align:center;color:#e8d6a8"><b>Ангийн давуу:</b> '+RN('archer')+' › '+RN('heavy')+' › '+RN('cav')+' › '+RN('archer')+' <span style="opacity:.8">(давуутай цохилт ×1.5)</span>'+(tg?'<br>Энэ дайсанд: <b style="color:'+tg[1]+'">'+tg[0]+'</b>':'')+'</div>'; }
     const list=F.slice().sort((a,b)=>heroPower(b)-heroPower(a)).filter(id=>flt==='all'||grp(id)===flt);
     const FL=[['all','Бүх дайчин'],['heavy',RN('heavy')],['cav',RN('cav')],['archer',RN('archer')],['support',RN('support')]];
     h+='<div class="t2pk" id="t2pk"><div class="t2fl">'+FL.map(x=>'<button class="'+(flt===x[0]?'on':'')+'" onclick="taFlt(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div><div class="t2g" id="t2g">'
@@ -20871,10 +20876,10 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const W=BT.W, H=BT.H, pt=H>W, sc=Math.max(W/IW,H/IH), ox=(W-IW*sc)/2, oy=pt?0:-(IH*sc-H)*0.3;
     /* Хоёр талыг ИЖИЛ томьёогоор тооцно: баатар бүрийн хүч p → HP = p*14*hp, цохилт = p*0.5*atk (адил хүчтэй баг тэнцүү тулна) */
     { const mine=BT.units.filter(u=>u.side===0&&u.id&&!u.sup), sum=mine.reduce((a,u)=>a+heroPower(u.id),0)||1, km=Math.max(1,X.teamPow())/sum;
-      mine.forEach(u=>{ if(u.hh) return; u.hh=1; const dd=BTDEF[u.type]||u.d, p=heroPower(u.id)*km, st=stat(u.type,p), mx=st.hp; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=p; u.sq=null; }); BT.p0=mine.reduce((a,u)=>a+u.max,0); }
+      mine.forEach(u=>{ if(u.hh) return; u.hh=1; const dd=BTDEF[u.type]||u.d, p=heroPower(u.id)*km, st=stat(cls(u.id),p), mx=st.hp; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=p; u.sq=null; }); BT.p0=mine.reduce((a,u)=>a+u.max,0); }
     if(E.eh){ const en=BT.units.filter(u=>u.side===1);
       en.forEach((u,k)=>{ if(u.hh) return; u.hh=1; const h=E.eh[k]; if(!h){ u.hp=0; u.max=0; u.dead=true; return; }
-        const he=HEROES.find(x=>x.id===h.id), t=(typeof htype==='function')?htype(h.id):'cav', dd=BTDEF[t]||BTDEF.cav, st=stat(t,h.p), mx=st.hp;
+        const he=HEROES.find(x=>x.id===h.id), t=(typeof htype==='function')?htype(h.id):'cav', dd=BTDEF[t]||BTDEF.cav, st=stat(cls(h.id),h.p), mx=st.hp;
         u.type=t; u.d=dd; u.id=h.id; if(he) u.name=he.n; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=h.p; u.cd=Math.random()*dd.cd; u.arn=0;
         try{ const bv=BTV[t]||BTV.cav; u.key=h.id==='chinggis'?'u_general':bv[(h.id.length+k)%bv.length]; }catch(e){} });
       BT.units=BT.units.filter(u=>!(u.side===1&&u.dead)); BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0); }

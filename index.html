@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='405ab3796f';
+var UPDB='62c54b0483';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21782,13 +21782,13 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
       h=h.replace(/(Дайсны хүч |Хүч )<b>[^<]*<\/b>/g,'$1<b>❓</b>');
       h=h.replace(/((?:Илгээх|Таны) хүч <b style="color:\s*)(#[0-9a-fA-F]{3,6}|rgb\([^)]*\))/g,'$1#ffe9b0');
     } else if(sn&&!/Тагнуулын мэдээ/.test(h)){
-      const ago=Math.max(0,Math.round((Date.now()-(sn.t||Date.now()))/60000));
-      h=h.replace('</h3>','</h3><div class="sm" style="color:#9fe08a">🔍 Тагнуулын мэдээ ('+ago+' мин өмнөх)'+(sn.s?': '+sn.s:'')+'</div>');
+      const ago=Math.max(0,Math.round((Date.now()-(sn.t||Date.now()))/60000)), old=ago>=30;
+      h=h.replace('</h3>','</h3><div class="sm" style="color:'+(old?'#ffd770':'#9fe08a')+'">🔍 Тагнуулын мэдээ ('+ago+' мин өмнөх)'+(old?' · Хуучирч байна':'')+(sn.s?': '+sn.s:'')+'</div><div class="sm" style="color:#e0b070;font-size:11px">⚠ Улс 2 цаг тутамд цэргээ татаж, нэмж байдаг. Мэдээ хуучирсан байж болно.</div>');
     }
     const s=W(), going=s.sct.find(q=>q.tid===e.id);
     if(going){ h=h.replace(/onclick="wmScout\('[^']*'\)"/g,'disabled').replace(/🔍 Тагнуул · [^<]*🪙/,'🔍 Тагнуул явж байна'); }
     else { try{ const tt=2*scoutOne(wmDist(e)); h=h.replace(/(🔍 Тагнуул · [^<]*?🪙)/,'$1 · '+wmFmt(tt)); }catch(x){} }
-    h=h.replace('Дайсны цэргийн төрлийг мэдэхэд тусална (заавал биш)','Очоод буцаж ирэхэд дайсны хүч, бүрэлдэхүүн мэдэгдэнэ (1 цаг хүчинтэй)');
+    h=h.replace('Дайсны цэргийн төрлийг мэдэхэд тусална (заавал биш)','Очоод буцаж ирэхэд дайсны хүч, бүрэлдэхүүн мэдэгдэнэ (1 цаг хүчинтэй). Улс 2 цагийн дотор өөрчлөгдөж болно.');
     if(h!==o) sh.innerHTML=h;
   }
   function wrap(name,getE){

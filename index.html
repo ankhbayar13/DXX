@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='55faac4826';
+var UPDB='4d868ce7d1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16604,9 +16604,10 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     const M=mine(), E=foes();
     const pa=M.reduce((a,u)=>a+Math.max(0,u.hp),0), ea=E.reduce((a,u)=>a+Math.max(0,u.hp),0);
     const set=(id,v)=>{ const e=$$(id); if(e&&e.textContent!==v) e.textContent=v; };
-    set('bu-lp',fm(Math.ceil(pa/14))); set('bu-rp',fm(Math.ceil(ea/14)));
+    { const ar=!!(BT.e&&BT.e.hbf), pw=a=>a.reduce((t,u)=>t+Math.max(0,u.hp)/(14*((u.d&&u.d.hp)||1)),0);
+      set('bu-lp',fm(Math.ceil(ar?pw(M):pa/14))); set('bu-rp',fm(Math.ceil(ar?pw(E):ea/14))); }
     const lh=$$('bu-lh'), rh=$$('bu-rh'); if(lh) lh.style.width=Math.max(0,Math.min(100,100*pa/(BT.p0||1)))+'%'; if(rh) rh.style.width=Math.max(0,Math.min(100,100*ea/(BT.e0||1)))+'%';
-    set('bu-rn',(BT.e&&BT.e.n)||'Дайсны цэрэг');
+    set('bu-rn',((BT.e&&BT.e.n)||'Дайсны цэрэг').replace(/^Багийн арена:\s*/,''));
     const vs=bu.querySelector('.bu-vs b'); const vt=Math.max(1,M.length)+' vs '+Math.max(1,E.length); if(vs&&vs.textContent!==vt) vs.textContent=vt;
     const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0'));
     if(!fight) return;
@@ -18075,7 +18076,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   function tInit(){ if(!S.ta) S.ta={r:0,w:0,l:0,d:'',n:0,team:[]}; if(S.ta.d!==dk()){ S.ta.d=dk(); S.ta.n=0; }
     S.ta.team=(S.ta.team||[]).filter(id=>S.heroes[id]&&!(SUPP&&SUPP[id])); const F=fighters().sort((a,b)=>heroPower(b)-heroPower(a));
     if(!S.ta.ed) for(const id of F){ if(S.ta.team.length>=3) break; if(S.ta.team.indexOf(id)<0) S.ta.team.push(id); } }
-  const teamPow=()=>{ const A=S.ta.team.reduce((s,id)=>s+heroPower(id),0), T=TR.reduce((s,t)=>s+trPow(t),0); return Math.floor((A+T)*(1+0.1*Math.max(0,S.bld.hureo-1))*(1+0.05*(S.bld.hushuu||0))); };
+  const teamPow=()=>Math.floor(S.ta.team.reduce((s,id)=>s+heroPower(id),0));   /* Арена: зөвхөн баатруудын хүч (цэрэг, барилгын нэмэгдэлгүй) */
   function opps(){ const P=Math.max(120,teamPow()), d=dk(); const TN=['Залуу баг','Мэргэн баг','Жанжин баг'];
     return [0.8,1.05,1.35].map((m,i)=>({i,n:NAMES[hsh(d+'t'+i)%NAMES.length]+' · '+TN[i],p:Math.round(P*m),pts:[15,25,40][i]})); }
   const rk=r=>{ try{ return arRank(r); }catch(e){ return ['Дайчин',0]; } };
@@ -18085,7 +18086,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     try{ save(); }catch(e){} try{ fillM(); }catch(e){} };
   window.taFight=function(i){ tInit(); const F=fighters(); if(F.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=opps()[i]; if(A.n>=5){ if(S.res.alt<5){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=5; } A.n++; S.taPick=false;
-    closeM(); startBattle(0,{n:'Багийн арена: '+o.n,p:o.p,g:Math.round(o.p*0.15),m:Math.round(o.p*0.04),bi:Math.min(6,i*2),rep:false,hs:A.team.slice(),slots:3,
+    closeM(); startBattle(0,{pc:{cav:0,archer:0,foot:0},n:'Багийн арена: '+o.n,p:o.p,g:Math.round(o.p*0.15),m:Math.round(o.p*0.04),bi:Math.min(6,i*2),rep:false,hs:A.team.slice(),slots:3,
       cb:()=>{ A.r+=o.pts; A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} },cbl:()=>{ A.r=Math.max(0,A.r-Math.round(o.pts/2)); A.l++; },back:'tarena'}); };
   function tarenaHTML(){
     tInit(); const A=S.ta, F=fighters(), r=rk(A.r), free=Math.max(0,5-A.n);
@@ -18097,7 +18098,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     if(S.taPick){
       h+='<div class="card"><b>Баатраа сонго</b> <span class="sm">('+A.team.length+'/3 · дарж сонгоно, дахин дарвал хасна)</span><div class="ta-grid">'+F.sort((a,b)=>heroPower(b)-heroPower(a)).map(id=>{ const on=A.team.indexOf(id)>=0; return '<div class="ta-c'+(on?' on':'')+'" onclick="taTog(\''+id+'\')">'+portrait(id,46)+'<b>'+hn(id).split(' ')[0]+'</b><span class="sm">'+f(heroPower(id))+'</span></div>'; }).join('')+'</div></div>'; }
     opps().forEach(o=>{ h+='<div class="card"><div class="row"><div><b>'+o.n+'</b><div class="sm">3 баатар · Хүч '+f(o.p)+' · Ялвал +'+o.pts+' оноо, +'+Math.round(o.p*0.15)+' зоос</div></div><button class="btn" onclick="taFight('+o.i+')">'+(free>0?'Тулах':'Тулах · 5 Алт')+'</button></div></div>'; });
-    h+='<div class="sm" style="text-align:center;margin-top:6px">Тулаанд зөвхөн таны сонгосон 3 баатар оролцоно. Цэргүүд баатруудад нэмэгдэнэ.</div>';
+    h+='<div class="sm" style="text-align:center;margin-top:6px">Тулаанд зөвхөн таны сонгосон 3 баатар оролцоно. Цэрэг, барилгын нэмэгдэл орохгүй, зөвхөн баатрын хүч.</div>';
     return h; }
   window.tarenaHTML=tarenaHTML;
   window.TAX={tInit:tInit,teamPow:teamPow,fighters:fighters,portrait:portrait,hn:hn,rk:rk,dk:dk,NAMES:NAMES};
@@ -20796,7 +20797,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       body=tb==='prize'?prizeView():tb==='top'?topView():fightView(); }
     return '<div id="tascr"><div class="tas">'+head()+tabs()+body+'<div class="t2sp"></div></div></div>'; }
   window.taClose=function(){ try{ closeM(); }catch(e){} };
-  window.taHelp=function(){ try{ dxAsk('<b>Багийн арена</b><br><span class="sm">Өөрийн 3 баатраа сонгоод, хүч нь ойролцоо бусад тоглогчийн багтай тулна. Сул багийг ялбал +10, адил +20, хүчтэй +32 оноо. Ялагдвал −20 / −12 / −5. Сар бүрийн Топ 3 шагнал авна. Өдөрт 5 үнэгүй тулаан, дараа нь тулаан бүр 100 Алт.</span>','Ойлголоо',()=>{}); }catch(e){ say('Сул ялбал +10, адил +20, хүчтэй +32'); } };
+  window.taHelp=function(){ try{ dxAsk('<b>Багийн арена</b><br><span class="sm">Өөрийн 3 баатраа сонгоод, хүч нь ойролцоо бусад тоглогчийн багтай тулна. Зөвхөн баатрын түвшин, довтолгоо, амь тооцогдоно: цэрэг, барилгын нэмэгдэл орохгүй. Сул багийг ялбал +10, адил +20, хүчтэй +32 оноо. Ялагдвал −20 / −12 / −5. Сар бүрийн Топ 3 шагнал авна. Өдөрт 5 үнэгүй тулаан, дараа нь тулаан бүр 100 Алт.</span>','Ойлголоо',()=>{}); }catch(e){ say('Сул ялбал +10, адил +20, хүчтэй +32'); } };
   window.taPlus=function(){ say('Өдөрт 5 үнэгүй тулаан. Дараа нь тулаан бүр '+CFG.cost+' Алт'); };
   window.taTab=function(k){ if(k==='league'){ say('Лиг удахгүй'); return; } TS.tab=k; if(k==='top') loadLb(); else rr(); };
   window.taSel=function(i){ TS.sel=i; rr(); };
@@ -20840,7 +20841,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
-    const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
+    const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={pc:{cav:0,archer:0,foot:0},n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
     { const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
       E.fr=1; E.eh=L.map(h=>({id:h.id,p:Math.max(1,(h.p||1)*k)})); }
     const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
@@ -20901,6 +20902,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
           if(el){ el.dataset.ar='1'; try{ const bu=document.getElementById('bu'), bi=bu&&bu.querySelector('.bu-in'); if(bi) bu.style.setProperty('--ox',((bu.offsetWidth-bi.offsetWidth)/2).toFixed(1)+'px'); }catch(e){} }
           if(el){ if(el.dataset.tar&&innerWidth>innerHeight){ UNROT(el); try{ btResize(); }catch(e){} } else if(!el.dataset.tar&&innerHeight>innerWidth){ ROT(el); try{ btResize(); }catch(e){} } }
           if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
+          try{ const ln=document.getElementById('bu-ln'); if(ln&&ln.textContent!=='Манай баг') ln.textContent='Манай баг'; }catch(e){}
           if(BT.tmax!==90) BT.tmax=90;   /* арена: 90 секунд, дуусахад үлдсэн HP-ийн хувиар шийднэ */
           /* Арена: хуучин «Баатраа сонго» самбар байхгүй. Шинэ дэлгэцээс «Эхлэх» дарсан тул шууд 3-2-1 → тулаан */
           if(BT.wait&&!BT.vs&&!E._ag&&!E.prep){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } }

@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b4c794e1f4';
+var UPDB='e3210d33b1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21607,6 +21607,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   '#wmbar::before{content:"";position:absolute;left:-2.7%;width:105.4%;top:-57%;height:164%;background:'+U('wm_hdr')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}'+
   /* цэрэг, баатрын самбар */
   '#wmheroes{isolation:isolate;background:none!important;border:0!important;box-shadow:none!important;top:80px!important;padding:12px 8px 14px!important;overflow:visible!important;transform:scale(.78);transform-origin:0 0}'+
+  '#wmap #wmheroes{right:auto!important;width:max-content!important;max-width:min(470px,calc(100% - 206px))!important}'+
   '#wmheroes::before{content:"";position:absolute;left:-4.3%;width:108.6%;top:-5.4%;height:119%;background:'+U('wm_pan')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   const flg=()=>{ try{ const b=document.getElementById('wmcl'); if(!b||typeof flgSrc!=='function'||typeof wmClanId!=='function') return; const k=wmClanId(); if(k>=0){ b.style.setProperty('background-image','url('+flgSrc(flgOf(k))+')','important'); } else b.style.removeProperty('background-image'); }catch(e){} };
@@ -22447,6 +22448,9 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
 #alv .cm-nt{font-size:12px;color:#a89570;text-align:center;padding:4px 8px 8px;line-height:1.35}
 #alv .ali-inf{padding:8px 4px 6px!important}#alv .ali-nm{margin-bottom:4px}
 `; document.head.appendChild(sty);
+  /* компьютер (өргөн дэлгэц): кланы цонхнууд утасны өргөнтэй, төвд харагдана */
+  const wd=document.createElement('style'); wd.textContent='@media (min-width:760px) and (min-height:500px){#alv{left:50%!important;right:auto!important;width:min(100vw,520px)!important;transform:translateX(-50%);box-shadow:0 0 0 2000px #000b,0 0 30px #000}#wmap #cwp{left:50%!important;right:auto!important;width:min(100% - 16px,500px);transform:translateX(-50%)}}';
+  document.head.appendChild(wd);
 })();
 
 

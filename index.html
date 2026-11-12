@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f7f64938e2';
+var UPDB='7cc9b6ae04';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21567,6 +21567,64 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   const flg=()=>{ try{ const b=document.getElementById('wmcl'); if(!b||typeof flgSrc!=='function'||typeof wmClanId!=='function') return; const k=wmClanId(); if(k>=0){ b.style.setProperty('background-image','url('+flgSrc(flgOf(k))+')','important'); } else b.style.removeProperty('background-image'); }catch(e){} };
   const tag=()=>{ flg(); try{ document.querySelectorAll('#wmap .wmz').forEach(b=>{ const t=b.textContent.trim(); const k=t==='+'?'k-pl':t==='−'?'k-mn':(t==='Бүх'||/^Бүх/.test(t))?'k-bl':''; if(k&&!b.classList.contains(k)) b.classList.add(k); }); }catch(e){} };
   if(typeof wmOpen==='function'){ const _o=wmOpen; wmOpen=function(){ const r=_o.apply(this,arguments); tag(); setTimeout(tag,300); setTimeout(tag,1500); setTimeout(tag,4000); return r; }; }
+})();
+
+
+/* p32/mspeed.js — Газрын зураг: явж байгаа цувааг Алтаар хурдан очуулах (1 минут = 10 Алт). Зөвхөн очих үе (буцах үед биш). */
+(function(){
+  const PER=10;
+  const css='#wmmr{position:absolute;left:68px;width:184px;z-index:6;display:flex;flex-direction:column;gap:4px;pointer-events:none}'+
+  '#wmmr .mrw{pointer-events:auto;display:flex;align-items:center;gap:6px;background:rgba(48,31,15,.93);border:1.5px solid #c9972b;border-radius:8px;padding:3px 4px 3px 7px;color:#ffd9a0;font-size:11px;line-height:1.2}'+
+  '#wmmr .mrn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+  '#wmmr .mrt{font-weight:bold;color:#ffe9b0;white-space:nowrap}'+
+  '#wmmr .mrb{flex:none;border:1px solid #7a5410;border-radius:6px;background:linear-gradient(#ffd770,#d9a024);color:#3b2410;font-weight:bold;font-size:10.5px;padding:3px 6px;white-space:nowrap}'+
+  '#wmmr .mrb:active{filter:brightness(.9)}';
+  const st0=document.createElement('style'); st0.textContent=css; document.head.appendChild(st0);
+
+  const remOf=(m,now)=>{ const el=(now-m.t0)/1000; return m.ty==='gather'?2*m.d+20-el:m.d-el; };
+  const outRem=(m,now)=>m.d-(now-m.t0)/1000;                 /* очих хугацаа */
+  const canSpd=(m,now)=>m.ty!=='camp'&&outRem(m,now)>2;
+  const cost=r=>Math.max(1,Math.ceil(r/60))*PER;
+  const nm=m=>{ const e=wmEnt(m.tid)||m.tg; return e?(e.n||(WM_RT[e.rt]&&WM_RT[e.rt].n)||'Бааз'):''; };
+
+  window.wmMSpeed=function(id){
+    try{
+      const s=wmSt(), m=s.m.find(x=>x.id===id); if(!m) return;
+      const now=Date.now(); if(!canSpd(m,now)){ say('Энэ цуваа очиж дууссан'); return; }
+      const r=outRem(m,now), c=cost(r);
+      dxAsk('Очихоос '+wmFmt(r)+' үлдсэн. '+c+' Алтаар одоо очуулах уу?','Хурдасгах (' +c+' Алт)',()=>{
+        const m2=wmSt().m.find(x=>x.id===id); if(!m2||!canSpd(m2,Date.now())){ say('Цуваа очиж дууссан'); return; }
+        if((S.res.alt||0)<c){ say('Алт хүрэлцэхгүй ('+c+' Алт хэрэгтэй)'); try{ sfx('err'); }catch(e){} return; }
+        S.res.alt-=c; m2.t0=Date.now()-m2.d*1000-1000;
+        try{ save(); }catch(e){} try{ refresh(); }catch(e){}
+        say('Цуваа хурдан очлоо: -'+c+' Алт'); try{ sfx('ok'); }catch(e){}
+        setTimeout(()=>{ try{ wmProcess(); }catch(e){} try{ wmRefreshBar(); }catch(e){} },150);
+      });
+    }catch(e){}
+  };
+
+  const _r=wmRefreshBar;
+  wmRefreshBar=function(){
+    const b=document.getElementById('wmbar'); if(!b) return _r.apply(this,arguments);
+    const s=wmSt(), now=Date.now();
+    const hd='🚩 Цуваа '+s.m.length+'/'+wmMax();
+    if(b.dataset.h!==hd){ b.dataset.h=hd; b.innerHTML=hd; }
+    let box=document.getElementById('wmmr');
+    if(!box||box.parentNode!==b.parentNode){ if(box) box.remove(); box=document.createElement('div'); box.id='wmmr'; b.parentNode.appendChild(box); box.dataset.k='#'; }
+    const hp=document.getElementById('wmheroes');
+    if(hp) box.style.top=(hp.offsetTop+hp.offsetHeight+26)+'px'; else box.style.top=(b.offsetTop+b.offsetHeight+10)+'px';
+    const key=s.m.map(m=>m.id+(canSpd(m,now)?'1':'0')).join('|');
+    if(box.dataset.k!==key){
+      box.dataset.k=key;
+      box.innerHTML=s.m.map(m=>'<div class="mrw" data-i="'+m.id+'"><span class="mrn"></span><span class="mrt"></span>'+(canSpd(m,now)?'<button class="mrb" onclick="wmMSpeed(\''+m.id+'\')"></button>':'')+'</div>').join('');
+    }
+    [...box.children].forEach((row,i)=>{ const m=s.m[i]; if(!m) return;
+      const n=row.querySelector('.mrn'), t=row.querySelector('.mrt'), bt=row.querySelector('.mrb');
+      const a=nm(m); if(n.textContent!==a) n.textContent=a;
+      const x=wmFmt(remOf(m,now)); if(t.textContent!==x) t.textContent=x;
+      if(bt){ const lb='Хурдас '+cost(outRem(m,now))+' Алт'; if(bt.textContent!==lb) bt.textContent=lb; }
+    });
+  };
 })();
 
 

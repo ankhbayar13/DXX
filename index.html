@@ -9401,8 +9401,8 @@ function mhImg(id){
 (function(){
   const _t=wmTrip, K=0.8;
   wmTrip=function(e){
-    let r=_t(e);
-    if(e&&(e.t==='kingdom'||e.t==='clan')){
+    let r=(e&&e.hq)?_t(Object.assign({},e,{t:'kingdom'})):_t(e);
+    if(e&&(e.t==='kingdom'||e.t==='clan'||e.hq)){
       try{ const dd=wmDist(e); if(dd>2300){ const yf=wmYamF(e); r=(600+Math.min(1,Math.pow((dd-2300)/9300,0.9))*1275)*yf; } }catch(x){}
       return typeof r==='number'?Math.max(1,r*K):r;
     }
@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='62c54b0483';
+var UPDB='d9325d03c3';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -19741,8 +19741,9 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     if(typeof CL==='undefined'||!CL.ok||!CL.uid||!FBM){ TOP.st='off'; return; }
     const {F,db}=FBM;
     if((CG().ow||0)>0) rankPush();
+    try{ const c=window.DLB&&DLB.get('ct'); if(c){ TOP.rows=c; TOP.st='ok'; return; } }catch(e){}
     F.getDocs(F.query(F.collection(db,'duel'),F.orderBy('kw','desc'),F.limit(10))).then(sn=>{
-      TOP.rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='k'&&x.kw>0); TOP.st='ok'; if(V==='top') render();
+      TOP.rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='k'&&x.kw>0); TOP.st='ok'; try{ window.DLB&&DLB.set('ct',TOP.rows); }catch(e){} if(V==='top') render();
     }).catch(()=>{ TOP.st='err'; if(V==='top') render(); });
   }
   function topView(){
@@ -19752,7 +19753,7 @@ img.flg{width:auto;vertical-align:middle;filter:drop-shadow(0 2px 2px #0008);poi
     else if(TOP.st==='err') body='<div class="cgbox">Жагсаалтыг ачаалж чадсангүй. Дараа дахин оролдоно уу.</div>';
     else if(!TOP.rows.length) body='<div class="cgbox" style="text-align:center">Одоогоор жагсаалт хоосон. Онлайн тулаанд хожиж эхний болоорой.</div>';
     else body=TOP.rows.map((x,i)=>'<div class="cgbox" style="display:flex;align-items:center;justify-content:space-between;gap:8px'+(CL&&x.u===CL.uid?';border-color:#ffd770':'')+'"><span><b style="color:#ffd770">'+(i+1)+'.</b> '+esc(String(x.kn||'Тоглогч').slice(0,16))+'</span><b>'+x.kw+'</b></div>').join('');
-    return '<div class="cgw"><div class="cgh"><h1>Топ 10</h1><span class="cgchip">Онлайн ялалт</span></div>'+body
+    return '<div class="cgw"><div class="cgh"><h1>Топ 10</h1><span class="cgchip">Онлайн ялалт</span></div>'+(window.DLB?DLB.note():'')+body
       +'<div class="cgbox" style="text-align:center">Таны онлайн ялалт: <b>'+(g.ow||0)+'</b><br><span style="color:#bfae8a">Зөвхөн жинхэнэ тоглогчтой хожсон тулаан тоологдоно.</span></div>'
       +'<button class="cgbtn go" data-a="menu">Буцах</button></div>';
   }
@@ -20789,8 +20790,11 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
 
   /* ---------- Сарын Топ 10 + шагнал ---------- */
   async function fetchMonth(m){ const {F,db}=FBM;
+    try{ const c=window.DLB&&DLB.get('am'+m); if(c) return c; }catch(e){}
     const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('sc','>=',m*MB),F.orderBy('sc','desc'),F.limit(40)));
-    return sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='t'&&x.sc<(m+1)*MB&&x.mp>0); }
+    const rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='t'&&x.sc<(m+1)*MB&&x.mp>0);
+    try{ window.DLB&&DLB.set('am'+m,rows); }catch(e){}
+    return rows; }
   async function loadLb(){ TS.lbSt='load'; TS.lb=null; rr(); if(!on()){ TS.lbSt='off'; rr(); return; }
     try{ await pushMe(); TS.lb=await fetchMonth(mi()); TS.lbSt='ok'; }catch(e){ TS.lbSt='err'; DG.r='АЛДАА: '+ec(e); } rr(); }
   async function checkPrev(){ X.tInit(); const A=S.ta; if(!on()||A.pz===mi()-1||TS.prevBusy) return; TS.prevBusy=true;
@@ -20853,7 +20857,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     if(TS.lbSt==='load') b='<div class="t2em">Ачаалж байна…</div>'; else if(TS.lbSt==='off') b='<div class="t2em">Интернет холбогдоогүй байна.</div>'; else if(TS.lbSt==='err') b='<div class="t2em">Жагсаалтыг ачаалж чадсангүй.</div>';
     else if(!rows.length) b='<div class="t2em">Энэ сар жагсаалт хоосон байна. Тулаанд орж оноо цуглуул.</div>';
     else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2lr'+(x.u===(CL&&CL.uid)?' me':'')+'"><div class="t2lk">'+(i<3?'<i class="t2md" style="background-image:'+SL('tas_md'+(i+1))+'"></i>':'<i class="t2rk" style="background-image:'+SL('tas_rk')+'"><u>'+(i+1)+'</u></i>')+'</div><b class="t2ln">'+esc(x.n)+'</b><span class="t2lp"><em>'+x.mp+' оноо</em>'+(pz?'<small>'+pz.alt+' Алт</small>':'')+'</span></div>'; }).join('');
-    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+b+'<div class="t2dg">Таны сарын оноо: <b>'+M().p+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
+    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+(window.DLB?DLB.note():'')+b+'<div class="t2dg">Таны сарын оноо: <b>'+M().p+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
   function arenaHTML(){
     X.tInit(); const F=X.fighters(); const tb=TS.tab||'fight'; let body;
     if(F.length<3) body='<div class="t2pn"><div class="t2em">3 баатартай болбол 3 vs 3 тулаанд орно. Одоо '+F.length+' баатар байна.</div></div>';
@@ -21652,10 +21656,11 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
 
   const _r=wmRefreshBar;
   wmRefreshBar=function(){
-    const b=document.getElementById('wmbar'); if(!b) return _r.apply(this,arguments);
+    const r0=_r.apply(this,arguments);   /* баатрын самбар, Клан тэмдэг зэргийг хуучин функц зурна */
+    const b=document.getElementById('wmbar'); if(!b) return r0;
     const s=wmSt(), now=Date.now();
     const hd='🚩 Цуваа '+s.m.length+'/'+wmMax();
-    if(b.dataset.h!==hd){ b.dataset.h=hd; b.innerHTML=hd; }
+    b.dataset.h=hd; b.innerHTML=hd;
     let box=document.getElementById('wmmr');
     if(!box||box.parentNode!==b.parentNode){ if(box) box.remove(); box=document.createElement('div'); box.id='wmmr'; b.parentNode.appendChild(box); box.dataset.k='#'; }
     const hp=document.getElementById('wmheroes');
@@ -21687,14 +21692,17 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   const W=()=>{ const s=wmSt(); if(!s.rt) s.rt=[]; if(!s.sct) s.sct=[]; if(!s.scp) s.scp={}; return s; };
 
   /* ---------- улсын хүчний хувьсал ---------- */
+  const REC=3*3600e3;
   function dynState(e){
     if(!e||e.t!=='kingdom') return {m:1,k:'home'};
+    try{ const df=(S.wm&&S.wm.def&&S.wm.def[e.id])||0; if(df){ const fr=(Date.now()-df)/REC; if(fr<1) return {m:0.4+0.6*fr,k:'rec',left:REC-(Date.now()-df)}; } }catch(x){}
     const key=e.id+':'+Math.floor(Date.now()/BLK), r1=(hs(key)%1000)/1000, r2=(hs(key+'x')%1000)/1000;
     if(r1<0.35) return {m:0.4+0.3*r2,k:'away'};
     if(r1>0.88) return {m:1.1+0.1*r2,k:'mob'};
     return {m:1,k:'home'};
   }
-  const stTxt=d=>{ const p=Math.round(d.m*100); return d.k==='away'?'Цэргээ дайнд гаргасан · хүч '+p+'%':d.k==='mob'?'Бүх цэргээ цуглуулсан · хүч '+p+'%':'Цэрэг гэртээ · хүч '+p+'%'; };
+  const lt=ms=>{ const m=Math.max(1,Math.round(ms/60000)); return m>=60?Math.floor(m/60)+' цаг '+(m%60?m%60+' мин':''):m+' мин'; };
+  const stTxt=d=>{ const p=Math.round(d.m*100); return d.k==='rec'?'Ялагдсаны дараа сэргэж байна · хүч '+p+'% · '+lt(d.left)+'-ийн дараа 100%':d.k==='away'?'Цэргээ дайнд гаргасан · хүч '+p+'%':d.k==='mob'?'Бүх цэргээ цуглуулсан · хүч '+p+'%':'Цэрэг гэртээ · хүч '+p+'%'; };
   let VIEW=0, HIDE=0;
   const snapOf=e=>{ try{ if(!e||!wmScouted(e)) return null; return (S.wm.scp&&S.wm.scp[e.id])||null; }catch(x){ return null; } };
   const _pw=wmPw;
@@ -21753,10 +21761,16 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   },1000);
 
   /* ---------- шагналыг суурь хүчээр тооцох (улс сул/хүчтэй үед) ---------- */
-  let DYN=1;
+  let DYN=1, CUR=null;
   const wb2=wmBattle;
-  wmBattle=function(e,tc,mm){ DYN=(e&&e.t==='kingdom')?dynState(e).m:1; return wb2.apply(this,arguments); };
-  function fixE(E){ try{ if(E&&E.back==='wmap'&&E.kt==='kingdom'&&DYN&&DYN!==1){ E.g=Math.round((E.g|0)/DYN); E.m=Math.round((E.m|0)/DYN); } DYN=1; }catch(x){} }
+  wmBattle=function(e,tc,mm){ if(e&&e.t==='kingdom'){ const ds=dynState(e); DYN=ds.k==='rec'?1:ds.m; CUR=e.id; } else { DYN=1; CUR=null; } return wb2.apply(this,arguments); };
+  function fixE(E){ try{
+    if(E&&E.back==='wmap'&&E.kt==='kingdom'){
+      if(DYN&&DYN!==1){ E.g=Math.round((E.g|0)/DYN); E.m=Math.round((E.m|0)/DYN); }
+      const id=CUR, cb=E.cb;
+      if(id) E.cb=function(){ const r=cb&&cb.apply(this,arguments); try{ S.wm.def=S.wm.def||{}; S.wm.def[id]=Date.now(); window.wmOnKingWin&&window.wmOnKingWin(id); say('Улс ялагдлаа. 3 цагийн дотор аажмаар сэргэнэ.'); }catch(x){} return r; };
+    }
+    DYN=1; CUR=null; }catch(x){} }
   const sb=startBattle; startBattle=function(i,E){ fixE(E); return sb.apply(this,arguments); };
   if(typeof rtsStart==='function'){ const rs=rtsStart; rtsStart=function(i,E){ fixE(E); return rs.apply(this,arguments); }; }
 
@@ -21805,6 +21819,210 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   wrap('wmTacSheet',id=>wmEnt(id));
   wrap('wmSheet',()=>(typeof WMS!=='undefined'&&WMS&&WMS!=='city')?wmEnt(WMS):null);
   const _pl=wmPowLine; wmPowLine=function(e){ const w=VIEW; VIEW=1; try{ return _pl.apply(this,arguments); } finally{ VIEW=w; } };
+})();
+
+
+/* p32/dailylb.js — Бүх Топ 10 жагсаалт өдөрт нэг л удаа (Улаанбаатарын цагаар 00:00 шинэчлэгдэнэ) Firebase-ээс уншина. */
+(function(){
+  const dk=()=>new Date(Date.now()+8*36e5).toISOString().slice(0,10);
+  window.DLB={
+    day:dk,
+    get:function(k){ try{ const o=JSON.parse(localStorage.getItem('dxxlb_'+k)||'null'); return o&&o.d===dk()?o.v:null; }catch(e){ return null; } },
+    set:function(k,v){ try{ localStorage.setItem('dxxlb_'+k,JSON.stringify({d:dk(),v:v})); }catch(e){} },
+    note:function(){ return '<div class="sm dlbn" style="margin:6px 0;text-align:center;color:#d9c38e;font-size:11px">Жагсаалт өдөр бүр Улаанбаатарын цагаар 00:00 цагт шинэчлэгдэнэ.<br>Сүүлд шинэчлэгдсэн: '+dk()+' 00:00</div>'; }
+  };
+  /* Нийгмийн «Топ» (хүчээр) */
+  const _lb=clLB;
+  clLB=async function(){
+    try{
+      const adm=(typeof isAdm==='function')&&isAdm();
+      if(!adm&&CL.ok){ const c=DLB.get('lb'); if(c&&c.lbAll){ CL.lbAll=c.lbAll; CL.lb=c.lb; try{ fillM(); }catch(e){} return; } }
+      const r=await _lb.apply(this,arguments);
+      if(!adm&&CL.lbAll&&CL.lb) DLB.set('lb',{lbAll:CL.lbAll,lb:CL.lb});
+      return r;
+    }catch(e){ return _lb.apply(this,arguments); }
+  };
+  const _sh=socHTML;
+  socHTML=function(){
+    let h=_sh.apply(this,arguments);
+    try{ if(typeof h==='string'&&h.indexOf('onclick="clLB()">🔄 Шинэчлэх</button>')>=0) h=h.replace('<button class="btn" onclick="clLB()">🔄 Шинэчлэх</button>',DLB.note()); }catch(e){}
+    return h;
+  };
+})();
+
+
+/* p32/wmquest.js — Газрын зураг: Түүхэн даалгавар (Мэргидийн түүх) + нуугдсан баазууд. Даалгаврыг доорх MQ жагсаалтаас нэмнэ/засна. */
+(function(){
+  const g=n=>{ try{ return _g().ks.find(k=>k.n===n); }catch(e){ return null; } };
+  /* ---- Даалгаврын жагсаалт ---- */
+  const MQ=[
+    { id:'bort', t:'Бөртийн өшөө',
+      d:'1180-аад онд Мэргидүүд Тэмүжиний эхнэр Бөртийг булаан авсан. Тэмүжин Хэрэйдийн Тоорил хан, Жамухатай хамт довтолж Бөртийг эргүүлэн авчээ.',
+      steps:[{k:'win',n:'Мэргид',txt:'Мэргид улсыг ял'}], rw:{alt:25} },
+    { id:'naiman', t:'Найманд дагасан Мэргид',
+      d:'Мэргидийн удирдагч Тоохто бэхи Найман ханд хоргодож, Чингисийн эсрэг байсаар байв. Эхлээд Найманыг дар, дараа нь тэнд нуугдсан үлдэгдлийг ал.',
+      steps:[{k:'win',n:'Найман',txt:'Найман улсыг ял'},{k:'camp',n:'Мэргидийн үлдэгдэл',near:'Найман',dx:150,dy:110,lv:4,p:1400,txt:'Найманы нутагт нуугдсан Мэргидийн үлдэгдлийг устга'}],
+      rw:{alt:40,relic:1} },
+    { id:'khoo', t:'Тоохто бэхийн хөвгүүд',
+      d:'1208 онд Тоохто бэхи алагдсаны дараа хөвгүүд нь Кыпчак нутаг руу дүрвэжээ. Жочи, Сүбээдэй нар мөшгөж, 1216 онд сүүлчийн үлдэгдлийг дарсан гэдэг.',
+      steps:[{k:'win',n:'Дорнод Кыпчак',txt:'Дорнод Кыпчак улсыг ял'},{k:'camp',n:'Мэргидийн сүүлчийн бааз',near:'Дорнод Кыпчак',dx:-160,dy:120,lv:5,p:2600,txt:'Кыпчакт нуугдсан Мэргидийн сүүлчийн баазыг устга'}],
+      rw:{alt:60,relic:1} }
+  ];
+  const Q=()=>{ const s=wmSt(); if(!s.q) s.q={}; return s.q; };
+  const wins=n=>{ const k=g(n); return k?((wmSt().st['w'+k.id])||0):0; };
+  const stepDone=(m,i)=>{ const st=m.steps[i]; if(st.k==='win') return wins(st.n)>=1; return !!(Q()[m.id]&&Q()[m.id].done); };
+  const unlocked=m=>!(m.steps.length>1)||stepDone(m,0);
+  const isDone=m=>!!(Q()[m.id]&&Q()[m.id].done);
+  const campOf=m=>m.steps.find(s=>s.k==='camp');
+
+  /* ---- нуугдсан баазыг газрын зурагт оруулах ---- */
+  const _g=wmGen;
+  wmGen=function(){
+    const D=_g.apply(this,arguments);
+    try{
+      MQ.forEach(m=>{ const c=campOf(m); if(!c) return; const id='q_'+m.id, i=D.camps.findIndex(x=>x.id===id), show=unlocked(m)&&!isDone(m);
+        if(show&&i<0){ const k=D.ks.find(q=>q.n===c.near); if(!k) return; D.camps.push({id:id,t:'camp',x:Math.max(150,Math.min(WM_W-150,k.x+c.dx)),y:Math.max(250,Math.min(WM_H-250,k.y+c.dy)),lv:c.lv,p:c.p,hq:m.id,n:c.n,ty:['heavy','cav','archer'][m.id.length%3]}); }
+        else if(!show&&i>=0) D.camps.splice(i,1); });
+    }catch(e){}
+    return D;
+  };
+  const _lbl=wmLabel;
+  wmLabel=function(c,t,x,y,col,sz){
+    try{ if(typeof t==='string'&&/^Бандит Lv\d/.test(t)){ const q=wmGen().camps.find(k=>k.hq&&Math.abs(k.x-x)<1); if(q) return _lbl.call(this,c,q.n,x,y,'#ffd770',sz); } }catch(e){}
+    return _lbl.apply(this,arguments);
+  };
+
+  /* ---- шагнал ---- */
+  function reward(m){
+    const r=m.rw; let tx='+'+r.alt+' Алт'; S.res.alt=(S.res.alt||0)+r.alt;
+    if(r.relic){ try{ tx+=' + '+wmRelicGrant(); }catch(e){} }
+    try{ save(); refresh(); }catch(e){}
+    return tx;
+  }
+  function done(m){ const q=Q(); if(q[m.id]&&q[m.id].done) return; q[m.id]={done:Date.now()}; const tx=reward(m); try{ sfx('win'); }catch(e){} say('Түүхэн даалгавар биелэв: '+m.t+' · '+tx); try{ WMD&&wmGen(); }catch(e){} }
+  /* Улс ялсан үед (wmlogi.js дуудна) */
+  const _kw=window.wmOnKingWin;
+  window.wmOnKingWin=function(id){
+    try{ if(_kw) _kw(id); }catch(e){}
+    try{ const k=wmEnt(id); MQ.forEach(m=>{ if(isDone(m)) return; const s=m.steps; if(s.length===1&&s[0].k==='win'&&k&&k.n===s[0].n) done(m);
+      else if(s.length>1&&k&&k.n===s[0].n&&!(Q()[m.id]&&Q()[m.id].un)){ Q()[m.id]=Object.assign(Q()[m.id]||{},{un:1}); const c=campOf(m); wmGen(); say('Түүхэн даалгавар: «'+c.n+'» газрын зураг дээр гарч ирлээ'); } }); }catch(e){}
+  };
+  /* Нуугдсан баазыг устгасан үед */
+  let CUR=null;
+  const wb=wmBattle;
+  wmBattle=function(e,tc,mm){ CUR=(e&&e.hq)?e:null; return wb.apply(this,arguments); };
+  function apply(E){ try{ const e=CUR; if(!e||!E||E.back!=='wmap') return; CUR=null; const cb=E.cb; E.cb=function(){ const r=cb&&cb.apply(this,arguments); try{ const m=MQ.find(x=>x.id===e.hq); if(m) done(m); }catch(x){} return r; }; }catch(e){} }
+  const sb=startBattle; startBattle=function(i,E){ apply(E); return sb.apply(this,arguments); };
+  if(typeof rtsStart==='function'){ const rs=rtsStart; rtsStart=function(i,E){ apply(E); return rs.apply(this,arguments); }; }
+
+  /* нуугдсан баазын самбарын гарчиг */
+  const _sh=wmSheet;
+  wmSheet=function(){ const r=_sh.apply(this,arguments); try{ const e=(typeof WMS!=='undefined'&&WMS&&WMS!=='city')?wmEnt(WMS):null, sh=document.getElementById('wmsheet'); if(e&&e.hq&&sh){ sh.innerHTML=sh.innerHTML.replace(/Бандитын бааз/,e.n); } }catch(x){} return r; };
+  /* ---- самбар (бусад модуль ашиглана) ---- */
+  const css='#wmpn{position:fixed;inset:0;z-index:460;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}'+
+  '#wmpn .pb{width:min(92vw,360px);max-height:80vh;overflow:auto;background:#2a1a0c;border:2px solid #c9972b;border-radius:14px;padding:12px;color:#f3e4bd;box-sizing:border-box}'+
+  '#wmpn h3{margin:0 0 6px;color:#ffd770;text-align:center}'+
+  '#wmpn .qc{background:#3b2815;border:1px solid #7a5a22;border-radius:10px;padding:8px;margin:8px 0}'+
+  '#wmpn .qc.dn{border-color:#5f8f4a;opacity:.85}'+
+  '#wmpn .qt{font-weight:bold;color:#ffe9b0}'+
+  '#wmpn .qs{font-size:12px;margin:2px 0}'+
+  '#wmpn .qd{font-size:12px;color:#d8c8a0;margin:4px 0}'+
+  '#wmpn .qb{margin-top:6px;padding:4px 10px;border-radius:8px;border:1px solid #7a5410;background:linear-gradient(#ffd770,#d9a024);color:#3b2410;font-weight:bold;font-size:12px}'+
+  '#wmpn .row{display:flex;align-items:center;gap:6px;padding:3px 2px;font-size:13px}'+
+  '#wmpn .row.me{color:#9fe08a;font-weight:bold}'+
+  '.wmq{position:absolute;left:8px;width:48px;height:52px;border:0;background:url(hf/sq/wm_bl.webp?v=1) center/contain no-repeat;color:#ffe9a8;font-size:11px;font-weight:bold;text-shadow:0 1px 2px #000,0 0 3px #000;padding:0;z-index:5}';
+  const st0=document.createElement('style'); st0.textContent=css; document.head.appendChild(st0);
+  window.wmPanel=function(html){ let o=document.getElementById('wmpn'); if(!o){ o=document.createElement('div'); o.id='wmpn'; o.onclick=e=>{ if(e.target===o) wmPanelX(); }; document.body.appendChild(o); } o.innerHTML='<div class="pb">'+html+'<div style="text-align:center;margin-top:8px"><button class="btn" onclick="wmPanelX()">Хаах</button></div></div>'; };
+  window.wmPanelX=function(){ const o=document.getElementById('wmpn'); if(o) o.remove(); };
+  window.wmFocus=function(x,y,id){ try{ const c=document.getElementById('wmc'); WMV.z=0.55; WMV.x=x-c.clientWidth/WMV.z/2; WMV.y=y-c.clientHeight/WMV.z/2; wmClamp(); if(id){ WMS=id; wmSheet(); } wmPanelX(); }catch(e){} };
+
+  window.wmQuestOpen=function(){
+    let h='<h3>Түүхэн даалгавар</h3><div class="qd" style="text-align:center">Түүхийн дагуу улс, нуугдсан баазыг ял.</div>';
+    MQ.forEach(m=>{ const dn=isDone(m), c=campOf(m);
+      h+='<div class="qc'+(dn?' dn':'')+'"><div class="qt">'+m.t+(dn?' · ✓ Биелсэн':'')+'</div><div class="qd">'+m.d+'</div>';
+      m.steps.forEach((s,i)=>{ const ok=stepDone(m,i); h+='<div class="qs" style="color:'+(ok?'#9fe08a':'#f3e4bd')+'">'+(ok?'✓ ':(i+1)+'. ')+s.txt+'</div>'; });
+      h+='<div class="qs" style="color:#e0b070">Шагнал: '+m.rw.alt+' Алт'+(m.rw.relic?' + дурсгал':'')+'</div>';
+      if(!dn){ let tg=null; if(m.steps.length>1&&unlocked(m)){ const D=wmGen(); tg=D.camps.find(x=>x.id==='q_'+m.id); } else { const st=m.steps[0]; tg=g(st.n); }
+        if(tg) h+='<button class="qb" onclick="wmFocus('+Math.round(tg.x)+','+Math.round(tg.y)+',\''+tg.id+'\')">Байршил харах</button>'; }
+      h+='</div>'; });
+    wmPanel(h);
+  };
+
+  /* ---- товчнууд ---- */
+  const _o=wmOpen;
+  wmOpen=function(){
+    const r=_o.apply(this,arguments);
+    try{ const w=document.getElementById('wmap'); if(w&&!document.getElementById('wmqb1')){
+      const mk=(id,top,tx,fn)=>{ const b=document.createElement('button'); b.id=id; b.className='wmq'; b.style.top=top+'px'; b.textContent=tx; b.onclick=fn; w.appendChild(b); };
+      mk('wmqb1',188,'Түүх',()=>wmQuestOpen()); mk('wmqb2',244,'Топ',()=>{ if(typeof wmTopOpen==='function') wmTopOpen(); });
+    } }catch(e){}
+    return r;
+  };
+})();
+
+
+/* p32/wmtop.js — Газрын зураг: Сарын Топ 10 (тухайн сард ялсан улсын тоо). Жагсаалт өдөрт нэг л удаа шинэчлэгдэнэ. */
+(function(){
+  const MB=1e6, PRIZE=[300,200,150,50,50,50,50,50,50,50];
+  const nowL=()=>new Date(Date.now()+8*36e5);
+  const mi=()=>{ const d=nowL(); return d.getUTCFullYear()*12+d.getUTCMonth(); };
+  const mname=m=>{ const y=Math.floor(m/12), mm=m%12+1; return y+'-'+(mm<10?'0':'')+mm; };
+  const myName=()=>String((S.prof&&S.prof.name)||'Хаан').slice(0,14);
+  const on=()=>{ try{ return typeof CL!=='undefined'&&CL.ok&&CL.uid&&typeof FBM!=='undefined'&&FBM&&FBM.F; }catch(e){ return false; } };
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const MC=()=>{ const s=wmSt(); if(!s.mc||s.mc.mi!==mi()) s.mc={mi:mi(),c:0}; return s.mc; };
+  let pq=Promise.resolve(), ST={st:'',rows:[],prev:null};
+
+  function push(){
+    if(!on()) return Promise.resolve();
+    const m=MC(); if(m.c<=0) return Promise.resolve();
+    const {F,db}=FBM, uid=CL.uid, rec={a:uid,g:'w',u:uid,n:myName(),mi:m.mi,cn:m.c,wsc:m.mi*MB+m.c,t:Date.now(),r:Math.random()};
+    pq=pq.then(async()=>{ const ref=F.doc(db,'duel','wc_'+uid); try{ await F.deleteDoc(ref); }catch(e){} await F.setDoc(ref,rec); }).catch(()=>{});
+    return pq;
+  }
+  /* улс ялсан үед */
+  const _kw=window.wmOnKingWin;
+  window.wmOnKingWin=function(id){ try{ if(_kw) _kw(id); }catch(e){} try{ MC().c++; push(); }catch(e){} };
+
+  async function fetchMonth(m){
+    try{ const c=window.DLB&&DLB.get('wt'+m); if(c) return c; }catch(e){}
+    const {F,db}=FBM;
+    const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('wsc','>=',m*MB),F.orderBy('wsc','desc'),F.limit(40)));
+    const rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='w'&&x.wsc<(m+1)*MB&&x.cn>0).slice(0,10).map(x=>({u:x.u,n:x.n,cn:x.cn}));
+    try{ window.DLB&&DLB.set('wt'+m,rows); }catch(e){}
+    return rows;
+  }
+  function html(){
+    const m=MC(), me=(ST.rows||[]).findIndex(x=>CL&&x.u===CL.uid);
+    let b;
+    if(ST.st==='load') b='<div class="qd" style="text-align:center">Ачаалж байна…</div>';
+    else if(ST.st==='off') b='<div class="qd" style="text-align:center">Интернет холбогдоогүй эсвэл нэвтрээгүй байна.</div>';
+    else if(ST.st==='err') b='<div class="qd" style="text-align:center">Жагсаалтыг ачаалж чадсангүй.</div>';
+    else if(!ST.rows.length) b='<div class="qd" style="text-align:center">Энэ сар жагсаалт хоосон байна. Улс ялж эхний болоорой.</div>';
+    else b=ST.rows.map((x,i)=>'<div class="row'+(CL&&x.u===CL.uid?' me':'')+'"><span style="width:24px;color:'+(i<3?'#ffd770':'#c9a46a')+'">'+(i+1)+'.</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.n)+'</span><span>'+x.cn+' улс</span><span style="width:60px;text-align:right;color:#e0b070;font-size:11px">'+PRIZE[i]+' Алт</span></div>').join('');
+    let h='<h3>Сарын Топ 10 · '+mname(mi())+'</h3><div class="qd" style="text-align:center">Энэ сард ялсан улсын тоогоор.</div>'+(window.DLB?DLB.note():'')+b;
+    h+='<div class="qc" style="text-align:center">Таны энэ сард ялсан улс: <b>'+m.c+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'<div class="qd">Таны тоо тоглоом дээр шууд нэмэгдэнэ. Жагсаалтад тусах нь өдөрт нэг шинэчлэгдэнэ.</div></div>';
+    h+='<div class="qd" style="text-align:center">Шагнал сар дуусахад: 1-р 300, 2-р 200, 3-р 150 Алт (+дурсгал), 4-10-р 50 Алт.</div>';
+    if(ST.prev){ h+='<div class="qc" style="text-align:center;border-color:#ffd770"><b>Өнгөрсөн сар '+ST.prev.rank+'-р байр</b><div class="qs">'+PRIZE[ST.prev.rank-1]+' Алт'+(ST.prev.rank<=3?' + дурсгал':'')+'</div><button class="qb" onclick="wmTopClaim()">Шагнал авах</button></div>'; }
+    return h;
+  }
+  window.wmTopClaim=function(){
+    const p=ST.prev, s=wmSt(); if(!p||s.tpz===p.mo) return; s.tpz=p.mo;
+    let tx=PRIZE[p.rank-1]+' Алт'; S.res.alt=(S.res.alt||0)+PRIZE[p.rank-1];
+    if(p.rank<=3){ try{ tx+=' + '+wmRelicGrant(); }catch(e){} }
+    try{ save(); refresh(); sfx('win'); }catch(e){} say('Шагнал: '+tx); ST.prev=null; wmPanel(html());
+  };
+  window.wmTopOpen=async function(){
+    ST.st=on()?'load':'off'; wmPanel(html());
+    if(!on()) return;
+    try{
+      await push();
+      ST.rows=await fetchMonth(mi()); ST.st='ok';
+      const pm=mi()-1, s=wmSt();
+      if(s.tpz!==pm){ const pr=await fetchMonth(pm), i=pr.findIndex(x=>x.u===CL.uid); ST.prev=(i>=0&&i<10)?{rank:i+1,mo:pm}:null; if(i<0||i>=10) s.tpz=pm; }
+    }catch(e){ ST.st='err'; }
+    if(document.getElementById('wmpn')) wmPanel(html());
+  };
 })();
 
 

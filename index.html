@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='043dabd179';
+var UPDB='b4c794e1f4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18752,8 +18752,8 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     {n:'Кланы дайн',d:'Дайсан кланы баазыг нураасан хувь',w:1},
     {n:'Кланы дайн',d:'Дайсан кланы баазыг нураасан хувь',w:1},
     {n:'Кланы дайн',d:'Дайсан кланы баазыг нураасан хувь',w:1}];
-  const PRIZE=[800,500,300,100,80,50,50,50,50,50];   /* клан эрэмбийн шагнал: гишүүн бүрт Алт (дор хаяж 1 довтолгоо хийсэн) */
-  const BOX=[{n:'Хүрэл авдар',pt:300,a:2,g:0.3,r:0},{n:'Мөнгөн авдар',pt:1000,a:5,g:0.6,r:0},{n:'Алтан авдар',pt:2500,a:10,g:1.0,r:0.5}];
+  const PRIZE=[{a:800,c:1000},{a:500,c:800},{a:300,c:500},{a:100,c:300},{a:80,c:150},{a:80,c:150},{a:80,c:150},{a:80,c:150},{a:80,c:150},{a:80,c:150}];   /* клан эрэмбийн шагнал: гишүүн бүрт Алт + кланы зоос (дор хаяж 1 довтолгоо хийсэн) */
+  const BOX=[{n:'Хүрэл авдар',pt:300,a:50,c:100},{n:'Мөнгөн авдар',pt:1000,a:80,c:120},{n:'Алтан авдар',pt:2500,a:100,c:150}];
   const AM=100000;   /* d[өдөр] доторх довтолгооны тооны үржвэр */
   const now=()=>(typeof wmNow==='function'?wmNow():Date.now());
   const cn2=v=>{ try{ return cn(v); }catch(e){ return String(Math.round(v)); } };
@@ -18854,7 +18854,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
   function myAtt(w){ const c=me(); let d=null; if(c.w===w) d=c.d; else if(S.ctp&&S.ctp.w===w) d=S.ctp.d; else { const r=(DT.rows[w]||[]).find(x=>CL&&x.id===w+'_'+CL.uid); d=r&&r.d; }
     let n=0; (d||[]).forEach((v,j)=>{ if(j>=4) n+=wAT(v); }); return n; }
   function myRank(w){ const rs=(DT.rows[w]||[]).find(x=>CL&&x.id===w+'_'+CL.uid), k=rs&&rs.c!=null?rs.c:clanId(); const b=board(w); const x=b.find(y=>y.k===k); return x?x.r:0; }
-  function prizeText(p){ return p+' Алт'; }
+  function prizeText(p){ return p.a+' Алт<br>'+p.c+' кланы зоос'; }
   function claimable(){ const w=prevW(); if(w<0) return null; if((S.ctClaim==null?-1:S.ctClaim)>=w) return null; me(); return (myAtt(w)>0||myWeekPts(w)>0)?w:null; }
   function myWeekPts(w){ const c=me(); if(c.w===w) return c.s; if(S.ctp&&S.ctp.w===w) return S.ctp.s;
     const r=(DT.rows[w]||[]).find(x=>CL&&x.id===w+'_'+CL.uid); return r?r.s||0:0; }
@@ -18862,15 +18862,15 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     const w=claimable(); if(w==null){ say('Шагнал авах зүйл алга'); return; }
     await fetchW(w,true); const k=clanId();
     if(k<0&&!(DT.rows[w]||[]).some(x=>CL&&x.id===w+'_'+CL.uid)){ say('Кланд нэгдээгүй байна'); return; }
-    const P=Math.max(500,totalPower()), att=myAtt(w), s=myWeekPts(w);
-    let a=0,g=0,txt=[],rel='';
+    const att=myAtt(w), s=myWeekPts(w);
+    let a=0,c=0,txt=[];
     const rk=myRank(w), pr=PRIZE[(rk||PRIZE.length+1)-1];
-    const cb=board(w).find(y=>y.r===rk); if(att>=1&&pr&&cb&&cb.s>0){ a+=pr; txt.push(rk+'-р байр'); } else if(att<1) txt.push('дайнд оролцоогүй');
+    const cb=board(w).find(y=>y.r===rk); if(att>=1&&pr&&cb&&cb.s>0){ a+=pr.a; c+=pr.c; txt.push(rk+'-р байр'); } else if(att<1) txt.push('дайнд оролцоогүй');
     let bx=null; BOX.forEach(b=>{ if(s>=b.pt) bx=b; });
-    if(bx){ a+=bx.a; g+=Math.round(P*bx.g); txt.push(bx.n); if(bx.r>0&&Math.random()<bx.r){ try{ rel+=' + '+wmRelicGrant(); }catch(e){} } }
-    S.ctClaim=w; if(a<1&&g<1){ say('Энэ долоо хоногт кланы дайнд оролцоогүй тул шагнал алга'); try{ save(); }catch(e){} return; }
-    S.res.alt+=a; S.res.gold+=g; try{ sfx('coin'); vib([40,30,40]); }catch(e){}
-    say('Тэмцээний шагнал: +'+a+' Алт'+(g?', +'+cn2(g)+' зоос':'')+' ('+txt.join(', ')+')'+rel); try{ refresh(); save(); }catch(e){}
+    if(bx){ a+=bx.a; c+=bx.c; txt.push(bx.n); }
+    S.ctClaim=w; if(a<1&&c<1){ say('Энэ долоо хоногт тэмцээнд оролцоогүй тул шагнал алга'); try{ save(); }catch(e){} return; }
+    S.res.alt+=a; try{ if(c>0) aliCoin(c); }catch(e){} try{ sfx('coin'); vib([40,30,40]); }catch(e){}
+    say('Тэмцээний шагнал: +'+a+' Алт, +'+c+' кланы зоос ('+txt.join(', ')+')'); try{ refresh(); save(); }catch(e){}
     try{ aliRender(); }catch(e){}
   };
 
@@ -18914,13 +18914,13 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
       if(mine) h+='<div class="ct-w ct-rk">'+mdlB(mine.r)+'<span class="ct-nm">Миний клан · '+esc2(CLN[mine.k].n)+'<small>7 хоногийн дайны оноо · '+brk(mine)+'</small></span><b>'+pct(mine.s)+'</b></div>';
       h+='<div class="ct-w ct-bx0"><div class="ct-lb">Хувийн оноо (Даваа-Пүрэв) · авдар</div><div class="ct-big">'+cn2(mw)+'</div>'+
          '<div class="ct-bar"><u style="width:'+Math.min(100,Math.round(100*mw/top.pt))+'%"></u>'+BOX.map(x=>'<i style="left:'+Math.round(100*x.pt/top.pt)+'%"></i>').join('')+'</div>'+
-         '<div class="ct-bxs">'+BOX.map(x=>'<span class="'+(mw>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+' оноо</em></span>').join('')+'</div></div>';
+         '<div class="ct-bxs">'+BOX.map(x=>'<span class="'+(mw>=x.pt?'on':'')+'">'+x.n+'<em>'+cn2(x.pt)+' оноо · '+x.a+' Алт</em></span>').join('')+'</div></div>';
       h+='<div class="ct-w ct-tp"><b>Яаж оноо авах вэ</b><span>Даваа-Пүрэв: өдрийн сэдвийн үйлдэл хувийн оноо өгнө. Баасан-Ням: дайсан кланы баазыг нураасан хувь кланы оноо болно (өдөр бүр 100% хүртэл, 3 өдөр нийт 300).</span></div>';
     } else if(tab==='r'){
       h+=b.slice(0,3).map(x=>rowTop(x,k,'r')).join('')+'<div class="ct-ls">'+b.slice(3).map(x=>rowLow(x,k,'r')).join('')+'</div>';
     } else {
       h+=b.slice(0,3).map(x=>rowTop(x,k,'p')).join('')+'<div class="ct-ls">'+b.slice(3).map(x=>rowLow(x,k,'p')).join('')+'</div>'+
-         '<div class="ct-nt">Эрэмбийн шагнал гишүүн бүрт өгөгдөнө. Авахын тулд тухайн долоо хоногт дор хаяж 1 удаа дайсан баазыг довтолсон байх ёстой. 7-10-р байр 50 Алт.</div>';
+         '<div class="ct-nt">Эрэмбийн шагнал гишүүн бүрт өгөгдөнө. Авахын тулд тухайн долоо хоногт дор хаяж 1 удаа дайсан баазыг довтолсон байх ёстой. 5-10-р байр 80 Алт + 150 кланы зоос.</div>';
     }
     const cw=claimable();
     if(cw!=null&&k>=0) h+='<button class="ct-go" onclick="ctClaim()">Шагнал авах</button>';

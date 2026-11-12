@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e3210d33b1';
+var UPDB='70d26cf698';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21895,12 +21895,34 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   const isDone=m=>!!(Q()[m.id]&&Q()[m.id].done);
   const campOf=m=>m.steps.find(s=>s.k==='camp');
 
+  /* ---- Өдрийн зарлиг: өдөрт 1 санамсаргүй зарлиг (Улаанбаатарын 00:00-д шинэчлэгдэнэ) ---- */
+  const DAYMS=86400000, UBH=8*3600000;
+  const nowT=()=>{ try{ return typeof wmNow==='function'?wmNow():Date.now(); }catch(e){ return Date.now(); } };
+  const today=()=>Math.floor((nowT()+UBH)/DAYMS);
+  const leftMs=()=>(today()+1)*DAYMS-UBH-nowT();
+  const DQ=()=>{ try{ return wmSt().dq||null; }catch(e){ return null; } };
+  function natQ(n,rw){ return {id:'n_'+n,nat:1,t:n+' улсыг ял',d:'Чингис хаан «'+n+'» руу аян дайн зарлалаа. Тэр улсыг ялж, хааны өмнө алдар нэр олж ир.',steps:[{k:'win',n:n,txt:n+' улсыг ял'}],rw:rw}; }
+  function natRw(k){ let pw=1500; try{ pw=wmPw(k)||pw; }catch(e){} const a=Math.max(3,Math.min(35,Math.round(2+pw/1000))); const r={alt:a,grain:a*80,wood:a*80,meat:a*50}; if(a>=15) r.relic=1; return r; }
+  function pickDq(D){
+    const pend=MQ.filter(m=>!isDone(m));
+    if(pend.length){ const m=pend[Math.floor(Math.random()*pend.length)]; return {d:today(),k:'h',id:m.id}; }
+    const st=wmSt().st||{}; const pool=D.ks.filter(k=>!st['w'+k.id]);
+    if(!pool.length) return {d:today(),k:'x'};
+    const k=pool[Math.floor(Math.random()*pool.length)]; return {d:today(),k:'n',n:k.n,rw:natRw(k)};
+  }
+  function ensureDq(D){ try{ const s=wmSt(); if(!s.dq||s.dq.d!==today()){ s.dq=pickDq(D); try{ save(); }catch(e){} } return s.dq; }catch(e){ return null; } }
+  function cur(){ const q=DQ(); if(!q) return null; if(q.k==='h') return MQ.find(m=>m.id===q.id)||null; if(q.k==='n') return natQ(q.n,q.rw); return null; }
+  const qDone=()=>{ const q=DQ(); return !!(q&&q.done); };
+  function badge(){ try{ const b=document.getElementById('wmqb1'); if(!b) return; const q=DQ(); b.classList.toggle('nw',!!(q&&!q.done&&q.k!=='x')); }catch(e){} }
+  const fmtLeft=()=>{ const m=Math.max(1,Math.round(leftMs()/60000)); return Math.floor(m/60)+' цаг '+(m%60)+' мин'; };
+
   /* ---- нуугдсан баазыг газрын зурагт оруулах ---- */
   const _g=wmGen;
   wmGen=function(){
     const D=_g.apply(this,arguments);
     try{
-      MQ.forEach(m=>{ const c=campOf(m); if(!c) return; const id='q_'+m.id, i=D.camps.findIndex(x=>x.id===id), show=unlocked(m)&&!isDone(m);
+      ensureDq(D); const c0=cur();
+      MQ.forEach(m=>{ const c=campOf(m); if(!c) return; const id='q_'+m.id, i=D.camps.findIndex(x=>x.id===id), show=!!(c0&&c0.id===m.id)&&unlocked(m)&&!isDone(m)&&!qDone();
         if(show&&i<0){ const k=D.ks.find(q=>q.n===c.near); if(!k) return; D.camps.push({id:id,t:'camp',x:Math.max(-9600,Math.min(6000,k.x+c.dx)),y:Math.max(-2400,Math.min(7000,k.y+c.dy)),lv:c.lv,p:c.p,hq:m.id,n:c.n,ty:['heavy','cav','archer'][m.id.length%3]}); }
         else if(!show&&i>=0) D.camps.splice(i,1); });
     }catch(e){}
@@ -21926,19 +21948,20 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     try{ save(); refresh(); }catch(e){}
     return tx;
   }
-  function done(m){ const q=Q(); if(q[m.id]&&q[m.id].done) return; q[m.id]={done:Date.now()}; const tx=reward(m); try{ sfx('win'); }catch(e){} say('Чингис хааны зарлиг биелэв: '+m.t+' · '+tx); try{ WMD&&wmGen(); }catch(e){} }
+  function done(m){ const dq=DQ(); if(!dq||dq.done) return; if(!m.nat){ const q=Q(); if(q[m.id]&&q[m.id].done) return; q[m.id]={done:Date.now()}; } dq.done=Date.now(); const tx=reward(m); try{ sfx('win'); }catch(e){} say('Чингис хааны зарлиг биелэв: '+m.t+' · '+tx+' · Маргааш шинэ зарлиг гарна'); badge(); try{ WMD&&wmGen(); }catch(e){} }
   /* Улс ялсан үед (wmlogi.js дуудна) */
   const _kw=window.wmOnKingWin;
   window.wmOnKingWin=function(id){
     try{ if(_kw) _kw(id); }catch(e){}
-    try{ const k=wmEnt(id); MQ.forEach(m=>{ if(isDone(m)) return; const s=m.steps; if(s.length===1&&s[0].k==='win'&&k&&k.n===s[0].n) done(m);
-      else if(s.length>1&&k&&k.n===s[0].n&&!(Q()[m.id]&&Q()[m.id].un)){ Q()[m.id]=Object.assign(Q()[m.id]||{},{un:1}); const c=campOf(m); wmGen(); say('Чингис хааны зарлиг: «'+c.n+'» газрын зураг дээр гарч ирлээ'); } }); }catch(e){}
+    try{ const c=cur(); if(!c||qDone()) return; const k=wmEnt(id); if(!k) return; const st=c.steps; if(k.n!==st[0].n) return;
+      if(st.length===1) done(c);
+      else if(!(Q()[c.id]&&Q()[c.id].un)){ Q()[c.id]=Object.assign(Q()[c.id]||{},{un:1}); const cp=campOf(c); wmGen(); say('Чингис хааны зарлиг: «'+cp.n+'» газрын зураг дээр гарч ирлээ'); } }catch(e){}
   };
   /* Нуугдсан баазыг устгасан үед */
   let CUR=null;
   const wb=wmBattle;
   wmBattle=function(e,tc,mm){ CUR=(e&&e.hq)?e:null; return wb.apply(this,arguments); };
-  function apply(E){ try{ const e=CUR; if(!e||!E||E.back!=='wmap') return; CUR=null; const cb=E.cb; E.cb=function(){ const r=cb&&cb.apply(this,arguments); try{ const m=MQ.find(x=>x.id===e.hq); if(m) done(m); }catch(x){} return r; }; }catch(e){} }
+  function apply(E){ try{ const e=CUR; if(!e||!E||E.back!=='wmap') return; CUR=null; const cb=E.cb; E.cb=function(){ const r=cb&&cb.apply(this,arguments); try{ const m=MQ.find(x=>x.id===e.hq), c=cur(); if(m&&c&&c.id===m.id) done(m); }catch(x){} return r; }; }catch(e){} }
   const sb=startBattle; startBattle=function(i,E){ apply(E); return sb.apply(this,arguments); };
   if(typeof rtsStart==='function'){ const rs=rtsStart; rtsStart=function(i,E){ apply(E); return rs.apply(this,arguments); }; }
 
@@ -21957,6 +21980,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   '#wmpn .qb{margin-top:6px;padding:4px 10px;border-radius:8px;border:1px solid #7a5410;background:linear-gradient(#ffd770,#d9a024);color:#3b2410;font-weight:bold;font-size:12px}'+
   '#wmpn .row{display:flex;align-items:center;gap:6px;padding:3px 2px;font-size:13px}'+
   '#wmpn .row.me{color:#9fe08a;font-weight:bold}'+
+  '.wmq.nw::after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:#e23b2a;border:1px solid #fff}'+
   '.wmq{position:absolute;left:8px;width:48px;height:52px;border:0;background:url(hf/sq/wm_bl.webp?v=1) center/contain no-repeat;color:#ffe9a8;font-size:11px;font-weight:bold;text-shadow:0 1px 2px #000,0 0 3px #000;padding:0;z-index:5}';
   const st0=document.createElement('style'); st0.textContent=css; document.head.appendChild(st0);
   window.wmPanel=function(html){ let o=document.getElementById('wmpn'); if(!o){ o=document.createElement('div'); o.id='wmpn'; o.onclick=e=>{ if(e.target===o) wmPanelX(); }; document.body.appendChild(o); } o.innerHTML='<div class="pb">'+html+'<div style="text-align:center;margin-top:8px"><button class="btn" onclick="wmPanelX()">Хаах</button></div></div>'; };
@@ -21964,14 +21988,18 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   window.wmFocus=function(x,y,id){ try{ const c=document.getElementById('wmc'); WMV.z=0.55; WMV.x=x-c.clientWidth/WMV.z/2; WMV.y=y-c.clientHeight/WMV.z/2; wmClamp(); if(id){ WMS=id; wmSheet(); } wmPanelX(); }catch(e){} };
 
   window.wmQuestOpen=function(){
-    let h='<h3>Чингис хааны зарлиг</h3><div class="qd" style="text-align:center">Хааны зарлигаар улс, нуугдсан баазыг ял.</div>';
-    MQ.forEach(m=>{ const dn=isDone(m), c=campOf(m);
-      h+='<div class="qc'+(dn?' dn':'')+'"><div class="qt">'+m.t+(dn?' · ✓ Биелсэн':'')+'</div><div class="qd">'+m.d+'</div>';
-      m.steps.forEach((s,i)=>{ const ok=stepDone(m,i); h+='<div class="qs" style="color:'+(ok?'#9fe08a':'#f3e4bd')+'">'+(ok?'✓ ':(i+1)+'. ')+s.txt+'</div>'; });
+    const D=wmGen(); ensureDq(D); const q=DQ(), m=cur(), dn=qDone(), hd=MQ.filter(isDone).length;
+    let h='<h3>Чингис хааны зарлиг</h3><div class="qd" style="text-align:center">Өдөрт нэг зарлиг гарна. Шинэ зарлиг '+fmtLeft()+'-ийн дараа (00:00) гарна.</div>';
+    if(!m){ h+='<div class="qc dn"><div class="qt">Бүх улсыг эзэлсэн</div><div class="qd">Газрын зураг дээрх бүх улс ялагдсан тул одоохондоо шинэ зарлиг алга.</div></div>'; }
+    else {
+      h+='<div class="qc'+(dn?' dn':'')+'"><div class="qt">Өнөөдрийн зарлиг: '+m.t+(dn?' · ✓ Биелсэн':'')+'</div><div class="qd">'+m.d+'</div>';
+      m.steps.forEach((s,i)=>{ const ok=dn||stepDone(m,i); h+='<div class="qs" style="color:'+(ok?'#9fe08a':'#f3e4bd')+'">'+(ok?'✓ ':(i+1)+'. ')+s.txt+'</div>'; });
       h+='<div class="qs" style="color:#e0b070">Шагнал: '+rwTxt(m.rw)+'</div>';
-      if(!dn){ let tg=null; if(m.steps.length>1&&unlocked(m)){ const D=wmGen(); tg=D.camps.find(x=>x.id==='q_'+m.id); } else { const st=m.steps[0]; tg=g(st.n); }
+      if(dn) h+='<div class="qd">Өнөөдөр биелсэн. Маргааш шинэ зарлиг гарна.</div>';
+      else { let tg=null; if(m.steps.length>1&&unlocked(m)){ tg=D.camps.find(x=>x.id==='q_'+m.id); } else { tg=g(m.steps[0].n); }
         if(tg) h+='<button class="qb" onclick="wmFocus('+Math.round(tg.x)+','+Math.round(tg.y)+',\''+tg.id+'\')">Байршил харах</button>'; }
-      h+='</div>'; });
+      h+='</div>'; }
+    h+='<div class="qd" style="text-align:center">Түүхэн зарлиг: '+hd+'/'+MQ.length+' биелсэн</div>';
     wmPanel(h);
   };
 
@@ -21983,6 +22011,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
       const mk=(id,top,tx,fn)=>{ const b=document.createElement('button'); b.id=id; b.className='wmq'; b.style.top=top+'px'; b.textContent=tx; b.onclick=fn; w.appendChild(b); };
       mk('wmqb1',188,'Зарлиг',()=>wmQuestOpen()); mk('wmqb2',244,'Топ',()=>{ if(typeof wmTopOpen==='function') wmTopOpen(); });
     } }catch(e){}
+    try{ ensureDq(wmGen()); badge(); const q=DQ(), c=cur(); if(q&&c&&!q.done&&q.seen!==q.d){ q.seen=q.d; setTimeout(()=>{ try{ say('Өнөөдрийн хааны зарлиг: '+c.t+' (Зарлиг товч)'); }catch(e){} },700); } }catch(e){}
     return r;
   };
 })();

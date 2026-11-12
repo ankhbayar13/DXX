@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c7bf0782f4';
+var UPDB='5613cdb674';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22150,6 +22150,19 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     }catch(e){ console.log('wmtroops',e); }
     try{ wmFitUI(); }catch(e){}
   };
+})();
+
+
+/* p32/wmrz.js — Дайнаас гарч утсаа эргүүлэхэд дэлхийн газрын зураг сунаж муудахыг засна: canvas-ийн хэмжээг дэлгэцэнд тааруулна */
+(function(){
+  const fix=()=>{ try{ const c=document.getElementById('wmc'); if(!c||typeof WMV==='undefined'||!WMV||!WMV.on) return; const dp=Math.min(2,devicePixelRatio||1), w=Math.round(innerWidth*dp), h=Math.round(innerHeight*dp);
+    if(Math.abs(c.width-w)>2||Math.abs(c.height-h)>2){ wmResize(); wmClamp(); try{ wmFitUI&&wmFitUI(); }catch(e){} } }catch(e){} };
+  const kick=()=>{ [60,300,800,1600].forEach(t=>setTimeout(fix,t)); };
+  addEventListener('resize',kick); addEventListener('orientationchange',kick); addEventListener('pageshow',kick);
+  try{ if(window.visualViewport) visualViewport.addEventListener('resize',()=>{ clearTimeout(window._wmRz); window._wmRz=setTimeout(fix,120); }); }catch(e){}
+  setInterval(()=>{ if(!document.hidden) fix(); },1200);
+  if(typeof rtsEnd==='function'){ const _e=rtsEnd; rtsEnd=function(){ const r=_e.apply(this,arguments); kick(); return r; }; }
+  if(typeof btEnd==='function'){ const _b=btEnd; btEnd=function(){ const r=_b.apply(this,arguments); kick(); return r; }; }
 })();
 
 

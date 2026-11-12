@@ -6557,7 +6557,7 @@ function isOrient(){ const R=RT; if(!R) return; const port=innerHeight>innerWidt
 async function isStart(i,E){
   if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
   if(RT) return;
-  ISMAP=(function(){ try{ const m=/[?&]map=(\d)/.exec(location.search); if(m&&+m[1]>=1&&+m[1]<=7) return +m[1]-1; const l=localStorage.getItem('dxx_map'); if(l&&/^[1-7]$/.test(l)) return +l-1; }catch(e){} return Math.floor(Math.random()*7); })(); try{ ISFC.clear(); }catch(e){}
+  ISMAP=(function(){ try{ const m=/[?&]map=(\d)/.exec(location.search); if(m&&+m[1]>=1&&+m[1]<=7) return +m[1]-1; const l=localStorage.getItem('dxx_map'); if(l&&/^[1-7]$/.test(l)) return +l-1; }catch(e){} const L=[0,1,3,4,5,6]; return L[Math.floor(Math.random()*L.length)]; })(); try{ ISFC.clear(); }catch(e){}
   try{ if(typeof WMV!=='undefined'&&WMV&&WMV.on&&typeof wmShut==='function') wmShut(); }catch(e){}
   const el=document.createElement('div'); el.id='rts'; el.className='iso';
   el.innerHTML='<canvas id="rcv"></canvas><div id="rtop"></div><div id="rbt"><button id="rx" onclick="rtsCmd(\'exit\')">✕</button><button id="rsp" onclick="rtsCmd(\'speed\')">×1</button><button id="rau" onclick="rtsCmd(\'auto\')">🤖</button></div><div id="rbn"></div><div id="ilv"><button id="ilv0" class="on" onclick="isLvl(0)">Бүгд</button><button id="ilv10" onclick="isLvl(10)">Арван<small>10</small></button><button id="ilv100" onclick="isLvl(100)">Зуут<small>100</small></button><button id="ilv1000" onclick="isLvl(1000)">Мянгат<small>1000</small></button></div><div id="rpan"><div class="pt"><div class="c" id="rpt"></div><span id="rpn"></span></div><div class="g"><div class="r" id="rcmd"><div class="b cm" onclick="isCmd(\'follow\')">➜ Дага</div><div class="b cm" onclick="isCmd(\'stop\')">■ Зогс</div><div class="b cm c2" onclick="isCmd(\'charge\')">⚔ Дайр</div><div class="b cm c3" onclick="isCmd(\'retreat\')">↩ Ухар</div></div><div class="r" id="rchips"></div></div></div><div id="rhint"></div><div id="rres"></div><div id="rld">Байлдааны талбар ачаалж байна…</div><div id="isrot"><i></i><div>Утсаа хэвтээ эргүүлнэ үү</div><div style="font-size:12px;font-weight:500;opacity:.8">Байлдаан хэвтээ үед эхэлнэ</div></div>';
@@ -10959,7 +10959,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='ca3accc362';
+var UPDB='deb37504a6';
 (function(){
   const K='updTry';
   const _go=updGo;

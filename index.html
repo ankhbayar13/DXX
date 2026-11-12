@@ -10922,7 +10922,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d9325d03c3';
+var UPDB='c1e36a4af4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21858,15 +21858,15 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   const MQ=[
     { id:'bort', t:'Бөртийн өшөө',
       d:'1180-аад онд Мэргидүүд Тэмүжиний эхнэр Бөртийг булаан авсан. Тэмүжин Хэрэйдийн Тоорил хан, Жамухатай хамт довтолж Бөртийг эргүүлэн авчээ.',
-      steps:[{k:'win',n:'Мэргид',txt:'Мэргид улсыг ял'}], rw:{alt:25} },
+      steps:[{k:'win',n:'Мэргид',txt:'Мэргид улсыг ял'}], rw:{alt:5,grain:300,wood:300,meat:200,mal:{honi:3}} },
     { id:'naiman', t:'Найманд дагасан Мэргид',
       d:'Мэргидийн удирдагч Тоохто бэхи Найман ханд хоргодож, Чингисийн эсрэг байсаар байв. Эхлээд Найманыг дар, дараа нь тэнд нуугдсан үлдэгдлийг ал.',
       steps:[{k:'win',n:'Найман',txt:'Найман улсыг ял'},{k:'camp',n:'Мэргидийн үлдэгдэл',near:'Найман',dx:150,dy:110,lv:4,p:1400,txt:'Найманы нутагт нуугдсан Мэргидийн үлдэгдлийг устга'}],
-      rw:{alt:40,relic:1} },
+      rw:{alt:10,relic:1,grain:600,wood:600,meat:400,mal:{honi:3,uher:2}} },
     { id:'khoo', t:'Тоохто бэхийн хөвгүүд',
       d:'1208 онд Тоохто бэхи алагдсаны дараа хөвгүүд нь Кыпчак нутаг руу дүрвэжээ. Жочи, Сүбээдэй нар мөшгөж, 1216 онд сүүлчийн үлдэгдлийг дарсан гэдэг.',
       steps:[{k:'win',n:'Дорнод Кыпчак',txt:'Дорнод Кыпчак улсыг ял'},{k:'camp',n:'Мэргидийн сүүлчийн бааз',near:'Дорнод Кыпчак',dx:-160,dy:120,lv:5,p:2600,txt:'Кыпчакт нуугдсан Мэргидийн сүүлчийн баазыг устга'}],
-      rw:{alt:60,relic:1} }
+      rw:{alt:15,relic:1,grain:1000,wood:1000,meat:600,mal:{uher:2,aduu:2}} }
   ];
   const Q=()=>{ const s=wmSt(); if(!s.q) s.q={}; return s.q; };
   const wins=n=>{ const k=g(n); return k?((wmSt().st['w'+k.id])||0):0; };
@@ -21893,8 +21893,15 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   };
 
   /* ---- шагнал ---- */
+  const AN={honi:'хонь',yamaa:'ямаа',uher:'үхэр',aduu:'адуу',temee:'тэмээ'};
+  function rwTxt(r){ let t=[r.alt+' Алт']; if(r.grain) t.push(r.grain+' тариа'); if(r.wood) t.push(r.wood+' мод'); if(r.meat) t.push(r.meat+' мах'); if(r.mal) Object.keys(r.mal).forEach(k=>t.push(r.mal[k]+' '+(AN[k]||k))); if(r.relic) t.push('дурсгал'); return t.join(', '); }
+  function giveAnimals(k,n){ let got=0, ov=0;
+    try{ for(let i=0;i<n;i++){ if((S.animals[k]||0)>=penCap(k)){ ov++; S.res.meat=(S.res.meat||0)+Math.round(ANIMALS[k].cost/4+6); } else { S.animals[k]=(S.animals[k]||0)+1; got++; } } try{ syncEnts(false); }catch(e){} }catch(e){}
+    return {got:got,ov:ov}; }
   function reward(m){
-    const r=m.rw; let tx='+'+r.alt+' Алт'; S.res.alt=(S.res.alt||0)+r.alt;
+    const r=m.rw; let tx=r.alt+' Алт'; S.res.alt=(S.res.alt||0)+r.alt;
+    ['grain','wood','meat'].forEach(k=>{ if(r[k]){ S.res[k]=(S.res[k]||0)+r[k]; tx+=', '+r[k]+' '+({grain:'тариа',wood:'мод',meat:'мах'}[k]); } });
+    if(r.mal) Object.keys(r.mal).forEach(k=>{ const o=giveAnimals(k,r.mal[k]); tx+=', '+o.got+' '+(AN[k]||k)+(o.ov?' (+'+o.ov+' хашаа дүүрэн тул махаар)':''); });
     if(r.relic){ try{ tx+=' + '+wmRelicGrant(); }catch(e){} }
     try{ save(); refresh(); }catch(e){}
     return tx;
@@ -21941,7 +21948,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     MQ.forEach(m=>{ const dn=isDone(m), c=campOf(m);
       h+='<div class="qc'+(dn?' dn':'')+'"><div class="qt">'+m.t+(dn?' · ✓ Биелсэн':'')+'</div><div class="qd">'+m.d+'</div>';
       m.steps.forEach((s,i)=>{ const ok=stepDone(m,i); h+='<div class="qs" style="color:'+(ok?'#9fe08a':'#f3e4bd')+'">'+(ok?'✓ ':(i+1)+'. ')+s.txt+'</div>'; });
-      h+='<div class="qs" style="color:#e0b070">Шагнал: '+m.rw.alt+' Алт'+(m.rw.relic?' + дурсгал':'')+'</div>';
+      h+='<div class="qs" style="color:#e0b070">Шагнал: '+rwTxt(m.rw)+'</div>';
       if(!dn){ let tg=null; if(m.steps.length>1&&unlocked(m)){ const D=wmGen(); tg=D.camps.find(x=>x.id==='q_'+m.id); } else { const st=m.steps[0]; tg=g(st.n); }
         if(tg) h+='<button class="qb" onclick="wmFocus('+Math.round(tg.x)+','+Math.round(tg.y)+',\''+tg.id+'\')">Байршил харах</button>'; }
       h+='</div>'; });

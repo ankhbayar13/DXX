@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bb04846ed9';
+var UPDB='092354903c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16653,6 +16653,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   startBattle=function(){ try{ S.skMan=0; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ BT.tmax=150; if(!BT.duel){ const v=(S.btSp|0)||1; BT.sp=(v>=3&&!VIP())?2:Math.max(1,Math.min(3,v)); } build(); ensure(); tick(true); } }catch(e){} return r; };
 
   /* талбар дээр: ээлж авсан баатарт алтан цагираг + ▼, байгаа байгаа дайсанд улаан цагираг + нум сум; түвшингийн тэмдэг */
+  const ELIM={}; const elIm=k=>{ if(!ELIM[k]){ const i=new Image(); i.src='hf/sq/el_'+k+'.webp?v=1'; ELIM[k]=i; } return ELIM[k]; };
   const _bd=btDraw;
   btDraw=function(t){
     _bd.apply(this,arguments);
@@ -16664,6 +16665,9 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
         BT.units.forEach(u=>{
           if(u.hp<=0||u.sup||u.tk) return;
           const x=u.x-44, y=u.y-H-5;
+          if(BT.e&&BT.e.hbf&&u.id&&window.taEl){ const im=elIm(window.taEl(u.id)); if(im&&im.complete&&im.naturalWidth){
+            c.beginPath(); c.arc(x,y,13.5,0,Math.PI*2); c.fillStyle=u.side?'#8a2218':'#2c6e1c'; c.fill(); c.lineWidth=2; c.strokeStyle=u.side?'#ffb0a0':'#ffd770'; c.stroke();
+            c.drawImage(im,x-11,y-11,22,22); return; } }
           c.beginPath(); c.arc(x,y,9,0,Math.PI*2);
           if(!u.side){ c.fillStyle='#2c6e1c'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffd770'; c.stroke(); c.fillStyle='#fff'; c.font='11px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(({heavy:'🛡',cav:'⚔',foot:'⚔',archer:'🏹',support:'✨'})[(typeof hcls==='function'?hcls(u.id):u.type)]||'⚔',x,y+1); }
           else { c.fillStyle='#8a2218'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffb0a0'; c.stroke(); c.fillStyle='#fff'; c.font='10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(cl(u.type),x,y+1); }

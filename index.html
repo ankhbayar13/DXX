@@ -10893,7 +10893,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d478994322';
+var UPDB='62585f3abf';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21538,6 +21538,33 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     if(R.st==='fin'&&!R.done) tx(R.place+'-р байр',W/2,H*0.45,42,R.place<=3?'#ffd35a':'#fff'); }
   window.raceOpenInner=function(){ return _inner.apply(this,arguments); };
   window.HZ={hz:hz,CLS:CLS,genField:genField,open:open};
+})();
+
+
+/* p32/wmskin.js — Дэлхийн газрын зургийн дэлгэцийн шинэ алтан хүрээтэй товч, самбарууд (зөвхөн харагдац). */
+(function(){
+  const U=n=>'url(hf/sq/'+n+'.webp?v=1)';
+  const css=
+  /* хаах товч */
+  '#wmx{width:48px!important;height:52px!important;background:'+U('wm_x')+' center/contain no-repeat!important;border:0!important;box-shadow:none!important;color:transparent!important;font-size:0!important;text-shadow:none!important;padding:0!important;border-radius:0!important}'+
+  /* + − Бүх */
+  '.wmz{width:50px!important;height:54px!important;border:0!important;border-radius:0!important;background-color:transparent!important;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;box-shadow:none!important;padding:0!important;color:#ffe9a8!important;text-shadow:0 1px 2px #000,0 0 3px #000}'+
+  '.wmz.k-pl{background-image:'+U('wm_pl')+'!important;font-size:0!important}'+
+  '.wmz.k-mn{background-image:'+U('wm_mn')+'!important;font-size:0!important}'+
+  '.wmz.k-bl{background-image:'+U('wm_bl')+'!important;font-size:12px!important;font-weight:bold}'+
+  /* гэр товч, клан товч */
+  '#wmhome{width:54px!important;height:60px!important;background:'+U('wm_home')+' center/contain no-repeat!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important}'+
+  '#wmhome img{display:none!important}'+
+  '#wmcl{width:50px!important;height:54px!important;background:'+U('wm_bl')+' center/contain no-repeat!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important}'+
+  /* цуваа самбар (дээд) */
+  '#wmbar{position:relative;isolation:isolate;background:none!important;border:0!important;box-shadow:none!important;top:30px!important;width:184px!important;right:auto!important;padding:0 14px!important;display:flex;align-items:center;height:34px!important}'+
+  '#wmbar::before{content:"";position:absolute;left:-2.7%;width:105.4%;top:-57%;height:164%;background:'+U('wm_hdr')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}'+
+  /* цэрэг, баатрын самбар */
+  '#wmheroes{isolation:isolate;background:none!important;border:0!important;box-shadow:none!important;top:80px!important;padding:12px 8px 14px!important;overflow:visible!important}'+
+  '#wmheroes::before{content:"";position:absolute;left:-4.3%;width:108.6%;top:-5.4%;height:119%;background:'+U('wm_pan')+' 0 0/100% 100% no-repeat;z-index:-1;pointer-events:none}';
+  const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  const tag=()=>{ try{ document.querySelectorAll('#wmap .wmz').forEach(b=>{ const t=b.textContent.trim(); const k=t==='+'?'k-pl':t==='−'?'k-mn':(t==='Бүх'||/^Бүх/.test(t))?'k-bl':''; if(k&&!b.classList.contains(k)) b.classList.add(k); }); }catch(e){} };
+  if(typeof wmOpen==='function'){ const _o=wmOpen; wmOpen=function(){ const r=_o.apply(this,arguments); tag(); setTimeout(tag,300); return r; }; }
 })();
 
 

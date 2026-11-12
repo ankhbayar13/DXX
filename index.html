@@ -3091,7 +3091,7 @@ function wmProcess(){
   wmRefreshBar(); }
 function wmBattle(e){
   const k=e.t==='kingdom', p=wmPw(e), st=wmSt(), kid=e.id;
-  (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Бандит Lv'+e.lv),fc:k?(e.i%5):'b',p:p,g:Math.round(p*(k?0.6:0.5)),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(e.i/2):e.lv),back:'wmap',
+  (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Дээрэмчид Lv'+e.lv),fc:k?(e.i%5):'b',p:p,g:Math.round(p*(k?0.6:0.5)),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(e.i/2):e.lv),back:'wmap',
     cb:()=>{ if(k){ st.st['w'+kid]=(st.st['w'+kid]||0)+1; st.st[kid]=Date.now()+15*60000; S.rp=(S.rp||0)+10; S.res.alt+=1+(e.i>6?1:0); addXP(40+e.i*6); say('Улс ялагдлаа! +'+Math.round(p*0.6)+' 🪙'); } else { st.st[kid]=Date.now()+8*60000; if(e.lv>=4) S.res.alt+=1; addXP(15*e.lv); say('Бааз устгагдлаа!'); } refresh(); }}); }
 setInterval(()=>{ try{ wmProcess(); }catch(x){} },1000);
 // ---- UI ----
@@ -3129,7 +3129,7 @@ function wmSheet(){
     else if(e.t==='chest'){ h='<h3>💎 Нуугдсан эрдэнэс</h3><div class="sm">Алт, Алт болор, заримдаа дурсгал. Зам '+wmFmt(d)+' (очих) + 0:10 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">Цуваа илгээх</button>'; }
     else if(e.t==='yam'){ h=wmYamSheet(e,d); }
     else if(e.t==='clan'){ const ok=pw>=e.p; h='<h3><span style="color:'+e.c+'">⚔</span> '+e.n+(e.real?'':' (NPC)')+'</h3><div class="sm">'+CLN[e.cl].n+' клан · Дайсан: <b>'+wmTyTxt(e)+'</b></div><div class="sm">Хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Ялбал: клан оноо +'+wmCwPts(e,null)+(e.real?' (бодит тоглогч ×1.5)':'')+'</div>'+(e.real?'<div class="sm">'+wmShieldTxt(e)+(wmLootPct(e)?' · Ялбал нөөцийн '+wmLootPct(e)+'%-ийг дээрэмдэнэ':'')+'</div>':'')+'<button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
-    else if(e.t==='camp'){ const ok=pw>=e.p; h='<h3>'+ico('bd_h0',30)+' Бандитын бааз · Lv '+e.lv+'</h3><div class="sm">Дайсны хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
+    else if(e.t==='camp'){ const ok=pw>=e.p; h='<h3>'+ico('bd_h0',30)+' Дээрэмчдийн бааз · Lv '+e.lv+'</h3><div class="sm">Дайсны хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
     else { const p=wmPw(e), ok=pw>=p; h='<h3><span style="color:'+e.c+'">⚑</span> '+e.n+' улс</h3><div class="sm">Хүч <b>'+f(p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Дайсан: <b>'+wmTyTxt(e)+'</b> · Ялбал: +'+f(p*0.6)+' 🪙, Алт, оноо</div>'+(((wmSt().st['w'+e.id])||0)===0?'<div class="sm" style="color:#ffd770"><b>🏆 Анхны эзлэлт: тусгай шагнал</b></div>':'')+'<button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; } }
   if(e.t==='kingdom'||e.t==='camp'||e.t==='clan'){ h=h.replace('</h3>','</h3>'+wmPowLine(e)); const _wk=weakBox(pw,e.t==='kingdom'?wmPw(e):e.p); if(_wk) h=h.replace('<button class="btn red"',_wk+'<button class="btn red"'); } sh.innerHTML=h+'<button class="btn" style="background:#5b3d1e" onclick="WMS=null;wmSheet()">Хаах</button>'; sh.style.display='block'; }
 function wmRefreshBar(){ const b=$('wmbar'); if(!b) return; const st=wmSt(), now=Date.now();
@@ -5592,7 +5592,7 @@ function wmRelicGrant(){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s=
 const wmRI=e=>(e.ri!=null?e.ri:e.i);
 function wmBattle(e,tc,mm){
   const k=e.t==='kingdom', cn=e.t==='clan', st=wmSt(), kid=e.id, tm=wmTacMul(e,tc), p0=k?wmPw(e):e.p, p=Math.max(30,Math.round(p0*tm.p)), first=k&&!(st.st['w'+kid]); let dn=0;
-  (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Бандит Lv'+e.lv),fc:k?(wmRI(e)%5):cn?(hsh(String(e.id))%5):'b',p:p,g:Math.round(p*(k?0.6:cn?0.3:0.5)*tm.r),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(wmRI(e)/2):cn?3:e.lv),back:'wmap',hs:mm&&mm.hs,pc:mm&&mm.pc,
+  (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Дээрэмчид Lv'+e.lv),fc:k?(wmRI(e)%5):cn?(hsh(String(e.id))%5):'b',p:p,g:Math.round(p*(k?0.6:cn?0.3:0.5)*tm.r),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(wmRI(e)/2):cn?3:e.lv),back:'wmap',hs:mm&&mm.hs,pc:mm&&mm.pc,
     cb:()=>{ if(dn) return; dn=1; const tt=tm.ok?' · Тактик таарлаа ×1.4':'';
       if(k){ st.st['w'+kid]=(st.st['w'+kid]||0)+1; st.st[kid]=Date.now()+15*60000; S.rp=(S.rp||0)+10; S.res.alt+=1+(wmRI(e)>6?1:0); addXP(40+wmRI(e)*6);
         if(first){ const al=3+wmRI(e), gg=Math.round(p0*1.0); S.res.alt+=al; S.res.gold+=gg; let rt=''; if(Math.random()<0.5) rt=' + '+wmRelicGrant(); passAdd(15); say('🏆 Анхны эзлэлт! +'+al+' Алт, +'+f(gg)+' 🪙'+rt); }
@@ -5931,7 +5931,7 @@ function wmChests(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_ch0'))) return wmChests
   D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; const s=wmS('wm_ch'+(n.v<=1?0:n.v===2?1:n.v===3?2:3)); if(!s) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.3+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-12,20+5*pu,0,7); c.fill(); c.globalAlpha=1; const w=0.36*s.iw, h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.85,w,h); wmLabel(c,'Эрдэнэс',n.x,n.y+10,'#ffe28a',11); }}); }); }
 function wmCamps(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_bc0'))) return wmCamps0(c,D,vis,items,t);
   D.camps.forEach(n=>{ if(!vis(n.x,n.y,80)) return; const cd=wmCd(n.id), s=wmS('wm_bc'+Math.min(4,n.lv-1)); if(!s) return;
-    items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; const w=0.28*s.iw*(0.92+0.04*n.lv), h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.8,w,h); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+h*0.2+8,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-h*0.8-4,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30+n.lv*2,t); }}); }); }
+    items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; const w=0.28*s.iw*(0.92+0.04*n.lv), h=w*s.ih/s.iw; c.drawImage(s.img,n.x-w/2,n.y-h*0.8,w,h); c.globalAlpha=1; wmLabel(c,'Дээрэмчид Lv'+n.lv,n.x,n.y+h*0.2+8,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-h*0.8-4,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30+n.lv*2,t); }}); }); }
 // клан төв, бусад тоглогчийн гэр, ям
 wmClanDraw=function(c,D,z,t,vis,items){ const my=wmClanId(), w=wmWeek(), op=my>=0?wmOpp(my,w):-1, ok=WMT.ok&&wmS('wm_hq0'), now=wmNow();
   items.push({y:D.C.y+1,f:()=>{ wmLabel(c,'🛡 Хамгаалалттай',D.C.x,D.C.y+46,'#9fd0ff',11); }});
@@ -6003,7 +6003,7 @@ function wmChests0(c,D,vis,items,t){
   D.chests.forEach(n=>{ if(!wmChestOn(n)||!vis(n.x,n.y,60)) return; items.push({y:n.y,f:()=>{ const pu=0.5+0.5*Math.sin(t*4); c.globalAlpha=0.35+0.3*pu; c.fillStyle='#ffe28a'; c.beginPath(); c.arc(n.x,n.y-8,16+4*pu,0,7); c.fill(); c.globalAlpha=1; wmDrawS(c,'ui2_chest',n.x,n.y,28); wmLabel(c,'Эрдэнэс',n.x,n.y+12,'#ffe28a',11); }}); });
 }
 function wmCamps0(c,D,vis,items,t){
-  D.camps.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; wmDrawS(c,'tent',n.x,n.y,34); wmDrawS(c,'bd_h0',n.x+16,n.y+4,18); c.globalAlpha=1; wmLabel(c,'Бандит Lv'+n.lv,n.x,n.y+14,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-30,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30,t); }}); });
+  D.camps.forEach(n=>{ if(!vis(n.x,n.y,60)) return; const cd=wmCd(n.id); items.push({y:n.y,f:()=>{ c.globalAlpha=cd?0.4:1; wmDrawS(c,'tent',n.x,n.y,34); wmDrawS(c,'bd_h0',n.x+16,n.y+4,18); c.globalAlpha=1; wmLabel(c,'Дээрэмчид Lv'+n.lv,n.x,n.y+14,'#ff9a7a',11); if(cd) wmLabel(c,wmFmt(cd),n.x,n.y-30,'#ffd770',10); if(WMS===n.id) wmRing(c,n.x,n.y-12,30,t); }}); });
 }
 function wmKs0(c,D,vis,items,t){
   D.ks.forEach(k=>{ if(!vis(k.x,k.y,90)) return; const cd=wmCd(k.id), sp=k.i<4?'ger':k.i<8?'ger2':k.i<11?'ger3':'ger4'; items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; const w=k.i<4?40:k.i<8?46:k.i<11?56:66; wmCastle(c,k,w); c.globalAlpha=1; c.fillStyle=k.c; c.fillRect(k.x-1,k.y-w*0.9-14,2,16); c.beginPath(); c.moveTo(k.x+1,k.y-w*0.9-14); c.lineTo(k.x+14,k.y-w*0.9-9); c.lineTo(k.x+1,k.y-w*0.9-4); c.fill(); wmLabel(c,k.n,k.x,k.y+14,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+28,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-w*0.9-20,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,44,t); }}); });
@@ -6602,17 +6602,20 @@ function isLoop(now){ const R=RT; if(!R) return; const dt=Math.min(0.05,(now-R.l
 function isModeToggle(){ let on=false; try{ on=localStorage.getItem('dxx_iso')==='1'; localStorage.setItem('dxx_iso',on?'0':'1'); }catch(e){}
   const msg=on?'Шинэ байлдаан УНТАРЛАА. Хуучин босоо байлдаан явна.':'Шинэ байлдаан АСЛАА. Байлдахдаа утсаа хажуу болго.'; try{ say(msg); }catch(e){} }
 
-/* Самбарын товчийг заавал ажиллуулах хамгаалалт: дарсан цэг товч дотор байвал (дээр нь юм давхарласан ч, click алдагдсан ч) тушаал биелнэ */
+/* Самбарын товчийг заавал ажиллуулах хамгаалалт: дарсан цэг товч дотор байвал (дээр нь юм давхарласан ч, click алдагдсан ч, iPhone Safari div дээр click өгөхгүй ч) тушаал биелнэ. Тулаан дууссаны дараах «Үргэлжлүүлэх» ба асуулгын цонхны товчийг ч хамруулна. */
 (function(){
   let clk=0, clT=null, dn=new Map();
-  const SEL='#rcmd .b.cm,#rchips .b[id^="rs_"],#rpsw,#rpg,#ilv button';
-  const hit=(x,y)=>{ const r=document.getElementById('rts'); if(!r||!window.RT||!RT.iso||RT.done) return null; let best=null,bd=1e9;
-    r.querySelectorAll(SEL).forEach(e=>{ const b=e.getBoundingClientRect(); if(!b.width||!b.height) return; const m=5; if(x>=b.left-m&&x<=b.right+m&&y>=b.top-m&&y<=b.bottom+m){ const d=Math.hypot(x-(b.left+b.right)/2,y-(b.top+b.bottom)/2); if(d<bd){ bd=d; best=e; } } }); return best; };
+  const SEL='#rcmd .b.cm,#rchips .b[id^="rs_"],#rchips .b[id^="rc_"],#rpsw,#rpg,#ilv button,#rbt button';
+  const SEL2='#rres button,#askov button';
+  const hit=(x,y)=>{ if(!window.RT||!RT.iso) return null; let best=null,bd=1e9;
+    document.querySelectorAll(RT.done?SEL2:SEL+','+SEL2).forEach(e=>{ const b=e.getBoundingClientRect(); if(!b.width||!b.height) return; const m=5; if(x>=b.left-m&&x<=b.right+m&&y>=b.top-m&&y<=b.bottom+m){ const d=Math.hypot(x-(b.left+b.right)/2,y-(b.top+b.bottom)/2); if(d<bd){ bd=d; best=e; } } }); return best; };
   document.addEventListener('click',ev=>{ clk=performance.now(); clT=ev.target; },true);
-  document.addEventListener('pointerdown',ev=>{ try{ const t=ev.target; if(!t||!t.closest||!t.closest('#rts')) return; dn.set(ev.pointerId,hit(ev.clientX,ev.clientY)); }catch(e){} },true);
+  document.addEventListener('pointerdown',ev=>{ try{ if(!window.RT||!RT.iso) return; const t=ev.target; if(!t||!t.closest||!(t.closest('#rts')||t.closest('#askov'))) return; dn.set(ev.pointerId,hit(ev.clientX,ev.clientY)); }catch(e){} },true);
   document.addEventListener('pointerup',ev=>{ try{ const a=dn.get(ev.pointerId); dn.delete(ev.pointerId); if(!a) return; const b=hit(ev.clientX,ev.clientY); if(b!==a) return; const t0=performance.now();
-    setTimeout(()=>{ if(!(clk>=t0&&clT&&a.contains(clT))&&document.contains(a)&&window.RT&&RT.iso&&!RT.done){ try{ a.click(); }catch(e){} } },260); }catch(e){} },true);
+    setTimeout(()=>{ if(!(clk>=t0&&clT&&a.contains(clT))&&document.contains(a)&&window.RT&&RT.iso){ try{ a.click(); }catch(e){} } },200); }catch(e){} },true);
   document.addEventListener('pointercancel',ev=>{ dn.delete(ev.pointerId); },true);
+  /* iOS: div дээр click үүсгэхийн тулд cursor:pointer хэрэгтэй */
+  const st=document.createElement('style'); st.textContent='#rts .b,#rts #rpsw,#rts #rpg,#rts button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}'; document.head.appendChild(st);
 })();
 
 
@@ -10959,7 +10962,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='deb37504a6';
+var UPDB='e4dc4896ac';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21967,7 +21970,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   };
   const _lbl=wmLabel;
   wmLabel=function(c,t,x,y,col,sz){
-    try{ if(typeof t==='string'&&/^Бандит Lv\d/.test(t)){ const q=wmGen().camps.find(k=>k.hq&&Math.abs(k.x-x)<1); if(q) return _lbl.call(this,c,q.n,x,y,'#ffd770',sz); } }catch(e){}
+    try{ if(typeof t==='string'&&/^Дээрэмчид Lv\d/.test(t)){ const q=wmGen().camps.find(k=>k.hq&&Math.abs(k.x-x)<1); if(q) return _lbl.call(this,c,q.n,x,y,'#ffd770',sz); } }catch(e){}
     return _lbl.apply(this,arguments);
   };
 
@@ -22004,7 +22007,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
 
   /* нуугдсан баазын самбарын гарчиг */
   const _sh=wmSheet;
-  wmSheet=function(){ const r=_sh.apply(this,arguments); try{ const e=(typeof WMS!=='undefined'&&WMS&&WMS!=='city')?wmEnt(WMS):null, sh=document.getElementById('wmsheet'); if(e&&e.hq&&sh){ sh.innerHTML=sh.innerHTML.replace(/Бандитын бааз/,e.n); } }catch(x){} return r; };
+  wmSheet=function(){ const r=_sh.apply(this,arguments); try{ const e=(typeof WMS!=='undefined'&&WMS&&WMS!=='city')?wmEnt(WMS):null, sh=document.getElementById('wmsheet'); if(e&&e.hq&&sh){ sh.innerHTML=sh.innerHTML.replace(/Дээрэмчдийн бааз/,e.n); } }catch(x){} return r; };
   /* ---- самбар (бусад модуль ашиглана) ---- */
   const css='#wmpn{position:fixed;inset:0;z-index:460;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}'+
   '#wmpn .pb{width:min(92vw,360px);max-height:80vh;overflow:auto;background:#2a1a0c;border:2px solid #c9972b;border-radius:14px;padding:12px;color:#f3e4bd;box-sizing:border-box}'+

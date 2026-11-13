@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='916e63ed1a';
+var UPDB='c39c42dd71';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23332,6 +23332,10 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   KEYS.forEach(k=>{ css+='body.pbg-'+k+' #modal .box{background:'+OV(k)+'url(rts/bg_'+k+'.webp?v=1) center top/cover no-repeat #2b1d12!important}'; });
   /* Бүтэн дэлгэц (sh2fs) дээр хүрээ байхгүй тул slice-ийг өөрчлөхгүй */
   css+='body.sh2fs[class*="pbg-"] #modal .box{border-image-slice:unset!important}';
+  /* Бүтэн дэлгэц (Цүнх, Агуулах, Дэлгүүр): картын бор дэвсгэрийг шуудархан болгоно (хүрээ хэвээр) */
+  const CS='.card,.sh2-t,.sh2-pk2,.sh2-jb,.sh2-sb,.sh2-fb,.sh2-em,.sh2-pk';
+  ['body.sh2fs.pbg-bag','body.sh2fs.pbg-agh','body.sh2fs.shbg'].forEach(P=>{
+    css+=CS.split(',').map(c=>P+' '+c).join(',')+'{border-image-slice:44!important;background:rgba(26,13,6,.5)!important}'; });
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   function setK(k){ const b=document.body; KEYS.forEach(x=>b.classList.remove('pbg-'+x)); if(k) b.classList.add('pbg-'+k); }
   const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ setK(MAP[typeof cur!=='undefined'?cur:'']||''); }catch(e){} return r; };

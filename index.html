@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e8982b02a6';
+var UPDB='f5e02f58d2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16627,6 +16627,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   '#bu.arn .bu-sk .buco{border-radius:'+U(9)+';padding:0 '+U(3)+';font-size:'+U(10)+'!important}'+
   '.bu-sk .bucd{position:absolute;left:8%;right:8%;top:10%;bottom:10%;background:#000c;border-radius:'+U(4)+';display:none;align-items:center;justify-content:center;color:#fff1c8;font:bold '+U(20)+'/1 Georgia,serif;text-shadow:0 1px 3px #000;z-index:3}'+
   '.bu-sk.cdw .bucd{display:flex}'+
+  '.bu-sk .quk{position:absolute;left:'+U(2)+';top:'+U(-3)+';padding:0 '+U(4)+';border-radius:'+U(6)+';background:linear-gradient(#e8b53a,#a8741a);border:'+U(1)+' solid #fff0a0;color:#2a1600;font:bold '+U(8)+'/'+U(11)+' sans-serif;z-index:4;pointer-events:none}'+
   '.bu-rest{position:absolute;right:'+U(92)+';bottom:'+U(12)+';width:'+U(66)+';height:'+U(46)+';pointer-events:auto;display:none;flex-direction:column;align-items:center;justify-content:center;border:0;padding:0;background:'+IMG('btn')+' center/100% 100% no-repeat;color:#e9cf93;font:bold '+U(12)+'/1.1 Georgia,serif;text-shadow:0 1px 3px #000,0 0 4px #000;touch-action:manipulation;cursor:pointer;filter:grayscale(.55) brightness(.8) drop-shadow(0 2px 3px #000a)}'+
   '.bu-rest small{font-size:'+U(9.5)+';color:#9fd7ff}'+
   '#bu.arn.fi.bupk .bu-rest{display:flex;filter:drop-shadow(0 0 7px #5aa8ff) brightness(1.1)}'+
@@ -16680,12 +16681,15 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   const cdOf=(u,sk)=>AR()?((u.skcd&&u.skcd[sk.i])||0):0;
   const fmtC=(u,sk)=>AR()?(ARCOST[sk.i]+'%'):String(sk.cost);
   const skOp=(u,sk)=>(u.elv!=null)?(u.elv>=SKUNL[sk.i]):skOpen(u.id,sk.i);
+  const isQa=sk=>!!(sk.arr&&sk.arr[5]&&sk.arr[5].qa);
   const canUse=(u,sk)=>skOp(u,sk)&&enOf(u)>=costOf(u,sk)&&cdOf(u,sk)<=0;
   function spend(u,sk){ if(AR()){ u.ep=Math.max(0,enOf(u)-ARCOST[sk.i]); u.skcd=u.skcd||[0,0,0,0]; u.skcd[sk.i]=ARCD[sk.i]+1; } else u.en=enOf(u)-sk.cost; }
   /* өөрийн ээлж эхлэхэд: энерги нэмэгдэж, cooldown 1-ээр буурна */
-  window.arTurnStart=function(u){ if(AR()){ u.ep=Math.min(100,enOf(u)+ARREG); if(u.skcd) u.skcd=u.skcd.map(v=>Math.max(0,(v||0)-1)); try{ arStatTick(u); }catch(e){} } else u.en=Math.min(5,(u.en==null?1:u.en)+1); };
+  window.arTurnStart=function(u){ if(AR()){ u.ep=Math.min(100,enOf(u)+ARREG); if(u.skcd) u.skcd=u.skcd.map(v=>Math.max(0,(v||0)-1)); try{ arStatTick(u); }catch(e){} u.qaUsed=0; u.xtU=0; } else u.en=Math.min(5,(u.en==null?1:u.en)+1); };
   function bhint(m){ if(!BT) return; BT.hm=m; BT.hmU=performance.now()+1800; try{ sfx('err'); }catch(e){} tick(true); }
-  function doSkill(u,sk,tg){ if(!castWith(u,sk,tg)) return; spend(u,sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; tick(true); }
+  function doSkill(u,sk,tg){ if(!castWith(u,sk,tg)) return; spend(u,sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.mode=null;
+    if(AR()&&isQa(sk)&&!u.qaUsed){ u.qaUsed=1; BT.hm='Түргэн үйлдэл · дахин нэг үйлдэл хий'; BT.hmU=performance.now()+2200; tick(true); return; }
+    BT.pick=null; tick(true); }
   window.buRest=function(){ if(!BT||!AR()||!BT.pick||BT.done) return; const u=BT.pick.u; u.ep=Math.min(100,enOf(u)+ARREST); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null;
     try{ BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Амарлаа · +'+ARREST+'% энерги',nm:u.name||hname(u.id),t:0,e:false}); }catch(e){} BT.tq=0.5; try{ sfx('tap'); }catch(e){} tick(true); };
   const VIP=()=>!!(S&&S.pass&&S.pass.vip);
@@ -16754,6 +16758,9 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
         if(sp.en) s+=3*sp.en*grp.length;
         if(sp.tn&&!al.some(x=>x.tn>t)&&u.hp>u.max*0.6) s+=12;
       }
+      if(sp.hs&&al.length>1+(sp.a==='self'?-1:0)) s+=25;
+      if(sp.it) s+=6*(sp.e==='one'?1:Math.min(fo.length,3));
+      if(sp.qa) s+=15;
       if(sp.ct&&!(u.ctn>0)&&fo.some(x=>x.type!=='archer')) s+=10;
       if(sp.sl&&!(u.sln>0)) s+=(u.hp<u.max*0.5?12:4);
       if(s<=0) return;
@@ -16766,7 +16773,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   window.arPlan=arPlan;
   function arAI(u){ try{
     if(!u||u.hp<=0) return false; const p=arPlan(u); if(!p) return false;
-    if(p.kind==='sk'){ const need=SKTG.indexOf(p.sk.k)>=0; if(castWith(u,p.sk,need?p.tg:null)){ spend(u,p.sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; return true; } }
+    if(p.kind==='sk'){ const need=SKTG.indexOf(p.sk.k)>=0; if(castWith(u,p.sk,need?p.tg:null)){ spend(u,p.sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; if(isQa(p.sk)&&!u.qaUsed){ u.qaUsed=1; return arAI(u)||true; } return true; } }
     if(p.kind==='rest'){ u.ep=Math.min(100,enOf(u)+ARREST); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null;
       try{ BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Амарлаа · +'+ARREST+'% энерги',nm:u.name||hname(u.id),t:0,e:false}); }catch(e){} return true; }
     const tg=(p.kind==='atk'&&p.tg)||turnPick(u); if(!tg) return false;
@@ -16858,7 +16865,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); if(BT.hm&&performance.now()<BT.hmU) t=BT.hm; } if(h.textContent!==t) h.textContent=t; } }
     const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
     if(su){ const L=heroSkills(su.id), en2=enOf(su), pk=BT.pick&&BT.pick.u===su;
-      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="'+((typeof SKP==='function'&&SKP(su.id,x.i))||('hf/sk_'+x.k+'.webp?v=2'))+'" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><div class="bucd"></div><span class="buco">'+fmtC(su,x)+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="'+((typeof SKP==='function'&&SKP(su.id,x.i))||('hf/sk_'+x.k+'.webp?v=2'))+'" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><div class="bucd"></div>'+(AR()&&isQa(x)?'<div class="quk">Түргэн</div>':'')+'<span class="buco">'+fmtC(su,x)+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
       setHTML($$('bu-sks'),'sks',skh,su.id+(window.SKPN?'p':'')+(AR()?'a':''));
       L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), cdn=cdOf(su,x), ok=open&&pk&&en2>=costOf(su,x)&&cdn<=0; { const cb=el.querySelector('.bucd'); if(cb&&cb.textContent!==(cdn>0?String(cdn):'')) cb.textContent=cdn>0?String(cdn):''; }
         el.className='bu-sk'+(open?'':' lock')+(open&&cdn>0?' cdw':'')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
@@ -16922,6 +16929,11 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     if(BT.pick){ const pu=BT.pick.u; if(pu.hp<=0||BT.done||!E0().length){ BT.pick=null; BT.mode=null; } else { BT.t-=dt; return; } }
     try{ dotTick(dt); }catch(e){}
     BT.tq=(BT.tq||0)-dt; if(BT.tq>0) return; const UU=BT.units;
+    if(AR()){ const x=UU.find(q=>q.xt>0&&q.hp>0&&!q.sup&&q.id&&!q.go);
+      if(x){ x.xt=0; x.xtU=1; x.qaUsed=0;
+        try{ BT.sk=BT.sk||[]; BT.sk.push({u:x,txt:'Нэмэлт ээлж',nm:x.name||'',t:0,e:!!x.side}); }catch(e){}
+        if(x.side===0){ BT.ts=1; BT.tq=0.3; BT.pick={u:x}; BT.mode=null; BT.bselM=0; BT.bsel=x.id; if(!skManual()){ autoAct(x); BT.tq=0.4; } else { try{ sfx('tap'); }catch(e){} } return; }
+        else if(window.taEnAct&&window.taEnAct(x,1)) return; } }
     for(let k=0;k<2;k++){ const sd=((BT.ts||0)+k)&1; const c=UU.filter(u=>u.side===sd&&u.hp>0&&!u.sup&&!u.go&&u.cd<=0); if(!c.length) continue;
       c.sort((a,b)=>(a.lastGo||0)-(b.lastGo||0)); const u=c[0];
       if(sd===0){ u.lastGo=BT.t; BT.ts=1; BT.tq=0.26; arTurnStart(u); if(AR()&&(u.hp<=0||arStun(u))){ u.cd=(u.d?u.d.cd:6)*0.3; BT.tq=0.5; return; } BT.pick={u}; BT.mode=null; BT.bselM=0; BT.bsel=u.id; if(!skManual()){ autoAct(u); BT.tq=0.4; } else { try{ sfx('tap'); }catch(e){} } return; }
@@ -21194,8 +21206,9 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       if(ad&&d.t<0.8){ c.font='bold 10px sans-serif'; c.lineWidth=3; const w=d.side?'Сул':'Давуу'; c.strokeText(w,d.x,y-sz-1); c.fillStyle=d.side?'#ff8a7a':'#9dff7a'; c.fillText(w,d.x,y-sz-1); }
       c.restore(); return true; }catch(e){ return false; } };
   /* Дайсны ээлж: тоглогчийн АВТО-той яг ижил логик (энергитэй чадвар → үгүй бол ердийн цохилт), талуудыг түр эргүүлж ажиллуулна */
-  window.taEnAct=function(u){ try{ if(typeof window.taAutoAct!=='function') return false; const U=BT.units; u.lastGo=BT.t; try{ window.arTurnStart(u); }catch(e){ u.en=Math.min(5,(u.en==null?1:u.en)+1); }
-    try{ if(u.hp<=0||arStun(u)){ u.cd=(u.d?u.d.cd:6)*0.3; BT.ts=0; BT.tq=0.5; return true; } }catch(e){}
+  window.taEnAct=function(u,extra){ try{ if(typeof window.taAutoAct!=='function') return false; const U=BT.units;
+    if(!extra){ u.lastGo=BT.t; try{ window.arTurnStart(u); }catch(e){ u.en=Math.min(5,(u.en==null?1:u.en)+1); }
+    try{ if(u.hp<=0||arStun(u)){ u.cd=(u.d?u.d.cd:6)*0.3; BT.ts=0; BT.tq=0.5; return true; } }catch(e){} }
     U.forEach(x=>{ x.side=x.side?0:1; }); let ok=false; try{ ok=window.taAutoAct(u); }catch(e){ ok=false; } finally{ U.forEach(x=>{ x.side=x.side?0:1; }); }
     if(!ok) return false; BT.ts=0; BT.tq=0.4; return true; }catch(e){ return false; } };
   /* Арена: 3-2-1 зураг байхгүй, шууд тулаан эхэлнэ */
@@ -22760,7 +22773,10 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   { const PIERCE={'Хуяг цоолох':1,'Хуяг эвдэх':1,'Цоолох жад':1};
     Object.keys(SK).forEach(id=>SK[id].forEach(e=>{ const sp=e[1]; if(sp.ex) sp.tr=1; if(PIERCE[e[0]]) sp.pc=1; }));
     SK.jelme[0][1].ct=2; SK.khubilai[1][1].ct=2; SK.arav[2][1].ct=2;
-    SK.harvaach[2][1].sl=1; SK.jamukha[0][1].sl=1; SK.subeedei[3][1].sl=1; }
+    SK.harvaach[2][1].sl=1; SK.jamukha[0][1].sl=1; SK.subeedei[3][1].sl=1;
+    /* шат 6: түргэн үйлдэл (qa) · таслах (it) */
+    SK.oelun[1][1].qa=1; SK.sorkh[1][1].qa=1; SK.haiyun[1][1].qa=1; SK.yelu[1][1].qa=1; SK.borte[0][1].qa=1;
+    SK.belgutei[0][1].it=1; SK.yelu[0][1].it=1; SK.mukhulai[2][1].it=1; SK.zev[2][1].it=1; }
   const pc=x=>Math.round(x*100);
   function descOf(sp,m){ const o=[]; const hh=sp.h?(sp.h*m).toFixed(1):''; const hn=sp.hn||1;
     if(sp.e){ const who=sp.e==='one'?'Сонгосон дайсанд':sp.e==='all'?'Бүх дайсанд':'3 дайсанд'; if(sp.h) o.push(who+' '+hh+' дахин цохилт'+(hn>1?' ×'+hn:'')+(sp.ex?' (HP '+pc(sp.ex[0])+'%-иас доош бол '+(sp.ex[1]*m).toFixed(0)+' дахин)':'')); else o.push(who); }
@@ -22769,7 +22785,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     if(sp.a){ const w=sp.a==='all'?'Бүх цэрэгт':sp.a==='self'?'Өөртөө':'Хамгийн шархтайд'; const q=[];
       if(sp.rv) q.push('унасан баатрыг '+pc(sp.rv)+'% HP-тэй босгоно'); if(sp.heal) q.push(pc(Math.min(0.9,sp.heal*m))+'% эдгээнэ'); if(sp.cl) q.push('хор, сулралыг цэвэрлэнэ'); if(sp.arm) q.push('авах гэмтэл -'+pc(Math.min(0.75,sp.arm[0]*(1+(m-1)*0.5)))+'% ('+sp.arm[1]+'с)'); if(sp.atkb) q.push('цохилт +'+pc(sp.atkb[0]*(1+(m-1)*0.6))+'% ('+sp.atkb[1]+'с)'); if(sp.en) q.push('+'+sp.en+' энерги'); if(sp.hs) q.push('ээлж түргэснэ'); if(sp.tn) q.push('дайсныг өөр рүүгээ татна ('+sp.tn+'с)');
       if(q.length) o.push(w+' '+q.join(', ')); }
-    if(sp.pc) o.push('хамгаалалтыг 50% нэвтэлнэ'); if(sp.tr) o.push('хамгаалалтыг үл тооно, цус алдаж байвал ×2'); if(sp.ct) o.push(sp.ct+' ээлж эсрэг цохилт хийнэ'); if(sp.sl) o.push(sp.sl+' ээлж нуугдана');
+    if(sp.pc) o.push('хамгаалалтыг 50% нэвтэлнэ'); if(sp.tr) o.push('хамгаалалтыг үл тооно, цус алдаж байвал ×2'); if(sp.ct) o.push(sp.ct+' ээлж эсрэг цохилт хийнэ'); if(sp.sl) o.push(sp.sl+' ээлж нуугдана'); if(sp.qa) o.push('Түргэн үйлдэл: ээлж дуусахгүй, дахин нэг үйлдэл хийнэ'); if(sp.hs) o.push(sp.a==='self'?'өөртөө нэмэлт ээлж':'хамгийн хүчтэй холбоотонд нэмэлт ээлж'); if(sp.it) o.push('зорилтын ээлжийг хойшлуулж, энергийн 20%-ийг авна');
     return o.join('. '); }
   const uik=sp=>sp.e==='one'?'snipe':sp.e?(sp.h&&!sp.a?'cleave':'cleave'):(sp.heal||sp.rv||sp.cl)?'heal':(sp.arm||sp.tn)?'guard':'rally';
   const _hs0=heroSkills;
@@ -22792,6 +22808,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
       if(sp.dash&&tgs[0]){ const tg=tgs[0]; u.x+=(tg.x-u.x)*(sp.e==='one'?0.6:0.4); u.y+=(tg.y-u.y)*(sp.e==='one'?0.6:0.4); u.fdir=tg.x>=u.x?1:-1; for(let q=0;q<5;q++) BT.pt.push({x:u.x,y:u.y,vx:(Math.random()-0.5)*30,vy:-6-Math.random()*10,t:0,l:0.6,c:'dust'}); }
       tgs.forEach(e=>{ if(sp.h){ let landed=false; for(let q=0;q<(sp.hn||1);q++){ let mult=sp.h; if(sp.ex&&e.hp<=e.max*sp.ex[0]) mult=sp.ex[1]; if(sp.ex&&BT.e&&BT.e.hbf&&arBleed(e)) mult=Math.max(mult,sp.h*2); let dm=Math.round(u.atk*mult*k), _cr=false; if(e.vu&&e.vu.t>t) dm=Math.round(dm*(1+e.vu.p)); if(BT.e&&BT.e.hbf){ if(!sp.tr&&!sp.pc&&e.arm&&e.arm.t>t) dm=Math.round(dm*(1-e.arm.p)); const _r=arMod(u,e,dm,1,sp.tr?'t':(sp.pc?'p':0)); if(_r.miss){ BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:0,miss:1,big:false,side:0}); continue; } dm=Math.round(_r.v); _cr=_r.crit; } landed=true; e.hp-=dm; u.dd=(u.dd||0)+dm; BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:dm,big:true,side:0,crit:_cr}); }
           if(!landed) return;
+          if(sp.it&&BT.e&&BT.e.hbf&&e.hp>0){ e.lastGo=BT.t; e._lg=e.lastGo; e.ep=Math.max(0,(e.ep==null?30:e.ep)-20); }
           e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; for(let q=0;q<6;q++) BT.pt.push({x:e.x,y:e.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:'spark'}); }
         if(e.hp>0){ if(sp.dot){ const dps=u.atk*sp.dot[1]*k, o=e.dot; if(!o||o.until<t||o.dps<=dps) e.dot={until:t+sp.dot[2],dps:dps,acc:0,c:sp.dot[0]}; }
           if(sp.st) e.cd=(e.cd>0?e.cd:0)+sp.st*Math.min(1.4,1+(k-1)*0.2); if(sp.wk) e.wk=t+sp.wk; if(sp.vu) e.vu={p:sp.vu[0],t:t+sp.vu[1]}; }
@@ -22804,9 +22821,10 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
         if(sp.arm){ const p=Math.min(0.75,sp.arm[0]*(1+(k-1)*0.5)); if(!a.arm||a.arm.t<t||a.arm.p<p) a.arm={p:p,t:t+sp.arm[1]}; else a.arm.t=Math.max(a.arm.t,t+sp.arm[1]); }
         if(sp.atkb){ const mm=1+sp.atkb[0]*(1+(k-1)*0.6); if(!a.bAtk||a.bAtk.t<t||a.bAtk.m<mm) a.bAtk={m:mm,t:t+sp.atkb[1]}; }
         if(sp.en){ if(BT.e&&BT.e.hbf) a.ep=Math.min(100,(a.ep==null?30:a.ep)+sp.en*20); else a.en=Math.min(5,(a.en==null?1:a.en)+sp.en); }
-        if(sp.hs&&!a.go){ a.cd=0; a.lastGo=-99; }
+        if(sp.hs&&!(BT.e&&BT.e.hbf)&&!a.go){ a.cd=0; a.lastGo=-99; }
         if(sp.tn&&a===u) u.tn=t+sp.tn;
-        FX(sp.f,a,'a'); }); if(sp.tn&&!as.includes(u)) u.tn=t+sp.tn; }
+        FX(sp.f,a,'a'); }); if(sp.hs&&BT.e&&BT.e.hbf){ const cand=sp.a==='self'?[u]:al.filter(x=>x!==u&&x.hp>0); const b=cand.length?cand.reduce((p,q)=>(q.atk||0)>(p.atk||0)?q:p):null; if(b&&!b.xt&&!b.xtU){ b.xt=1; try{ BT.sk=BT.sk||[]; BT.sk.push({u:b,txt:'Нэмэлт ээлж авна',nm:b.name||'',t:0,e:false}); }catch(x){} } }
+      if(sp.tn&&!as.includes(u)) u.tn=t+sp.tn; }
     FX(sp.f,u,'c');
     if(BT.e&&BT.e.hbf){ if(sp.ct) u.ctn=sp.ct+1; if(sp.sl) u.sln=sp.sl+1; }
     BT.ban={txt:d[1],n:u.name||'',t:0}; try{ sfx('skill'); vib(30); }catch(x){} return true; };

@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='295a39ae6c';
+var UPDB='6c6d9dc7cc';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22784,6 +22784,91 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
       sh.insertAdjacentHTML('afterbegin','<div class="sm" style="text-align:center;margin-bottom:4px">⚔ '+t+'</div>');
     }catch(x){}
   };
+})();
+
+
+/* p32/vsintro.js — Арена: «Эхлэх» дарсны дараа VS дэлгэц.
+   Зүүн талд цэнхэр хүрээ (миний баг), баруун талд улаан хүрээ (эсрэгч), голд VS. Хүрээ бүрт: баатрын хамгийн хүчтэй нь, дээр нь тоглогчийн нэр, доор нь багийн нийт хүч.
+   btGo-г ороож арены тулаанд (E.hbf && E.fr) л ажиллана; дэлгэц дээр дарвал алгасна. */
+(function(){
+  var VSA='rts/', VSV='?v=1', VST=1500;   /* VST: тулаан эхлэх хүртэлх хугацаа (мс) */
+  function vsEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function vsF(n){ try{ return window.f?window.f(n):String(Math.round(n)); }catch(e){ return String(Math.round(n)); } }
+  function vsHero(id){ try{ return HEROES.find(function(x){ return x.id===id; }); }catch(e){ return null; } }
+  function vsBest(list){ var b=null; list.forEach(function(h){ if(!b||h.p>b.p) b=h; }); return b; }
+  /* Миний тал: багийн хамгийн хүчтэй баатар + багийн нийт хүч */
+  function vsMine(E){
+    var ids=(E.hs||[]).slice(0,3), L=ids.map(function(id){ var p=0; try{ p=heroPower(id); }catch(e){} return {id:id,p:p,lv:(S.heroes&&S.heroes[id])||1}; }), b=vsBest(L), tp=0;
+    try{ tp=window.TAX.teamPow(); }catch(e){} if(!tp) tp=L.reduce(function(a,x){ return a+x.p; },0);
+    return {n:String((S.prof&&S.prof.name)||'Хаан').slice(0,14), h:b, p:tp};
+  }
+  /* Эсрэг тал: E.eh (масштаблагдсан хүчтэй) дундаас хамгийн хүчтэй нь */
+  function vsOpp(E){
+    var L=(E.eh||[]).map(function(h){ return {id:h.id,p:h.p||0,lv:h.lv||1}; }), b=vsBest(L), n=String(E.n||'').replace(/^Багийн арена:\s*/,'').replace(/^Бот\s*·\s*/,'');
+    return {n:(n||'Дайсан').slice(0,16), h:b, p:E.p||L.reduce(function(a,x){ return a+x.p; },0)};
+  }
+  var SW='<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.8" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>';
+  function vsCard(side,d){
+    var h=d.h, he=h?vsHero(h.id):null, img=h&&typeof hdImg==='function'?hdImg(h.id,0,'vsx-img',0):'';
+    var el=''; try{ if(h&&window.taElImg) el=window.taElImg(h.id,'right:5%;top:5%;width:20%;height:auto'); }catch(e){}
+    var hn=he?String(he.n).split(' ')[0]:'';
+    return '<div class="vsc '+side+'"><div class="vsp">'+img+el
+      +(h?'<div class="vsl">'+h.lv+'</div><div class="vsh"><b>'+vsEsc(hn)+'</b></div>':'')+'</div>'
+      +'<img class="vsf" alt="" src="'+VSA+(side==='L'?'vs_blue':'vs_red')+'.webp'+VSV+'">'
+      +'<div class="vsn"><span>'+vsEsc(d.n)+'</span></div>'
+      +'<div class="vsw"><i>'+SW+'</i><span>'+vsF(d.p)+'</span></div></div>';
+  }
+  /* Дэлгэцийн хэмжээнд тааруулан хүрээний хэмжээг тооцно (босоо утсан дээр #btl эргэсэн ч зөв) */
+  function vsSize(o){
+    var W=o.clientWidth||innerWidth, H=o.clientHeight||innerHeight, ch=Math.min(H*0.86,W*0.5), cw=ch*2/3;
+    o.style.setProperty('--ch',ch.toFixed(1)+'px'); o.style.setProperty('--cw',cw.toFixed(1)+'px');
+    Array.prototype.forEach.call(o.querySelectorAll('.vsn span'),function(s){ var len=Math.max(4,s.textContent.length); s.style.fontSize=Math.min(ch*0.052,(cw*0.64)/(len*0.62)).toFixed(1)+'px'; });
+  }
+  function vsShow(E,go){
+    var bl=document.getElementById('btl'); if(!bl){ go(); return; }
+    var old=document.getElementById('tavs'); if(old) old.remove();
+    var o=document.createElement('div'); o.id='tavs';
+    o.innerHTML='<div class="vsrow">'+vsCard('L',vsMine(E))+'<img class="vsv" alt="VS" src="'+VSA+'vs_vs.webp'+VSV+'">'+vsCard('R',vsOpp(E))+'</div>';
+    bl.appendChild(o); bl.dataset.vs='1'; vsSize(o);
+    var done=false, fin=function(){ if(done) return; done=true; o.classList.add('out'); try{ go(); }catch(e){} setTimeout(function(){ if(o.parentNode) o.remove(); if(bl.dataset) delete bl.dataset.vs; },1200); };
+    o.addEventListener('pointerdown',function(ev){ ev.stopPropagation(); fin(); },true);
+    setTimeout(function(){ try{ sfx('big'); vib(30); }catch(e){} },430);
+    setTimeout(function(){ if(!(BT&&BT.e===E)){ done=true; if(o.parentNode) o.remove(); if(bl.dataset) delete bl.dataset.vs; return; } fin(); },VST);
+  }
+  var _g=btGo;
+  btGo=function(){
+    var E=null; try{ E=BT&&BT.e; }catch(e){}
+    if(!E||!E.hbf||!E.fr||!E.eh||!BT.wait||BT.vs||E._vsd) return _g.apply(this,arguments);
+    if(!BT.sel||!BT.sel.filter(function(x){ return !SUPP[x]; }).length) return _g.apply(this,arguments);   /* «Эхлээд баатраа сонго» зэрэг шалгалт хуучин btGo дотор */
+    E._vsd=1; vsShow(E,function(){ if(BT&&BT.e===E&&BT.wait&&!BT.vs) _g.call(window); });
+  };
+  var css='#tavs{position:absolute;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(10,6,4,.55),rgba(0,0,0,.82));opacity:1;transition:opacity .55s ease;touch-action:manipulation;cursor:pointer;overflow:hidden}'
+   +'#tavs.out{opacity:0;pointer-events:none}'
+   +'#tavs .vsrow{position:relative;display:flex;align-items:center;justify-content:center;height:var(--ch,300px);animation:vsK .32s ease-out .52s}'
+   +'#tavs .vsc{position:relative;flex:none;width:var(--cw,200px);height:var(--ch,300px);filter:drop-shadow(0 6px 14px #000c)}'
+   +'#tavs .vsc.L{animation:vsL .6s cubic-bezier(.17,.84,.3,1.12) both}#tavs .vsc.R{animation:vsR .6s cubic-bezier(.17,.84,.3,1.12) both}'
+   +'#tavs .vsf{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;display:block;max-width:none}'
+   +'#tavs .vsp{position:absolute;z-index:1;left:19%;top:25.6%;width:62%;height:48%;overflow:hidden;background:radial-gradient(circle at 50% 35%,#4a3a28,#171008)}'
+   +'#tavs .vsc.L .vsp{background:radial-gradient(circle at 50% 35%,#2c4a82,#0b1428)}#tavs .vsc.R .vsp{background:radial-gradient(circle at 50% 35%,#7a2a20,#240806)}'
+   +'#tavs .vsx-img{position:absolute;left:0;top:0;width:100%!important;height:100%!important;object-fit:cover;object-position:50% 18%;display:block}'
+   +'#tavs .vsc.R .vsx-img{transform:scaleX(-1)}'
+   +'#tavs .vsh{position:absolute;left:0;right:0;bottom:0;padding:calc(var(--ch)*.04) 17% calc(var(--ch)*.016);background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,0));display:flex;justify-content:center;align-items:baseline;font-family:Georgia,"Times New Roman",serif;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap}'
+   +'#tavs .vsh b{font-size:calc(var(--ch)*.05);max-width:100%;overflow:hidden;text-overflow:ellipsis}'
+   +'#tavs .vsl{position:absolute;left:5%;top:5%;width:19%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7df04a,#25a10f 70%,#157008);border:2px solid #d4ffb0;box-shadow:0 2px 4px #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:Georgia,"Times New Roman",serif;font-weight:bold;font-size:calc(var(--ch)*.042);color:#fff;text-shadow:0 1px 2px #000;z-index:2}'
+   +'#tavs .vsn,#tavs .vsw{position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;font-family:Georgia,"Times New Roman",serif;font-weight:bold;white-space:nowrap;pointer-events:none}'
+   +'#tavs .vsn{left:17%;width:66%;top:14.4%;height:7.8%;color:#ffe7a8;text-shadow:0 2px 3px #000,0 0 8px #2a0a02}#tavs .vsn span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}'
+   +'#tavs .vsw{left:26%;width:48%;top:76.8%;height:7%;gap:calc(var(--cw)*.03);color:#ffd770;font-size:calc(var(--ch)*.056);text-shadow:0 2px 3px #000}#tavs .vsw i{display:block;width:calc(var(--ch)*.05);height:calc(var(--ch)*.05)}#tavs .vsw i svg{display:block;width:100%;height:100%}'
+   +'#tavs .vsv{position:relative;z-index:5;flex:none;width:calc(var(--cw)*.94);height:auto;margin:0 calc(var(--cw)*-.12);pointer-events:none;animation:vsV .55s cubic-bezier(.2,.9,.25,1.2) .42s both,vsG 1.2s ease-in-out 1s infinite;filter:drop-shadow(0 0 14px #ff8a2a99) drop-shadow(0 4px 8px #000)}'
+   +'#tavs:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#fff3c0,rgba(255,200,90,0) 60%);opacity:0;pointer-events:none;animation:vsFl .5s ease-out .45s}'
+   +'@keyframes vsL{0%{transform:translateX(-135%) rotate(-7deg);opacity:0}100%{transform:none;opacity:1}}'
+   +'@keyframes vsR{0%{transform:translateX(135%) rotate(7deg);opacity:0}100%{transform:none;opacity:1}}'
+   +'@keyframes vsV{0%{transform:scale(3.2);opacity:0}60%{transform:scale(.9);opacity:1}100%{transform:scale(1);opacity:1}}'
+   +'@keyframes vsG{50%{transform:scale(1.045)}}'
+   +'@keyframes vsK{0%{transform:translate(0,0)}20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}100%{transform:translate(0,0)}}'
+   +'@keyframes vsFl{0%{opacity:.85}100%{opacity:0}}'
+   +'#btl[data-vs] #bvs,#btl[data-vs] #btpan,#btl[data-vs] #bmatch,#btl[data-vs] #bstart{display:none!important}#btl[data-vs] #bu-pan,#btl[data-vs] #bu-sks,#btl[data-vs] #bu-ctl,#btl[data-vs] #bu-go,#btl[data-vs] #bu-hint{visibility:hidden}';
+  var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+  window.vsIntro=vsShow;
 })();
 
 

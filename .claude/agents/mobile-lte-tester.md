@@ -1,6 +1,6 @@
 ---
 name: mobile-lte-tester
-description: Tests loading and behaviour on slow mobile networks and in Messenger/Facebook in-app browser; offline/update flow.
+description: "Мобайл ба LTE шалгагч — LTE, Messenger browser | Tests loading and behaviour on slow mobile networks and in Messenger/Facebook in-app browser; offline/update flow."
 ---
 
 # Мобайл ба LTE шалгагч

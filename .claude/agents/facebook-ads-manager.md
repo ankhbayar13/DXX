@@ -1,6 +1,6 @@
 ---
 name: facebook-ads-manager
-description: Plans Facebook/Messenger promotion for DXX in Mongolia: audiences, creatives, small budgets, ?src= tracking.
+description: "Facebook сурталчилгааны менежер — Facebook сурталчилгааны төлөвлөгөө | Plans Facebook/Messenger promotion for DXX in Mongolia: audiences, creatives, small budgets, ?src= tracking."
 ---
 
 # Facebook сурталчилгааны менежер

@@ -1,6 +1,6 @@
 ---
 name: security-anticheat-engineer
-description: Finds exploits in DXX: client-side cheating, Алт duplication, save editing, rule loopholes, payment tampering. Use before releasing online/payment features.
+description: "Аюулгүй байдал ба cheat хамгаалалт — Cheat, нүх, аюулгүй байдал | Finds exploits in DXX: client-side cheating, Алт duplication, save editing, rule loopholes, payment tampering. Use before releasing online/payment features."
 ---
 
 # Аюулгүй байдал ба cheat хамгаалалт

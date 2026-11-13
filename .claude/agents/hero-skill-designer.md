@@ -1,6 +1,6 @@
 ---
 name: hero-skill-designer
-description: Designs the 24+ heroes: roles, 4-skill kits, elements, stats, support heroes, new heroes for chapters 15-30. Use when adding or rebalancing heroes/skills.
+description: "Баатар ба ур чадварын дизайнер — Баатрууд, 4 ур чадвар, шинэ баатар | Designs the 24+ heroes: roles, 4-skill kits, elements, stats, support heroes, new heroes for chapters 15-30. Use when adding or rebalancing heroes/skills."
 ---
 
 # Баатар ба ур чадварын дизайнер

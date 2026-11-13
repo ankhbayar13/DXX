@@ -1,6 +1,6 @@
 ---
 name: js-gameplay-programmer
-description: Writes and fixes JavaScript gameplay in DXX: village, buildings, NPCs, livestock, quests, economy logic. Use for building or fixing features after the owner says «хий».
+description: "Gameplay программист — Тоглоомын код, алдаа засах | Writes and fixes JavaScript gameplay in DXX: village, buildings, NPCs, livestock, quests, economy logic. Use for building or fixing features after the owner says «хий»."
 ---
 
 # Gameplay программист

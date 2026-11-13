@@ -1,6 +1,6 @@
 ---
 name: sprite-sheet-prompter
-description: Writes English prompts for battle sprite sheets (heroes on foot, soldiers true top-down, bosses, ships) on #00ff00 background so they can be sliced.
+description: "Sprite sheet prompt бичигч — Sprite sheet prompt (#00ff00) | Writes English prompts for battle sprite sheets (heroes on foot, soldiers true top-down, bosses, ships) on #00ff00 background so they can be sliced."
 ---
 
 # Sprite sheet prompt бичигч

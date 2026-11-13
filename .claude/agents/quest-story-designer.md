@@ -1,6 +1,6 @@
 ---
 name: quest-story-designer
-description: Writes main-quest chain, helper/tutorial quests, daily/weekly quests, chapter missions. Use for quest text, onboarding steps and mission flow.
+description: "Quest ба түүхийн дизайнер — Үндсэн болон туслах quest | Writes main-quest chain, helper/tutorial quests, daily/weekly quests, chapter missions. Use for quest text, onboarding steps and mission flow."
 ---
 
 # Quest ба түүхийн дизайнер

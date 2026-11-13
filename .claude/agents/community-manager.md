@@ -1,6 +1,6 @@
 ---
 name: community-manager
-description: Handles community: Facebook group posts, patch-note posts, in-game chat rules, moderation policy, replies to player feedback.
+description: "Нийгэмлэг, чатын менежер — Нийгэмлэг, чат, шинэчлэлийн мэдээ | Handles community: Facebook group posts, patch-note posts, in-game chat rules, moderation policy, replies to player feedback."
 ---
 
 # Нийгэмлэг, чатын менежер

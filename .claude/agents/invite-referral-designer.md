@@ -1,6 +1,6 @@
 ---
 name: invite-referral-designer
-description: Designs invite/referral loops: «Найзаа урь», share cards, Messenger link preview, rewards, abuse prevention.
+description: "Найз урих системийн дизайнер — Найзаа урих систем | Designs invite/referral loops: «Найзаа урь», share cards, Messenger link preview, rewards, abuse prevention."
 ---
 
 # Найз урих системийн дизайнер

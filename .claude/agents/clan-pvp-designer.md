@@ -1,6 +1,6 @@
 ---
 name: clan-pvp-designer
-description: Designs clans, weekly clan competition, empire wars, raids, ranking, 1v1 live arena, friends. Use for multiplayer/social features.
+description: "Клан ба PvP дизайнер — Клан, өрсөлдөөн, найз, 1v1 | Designs clans, weekly clan competition, empire wars, raids, ranking, 1v1 live arena, friends. Use for multiplayer/social features."
 ---
 
 # Клан ба PvP дизайнер

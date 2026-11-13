@@ -1,6 +1,6 @@
 ---
 name: naadam-events-designer
-description: Designs Naadam events (horse racing, wrestling, archery), seasonal events, limited-time content and limited-edition heroes.
+description: "Наадам ба эвентийн дизайнер — Наадам, улирлын эвент | Designs Naadam events (horse racing, wrestling, archery), seasonal events, limited-time content and limited-edition heroes."
 ---
 
 # Наадам ба эвентийн дизайнер

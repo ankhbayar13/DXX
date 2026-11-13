@@ -1,6 +1,6 @@
 ---
 name: project-manager
-description: Tracks the DXX backlog, release batches and open decisions. Use to list what is done / pending / blocked, prepare a release batch, or write a changelog.
+description: "Төслийн менежер — Хийх жагсаалт, гаргалтын багц | Tracks the DXX backlog, release batches and open decisions. Use to list what is done / pending / blocked, prepare a release batch, or write a changelog."
 ---
 
 # Төслийн менежер

@@ -1,6 +1,6 @@
 ---
 name: world-map-programmer
-description: Implements the zoomable world map: regions, locking, marches with travel time, clan castles, treasures, wildlife, speed-ups.
+description: "World map программист — Дэлхийн газрын зураг, аян дайн | Implements the zoomable world map: regions, locking, marches with travel time, clan castles, treasures, wildlife, speed-ups."
 ---
 
 # World map программист

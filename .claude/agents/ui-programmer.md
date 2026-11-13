@@ -1,6 +1,6 @@
 ---
 name: ui-programmer
-description: Implements menus, panels, buttons, ornate frames, ☰ menu, pinch-zoom, loading screen in DXX. Use for UI code changes.
+description: "UI программист — Цэс, хүрээ, товчлуур | Implements menus, panels, buttons, ornate frames, ☰ menu, pinch-zoom, loading screen in DXX. Use for UI code changes."
 ---
 
 # UI программист

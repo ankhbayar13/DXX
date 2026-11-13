@@ -1,6 +1,6 @@
 ---
 name: building-art-prompter
-description: Writes prompts for buildings, ger/ordon levels, pens, fields, decor, regional castles per world-map region.
+description: "Барилгын зургийн prompt бичигч — Барилга, гэрийн зургийн prompt | Writes prompts for buildings, ger/ordon levels, pens, fields, decor, regional castles per world-map region."
 ---
 
 # Барилгын зургийн prompt бичигч

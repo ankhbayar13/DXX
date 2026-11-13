@@ -1,6 +1,6 @@
 ---
 name: audio-voice-director
-description: Plans sound effects and NPC voice lines (owner records voices himself), prompts for AI sound tools, and how to attach clips efficiently.
+description: "Дуу, дуу хоолойн найруулагч — Дуу, NPC дуу хоолой | Plans sound effects and NPC voice lines (owner records voices himself), prompts for AI sound tools, and how to attach clips efficiently."
 ---
 
 # Дуу, дуу хоолойн найруулагч

@@ -1,6 +1,6 @@
 ---
 name: play-store-launch-manager
-description: Prepares store listing text, screenshots plan, privacy/terms pages, data-safety, testing track plan for the Google Play beta.
+description: "Google Play гаргалтын менежер — Google Play-д гаргах бэлтгэл | Prepares store listing text, screenshots plan, privacy/terms pages, data-safety, testing track plan for the Google Play beta."
 ---
 
 # Google Play гаргалтын менежер

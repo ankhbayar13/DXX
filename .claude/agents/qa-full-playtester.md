@@ -1,6 +1,6 @@
 ---
 name: qa-full-playtester
-description: Plays through DXX in a headless browser or by code reading: finds bugs, broken flows, console errors. Use after any build and before releases.
+description: "Бүтэн тоглоом шалгагч — Бүтэн тоглоом шалгаж алдаа олно | Plays through DXX in a headless browser or by code reading: finds bugs, broken flows, console errors. Use after any build and before releases."
 ---
 
 # Бүтэн тоглоом шалгагч

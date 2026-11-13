@@ -1,6 +1,6 @@
 ---
 name: hero-art-prompter
-description: Writes English AI-image prompts for hero portraits, full-body art, summon-door art in a consistent early-13th-century Mongol look.
+description: "Баатрын дүрийн prompt бичигч — Баатрын зургийн prompt | Writes English AI-image prompts for hero portraits, full-body art, summon-door art in a consistent early-13th-century Mongol look."
 ---
 
 # Баатрын дүрийн prompt бичигч

@@ -1,6 +1,6 @@
 ---
 name: new-player-tester
-description: Reviews onboarding as a first-time player: clarity of tutorial, first 5 minutes, first-day return reasons, confusing words.
+description: "Шинэ тоглогчийн туршлага шалгагч — Шинэ тоглогчийн туршлага | Reviews onboarding as a first-time player: clarity of tutorial, first 5 minutes, first-day return reasons, confusing words."
 ---
 
 # Шинэ тоглогчийн туршлага шалгагч

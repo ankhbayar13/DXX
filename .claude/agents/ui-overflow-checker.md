@@ -1,6 +1,6 @@
 ---
 name: ui-overflow-checker
-description: Finds text/button overflow, overlapping UI, mismatched numbers, unclear names across menus and screen sizes.
+description: "UI дүүргэлт ба текст хэтрэлт шалгагч — Текст хэтрэлт, давхцал | Finds text/button overflow, overlapping UI, mismatched numbers, unclear names across menus and screen sizes."
 ---
 
 # UI дүүргэлт ба текст хэтрэлт шалгагч

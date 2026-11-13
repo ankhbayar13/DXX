@@ -1,6 +1,6 @@
 ---
 name: regression-checker
-description: After each change, checks that old features and old saves still work; reviews diffs for risky edits in the huge files.
+description: "Дахин шалгалтын (regression) шалгагч — Өөрчлөлт хуучныг эвдсэн эсэх | After each change, checks that old features and old saves still work; reviews diffs for risky edits in the huge files."
 ---
 
 # Дахин шалгалтын (regression) шалгагч

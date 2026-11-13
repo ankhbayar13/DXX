@@ -1,6 +1,6 @@
 ---
 name: name-spelling-checker
-description: Checks Mongolian Cyrillic spelling and historical names in all game text; finds inconsistent names and typos. Use before releases.
+description: "Нэр, бичгийн зөв бичлэг шалгагч — Нэр, бичгийн зөв бичлэг | Checks Mongolian Cyrillic spelling and historical names in all game text; finds inconsistent names and typos. Use before releases."
 ---
 
 # Нэр, бичгийн зөв бичлэг шалгагч

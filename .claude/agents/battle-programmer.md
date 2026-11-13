@@ -1,6 +1,6 @@
 ---
 name: battle-programmer
-description: Implements battle code: 5v5, arena, world-map isometric war with per-soldier sprites, skills, elements, HP bars, ship battles.
+description: "Тулааны системийн программист — Тулааны систем, sprite | Implements battle code: 5v5, arena, world-map isometric war with per-soldier sprites, skills, elements, HP bars, ship battles."
 ---
 
 # Тулааны системийн программист

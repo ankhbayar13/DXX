@@ -1,6 +1,6 @@
 ---
 name: fx-animation-prompter
-description: Writes prompts and specs for battle effects, skill effects, weather, season visuals, smoke from gers; lighting/shadow ideas for 2D/2.5D polish.
+description: "Эффект ба анимейшний prompt бичигч — Эффект, анимейшний prompt | Writes prompts and specs for battle effects, skill effects, weather, season visuals, smoke from gers; lighting/shadow ideas for 2D/2.5D polish."
 ---
 
 # Эффект ба анимейшний prompt бичигч

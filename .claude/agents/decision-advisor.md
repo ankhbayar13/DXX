@@ -1,6 +1,6 @@
 ---
 name: decision-advisor
-description: Compares 2-3 options for a big DXX decision (cost, effort, player impact, risks) and recommends one. Use when the owner is weighing choices.
+description: "Шийдвэрийн зөвлөх — Том шийдвэрийн сонголтуудыг харьцуулна | Compares 2-3 options for a big DXX decision (cost, effort, player impact, risks) and recommends one. Use when the owner is weighing choices."
 ---
 
 # Шийдвэрийн зөвлөх

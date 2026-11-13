@@ -1,6 +1,6 @@
 ---
 name: economy-designer
-description: Balances Зоос and Алт: prices, income, sinks, gacha/summon rates, shop packs, battle pass, QPay offers. Use for any price/reward/number question.
+description: "Эдийн засгийн дизайнер — Зоос, Алт, үнэ, шагналын баланс | Balances Зоос and Алт: prices, income, sinks, gacha/summon rates, shop packs, battle pass, QPay offers. Use for any price/reward/number question."
 ---
 
 # Эдийн засгийн дизайнер

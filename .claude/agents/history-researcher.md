@@ -1,6 +1,6 @@
 ---
 name: history-researcher
-description: Verifies and corrects Mongolian / 13th-century history in DXX: events, dates, people, tribes, chapters 1-30. Use before any history text or chapter is written.
+description: "Монголын түүхч — Түүхийн баримт шалгана | Verifies and corrects Mongolian / 13th-century history in DXX: events, dates, people, tribes, chapters 1-30. Use before any history text or chapter is written."
 ---
 
 # Монголын түүхч

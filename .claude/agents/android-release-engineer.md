@@ -1,6 +1,6 @@
 ---
 name: android-release-engineer
-description: Packages DXX for Google Play (TWA/APK via android/ and the GitHub workflow), store listing, data-safety, checklist; also iOS App Store questions.
+description: "Android / Google Play инженер — Google Play, Android багцлалт | Packages DXX for Google Play (TWA/APK via android/ and the GitHub workflow), store listing, data-safety, checklist; also iOS App Store questions."
 ---
 
 # Android / Google Play инженер

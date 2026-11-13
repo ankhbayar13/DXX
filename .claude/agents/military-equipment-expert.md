@@ -1,6 +1,6 @@
 ---
 name: military-equipment-expert
-description: Advises on accurate 13th-century Mongol (and enemy) weapons, armor, clothing, horses, ger, tools. Use for unit looks, art prompts and item names.
+description: "Зэвсэг, хувцасны шинжээч — Зэвсэг, хувцас, морь, гэр | Advises on accurate 13th-century Mongol (and enemy) weapons, armor, clothing, horses, ger, tools. Use for unit looks, art prompts and item names."
 ---
 
 # Зэвсэг, хувцасны шинжээч

@@ -1,6 +1,6 @@
 ---
 name: geography-map-expert
-description: Checks world-map geography and travel logic: regions, routes, travel times, which countries/cities exist when. Use for the world map and chapter marches.
+description: "Газар зүй ба газрын зургийн шинжээч — Газрын зураг, аяллын хугацаа | Checks world-map geography and travel logic: regions, routes, travel times, which countries/cities exist when. Use for the world map and chapter marches."
 ---
 
 # Газар зүй ба газрын зургийн шинжээч

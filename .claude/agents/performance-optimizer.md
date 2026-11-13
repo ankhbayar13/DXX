@@ -1,6 +1,6 @@
 ---
 name: performance-optimizer
-description: Makes DXX load and run fast on LTE and low-end Android: file sizes, lazy loading, caching, service worker, memory, FPS.
+description: "Оновчлолын инженер — LTE дээр хурдан ачаалах | Makes DXX load and run fast on LTE and low-end Android: file sizes, lazy loading, caching, service worker, memory, FPS."
 ---
 
 # Оновчлолын инженер

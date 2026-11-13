@@ -1,6 +1,6 @@
 ---
 name: qpay-payment-engineer
-description: Implements and checks the QPay real-money flow via Cloudflare Worker: invoices, callbacks, crediting Алт safely.
+description: "QPay төлбөрийн инженер — QPay төлбөрийн урсгал | Implements and checks the QPay real-money flow via Cloudflare Worker: invoices, callbacks, crediting Алт safely."
 ---
 
 # QPay төлбөрийн инженер

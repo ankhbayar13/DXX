@@ -1,6 +1,6 @@
 ---
 name: battle-designer
-description: Designs battle systems: 5v5 heroes, 3v3 arena, world-map war, ship battles, elements (Гал/Ус/Салхи), skills, boss fights. Use for battle rules and difficulty.
+description: "Тулааны дизайнер — Тулааны дүрэм, ур чадвар, элемент | Designs battle systems: 5v5 heroes, 3v3 arena, world-map war, ship battles, elements (Гал/Ус/Салхи), skills, boss fights. Use for battle rules and difficulty."
 ---
 
 # Тулааны дизайнер

@@ -1,6 +1,6 @@
 ---
 name: shop-monetization-manager
-description: Plans the real-money shop (QPay), packs, limited-edition heroes, battle pass, first-purchase offers, in a fair way.
+description: "Дэлгүүр ба орлогын менежер — Дэлгүүр, багц, орлого | Plans the real-money shop (QPay), packs, limited-edition heroes, battle pass, first-purchase offers, in a fair way."
 ---
 
 # Дэлгүүр ба орлогын менежер

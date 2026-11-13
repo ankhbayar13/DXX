@@ -1,6 +1,6 @@
 ---
 name: ui-art-prompter
-description: Writes prompts for UI sets: wood textures, cards, buttons, tags, icons (Зоос silver coin, Алт gold coin with blue gem), element icons, skill icons.
+description: "UI хүрээ, товчлууруудын prompt бичигч — UI хүрээ, товч, дүрсний prompt | Writes prompts for UI sets: wood textures, cards, buttons, tags, icons (Зоос silver coin, Алт gold coin with blue gem), element icons, skill icons."
 ---
 
 # UI хүрээ, товчлууруудын prompt бичигч

@@ -1,6 +1,6 @@
 ---
 name: balance-tester
-description: Simulates economy and battles to find too-easy/too-hard content, runaway currency, dominant heroes.
+description: "Балансын шалгагч — Баланс, эдийн засгийн симуляци | Simulates economy and battles to find too-easy/too-hard content, runaway currency, dominant heroes."
 ---
 
 # Балансын шалгагч

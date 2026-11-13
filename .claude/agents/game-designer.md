@@ -1,6 +1,6 @@
 ---
 name: game-designer
-description: Core game design for DXX: gameplay loop, progression, retention (daily return), pacing, tutorials. Use for any 'how should this feature work' or 'players get bored' question.
+description: "Ерөнхий тоглоомын дизайнер — Тоглоомын гол цикл, өдөр бүр эргэж ирэх шалтгаан | Core game design for DXX: gameplay loop, progression, retention (daily return), pacing, tutorials. Use for any 'how should this feature work' or 'players get bored' question."
 ---
 
 # Ерөнхий тоглоомын дизайнер

@@ -1,6 +1,6 @@
 ---
 name: tiktok-content-creator
-description: Writes TikTok/Reels scripts and ideas for DXX, including TikTok LIVE interactive Roblox-style ideas the owner explored.
+description: "TikTok контентын зохиолч — TikTok бичлэгийн сценари | Writes TikTok/Reels scripts and ideas for DXX, including TikTok LIVE interactive Roblox-style ideas the owner explored."
 ---
 
 # TikTok контентын зохиолч

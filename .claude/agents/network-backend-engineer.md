@@ -1,6 +1,6 @@
 ---
 name: network-backend-engineer
-description: Firebase/Supabase, cloud save, auth (email/Google/PIN), chat, friends, leaderboard, admin tools — within FREE tiers.
+description: "Сүлжээ ба backend инженер — Firebase, Supabase, үнэгүй хязгаар | Firebase/Supabase, cloud save, auth (email/Google/PIN), chat, friends, leaderboard, admin tools — within FREE tiers."
 ---
 
 # Сүлжээ ба backend инженер

@@ -1,6 +1,6 @@
 ---
 name: card-game-designer
-description: Designs the Marvel-Snap-style «Картын тулаан» mini-game: cards, locations, synergies, shards, lobby, ranking.
+description: "Картын тулааны дизайнер — Картын тулааны мини тоглоом | Designs the Marvel-Snap-style «Картын тулаан» mini-game: cards, locations, synergies, shards, lobby, ranking."
 ---
 
 # Картын тулааны дизайнер

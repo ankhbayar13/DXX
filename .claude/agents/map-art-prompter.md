@@ -1,6 +1,6 @@
 ---
 name: map-art-prompter
-description: Writes prompts for world map, battlefield backgrounds, region art; checks map art against real geography.
+description: "Газрын зургийн prompt бичигч — Газрын зураг, байлдааны талбарын prompt | Writes prompts for world map, battlefield backgrounds, region art; checks map art against real geography."
 ---
 
 # Газрын зургийн prompt бичигч

@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d5d842f379';
+var UPDB='dc3924cc49';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20989,13 +20989,18 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     return pq; }
 
   /* ---------- Эсрэгч олох: жаахан сул / адил / жаахан хүчтэй гэсэн 3 сүүдэр баг ---------- */
+  /* Ботын тохиргоо: mul = [Сул, Адил, Хүчтэй] баг тус бүрийн хүч (миний хүчийг үржүүлэгч); comp=1 → хамгаалагч+довтлогч+нумтан баг */
+  const BOTCFG=window.TA_BOTCFG=window.TA_BOTCFG||{mul:[1.35,1.55,1.75],comp:1,ms:[0,3,4],dl:[-2,0,2]};
   const BN=['Залуу баг','Мэргэн баг','Жанжин баг'], BAND=[[0.80,0.96,0.90],[0.96,1.06,1.00],[1.06,1.32,1.15]];
   function rr(){ try{ if(typeof cur==='undefined'||cur!=='tarena') return; const s=document.getElementById('tascr'), g=document.getElementById('t2g'), t=s?s.scrollTop:0, gt=g?g.scrollTop:0; fillM(); const n=document.getElementById('tascr'), g2=document.getElementById('t2g'); if(n) n.scrollTop=t; if(g2) g2.scrollTop=gt; }catch(e){} }
   /* Ботод санамсаргүй 3 баатар өгнө (тоглогчийн баг шиг баатруудаар тулна) */
-  function botHeroes(tp){ const ids=HEROES.map(h=>h.id).filter(id=>{ try{ return !(typeof SUPP!=='undefined'&&SUPP[id]); }catch(e){ return true; } });
+  function botHeroes(tp,lv,ms){ const ids=HEROES.map(h=>h.id).filter(id=>{ try{ return !(typeof SUPP!=='undefined'&&SUPP[id]); }catch(e){ return true; } });
     for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
     const w=[0,1,2].map(()=>0.8+Math.random()*0.4), sw=w[0]+w[1]+w[2];
-    return ids.slice(0,3).map((id,k)=>({id:id,lv:5,p:Math.round(tp*w[k]/sw)})); }
+    if(ms){ const st=id=>{ const h=HEROES.find(x=>x.id===id); return h?h.s:1; }; ids.sort((a,b)=>(st(b)>=ms?1:0)-(st(a)>=ms?1:0)); }
+    let pk=[]; if(BOTCFG.comp){ ['heavy','cav','archer'].forEach(c=>{ const x=ids.find(id=>cls(id)===c&&pk.indexOf(id)<0); if(x) pk.push(x); }); }
+    ids.forEach(id=>{ if(pk.length<3&&pk.indexOf(id)<0) pk.push(id); });
+    return pk.slice(0,3).map((id,k)=>({id:id,lv:lv||5,p:Math.round(tp*w[k]/sw)})); }
   async function find(){
     if(TS.busy) return; TS.busy=true; X.tInit(); const P=Math.max(120,X.teamPow()); const all=[];
     if(on()){ const {F,db}=FBM, pick=new Map();
@@ -21008,11 +21013,13 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       DG.n=pick.size; pick.forEach(v=>all.push(v)); }
     else { DG.r='холбогдоогүй'; DG.n=0; }
     const used=new Set(), out=[];
+    /* Ботын баатрын түвшин = миний багийн дундаж түвшин (±2): чадвар нээгдэхэд түвшин хамаарна (SKUNL 1/5/10/20) */
+    let tl=1; try{ const ts=(S.ta.team||[]).slice(0,3); if(ts.length) tl=Math.round(ts.reduce((a,id)=>a+(typeof hlv==='function'?hlv(id):1),0)/ts.length); }catch(e){} tl=Math.max(1,tl);
     BAND.forEach((b,i)=>{
       let c=all.filter(x=>!used.has(x.u)&&x.tp/P>=b[0]&&x.tp/P<b[1]);
       if(!c.length) c=all.filter(x=>!used.has(x.u)&&Math.abs(x.tp/P-b[2])<0.2).sort((x,y)=>Math.abs(x.tp/P-b[2])-Math.abs(y.tp/P-b[2]));
       if(c.length){ const o=c[Math.floor(Math.random()*(c.length>1&&c.length>3?3:c.length))]; used.add(o.u); out.push(o); }
-      else { const tpb=Math.round(P*b[2]); out.push({bot:1,i:i,u:'bot'+i,n:'Бот · '+BN[i],tp:tpb,h:botHeroes(tpb)}); } });
+      else { const tpb=Math.round(P*(BOTCFG.mul[i]||b[2])); out.push({bot:1,i:i,u:'bot'+i,n:'Бот · '+BN[i],tp:tpb,h:botHeroes(tpb,Math.max(1,Math.min(30,tl+(BOTCFG.dl||[-2,0,2])[i])),(BOTCFG.ms||[0,0,0])[i])}); } });
     TS.opp=out; if(TS.sel==null||TS.sel>2) TS.sel=1; TS.t=Date.now(); TS.tpk=Math.round(P); TS.busy=false; rr(); }
 
   /* ---------- Сарын Топ 10 + шагнал ---------- */
@@ -21040,6 +21047,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const fst=id=>X.hn(id).split(' ')[0];
   const CFGT=['fight','league','prize','top'], TABN={fight:'Тулалдах',league:'Лиг',prize:'Шагнал',top:'Топ 10'};
   function rankPct(r){ const R=window.ARR||null; try{ const a=ARR, c=arRank(r), i=a.indexOf(c), n=a[i+1]; if(!n) return 100; return Math.max(3,Math.min(100,100*(r-c[1])/(n[1]-c[1]))); }catch(e){ return 5; } }
+  function tagB(i){ return [['Сул','#8fe39a'],['Адил','#ffd770'],['Хүчтэй','#ff8a7a']][Math.max(0,Math.min(2,i|0))]; }
   function tag(r){ return r<0.96?['Сул','#8fe39a']:(r<1.06?['Адил','#ffd770']:['Хүчтэй','#ff8a7a']); }
   function head(){ return '<div class="t2h"><button class="t2bk" onclick="taClose()">‹ Буцах</button><div class="t2tt">Багийн арена</div><button class="t2hq" onclick="taHelp()">?</button></div>'; }
   function tabs(){ return '<div class="t2tabs">'+CFGT.map(k=>'<button class="t2tb'+((TS.tab||'fight')===k?' on':'')+'" onclick="taTab(\''+k+'\')">'+TABN[k]+'</button>').join('')+'</div>'; }
@@ -21070,7 +21078,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     /* доод хоёр хайрцаг */
     h+='<div class="t2bx"><div class="t2bm"><div class="t2bt">Тулааны горим</div><div class="t2ms"><div class="mb"><span style="background-image:'+SL('tas_m1')+'"></span><small>3 vs 3</small></div><div class="mb" onclick="say(\'5 vs 5 удахгүй\')"><span style="background-image:'+SL('tas_m2')+'"></span><small>5 vs 5</small></div><div class="mb" onclick="say(\'Удахгүй\')"><span style="background-image:'+SL('tas_m3')+'"></span><small>Өөрийн баг</small></div></div></div>'
       +'<div class="t2bo"><div class="t2bt">Өрсөлдөгч сонго <button class="t2rf2" onclick="taRef()">Шинэчлэх</button></div><div class="t2os">'
-      +(TS.opp.length?TS.opp.map((q,i)=>{ const tg=tag(q.tp/P), top=(q.h&&q.h[0])?q.h.slice().sort((a,b)=>(b.p||0)-(a.p||0))[0].id:null;
+      +(TS.opp.length?TS.opp.map((q,i)=>{ const tg=q.bot?tagB(q.i):tag(q.tp/P), top=(q.h&&q.h[0])?q.h.slice().sort((a,b)=>(b.p||0)-(a.p||0))[0].id:null;
         return '<div class="t2o'+((TS.sel==null?1:TS.sel)===i?' on':'')+'" onclick="taSel('+i+')"><small style="color:'+tg[1]+'">'+tg[0]+'</small>'+(top?pimg(top,'t2op'):'<span class="t2op q">?</span>')+'<b>'+esc(q.bot?'Бот':q.n)+'</b><span>'+f(q.tp)+'</span></div>'; }).join(''):'<div class="t2em">'+(TS.busy?'Хайж байна…':'Эсрэгч алга')+'</div>')+'</div></div></div>';
     h+='<button class="t2go" onclick="taFight()"><span>'+(free>0?'Тулалдах':'Тулалдах · '+CFG.cost+' Алт')+'</span></button>';
     h+='<div class="t2dg">Эсрэгч нь бусад тоглогчийн сонгосон 3 баатар (онлайн байх шаардлагагүй). '+(TS.opp.some(x=>x.bot)?'Тохирох тоглогч олдоогүй газар «Бот» орсон. ':'')+'<br>Оношлогоо: бичих '+esc(DG.w)+' · унших '+esc(DG.r)+(DG.n>=0?' · олдсон '+DG.n:'')+'</div>';

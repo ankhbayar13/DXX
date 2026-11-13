@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='6c6d9dc7cc';
+var UPDB='7c648943af';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22869,6 +22869,69 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    +'#btl[data-vs] #bvs,#btl[data-vs] #btpan,#btl[data-vs] #bmatch,#btl[data-vs] #bstart{display:none!important}#btl[data-vs] #bu-pan,#btl[data-vs] #bu-sks,#btl[data-vs] #bu-ctl,#btl[data-vs] #bu-go,#btl[data-vs] #bu-hint{visibility:hidden}';
   var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   window.vsIntro=vsShow;
+})();
+
+
+/* p32/shop3.js — Дэлгүүрийн Хурдасгагч / Хамгаалалт / Багц / Хямдрал / Агуулах табуудыг «Нүүр» табтай ижил загварт оруулна.
+   «Нүүр» таб нь тоглоомын нийтлэг .card / h3 / .btn хүрээний зургуудыг ашигладаг. Тэдгээр зургийг (давхардуулахгүйгээр) ажиллах үед
+   нууц жишээ элементээс уншиж CSS хувьсагч болгон, sh2-* элементүүдэд тохируулна. Зөвхөн дэлгүүрийн бүтэн дэлгэц дээр (body.sh2fs) үйлчилнэ. */
+(function(){
+  function shFr(){
+    const r=document.documentElement; if(r.classList.contains('shfr')) return true;
+    let box=null;
+    try{
+      box=document.createElement('div'); box.style.cssText='position:fixed;left:-9999px;top:0;width:200px;visibility:hidden;pointer-events:none';
+      box.innerHTML='<div class="card"><h3>x</h3><button class="btn">x</button><button class="btn red">x</button></div>';
+      document.body.appendChild(box);
+      const g=el=>{ const v=getComputedStyle(el).borderImageSource||''; return /url\(/.test(v)?v:''; };
+      const card=g(box.querySelector('.card')), rib=g(box.querySelector('h3')), btn=g(box.querySelector('.btn:not(.red)')), red=g(box.querySelector('.btn.red'));
+      if(card&&rib&&btn&&red){ r.style.setProperty('--fr-card',card); r.style.setProperty('--fr-rib',rib); r.style.setProperty('--fr-btn',btn); r.style.setProperty('--fr-red',red); r.classList.add('shfr'); return true; }
+    }catch(e){} finally{ if(box&&box.parentNode) box.remove(); }
+    return false;
+  }
+  window.shFr=shFr;
+  { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ if(document.body.classList.contains('sh2fs')) shFr(); }catch(e){} return r; }; }
+  setTimeout(function(){ try{ shFr(); }catch(e){} },3000);
+
+  const P='html.shfr body.sh2fs ';
+  const css=
+   /* картууд (тайлан, багц, ажлын мөр, өнөөдрийн баатар, төлөв) — «Нүүр» табын хүрээтэй адил */
+   P+'.sh2-t,'+P+'.sh2-pk2,'+P+'.sh2-jb,'+P+'.sh2-sb,'+P+'.sh2-fb,'+P+'.sh2-em,'+P+'.sh2-pk{background:none;border:12px solid transparent;border-image:var(--fr-card) 44 fill/14px/0 stretch;border-radius:0;box-shadow:none}'
+   +P+'.sh2-t{padding:0 0 2px;gap:3px;color:#ffe9b0}'
+   +P+'.sh2-t b{color:#ffe9b0;text-shadow:0 1px 0 #1a0f06;min-height:30px;display:flex;align-items:center;justify-content:center}'
+   +P+'.sh2-t em{color:#c9b58a}'
+   +P+'.sh2-t.sel{filter:drop-shadow(0 0 7px #ffd770)}'
+   +P+'.sh2-pk2{padding:0 0 4px;margin-bottom:12px}'
+   +P+'.sh2-jb,'+P+'.sh2-sb,'+P+'.sh2-em{padding:2px 4px;margin-bottom:10px}'
+   +P+'.sh2-fb{padding:2px 4px;margin-bottom:14px}'
+   +P+'.sh2-sb.on{filter:hue-rotate(60deg) saturate(1.1)}'
+   /* үнийн «товч»: улаан хүрээт */
+   +P+'.sh2-tp{background:none;border:8px solid transparent;border-image:var(--fr-red) 34 fill/8px/0 stretch;border-radius:0;padding:0 4px;margin-top:3px;font:bold 13px/16px sans-serif;color:#fff;text-shadow:0 1px 0 #3a0800}'
+   /* хэсгийн гарчиг: улаан тууз */
+   +P+'.sh2-h{display:inline-block;max-width:100%;box-sizing:border-box;border:solid transparent;border-width:0 20px;border-image:var(--fr-rib) 0 52 fill/0 20px/0 stretch;padding:5px 6px;margin:14px 2px 8px;color:#ffe9b0;font:bold 14px/18px sans-serif;text-shadow:0 1px 0 #1a0f06;overflow-wrap:anywhere}'
+   +P+'.sh2-h img{vertical-align:middle;margin-right:4px}'
+   +P+'.sh2-pt{padding:0 2px;margin-bottom:6px;gap:6px}'
+   +P+'.sh2-pt b{flex:1;min-width:0;text-align:center;border:solid transparent;border-width:0 20px;border-image:var(--fr-rib) 0 52 fill/0 20px/0 stretch;padding:5px 4px;color:#ffe9b0;font-size:15px;line-height:18px;text-shadow:0 1px 0 #1a0f06}'
+   +P+'.sh2-pl{background:#0000004d;color:#e8d6a8;border:1px solid #8a6420}'
+   +P+'.sh2-pr{padding:0 4px;justify-content:center}'
+   /* багцын доторх зүйлсийн нүд: Ажилчид/Клан дээрх жижиг хүрээ */
+   +P+'.sh2-pi{width:68px}'
+   +P+'.sh2-pb{width:66px;height:62px;box-sizing:border-box;border:7px solid transparent;border-image:url(rts/ui_sq.webp?v=1) 90 fill/7px stretch;background:none;border-radius:0}'
+   +P+'.sh2-pb span img{max-width:40px;max-height:40px;width:auto;height:auto}'
+   +P+'.sh2-pb b{right:-2px;bottom:-4px;font-size:12px}'
+   /* товчнууд: «Нүүр» табын алтан товч */
+   +P+'.sh2-ub{background:none;border:12px solid transparent;border-image:var(--fr-btn) 34 fill/12px/0 stretch;border-radius:0;padding:0 6px;min-width:90px;color:#2b1d12;font:bold 14px/18px sans-serif;text-shadow:0 1px 0 #fff6}'
+   +P+'.sh2-ub.big,'+P+'.sh2-ub.wide{background:none;border-bottom:12px solid transparent;color:#2b1d12;padding:2px 6px}'
+   +P+'.sh2-ub.wide{width:100%;font-size:15px}'
+   +P+'.sh2-ub:disabled{filter:grayscale(1) brightness(.78);color:#4a4034}'
+   +P+'.sh2-ub img{vertical-align:middle}'
+   +P+'.sh2-jl .sh2-ub{padding:0 6px}'
+   +P+'.sh2-fi>b{color:#ffe9b0;text-shadow:0 1px 0 #1a0f06}.sh2-fi .sh2-ft{color:#ffd770}'
+   +P+'.sh2-sm{color:#d9c9a0}'
+   +P+'.sh2-dw .sh2-off{left:2px;top:2px;z-index:3}'
+   /* PC / өргөн дэлгэц: агуулга хэт тэлэхгүй, голд нь байрлана */
+   +'@media (min-width:700px){body.sh2fs #mbody>*{max-width:620px;margin-left:auto;margin-right:auto}}';
+  const st=document.createElement('style'); st.id='shop3css'; st.textContent=css; document.head.appendChild(st);
 })();
 
 

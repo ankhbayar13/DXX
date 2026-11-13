@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='8040ea4e8c';
+var UPDB='2bc86a10f2';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -18149,8 +18149,8 @@ body:has(#alv) #ckov{z-index:88!important}
     hd.innerHTML='<b>Дэлгүүр</b><span class="sh2-al">'+gem()+' '+alt()+' Алт</span>';
     bar.innerHTML=TABS.map(x=>'<button class="'+(t===x[0]?'on':'')+'" onclick="sh2Tab(\''+x[0]+'\')"><i>'+im(x[1],30)+'</i><span>'+x[2]+'</span></button>').join('');
   }
-  { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ const on=typeof cur!=='undefined'&&(cur==='shop'||cur==='bag'||cur==='agh'); document.body.classList.toggle('sh2fs',on); chrome(on); }catch(e){ console.error(e); } return r; };
-    const _c=closeM; closeM=function(){ document.body.classList.remove('sh2fs'); try{ chrome(false); }catch(e){} return _c.apply(this,arguments); }; }
+  { const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ const on=typeof cur!=='undefined'&&(cur==='shop'||cur==='bag'||cur==='agh'); document.body.classList.toggle('sh2fs',on); document.body.classList.toggle('shbg',on&&cur==='shop'); chrome(on); }catch(e){ console.error(e); } return r; };
+    const _c=closeM; closeM=function(){ document.body.classList.remove('sh2fs'); document.body.classList.remove('shbg'); try{ chrome(false); }catch(e){} return _c.apply(this,arguments); }; }
 
   /* ---- Хамгаалалт: дайралтыг хориглоно ---- */
   const _ro=raidOK; raidOK=function(){ if(shdLeft()>0) return false; return _ro.apply(this,arguments); };
@@ -18161,6 +18161,7 @@ body:has(#alv) #ckov{z-index:88!important}
   const st=document.createElement('style'); st.textContent=`
 body.sh2fs #modal .box{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;border:0!important;border-image:none!important;border-radius:0!important;background:#2b1d12!important;box-shadow:none!important;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)!important;display:flex!important;flex-direction:column!important;transform:none!important;overflow:hidden!important}
 body.sh2fs #mbody>h2{display:none!important}
+body.sh2fs.shbg #modal .box{background:linear-gradient(rgba(22,11,4,.42),rgba(22,11,4,.28)),url(rts/shop_bg.webp?v=1) center top/cover no-repeat #2b1d12!important}
 body.sh2fs #modal .box:before,body.sh2fs #modal .box:after{display:none!important}
 body.sh2fs #mbody{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 12px}
 body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:auto!important;top:calc(9px + env(safe-area-inset-top))!important;width:40px!important;height:40px!important;z-index:6!important}

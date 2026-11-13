@@ -10985,7 +10985,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bb76e1b03e';
+var UPDB='01f2927c6a';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16586,7 +16586,14 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   '.bu-sk{flex:0 0 '+U(56)+'!important;width:'+U(56)+'!important}'+
   '.bu-sk .ic{width:'+U(56)+'!important;height:'+U(49)+'!important}'+
   '.bu-sk small{font-size:'+U(10)+'!important}'+
-  '.bu-sk .buco{min-width:'+U(20)+'!important;height:'+U(20)+'!important;font-size:'+U(11.5)+'!important;line-height:'+U(16)+'!important}';
+  '.bu-sk .buco{min-width:'+U(20)+'!important;height:'+U(20)+'!important;font-size:'+U(11.5)+'!important;line-height:'+U(16)+'!important}'+
+  '#bu.arn .bu-sk .buco{border-radius:'+U(9)+';padding:0 '+U(3)+';font-size:'+U(10)+'!important}'+
+  '.bu-sk .bucd{position:absolute;left:8%;right:8%;top:10%;bottom:10%;background:#000c;border-radius:'+U(4)+';display:none;align-items:center;justify-content:center;color:#fff1c8;font:bold '+U(20)+'/1 Georgia,serif;text-shadow:0 1px 3px #000;z-index:3}'+
+  '.bu-sk.cdw .bucd{display:flex}'+
+  '.bu-rest{position:absolute;right:'+U(92)+';bottom:'+U(12)+';width:'+U(66)+';height:'+U(46)+';pointer-events:auto;display:none;flex-direction:column;align-items:center;justify-content:center;border:0;padding:0;background:'+IMG('btn')+' center/100% 100% no-repeat;color:#e9cf93;font:bold '+U(12)+'/1.1 Georgia,serif;text-shadow:0 1px 3px #000,0 0 4px #000;touch-action:manipulation;cursor:pointer;filter:grayscale(.55) brightness(.8) drop-shadow(0 2px 3px #000a)}'+
+  '.bu-rest small{font-size:'+U(9.5)+';color:#9fd7ff}'+
+  '#bu.arn.fi.bupk .bu-rest{display:flex;filter:drop-shadow(0 0 7px #5aa8ff) brightness(1.1)}'+
+  '#bu.dn .bu-rest{display:none!important}';
   const st=document.createElement('style'); st.id='cssbu'; st.textContent=css; document.head.appendChild(st);
 
   const $$=id=>document.getElementById(id);
@@ -16618,6 +16625,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
        +'<div class="bu-en"><span id="bu-et">Чадвар</span><b></b><b></b><b></b><b></b><b></b></div>'
      +'</div>'
      +'<button class="bu-go" id="bu-go" onclick="buAtkBtn()"><b>Довтлох</b></button>'
+     +'<button class="bu-rest" id="bu-rest" onclick="buRest()">Амрах<small>+50%</small></button>'
      +'<div class="bu-hint" id="bu-hint"></div>'
      +'<div class="bu-sks" id="bu-sks"></div>'
      +'<div id="bu-ctl"><button class="gear" onclick="buGear()"></button><button class="bsd" data-s="1" onclick="buSpd(1)">×1</button><button class="bsd" data-s="2" onclick="buSpd(2)">×2</button><button class="bsd" data-s="3" onclick="buSpd(3)">×3<i class="lkc"></i></button><button class="au" id="bu-au" onclick="buAuto()"><span>Авто</span></button></div>'
@@ -16627,7 +16635,22 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   }
 
   const E0=()=>foes().filter(x=>x.hp>0);
-  function doSkill(u,sk,tg){ if(!castWith(u,sk,tg)) return; u.en=(u.en==null?1:u.en)-sk.cost; u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; tick(true); }
+  /* ===== АРЕНА (шат 2): энерги % (0-100), чадвар бүр cooldown-той (өөрийн ээлжээр), «Амрах» ===== */
+  const AR=()=>!!(BT&&BT.e&&BT.e.hbf);
+  const ARCOST=[0,20,30,45], ARCD=[1,2,3,4], AR0=30, ARREG=10, ARREST=50;
+  const enOf=u=>AR()?(u.ep==null?AR0:u.ep):(u.en==null?1:u.en);
+  const costOf=(u,sk)=>AR()?ARCOST[sk.i]:sk.cost;
+  const cdOf=(u,sk)=>AR()?((u.skcd&&u.skcd[sk.i])||0):0;
+  const fmtC=(u,sk)=>AR()?(ARCOST[sk.i]+'%'):String(sk.cost);
+  const skOp=(u,sk)=>(u.elv!=null)?(u.elv>=SKUNL[sk.i]):skOpen(u.id,sk.i);
+  const canUse=(u,sk)=>skOp(u,sk)&&enOf(u)>=costOf(u,sk)&&cdOf(u,sk)<=0;
+  function spend(u,sk){ if(AR()){ u.ep=Math.max(0,enOf(u)-ARCOST[sk.i]); u.skcd=u.skcd||[0,0,0,0]; u.skcd[sk.i]=ARCD[sk.i]+1; } else u.en=enOf(u)-sk.cost; }
+  /* өөрийн ээлж эхлэхэд: энерги нэмэгдэж, cooldown 1-ээр буурна */
+  window.arTurnStart=function(u){ if(AR()){ u.ep=Math.min(100,enOf(u)+ARREG); if(u.skcd) u.skcd=u.skcd.map(v=>Math.max(0,(v||0)-1)); } else u.en=Math.min(5,(u.en==null?1:u.en)+1); };
+  function bhint(m){ if(!BT) return; BT.hm=m; BT.hmU=performance.now()+1800; try{ sfx('err'); }catch(e){} tick(true); }
+  function doSkill(u,sk,tg){ if(!castWith(u,sk,tg)) return; spend(u,sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; tick(true); }
+  window.buRest=function(){ if(!BT||!AR()||!BT.pick||BT.done) return; const u=BT.pick.u; u.ep=Math.min(100,enOf(u)+ARREST); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null;
+    try{ BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Амарлаа · +'+ARREST+'% энерги',nm:u.name||hname(u.id),t:0,e:false}); }catch(e){} BT.tq=0.5; try{ sfx('tap'); }catch(e){} tick(true); };
   const VIP=()=>!!(S&&S.pass&&S.pass.vip);
   function ctlSync(){ try{ if(!BT) return; const bu=$$('bu'); if(!bu) return; const sp=BT.sp||1;
     bu.querySelectorAll('#bu-ctl .bsd').forEach(b=>{ const n=+b.dataset.s; b.classList.toggle('on',sp===n); b.classList.toggle('blk',n===3&&!VIP()); });
@@ -16640,9 +16663,10 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   window.buGear=()=>{ try{ dxAsk('Тулаанаас гарах уу?','Гарах',()=>{ btEnd(true); },'Үргэлжлүүл'); }catch(e){ btEnd(true); } };
   window.buSel=id=>{ if(!BT) return; BT.bsel=id; BT.bselM=performance.now(); tick(true); };
   window.buSkill=function(i){ if(!BT||BT.done) return; const su=mine().find(u=>u.id===BT.bsel); if(!su) return; const sk=heroSkills(su.id)[i]; if(!sk) return;
-    if(!skOpen(su.id,i)){ say('🔒 '+sk.n+' · Lv '+sk.lv+' дээр нээгдэнэ'); return; }
-    const P=BT.pick; if(!P||P.u!==su){ say('Одоо '+hname(su.id)+'-ийн ээлж биш'); return; }
-    const en=su.en==null?1:su.en; if(en<sk.cost){ say('Энерги хүрэхгүй · '+en+'/'+sk.cost); return; }
+    if(!skOpen(su.id,i)){ bhint('Түгжээтэй · '+sk.n+' · Lv '+sk.lv+' дээр нээгдэнэ'); return; }
+    const P=BT.pick; if(!P||P.u!==su){ bhint('Одоо '+hname(su.id)+'-ийн ээлж биш'); return; }
+    if(cdOf(su,sk)>0){ bhint(sk.n+' · '+cdOf(su,sk)+' ээлжийн дараа бэлэн болно'); return; }
+    const en=enOf(su), cs=costOf(su,sk); if(en<cs){ bhint('Энерги хүрэхгүй · '+en+(AR()?'%':'')+' / '+cs+(AR()?'%':'')+' · «Амрах» дарж +'+ARREST+'%'); return; }
     const E=E0(); if(!E.length) return;
     if(SKTG.indexOf(sk.k)>=0){ if(E.length>1){ BT.mode=(BT.mode&&BT.mode.i===i)?null:{i}; tick(true); return; } doSkill(su,sk,E[0]); return; }
     doSkill(su,sk,null); };
@@ -16653,10 +16677,10 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   window.taAutoAct=function(u){ return autoAct(u); };
   function autoAct(u){ try{
     const E=E0(); if(!E.length||!u||u.hp<=0) return false;
-    const en=u.en==null?1:u.en, hurt=mine().some(a=>a.hp>0&&a.hp<a.max*0.7);
-    let best=null; (heroSkills(u.id)||[]).forEach(sk=>{ if(!skOpen(u.id,sk.i)||sk.cost>en) return; if(sk.k==='heal'&&!hurt) return; if(!best||sk.cost>best.cost) best=sk; });
+    const hurt=mine().some(a=>a.hp>0&&a.hp<a.max*0.7);
+    let best=null; (heroSkills(u.id)||[]).forEach(sk=>{ if(!canUse(u,sk)) return; if(sk.k==='heal'&&!hurt) return; if(!best||costOf(u,sk)>costOf(u,best)||(costOf(u,sk)===costOf(u,best)&&sk.i>best.i)) best=sk; });
     const tg=turnPick(u)||E[0];
-    if(best){ const need=SKTG.indexOf(best.k)>=0; if(castWith(u,best,need?tg:null)){ u.en=en-best.cost; u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; return true; } }
+    if(best){ const need=SKTG.indexOf(best.k)>=0; if(castWith(u,best,need?tg:null)){ spend(u,best); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; return true; } }
     u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; return true;
   }catch(e){ return false; } }
   window.buTg=i=>{ if(!BT) return; buTgt(foes()[i]); };
@@ -16725,24 +16749,25 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
       setHTML($$('bu-po'),'po',hpi(su.id,70)); set('bu-lv',String(lvOf(su.id)));
       set('bu-nm',hname(su.id)); set('bu-cl',cl(su.type)+' '+tn(su.type)+(d?' · '+d[1]:'')+((BT.e&&BT.e.hbf&&su.atk)?' · Цохилт '+fm(Math.round(su.atk)):''));
       const hu=$$('bu-hu'); if(hu) hu.style.width=Math.max(0,Math.min(100,100*su.hp/su.max))+'%'; set('bu-ht',fm(Math.max(0,Math.round(su.hp)))+' / '+fm(Math.round(su.max)));
-      const en=su.en==null?1:su.en;
-      const dots=bu.querySelectorAll('.bu-en b'); dots.forEach((b,i)=>b.classList.toggle('on',i<en)); set('bu-et','Энерги '+en+'/5');
+      const en=enOf(su), ar=AR();
+      const dots=bu.querySelectorAll('.bu-en b'); dots.forEach((b,i)=>b.classList.toggle('on',ar?(en>=(i+1)*20):i<en)); set('bu-et',ar?('Энерги '+Math.round(en)+'%'):('Энерги '+en+'/5'));
+      bu.classList.toggle('arn',ar);
       const go=$$('bu-go'); go.classList.toggle('rdy',!!BT.pick);
     }
     bu.classList.toggle('bupk',!!BT.pick);
-    { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); } if(h.textContent!==t) h.textContent=t; } }
+    { const h=$$('bu-hint'); if(h){ let t=''; if(BT.pick){ const hs=hname(BT.pick.u.id); t=BT.mode?('🎯 '+hs+' · чадварын зорилт сонго'):('⚔ '+hs+' · дайсан сонго'); if(BT.hm&&performance.now()<BT.hmU) t=BT.hm; } if(h.textContent!==t) h.textContent=t; } }
     const SKM={snipe:1,volley:2,cleave:3,charge:3,rally:4,guard:5,heal:5,anda:4,stun:5,burn:2,drain:5,execute:1,focus:4,weaken:5};
-    if(su){ const L=heroSkills(su.id), en2=su.en==null?1:su.en, pk=BT.pick&&BT.pick.u===su;
-      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="'+((typeof SKP==='function'&&SKP(su.id,x.i))||('hf/sk_'+x.k+'.webp?v=2'))+'" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><span class="buco">'+x.cost+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
-      setHTML($$('bu-sks'),'sks',skh,su.id+(window.SKPN?'p':''));
-      L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), ok=open&&pk&&en2>=x.cost;
-        el.className='bu-sk'+(open?'':' lock')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
+    if(su){ const L=heroSkills(su.id), en2=enOf(su), pk=BT.pick&&BT.pick.u===su;
+      const skh=L.map(x=>'<div class="bu-sk" data-i="'+x.i+'" onclick="buSkill('+x.i+')"><div class="ic" style="background-image:'+IMG('s'+(SKM[x.k]||1))+'"><img class="skimg" src="'+((typeof SKP==='function'&&SKP(su.id,x.i))||('hf/sk_'+x.k+'.webp?v=2'))+'" onerror="this.remove()" draggable="false"><div class="bulk">🔒<span>Lv '+x.lv+'</span></div><div class="bucd"></div><span class="buco">'+fmtC(su,x)+'</span></div><small>'+(n=>n.length>9?n.slice(0,8)+'…':n)(x.n)+'</small></div>').join('');
+      setHTML($$('bu-sks'),'sks',skh,su.id+(window.SKPN?'p':'')+(AR()?'a':''));
+      L.forEach(x=>{ const el=bu.querySelector('.bu-sk[data-i="'+x.i+'"]'); if(!el) return; const open=skOpen(su.id,x.i), cdn=cdOf(su,x), ok=open&&pk&&en2>=costOf(su,x)&&cdn<=0; { const cb=el.querySelector('.bucd'); if(cb&&cb.textContent!==(cdn>0?String(cdn):'')) cb.textContent=cdn>0?String(cdn):''; }
+        el.className='bu-sk'+(open?'':' lock')+(open&&cdn>0?' cdw':'')+(ok?' rdy':(open?' dim':''))+((BT.mode&&BT.mode.i===x.i&&pk)?' armed':''); }); }
   }
   function ensure(){ if(!tmr) tmr=setInterval(()=>{ try{ tick(); }catch(e){} },110); }
 
   /* тулаан эхлэхэд HUD угсарна */
   const _sb=startBattle;
-  startBattle=function(){ try{ S.skMan=0; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ BT.tmax=150; if(!BT.duel){ const v=(S.btSp|0)||1; BT.sp=(v>=3&&!VIP())?2:Math.max(1,Math.min(3,v)); } build(); ensure(); tick(true); } }catch(e){} return r; };
+  startBattle=function(i,E){ try{ S.skMan=(E&&E.hbf)?1:0; }catch(e){} const r=_sb.apply(this,arguments); try{ if(BT&&$$('bti')){ BT.tmax=150; if(!BT.duel){ const v=(S.btSp|0)||1; BT.sp=(v>=3&&!VIP())?2:Math.max(1,Math.min(3,v)); } build(); ensure(); tick(true); } }catch(e){} return r; };
 
   /* талбар дээр: ээлж авсан баатарт алтан цагираг + ▼, байгаа байгаа дайсанд улаан цагираг + нум сум; түвшингийн тэмдэг */
   const ELIM={}; const elIm=k=>{ if(!ELIM[k]){ const i=new Image(); i.src='hf/sq/el_'+k+'.webp?v=1'; ELIM[k]=i; } return ELIM[k]; };
@@ -16799,7 +16824,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     BT.tq=(BT.tq||0)-dt; if(BT.tq>0) return; const UU=BT.units;
     for(let k=0;k<2;k++){ const sd=((BT.ts||0)+k)&1; const c=UU.filter(u=>u.side===sd&&u.hp>0&&!u.sup&&!u.go&&u.cd<=0); if(!c.length) continue;
       c.sort((a,b)=>(a.lastGo||0)-(b.lastGo||0)); const u=c[0];
-      if(sd===0){ u.lastGo=BT.t; BT.ts=1; BT.tq=0.26; u.en=Math.min(5,(u.en==null?1:u.en)+1); BT.pick={u}; BT.mode=null; BT.bselM=0; BT.bsel=u.id; if(!skManual()){ autoAct(u); BT.tq=0.4; } else { try{ sfx('tap'); }catch(e){} } return; }
+      if(sd===0){ u.lastGo=BT.t; BT.ts=1; BT.tq=0.26; arTurnStart(u); BT.pick={u}; BT.mode=null; BT.bselM=0; BT.bsel=u.id; if(!skManual()){ autoAct(u); BT.tq=0.4; } else { try{ sfx('tap'); }catch(e){} } return; }
       if(BT.e&&BT.e.hbf&&window.taEnAct&&window.taEnAct(u)) return;
       const tg=turnPick(u); if(!tg) continue;
       u.lastGo=BT.t; u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.ts=sd^1; BT.tq=0.26; return; }
@@ -20989,7 +21014,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
     const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={pc:{cav:0,archer:0,foot:0},n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
     { const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
-      E.fr=1; E.eh=L.map(h=>({id:h.id,p:Math.max(1,(h.p||1)*k)})); }
+      E.fr=1; E.eh=L.map(h=>({id:h.id,lv:h.lv||1,p:Math.max(1,(h.p||1)*k)})); }
     const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
       if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' оноо'); try{ save(); }catch(e){} TS.t=0; pushMe(); };
     E.cb=()=>apply(true); E.cbl=()=>apply(false);
@@ -21015,7 +21040,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     if(E.eh){ const en=BT.units.filter(u=>u.side===1);
       en.forEach((u,k)=>{ if(u.hh) return; u.hh=1; const h=E.eh[k]; if(!h){ u.hp=0; u.max=0; u.dead=true; return; }
         const he=HEROES.find(x=>x.id===h.id), t=(typeof htype==='function')?htype(h.id):'cav', dd=BTDEF[t]||BTDEF.cav, st=stat(cls(h.id),h.p), mx=st.hp;
-        u.type=t; u.d=dd; u.id=h.id; if(he) u.name=he.n; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=h.p; u.cd=Math.random()*dd.cd; u.arn=0;
+        u.type=t; u.d=dd; u.id=h.id; u.elv=h.lv||1; if(he) u.name=he.n; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=h.p; u.cd=Math.random()*dd.cd; u.arn=0;
         try{ const bv=BTV[t]||BTV.cav; u.key=h.id==='chinggis'?'u_general':bv[(h.id.length+k)%bv.length]; }catch(e){} });
       BT.units=BT.units.filter(u=>!(u.side===1&&u.dead)); BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0); }
     if(pt) return; /* босоо горимд зураг тайрагддаг тул анхны байрлалыг хэвээр үлдээнэ */
@@ -21067,7 +21092,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       if(ad&&d.t<0.8){ c.font='bold 10px sans-serif'; c.lineWidth=3; const w=d.side?'Сул':'Давуу'; c.strokeText(w,d.x,y-sz-1); c.fillStyle=d.side?'#ff8a7a':'#9dff7a'; c.fillText(w,d.x,y-sz-1); }
       c.restore(); return true; }catch(e){ return false; } };
   /* Дайсны ээлж: тоглогчийн АВТО-той яг ижил логик (энергитэй чадвар → үгүй бол ердийн цохилт), талуудыг түр эргүүлж ажиллуулна */
-  window.taEnAct=function(u){ try{ if(typeof window.taAutoAct!=='function') return false; const U=BT.units; u.lastGo=BT.t; u.en=Math.min(5,(u.en==null?1:u.en)+1);
+  window.taEnAct=function(u){ try{ if(typeof window.taAutoAct!=='function') return false; const U=BT.units; u.lastGo=BT.t; try{ window.arTurnStart(u); }catch(e){ u.en=Math.min(5,(u.en==null?1:u.en)+1); }
     U.forEach(x=>{ x.side=x.side?0:1; }); let ok=false; try{ ok=window.taAutoAct(u); }catch(e){ ok=false; } finally{ U.forEach(x=>{ x.side=x.side?0:1; }); }
     if(!ok) return false; BT.ts=0; BT.tq=0.4; return true; }catch(e){ return false; } };
   /* Арена: 3-2-1 зураг байхгүй, шууд тулаан эхэлнэ */
@@ -22664,7 +22689,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
       as.forEach(a=>{ if(sp.heal) a.hp=Math.min(a.max,a.hp+a.max*Math.min(0.9,sp.heal*k)); if(sp.cl){ a.dot=null; a.wk=0; a.vu=null; }
         if(sp.arm){ const p=Math.min(0.75,sp.arm[0]*(1+(k-1)*0.5)); if(!a.arm||a.arm.t<t||a.arm.p<p) a.arm={p:p,t:t+sp.arm[1]}; else a.arm.t=Math.max(a.arm.t,t+sp.arm[1]); }
         if(sp.atkb){ const mm=1+sp.atkb[0]*(1+(k-1)*0.6); if(!a.bAtk||a.bAtk.t<t||a.bAtk.m<mm) a.bAtk={m:mm,t:t+sp.atkb[1]}; }
-        if(sp.en) a.en=Math.min(5,(a.en==null?1:a.en)+sp.en);
+        if(sp.en){ if(BT.e&&BT.e.hbf) a.ep=Math.min(100,(a.ep==null?30:a.ep)+sp.en*20); else a.en=Math.min(5,(a.en==null?1:a.en)+sp.en); }
         if(sp.hs&&!a.go){ a.cd=0; a.lastGo=-99; }
         if(sp.tn&&a===u) u.tn=t+sp.tn;
         FX(sp.f,a,'a'); }); if(sp.tn&&!as.includes(u)) u.tn=t+sp.tn; }

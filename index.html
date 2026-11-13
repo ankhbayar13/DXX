@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='515e57f6c7';
+var UPDB='e8982b02a6';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16710,9 +16710,72 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   window.buTgt=function(tg){ const P=BT&&BT.pick; if(!P||!tg||tg.hp<=0||!tg.side) return; const u=P.u; if(tg.sln>0&&E0().some(x=>!(x.sln>0))){ bhint('Нуугдсан · зорилт болгож чадахгүй'); return; }
     if(BT.mode){ const sk=heroSkills(u.id)[BT.mode.i]; doSkill(u,sk,tg); return; }
     u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; try{ sfx('tap'); }catch(e){} tick(true); };
+
+  /* ===== АРЕНА (шат 5): дайсны/авто AI — үйлдэл бүрт оноо тооцоод хамгийн өндрийг сонгоно =====
+     Оноо: гэмтлийн хувь, дуусгах (+80), HP<25% (+30), анги/элементийн давуу (+15), цус алдсан зорилтод exploit (+40),
+     сул/хоргүй зорилтод төлөв (хор, stun, сулрал), <50% HP холбоотонд эдгээх, ≥2 төлөвтэй холбоотонд цэвэрлэх, унасан баатарт сэргээх,
+     чадварын эрэмбэ (4→1), энерги дутвал Амрах. Тогтоосон шийдвэр нь санамсаргүй ±8%-аар бага зэрэг ялгаатай. */
+  const dbf=x=>(x.dots?x.dots.filter(s=>s.n>0).length:0)+(x.wk>BT.t?1:0)+(x.vu&&x.vu.t>BT.t?1:0)+(x.stun>0?1:0);
+  function arPlan(u){
+    const t=BT.t, sd=u.side;
+    const al=BT.units.filter(x=>x.side===sd&&!x.sup&&!x.tk&&x.id&&x.hp>0);
+    const dead=BT.units.filter(x=>x.side===sd&&!x.sup&&!x.tk&&x.id&&x.hp<=0);
+    const fo=BT.units.filter(x=>x.side!==sd&&!x.sup&&!x.tk&&x.hp>0); if(!fo.length) return null;
+    const vis=fo.filter(x=>!(x.sln>0)), fv=vis.length?vis:fo, tnt=fv.filter(x=>x.tn>t), single=tnt.length?tnt:fv;
+    const maxAtk=Math.max.apply(null,fo.map(x=>x.atk||1));
+    const dmgEst=(m,tg,tr,pc)=>{ const D=tr?0:(ARDEF[tg.type]||24)*(pc?0.5:1); return u.atk*m*(1-D/(D+100)); };
+    const tgScore=(tg,est,ex)=>{ let s=100*Math.min(1,est/Math.max(1,tg.hp)); if(est>=tg.hp) s+=80; else if(tg.hp<tg.max*0.25) s+=30;
+      const em=(u.id&&tg.id&&window.btElMul)?window.btElMul(u.id,tg.id):1; if(em>1) s+=15; else if(em<1) s-=10;
+      s+=10*(tg.atk||0)/maxAtk; if(ex){ if(arBleed(tg)) s+=40; if(tg.hp<=tg.max*ex[0]) s+=30; } return s; };
+    const debuf=(x,sp)=>{ let s=0; if(sp.dot&&!(x.dots&&x.dots.filter(q=>q.n>0).length>=3)) s+=20; if(sp.st&&!(x.stun>0)) s+=25; if(sp.wk&&!(x.wk>t)) s+=10; if(sp.vu&&!(x.vu&&x.vu.t>t)) s+=15; return s; };
+    const opts=[];
+    { let b=null; single.forEach(tg=>{ const s=tgScore(tg,dmgEst(TMUL,tg,0,0))*0.55; if(!b||s>b.s) b={s:s,tg:tg}; }); opts.push({kind:'atk',s:b.s,tg:b.tg}); }
+    let want=0;
+    (heroSkills(u.id)||[]).forEach(sk=>{
+      if(!skOp(u,sk)||cdOf(u,sk)>0) return;
+      if(enOf(u)<costOf(u,sk)){ want=Math.max(want,costOf(u,sk)); return; }
+      const sp=sk.arr&&sk.arr[5], need=SKTG.indexOf(sk.k)>=0;
+      if(!sp){ opts.push({kind:'sk',sk:sk,tg:need?single[0]:null,s:35+12*sk.i}); return; }
+      const m=sk.m, hn=sp.hn||1; let s=0, tg=null;
+      if(sp.e){
+        const ex=sp.ex;
+        const base=x=>{ let b=sp.h||0; if(ex){ if(x.hp<=x.max*ex[0]) b=ex[1]; if(arBleed(x)) b=Math.max(b,(sp.h||0)*2); } return b; };
+        if(sp.e==='one'){ let bb=null; single.forEach(x=>{ const est=dmgEst(base(x)*hn*m,x,sp.tr,sp.pc), v=(sp.h?tgScore(x,est,ex):0)+debuf(x,sp); if(!bb||v>bb.v) bb={v:v,x:x}; }); if(bb){ s+=bb.v; tg=bb.x; } }
+        else { const f=sp.e==='three'?0.6:1; fo.forEach(x=>{ const est=dmgEst(base(x)*hn*m,x,sp.tr,sp.pc); s+=f*((sp.h?80*Math.min(1,est/Math.max(1,x.hp)):0)+(est>=x.hp?50:0)+debuf(x,sp)*0.7); }); }
+      }
+      if(sp.a){
+        const grp=sp.a==='all'?al:(sp.a==='low'?[al.slice().sort((a,b)=>a.hp/a.max-b.hp/b.max)[0]].filter(Boolean):[u]);
+        const low=Math.min.apply(null,al.map(x=>x.hp/x.max));
+        if(sp.heal){ const hv=grp.reduce((a,x)=>a+Math.min(Math.min(0.9,sp.heal*m),1-x.hp/x.max),0)*100; s+=hv; if(hv>10){ if(low<0.5) s+=40; if(low<0.4) s+=20; } }
+        if(sp.cl){ s+=60*grp.filter(x=>dbf(x)>=2).length+15*grp.filter(x=>dbf(x)===1).length; }
+        if(sp.rv){ if(dead.length) s+=90; }
+        if(sp.arm) s+=8*grp.filter(x=>!(x.arm&&x.arm.t>t)).length;
+        if(sp.atkb) s+=9*grp.filter(x=>!(x.bAtk&&x.bAtk.t>t&&x.bAtk.m>1)).length;
+        if(sp.en) s+=3*sp.en*grp.length;
+        if(sp.tn&&!al.some(x=>x.tn>t)&&u.hp>u.max*0.6) s+=12;
+      }
+      if(sp.ct&&!(u.ctn>0)&&fo.some(x=>x.type!=='archer')) s+=10;
+      if(sp.sl&&!(u.sln>0)) s+=(u.hp<u.max*0.5?12:4);
+      if(s<=0) return;
+      s+=12*sk.i;
+      opts.push({kind:'sk',sk:sk,tg:tg,s:s});
+    });
+    if(want>0){ const rs=30+(100-enOf(u))*0.25; opts.push({kind:'rest',s:rs}); }
+    opts.forEach(o=>{ o.s*=0.92+Math.random()*0.16; });
+    opts.sort((a,b)=>b.s-a.s); return opts[0]; }
+  window.arPlan=arPlan;
+  function arAI(u){ try{
+    if(!u||u.hp<=0) return false; const p=arPlan(u); if(!p) return false;
+    if(p.kind==='sk'){ const need=SKTG.indexOf(p.sk.k)>=0; if(castWith(u,p.sk,need?p.tg:null)){ spend(u,p.sk); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null; return true; } }
+    if(p.kind==='rest'){ u.ep=Math.min(100,enOf(u)+ARREST); u.cd=(u.d?u.d.cd:6)*0.3; BT.pick=null; BT.mode=null;
+      try{ BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Амарлаа · +'+ARREST+'% энерги',nm:u.name||hname(u.id),t:0,e:false}); }catch(e){} return true; }
+    const tg=(p.kind==='atk'&&p.tg)||turnPick(u); if(!tg) return false;
+    u.go={ph:u.type==='archer'?'shoot':'out',tg,t:0,did:0}; BT.pick=null; BT.mode=null; return true;
+  }catch(e){ return false; } }
+
   /* АВТО: өөрийн баатрын ээлж ирэхэд хамгийн сайн чадварыг (энерги хүрвэл) өөрөө ашиглаж, үгүй бол ердийн довтолгоо хийнэ */
   window.taAutoAct=function(u){ return autoAct(u); };
-  function autoAct(u){ try{
+  function autoAct(u){ try{ if(AR()) return arAI(u);
     const E=E0(); if(!E.length||!u||u.hp<=0) return false;
     const hurt=mine().some(a=>a.hp>0&&a.hp<a.max*0.7);
     let best=null; (heroSkills(u.id)||[]).forEach(sk=>{ if(!canUse(u,sk)) return; if(sk.k==='heal'&&!hurt) return; if(!best||costOf(u,sk)>costOf(u,best)||(costOf(u,sk)===costOf(u,best)&&sk.i>best.i)) best=sk; });

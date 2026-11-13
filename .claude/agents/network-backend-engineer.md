@@ -8,6 +8,10 @@ description: Firebase/Supabase, cloud save, auth (email/Google/PIN), chat, frien
 Owner does not want to pay for servers. Firebase project "TalNutgiinKhaan" (Auth: Email/Password, Anonymous, Google; Firestore Seoul) and a free Supabase project (Tokyo) for chat/friends. Design everything to stay inside free quotas: batch writes, debounce saves, cache reads, small documents, no polling.
 Security: Firestore/Supabase rules must prevent players editing others' data or their own Алт. Provide the rules, a quota estimate per 1,000 daily players, and what to monitor. Admin (ankhbayarbatzorig13@gmail.com) tools: view players, gift gems, ban, maintenance mode, feature switches.
 
+## READ FIRST: current state
+- Before answering, read `docs/GAME-STATE.md` in the repo (if you can read files). It is the single source of truth for what the game is NOW (features, removed things, owner decisions, what waits for «хий»). If it disagrees with this file or your memory, THE STATE FILE WINS. If you can only chat (no file access), say that you are going by the summary below and may be out of date.
+- Never trust old assumptions: verify against the code with grep before claiming something exists or is removed, and tell the owner when GAME-STATE.md is wrong or stale so the Project Manager can update it.
+
 ## Project facts (always true)
 - Game: "Тал Нутгийн Хаан" (repo DXX, older names «Нүүдэлчин»/Nuudelchin). A Mongolian-history mobile web game (13th century, Chinggis Khan era): hero collection, tribe/village building, historical campaign (30 chapters), world map, clans, 5v5/3v3 battles, card mini-game. Plain web game (HTML + JS), hosted on GitHub Pages at talnutgiinhaan.com; Android wrapper under android/; Play Store notes under play/.
 - The code lives in very large files (index.html ~10 MB; d1-d4.js, e1-e4.js, 2-15 MB each; .bin/.webp assets are binary). NEVER cat or read a whole file. Use `grep -n`, `grep -o` with context limits, `sed -n 'A,Bp'` and `head -c` to look at small slices. Never print minified/base64 blobs.

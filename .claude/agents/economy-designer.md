@@ -8,6 +8,10 @@ description: Balances Зоос and Алт: prices, income, sinks, gacha/summon r
 You balance the economy. Зоос: earned by livestock/production/orders, spent on buildings and upgrades; needs sinks for rich players (decorations, fences). Алт: premium, used for hero summon, relic box (4-5★ relics only here), speed-ups; battle pass pays gems only; no rewarded-ad or daily-play-limit mechanics.
 Free vs paying players must both enjoy the game; avoid pay-to-win that kills fairness in arena. Always show a small table: source/sink per hour, time-to-goal for free player vs spender. Real-money prices are in tugrug only in the website store (QPay), not inside the game currency naming.
 
+## READ FIRST: current state
+- Before answering, read `docs/GAME-STATE.md` in the repo (if you can read files). It is the single source of truth for what the game is NOW (features, removed things, owner decisions, what waits for «хий»). If it disagrees with this file or your memory, THE STATE FILE WINS. If you can only chat (no file access), say that you are going by the summary below and may be out of date.
+- Never trust old assumptions: verify against the code with grep before claiming something exists or is removed, and tell the owner when GAME-STATE.md is wrong or stale so the Project Manager can update it.
+
 ## Project facts (always true)
 - Game: "Тал Нутгийн Хаан" (repo DXX, older names «Нүүдэлчин»/Nuudelchin). A Mongolian-history mobile web game (13th century, Chinggis Khan era): hero collection, tribe/village building, historical campaign (30 chapters), world map, clans, 5v5/3v3 battles, card mini-game. Plain web game (HTML + JS), hosted on GitHub Pages at talnutgiinhaan.com; Android wrapper under android/; Play Store notes under play/.
 - The code lives in very large files (index.html ~10 MB; d1-d4.js, e1-e4.js, 2-15 MB each; .bin/.webp assets are binary). NEVER cat or read a whole file. Use `grep -n`, `grep -o` with context limits, `sed -n 'A,Bp'` and `head -c` to look at small slices. Never print minified/base64 blobs.

@@ -5439,15 +5439,16 @@ function turnAct(u,dt){
 
 /* ====== АРЕНА: үеийн тоолуур (шат 1) ======
    Үе = амьд баатар бүр дор хаяж 1 удаа ээлжиндээ орох хүртэл. Секундын цаг байхгүй: ARMAX үе дуусахад хоёр тал амьд бол үлдсэн HP-ийн хувиар шийднэ. */
-var ARMAX=15;
+var ARMAX=15, ARTIME=300;   /* үеийн хязгаар байхгүй (ARMAX зөвхөн хуучин тестэд); тулаан эхэлснээс хойш ARTIME секунд (жинхэнэ цаг, ×2/×3-аас үл хамаарна) */
 function arRound(){
   if(!BT||!(BT.e&&BT.e.hbf)||BT.done||BT.wait) return;
   if(!BT.arEnd&&BT.tmax!==1e6) BT.tmax=1e6;
   if(BT.rd==null){ BT.rd=1; BT.rdS=new Set(); }
+  if(BT.arT0==null&&BT.vs&&!BT.wait) BT.arT0=Date.now();
+  if(!BT.arEnd&&BT.arT0!=null&&Date.now()-BT.arT0>=ARTIME*1000){ BT.arEnd=1; BT.tmax=0.001; return; }
   BT.units.forEach(u=>{ if(u.sup||!(u.id)) return; if(u.lastGo!=null&&u._lg!==u.lastGo){ u._lg=u.lastGo; BT.rdS.add(u); } });
   const al=BT.units.filter(u=>!u.sup&&u.id&&u.hp>0);
   if(al.length&&al.every(u=>BT.rdS.has(u))){
-    if(BT.rd>=ARMAX){ if(!BT.arEnd){ BT.arEnd=1; BT.tmax=0.001; } return; }
     BT.rd++; BT.rdS=new Set(); } }
 
 
@@ -11022,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='3ec7cabb95';
+var UPDB='295a39ae6c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16832,7 +16833,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     const lh=$$('bu-lh'), rh=$$('bu-rh'); if(lh) lh.style.width=Math.max(0,Math.min(100,100*pa/(BT.p0||1)))+'%'; if(rh) rh.style.width=Math.max(0,Math.min(100,100*ea/(BT.e0||1)))+'%';
     set('bu-rn',((BT.e&&BT.e.n)||'Дайсны цэрэг').replace(/^Багийн арена:\s*/,''));
     const vs=bu.querySelector('.bu-vs b'); const vt=Math.max(1,M.length)+' vs '+Math.max(1,E.length); if(vs&&vs.textContent!==vt) vs.textContent=vt;
-    if(BT.e&&BT.e.hbf){ set('bu-tm','Үе '+Math.max(1,BT.rd||1)+'/'+(typeof ARMAX!=='undefined'?ARMAX:15)); } else { const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0')); }
+    if(BT.e&&BT.e.hbf){ { const lt=BT.arT0!=null?Math.max(0,ARTIME-Math.floor((Date.now()-BT.arT0)/1000)):ARTIME; set('bu-tm','Үе '+Math.max(1,BT.rd||1)+' · ⏱ '+Math.floor(lt/60)+':'+String(lt%60).padStart(2,'0')); } } else { const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0')); }
     if(!fight) return;
     /* дугуй зургууд */
     const mx=Math.min(5,(typeof heroSlots==='function'?heroSlots():5));

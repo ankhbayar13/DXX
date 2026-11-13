@@ -5646,8 +5646,8 @@ function wmBattle(e,tc,mm){
   const k=e.t==='kingdom', cn=e.t==='clan', st=wmSt(), kid=e.id, tm=wmTacMul(e,tc), p0=k?wmPw(e):e.p, p=Math.max(30,Math.round(p0*tm.p)), first=k&&!(st.st['w'+kid]); let dn=0;
   (typeof rtsStart==='function'&&!window.RTS_OFF?rtsStart:startBattle)(0,{kt:e.t,dh:e.dh,ty:e.ty,rs:e.rs,n:e.n||('Дээрэмчид Lv'+e.lv),fc:k?(wmRI(e)%5):cn?(hsh(String(e.id))%5):'b',p:p,g:Math.round(p*(k?0.6:cn?0.3:0.5)*tm.r),m:Math.round(p*0.12),bi:Math.min(6,k?Math.floor(wmRI(e)/2):cn?3:e.lv),back:'wmap',hs:mm&&mm.hs,pc:mm&&mm.pc,
     cb:()=>{ if(dn) return; dn=1; const tt=tm.ok?' · Тактик таарлаа ×1.4':'';
-      if(k){ st.st['w'+kid]=(st.st['w'+kid]||0)+1; st.st[kid]=Date.now()+15*60000; S.rp=(S.rp||0)+10; S.res.alt+=1+(wmRI(e)>6?1:0); addXP(40+wmRI(e)*6);
-        if(first){ const al=3+wmRI(e), gg=Math.round(p0*1.0); S.res.alt+=al; S.res.gold+=gg; let rt=''; if(Math.random()<0.5) rt=' + '+wmRelicGrant(); passAdd(15); say('🏆 Анхны эзлэлт! +'+al+' Алт, +'+f(gg)+' 🪙'+rt); }
+      if(k){ st.st['w'+kid]=(st.st['w'+kid]||0)+1; st.st[kid]=Date.now()+6*3600*1000; S.rp=(S.rp||0)+10; S.res.alt+=1+(wmRI(e)>6?1:0); addXP(40+wmRI(e)*6);
+        if(first){ const al=5, gg=Math.round(p0*1.0); S.res.alt+=al; S.res.gold+=gg; let rt=''; if(Math.random()<0.5) rt=' + '+wmRelicGrant(); passAdd(15); say('🏆 Анхны эзлэлт! +'+al+' Алт, +'+f(gg)+' 🪙'+rt); }
         else say('Улс ялагдлаа! +'+Math.round(p*0.6*tm.r)+' 🪙'+tt); }
       else if(cn){ st.st[kid]=Date.now()+30*60000; const pts=wmCwPts(e,tm); wmCsAdd(pts); S.cwn=(S.cwn||0)+1; if(e.real){ const lp=wmLootPct(e); if(lp>0) cwRaidDo(e,lp); } S.res.alt+=1; addXP(30); passAdd(8); say('⚔ Клан дайн: +'+pts+' оноо'+tt); }
       else { st.st[kid]=Date.now()+8*60000; if(e.lv>=4) S.res.alt+=1; addXP(15*e.lv); say('Бааз устгагдлаа!'+tt); }
@@ -6035,7 +6035,7 @@ const WM_KW=[160,165,165,180,180,190,195,210,210,215,225,235,240,240];
 function wmKs(c,D,vis,items,t){ if(!(WMT.ok&&wmS('wm_kg0'))) return wmKs0(c,D,vis,items,t);
   D.ks.forEach(k=>{ if(!vis(k.x,k.y,110)) return; const s=wmS('wm_kg'+k.i); if(!s){ return wmKs1(c,k,vis,items,t); } const cd=wmCd(k.id), w=WM_KW[k.i]||150, h=w*s.ih/s.iw;
     items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.drawImage(s.img,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
-      wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); }
+      wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11); if(cd) wmLabel(c,'🛡'+wmFmtL(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10); if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); }
 
 // ---- 156: гэрийн дэлгэцийн захын мод — улирлын ойн зураг ----
 try{ wmtBin('wmterr5.bin?v=1',(nm,im,w,h)=>{ SPR[nm]={img:im,iw:w,ih:h}; }).catch(()=>{}); }catch(e){}
@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b009815070';
+var UPDB='d5d842f379';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -14580,7 +14580,7 @@ rkGiftOf=function(l){ return {alt:[0,0,50,60,70,80,90,100,200,300,400][l]||0, go
       const w=MAP[k.n]==='j'?W*1.16:W, h=w*im.naturalHeight/im.naturalWidth, cd=wmCd(k.id);
       items.push({y:k.y,f:()=>{ c.globalAlpha=cd?0.5:1; c.drawImage(im,k.x-w/2,k.y-h*0.86,w,h); c.globalAlpha=1;
         wmLabel(c,k.n,k.x,k.y+h*0.14+10,'#fff',13); wmLabel(c,'⚔'+f(wmPw(k)),k.x,k.y+h*0.14+24,'#ffd770',11);
-        if(cd) wmLabel(c,'🛡'+wmFmt(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10);
+        if(cd) wmLabel(c,'🛡'+wmFmtL(cd),k.x,k.y-h*0.86-6,'#9fd0ff',10);
         if(WMS===k.id) wmRing(c,k.x,k.y-14,Math.max(44,w*0.35),t); }}); }); };
 })();
 
@@ -22719,6 +22719,57 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   /* компьютер (өргөн дэлгэц): кланы цонхнууд утасны өргөнтэй, төвд харагдана */
   const wd=document.createElement('style'); wd.textContent='@media (min-width:760px) and (min-height:500px){#alv{left:50%!important;right:auto!important;width:min(100vw,520px)!important;transform:translateX(-50%);box-shadow:0 0 0 2000px #000b,0 0 30px #000}#wmap #cwp{left:50%!important;right:auto!important;width:min(100% - 16px,500px);transform:translateX(-50%)}}';
   document.head.appendChild(wd);
+})();
+
+
+/* p32/wmlim.js — Дэлхийн дайн: улс руу дайралт өдөрт 4 (шөнө 00:00-д шинэчлэгдэнэ), дараа нь нэг дайралт 100 Алт.
+   Улс ялсны дараа тэр улс руу 6 цаг дахин дайрахгүй (wm2.js дотор). Клан дайн, бааз, нөөцийн цэгт хамаарахгүй. */
+var WMDAY=4, WMPAY=100;
+/* 1 цагаас дээш хүлээлтийг «ц:мм» хэлбэрээр харуулна */
+function wmFmtL(s){ s=Math.max(0,Math.round(s)); if(s>=3600) return Math.floor(s/3600)+'ц '+String(Math.floor(s%3600/60)).padStart(2,'0')+'м'; return wmFmt(s); }
+function wmDL(){ try{ dqInit(); return Math.max(0,WMDAY-(S.dq.wn||0)); }catch(e){ return WMDAY; } }
+function wmPayAsk(id,tc){
+  const sh=$('wmsheet'); if(!sh) return; window.WM_PQ={id:id,tc:tc};
+  sh.innerHTML='<h3>Нэмэлт дайралт</h3><div class="sm">Өнөөдрийн '+WMDAY+' дайралт дууссан. Нэмэлт дайралт: <b>'+WMPAY+' Алт</b> (чинийх '+(S.res.alt||0)+' Алт).</div>'
+    +'<button class="btn red" onclick="wmPayGo()">Тийм, '+WMPAY+' Алт төлж дайрна</button>'
+    +'<button class="btn" style="background:#5b3d1e" onclick="wmSelSheet(\''+id+'\')">Болих</button>';
+  sh.style.display='block';
+}
+function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; window.WM_PAYOK={id:q.id,tc:q.tc}; wmSend(q.id,q.tc); }
+(function(){
+  const _s=wmSend;
+  wmSend=function(id,tc){
+    let e=null; try{ e=wmEnt(id); }catch(x){}
+    if(!e||e.t!=='kingdom'||tc==null) return _s.apply(this,arguments);
+    try{ if(wmCd(id)||wmSt().m.length>=wmMax()||wmSt().m.some(m=>m.tid===id)) return _s.apply(this,arguments); }catch(x){}
+    const free=wmDL()>0;
+    if(!free){
+      if((S.res.alt||0)<WMPAY){ say('Өнөөдрийн '+WMDAY+' дайралт дууссан. Нэмэлт дайралтад '+WMPAY+' Алт хэрэгтэй (чинийх '+(S.res.alt||0)+')'); try{ sfx('err'); }catch(x){} return; }
+      const ok=window.WM_PAYOK; if(!(ok&&ok.id===id&&ok.tc===tc)){ wmPayAsk(id,tc); return; }
+    }
+    window.WM_PAYOK=null;
+    const st=wmSt(), n0=st.m.length;
+    const r=_s.apply(this,arguments);
+    try{
+      const m=st.m[st.m.length-1];
+      if(st.m.length>n0&&m&&m.tid===id){
+        dqInit(); S.dq.wn=(S.dq.wn||0)+1;
+        if(!free){ S.res.alt-=WMPAY; say('−'+WMPAY+' Алт · нэмэлт дайралт'); }
+        try{ save(); updateHUD(); }catch(x){}
+      }
+    }catch(x){}
+    return r;
+  };
+  const _ss=wmSelSheet;
+  wmSelSheet=function(id){
+    _ss.apply(this,arguments);
+    try{
+      const e=wmEnt(id), sh=$('wmsheet'); if(!e||e.t!=='kingdom'||!sh) return;
+      const n=wmDL(), t=n>0?'Өнөөдрийн дайралт: <b style="color:#ffd770">'+n+'/'+WMDAY+'</b> · шөнө 00:00-д шинэчлэгдэнэ'
+        :'Өнөөдрийн '+WMDAY+' дайралт дууссан · нэмэлт дайралт <b style="color:#ff9a7a">'+WMPAY+' Алт</b>';
+      sh.insertAdjacentHTML('afterbegin','<div class="sm" style="text-align:center;margin-bottom:4px">⚔ '+t+'</div>');
+    }catch(x){}
+  };
 })();
 
 

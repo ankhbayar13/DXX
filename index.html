@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4df95e62d4';
+var UPDB='996562acbd';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21151,15 +21151,16 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.tpkExit=function(){ tpkLeave(); };
   window.tpkTeam=function(){ tpkLeave(); setTimeout(()=>{ try{ taGoGrid(); }catch(e){} },500); };
   /* Тулааны талбайн доод төвд жижиг самбар (тулаан эхлээгүй, баатрууд тойрог дээрээ зогсож байна) */
-  function pkShow(i){
-    const el=document.getElementById('btl'); if(!el||!BT) return;
+  function pkShow(i,quiet){
+    const el=document.getElementById('btl'); if(!el||!BT) return; TS.pki=i; if(!quiet) TS.pks=null;
     tpkClose(); const A=S.ta, paid=A.n>=5, LX=[40,372,705];
     let h='<div class="tpk"><div class="tpkt">Миний баатар</div><div class="tpkn">'+A.team.length+' / 3</div>';
-    A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const lv=(S.heroes&&S.heroes[id])||1;
-      h+='<div class="tpki" style="left:'+PW(x+14)+'">'+pimg(id,'tpkp')+elImg(id,'right:3%;top:3%;width:24%;height:auto')+'</div>'
-        +'<div class="tpkb" style="left:'+PW(x+211)+'">'+lv+'</div>'
-        +'<div class="tpkh" style="left:'+PW(x+14)+'">'+esc(fst(id))+'</div>'
-        +'<div class="tpkv" style="left:'+PW(x+14)+'"><i>'+IC.sw+'</i>'+f(heroPower(id))+'</div>'; });
+    A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const sel=TS.pks===k, oc=' onclick="tpkPick('+k+')"';
+      h+='<div class="tpki'+(sel?' sel':'')+'" style="left:'+PW(x+14)+'"'+oc+'>'+pimg(id,'tpkp')+elImg(id,'right:3%;top:3%;width:24%;height:auto')+'</div>'
+        +'<div class="tpkb" style="left:'+PW(x+84)+'"'+oc+'>'+esc(RN(grp(id)))+'</div>'
+        +'<div class="tpkh" style="left:'+PW(x+14)+'"'+oc+'>'+esc(fst(id))+'</div>'
+        +'<div class="tpkv" style="left:'+PW(x+14)+'"'+oc+'><i>'+IC.sw+'</i>'+f(heroPower(id))+'</div>'; });
+    if(TS.pks!=null) h+='<div class="tpkhint">Солих баатраа дар</div>';
     { const o=TS.opp[i], eh=((o&&o.h)||[]).slice(0,3), BE=(typeof BTBEAT!=='undefined')?BTBEAT:{archer:'heavy',heavy:'cav',cav:'archer'}; let ad=0, ds=0;
       A.team.slice(0,3).forEach(m=>eh.forEach(e=>{ const q=elMul(m,e.id); if(q>1) ad++; else if(q<1) ds++; }));
       const tg=ad>ds?['Давуу','#9dff7a']:ad<ds?['Сул','#ff8a7a']:['Адил','#ffd770'];
@@ -21168,7 +21169,19 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     h+='<button class="tpkB" style="left:'+PW(38)+';width:'+PW(420)+'" onclick="tpkExit()"><i>'+IC.door+'</i>Гарах</button>'
       +'<button class="tpkB" style="left:'+PW(488)+';width:'+PW(410)+'" onclick="tpkTeam()"><i>'+IC.team+'</i>Баг</button>'
       +'<button class="tpkG" onclick="taGo()"><i>'+IC.sw+'</i><span>Эхлэх'+(paid?'<small>'+CFG.cost+' Алт</small>':'')+'</span></button></div>';
-    const o=document.createElement('div'); o.id='tapk'; o.className='tpkp'; o.innerHTML='<div class="tpkw">'+h+'</div>'; el.appendChild(o); el.dataset.prep='1'; try{ sfx('ok'); }catch(e){} }
+    const o=document.createElement('div'); o.id='tapk'; o.className='tpkp'; o.innerHTML='<div class="tpkw">'+h+'</div>'; el.appendChild(o); el.dataset.prep='1'; try{ if(!quiet) sfx('ok'); }catch(e){} }
+  /* Тулаанаас өмнө баатруудын байрыг солих: нэгийг дарж сонгоод, нөгөөг дарвал хоёул байраа солино (баг дотор дараалал хадгалагдана) */
+  window.tpkPick=function(k){
+    try{ const E=BT&&BT.e; if(!E||!E.prep||!BT.wait) return; const A=S.ta;
+      if(TS.pks==null){ TS.pks=k; try{ sfx('ok'); }catch(e){} pkShow(TS.pki,1); return; }
+      if(TS.pks===k){ TS.pks=null; pkShow(TS.pki,1); return; }
+      const a=TS.pks, b=k, ia=A.team[a], ib=A.team[b]; TS.pks=null;
+      A.team[a]=ib; A.team[b]=ia; if(E.hs){ E.hs[a]=ib; E.hs[b]=ia; }
+      const ua=BT.units.find(u=>!u.side&&u.id===ia), ub=BT.units.find(u=>!u.side&&u.id===ib);
+      if(ua&&ub){ ['x','y','hx','hy'].forEach(q=>{ const t=ua[q]; ua[q]=ub[q]; ub[q]=t; }); const i1=BT.units.indexOf(ua), i2=BT.units.indexOf(ub); BT.units[i1]=ub; BT.units[i2]=ua; }
+      try{ save(); }catch(e){} try{ sfx('ok'); vib(20); }catch(e){}
+      pkShow(TS.pki,1);
+    }catch(e){} };
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
@@ -21383,7 +21396,9 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#tapk .tpkn{left:'+PW(1405)+';top:'+PW(40)+';width:'+PW(225)+';height:'+PW(90)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(60)+';font-weight:bold;color:#9dff5a;text-shadow:0 '+PW(3)+' '+PW(4)+' #000}'
   +'#tapk .tpki{top:'+PW(252)+';width:'+PW(274)+';height:'+PW(208)+';overflow:hidden;border-radius:'+PW(10)+'}'
   +'#tapk .tpkp{display:block;width:100%;height:100%}#tapk .ta-img{width:100%!important;height:100%!important;object-fit:cover;object-position:50% 20%;display:block}'
-  +'#tapk .tpkb{top:'+PW(226)+';width:'+PW(86)+';height:'+PW(86)+';border-radius:50%;background:radial-gradient(circle at 35% 30%,#7df04a,#25a10f 70%,#157008);border:'+PW(4)+' solid #d4ffb0;box-shadow:0 '+PW(3)+' '+PW(6)+' #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:'+PW(50)+';font-weight:bold;color:#fff;text-shadow:0 '+PW(3)+' '+PW(3)+' #063a08}'
+  +'#tapk .tpkb{top:'+PW(232)+';width:'+PW(204)+';height:'+PW(56)+';border-radius:'+PW(16)+';background:linear-gradient(#3fae22,#1b6d0c);border:'+PW(4)+' solid #d4ffb0;box-shadow:0 '+PW(3)+' '+PW(6)+' #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:'+PW(30)+';font-weight:bold;color:#fff;text-shadow:0 '+PW(3)+' '+PW(3)+' #063a08;white-space:nowrap;padding:0 '+PW(6)+'}'
+  +'#tapk .tpki,#tapk .tpkb,#tapk .tpkh,#tapk .tpkv{cursor:pointer}#tapk .tpkb{z-index:4}#tapk .tpki.sel{z-index:3;filter:brightness(1.2)}#tapk .tpki.sel:after{content:"";position:absolute;inset:0;border:'+PW(9)+' solid #ffe14a;border-radius:'+PW(10)+';box-shadow:inset 0 0 '+PW(34)+' #ffe14a;pointer-events:none}'
+  +'#tapk .tpkhint{left:'+PW(300)+';top:'+PW(180)+';width:'+PW(700)+';height:'+PW(56)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(34)+';color:#ffe14a;text-shadow:0 '+PW(3)+' '+PW(3)+' #000;pointer-events:none}'
   +'#tapk .tpkh{top:'+PW(462)+';width:'+PW(274)+';height:'+PW(54)+';display:flex;align-items:center;justify-content:center;font-size:'+PW(46)+';font-weight:bold;text-shadow:0 '+PW(3)+' '+PW(3)+' #000;white-space:nowrap;overflow:hidden}'
   +'#tapk .tpkv{top:'+PW(520)+';width:'+PW(274)+';height:'+PW(56)+';display:flex;align-items:center;justify-content:center;gap:'+PW(14)+';font-size:'+PW(44)+';font-weight:bold;color:#ffd770;text-shadow:0 '+PW(3)+' '+PW(3)+' #000}'
   +'#tapk .tpkv i,#tapk .tpkB i,#tapk .tpkG i{display:block;width:'+PW(46)+';height:'+PW(46)+'}#tapk i svg{display:block;width:100%;height:100%}'
@@ -22812,12 +22827,13 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     return {n:(n||'Дайсан').slice(0,16), h:b, p:E.p||L.reduce(function(a,x){ return a+x.p; },0)};
   }
   var SW='<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.8" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>';
+  function vsCls(id){ try{ var c=(typeof hcls==='function')?hcls(id):htype(id); return (TNAME&&TNAME[c])||c||''; }catch(e){ return ''; } }
   function vsCard(side,d){
     var h=d.h, he=h?vsHero(h.id):null, img=h&&typeof hdImg==='function'?hdImg(h.id,0,'vsx-img',0):'';
     var el=''; try{ if(h&&window.taElImg) el=window.taElImg(h.id,'right:5%;top:5%;width:20%;height:auto'); }catch(e){}
     var hn=he?String(he.n).split(' ')[0]:'';
     return '<div class="vsc '+side+'"><div class="vsp">'+img+el
-      +(h?'<div class="vsl">'+h.lv+'</div><div class="vsh"><b>'+vsEsc(hn)+'</b></div>':'')+'</div>'
+      +(h?'<div class="vsl">'+vsEsc(vsCls(h.id))+'</div><div class="vsh"><b>'+vsEsc(hn)+'</b></div>':'')+'</div>'
       +'<img class="vsf" alt="" src="'+VSA+(side==='L'?'vs_blue':'vs_red')+'.webp'+VSV+'">'
       +'<div class="vsn"><span>'+vsEsc(d.n)+'</span></div>'
       +'<div class="vsw"><i>'+SW+'</i><span>'+vsF(d.p)+'</span></div></div>';
@@ -22858,7 +22874,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    +'#tavs .vsc.R .vsx-img{transform:scaleX(-1)}'
    +'#tavs .vsh{position:absolute;left:0;right:0;bottom:0;padding:calc(var(--ch)*.04) 17% calc(var(--ch)*.016);background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,0));display:flex;justify-content:center;align-items:baseline;font-family:Georgia,"Times New Roman",serif;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap}'
    +'#tavs .vsh b{font-size:calc(var(--ch)*.05);max-width:100%;overflow:hidden;text-overflow:ellipsis}'
-   +'#tavs .vsl{position:absolute;left:5%;top:5%;width:19%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7df04a,#25a10f 70%,#157008);border:2px solid #d4ffb0;box-shadow:0 2px 4px #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:Georgia,"Times New Roman",serif;font-weight:bold;font-size:calc(var(--ch)*.042);color:#fff;text-shadow:0 1px 2px #000;z-index:2}'
+   +'#tavs .vsl{position:absolute;left:5%;top:5%;padding:0 calc(var(--ch)*.016);height:calc(var(--ch)*.05);border-radius:calc(var(--ch)*.016);background:radial-gradient(circle at 35% 30%,#7df04a,#25a10f 70%,#157008);border:2px solid #d4ffb0;box-shadow:0 2px 4px #000a;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:Georgia,"Times New Roman",serif;font-weight:bold;font-size:calc(var(--ch)*.03);white-space:nowrap;color:#fff;text-shadow:0 1px 2px #000;z-index:2}'
    +'#tavs .vsn,#tavs .vsw{position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;font-family:Georgia,"Times New Roman",serif;font-weight:bold;white-space:nowrap;pointer-events:none}'
    +'#tavs .vsn{left:17%;width:66%;top:14.4%;height:7.8%;color:#ffe7a8;text-shadow:0 2px 3px #000,0 0 8px #2a0a02}#tavs .vsn span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}'
    +'#tavs .vsw{left:26%;width:48%;top:76.8%;height:7%;gap:calc(var(--cw)*.03);color:#ffd770;font-size:calc(var(--ch)*.056);text-shadow:0 2px 3px #000}#tavs .vsw i{display:block;width:calc(var(--ch)*.05);height:calc(var(--ch)*.05)}#tavs .vsw i svg{display:block;width:100%;height:100%}'

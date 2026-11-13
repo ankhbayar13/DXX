@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b7245244b5';
+var UPDB='4df95e62d4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22795,7 +22795,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    Зүүн талд цэнхэр хүрээ (миний баг), баруун талд улаан хүрээ (эсрэгч), голд VS. Хүрээ бүрт: баатрын хамгийн хүчтэй нь, дээр нь тоглогчийн нэр, доор нь багийн нийт хүч.
    btGo-г ороож арены тулаанд (E.hbf && E.fr) л ажиллана; дэлгэц дээр дарвал алгасна. */
 (function(){
-  var VSA='rts/', VSV='?v=1', VST=1500;   /* VST: тулаан эхлэх хүртэлх хугацаа (мс) */
+  var VSA='rts/', VSV='?v=1', VST=4000;   /* VST: тулаан эхлэх хүртэлх хугацаа (мс) */
   function vsEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function vsF(n){ try{ return window.f?window.f(n):String(Math.round(n)); }catch(e){ return String(Math.round(n)); } }
   function vsHero(id){ try{ return HEROES.find(function(x){ return x.id===id; }); }catch(e){ return null; } }

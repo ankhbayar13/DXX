@@ -5392,12 +5392,24 @@ const EVAR={foot:['esword','espear','eshaman'],heavy:['eaxe'],archer:['ebow'],ca
 
 /* p32/turn.js — 133: ээлжлэн довтлох тулаан (баатрууд байрандаа зогсож, ээлжээр гүйж очоод цохиод буцна) */
 var TURNB=1, TMUL=2.1;
+/* ====== АРЕНА (шат 3): цохилт алдах, чухал цохилт, хамгаалалт ======
+   Хамгаалалт D → гэмтэл D/(D+100)-аар буурна (анги бүрийн D тогтмол). Чухал цохилт ×1.5 бөгөөд хамгаалалтын 50%-ийг үл тооно.
+   Алдах: суурь 95% × (1 − тохирох ангийн мултрах %). Хэлбэлзэл ±5%. */
+var ARHP=2, ARDEF={heavy:54,cav:28,foot:28,archer:14,support:18}, ARDOD={heavy:0.02,cav:0.08,foot:0.05,archer:0.10,support:0.05}, ARCRIT={heavy:0.07,cav:0.12,foot:0.10,archer:0.15,support:0.08}, ARACC=0.95, ARCRM=1.5;
+function arMod(u,tg,dmg,var5){
+  if(!(BT&&BT.e&&BT.e.hbf)) return {v:dmg,miss:false,crit:false};
+  const tt=tg.type||'foot', ut=u.type||'foot';
+  if(Math.random()>ARACC*(1-(ARDOD[tt]||0.05))) return {v:0,miss:true,crit:false};
+  const crit=Math.random()<(ARCRIT[ut]||0.1), D=(ARDEF[tt]||24)*(crit?0.5:1);
+  let v=dmg*(var5?(0.95+Math.random()*0.1):1)*(crit?ARCRM:1)*(1-D/(D+100));
+  return {v:Math.max(1,v),miss:false,crit:crit}; }
 function turnHit(u,tg){
-  let dmg=u.atk*(0.9+Math.random()*0.2)*TMUL; if(u.bAtk&&u.bAtk.t>BT.t) dmg*=u.bAtk.m; if(tg.shT>BT.t) dmg*=0.5; const _em=(BT.e&&BT.e.hbf&&u.id&&tg.id&&window.btElMul)?window.btElMul(u.id,tg.id):(BTBEAT[u.type]===tg.type?1.5:1); const big=_em>1; if(_em!==1) dmg*=_em;
+  let dmg=u.atk*((BT.e&&BT.e.hbf)?(0.95+Math.random()*0.1):(0.9+Math.random()*0.2))*TMUL; if(u.bAtk&&u.bAtk.t>BT.t) dmg*=u.bAtk.m; if(tg.shT>BT.t) dmg*=0.5; const _em=(BT.e&&BT.e.hbf&&u.id&&tg.id&&window.btElMul)?window.btElMul(u.id,tg.id):(BTBEAT[u.type]===tg.type?1.5:1); const big=_em>1; if(_em!==1) dmg*=_em;
+  let _cr=false; if(BT.e&&BT.e.hbf){ const _r=arMod(u,tg,dmg); if(_r.miss){ u.hit=0.25; BT.dm.push({x:tg.x,y:tg.y-30,t:0,v:0,miss:1,big:false,side:u.side}); sfx('hit',30); return; } dmg=_r.v; _cr=_r.crit; if(_cr){ BT.shake=Math.min(1,BT.shake+0.25); } }
   tg.hp-=dmg; if(u.id&&!u.side) u.dd=(u.dd||0)+dmg; if(tg.id&&!tg.side) tg.tkn=(tg.tkn||0)+dmg; u.hit=0.25; tg.hurt=0.3; chgRev(tg); if(big){ sfx('big',90); vib(15); } else sfx(u.type==='archer'?'bow':u.type==='heavy'?'slash':'hit',70);
   if(tg.hp<=0&&!tg.dead) tg.dead=BT.t; if(big) BT.shake=Math.min(1,BT.shake+0.35);
   for(let q=0;q<(u.type==='archer'?3:6);q++) BT.pt.push({x:tg.x,y:tg.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:u.side?'blood':'spark'});
-  BT.dm.push({x:tg.x,y:tg.y-30,t:0,v:Math.round(dmg),big,side:u.side});
+  BT.dm.push({x:tg.x,y:tg.y-30,t:0,v:Math.round(dmg),big,side:u.side,crit:_cr});
   BT.fx.push({k:u.type==='archer'?'arrow':(u.type==='heavy'?'slash':'clash'),x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0});
   efAdd(u.type==='archer'?0:(u.type==='heavy'?6:1),tg.x,tg.y-16,u.type==='archer'?32:36,0.4); }
 function turnPick(u){ const U=BT.units; let best=null,bs=1e9;
@@ -10985,7 +10997,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='01f2927c6a';
+var UPDB='3d0d2b021b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16435,10 +16447,10 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     if(NEWK.indexOf(d[0])>=0||(d[0]==='charge'&&BT&&BT.forceTg&&BT.forceTg.hp>0)){
       const U=BT.units, en=U.filter(x=>x.side&&x.hp>0&&!x.sup); if(!en.length) return false;
       const lv=Math.max(1,S.heroes[u.id]||1), k=(1+SKB[Math.min(6,lv-1)]/100)*(d[4]||1);
-      const hitE=(e,m)=>{ const dm=Math.round(u.atk*m*k); e.hp-=dm; if(u.id) u.dd=(u.dd||0)+dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0}); return dm; };
+      const hitE=(e,m)=>{ let dm=Math.round(u.atk*m*k), _cr=false; if(BT.e&&BT.e.hbf){ const _r=arMod(u,e,dm,1); if(_r.miss){ BT.dm.push({x:e.x,y:e.y-30,t:0,v:0,miss:1,big:false,side:0}); return 0; } dm=Math.round(_r.v); _cr=_r.crit; } e.hp-=dm; if(u.id) u.dd=(u.dd||0)+dm; e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; BT.dm.push({x:e.x,y:e.y-30,t:0,v:dm,big:true,side:0,crit:_cr}); return dm; };
       const al=U.filter(x=>!x.side&&x.hp>0&&!x.sup), pickT=()=>(BT.forceTg&&BT.forceTg.hp>0)?BT.forceTg:en.reduce((a,b)=>b.hp>a.hp?b:a);
       if(d[0]==='cleave'){ en.forEach(e=>{ hitE(e,1.6); try{ efAdd(1,e.x,e.y-18,54,0.5); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:e.x,y1:e.y-18,t:0}); }catch(x){} }); BT.shake=Math.min(1,(BT.shake||0)+0.5); }
-      else if(d[0]==='stun'){ const tg=pickT(); hitE(tg,1.5); tg.cd=(tg.cd>0?tg.cd:0)+6; try{ efAdd(2,tg.x,tg.y-18,60,0.6); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.35); }
+      else if(d[0]==='stun'){ const tg=pickT(); if(hitE(tg,1.5)>0) tg.cd=(tg.cd>0?tg.cd:0)+6; try{ efAdd(2,tg.x,tg.y-18,60,0.6); efAdd(2,tg.x,tg.y+4,60,0.7,true); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.35); }
       else if(d[0]==='burn'){ en.forEach(e=>{ e.dot={until:BT.t+8,dps:u.atk*0.3*k,acc:0}; try{ efAdd(6,e.x,e.y-18,54,0.6); }catch(x){} }); }
       else if(d[0]==='drain'){ const tg=pickT(), dm=hitE(tg,3); al.forEach(a=>{ a.hp=Math.min(a.max,a.hp+dm*0.35); try{ efAdd(4,a.x,a.y+4,60,0.8,true); }catch(x){} }); try{ efAdd(6,tg.x,tg.y-18,60,0.5); }catch(x){} }
       else if(d[0]==='execute'){ const tg=pickT(); hitE(tg,tg.hp<=tg.max*0.35?9:4); try{ efAdd(6,tg.x,tg.y-18,66,0.6); BT.fx.push({k:'slash',x0:u.x,y0:u.y-18,x1:tg.x,y1:tg.y-18,t:0}); }catch(x){} BT.shake=Math.min(1,(BT.shake||0)+0.5); }
@@ -21036,10 +21048,10 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     const W=BT.W, H=BT.H, pt=H>W, sc=Math.max(W/IW,H/IH), ox=(W-IW*sc)/2, oy=pt?0:-(IH*sc-H)*0.3;
     /* Хоёр талыг ИЖИЛ томьёогоор тооцно: баатар бүрийн хүч p → HP = p*14*hp, цохилт = p*0.5*atk (адил хүчтэй баг тэнцүү тулна) */
     { const mine=BT.units.filter(u=>u.side===0&&u.id&&!u.sup), sum=mine.reduce((a,u)=>a+heroPower(u.id),0)||1, km=Math.max(1,X.teamPow())/sum;
-      mine.forEach(u=>{ if(u.hh) return; u.hh=1; const dd=BTDEF[u.type]||u.d, p=heroPower(u.id)*km, st=stat(cls(u.id),p), mx=st.hp; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=p; u.sq=null; }); BT.p0=mine.reduce((a,u)=>a+u.max,0); }
+      mine.forEach(u=>{ if(u.hh) return; u.hh=1; const dd=BTDEF[u.type]||u.d, p=heroPower(u.id)*km, st=stat(cls(u.id),p), mx=st.hp*(typeof ARHP!=='undefined'?ARHP:1); u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=p; u.sq=null; }); BT.p0=mine.reduce((a,u)=>a+u.max,0); }
     if(E.eh){ const en=BT.units.filter(u=>u.side===1);
       en.forEach((u,k)=>{ if(u.hh) return; u.hh=1; const h=E.eh[k]; if(!h){ u.hp=0; u.max=0; u.dead=true; return; }
-        const he=HEROES.find(x=>x.id===h.id), t=(typeof htype==='function')?htype(h.id):'cav', dd=BTDEF[t]||BTDEF.cav, st=stat(cls(h.id),h.p), mx=st.hp;
+        const he=HEROES.find(x=>x.id===h.id), t=(typeof htype==='function')?htype(h.id):'cav', dd=BTDEF[t]||BTDEF.cav, st=stat(cls(h.id),h.p), mx=st.hp*(typeof ARHP!=='undefined'?ARHP:1);
         u.type=t; u.d=dd; u.id=h.id; u.elv=h.lv||1; if(he) u.name=he.n; u.hp=mx; u.max=mx; u.atk=st.atk; u.pw0=h.p; u.cd=Math.random()*dd.cd; u.arn=0;
         try{ const bv=BTV[t]||BTV.cav; u.key=h.id==='chinggis'?'u_general':bv[(h.id.length+k)%bv.length]; }catch(e){} });
       BT.units=BT.units.filter(u=>!(u.side===1&&u.dead)); BT.e0=BT.units.filter(u=>u.side===1).reduce((a,u)=>a+u.max,0); }
@@ -21085,10 +21097,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   /* ---------- Харагдац: HP тоо, цохилтын тоо, тулааны хураангуй ---------- */
   const sh=n=>{ n=Math.max(0,Math.round(n)); return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'k':n>=1e3?(n/1e3).toFixed(1)+'k':String(n); };
   window.taHp=function(c,u,bw,h){ if(window.hbBar) return; try{ c.save(); c.font='bold 9px sans-serif'; c.textAlign='left'; c.lineWidth=3; c.strokeStyle='#000'; const x=u.x+bw/2+3, y=u.y-h-0.5, t=sh(u.hp); c.strokeText(t,x,y); c.fillStyle='#fff'; c.fillText(t,x,y); c.restore(); }catch(e){} };
-  window.taDmg=function(c,d){ try{ const sk=d.big&&!d.adv, ad=!!d.adv, pop=d.t<0.12?1+(0.12-d.t)*5:1, sz=Math.round((sk?27:ad?22:15)*pop), y=d.y-d.t*26-(sk?8:ad?6:0);
+  window.taDmg=function(c,d){ try{ if(d.miss){ const yy=d.y-d.t*22; c.save(); c.globalAlpha=Math.max(0,Math.min(1,(1.2-d.t)*2.5)); c.textAlign='center'; c.font='bold 15px sans-serif'; c.lineWidth=3.5; c.strokeStyle='#000'; c.strokeText('Алдлаа',d.x,yy); c.fillStyle='#d8d8d8'; c.fillText('Алдлаа',d.x,yy); c.restore(); return true; }
+    const sk=d.big&&!d.adv, ad=!!d.adv, pop=d.t<0.12?1+(0.12-d.t)*5:1, sz=Math.round((sk?27:ad?22:15)*pop*(d.crit?1.25:1)), y=d.y-d.t*26-(sk?8:ad?6:0);
       const col=d.side?(sk?'#ff2a2a':ad?'#ff4a3a':'#ff9a8a'):(sk?'#ff9a2a':ad?'#ffd24a':'#ffffff');
       c.save(); c.globalAlpha=Math.max(0,Math.min(1,(1.4-d.t)*2.5)); c.textAlign='center'; c.lineWidth=4; c.strokeStyle='#000';
       c.font='bold '+sz+'px sans-serif'; const tx='-'+d.v; c.strokeText(tx,d.x,y); c.fillStyle=col; c.fillText(tx,d.x,y);
+      if(d.crit&&d.t<0.9){ c.font='bold 11px sans-serif'; c.lineWidth=3; c.strokeText('Чухал!',d.x,y-sz-(ad?12:1)); c.fillStyle='#ffe14a'; c.fillText('Чухал!',d.x,y-sz-(ad?12:1)); }
       if(ad&&d.t<0.8){ c.font='bold 10px sans-serif'; c.lineWidth=3; const w=d.side?'Сул':'Давуу'; c.strokeText(w,d.x,y-sz-1); c.fillStyle=d.side?'#ff8a7a':'#9dff7a'; c.fillText(w,d.x,y-sz-1); }
       c.restore(); return true; }catch(e){ return false; } };
   /* Дайсны ээлж: тоглогчийн АВТО-той яг ижил логик (энергитэй чадвар → үгүй бол ердийн цохилт), талуудыг түр эргүүлж ажиллуулна */
@@ -22677,7 +22691,8 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     let tgs=[];
     if(sp.e){ if(sp.e==='all') tgs=en.slice(); else if(sp.e==='three') tgs=en.slice().sort(()=>Math.random()-0.5).slice(0,3); else { const f=BT.forceTg&&BT.forceTg.hp>0?BT.forceTg:null; tgs=[f||turnPick(u)||en[0]]; }
       if(sp.dash&&tgs[0]){ const tg=tgs[0]; u.x+=(tg.x-u.x)*(sp.e==='one'?0.6:0.4); u.y+=(tg.y-u.y)*(sp.e==='one'?0.6:0.4); u.fdir=tg.x>=u.x?1:-1; for(let q=0;q<5;q++) BT.pt.push({x:u.x,y:u.y,vx:(Math.random()-0.5)*30,vy:-6-Math.random()*10,t:0,l:0.6,c:'dust'}); }
-      tgs.forEach(e=>{ if(sp.h){ for(let q=0;q<(sp.hn||1);q++){ let mult=sp.h; if(sp.ex&&e.hp<=e.max*sp.ex[0]) mult=sp.ex[1]; let dm=Math.round(u.atk*mult*k); if(e.vu&&e.vu.t>t) dm=Math.round(dm*(1+e.vu.p)); e.hp-=dm; u.dd=(u.dd||0)+dm; BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:dm,big:true,side:0}); }
+      tgs.forEach(e=>{ if(sp.h){ let landed=false; for(let q=0;q<(sp.hn||1);q++){ let mult=sp.h; if(sp.ex&&e.hp<=e.max*sp.ex[0]) mult=sp.ex[1]; let dm=Math.round(u.atk*mult*k), _cr=false; if(e.vu&&e.vu.t>t) dm=Math.round(dm*(1+e.vu.p)); if(BT.e&&BT.e.hbf){ const _r=arMod(u,e,dm,1); if(_r.miss){ BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:0,miss:1,big:false,side:0}); continue; } dm=Math.round(_r.v); _cr=_r.crit; } landed=true; e.hp-=dm; u.dd=(u.dd||0)+dm; BT.dm.push({x:e.x+q*8,y:e.y-30-q*10,t:0,v:dm,big:true,side:0,crit:_cr}); }
+          if(!landed) return;
           e.hurt=0.3; if(e.hp<=0&&!e.dead) e.dead=BT.t; for(let q=0;q<6;q++) BT.pt.push({x:e.x,y:e.y-16,vx:(Math.random()-0.5)*50,vy:-10-Math.random()*30,t:0,l:0.5,c:'spark'}); }
         if(e.hp>0){ if(sp.dot){ const dps=u.atk*sp.dot[1]*k, o=e.dot; if(!o||o.until<t||o.dps<=dps) e.dot={until:t+sp.dot[2],dps:dps,acc:0,c:sp.dot[0]}; }
           if(sp.st) e.cd=(e.cd>0?e.cd:0)+sp.st*Math.min(1.4,1+(k-1)*0.2); if(sp.wk) e.wk=t+sp.wk; if(sp.vu) e.vu={p:sp.vu[0],t:t+sp.vu[1]}; }

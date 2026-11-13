@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f5e02f58d2';
+var UPDB='b009815070';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20959,18 +20959,32 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const ec=e=>String((e&&(e.code||e.message))||e||'?').slice(0,40);
   const DG={w:'—',r:'—',n:-1};
   const TS={opp:[],t:0,busy:false,tpk:0,lb:null,lbSt:'',prev:null};
-  const M=()=>{ const A=S.ta; if(!A.m||A.m.mi!==mi()) A.m={mi:mi(),p:0}; return A.m; };
+  const M=()=>{ const A=S.ta; if(!A.m||A.m.mi!==mi()) A.m={mi:mi(),p:0,n:0}; return A.m; };
+  /* ---------- ЭЛО рейтинг · лиг · улирал (шат 7) ----------
+     Эсрэгч нь хадгалагдсан баг тул зөвхөн МИНИЙ рейтинг өөрчлөгдөнө (Firebase дүрмээр бусдын бичлэгийг засахгүй).
+     Эсрэгчийн рейтинг: бичлэгт байвал тэр, үгүй бол (бот) багийн хүчний харьцаагаас. Улирал = сар: шинэ сард рейтинг 1000 руу 50% ойртоно. */
+  const ER0=1000, RMT=60*60*1000;
+  const ELG=[['Хүрэл',0,'#c58b4a'],['Мөнгө',1050,'#c9d3dc'],['Алт',1200,'#ffd24a'],['Платин',1350,'#7fe3d4'],['Алмаз',1500,'#7fb4ff'],['Их хаан',1700,'#ff8a5a']];
+  const leagueOf=r=>{ let x=ELG[0]; ELG.forEach(a=>{ if(r>=a[1]) x=a; }); return x; };
+  function erGet(){ const A=S.ta; if(A.er==null) A.er=ER0; if(A.es==null) A.es=mi(); else if(A.es!==mi()){ A.er=Math.round(ER0+(A.er-ER0)*0.5); A.es=mi(); A.en=0; try{ save(); }catch(e){} } return A.er; }
+  const oppEr=(o,P)=>o.er!=null?o.er:erGet()+Math.round(Math.max(-250,Math.min(250,400*Math.log10(Math.max(0.3,Math.min(3,o.tp/P))))));
+  const eloD=(Rm,Ro,K)=>{ const E=1/(1+Math.pow(10,(Ro-Rm)/400)); return [Math.max(1,Math.round(K*(1-E))),Math.max(1,Math.round(K*E))]; };
+  const KF=()=>((S.ta.en||0)<10?40:32);
+  const seasonDays=()=>{ const d=nowL(), y=d.getUTCFullYear(), m=d.getUTCMonth(); return Math.max(1,Math.ceil((Date.UTC(y,m+1,1)-d.getTime())/864e5)); };
+  window.TA_ELO={get:erGet,league:leagueOf,delta:eloD,opp:oppEr};
+  const defOk=A=>Array.isArray(A.def)&&A.def.length===3&&A.def.every(id=>S.heroes[id]);
 
   /* ---------- Сүүдэр багаа Firestore руу хадгалах ---------- */
   let pq=Promise.resolve();
   function pushMe(){
     try{ X.tInit(); }catch(e){}
     if(!on()){ DG.w='нэвтрээгүй / Firebase холбогдоогүй'; return Promise.resolve(); }
-    const A=S.ta, ids=(A.team||[]).filter(id=>S.heroes[id]);
+    const A=S.ta, ids=(defOk(A)?A.def:(A.team||[])).filter(id=>S.heroes[id]);
     if(ids.length<3){ DG.w='баг дутуу'; return Promise.resolve(); }
     const {F,db}=FBM, uid=CL.uid, m=M();
     const h=ids.map(id=>({id:id,lv:(typeof hlv==='function'?hlv(id):1),p:Math.round(heroPower(id))}));
-    const rec={a:uid,g:'t',u:uid,n:myName(),tp:Math.round(X.teamPow()),h:h,r:Math.random(),mi:m.mi,mp:m.p,w:A.w||0,l:A.l||0,sc:m.mi*MB+m.p,t:Date.now()};
+    const er=erGet(), mp=(m.n>0)?er:0, tpv=defOk(A)?Math.floor(ids.reduce((s,id)=>s+heroPower(id),0)):Math.round(X.teamPow());
+    const rec={a:uid,g:'t',u:uid,n:myName(),tp:tpv,h:h,r:Math.random(),mi:m.mi,mp:mp,er:er,w:A.w||0,l:A.l||0,sc:m.mi*MB+mp,t:Date.now()};
     pq=pq.then(async()=>{ const ref=F.doc(db,'duel','ta_'+uid); try{ await F.deleteDoc(ref); }catch(e){} await F.setDoc(ref,rec); DG.w='ok'; }).catch(e=>{ DG.w='АЛДАА: '+ec(e); });
     return pq; }
 
@@ -20985,7 +20999,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   async function find(){
     if(TS.busy) return; TS.busy=true; X.tInit(); const P=Math.max(120,X.teamPow()); const all=[];
     if(on()){ const {F,db}=FBM, pick=new Map();
-      const take=sn=>sn.docs.forEach(d=>{ const v=d.data(); if(v&&v.g==='t'&&v.u&&v.u!==CL.uid&&v.tp>0&&Array.isArray(v.h)&&v.h.length&&Date.now()-(v.t||0)<FRESH&&!pick.has(v.u)) pick.set(v.u,{u:v.u,n:String(v.n||'Тоглогч').slice(0,14),tp:v.tp,h:v.h.slice(0,3)}); });
+      const rm=S.ta.rm||{};
+      const take=sn=>sn.docs.forEach(d=>{ const v=d.data(); if(v&&v.g==='t'&&v.u&&v.u!==CL.uid&&v.tp>0&&Array.isArray(v.h)&&v.h.length&&Date.now()-(v.t||0)<FRESH&&!pick.has(v.u)&&!(rm[v.u]&&Date.now()-rm[v.u]<RMT)) pick.set(v.u,{u:v.u,n:String(v.n||'Тоглогч').slice(0,14),tp:v.tp,h:v.h.slice(0,3),er:(typeof v.er==='number'?v.er:null)}); });
       try{
         take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('tp','>=',Math.round(P*0.6)),F.where('tp','<=',Math.round(P*1.5)),F.limit(40))));
         if(pick.size<3) take(await F.getDocs(F.query(F.collection(db,'duel'),F.where('tp','>=',Math.round(P*0.3)),F.where('tp','<=',Math.round(P*3)),F.limit(40))));
@@ -21027,14 +21042,16 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   function rankPct(r){ const R=window.ARR||null; try{ const a=ARR, c=arRank(r), i=a.indexOf(c), n=a[i+1]; if(!n) return 100; return Math.max(3,Math.min(100,100*(r-c[1])/(n[1]-c[1]))); }catch(e){ return 5; } }
   function tag(r){ return r<0.96?['Сул','#8fe39a']:(r<1.06?['Адил','#ffd770']:['Хүчтэй','#ff8a7a']); }
   function head(){ return '<div class="t2h"><button class="t2bk" onclick="taClose()">‹ Буцах</button><div class="t2tt">Багийн арена</div><button class="t2hq" onclick="taHelp()">?</button></div>'; }
-  function tabs(){ return '<div class="t2tabs">'+CFGT.map(k=>'<button class="t2tb'+((TS.tab||'fight')===k?' on':'')+(k==='league'?' tlg':'')+'" onclick="taTab(\''+k+'\')">'+TABN[k]+'</button>').join('')+'</div>'; }
+  function tabs(){ return '<div class="t2tabs">'+CFGT.map(k=>'<button class="t2tb'+((TS.tab||'fight')===k?' on':'')+'" onclick="taTab(\''+k+'\')">'+TABN[k]+'</button>').join('')+'</div>'; }
   function fightView(){
     const A=S.ta, F=X.fighters(), r=X.rk(A.r), free=Math.max(0,5-A.n), m=M(), P=Math.max(120,X.teamPow()), flt=TS.flt||'all';
-    let h='<div class="t2r"><div class="t2rn">'+esc(r[0])+'</div><div class="t2rs">Оноо <b>'+A.r+'</b> · Ялалт <b>'+A.w+'</b> · Ялагдал <b>'+A.l+'</b></div>'
-      +'<div class="t2rb"><i style="width:'+rankPct(A.r).toFixed(0)+'%"></i></div><div class="t2rf">Өнөөдөр үлдсэн <b>'+free+'/5</b></div><div class="t2rm">Сарын оноо <b>'+m.p+'</b></div><button class="t2rp" onclick="taPlus()" aria-label="info"></button></div>';
+    const ER=erGet(), LG=leagueOf(ER), nx=ELG[ELG.indexOf(LG)+1], lp=nx?Math.max(3,Math.min(100,100*(ER-LG[1])/(nx[1]-LG[1]))):100;
+    let h='<div class="t2r"><div class="t2rn" style="color:'+LG[2]+'">'+esc(LG[0])+' лиг</div><div class="t2rs">Эло <b>'+ER+'</b> · Ялалт <b>'+A.w+'</b> · Ялагдал <b>'+A.l+'</b></div>'
+      +'<div class="t2rb"><i style="width:'+lp.toFixed(0)+'%"></i></div><div class="t2rf">Өнөөдөр үлдсэн <b>'+free+'/5</b></div><div class="t2rm">Улирал <b>'+seasonDays()+' өдөр</b></div><button class="t2rp" onclick="taPlus()" aria-label="info"></button></div>';
     h+='<div class="t2sec"><b>Миний баг ('+A.team.length+'/3)</b><span>Багийн хүч <b>'+f(X.teamPow())+'</b> · Амь <b>'+f(Math.round(teamStat().hp))+'</b> · Цохилт <b>'+f(Math.round(teamStat().atk))+'</b></span></div><div class="t2tm">';
     [0,1,2].forEach(i=>{ const id=A.team[i]; h+=id?'<div class="t2c">'+pimg(id,'t2cp')+elImg(id,'left:3px;top:3px;width:26%;height:auto')+'<button class="t2x" onclick="taTog(\''+id+'\')">✕</button><div class="t2cn"><b>'+esc(fst(id))+'</b><span>'+f(heroPower(id))+'</span><small style="display:block;font-size:9px;opacity:.85;font-weight:normal">'+esc(RN(grp(id)))+'</small></div></div>':'<div class="t2c emp" onclick="taGoGrid()"><div class="t2pl">+</div><div class="t2ps">Дайчин сонгох</div></div>'; });
     h+='</div>';
+    h+=defHTML();
     { const o2=TS.opp[TS.sel==null?1:TS.sel], eh2=((o2&&o2.h)||[]).slice(0,3); let ad=0, ds=0;
       A.team.slice(0,3).forEach(mm=>eh2.forEach(e=>{ const q=elMul(mm,e.id); if(q>1) ad++; else if(q<1) ds++; }));
       const tg=!eh2.length?null:(ad>ds?['Давуутай','#9dff7a']:ad<ds?['Сул талтай','#ff8a7a']:['Адил','#ffd770']);
@@ -21044,12 +21061,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     h+='<div class="t2pk" id="t2pk"><div class="t2fl">'+FL.map(x=>'<button class="'+(flt===x[0]?'on':'')+'" onclick="taFlt(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div><div class="t2g" id="t2g">'
       +(list.length?list.map(id=>{ const on2=A.team.indexOf(id)>=0; return '<div class="t2gc'+(on2?' on':'')+'" onclick="taTog(\''+id+'\')">'+pimg(id,'t2gp')+elImg(id,'left:2px;top:2px;width:30%;height:auto')+(on2?'<i class="t2ck">✓</i>':'')+'<span class="t2gv">'+f(heroPower(id))+'</span></div>'; }).join(''):'<div class="t2em">Энэ төрлийн баатар алга</div>')+'</div></div>';
     /* VS */
-    const o=TS.opp[TS.sel==null?1:TS.sel], op=o?o.tp:0, pt=o?CFG.pts(o.tp/P):[0,0];
+    const o=TS.opp[TS.sel==null?1:TS.sel], op=o?o.tp:0, pt=o?eloD(erGet(),oppEr(o,P),KF()):[0,0];
     const mine=A.team.map(id=>pimg(id,'t2vp')).join('');
     const enemy=o?(o.h||[]).slice(0,3).map(x=>pimg(x.id,'t2vp')).join(''):'';
     h+='<div class="t2v"><div class="t2vl"><div class="t2vt">Миний баг</div><div class="t2vw">'+f(X.teamPow())+'</div><div class="t2vr">'+mine+'</div></div>'
       +'<div class="t2vl rt"><div class="t2vt">Өрсөлдөгч баг</div><div class="t2vw">'+(o?f(op):'—')+'</div><div class="t2vr">'+(enemy||'<span class="t2vp q">…</span>')+'</div></div></div>';
-    h+='<div class="t2pt">'+(o?'Ялвал <b class="g">+'+pt[0]+'</b> оноо · Ялагдвал <b class="r">−'+pt[1]+'</b> оноо':(TS.busy?'Эсрэгч хайж байна…':''))+'</div>';
+    h+='<div class="t2pt">'+(o?'Ялвал <b class="g">+'+pt[0]+'</b> Эло · Ялагдвал <b class="r">−'+pt[1]+'</b> Эло':(TS.busy?'Эсрэгч хайж байна…':''))+'</div>';
     /* доод хоёр хайрцаг */
     h+='<div class="t2bx"><div class="t2bm"><div class="t2bt">Тулааны горим</div><div class="t2ms"><div class="mb"><span style="background-image:'+SL('tas_m1')+'"></span><small>3 vs 3</small></div><div class="mb" onclick="say(\'5 vs 5 удахгүй\')"><span style="background-image:'+SL('tas_m2')+'"></span><small>5 vs 5</small></div><div class="mb" onclick="say(\'Удахгүй\')"><span style="background-image:'+SL('tas_m3')+'"></span><small>Өөрийн баг</small></div></div></div>'
       +'<div class="t2bo"><div class="t2bt">Өрсөлдөгч сонго <button class="t2rf2" onclick="taRef()">Шинэчлэх</button></div><div class="t2os">'
@@ -21058,18 +21075,33 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     h+='<button class="t2go" onclick="taFight()"><span>'+(free>0?'Тулалдах':'Тулалдах · '+CFG.cost+' Алт')+'</span></button>';
     h+='<div class="t2dg">Эсрэгч нь бусад тоглогчийн сонгосон 3 баатар (онлайн байх шаардлагагүй). '+(TS.opp.some(x=>x.bot)?'Тохирох тоглогч олдоогүй газар «Бот» орсон. ':'')+'<br>Оношлогоо: бичих '+esc(DG.w)+' · унших '+esc(DG.r)+(DG.n>=0?' · олдсон '+DG.n:'')+'</div>';
     return h; }
+  function leagueView(){
+    const ER=erGet(), LG=leagueOf(ER), nx=ELG[ELG.indexOf(LG)+1], m=M();
+    let h='<div class="t2pn"><div class="t2sec"><b>Лиг</b><span>Улирал '+mname(mi())+' · '+seasonDays()+' өдөр үлдсэн</span></div>';
+    h+='<div class="t2pr" style="border-color:'+LG[2]+'"><b style="color:'+LG[2]+'">'+esc(LG[0])+' лиг</b><span>Эло <b>'+ER+'</b>'+(nx?' · '+esc(nx[0])+' хүртэл <b>'+(nx[1]-ER)+'</b>':' · дээд лиг')+' · Энэ улирал <b>'+(m.n||0)+'</b> тулаан</span></div>';
+    ELG.slice().reverse().forEach(a=>{ const cur=a===LG; h+='<div class="t2pr"'+(cur?' style="border-color:'+a[2]+';background:#ffffff14"':'')+'><b style="color:'+a[2]+'">'+esc(a[0])+'</b><span>'+(a[1]?a[1]+'+ Эло':'0 – '+(ELG[1][1]-1)+' Эло')+(cur?' · одоо':'')+'</span></div>'; });
+    h+='<div class="t2dg" style="text-align:left">Ялбал эсрэгчийн рейтингээс хамаарч Эло нэмэгдэнэ: хүчтэй багийг дарвал илүү, сул багийг дарвал бага. Эхний 10 тулаанд өөрчлөлт арай их. Улирал сар бүр шинэчлэгдэж, Эло нь 1000 руу 50%-иар ойртоно. Нэг тоглогчтой 60 минутын дотор дахин тулахгүй.</div></div>';
+    return h; }
+  function defHTML(){ const A=S.ta, ok=defOk(A), ids=ok?A.def:[];
+    const same=ok&&A.team.length===3&&A.team.every(id=>A.def.indexOf(id)>=0);
+    return '<div class="t2lg" style="margin:4px 2px 6px;padding:6px 8px;border-radius:8px;background:#00000055;font-size:11px;line-height:1.5;color:#e8d6a8"><b>Хамгаалалтын баг:</b> '
+      +(ok?ids.map(id=>esc(fst(id))).join(' · ')+' · Хүч '+f(Math.floor(ids.reduce((s,id)=>s+heroPower(id),0))):'тусдаа тохируулаагүй (довтлох баг ашиглагдана)')
+      +'<div style="margin-top:4px;display:flex;gap:6px;justify-content:center"><button style="padding:4px 10px;border-radius:6px;border:1px solid #c9972b;background:#3a2410;color:#ffe7a8;font-size:11px" onclick="taDef(1)">'+(same?'Хадгалсан':'Одоогийн багийг хамгаалалтад хадгалах')+'</button>'+(ok?'<button style="padding:4px 10px;border-radius:6px;border:1px solid #8a5f1e;background:#2a1c0e;color:#d9c79a;font-size:11px" onclick="taDef(0)">Цэвэрлэх</button>':'')+'</div>'
+      +'<div style="opacity:.8;margin-top:3px">Бусад тоглогч таны хамгаалалтын багтай тулна. Довтлох багаа чөлөөтэй солиж болно.</div></div>'; }
+  window.taDef=function(on){ X.tInit(); const A=S.ta; if(on){ if(A.team.length<3){ say('Эхлээд 3 баатраа сонго'); return; } A.def=A.team.slice(0,3); say('Хамгаалалтын баг хадгалагдлаа'); } else { A.def=null; say('Хамгаалалтын баг цэвэрлэгдлээ'); }
+    try{ save(); }catch(e){} clearTimeout(TS.pt); TS.pt=setTimeout(pushMe,400); rr(); };
   function prizeView(){
     let h='<div class="t2pn"><div class="t2sec"><b>Сарын шагнал</b><span>'+mname(mi())+'</span></div>';
     CFG.prize.forEach((pz,i)=>{ h+='<div class="t2pr"><b>'+(i+1)+'-р байр</b><span>'+pz.alt+' Алт + '+pz.tier+'-р түвшний зэр зэвсэг</span></div>'; });
-    h+='<div class="t2dg" style="text-align:left">Сарын Топ 10-ыг арена оноогоор гаргана. Сар шинэчлэгдэхэд өмнөх сарын Топ 3 тоглогч арена руу ороод шагналаа авна. Таны сарын оноо: <b>'+M().p+'</b></div>';
+    h+='<div class="t2dg" style="text-align:left">Сарын Топ 10-ыг Эло рейтингээр гаргана (улирал = сар). Сар шинэчлэгдэхэд өмнөх сарын Топ 3 тоглогч арена руу ороод шагналаа авна. Таны Эло: <b>'+erGet()+'</b></div>';
     if(TS.prev){ const pz=CFG.prize[TS.prev.rank-1]; h+='<div class="t2pr cl"><b>Өнгөрсөн сар '+TS.prev.rank+'-р байр</b><span>'+pz.alt+' Алт + '+pz.tier+'-р түвшний зэр зэвсэг</span><button class="t2cb" onclick="taClaim()">Шагнал авах</button></div>'; }
     return h+'</div>'; }
   function topView(){
     const rows=(TS.lb||[]).slice(0,10), me=(TS.lb||[]).findIndex(x=>x.u===(CL&&CL.uid)); let b;
     if(TS.lbSt==='load') b='<div class="t2em">Ачаалж байна…</div>'; else if(TS.lbSt==='off') b='<div class="t2em">Интернет холбогдоогүй байна.</div>'; else if(TS.lbSt==='err') b='<div class="t2em">Жагсаалтыг ачаалж чадсангүй.</div>';
-    else if(!rows.length) b='<div class="t2em">Энэ сар жагсаалт хоосон байна. Тулаанд орж оноо цуглуул.</div>';
-    else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2lr'+(x.u===(CL&&CL.uid)?' me':'')+'"><div class="t2lk">'+(i<3?'<i class="t2md" style="background-image:'+SL('tas_md'+(i+1))+'"></i>':'<i class="t2rk" style="background-image:'+SL('tas_rk')+'"><u>'+(i+1)+'</u></i>')+'</div><b class="t2ln">'+esc(x.n)+'</b><span class="t2lp"><em>'+x.mp+' оноо</em>'+(pz?'<small>'+pz.alt+' Алт</small>':'')+'</span></div>'; }).join('');
-    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+(window.DLB?DLB.note():'')+b+'<div class="t2dg">Таны сарын оноо: <b>'+M().p+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
+    else if(!rows.length) b='<div class="t2em">Энэ сар жагсаалт хоосон байна. Тулаанд орж Эло цуглуул.</div>';
+    else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2lr'+(x.u===(CL&&CL.uid)?' me':'')+'"><div class="t2lk">'+(i<3?'<i class="t2md" style="background-image:'+SL('tas_md'+(i+1))+'"></i>':'<i class="t2rk" style="background-image:'+SL('tas_rk')+'"><u>'+(i+1)+'</u></i>')+'</div><b class="t2ln">'+esc(x.n)+'</b><span class="t2lp"><em>'+x.mp+' Эло</em>'+(pz?'<small>'+pz.alt+' Алт</small>':'')+'</span></div>'; }).join('');
+    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+(window.DLB?DLB.note():'')+b+'<div class="t2dg">Таны Эло: <b>'+erGet()+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
   function arenaHTML(){
     X.tInit(); const F=X.fighters(); const tb=TS.tab||'fight'; let body;
     if(F.length<3) body='<div class="t2pn"><div class="t2em">3 баатартай болбол 3 vs 3 тулаанд орно. Одоо '+F.length+' баатар байна.</div></div>';
@@ -21077,12 +21109,12 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       const stale=!TS.t||Date.now()-TS.t>120000||Math.abs(TS.tpk-X.teamPow())>Math.max(30,TS.tpk*0.05);
       if(stale&&!TS.busy) setTimeout(find,0);
       if(!TS.pk){ TS.pk=1; setTimeout(()=>{ pushMe(); checkPrev(); },0); }
-      body=tb==='prize'?prizeView():tb==='top'?topView():fightView(); }
+      body=tb==='prize'?prizeView():tb==='top'?topView():tb==='league'?leagueView():fightView(); }
     return '<div id="tascr"><div class="tas">'+head()+tabs()+body+'<div class="t2sp"></div></div></div>'; }
   window.taClose=function(){ try{ closeM(); }catch(e){} };
   window.taHelp=function(){ try{ dxAsk('<b>Багийн арена</b><br><span class="sm">Өөрийн 3 баатраа сонгоод, хүч нь ойролцоо бусад тоглогчийн багтай тулна. Зөвхөн баатрын түвшин, довтолгоо, амь тооцогдоно: цэрэг, барилгын нэмэгдэл орохгүй. Элементийн давуу: Ус › Гал › Салхи › Ус (×1.5, сул талд ×0.75). Сул багийг ялбал +10, адил +20, хүчтэй +32 оноо. Ялагдвал −20 / −12 / −5. Сар бүрийн Топ 3 шагнал авна. Өдөрт 5 үнэгүй тулаан, дараа нь тулаан бүр 100 Алт.</span>','Ойлголоо',()=>{}); }catch(e){ say('Сул ялбал +10, адил +20, хүчтэй +32'); } };
   window.taPlus=function(){ say('Өдөрт 5 үнэгүй тулаан. Дараа нь тулаан бүр '+CFG.cost+' Алт'); };
-  window.taTab=function(k){ if(k==='league'){ say('Лиг удахгүй'); return; } TS.tab=k; if(k==='top') loadLb(); else rr(); };
+  window.taTab=function(k){ TS.tab=k; if(k==='top') loadLb(); else rr(); };
   window.taSel=function(i){ TS.sel=i; rr(); };
   window.taFlt=function(k){ TS.flt=k; rr(); };
   window.taGoGrid=function(){ const e=document.getElementById('t2pk'); if(e) e.scrollIntoView({behavior:'smooth',block:'center'}); };
@@ -21124,11 +21156,14 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.taFight=function(i){ if(i==null) i=(TS.sel==null?1:TS.sel);
     X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Багийн арена: 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. 3 баатар сонго'); return; }
     const A=S.ta, o=TS.opp[i]; if(!o){ say('Эсрэгч олдсонгүй. Шинэчил'); return; }
-    const P=Math.max(120,X.teamPow()), pt=CFG.pts(o.tp/P), E={pc:{cav:0,archer:0,foot:0},n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
+    if(!o.bot&&A.rm&&A.rm[o.u]&&Date.now()-A.rm[o.u]<RMT){ say('Энэ тоглогчтой 60 минутын дотор дахин тулахгүй. Шинэчил'); TS.t=0; return; }
+    const P=Math.max(120,X.teamPow()), E={pc:{cav:0,archer:0,foot:0},n:'Багийн арена: '+o.n,p:o.tp,g:Math.round(o.tp*0.15),m:Math.round(o.tp*0.04),bi:0,rep:false,hs:A.team.slice(),slots:3,back:'tarena'};
     { const L=(o.h||[]).filter(h=>HEROES.find(x=>x.id===h.id)), sum=L.reduce((a,x)=>a+(x.p||0),0)||1, k=o.tp/sum;
       E.fr=1; E.eh=L.map(h=>({id:h.id,lv:h.lv||1,p:Math.max(1,(h.p||1)*k)})); }
-    const apply=win=>{ const d=win?pt[0]:-pt[1]; A.r=Math.max(0,A.r+d); const m=M(); m.p=Math.max(0,m.p+d); if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
-      if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' оноо'); try{ save(); }catch(e){} TS.t=0; pushMe(); };
+    const apply=win=>{ const Rm=erGet(), pt=eloD(Rm,oppEr(o,P),KF()), d=win?pt[0]:-pt[1]; A.er=Math.max(0,Rm+d); A.en=(A.en||0)+1; const m=M(); m.n=(m.n||0)+1; m.p=Math.max(0,m.p+d);
+      if(!o.bot){ A.rm=A.rm||{}; const now=Date.now(); A.rm[o.u]=now; Object.keys(A.rm).forEach(k=>{ if(now-A.rm[k]>2*RMT) delete A.rm[k]; }); }
+      if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
+      if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' Эло · '+A.er); try{ save(); }catch(e){} TS.t=0; pushMe(); };
     E.cb=()=>apply(true); E.cbl=()=>apply(false);
     TS.fromBt=1; E.hb='tarena'; E.hbf=1; E.prep=1;
     closeM(); startBattle(0,E); pkShow(i); };

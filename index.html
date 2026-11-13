@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='7c648943af';
+var UPDB='a66b811c55';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23031,7 +23031,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     if(sp.dot){ const nm={p:'хорлоно',b:'цус алдуулна',f:'шатаана'}[sp.dot[0]]; o.push(sp.dot[2]+'с '+nm+' (секунд бүр цохилтын '+pc(sp.dot[1]*m)+'%)'); }
     if(sp.st) o.push(sp.st+'с ээлжээ алгасна'); if(sp.wk) o.push('цохилт -35% ('+sp.wk+'с)'); if(sp.vu) o.push('авах гэмтэл +'+pc(sp.vu[0])+'% ('+sp.vu[1]+'с)');
     if(sp.a){ const w=sp.a==='all'?'Бүх цэрэгт':sp.a==='self'?'Өөртөө':'Хамгийн шархтайд'; const q=[];
-      if(sp.rv) q.push('унасан баатрыг '+pc(sp.rv)+'% HP-тэй босгоно'); if(sp.heal) q.push(pc(Math.min(0.9,sp.heal*m))+'% эдгээнэ'); if(sp.cl) q.push('хор, сулралыг цэвэрлэнэ'); if(sp.arm) q.push('авах гэмтэл -'+pc(Math.min(0.75,sp.arm[0]*(1+(m-1)*0.5)))+'% ('+sp.arm[1]+'с)'); if(sp.atkb) q.push('цохилт +'+pc(sp.atkb[0]*(1+(m-1)*0.6))+'% ('+sp.atkb[1]+'с)'); if(sp.en) q.push('+'+sp.en+' энерги'); if(sp.hs) q.push('ээлж түргэснэ'); if(sp.tn) q.push('дайсныг өөр рүүгээ татна ('+sp.tn+'с)');
+      if(sp.rv) q.push('унасан баатрыг '+pc(sp.rv)+'% HP-тэй босгоно'+(sp.r1?' (тулаанд 1 удаа)':'')); if(sp.heal) q.push(pc(Math.min(sp.hcap||0.9,sp.heal*m))+'% эдгээнэ'); if(sp.cl) q.push('хор, сулралыг цэвэрлэнэ'); if(sp.arm) q.push('авах гэмтэл -'+pc(Math.min(sp.acap||0.75,sp.arm[0]*(1+(m-1)*0.5)))+'% ('+sp.arm[1]+'с)'); if(sp.atkb) q.push('цохилт +'+pc(sp.atkb[0]*(1+(m-1)*0.6))+'% ('+sp.atkb[1]+'с)'); if(sp.en) q.push('+'+sp.en+' энерги'); if(sp.hs) q.push('ээлж түргэснэ'); if(sp.tn) q.push('дайсныг өөр рүүгээ татна ('+sp.tn+'с)');
       if(q.length) o.push(w+' '+q.join(', ')); }
     if(sp.pc) o.push('хамгаалалтыг 50% нэвтэлнэ'); if(sp.tr) o.push('хамгаалалтыг үл тооно, цус алдаж байвал ×2'); if(sp.ct) o.push(sp.ct+' ээлж эсрэг цохилт хийнэ'); if(sp.sl) o.push(sp.sl+' ээлж нуугдана'); if(sp.qa) o.push('Түргэн үйлдэл: ээлж дуусахгүй, дахин нэг үйлдэл хийнэ'); if(sp.hs) o.push(sp.a==='self'?'өөртөө нэмэлт ээлж':'хамгийн хүчтэй холбоотонд нэмэлт ээлж'); if(sp.it) o.push('зорилтын ээлжийг хойшлуулж, энергийн 20%-ийг авна');
     return o.join('. '); }
@@ -23041,6 +23041,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     return L.map((e,i)=>{ const sp=e[1], lm=skMul(id,i), m=lm*(1+0.05*i), k=uik(sp), d=descOf(sp,m), cd=14+i*2, arr=[k,e[0],d,cd,m,sp];
       return {i:i,k:k,n:e[0],d:d,cd:cd,m:m,lm:lm,L:skLv(id,i),cost:SKCOST[i],lv:SKUNL[i],arr:arr}; }); };
   Object.keys(SK).forEach(id=>{ const sp=SK[id][0][1]; HSK[id]=[uik(sp),SK[id][0][0],descOf(sp,1),14,1,sp]; });
+  window.SK24={descOf:descOf,uik:uik,SK:SK};
 
   /* ---------- гүйцэтгэл ---------- */
   const _cs=castSkill;
@@ -23064,9 +23065,9 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
       BT.shake=Math.min(1,(BT.shake||0)+(sp.h&&sp.h>=8?0.6:0.3)); }
     /* өөрийн тал */
     if(sp.a){ let as=[]; if(sp.a==='all') as=al.slice(); else if(sp.a==='self') as=[u]; else as=[al.slice().sort((a,b)=>a.hp/a.max-b.hp/b.max)[0]].filter(Boolean);
-      if(sp.rv){ const dead=U.filter(x=>!x.side&&x.hp<=0&&!x.sup&&x.id).sort((a,b)=>(b.max||0)-(a.max||0))[0]; if(dead){ dead.hp=dead.max*Math.min(1,sp.rv*Math.min(1.3,k)); dead.dead=null; dead.dot=null; dead.cd=0; as.push(dead); } }
-      as.forEach(a=>{ if(sp.heal) a.hp=Math.min(a.max,a.hp+a.max*Math.min(0.9,sp.heal*k)); if(sp.cl){ a.dot=null; a.dots=null; a.wk=0; a.vu=null; }
-        if(sp.arm){ const p=Math.min(0.75,sp.arm[0]*(1+(k-1)*0.5)); if(!a.arm||a.arm.t<t||a.arm.p<p) a.arm={p:p,t:t+sp.arm[1]}; else a.arm.t=Math.max(a.arm.t,t+sp.arm[1]); }
+      if(sp.rv&&!(sp.r1&&u.rvU)){ const dead=U.filter(x=>!x.side&&x.hp<=0&&!x.sup&&x.id).sort((a,b)=>(b.max||0)-(a.max||0))[0]; if(dead){ dead.hp=dead.max*Math.min(1,sp.rv*Math.min(1.3,k)); dead.dead=null; dead.dot=null; dead.cd=0; as.push(dead); if(sp.r1) u.rvU=1; } }
+      as.forEach(a=>{ if(sp.heal) a.hp=Math.min(a.max,a.hp+a.max*Math.min(sp.hcap||0.9,sp.heal*k)); if(sp.cl){ a.dot=null; a.dots=null; a.wk=0; a.vu=null; }
+        if(sp.arm){ const p=Math.min(sp.acap||0.75,sp.arm[0]*(1+(k-1)*0.5)); if(!a.arm||a.arm.t<t||a.arm.p<p) a.arm={p:p,t:t+sp.arm[1]}; else a.arm.t=Math.max(a.arm.t,t+sp.arm[1]); }
         if(sp.atkb){ const mm=1+sp.atkb[0]*(1+(k-1)*0.6); if(!a.bAtk||a.bAtk.t<t||a.bAtk.m<mm) a.bAtk={m:mm,t:t+sp.atkb[1]}; }
         if(sp.en){ if(BT.e&&BT.e.hbf) a.ep=Math.min(100,(a.ep==null?30:a.ep)+sp.en*20); else a.en=Math.min(5,(a.en==null?1:a.en)+sp.en); }
         if(sp.hs&&!(BT.e&&BT.e.hbf)&&!a.go){ a.cd=0; a.lastGo=-99; }
@@ -23180,6 +23181,57 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
 
 /* Арена шат 4: чадвар бүрийн өмнө/дараа төлөвүүдийг ээлж болгон хөрвүүлнэ (turn.js: arPre/arPost) */
 (function(){ const _c=castSkill; castSkill=function(u){ if(!arOn()) return _c.apply(this,arguments); const snap=arPre(); let r=false; try{ r=_c.apply(this,arguments); } finally{ try{ arPost(snap); }catch(e){} } return r; }; })();
+
+
+/* p32/supkit.js — Арена: Дэмжигч (support) баатруудын шинэ чадвар + пассив. Зөвхөн «Багийн арена» (BT.e.hbf) дээр үйлчилнэ; кампани, бусад тулаанд хуучин хэвээр.
+   Асуудал: 3 дэмжигчтэй баг «бүгдийг 35-38% эмчлэх», «бүгдэд авах гэмтэл -50%» зэргээр үхдэггүй баг болж, хугацаа дуустал тулаад үлдсэн HP-ийн хувиар ялдаг байсан.
+   Шийдэл: нэг хүнийг (хамгийн шархтайг) эмчилдэг болгож, бүгдийг эмчлэх хэмжээг багасгаж, босгох нь тулаанд 1 удаа, хамгаалалт 30% (6с), хамгийн дээд хэмжээг (hcap, acap) тагтай болгов.
+   Пассив (бүх дэмжигч): HP 50%-иас доош унахад дээд HP-ийн 30%-ийг нөхнө, тулаанд 2 удаа. */
+(function(){
+  if(!window.SK24) return;
+  const D=window.SK24;
+  /* hcap/acap: skill-ийн түвшин, баатрын түвшнээр өсөх хэмжээний дээд хязгаар. r1: босгох нь тулаанд 1 удаа */
+  const H1={a:'low',heal:0.25,hcap:0.45};        /* нэг (хамгийн шархтай) хүнийг эмчилнэ */
+  const A1={a:'low',arm:[0.3,6],acap:0.4};        /* нэг (хамгийн шархтай) хүнд хамгаалалт */
+  const KIT={
+    oelun:[['Эхийн гар',Object.assign({f:[['heal','a']]},H1)],
+           ['Эхийн хамгаалалт',Object.assign({f:[['armor','a']]},A1)],
+           ['Эхийн даллага',{a:'all',cl:1,heal:0.08,hcap:0.15,f:[['glow','a']]}],
+           ['Эхийн залбирал',{a:'all',heal:0.18,hcap:0.3,rv:0.3,r1:1,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
+    borte:[['Хатны үг',{a:'all',atkb:[0.25,8],f:[['buff','a']]}],
+           ['Хатны ивээл',Object.assign({f:[['heal','a'],['crown','a',0.2]]},H1)],
+           ['Хатны тушаал',{a:'all',atkb:[0.3,8],hs:1,f:[['buff','a'],['tempo','a',0.2]]}],
+           ['Эрдмийн дуу',{a:'all',heal:0.18,hcap:0.3,atkb:[0.2,10],f:[['glow','a'],['heal','a',0.2]]}]],
+    sorkh:[['Тосгоны ивээл',Object.assign({f:[['heal','a']]},H1)],
+           ['Бодлын хэрэм',Object.assign({f:[['armor','a']]},A1)],
+           ['Хор цэвэрлэх',{a:'all',cl:1,heal:0.08,hcap:0.15,f:[['heal','a'],['glow','a',0.2]]}],
+           ['Эрхмийн хаалт',{a:'all',arm:[0.3,6],acap:0.4,heal:0.1,hcap:0.18,f:[['guard','a'],['armor','a',0.2]]}]],
+    haiyun:[['Амьсгалын мөн',Object.assign({f:[['heal','a']]},H1)],
+            ['Урт наслал',{a:'low',arm:[0.3,6],acap:0.4,heal:0.1,hcap:0.2,f:[['heal','a'],['armor','a',0.2]]}],
+            ['Дао',{a:'all',cl:1,f:[['armor','a'],['glow','a',0.2]]}],
+            ['Мөнхийн сэргэл',{a:'all',heal:0.18,hcap:0.3,rv:0.3,r1:1,cl:1,f:[['revive','a'],['heal','a',0.25]]}]]
+  };
+  const PAS='Пассив: HP 50%-д 30% нөхнө (тулаанд 2 удаа)';
+  const inAr=()=>{ try{ return !!(BT&&BT.e&&BT.e.hbf); }catch(e){ return false; } };
+  const _hs=heroSkills;
+  heroSkills=function(id){
+    const L=KIT[id]; if(!L||!inAr()) return _hs.apply(this,arguments);
+    return L.map((e,i)=>{ const sp=e[1], lm=skMul(id,i), m=lm*(1+0.05*i), k=D.uik(sp); let d=D.descOf(sp,m); if(i===0) d+='. '+PAS; const cd=14+i*2, arr=[k,e[0],d,cd,m,sp];
+      return {i:i,k:k,n:e[0],d:d,cd:cd,m:m,lm:lm,L:skLv(id,i),cost:SKCOST[i],lv:SKUNL[i],arr:arr}; }); };
+  /* Пассив: дэмжигч HP 50%-иас доош бол дээд HP-ийн 30%-ийг нөхнө (2 удаа). Хоёр талд ижил (бусад тоглогчийн сүүдэр багийн дэмжигчид ч мөн). */
+  function pas(){
+    if(!inAr()||BT.done||BT.wait) return;
+    BT.units.forEach(u=>{
+      if(!u.id||u.sup||!u.max||u.hp<=0||u.dead||(u.pas||0)>=2||u.hp>u.max*0.5) return;
+      if(typeof hcls!=='function'||hcls(u.id)!=='support') return;
+      const h=u.max*0.3; u.hp=Math.min(u.max,u.hp+h); u.pas=(u.pas||0)+1;
+      try{ fxs('heal',u.x,u.y,{d:0.8,z:1.1}); BT.dm.push({x:u.x,y:u.y-44,t:0,v:Math.round(h),big:false,side:u.side?1:0,heal:1}); BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Сэргэлт · +30% HP ('+(2-u.pas)+' үлдсэн)',nm:u.name||'',t:0,e:!!u.side}); }catch(e){}
+    }); }
+  const _et=efTick; efTick=function(dt){ try{ pas(); }catch(e){} return _et.apply(this,arguments); };
+  /* эмчлэлтийн тоо: ногоон «+N» */
+  const _td=window.taDmg; window.taDmg=function(c,d){ if(d&&d.heal){ const yy=d.y-d.t*26; c.save(); c.globalAlpha=Math.max(0,Math.min(1,(1.4-d.t)*2.5)); c.textAlign='center'; c.font='bold 19px sans-serif'; c.lineWidth=4; c.strokeStyle='#000'; const tx='+'+d.v; c.strokeText(tx,d.x,yy); c.fillStyle='#7dff7a'; c.fillText(tx,d.x,yy); c.restore(); return true; } return _td?_td.apply(this,arguments):false; };
+  window.SUPKIT=KIT;
+})();
 
 
 function clPushL(q){ try{ const now=Date.now(), sg=[Math.floor((S.res&&S.res.alt)||0),Object.keys(S.heroes||{}).length,(S.paidInv||[]).length,(S.friends||[]).length,S.pl||1,S.clan,(S.prof&&S.prof.name)||''].join('|'); const key=(window._clSg!==sg); if(key) window._clSg=sg;

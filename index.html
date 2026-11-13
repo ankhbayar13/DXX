@@ -6583,7 +6583,7 @@ async function isStart(i,E){
   cv.addEventListener('pointermove',e=>{ const p=P.get(e.pointerId); if(!p) return; const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX; p.y=e.clientY;
     if(P.size===1){ if(!moved&&Math.hypot(e.clientX-p.sx,e.clientY-p.sy)>10) moved=true; if(moved){ R.cx-=dx/R.z; R.cy-=dy/R.z; isClamp(); } }
     else if(P.size===2){ const a=[...P.values()], d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pd0>0){ const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2, before=isMap(mx,my); R.z=Math.max(R.zmin,Math.min(R.zmin*3.2,z0*d/pd0)); const after=isMap(mx,my); R.cx+=before.x-after.x; R.cy+=before.y-after.y; isClamp(); } } });
-  const up=e=>{ const p=P.get(e.pointerId); P.delete(e.pointerId); if(p&&!moved&&P.size===0&&e.type==='pointerup') isTap(e.clientX,e.clientY); };
+  const up=e=>{ const p=P.get(e.pointerId); P.delete(e.pointerId); if(p&&!moved&&P.size===0&&e.type==='pointerup'&&!(window.__btnDown&&performance.now()-window.__btnDown<1500&&window.__btnT&&performance.now()-window.__btnT<700)) isTap(e.clientX,e.clientY); };
   cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
   cv.addEventListener('wheel',e=>{ e.preventDefault(); const before=isMap(e.clientX,e.clientY); R.z=Math.max(R.zmin,Math.min(R.zmin*3.2,R.z*(e.deltaY<0?1.12:0.89))); const after=isMap(e.clientX,e.clientY); R.cx+=before.x-after.x; R.cy+=before.y-after.y; isClamp(); },{passive:false});
   R.onrs=()=>{ if(RT===R){ isLayout(); isOrient(); } }; window.addEventListener('resize',R.onrs); window.addEventListener('orientationchange',R.onrs);
@@ -6602,18 +6602,26 @@ function isLoop(now){ const R=RT; if(!R) return; const dt=Math.min(0.05,(now-R.l
 function isModeToggle(){ let on=false; try{ on=localStorage.getItem('dxx_iso')==='1'; localStorage.setItem('dxx_iso',on?'0':'1'); }catch(e){}
   const msg=on?'Шинэ байлдаан УНТАРЛАА. Хуучин босоо байлдаан явна.':'Шинэ байлдаан АСЛАА. Байлдахдаа утсаа хажуу болго.'; try{ say(msg); }catch(e){} }
 
-/* Самбарын товчийг заавал ажиллуулах хамгаалалт: дарсан цэг товч дотор байвал (дээр нь юм давхарласан ч, click алдагдсан ч, iPhone Safari div дээр click өгөхгүй ч) тушаал биелнэ. Тулаан дууссаны дараах «Үргэлжлүүлэх» ба асуулгын цонхны товчийг ч хамруулна. */
+/* Самбарын товчийг заавал ажиллуулах хамгаалалт (v3): click-д огт найдахгүй. Хуруу товчны ДЭЭР өргөгдөх үед (pointerup / touchend / mouseup аль нь ч ирсэн) координатаар товчийг олж шууд ажиллуулна. Дээр нь юм давхарласан, click алдагдсан, iPhone Safari-д div дээр click өгөхгүй байсан ч ажиллана. Давхар ажиллахгүйн тулд дараагийн click-ийг хаана. Товчны дээр дарсан үед газар руу тушаал явахгүй. */
 (function(){
-  let clk=0, clT=null, dn=new Map();
   const SEL='#rcmd .b.cm,#rchips .b[id^="rs_"],#rchips .b[id^="rc_"],#rpsw,#rpg,#ilv button,#rbt button';
   const SEL2='#rres button,#askov button';
-  const hit=(x,y)=>{ if(!window.RT||!RT.iso) return null; let best=null,bd=1e9;
-    document.querySelectorAll(RT.done?SEL2:SEL+','+SEL2).forEach(e=>{ const b=e.getBoundingClientRect(); if(!b.width||!b.height) return; const m=5; if(x>=b.left-m&&x<=b.right+m&&y>=b.top-m&&y<=b.bottom+m){ const d=Math.hypot(x-(b.left+b.right)/2,y-(b.top+b.bottom)/2); if(d<bd){ bd=d; best=e; } } }); return best; };
-  document.addEventListener('click',ev=>{ clk=performance.now(); clT=ev.target; },true);
-  document.addEventListener('pointerdown',ev=>{ try{ if(!window.RT||!RT.iso) return; const t=ev.target; if(!t||!t.closest||!(t.closest('#rts')||t.closest('#askov'))) return; dn.set(ev.pointerId,hit(ev.clientX,ev.clientY)); }catch(e){} },true);
-  document.addEventListener('pointerup',ev=>{ try{ const a=dn.get(ev.pointerId); dn.delete(ev.pointerId); if(!a) return; const b=hit(ev.clientX,ev.clientY); if(b!==a) return; const t0=performance.now();
-    setTimeout(()=>{ if(!(clk>=t0&&clT&&a.contains(clT))&&document.contains(a)&&window.RT&&RT.iso){ try{ a.click(); }catch(e){} } },200); }catch(e){} },true);
-  document.addEventListener('pointercancel',ev=>{ dn.delete(ev.pointerId); },true);
+  const hit=(x,y)=>{ try{ if(!window.RT||!RT.iso) return null; let ex=null,ea=1e12,nr=null,nd=1e9;
+    document.querySelectorAll(RT.done?SEL2:SEL+','+SEL2).forEach(e=>{ const b=e.getBoundingClientRect(); if(!b.width||!b.height) return;
+      if(x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom){ const ar=b.width*b.height; if(ar<ea){ ea=ar; ex=e; } }
+      else if(x>=b.left-5&&x<=b.right+5&&y>=b.top-5&&y<=b.bottom+5){ const d=Math.hypot(x-(b.left+b.right)/2,y-(b.top+b.bottom)/2); if(d<nd){ nd=d; nr=e; } } });
+    return ex||nr; }catch(e){ return null; } };
+  const dn=new Map(); let last=null, lastT=0, seq=0;
+  const fire=(a)=>{ if(!a||!document.contains(a)||!window.RT||!RT.iso) return; const n=performance.now(); if(a===last&&n-lastT<350) return; last=a; lastT=n; window.__btnT=n; try{ a.click(); }catch(e){} };
+  const P0=(x,y,id)=>{ const a=hit(x,y); dn.set(id,{a,x,y,t:performance.now()}); window.__btnDown=a?performance.now():0; };
+  const P1=(x,y,id)=>{ const d=dn.get(id); dn.delete(id); if(!d||!d.a) return; if(Math.hypot(x-d.x,y-d.y)>18||performance.now()-d.t>900) return; const b=hit(x,y); if(b!==d.a) return; fire(d.a); };
+  window.addEventListener('pointerdown',ev=>P0(ev.clientX,ev.clientY,'p'+ev.pointerId),true);
+  window.addEventListener('pointerup',ev=>{ P1(ev.clientX,ev.clientY,'p'+ev.pointerId); },true);
+  window.addEventListener('pointercancel',ev=>{ dn.delete('p'+ev.pointerId); },true);
+  window.addEventListener('touchstart',ev=>{ const t=ev.changedTouches&&ev.changedTouches[0]; if(t&&!dn.has('t'+t.identifier)) P0(t.clientX,t.clientY,'t'+t.identifier); },{capture:true,passive:true});
+  window.addEventListener('touchend',ev=>{ const t=ev.changedTouches&&ev.changedTouches[0]; if(t) P1(t.clientX,t.clientY,'t'+t.identifier); },{capture:true,passive:true});
+  /* ажиллуулсны дараах нативын click-ийг хаана (давхар ажиллахаас сэргийлнэ) */
+  window.addEventListener('click',ev=>{ try{ if(!ev.isTrusted||!last||!document.contains(last)) return; if(performance.now()-lastT<700&&last.contains(ev.target)){ ev.stopImmediatePropagation(); ev.preventDefault(); } }catch(e){} },true);
   /* iOS: div дээр click үүсгэхийн тулд cursor:pointer хэрэгтэй */
   const st=document.createElement('style'); st.textContent='#rts .b,#rts #rpsw,#rts #rpg,#rts button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}'; document.head.appendChild(st);
 })();
@@ -10962,7 +10970,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e4dc4896ac';
+var UPDB='aab9a623f4';
 (function(){
   const K='updTry';
   const _go=updGo;

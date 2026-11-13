@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a66b811c55';
+var UPDB='b25e119a5d';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23231,6 +23231,33 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   /* эмчлэлтийн тоо: ногоон «+N» */
   const _td=window.taDmg; window.taDmg=function(c,d){ if(d&&d.heal){ const yy=d.y-d.t*26; c.save(); c.globalAlpha=Math.max(0,Math.min(1,(1.4-d.t)*2.5)); c.textAlign='center'; c.font='bold 19px sans-serif'; c.lineWidth=4; c.strokeStyle='#000'; const tx='+'+d.v; c.strokeText(tx,d.x,yy); c.fillStyle='#7dff7a'; c.fillText(tx,d.x,yy); c.restore(); return true; } return _td?_td.apply(this,arguments):false; };
   window.SUPKIT=KIT;
+})();
+
+
+/* p32/arrel.js — Арена: дурсгал жаахан нөлөөлдөг болно (зөвхөн «Багийн арена»). Бусад тулаанд (кампани, дээрэмчид…) хуучнаараа бүрэн хүчээр.
+   Цохилтын дурсгал ×1/3 (Хөх сүлд +36% → +12%), HP-ийн дурсгал ×0.47 (Хар сүлд +34% → +16%). HP-ийн дурсгал нэмэгдсэн HP-ийн ¼-ээр хамгаалалт нэмнэ (+16% → +4).
+   Зөвхөн миний талын баатарт. Нэмэлт өгөөж: arMod-ийг ороож хамгаалалтыг тооцно. */
+(function(){
+  const KA=1/3, KH=0.47, KD=0.25;
+  const inAr=()=>{ try{ return !!(BT&&BT.e&&BT.e.hbf&&BT.e.fr&&BT.e.eh); }catch(e){ return false; } };
+  window.ARREL=function(id){
+    let a=0,h=0; try{ ((S.heq&&S.heq[id])||[]).forEach(rid=>{ const r=RELICS.find(x=>x.id===rid); if(!r) return; if(r.st==='atk') a+=r.v*KA; else h+=r.v*KH; }); }catch(e){}
+    return {a:a/100,h:h/100,d:h*KD}; };
+  function apply(){
+    if(!inAr()) return;
+    let add=0;
+    BT.units.forEach(u=>{
+      if(u.side||!u.id||u.sup||!u.hh||u.rl) return; u.rl=1;
+      const b=window.ARREL(u.id); if(!b.a&&!b.h) return;
+      const m0=u.max; u.max*=1+b.h; u.hp*=1+b.h; u.atk*=1+b.a; u.rdef=b.d; add+=u.max-m0; });
+    if(add) BT.p0=(BT.p0||0)+add; }
+  const _et=efTick; efTick=function(dt){ try{ apply(); }catch(e){} return _et.apply(this,arguments); };
+  /* хамгаалалтын нэмэгдэл: D → D+rdef */
+  const _am=arMod; arMod=function(u,tg,dmg,v5,mode){
+    const r=_am.apply(this,arguments);
+    try{ if(r&&!r.miss&&tg&&tg.rdef&&mode!=='t'&&inAr()){ const k=(r.crit?0.5:1)*(mode==='p'?0.5:1), D=(ARDEF[tg.type||'foot']||24)*k, E=tg.rdef*k;
+      r.v=Math.max(1,r.v*(1-(D+E)/(D+E+100))/(1-D/(D+100))); } }catch(e){}
+    return r; };
 })();
 
 

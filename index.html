@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='82df0b28c4';
+var UPDB='7a76e398c4';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23326,7 +23326,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    Бүтэн дэлгэц (Цүнх, Агуулах): shop2.js-ийн sh2fs дээр. Самбар (алтан хүрээтэй): хүрээний дотор. */
 (function(){
   const MAP={bag:'bag',agh:'agh',mal:'mal',menu:'khan',profile:'khan',mail:'mail',rank:'treasure',patrol:'treasure',pwr:'war',sup:'war',dain:'war',trade:'trade',wk:'trade',quests:'quest',orders:'quest',res:'quest',soc:'friend'};
-  const KEYS=['bag','agh','mal','khan','mail','treasure','war','trade','quest','friend'];
+  const KEYS=['bag','agh','mal','khan','mail','treasure','war','trade','quest','friend','life','fac','army','stat'];
   const OV=k=>(k==='bag'||k==='agh')?'linear-gradient(rgba(22,11,4,.42),rgba(22,11,4,.28)),':'linear-gradient(rgba(22,11,4,.64),rgba(22,11,4,.52)),';
   let css='body[class*=" pbg-"] #modal .box,body[class^="pbg-"] #modal .box{border-image-slice:120!important}';
   KEYS.forEach(k=>{ css+='body.pbg-'+k+' #modal .box{background:'+OV(k)+'url(rts/bg_'+k+'.webp?v=1) center top/cover no-repeat #2b1d12!important}'; });
@@ -23355,7 +23355,9 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   css+='#chat .kP{border-image-slice:120!important;background:linear-gradient(rgba(22,11,4,.6),rgba(22,11,4,.48)),url(rts/bg_chat.webp?v=1) center/cover no-repeat #2b1d12!important}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   function setK(k){ const b=document.body; KEYS.forEach(x=>b.classList.remove('pbg-'+x)); if(k) b.classList.add('pbg-'+k); }
-  const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ setK(MAP[typeof cur!=='undefined'?cur:'']||''); }catch(e){} return r; };
+  const BC={fac:['airag','aaruul','tos','esgii','buuz'],army:['hureo','stable','range','yard','naadamring','smith','school','tower'],stat:['hushuu','ovoo','suvarga','temple']};
+  function keyOf(c){ if(!c) return ''; if(MAP[c]) return MAP[c]; if(c.indexOf('bld:')===0){ const k=c.slice(4); for(const g in BC){ if(BC[g].indexOf(k)>=0) return g; } return 'life'; } return ''; }
+  const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ setK(keyOf(typeof cur!=='undefined'?cur:'')); }catch(e){} return r; };
   const _c=closeM; closeM=function(){ try{ setK(''); }catch(e){} return _c.apply(this,arguments); };
 })();
 

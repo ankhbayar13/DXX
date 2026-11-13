@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e1029a89cc';
+var UPDB='8040ea4e8c';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23229,25 +23229,25 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   if(!window.SK24) return;
   const D=window.SK24;
   /* hcap/acap: skill-ийн түвшин, баатрын түвшнээр өсөх хэмжээний дээд хязгаар. r1: босгох нь тулаанд 1 удаа */
-  const H1={a:'low',heal:0.25,hcap:0.45};        /* нэг (хамгийн шархтай) хүнийг эмчилнэ */
+  const H1={a:'low',heal:0.18,hcap:0.30};        /* нэг (хамгийн шархтай) хүнийг эмчилнэ */
   const A1={a:'low',arm:[0.3,6],acap:0.4};        /* нэг (хамгийн шархтай) хүнд хамгаалалт */
   const KIT={
     oelun:[['Эхийн гар',Object.assign({f:[['heal','a']]},H1)],
            ['Эхийн хамгаалалт',Object.assign({f:[['armor','a']]},A1)],
-           ['Эхийн даллага',{a:'all',cl:1,heal:0.08,hcap:0.15,f:[['glow','a']]}],
-           ['Эхийн залбирал',{a:'all',heal:0.18,hcap:0.3,rv:0.3,r1:1,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
+           ['Эхийн даллага',{a:'all',cl:1,heal:0.05,hcap:0.10,f:[['glow','a']]}],
+           ['Эхийн залбирал',{a:'all',heal:0.12,hcap:0.2,rv:0.2,r1:1,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
     borte:[['Хатны үг',{a:'all',atkb:[0.25,8],f:[['buff','a']]}],
            ['Хатны ивээл',Object.assign({f:[['heal','a'],['crown','a',0.2]]},H1)],
            ['Хатны тушаал',{a:'all',atkb:[0.3,8],hs:1,f:[['buff','a'],['tempo','a',0.2]]}],
-           ['Эрдмийн дуу',{a:'all',heal:0.18,hcap:0.3,atkb:[0.2,10],f:[['glow','a'],['heal','a',0.2]]}]],
+           ['Эрдмийн дуу',{a:'all',heal:0.12,hcap:0.2,atkb:[0.2,10],f:[['glow','a'],['heal','a',0.2]]}]],
     sorkh:[['Тосгоны ивээл',Object.assign({f:[['heal','a']]},H1)],
            ['Бодлын хэрэм',Object.assign({f:[['armor','a']]},A1)],
-           ['Хор цэвэрлэх',{a:'all',cl:1,heal:0.08,hcap:0.15,f:[['heal','a'],['glow','a',0.2]]}],
-           ['Эрхмийн хаалт',{a:'all',arm:[0.3,6],acap:0.4,heal:0.1,hcap:0.18,f:[['guard','a'],['armor','a',0.2]]}]],
+           ['Хор цэвэрлэх',{a:'all',cl:1,heal:0.05,hcap:0.10,f:[['heal','a'],['glow','a',0.2]]}],
+           ['Эрхмийн хаалт',{a:'all',arm:[0.3,6],acap:0.4,heal:0.06,hcap:0.11,f:[['guard','a'],['armor','a',0.2]]}]],
     haiyun:[['Амьсгалын мөн',Object.assign({f:[['heal','a']]},H1)],
-            ['Урт наслал',{a:'low',arm:[0.3,6],acap:0.4,heal:0.1,hcap:0.2,f:[['heal','a'],['armor','a',0.2]]}],
+            ['Урт наслал',{a:'low',arm:[0.3,6],acap:0.4,heal:0.07,hcap:0.13,f:[['heal','a'],['armor','a',0.2]]}],
             ['Дао',{a:'all',cl:1,f:[['armor','a'],['glow','a',0.2]]}],
-            ['Мөнхийн сэргэл',{a:'all',heal:0.18,hcap:0.3,rv:0.3,r1:1,cl:1,f:[['revive','a'],['heal','a',0.25]]}]]
+            ['Мөнхийн сэргэл',{a:'all',heal:0.12,hcap:0.2,rv:0.2,r1:1,cl:1,f:[['revive','a'],['heal','a',0.25]]}]]
   };
   const PAS='Пассив: HP 50%-д 30% нөхнө (тулаанд 2 удаа)';
   const inAr=()=>{ try{ return !!(BT&&BT.e&&BT.e.hbf); }catch(e){ return false; } };

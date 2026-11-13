@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d494c1cc4b';
+var UPDB='4b86a98f57';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23347,6 +23347,10 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   css+='#alv .ali-bd{background:linear-gradient(rgba(22,11,4,.55),rgba(22,11,4,.42)),url(rts/bg_clan.webp?v=1) center top/cover no-repeat #1c1109!important}'
     +'#alv .ali-card,#alv .ali-rk,#alv .ali-rr,#alv .ali-lg,#alv .ali-inf,#alv .ali-an,#alv .ali-si,#alv .ali-it,#alv .cm-card{border-image-slice:42 52!important}'
     +'#alv .ali-card,#alv .ali-rk,#alv .ali-lg,#alv .ali-inf,#alv .ali-an,#alv .ali-si,#alv .ali-it:not(.red),#alv .cm-card,#alv .ali-rr:not(.t1):not(.t2):not(.t3){background:rgba(26,13,6,.5)!important}';
+  /* Нэвтрэх / холбогдох дэлгэц (#gate): cover зураг, карт шуудархан */
+  css+='#gate{background:linear-gradient(rgba(12,6,2,.6),rgba(12,6,2,.18) 38%,rgba(12,6,2,.34)),url(rts/bg_login.webp?v=1) center/cover no-repeat #120a04!important}'
+    +'#gate .card{border-image-slice:44!important;background:rgba(26,13,6,.58)!important}'
+    +'#gate h1{text-shadow:0 2px 6px #000,0 0 18px #000a!important}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   function setK(k){ const b=document.body; KEYS.forEach(x=>b.classList.remove('pbg-'+x)); if(k) b.classList.add('pbg-'+k); }
   const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ setK(MAP[typeof cur!=='undefined'?cur:'']||''); }catch(e){} return r; };

@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c39c42dd71';
+var UPDB='b231f355f7';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23336,6 +23336,13 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   const CS='.card,.sh2-t,.sh2-pk2,.sh2-jb,.sh2-sb,.sh2-fb,.sh2-em,.sh2-pk';
   ['body.sh2fs.pbg-bag','body.sh2fs.pbg-agh','body.sh2fs.shbg'].forEach(P=>{
     css+=CS.split(',').map(c=>P+' '+c).join(',')+'{border-image-slice:44!important;background:rgba(26,13,6,.5)!important}'; });
+  /* Самбарууд (Мал, Профайл, Хааны зэрэг, Даалгавар ...): картын бор дэвсгэр шуудархан */
+  css+='body[class*="pbg-"]:not(.sh2fs) #modal .card{border-image-slice:44!important;background:rgba(26,13,6,.5)!important}';
+  /* Ажилчид (wk): өөрийн бүдүүн дэвсгэртэй, өөр slice */
+  css+='body.pbg-trade #modal .w2root{background:transparent!important}'
+    +'body.pbg-trade #modal .w2root .card,body.pbg-trade #modal .w2root .w2-p{border-image-slice:42 52!important;background:rgba(26,13,6,.5)!important}'
+    +'body.pbg-trade #modal .w2root .w2-top{border-image-slice:95!important;background:rgba(26,13,6,.4)!important}'
+    +'body.pbg-trade #modal .w2root .w2-tip{background:rgba(37,24,12,.55)!important}';
   const st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
   function setK(k){ const b=document.body; KEYS.forEach(x=>b.classList.remove('pbg-'+x)); if(k) b.classList.add('pbg-'+k); }
   const _f=fillM; fillM=function(){ const r=_f.apply(this,arguments); try{ setK(MAP[typeof cur!=='undefined'?cur:'']||''); }catch(e){} return r; };

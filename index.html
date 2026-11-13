@@ -2919,7 +2919,7 @@ function btStep(dt){
   U.forEach(u=>{ u.tc=0; });
   if(TURNB) turnSched(dt);
   U.forEach(u=>{ if(u.hp<=0) return; if(u.sup){ u.mv=false; return; } u.cd-=dt;
-    if(u.id&&HSK[u.id]&&(!u.side||(BT.e&&BT.e.hbf))){ u.skc=(u.skc==null?(u.skt=3+Math.random()*3):u.skc)-dt; if(u.skc<=0){ if(!u.side&&skManual()){ u.skc=0; } else { u.skc=(u.side?btArenaCast(u):castSkill(u))?(u.skt=HSK[u.id][3]*(1-Math.min(0.5,rsb('cul_cd')))):1; } } }
+    if(u.id&&HSK[u.id]&&!u.side&&!(BT.e&&BT.e.hbf)){ u.skc=(u.skc==null?(u.skt=3+Math.random()*3):u.skc)-dt; if(u.skc<=0){ if(!u.side&&skManual()){ u.skc=0; } else { u.skc=(u.side?btArenaCast(u):castSkill(u))?(u.skt=HSK[u.id][3]*(1-Math.min(0.5,rsb('cul_cd')))):1; } } }
     if(TURNB){ turnAct(u,dt); return; }
     let tg=null,bd=1e9,bs=1e9; U.forEach(o=>{ if(o.side!==u.side&&o.hp>0&&!o.sup){ const dd=Math.hypot(o.x-u.x,o.y-u.y), sc=dd+(o.tc||0)*45; if(sc<bs){ bs=sc; bd=dd; tg=o; } } });
     if(tg) tg.tc=(tg.tc||0)+1;
@@ -5424,6 +5424,19 @@ function turnAct(u,dt){
   if(g.ph==='back'){ const dx=u.hx-u.x, dy=u.hy-u.y, L=Math.hypot(dx,dy);
     if(L<=Math.max(6,spd*1.2*dt)){ home(); u.go=null; u.cd=u.d.cd*0.3; }
     else { u.x+=dx/L*spd*1.2*dt; u.y+=dy/L*spd*1.2*dt; u.mv=true; if(Math.abs(dx)>6) u.fdir=dx>0?1:-1; } } }
+
+/* ====== АРЕНА: үеийн тоолуур (шат 1) ======
+   Үе = амьд баатар бүр дор хаяж 1 удаа ээлжиндээ орох хүртэл. Секундын цаг байхгүй: ARMAX үе дуусахад хоёр тал амьд бол үлдсэн HP-ийн хувиар шийднэ. */
+var ARMAX=15;
+function arRound(){
+  if(!BT||!(BT.e&&BT.e.hbf)||BT.done||BT.wait) return;
+  if(!BT.arEnd&&BT.tmax!==1e6) BT.tmax=1e6;
+  if(BT.rd==null){ BT.rd=1; BT.rdS=new Set(); }
+  BT.units.forEach(u=>{ if(u.sup||!(u.id)) return; if(u.lastGo!=null&&u._lg!==u.lastGo){ u._lg=u.lastGo; BT.rdS.add(u); } });
+  const al=BT.units.filter(u=>!u.sup&&u.id&&u.hp>0);
+  if(al.length&&al.every(u=>BT.rdS.has(u))){
+    if(BT.rd>=ARMAX){ if(!BT.arEnd){ BT.arEnd=1; BT.tmax=0.001; } return; }
+    BT.rd++; BT.rdS=new Set(); } }
 
 
 function sfxMaster(c){ if(!c._m){ const g=c.createGain(); g.gain.value=0.5; g.connect(c.destination); c._m=g; } return c._m; }
@@ -10972,7 +10985,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1a57c98632';
+var UPDB='bb76e1b03e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16688,7 +16701,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     const lh=$$('bu-lh'), rh=$$('bu-rh'); if(lh) lh.style.width=Math.max(0,Math.min(100,100*pa/(BT.p0||1)))+'%'; if(rh) rh.style.width=Math.max(0,Math.min(100,100*ea/(BT.e0||1)))+'%';
     set('bu-rn',((BT.e&&BT.e.n)||'Дайсны цэрэг').replace(/^Багийн арена:\s*/,''));
     const vs=bu.querySelector('.bu-vs b'); const vt=Math.max(1,M.length)+' vs '+Math.max(1,E.length); if(vs&&vs.textContent!==vt) vs.textContent=vt;
-    const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0'));
+    if(BT.e&&BT.e.hbf){ set('bu-tm','Үе '+Math.max(1,BT.rd||1)+'/'+(typeof ARMAX!=='undefined'?ARMAX:15)); } else { const tm=Math.max(0,(BT.tmax||75)-Math.floor(BT.t||0)); set('bu-tm','⏱ '+Math.floor(tm/60)+':'+String(tm%60).padStart(2,'0')); }
     if(!fight) return;
     /* дугуй зургууд */
     const mx=Math.min(5,(typeof heroSlots==='function'?heroSlots():5));
@@ -21036,7 +21049,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
           if(el){ if(el.dataset.tar&&innerWidth>innerHeight){ UNROT(el); try{ btResize(); }catch(e){} } else if(!el.dataset.tar&&innerHeight>innerWidth){ ROT(el); try{ btResize(); }catch(e){} } }
           if(BT.wait&&!BT.vs||!lw){ layout(E); lw=BT.W; lh=BT.H; }
           try{ const ln=document.getElementById('bu-ln'); if(ln&&ln.textContent!=='Манай баг') ln.textContent='Манай баг'; }catch(e){}
-          if(BT.tmax!==90) BT.tmax=90;   /* арена: 90 секунд, дуусахад үлдсэн HP-ийн хувиар шийднэ */
+          if(!BT.arEnd&&BT.tmax!==1e6) BT.tmax=1e6;   /* арена: секундын цаггүй, ARMAX үеийн дараа үлдсэн HP-ийн хувиар шийднэ (turn.js) */
           /* Арена: хуучин «Баатраа сонго» самбар байхгүй. Шинэ дэлгэцээс «Эхлэх» дарсан тул шууд 3-2-1 → тулаан */
           if(BT.wait&&!BT.vs&&!E._ag&&!E.prep){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } }
           return true; };
@@ -22727,7 +22740,8 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
   const _ts=turnSched;
   turnSched=function(dt){
     const r=_ts.apply(this,arguments);
-    try{ if(BT&&!BT.done&&!BT.wait) BT.units.forEach(u=>{ if(!u.side||u.sup||u.hp<=0||!u.go||u.go.skd) return; u.go.skd=1;
+    try{ arRound(); }catch(e){}
+    try{ if(BT&&!BT.done&&!BT.wait&&!(BT.e&&BT.e.hbf)) BT.units.forEach(u=>{ if(!u.side||u.sup||u.hp<=0||!u.go||u.go.skd) return; u.go.skd=1;
       const boss=/^bd_/.test(u.key||''), d=ENSK[u.type]||ENSK.foot;
       if(u.eskT==null) u.eskT=BT.t+3+Math.random()*(boss?3:6);
       if(BT.t>=u.eskT){ u.eskT=BT.t+(d.cd+Math.random()*4)*(boss?0.7:1); enemyCast(u); } }); }catch(e){}

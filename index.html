@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='dc3924cc49';
+var UPDB='a420fb094e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20990,7 +20990,11 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
 
   /* ---------- Эсрэгч олох: жаахан сул / адил / жаахан хүчтэй гэсэн 3 сүүдэр баг ---------- */
   /* Ботын тохиргоо: mul = [Сул, Адил, Хүчтэй] баг тус бүрийн хүч (миний хүчийг үржүүлэгч); comp=1 → хамгаалагч+довтлогч+нумтан баг */
-  const BOTCFG=window.TA_BOTCFG=window.TA_BOTCFG||{mul:[1.35,1.55,1.75],comp:1,ms:[0,3,4],dl:[-2,0,2]};
+  const BOTCFG=window.TA_BOTCFG=window.TA_BOTCFG||{mul:[0.85,1.00,1.20],comp:1,ms:[0,3,4],dl:[-2,0,2],tg:[0.75,0.5,0.25],k:0.16,lo:0.5,hi:2.5,fix:0};
+  /* Тоглогч бүрийн ботын хүч (S.ta.bd): ялбал арай хүчтэй, ялагдвал арай сул болж, зорилтот ялах хувь (tg) руу өөрөө тохирно */
+  function bdGet(){ const A=S.ta; if(!A) return BOTCFG.mul.slice(); if(!Array.isArray(A.bd)||A.bd.length<3) A.bd=BOTCFG.mul.slice(); return A.bd; }
+  function bdLearn(i,win){ try{ if(BOTCFG.fix) return; const bd=bdGet(), t=BOTCFG.tg[i]; if(t==null) return; bd[i]=Math.max(BOTCFG.lo,Math.min(BOTCFG.hi,bd[i]*(1+BOTCFG.k*((win?1:0)-t)))); bd[i]=Math.round(bd[i]*1000)/1000; }catch(e){} }
+  window.TA_BD={get:bdGet,learn:bdLearn};
   const BN=['Залуу баг','Мэргэн баг','Жанжин баг'], BAND=[[0.80,0.96,0.90],[0.96,1.06,1.00],[1.06,1.32,1.15]];
   function rr(){ try{ if(typeof cur==='undefined'||cur!=='tarena') return; const s=document.getElementById('tascr'), g=document.getElementById('t2g'), t=s?s.scrollTop:0, gt=g?g.scrollTop:0; fillM(); const n=document.getElementById('tascr'), g2=document.getElementById('t2g'); if(n) n.scrollTop=t; if(g2) g2.scrollTop=gt; }catch(e){} }
   /* Ботод санамсаргүй 3 баатар өгнө (тоглогчийн баг шиг баатруудаар тулна) */
@@ -21019,7 +21023,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       let c=all.filter(x=>!used.has(x.u)&&x.tp/P>=b[0]&&x.tp/P<b[1]);
       if(!c.length) c=all.filter(x=>!used.has(x.u)&&Math.abs(x.tp/P-b[2])<0.2).sort((x,y)=>Math.abs(x.tp/P-b[2])-Math.abs(y.tp/P-b[2]));
       if(c.length){ const o=c[Math.floor(Math.random()*(c.length>1&&c.length>3?3:c.length))]; used.add(o.u); out.push(o); }
-      else { const tpb=Math.round(P*(BOTCFG.mul[i]||b[2])); out.push({bot:1,i:i,u:'bot'+i,n:'Бот · '+BN[i],tp:tpb,h:botHeroes(tpb,Math.max(1,Math.min(30,tl+(BOTCFG.dl||[-2,0,2])[i])),(BOTCFG.ms||[0,0,0])[i])}); } });
+      else { const tpb=Math.round(P*((BOTCFG.fix?BOTCFG.mul:bdGet())[i]||b[2])); out.push({bot:1,i:i,u:'bot'+i,n:'Бот · '+BN[i],tp:tpb,h:botHeroes(tpb,Math.max(1,Math.min(30,tl+(BOTCFG.dl||[-2,0,2])[i])),(BOTCFG.ms||[0,0,0])[i])}); } });
     TS.opp=out; if(TS.sel==null||TS.sel>2) TS.sel=1; TS.t=Date.now(); TS.tpk=Math.round(P); TS.busy=false; rr(); }
 
   /* ---------- Сарын Топ 10 + шагнал ---------- */
@@ -21170,6 +21174,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
       E.fr=1; E.eh=L.map(h=>({id:h.id,lv:h.lv||1,p:Math.max(1,(h.p||1)*k)})); }
     const apply=win=>{ const Rm=erGet(), pt=eloD(Rm,oppEr(o,P),KF()), d=win?pt[0]:-pt[1]; A.er=Math.max(0,Rm+d); A.en=(A.en||0)+1; const m=M(); m.n=(m.n||0)+1; m.p=Math.max(0,m.p+d);
       if(!o.bot){ A.rm=A.rm||{}; const now=Date.now(); A.rm[o.u]=now; Object.keys(A.rm).forEach(k=>{ if(now-A.rm[k]>2*RMT) delete A.rm[k]; }); }
+      if(o.bot&&typeof o.i==='number') bdLearn(o.i,win);
       if(win){ A.w++; S.res.alt+=1; try{ passAdd(5); }catch(e){} } else A.l++;
       if(d!==0) say((d>0?'+':'−')+Math.abs(d)+' Эло · '+A.er); try{ save(); }catch(e){} TS.t=0; pushMe(); };
     E.cb=()=>apply(true); E.cbl=()=>apply(false);

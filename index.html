@@ -11023,7 +11023,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b25e119a5d';
+var UPDB='5a7a9f8c73';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23258,6 +23258,28 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     try{ if(r&&!r.miss&&tg&&tg.rdef&&mode!=='t'&&inAr()){ const k=(r.crit?0.5:1)*(mode==='p'?0.5:1), D=(ARDEF[tg.type||'foot']||24)*k, E=tg.rdef*k;
       r.v=Math.max(1,r.v*(1-(D+E)/(D+E+100))/(1-D/(D+100))); } }catch(e){}
     return r; };
+})();
+
+
+/* p32/arfin.js — Арена: сүүлийн баатар үхсэний дараа тулаан шууд таслагдахгүй. Сүүлчийн цохилтыг өгсөн баатар байрандаа буцаж ирээд, 4 секундын дараа тулаан дуусна.
+   Хугацаа дууссан (ARTIME) үед шууд дуусна. Зөвхөн «Багийн арена». */
+(function(){
+  const HOLD=4;   /* буцаж ирснээс хойших хүлээлт (тоглоомын секунд) */
+  const inAr=()=>{ try{ return !!(BT&&BT.e&&BT.e.hbf&&BT.e.fr&&BT.e.eh); }catch(e){ return false; } };
+  const _bf=btFinish;
+  btFinish=function(win){
+    try{
+      if(inAr()&&!BT.done&&!BT.arEnd){
+        const al=s=>BT.units.some(u=>!!u.side===s&&!u.sup&&u.hp>0);
+        if(!al(false)||!al(true)){
+          const busy=BT.units.some(u=>u.hp>0&&!u.sup&&(u.go||Math.abs(u.x-u.hx)+Math.abs(u.y-u.hy)>2))||BT.busyH;
+          if(busy){ BT.fz=null; return; }
+          if(BT.fz==null) BT.fz=BT.t;
+          if(BT.t-BT.fz<HOLD) return;
+        }
+      }
+    }catch(e){}
+    return _bf.apply(this,arguments); };
 })();
 
 

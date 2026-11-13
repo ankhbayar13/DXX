@@ -11034,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='bb155c7385';
+var UPDB='e1029a89cc';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -22851,8 +22851,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     var h=d.h, he=h?vsHero(h.id):null, img=d.av?'<img class="vsx-img vsav" alt="" draggable="false" src="'+d.av+'">':(h&&typeof hdImg==='function'?hdImg(h.id,0,'vsx-img',0):'');
     var el=''; try{ if(h&&window.taElImg) el=window.taElImg(h.id,'right:5%;top:5%;width:20%;height:auto'); }catch(e){}
     var hn=he?String(he.n).split(' ')[0]:'';
-    return '<div class="vsc '+side+'"><div class="vsp">'+img+el
-      +(h?'<div class="vsl">'+vsCls(h.id)+'</div>':'')+'</div>'
+    return '<div class="vsc '+side+'"><div class="vsp">'+img+'</div>'
       +'<img class="vsf" alt="" src="'+VSA+(side==='L'?'vs_blue':'vs_red')+'.webp'+VSV+'">'
       +'<div class="vsn"><span>'+vsEsc(d.n)+'</span></div>'
       +'<div class="vsw"><i>'+SW+'</i><span>'+vsF(d.p)+'</span></div></div>';

@@ -11022,7 +11022,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a420fb094e';
+var UPDB='3ec7cabb95';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16828,7 +16828,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     const pa=M.reduce((a,u)=>a+Math.max(0,u.hp),0), ea=E.reduce((a,u)=>a+Math.max(0,u.hp),0);
     const set=(id,v)=>{ const e=$$(id); if(e&&e.textContent!==v) e.textContent=v; };
     { const ar=!!(BT.e&&BT.e.hbf), pw=a=>a.reduce((t,u)=>t+(u.pw0!=null?u.pw0*Math.max(0,u.hp)/Math.max(1,u.max):Math.max(0,u.hp)/(14*((u.d&&u.d.hp)||1))),0);
-      set('bu-lp',fm(Math.ceil(ar?pw(M):pa/14))); set('bu-rp',fm(Math.ceil(ar?pw(E):ea/14))); }
+      set('bu-lp',fm(Math.ceil(ar?pa:pa/14))); set('bu-rp',fm(Math.ceil(ar?ea:ea/14))); }
     const lh=$$('bu-lh'), rh=$$('bu-rh'); if(lh) lh.style.width=Math.max(0,Math.min(100,100*pa/(BT.p0||1)))+'%'; if(rh) rh.style.width=Math.max(0,Math.min(100,100*ea/(BT.e0||1)))+'%';
     set('bu-rn',((BT.e&&BT.e.n)||'Дайсны цэрэг').replace(/^Багийн арена:\s*/,''));
     const vs=bu.querySelector('.bu-vs b'); const vt=Math.max(1,M.length)+' vs '+Math.max(1,E.length); if(vs&&vs.textContent!==vt) vs.textContent=vt;

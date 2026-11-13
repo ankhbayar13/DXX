@@ -5139,15 +5139,20 @@ EMJ2["🙂"]="smile";
 EMJ2["🔔"]="bell";
 EMJ2["🔮"]="stone";
 Object.keys(EMJ2).forEach(function(k){ EMJ[k]=EMJ2[k]; });
+
+/* emx: хэрэглэгчийн AI зургийн овал дүрсүүд (rts/emx_*.webp) */
+window.EMXU={};
+(function(){ var M={"💬":"chat","🔥":"fire","☁":"cloud","⚓":"anchor","😴":"sleepface","💤":"zzz","❓":"question","💡":"lamp","📢":"horn2","💫":"comet","✚":"cross","🏅":"medal","🤖":"bot","🎖":"order","🚪":"door","📨":"inmail","🎡":"wheel","🌅":"sunrise","🏳":"whiteflag","🚚":"cart","🧩":"puzzle","🏥":"clinic","🍲":"stew","🚫":"ban","🗑":"bin","🌧":"rain","🦌":"deer","🔓":"unlock","🧓":"elder","💊":"jar","⏰":"alarm","✋":"hand","🧑":"person","🚢":"ship","☠":"skull2"};
+  Object.keys(M).forEach(function(k){ if(!EMJ[k]){ EMJ[k]='x_'+M[k]; } window.EMXU[k]='rts/emx_'+M[k]+'.webp?v=1'; }); })();
 var EMRE=new RegExp('('+Object.keys(EMJ).join('|')+')\\uFE0F?','g'), EMTEST=new RegExp(Object.keys(EMJ).join('|'));
 var EMSKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,OPTION:1,TITLE:1,NOSCRIPT:1,SELECT:1};
-(function(){ const st=document.createElement('style'); st.textContent='img.emj{height:1.15em;width:auto;vertical-align:-.2em;display:inline-block;margin:0 .05em;pointer-events:none}'; document.head.appendChild(st); })();
+(function(){ const st=document.createElement('style'); st.textContent='img.emj.emx{height:1.7em;vertical-align:-.5em;margin:-.2em .05em}img.emj{height:1.15em;width:auto;vertical-align:-.2em;display:inline-block;margin:0 .05em;pointer-events:none}'; document.head.appendChild(st); })();
 function emjText(n){
   if(typeof IC==='undefined'||!IC) return;
-  const p=n.parentNode; if(!p||EMSKIP[p.nodeName]||p.isContentEditable) return;
+  const p=n.parentNode; if(!p||EMSKIP[p.nodeName]||p.isContentEditable) return; if(p.closest&&p.closest('button[onclick="chatOpen()"]')) return;
   const s=n.nodeValue; if(!s||!EMTEST.test(s)) return;
   EMRE.lastIndex=0; let m, last=0, fr=null;
-  while((m=EMRE.exec(s))){ const u=(EMJ[m[1]]==='stone'&&window.STONEI)?window.STONEI:IC['gi_'+EMJ[m[1]]]; if(!u) continue; fr=fr||document.createDocumentFragment(); if(m.index>last) fr.appendChild(document.createTextNode(s.slice(last,m.index))); const im=document.createElement('img'); im.className='emj'; im.src=u; im.alt=m[1]; fr.appendChild(im); last=m.index+m[0].length; }
+  while((m=EMRE.exec(s))){ const xu=window.EMXU[m[1]]; const u=xu||((EMJ[m[1]]==='stone'&&window.STONEI)?window.STONEI:IC['gi_'+EMJ[m[1]]]); if(!u) continue; fr=fr||document.createDocumentFragment(); if(m.index>last) fr.appendChild(document.createTextNode(s.slice(last,m.index))); const im=document.createElement('img'); im.className=xu?'emj emx':'emj'; im.src=u; im.alt=m[1]; fr.appendChild(im); last=m.index+m[0].length; }
   if(!fr) return; if(last<s.length) fr.appendChild(document.createTextNode(s.slice(last))); p.replaceChild(fr,n);
 }
 function emjScan(root){
@@ -5158,6 +5163,12 @@ function emjScan(root){
   l.forEach(emjText);
 }
 try{ new MutationObserver(ms=>{ if(typeof IC==='undefined'||!IC) return; for(const m of ms){ if(m.type==='characterData') emjText(m.target); else m.addedNodes.forEach(n=>emjScan(n)); } }).observe(document.body,{childList:true,subtree:true,characterData:true}); }catch(e){}
+
+/* ангийн дүрс (Хамгаалагч/Довтлогч/Нумтан/Дэмжигч) — бүх тулаанд */
+window.CLSP={heavy:'rts/cls_heavy.webp?v=1',cav:'rts/cls_cav.webp?v=1',archer:'rts/cls_archer.webp?v=1',support:'rts/cls_support.webp?v=1'};
+window.CLSIM={}; Object.keys(CLSP).forEach(function(k){ var im=new Image(); im.src=CLSP[k]; CLSIM[k]=im; });
+window.clsIc=function(t,st){ var u=window.CLSP[t]; if(!u) return (typeof CLSI!=='undefined'&&CLSI[t])||'\u2694'; return '<img class="clsi" alt="" draggable="false" src="'+u+'"'+(st?' style="'+st+'"':'')+'>'; };
+(function(){ var st=document.createElement('style'); st.textContent='img.clsi{height:1.25em;width:auto;vertical-align:-.28em;pointer-events:none;display:inline-block}'; document.head.appendChild(st); })();
 
 
 /* p32/tabbar.js — 114: Барилгын табын шинэ самбар (icons.bin tabbar) */
@@ -11023,7 +11034,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b9d51aefdb';
+var UPDB='9375d7509f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16328,7 +16339,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
       if(!BT) return; const el=document.getElementById('bmatch'); if(!el) return;
       const E=BT.units.filter(u=>u.side&&!u.sup);
       const num=['①','②','③','④','⑤','⑥','⑦','⑧'];
-      const row=E.map((u,i)=>num[i]+' '+(CLSI[u.type]||'')+' '+(TNAME[u.type]||u.type)).join(' · ');
+      const row=E.map((u,i)=>num[i]+' '+(window.clsIc?clsIc(u.type):(CLSI[u.type]||''))+' '+(TNAME[u.type]||u.type)).join(' · ');
       el.innerHTML=el.innerHTML.replace(/<div class="bord">.*?<\/div>/,'')+'<div class="bord" style="margin-top:3px;color:#ffb0a0"><b>Дайсны дараалал:</b> '+row+'</div>';
     }catch(e){}
   };
@@ -16639,7 +16650,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   const fm=n=>{ try{ return f(n); }catch(e){ return String(Math.round(n)); } };
   const mine=()=>BT.units.filter(u=>!u.side&&!u.sup&&u.id&&!u.tk);
   const foes=()=>BT.units.filter(u=>u.side&&!u.sup&&!u.tk);
-  const cl=t=>(typeof CLSI!=='undefined'&&CLSI[t])||(t==='foot'?'⚔':'⚔');
+  const cl=t=>(window.clsIc?window.clsIc(t):((typeof CLSI!=='undefined'&&CLSI[t])||'⚔'));
   const tn=t=>(typeof TNAME!=='undefined'&&TNAME[t])||(typeof ENM!=='undefined'&&ENM[t])||t;
   const hname=id=>{ try{ return HEROES.find(x=>x.id===id).n; }catch(e){ return id; } };
   const lvOf=id=>Math.max(1,(S&&S.heroes&&S.heroes[id])||1);
@@ -16855,7 +16866,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     if(su){
       const d=(typeof HSK!=='undefined')?HSK[su.id]:null;
       setHTML($$('bu-po'),'po',hpi(su.id,70)); set('bu-lv',String(lvOf(su.id)));
-      set('bu-nm',hname(su.id)); set('bu-cl',cl(su.type)+' '+tn(su.type)+(d?' · '+d[1]:'')+((BT.e&&BT.e.hbf&&su.atk)?' · Цохилт '+fm(Math.round(su.atk)):''));
+      set('bu-nm',hname(su.id)); { const t2=cl(su.type)+' '+tn(su.type)+(d?' · '+d[1]:'')+((BT.e&&BT.e.hbf&&su.atk)?' · Цохилт '+fm(Math.round(su.atk)):''); setHTML($$('bu-cl'),'cl',t2); }
       const hu=$$('bu-hu'); if(hu) hu.style.width=Math.max(0,Math.min(100,100*su.hp/su.max))+'%'; set('bu-ht',fm(Math.max(0,Math.round(su.hp)))+' / '+fm(Math.round(su.max)));
       const en=enOf(su), ar=AR();
       const dots=bu.querySelectorAll('.bu-en b'); dots.forEach((b,i)=>b.classList.toggle('on',ar?(en>=(i+1)*20):i<en)); set('bu-et',ar?('Энерги '+Math.round(en)+'%'):('Энерги '+en+'/5'));
@@ -16894,7 +16905,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
             c.shadowColor='#000'; c.shadowBlur=3; c.drawImage(im,x-14,y-14,28,28); c.shadowBlur=0; return; } }
           c.beginPath(); c.arc(x,y,9,0,Math.PI*2);
           if(!u.side){ c.fillStyle='#2c6e1c'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffd770'; c.stroke(); c.fillStyle='#fff'; c.font='11px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(({heavy:'🛡',cav:'⚔',foot:'⚔',archer:'🏹',support:'✨'})[(typeof hcls==='function'?hcls(u.id):u.type)]||'⚔',x,y+1); }
-          else { c.fillStyle='#8a2218'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffb0a0'; c.stroke(); c.fillStyle='#fff'; c.font='10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(cl(u.type),x,y+1); }
+          else { c.fillStyle='#8a2218'; c.fill(); c.lineWidth=2; c.strokeStyle='#ffb0a0'; c.stroke(); c.fillStyle='#fff'; c.font='10px sans-serif'; c.textAlign='center'; c.textBaseline='middle'; { const ci=window.CLSIM&&window.CLSIM[u.type]; if(ci&&ci.complete&&ci.naturalWidth){ c.drawImage(ci,x-7,y-7,14,14); } else c.fillText('⚔',x,y+1); } }
         });
         const ac=BT.units.filter(u=>u.go&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0)).slice(0,3);
         if(BT.pick&&BT.pick.u.hp>0&&!ac.includes(BT.pick.u)) ac.unshift(BT.pick.u);
@@ -21157,7 +21168,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     let h='<div class="tpk"><div class="tpkt">Миний баатар</div><div class="tpkn">'+A.team.length+' / 3</div>';
     A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const sel=TS.pks===k, oc=' onclick="tpkPick('+k+')"';
       h+='<div class="tpki'+(sel?' sel':'')+'" style="left:'+PW(x+14)+'"'+oc+'>'+pimg(id,'tpkp')+elImg(id,'right:3%;top:3%;width:24%;height:auto')+'</div>'
-        +'<div class="tpkb" style="left:'+PW(x+211)+'"'+oc+'>'+((typeof CLSI!=='undefined'&&CLSI[grp(id)])||'⚔')+'</div>'
+        +'<div class="tpkb" style="left:'+PW(x+211)+'"'+oc+'>'+(window.clsIc?clsIc(grp(id),'height:74%;width:auto;margin:0'):'⚔')+'</div>'
         +'<div class="tpkh" style="left:'+PW(x+14)+'"'+oc+'>'+esc(fst(id))+'</div>'
         +'<div class="tpkv" style="left:'+PW(x+14)+'"'+oc+'><i>'+IC.sw+'</i>'+f(heroPower(id))+'</div>'; });
     if(TS.pks!=null) h+='<div class="tpkhint">Солих баатраа дар</div>';
@@ -22827,13 +22838,13 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     return {n:(n||'Дайсан').slice(0,16), h:b, p:E.p||L.reduce(function(a,x){ return a+x.p; },0)};
   }
   var SW='<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.8" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>';
-  function vsCls(id){ try{ var c=(typeof hcls==='function')?hcls(id):htype(id); return (typeof CLSI!=='undefined'&&CLSI[c])||'⚔'; }catch(e){ return '⚔'; } }
+  function vsCls(id){ try{ var c=(typeof hcls==='function')?hcls(id):htype(id); return window.clsIc?window.clsIc(c,'height:70%;width:auto;margin:0'):'⚔'; }catch(e){ return '⚔'; } }
   function vsCard(side,d){
     var h=d.h, he=h?vsHero(h.id):null, img=h&&typeof hdImg==='function'?hdImg(h.id,0,'vsx-img',0):'';
     var el=''; try{ if(h&&window.taElImg) el=window.taElImg(h.id,'right:5%;top:5%;width:20%;height:auto'); }catch(e){}
     var hn=he?String(he.n).split(' ')[0]:'';
     return '<div class="vsc '+side+'"><div class="vsp">'+img+el
-      +(h?'<div class="vsl">'+vsEsc(vsCls(h.id))+'</div><div class="vsh"><b>'+vsEsc(hn)+'</b></div>':'')+'</div>'
+      +(h?'<div class="vsl">'+vsCls(h.id)+'</div><div class="vsh"><b>'+vsEsc(hn)+'</b></div>':'')+'</div>'
       +'<img class="vsf" alt="" src="'+VSA+(side==='L'?'vs_blue':'vs_red')+'.webp'+VSV+'">'
       +'<div class="vsn"><span>'+vsEsc(d.n)+'</span></div>'
       +'<div class="vsw"><i>'+SW+'</i><span>'+vsF(d.p)+'</span></div></div>';

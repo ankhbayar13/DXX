@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='c1cee162fa';
+var UPDB='8fd4141ee1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23379,7 +23379,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    таб/барааны дүрс, чимэг. Зөвхөн дэлгүүр / цүнх / агуулах дэлгэц дээр. */
 (function(){
   var R='rts/',V='?v=1';
-  var F=['close','hdr','alt','note','yurt','micro','swords','scrollL','scrollS','price','horseL','orn','horseR','t_main','t_sp','t_pr','t_pk','t_dl'];
+  var F=['bar','close','hdr','alt','note','yurt','micro','swords','scrollL','scrollS','price','horseL','orn','horseR','t_main','t_sp','t_pr','t_pk','t_dl'];
   F.forEach(function(n){ var i=new Image(); i.src=R+'shu_'+n+'.webp'+V; });
   var U=function(n){ return 'url('+R+'shu_'+n+'.webp'+V+')'; };
   var P='body.sh2fs #modal ';
@@ -23399,6 +23399,12 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    +P+'.sh2-sm.shu-note{box-sizing:border-box;min-height:30px;margin:2px 0 10px;padding:4px 0;border-style:solid;border-color:transparent;border-width:0 34px 0 33px;border-image:'+U('note')+' 0 48 0 46 fill/0 34px 0 33px stretch;display:block;text-align:center;font:bold 12px/22px sans-serif;color:#ffe9b0;text-shadow:0 1px 2px #000}'
    +P+'.sh2-sm.shu-note b{color:#ffd770}'
    +P+'.sh2-sm{text-shadow:0 1px 2px #000,0 0 4px #000}'
+   /* доод таб: 5 нүдтэй хүрээ */
+   +P+'.sh2-tabs.shu-bar{height:70px;box-sizing:border-box;padding:6px 1.1%;border-top:0;box-shadow:none;background:'+U('bar')+' center/100% 100% no-repeat}'
+   +P+'.sh2-tabs.shu-bar button{border-radius:6px;margin:0;color:#e8d6a8;text-shadow:0 1px 2px #000;padding:2px 0 1px;min-width:0}'
+   +P+'.sh2-tabs.shu-bar button i{height:30px}'
+   +P+'.sh2-tabs.shu-bar button span{font:bold 11px/12px sans-serif}'
+   +P+'.sh2-tabs.shu-bar button.on{background:radial-gradient(ellipse at 50% 30%,#fff0b0,#f0c04a 55%,#c98a1a);box-shadow:inset 0 0 0 2px #fff6c8aa,inset 0 0 8px #fff3,0 0 10px #ffd770bb;color:#3a2208;text-shadow:0 1px 0 #fff8}'
    /* чимэг */
    +'.shu-orn{display:flex;align-items:center;justify-content:center;gap:2px;height:26px;margin:-4px 0 4px;pointer-events:none}.shu-orn img{height:100%;width:auto;max-width:34%;object-fit:contain}.shu-orn img.o{max-width:36%}';
   var st=document.createElement('style'); st.id='shuiCss'; st.textContent=css; document.head.appendChild(st);
@@ -23413,12 +23419,14 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     if(!on()) return;
     var box=document.querySelector('#modal .box'); if(!box) return;
     var m=srcMap();
+    var br0=document.getElementById('sh2bar'); if(br0&&cur!=='shop') br0.classList.remove('shu-bar');
     box.querySelectorAll('img').forEach(function(im){
       if(im.dataset.shu) return;
       var k=m[im.getAttribute('src')]; if(!k) return;
       if(k==='scrollS'){ var tg=im.parentNode&&im.parentNode.querySelector&&im.parentNode.querySelector('i'); if(tg&&/900/.test(tg.textContent)) k='scrollL'; }
       im.src=R+'shu_'+k+'.webp'+V; im.dataset.shu='1'; im.style.imageRendering='auto'; });
     if(cur==='shop'){
+      var br=document.getElementById('sh2bar'); if(br) br.classList.add('shu-bar');
       var hd=document.getElementById('sh2hd');
       if(hd&&!hd.querySelector('.shu-hdi')){ hd.classList.add('shu-hd'); var b=hd.querySelector('b'); var g=document.createElement('img'); g.className='shu-hdi'; g.alt='Дэлгүүр'; g.src=R+'shu_hdr.webp'+V; if(b) hd.replaceChild(g,b); else hd.insertBefore(g,hd.firstChild); }
       var mb=document.getElementById('mbody');

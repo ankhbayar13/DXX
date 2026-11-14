@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='d0133a8200';
+var UPDB='d3a9f3ca58';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -20943,7 +20943,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.taEl=elOf; window.btElMul=elMul; window.taElImg=elImg;
   /* Арена: баатрын хүч p → амь (HP) ба цохилт (ATK) тусдаа. Хүч = HP/14*0.5 + ATK (хүчний тоо өөрчлөгдөхгүй).
      Анги бүр хүчний хэдэн хувийг амьд (s), үлдсэнийг цохилтод өгнө: Хамгаалагч 65%, Явган 55%, Довтлогч 50%, Нумтан 35%. */
-  const HSH={heavy:0.65,foot:0.55,cav:0.5,archer:0.35,support:0.6};
+  const HSH={heavy:0.65,foot:0.55,cav:0.5,archer:0.35,support:0.45};
   const cls=id=>{ try{ return typeof hcls==='function'?hcls(id):htype(id); }catch(e){ return 'cav'; } };
   const stat=(type,p)=>{ const s=HSH[type]!=null?HSH[type]:0.5; return {hp:28*s*p,atk:(1-s)*p,pw:p}; };
   window.taStat=stat;
@@ -23243,27 +23243,27 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   if(!window.SK24) return;
   const D=window.SK24;
   /* hcap/acap: skill-ийн түвшин, баатрын түвшнээр өсөх хэмжээний дээд хязгаар. r1: босгох нь тулаанд 1 удаа */
-  const H1={a:'low',heal:0.18,hcap:0.30};        /* нэг (хамгийн шархтай) хүнийг эмчилнэ */
+  const H1={a:'low',heal:0.12,hcap:0.20};        /* нэг (хамгийн шархтай) хүнийг эмчилнэ */
   const A1={a:'low',arm:[0.3,6],acap:0.4};        /* нэг (хамгийн шархтай) хүнд хамгаалалт */
   const KIT={
     oelun:[['Эхийн гар',Object.assign({f:[['heal','a']]},H1)],
            ['Эхийн хамгаалалт',Object.assign({f:[['armor','a']]},A1)],
-           ['Эхийн даллага',{a:'all',cl:1,heal:0.05,hcap:0.10,f:[['glow','a']]}],
-           ['Эхийн залбирал',{a:'all',heal:0.12,hcap:0.2,rv:0.2,r1:1,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
+           ['Эхийн даллага',{a:'all',cl:1,heal:0.03,hcap:0.06,f:[['glow','a']]}],
+           ['Эхийн залбирал',{a:'all',heal:0.08,hcap:0.13,rv:0.15,r1:1,cl:1,f:[['revive','a'],['heal','a',0.2]]}]],
     borte:[['Хатны үг',{a:'all',atkb:[0.25,8],f:[['buff','a']]}],
            ['Хатны ивээл',Object.assign({f:[['heal','a'],['crown','a',0.2]]},H1)],
            ['Хатны тушаал',{a:'all',atkb:[0.3,8],hs:1,f:[['buff','a'],['tempo','a',0.2]]}],
-           ['Эрдмийн дуу',{a:'all',heal:0.12,hcap:0.2,atkb:[0.2,10],f:[['glow','a'],['heal','a',0.2]]}]],
+           ['Эрдмийн дуу',{a:'all',heal:0.08,hcap:0.13,atkb:[0.2,10],f:[['glow','a'],['heal','a',0.2]]}]],
     sorkh:[['Тосгоны ивээл',Object.assign({f:[['heal','a']]},H1)],
            ['Бодлын хэрэм',Object.assign({f:[['armor','a']]},A1)],
-           ['Хор цэвэрлэх',{a:'all',cl:1,heal:0.05,hcap:0.10,f:[['heal','a'],['glow','a',0.2]]}],
-           ['Эрхмийн хаалт',{a:'all',arm:[0.3,6],acap:0.4,heal:0.06,hcap:0.11,f:[['guard','a'],['armor','a',0.2]]}]],
+           ['Хор цэвэрлэх',{a:'all',cl:1,heal:0.03,hcap:0.06,f:[['heal','a'],['glow','a',0.2]]}],
+           ['Эрхмийн хаалт',{a:'all',arm:[0.3,6],acap:0.4,heal:0.04,hcap:0.07,f:[['guard','a'],['armor','a',0.2]]}]],
     haiyun:[['Амьсгалын мөн',Object.assign({f:[['heal','a']]},H1)],
-            ['Урт наслал',{a:'low',arm:[0.3,6],acap:0.4,heal:0.07,hcap:0.13,f:[['heal','a'],['armor','a',0.2]]}],
+            ['Урт наслал',{a:'low',arm:[0.3,6],acap:0.4,heal:0.05,hcap:0.09,f:[['heal','a'],['armor','a',0.2]]}],
             ['Дао',{a:'all',cl:1,f:[['armor','a'],['glow','a',0.2]]}],
-            ['Мөнхийн сэргэл',{a:'all',heal:0.12,hcap:0.2,rv:0.2,r1:1,cl:1,f:[['revive','a'],['heal','a',0.25]]}]]
+            ['Мөнхийн сэргэл',{a:'all',heal:0.08,hcap:0.13,rv:0.15,r1:1,cl:1,f:[['revive','a'],['heal','a',0.25]]}]]
   };
-  const PAS='Пассив: HP 50%-д 30% нөхнө (тулаанд 2 удаа)';
+  const PAS='Пассив: HP 50%-д 20% нөхнө (тулаанд 2 удаа)';
   const inAr=()=>{ try{ return !!(BT&&BT.e&&BT.e.hbf); }catch(e){ return false; } };
   const _hs=heroSkills;
   heroSkills=function(id){
@@ -23276,8 +23276,8 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     BT.units.forEach(u=>{
       if(!u.id||u.sup||!u.max||u.hp<=0||u.dead||(u.pas||0)>=2||u.hp>u.max*0.5) return;
       if(typeof hcls!=='function'||hcls(u.id)!=='support') return;
-      const h=u.max*0.3; u.hp=Math.min(u.max,u.hp+h); u.pas=(u.pas||0)+1;
-      try{ fxs('heal',u.x,u.y,{d:0.8,z:1.1}); BT.dm.push({x:u.x,y:u.y-44,t:0,v:Math.round(h),big:false,side:u.side?1:0,heal:1}); BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Сэргэлт · +30% HP ('+(2-u.pas)+' үлдсэн)',nm:u.name||'',t:0,e:!!u.side}); }catch(e){}
+      const h=u.max*0.2; u.hp=Math.min(u.max,u.hp+h); u.pas=(u.pas||0)+1;
+      try{ fxs('heal',u.x,u.y,{d:0.8,z:1.1}); BT.dm.push({x:u.x,y:u.y-44,t:0,v:Math.round(h),big:false,side:u.side?1:0,heal:1}); BT.sk=BT.sk||[]; BT.sk.push({u:u,txt:'Сэргэлт · +20% HP ('+(2-u.pas)+' үлдсэн)',nm:u.name||'',t:0,e:!!u.side}); }catch(e){}
     }); }
   const _et=efTick; efTick=function(dt){ try{ pas(); }catch(e){} return _et.apply(this,arguments); };
   /* эмчлэлтийн тоо: ногоон «+N» */

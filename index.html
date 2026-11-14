@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='4f43c594bb';
+var UPDB='3f2e3e75f8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23529,18 +23529,19 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
    Нөөцөө зарна (хүссэн бараа нь өндөр үнэтэй), 1★ сахиус үргэлж, 2★ сахиус ховор (1 ширхэг, их үнэтэй) зарна. */
 (function(){
   var M=[
-    {id:'jin',  w:50, n:'Алтан улсын наймаачин', from:'Урд зүгээс, Алтан улс ба Тангутаар дамжин ирлээ.', goods:'Торго, цай, төмөр', want:['meat','wool','tos'], hi:1.9, p2:0.12, c1:3000, c2:12000},
-    {id:'uig',  w:35, n:'Уйгур, Хорезмын наймаачин', from:'Баруун зүгээс, Уйгурын нутаг ба Хорезмоор дамжин ирлээ.', goods:'Үнэт чулуу, нандин даавуу', want:['esgii','wool','aaruul'], hi:2.0, p2:0.18, c1:3000, c2:11000},
-    {id:'arab', w:15, n:'Арабын наймаачин', from:'Алс баруунаас, Перс ба Хорезмоор дамжин ирлээ.', goods:'Ховор эдлэл, дарс, нэрс', want:['airag','tos','buuz'], hi:2.3, p2:0.30, c1:3500, c2:10000}
+    {id:'jin',  w:50, n:'Алтан улсын наймаачин', from:'Урд зүгээс, Алтан улс ба Тангутаар дамжин ирлээ.', goods:'Торго, цай, төмөр', want:['meat','wool','tos'], hi:1.9, p2:0.12, c1:[12000,15000], c2:[28000,31000]},
+    {id:'uig',  w:35, n:'Уйгур, Хорезмын наймаачин', from:'Баруун зүгээс, Уйгурын нутаг ба Хорезмоор дамжин ирлээ.', goods:'Үнэт чулуу, нандин даавуу', want:['esgii','wool','aaruul'], hi:2.0, p2:0.18, c1:[12000,15000], c2:[28000,31000]},
+    {id:'arab', w:15, n:'Арабын наймаачин', from:'Алс баруунаас, Перс ба Хорезмоор дамжин ирлээ.', goods:'Ховор эдлэл, дарс, нэрс', want:['airag','tos','buuz'], hi:2.3, p2:0.30, c1:[12000,15000], c2:[28000,31000]}
   ];
   window.SILK_M=M;
+  function rp(a){ return Math.round((a[0]+Math.random()*(a[1]-a[0]))/100)*100; }
   window.silkNew=function(c){
     try{
       var r=Math.random()*100, m=M[0], a=0; for(var i=0;i<M.length;i++){ a+=M[i].w; if(r<a){ m=M[i]; break; } }
       c.m=m; c.mn=m.n; c.want=m.want[Math.floor(Math.random()*m.want.length)];
       var o=[], p1=RELICS.filter(function(x){ return x.s===1; }), p2=RELICS.filter(function(x){ return x.s===2; });
-      if(p1.length){ var x1=p1[Math.floor(Math.random()*p1.length)]; o.push({id:x1.id,s:1,price:m.c1,sold:0}); }
-      if(p2.length&&Math.random()<m.p2){ var x2=p2[Math.floor(Math.random()*p2.length)]; o.push({id:x2.id,s:2,price:m.c2,sold:0}); c.has2=1; }
+      if(p1.length){ var x1=p1[Math.floor(Math.random()*p1.length)]; o.push({id:x1.id,s:1,price:rp(m.c1),sold:0}); }
+      if(p2.length&&Math.random()<m.p2){ var x2=p2[Math.floor(Math.random()*p2.length)]; o.push({id:x2.id,s:2,price:rp(m.c2),sold:0}); c.has2=1; }
       c.offers=o;
     }catch(e){ console.error(e); }
   };

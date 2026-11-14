@@ -9358,7 +9358,7 @@ wmSelHero=function(hid,id){ const A=wmAway(); if(A.h[hid]) return; wmSelGet().h=
 })();
 
 
-/* p32/frduel.js — 204: найзын профайл дээр «⚔ 5vs5 тулах» — найзын баатруудтай (бот удирдана) тулна. Шагналгүй, найрсаг тулаан */
+/* p32/frduel.js — 204: найзын профайл дээр «⚔ 3vs3 тулах» — найзын баатруудтай (бот удирдана) тулна. Шагналгүй, найрсаг тулаан */
 function frPow(id,lv){
   const had=Object.prototype.hasOwnProperty.call(S.heroes,id), old=S.heroes[id];
   S.heroes[id]=lv; let p=0; try{ p=heroPower(id); }catch(e){}
@@ -9369,9 +9369,10 @@ window.frDuel=function(){
   try{
     const r=CL.sv; if(!r||!r.v||!r.v.h){ say('Найзын баатрын мэдээлэл алга'); return; }
     if(!Object.keys(S.heroes).length){ say('Эхлээд баатар дууд'); return; }
-    const L=Object.keys(r.v.h).filter(id=>HEROES.find(x=>x.id===id)).map(id=>({id:id,lv:r.v.h[id],p:frPow(id,r.v.h[id])})).sort((a,b)=>b.p-a.p).slice(0,5);
+    const L=Object.keys(r.v.h).filter(id=>HEROES.find(x=>x.id===id)).map(id=>({id:id,lv:r.v.h[id],p:frPow(id,r.v.h[id])})).sort((a,b)=>b.p-a.p).slice(0,3);
     if(!L.length){ say('Найзад баатар алга'); return; }
     const tot=Math.max(100,L.reduce((a,x)=>a+x.p,0)), nm=String(r.n||'Найз').slice(0,14);
+    if(window.TASH&&TASH.friendFight){ TASH.friendFight(nm,L,tot,r.v); return; }
     try{ closeM(); }catch(e){}
     startBattle(0,{n:nm+' · 5vs5',fc:1,p:tot,g:0,m:0,bi:0,fr:1,eh:L,pc:{cav:0,archer:0,foot:0},back:'soc',
       cb:()=>{ try{ say('🏆 '+nm+'-г 5vs5 тулаанд ялав!'); }catch(e){} },cbl:()=>{ try{ say('Ялагдлаа. '+nm+' илүү хүчтэй байна'); }catch(e){} }});
@@ -9397,7 +9398,7 @@ window.frDuel=function(){
       const r=CL.sv, me=r&&r.id===CL.uid;
       if(!me&&r&&r.v&&r.v.h&&Object.keys(r.v.h).length){
         const i=h.indexOf('Хүч <b>'), j=i<0?-1:h.indexOf('</div>',i);
-        if(j>0) h=h.slice(0,j+6)+'<div style="margin-top:8px"><button class="btn red" style="width:100%" onclick="frDuel()">⚔ 5vs5 тулах</button><div class="sm">Найзын баатруудтай тулна · шагналгүй</div></div>'+h.slice(j+6);
+        if(j>0) h=h.slice(0,j+6)+'<div style="margin-top:8px"><button class="btn red" style="width:100%" onclick="frDuel()">⚔ 3vs3 тулах</button><div class="sm">Найзын 3 баатартай Арена шиг тулна · шагналгүй</div></div>'+h.slice(j+6);
       }
     }catch(e){}
     return h;
@@ -11034,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='f3a6071246';
+var UPDB='d0133a8200';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21165,7 +21166,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   /* Тулааны талбайн доод төвд жижиг самбар (тулаан эхлээгүй, баатрууд тойрог дээрээ зогсож байна) */
   function pkShow(i,quiet){
     const el=document.getElementById('btl'); if(!el||!BT) return; TS.pki=i; if(!quiet) TS.pks=null;
-    tpkClose(); const A=S.ta, paid=A.n>=5, LX=[40,372,705];
+    tpkClose(); const A=S.ta, paid=A.n>=5&&!(BT&&BT.e&&BT.e.frd), LX=[40,372,705];
     let h='<div class="tpk"><div class="tpkt">Миний баатар</div><div class="tpkn">'+A.team.length+' / 3</div>';
     A.team.slice(0,3).forEach((id,k)=>{ const x=LX[k]; const sel=TS.pks===k, oc=' onclick="tpkPick('+k+')"';
       h+='<div class="tpki'+(sel?' sel':'')+'" style="left:'+PW(x+14)+'"'+oc+'>'+pimg(id,'tpkp')+elImg(id,'right:3%;top:3%;width:24%;height:auto')+'</div>'
@@ -21173,7 +21174,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
         +'<div class="tpkh" style="left:'+PW(x+14)+'"'+oc+'>'+esc(fst(id))+'</div>'
         +'<div class="tpkv" style="left:'+PW(x+14)+'"'+oc+'><i>'+IC.sw+'</i>'+f(heroPower(id))+'</div>'; });
     if(TS.pks!=null) h+='<div class="tpkhint">Солих баатраа дар</div>';
-    { const o=TS.opp[i], eh=((o&&o.h)||[]).slice(0,3), BE=(typeof BTBEAT!=='undefined')?BTBEAT:{archer:'heavy',heavy:'cav',cav:'archer'}; let ad=0, ds=0;
+    { const o=(BT&&BT.e&&BT.e.frd)||TS.opp[i], eh=((o&&o.h)||[]).slice(0,3), BE=(typeof BTBEAT!=='undefined')?BTBEAT:{archer:'heavy',heavy:'cav',cav:'archer'}; let ad=0, ds=0;
       A.team.slice(0,3).forEach(m=>eh.forEach(e=>{ const q=elMul(m,e.id); if(q>1) ad++; else if(q<1) ds++; }));
       const tg=ad>ds?['Давуу','#9dff7a']:ad<ds?['Сул','#ff8a7a']:['Адил','#ffd770'];
       h+='<div class="tpke"><div class="tpkh2">Дайсан · '+esc(o&&o.bot?'Бот':(o?o.n:''))+'</div><div class="tpkr">'+eh.map(e=>'<div>'+pimg(e.id,'tpkq')+'<b>'+esc(fst(e.id))+'</b><small>'+esc(RN(grp(e.id)))+'</small></div>').join('')+'</div>'
@@ -21210,11 +21211,11 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
     TS.fromBt=1; E.hb='tarena'; E.hbf=1; E.prep=1;
     closeM(); startBattle(0,E); pkShow(i); };
   /* «Эхлэх»: тулааны тоо / Алт энд л хасагдана, самбар алга болж тулаан шууд эхэлнэ */
-  window.taGo=function(ok){ const E=BT&&BT.e; if(!E||!E.prep) return; const A=S.ta, paid=A.n>=5;
+  window.taGo=function(ok){ const E=BT&&BT.e; if(!E||!E.prep) return; const A=S.ta, frd=!!E.frd, paid=!frd&&A.n>=5;
     if(paid&&!ok){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна · '+CFG.cost+' Алт хэрэгтэй'); try{ sfx('err'); }catch(e){} return; }
       try{ dxAsk('<b>Нэмэлт тулаан</b><br><span class="sm">Өнөөдрийн 5 үнэгүй тулаан дууссан. '+CFG.cost+' Алтаар 1 тулаан авах уу?</span>','Авах',()=>taGo(1),'Болих'); }catch(e){ taGo(1); } return; }
     if(paid){ if(S.res.alt<CFG.cost){ say('Алт хүрэхгүй байна'); try{ sfx('err'); }catch(e){} return; } S.res.alt-=CFG.cost; }
-    A.n++; try{ save(); updateHUD(); }catch(e){}
+    if(!frd) A.n++; try{ save(); updateHUD(); }catch(e){}
     E.prep=0; tpkClose();
     if(BT.wait&&!BT.vs&&!E._ag){ E._ag=1; BT.sel=(E.hs||[]).slice(); try{ btGo(); }catch(e){ E._ag=0; } } };
 
@@ -21426,7 +21427,19 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   +'#tapk .tpkf{font-size:'+PW(29)+';color:#e8d8b2}#tapk .tpkf b{color:#ffd770}'
   +'#tapk .tpkB:active,#tapk .tpkG:active{filter:brightness(1.25)}';
   document.head.appendChild(stp);
-  window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG};
+  /* Найзтай тулах: Арена шиг 3vs3 (баг сонгох, VS, ангийн дүрс, дэмжигч...). Арена тулааны тоо, Эло, Алтанд нөлөөлөхгүй, шагналгүй */
+  function friendFight(nm,L,tot,v){
+    X.tInit(); const Fi=X.fighters(); if(Fi.length<3){ say('Найзтай тулахад 3 баатар хэрэгтэй'); return; } if(S.ta.team.length<3){ say('Баг дутуу. Багийн аренад 3 баатар сонго'); return; }
+    const A=S.ta, H=(L||[]).slice(0,3); if(!H.length){ say('Найзад баатар алга'); return; }
+    const o={n:nm,tp:tot,h:H,bot:false,u:'fr'};
+    const E={pc:{cav:0,archer:0,foot:0},n:nm+' · 3vs3',p:tot,g:0,m:0,bi:0,rep:false,hs:A.team.slice(),slots:3,back:'soc',frd:o};
+    E.fr=1; E.eh=H.map(h=>({id:h.id,lv:h.lv||1,p:Math.max(1,h.p||1)}));
+    if(v&&v.sp) E.sp=v.sp; if(v&&v.im) E.img=v.im;
+    E.cb=()=>{ try{ say('🏆 '+nm+'-г 3vs3 тулаанд ялав!'); }catch(e){} };
+    E.cbl=()=>{ try{ say('Ялагдлаа. '+nm+' илүү хүчтэй байна'); }catch(e){} };
+    TS.fromBt=1; E.hb='tarena'; E.hbf=1; E.prep=1;
+    closeM(); startBattle(0,E); pkShow(0); }
+  window.TASH={pushMe:pushMe,find:find,TS:TS,CFG:CFG,friendFight:friendFight};
 })();
 
 
@@ -22835,7 +22848,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   }
   /* Эсрэг тал: E.eh (масштаблагдсан хүчтэй) дундаас хамгийн хүчтэй нь */
   function vsOpp(E){
-    var L=(E.eh||[]).map(function(h){ return {id:h.id,p:h.p||0,lv:h.lv||1}; }), b=vsBest(L), n=String(E.n||'').replace(/^Багийн арена:\s*/,'').replace(/^Бот\s*·\s*/,'');
+    var L=(E.eh||[]).map(function(h){ return {id:h.id,p:h.p||0,lv:h.lv||1}; }), b=vsBest(L), n=String(E.n||'').replace(/^Багийн арена:\s*/,'').replace(/^Бот\s*·\s*/,'').replace(/\s*·\s*3vs3$/,'');
     var ov=E.v||E.ov||{}; return {n:(n||'Дайсан').slice(0,16), h:b, p:E.p||L.reduce(function(a,x){ return a+x.p; },0), av:vsAv(E.img||ov.img||'',E.sp||ov.sp||'')};
   }
   var SW='<svg viewBox="0 0 32 32" fill="none" stroke="#ffe7a8" stroke-width="2.8" stroke-linecap="round"><path d="M5 5l14 14M27 5L13 19M17 21l-4 4M15 17l-3-3M21 17l3-3M19 21l4 4"/></svg>';

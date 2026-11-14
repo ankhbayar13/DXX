@@ -2210,12 +2210,12 @@ function modalContent(k){
   }
   if(k==='baatar') return heroListHTML();
   if(k==='summon') return summonHTML();
-  if(k==='relics') return '<h2>Дурсгал</h2><button class="btn" onclick="openM(\'baatar\')">‹ Баатар</button>'+relicsHTML();
+  if(k==='relics') return '<h2>Сахиус</h2><button class="btn" onclick="openM(\'baatar\')">‹ Баатар</button>'+relicsHTML();
   if(k==='naadam') return naadamHTML();
   if(k==='ndlb') return ndLbHTML();
   if(k==='dain'){
     const P=totalPower(), fb=facBonus(), rm=relicMul();
-    let h='<h2>Дайн</h2><div class="sm" style="text-align:center;margin:-4px 0 6px">⚔ Өнөөдрийн дайралт: <b style="color:#ffd770">'+dnLeft()+'/'+DNMAX+'</b> · шөнө 00:00-д шинэчлэгдэнэ</div>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Дурсгал: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
+    let h='<h2>Дайн</h2><div class="sm" style="text-align:center;margin:-4px 0 6px">⚔ Өнөөдрийн дайралт: <b style="color:#ffd770">'+dnLeft()+'/'+DNMAX+'</b> · шөнө 00:00-д шинэчлэгдэнэ</div>'+upCard('hureo')+troopCard()+'<div class="card"><h3>Миний хүч: '+f(P)+'</h3><div class="sm">'+(fb.txt?'Овгийн бонус: '+fb.txt:'Нэг овгийн 2+ баатар цуг байвал бонус авна.')+'<br>Сахиус: цохилт +'+Math.round((rm.a-1)*100)+'%, бие +'+Math.round((rm.h-1)*100)+'%</div></div>';
     h+='<div class="card"><h3>Миний баг</h3>'+(squad().length?squad().map(id=>{ const d=HEROES.find(x=>x.id===id); return '<div class="hero"><div><span class="s'+d.s+'">'+d.n+'</span></div><div class="sm">'+TNAME[hcls(id)]+' · '+TROW[htype(id)]+' · Хүч '+heroPower(id)+'</div></div>'; }).join(''):'<div class="sm">Баатар дуудаарай</div>')+'<div class="sm" style="margin-top:6px">Нум → хүнд морьт, хүнд морьт → морин, морин → нум дээр хүчтэй.</div></div>';
     STAGEZ.forEach((z,zi)=>{
       h+='<h3 style="margin:10px 4px 2px">'+ico(ZTILE[zi],34)+' '+z.n+'</h3>';
@@ -2459,8 +2459,8 @@ function passAdd(n){ if(!S.pass) S.pass={p:0,c:0}; S.pass.p+=Math.round(n*evBonu
 const PASSN=20, PASSP=50;
 function passRew(i){ const n=i+1; if(n===PASSN) return {alt:60,relic:3}; if(n===10) return {alt:30,relic:3}; if(n%5===0) return {alt:20}; return {alt:n%2?5:8}; }
 const LOGR=[{alt:5},{alt:8},{alt:10},{alt:12},{alt:15},{alt:20},{alt:50,relic:3}];
-function rewT(r){ return ico('ui_gem',16)+' <b>'+r.alt+'</b>'+(r.relic?'<br><small>+ '+'★'.repeat(r.relic)+' дурсгал</small>':''); }
-function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s>=r.relic&&(r.relic>=5||x.s<=3)); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' дурсгал олдлоо!'); } }
+function rewT(r){ return ico('ui_gem',16)+' <b>'+r.alt+'</b>'+(r.relic?'<br><small>+ '+'★'+' сахиус</small>':''); }
+function givR(r){ if(r.gold) S.res.gold+=r.gold; if(r.meat) S.res.meat+=r.meat; if(r.alt) S.res.alt+=r.alt; if(r.relic){ const pool=RELICS.filter(x=>x.s<=1); const x=pool[Math.floor(Math.random()*pool.length)]; S.relics[x.id]=(S.relics[x.id]||0)+1; say(x.n+' сахиус олдлоо!'); } }
 function logDay(){ return Math.floor((srvNow()+8*3600e3)/864e5); }
 function logState(){ if(!S.login) S.login={d:-9,n:0}; const t=logDay(), L=S.login; const claimed=L.d===t; const next=claimed?L.n:(L.d===t-1?L.n:0); return {t,claimed,idx:claimed?(L.n+6)%7:next%7}; }
 function logClaim(){ if(!SRV.ok){ say('Серверийн цаг шалгаж байна. Интернэтээ шалгаад дахин дарна уу'); srvSync(); return; } const st=logState(); if(st.claimed){ say('Өнөөдрийн бэлэг авсан'); return; } givR(LOGR[st.idx]); sfx('coin'); vib(30); S.login={d:st.t,n:st.idx+1}; S.daily=nowD().toDateString(); passAdd(20); say('Бэлэг авлаа!'); refresh(); evoShow(); }
@@ -2592,17 +2592,17 @@ function startMove(k){
 function relWorn(id){ relMig(); let n=0; Object.keys(S.heq).forEach(h=>{ if(S.heroes[h]) n+=S.heq[h].filter(x=>x===id).length; }); return n; }
 function relicsHTML(){
   relMig(); const own=RELICS.filter(r=>S.relics[r.id]);
-  let h='<div class="card"><h3>Дурсгал</h3><div class="sm">Баатар бүр 3 дурсгал өмсөнө. Баатрын мэдээлэл дээр дарж өмсүүлнэ.</div>';
-  if(!own.length) h+='<div class="sm" style="margin-top:6px">Одоохондоо дурсгал алга.</div>';
+  let h='<div class="card"><h3>Сахиус</h3><div class="sm">Баатар бүр 3 сахиус өмсөнө. Баатрын мэдээлэл дээр дарж өмсүүлнэ.</div>';
+  if(!own.length) h+='<div class="sm" style="margin-top:6px">Одоохондоо сахиус алга.</div>';
   own.forEach(r=>{ const w=relWorn(r.id); h+='<div class="row" style="margin-top:6px"><div>'+ico(r.ic,40)+' <b>'+r.n+'</b> ×'+S.relics[r.id]+' <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'% · өмссөн '+w+'</div></div></div>'; });
-  return h+'<button class="btn" style="margin-top:8px" onclick="openM(\'rbox\')">🏺 Дурсгалын хайрцаг</button></div>';
+  return h+'<button class="btn" style="margin-top:8px" onclick="openM(\'rbox\')">🏺 Сахиусны хайрцаг</button></div>';
 }
 const RBOXC=100, RW={1:40,2:30,3:20,4:8,5:2};
 function relPick(){ let r=Math.random()*100, st=1; for(let q=1;q<=5;q++){ if(r<RW[q]){ st=q; break; } r-=RW[q]; } const pool=RELICS.filter(x=>x.s===st); return pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; }
 function relBoxOpen(n){ const cost=n===5?Math.round(RBOXC*4.5):RBOXC; if(S.res.alt<cost){ say('Алт хүрэхгүй байна.'); return; } S.res.alt-=cost; const res=[]; for(let i=0;i<n;i++){ const r=relPick(); S.relics[r.id]=(S.relics[r.id]||0)+1; res.push(r); } passAdd(5*n); refresh();
-  const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Дурсгал нээгдэж байна...</div></div>'; document.body.appendChild(o);
+  const tier=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0, best=Math.max(...res.map(tier)); let o=document.getElementById('boxov'); if(o) o.remove(); o=document.createElement('div'); o.id='boxov'; sfx('box'); o.innerHTML='<div class="bxs"><div class="bxbox bx'+best+'">'+BOXSVG+'</div><div class="bxt">Сахиус нээгдэж байна...</div></div>'; document.body.appendChild(o);
   setTimeout(()=>{ if(!o.parentNode) return; o.innerHTML='<div class="bxrs'+(best===3?' leg':'')+'"><div class="bxray"></div><div class="bxg'+(res.length>1?' many':'')+'">'+res.map((r,i)=>'<div class="bxc t'+tier(r)+'" style="animation-delay:'+(i*0.12)+'s"><div class="bxa">'+(r.s>=5?'<i class="bxray2"></i>':'')+ico(r.ic,res.length>1?46:80)+'</div><b style="color:'+SKT[tier(r)].col+'">'+stars(r.s)+'</b><div class="sm">'+r.n+'</div><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div>').join('')+'</div><button class="btn" onclick="document.getElementById(\'boxov\').remove();fillM()">Болсон</button></div>'; },1500); }
-function rboxHTML(){ let h='<h2>Дурсгалын хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div></div><div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<RBOXC?'disabled':'')+' onclick="relBoxOpen(1)">1 удаа · '+RBOXC+' Алт</button><button class="btn" '+(S.res.alt<Math.round(RBOXC*4.5)?'disabled':'')+' onclick="relBoxOpen(5)">5 удаа · '+(Math.round(RBOXC*4.5))+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div><div class="card sm">★ 40% · ★★ 30% · ★★★ 20% · ★★★★ 8% · ★★★★★ 2%<br>Нэг дурсгал олон удаа унавал өөр өөр баатарт өмсүүлж болно.</div>';
+function rboxHTML(){ let h='<h2>Сахиусны хайрцаг</h2><div class="card row"><div>'+ico('ui_gem',28)+' <b>'+S.res.alt+' Алт</b></div></div><div class="card" style="text-align:center"><div class="bxbox bxs0">'+BOXSVG+'</div><div class="row" style="margin-top:8px"><button class="btn" '+(S.res.alt<RBOXC?'disabled':'')+' onclick="relBoxOpen(1)">1 удаа · '+RBOXC+' Алт</button><button class="btn" '+(S.res.alt<Math.round(RBOXC*4.5)?'disabled':'')+' onclick="relBoxOpen(5)">5 удаа · '+(Math.round(RBOXC*4.5))+' Алт</button></div><div class="row" style="margin-top:6px"><button class="btn red" onclick="openM(\'shop\')">Алт авах (₮)</button></div></div><div class="card sm">★ 40% · ★★ 30% · ★★★ 20% · ★★★★ 8% · ★★★★★ 2%<br>Нэг сахиус олон удаа унавал өөр өөр баатарт өмсүүлж болно.</div>';
   return h+relicsHTML(); }
 // ================= БААТАР: жагсаалт + баатрын дэлгэц (од, хэлтэрхий) =================
 const DUPSH=3, STC=[3,4,6,8,10,14], stcOf=(id,s)=>id==='jamukha'?50:STC[s], SKB=[0,7,18,32,51,72,98], STMAX=6;
@@ -2634,7 +2634,7 @@ function heroListHTML(){
   let h='<h2>Баатар</h2><div class="card"><div class="row"><div><b>Цуглуулга '+own+'/'+HEROES.length+'</b><div class="sm">Хамгийн хүчтэй '+heroSlots()+' баатар тулалдаанд оролцоно</div></div><button class="btn" onclick="openM(\'summon\')">🎴 Дуудах</button></div></div>';
   h+='<div class="hl-chs">'+[0,5,4,3,2,1].map(r=>'<button class="hl-ch'+(HLF===r?' on':'')+'" onclick="HLF='+r+';fillM()">'+(r?RAR[r].n:'Бүгд')+'</button>').join('')+'</div>';
   h+='<div class="hl-grid">'+list.map(hCard).join('')+'</div>';
-  h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Дурсгал</button></div>';
+  h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Сахиус</button></div>';
   return h; }
 function summonHTML(){
   return '<h2>Баатар дуудах</h2><button class="btn" onclick="openM(\'baatar\')">‹ Баатар</button><div class="card" style="margin-top:8px"><h3>Баатар дуудах</h3>'+
@@ -2652,7 +2652,7 @@ function hdStatsHTML(id){
   if(sel&&sel.t==='r'&&!L[sel.k]) HDS.sel=null;
   let h='';
   if(HDS.pick){ const av=RELICS.filter(r=>(S.relics[r.id]||0)-relWorn(r.id)>0).sort((a,b)=>b.s-a.s);
-    h+='<div class="hd-sel"><b>Дурсгал сонгох</b>'+(av.length?av.map(r=>'<div class="row" style="margin-top:6px"><div>'+ico(r.ic,36)+' <b>'+r.n+'</b> <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div><button class="btn" onclick="relEq(\''+id+'\',\''+r.id+'\')">Өмсөх</button></div>').join(''):'<div class="sm" style="margin-top:6px">Чөлөөт дурсгал алга. Дурсгалын хайрцгаас аваарай.</div>')+'<button class="btn" onclick="heroInfo(\''+id+'\')">Буцах</button></div>'; return h; }
+    h+='<div class="hd-sel"><b>Сахиус сонгох</b>'+(av.length?av.map(r=>'<div class="row" style="margin-top:6px"><div>'+ico(r.ic,36)+' <b>'+r.n+'</b> <span class="stars">'+stars(r.s)+'</span><div class="sm">'+(r.st==='atk'?'Цохилт':'Бие')+' +'+r.v+'%</div></div><button class="btn" onclick="relEq(\''+id+'\',\''+r.id+'\')">Өмсөх</button></div>').join(''):'<div class="sm" style="margin-top:6px">Чөлөөт сахиус алга. Сахиусны хайрцгаас аваарай.</div>')+'<button class="btn" onclick="heroInfo(\''+id+'\')">Буцах</button></div>'; return h; }
   if(HDS.sel&&HDS.sel.t==='w'){ const w=WPN.find(x=>x.k===HDS.sel.k), lv=hwl(id,w.k), g=(lv+1)*200, st=(lv+1)*2;
     h+='<div class="hd-sel"><div class="row"><div><b>'+w.e+' '+w.n+'</b> · Lv '+lv+'/'+WMAX+'<div class="sm">'+(w.st==='a'?'Цохилт':'Бие')+' +'+(w.v*lv)+'%</div></div>'+(lv>=WMAX?'<div class="sm">Дээд</div>':'<button class="btn" onclick="hwUp(\''+id+'\',\''+w.k+'\')">⬆ '+g+'🪙 '+st+'🔮</button>')+'</div></div>'; }
   else if(HDS.sel&&HDS.sel.t==='r'){ const rq=HDS.sel.k, r=RELICS.find(x=>x.id===L[rq]);
@@ -2661,7 +2661,7 @@ function hdStatsHTML(id){
   h+=stnBuyHTML(); h+='<div class="hd-kv"><span>Төрөл</span><b>'+CLSI[hcls(id)]+' '+TNAME[hcls(id)]+' · '+TROW[htype(id)]+'</b></div>';
   h+='<div class="hd-kv"><span>Хүч</span><b>'+f(heroPowerEff(id))+'</b></div>';
   h+='<div class="hd-kv"><span>Цохилтын бонус</span><b>+'+Math.round((rm.a-1-gm.a)*100)+'%</b></div><div class="hd-kv"><span>Биеийн бонус</span><b>+'+Math.round((rm.h-1-gm.h)*100)+'%</b></div>';
-  h+='<div class="sm" style="margin-top:6px;text-align:center">Зүүн талд зэвсэг, баруун талд дурсгал. Нүд дээр дарж сайжруулна.</div>';
+  h+='<div class="sm" style="margin-top:6px;text-align:center">Зүүн талд зэвсэг, баруун талд сахиус. Нүд дээр дарж сайжруулна.</div>';
   return h; }
 function hdSkillHTML(id,ow){
   const d=HSK[id]; if(!d) return '<div class="sm">Ур чадвар байхгүй</div>'; const s=ow?starOf(id):0, si=SKI[d[0]];
@@ -3021,7 +3021,7 @@ function btDraw(t){
 const E_isCamp=e=>!!e.cb;
 function btFinish(win){
   BT.done=true; BT.win=win; sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); const e=BT.e; let h=''; let lossTxt=''; (BT.tr||[]).forEach(T=>{ const n=Math.floor(S.res[T.k]||0), keep=Math.floor(n*(1-btLossRate(win)*((e.pc&&e.pc[T.ty]!=null)?e.pc[T.ty]:1))); if(n>keep){ const _w=woundAdd(T,n-keep); lossTxt+=T.n+' -'+(n-keep)+(_w?' (шархтан '+_w+')':'')+'  '; } S.res[T.k]=keep; });
-  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+  if(win){ qh('win',1); passAdd(10); const rp=!!e.rep, G=Math.round((rp?Math.round(e.g*0.2):e.g)*evBonus().g), M=rp?Math.round(e.m*0.2):e.m; S.res.gold+=G; S.res.meat+=M; if(BT.i===S.won&&!E_isCamp(e)) S.won++; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=1); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Ялалт!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+(rp?'<div class="sm">Өмнө нь ялсан тул шагнал 20%</div>':'')+lootAnimals(Math.min(3,1+Math.floor((e.bi||0)/2)),rp)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>Ялагдлаа</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   $('bres').innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="btEnd()">Үргэлжлүүлэх</button>'; $('bres').style.display='block'; refresh();
@@ -3085,7 +3085,7 @@ function wmProcess(){
   { const D=wmGen(); st.tr=st.tr||{}; st.m.forEach(m=>{ const e=wmEnt(m.tid); if(!e) return; const el=(now-m.t0)/1000; let p; if(m.ty==='gather'&&el>m.d+20) p=1-Math.min(1,(el-m.d-20)/m.d); else p=Math.min(1,el/m.d); const mx=D.C.x+(e.x-D.C.x)*p, my=D.C.y+(e.y-D.C.y)*p; D.chests.forEach(ch=>{ if(!st.tr[ch.id]&&Math.hypot(ch.x-mx,ch.y-my)<260){ st.tr[ch.id]=1; say('💎 Нуугдсан эрдэнэс олдлоо! Газрын зургаас хар.'); } }); }); }
   st.m=st.m.filter(m=>{ const e=wmEnt(m.tid)||m.tg; if(!e) return false; const el=(now-m.t0)/1000;
     if(m.ty==='visit'){ if(el>=m.d){ S.wm.yam=S.wm.yam||{}; if(!S.wm.yam[e.id]){ S.wm.yam[e.id]=1; const gg=150+Math.round(Math.min(2000,totalPower()*0.05)); S.res.gold+=gg; addXP(10); say('🐎 Ям цэг нээгдлээ! Ойролцоох зам -12% · +'+gg+' 🪙'); refresh(); } return false; } return true; }
-    if(m.ty==='gather'&&e.t==='chest'){ if(el>=2*m.d+10){ const g=Math.round(250*e.v*(1+Math.min(2,totalPower()/1500))), al=1+Math.floor(Math.random()*2*e.v); S.res.gold+=g; S.res.alt+=al; let rt2=''; if(Math.random()<0.35){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; rt2=' + '+r.n; } (st.tk=st.tk||{})[e.id]=1; say('💎 Эрдэнэс: +'+g+' 🪙, +'+al+' Алт'+rt2); addXP(20); refresh(); return false; } return true; }
+    if(m.ty==='gather'&&e.t==='chest'){ if(el>=2*m.d+10){ const g=Math.round(250*e.v*(1+Math.min(2,totalPower()/1500))), al=1+Math.floor(Math.random()*2*e.v); S.res.gold+=g; S.res.alt+=al; let rt2=''; if(Math.random()<0.35){ const pool=RELICS.filter(r=>r.s<=1); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; rt2=' + '+r.n; } (st.tk=st.tk||{})[e.id]=1; say('💎 Эрдэнэс: +'+g+' 🪙, +'+al+' Алт'+rt2); addXP(20); refresh(); return false; } return true; }
     if(m.ty==='gather'){ if(el>=2*m.d+20){ const rt=WM_RT[e.rt], pw=totalPower(), g=Math.round(rt.g*e.lv*(1+Math.min(2,pw/1500))*wmTerrMul(e)); S.res[rt.k]=Math.min(rt.k==='gold'?1e12:cap(),(S.res[rt.k]||0)+g); st.st[m.tid]=now+240000; say(rt.n+': +'+g+' '+(rt.k==='gold'?'🪙':{wood:'мод',meat:'мах',grain:'тариа'}[rt.k])); addXP(8); refresh(); return false; } return true; }
     if(el>=m.d){ if(BT||RT) return true; wmBattle(e,m.tc,m); return false; } return true; });
   wmRefreshBar(); }
@@ -3126,7 +3126,7 @@ function wmSheet(){
   if(e.t==='city'){ h='<h3>🏠 Таны тосгон</h3><div class="sm">Цуваа: '+wmSt().m.length+'/'+wmMax()+' · Хүч '+f(pw)+'</div><button class="btn" onclick="wmShut()">Тосгон руу буцах</button>'; }
   else { const d=wmTrip(e), cd=wmCd(e.id), busy=wmSt().m.some(m=>m.tid===e.id);
     if(e.t==='node'){ const rt=WM_RT[e.rt]; h='<h3>'+ico(rt.ic,26)+' '+rt.n+' · Lv '+e.lv+'</h3><div class="sm">Цуглуулах: ~'+Math.round(rt.g*e.lv*(1+Math.min(2,pw/1500)))+' · Зам '+wmFmt(d)+' (очих) + 0:20 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Цуглуулах')+'</button>'; }
-    else if(e.t==='chest'){ h='<h3>💎 Нуугдсан эрдэнэс</h3><div class="sm">Алт, Алт болор, заримдаа дурсгал. Зам '+wmFmt(d)+' (очих) + 0:10 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">Цуваа илгээх</button>'; }
+    else if(e.t==='chest'){ h='<h3>💎 Нуугдсан эрдэнэс</h3><div class="sm">Алт, Алт болор, заримдаа сахиус. Зам '+wmFmt(d)+' (очих) + 0:10 + '+wmFmt(d)+' (буцах)</div><button class="btn" '+(busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">Цуваа илгээх</button>'; }
     else if(e.t==='yam'){ h=wmYamSheet(e,d); }
     else if(e.t==='clan'){ const ok=pw>=e.p; h='<h3><span style="color:'+e.c+'">⚔</span> '+e.n+(e.real?'':' (NPC)')+'</h3><div class="sm">'+CLN[e.cl].n+' клан · Дайсан: <b>'+wmTyTxt(e)+'</b></div><div class="sm">Хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><div class="sm">Ялбал: клан оноо +'+wmCwPts(e,null)+(e.real?' (бодит тоглогч ×1.5)':'')+'</div>'+(e.real?'<div class="sm">'+wmShieldTxt(e)+(wmLootPct(e)?' · Ялбал нөөцийн '+wmLootPct(e)+'%-ийг дээрэмдэнэ':'')+'</div>':'')+'<button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'🛡 Сэргэж байна '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
     else if(e.t==='camp'){ const ok=pw>=e.p; h='<h3>'+ico('bd_h0',30)+' Дээрэмчдийн бааз · Lv '+e.lv+'</h3><div class="sm">Дайсны хүч <b>'+f(e.p)+'</b> · Таны хүч <b style="color:'+(ok?'#8fe07a':'#ff8a7a')+'">'+f(pw)+'</b> · Зам '+wmFmt(d)+'</div><button class="btn red" '+(cd||busy?'disabled':'')+' onclick="wmSend(\''+e.id+'\')">'+(cd?'⏳ '+wmFmt(cd):busy?'Цуваа явж байна':'Дайрах')+'</button>'; }
@@ -4289,7 +4289,7 @@ function gmainCard(){ const L=S.bld.ger||1, g=S.upg&&S.upg.ger, spn=(typeof TSET
   return '<div class="bcard"><div class="in"><div class="nm">Гол гэр</div><div class="pic" onclick="openM(\'bld:ger\')"><img class="bi" src="'+spd[0]+'"></div>'+foot+'</div><i class="blv">'+L+'</i><img class="fr" src="'+SPRDATA.bf2[0]+'"></div>'; }
 
 
-// ===== 57: баатрын «Хүч» дурсгал/зэвсэг/гэгээнтнийг тооцно; 🔮 Ид шидийн чулууг Алтаар авна =====
+// ===== 57: баатрын «Хүч» сахиус/зэвсэг/гэгээнтнийг тооцно; 🔮 Ид шидийн чулууг Алтаар авна =====
 function heroPowerEff(id){ try{ const rm=relicMul(id); return Math.floor(heroPower(id)/(1+hxP(id))*((rm.a+rm.h)/2)); }catch(e){ return heroPower(id); } }
 const STNPK=[{n:10,a:5},{n:50,a:20}];
 function stnBuy(n,a){ if((S.res.alt||0)<a){ say('Алт хүрэхгүй байна'); sfx('err'); return; }
@@ -5652,7 +5652,7 @@ function wmTacSheet(id){ const e=wmEnt(id), sh=$('wmsheet'); if(!e||!sh) return;
 (function(){ const _s=wmSend; wmSend=function(id,tc){ const e=wmEnt(id); if(e&&(e.t==='kingdom'||e.t==='camp'||e.t==='clan')&&tc==null){ wmSelSheet(id); return; } window.WM_TC=tc||0; window.WM_SEL=wmSelEff(); try{ _s(id); }finally{ window.WM_TC=0; } }; })();
 (function(){ const _o=wmOpen; wmOpen=function(){ if(WMD&&(WMD.wk!==wmWeek()||WMD.cl!==wmClanId())) WMD=null; _o(); try{ cwFetch(); if(S.clan==null&&!S.clanAsk){ S.clanAsk=1; setTimeout(cwOpen,500); } }catch(e){} }; })();
 function wmCwPts(e,tm){ const ratio=e.p/Math.max(150,totalPower()); let b=ratio<0.8?10:ratio<1.1?15:25; if(e.real) b=Math.round(b*1.5); return b+(tm&&tm.ok?2:0); }
-function wmRelicGrant(){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; return r.n; }
+function wmRelicGrant(){ const pool=RELICS.filter(r=>r.s<=1); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; return r.n; }
 const wmRI=e=>(e.ri!=null?e.ri:e.i);
 function wmBattle(e,tc,mm){
   const k=e.t==='kingdom', cn=e.t==='clan', st=wmSt(), kid=e.id, tm=wmTacMul(e,tc), p0=k?wmPw(e):e.p, p=Math.max(30,Math.round(p0*tm.p)), first=k&&!(st.st['w'+kid]); let dn=0;
@@ -6262,7 +6262,7 @@ function rtsStep(dt){
 function rtsFinish(win,timeout){ const R=RT; if(R.done) return; R.done=true; R.win=win; R.endT=0; R.timeout=!!timeout; try{ sfx(win?'win':'lose'); vib(win?[60,40,60]:[120]); }catch(e){} }
 function rtsResult(){ const R=RT, E=R.E, win=R.win; let lossTxt='', h='';
   R.G.filter(g=>!g.side&&g.kind==='troop').forEach(g=>{ const mx=g.us.reduce((a,u)=>a+u.max,0), hp=g.us.reduce((a,u)=>a+Math.max(0,u.hp),0), fr=mx?hp/mx:0, lf=win?Math.max(0.03,(1-fr)*0.6):Math.max(0.1,1-fr), n=Math.floor(S.res[g.T.k]||0), l=Math.min(n,Math.floor(g.n*lf)); const _w=l>0?woundAdd(g.T,l):0; S.res[g.T.k]=n-l; if(l>0) lossTxt+=g.T.n+' -'+l+(_w?' (шархтан '+_w+')':'')+'  '; });
-  if(win){ qh('win',1); passAdd(10); const G=Math.round(E.g*evBonus().g), M=E.m; S.res.gold+=G; S.res.meat+=M; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=3&&Math.random()<(r.s===3?0.5:1)); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
+  if(win){ qh('win',1); passAdd(10); const G=Math.round(E.g*evBonus().g), M=E.m; S.res.gold+=G; S.res.meat+=M; let extra=''; if(Math.random()<0.45){ const pool=RELICS.filter(r=>r.s<=1); const r=pool[Math.floor(Math.random()*pool.length)]||RELICS[RELICS.length-1]; S.relics[r.id]=(S.relics[r.id]||0)+1; extra='<div class="brl">'+ico('vf_star',22)+' '+ico(r.ic,48)+'<br>'+r.n+' олдлоо!</div>'; }
     h='<div>'+ico('fx16',72)+'</div><h2>Штаб устгагдлаа!</h2><div>+'+G+' 🪙 · +'+M+' мах</div>'+lootAnimals(Math.min(3,1+Math.floor((E.bi||0)/2)),false)+extra; }
   else { const loss=Math.floor(S.res.meat*0.2); S.res.meat-=loss; h='<div>'+ico('fx17',72)+'</div><h2>'+(R.timeout?'Цаг дууслаа':'Ялагдлаа')+'</h2><div>'+loss+' мах алдлаа. Баатраа хүчжүүлээд дахин оролд.</div>'; }
   const el=$('rres'); if(el){ el.innerHTML=h+(lossTxt?'<div class="sm" style="margin-top:6px">Цэрэг алдсан: '+lossTxt+'</div>':'')+'<button class="btn" onclick="rtsEnd()">Үргэлжлүүлэх</button>'; el.style.display='block'; } refresh(); }
@@ -10831,7 +10831,7 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
 })();
 
 
-/* p32/rbreel.js — 209: Дурсгалын хайрцаг баатар дуудах шиг: хайрцаг нээгдэнэ → дурсгал гүйдэг тууз → онилсон дурсгал → картууд */
+/* p32/rbreel.js — 209: Сахиусны хайрцаг баатар дуудах шиг: хайрцаг нээгдэнэ → сахиус гүйдэг тууз → онилсон сахиус → картууд */
 (function(){
   const tierOf=r=>r.s>=5?3:r.s===4?2:r.s===3?1:0;
   function rbRun(o,winR,done){
@@ -10839,12 +10839,12 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
     for(let i=0;i<N;i++){ const r=i===WI?winR:relPick(); cells+='<div class="rlc" style="border-color:'+SKT[tierOf(r)].col+'">'+ico(r.ic,38)+'</div>'; }
     let fin=false, tm=0, tk=0, t1=0;
     const end=()=>{ if(fin) return; fin=true; clearTimeout(tm); clearTimeout(t1); clearInterval(tk); if(!o.parentNode) return; try{ done(); }catch(e){} };
-    o.innerHTML='<div class="bxs rlw"><div class="bxbox" id="rlch"><img src="'+SPRDATA.chest0[0]+'" style="width:150px"></div><div class="bxt">Дурсгал нээгдэж байна...</div><button class="btn" id="rlk0" style="margin-top:8px">Алгасах</button></div>';
+    o.innerHTML='<div class="bxs rlw"><div class="bxbox" id="rlch"><img src="'+SPRDATA.chest0[0]+'" style="width:150px"></div><div class="bxt">Сахиус нээгдэж байна...</div><button class="btn" id="rlk0" style="margin-top:8px">Алгасах</button></div>';
     document.getElementById('rlk0').onclick=end;
     t1=setTimeout(()=>{ const c=document.getElementById('rlch'); if(c) c.firstChild.src=SPRDATA.chest1[0]; },500);
     tm=setTimeout(()=>{ if(fin||!o.parentNode) return; const c=document.getElementById('rlch'); if(c) c.firstChild.src=SPRDATA.chest2[0];
       setTimeout(()=>{ if(fin||!o.parentNode) return;
-        o.innerHTML='<div class="bxs rlw"><div class="bxt">Дурсгал нээгдэж байна...</div><div class="rlf" style="border-image-source:url('+SPRDATA.rl_fr[0]+')"><div class="rlv"><div class="rlt" id="rlt">'+cells+'</div><div class="rlm"></div><div class="rll"></div></div></div><img src="'+SPRDATA.rl_mk[0]+'" class="rlk"><br><button class="btn" id="rlk">Алгасах</button></div>';
+        o.innerHTML='<div class="bxs rlw"><div class="bxt">Сахиус нээгдэж байна...</div><div class="rlf" style="border-image-source:url('+SPRDATA.rl_fr[0]+')"><div class="rlv"><div class="rlt" id="rlt">'+cells+'</div><div class="rlm"></div><div class="rll"></div></div></div><img src="'+SPRDATA.rl_mk[0]+'" class="rlk"><br><button class="btn" id="rlk">Алгасах</button></div>';
         const rt=document.getElementById('rlt'), box=o.querySelector('.rlv'), cw=54;
         const tx=-(WI*cw+cw/2-box.clientWidth/2+(Math.random()-0.5)*cw*0.6);
         rt.style.transform='translateX(0)'; void rt.offsetWidth; rt.style.transition='transform 4.6s cubic-bezier(.08,.6,.12,1)'; rt.style.transform='translateX('+tx+'px)';
@@ -10863,16 +10863,16 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
 })();
 
 
-/* p32/relsrc.js — 210: 4★/5★ дурсгал зөвхөн хайрцгаас. Бүлэг нэгдэх, өдрийн саванд 2–3★ дурсгал */
+/* p32/relsrc.js — 210: 4★/5★ сахиус зөвхөн хайрцгаас. Бүлэг нэгдэх, өдрийн саванд 2–3★ сахиус */
 (function(){
   const give=x=>{ if(!x) return null; S.relics[x.id]=(S.relics[x.id]||0)+1; return x; };
   const pick=st=>{ const p=RELICS.filter(x=>x.s===st); return p[Math.floor(Math.random()*p.length)]; };
-  window.campRelic=function(ci){ if(ci>=13&&![13,17,21,25].includes(ci)) return null; return give(pick(ci<6?2:3)); };
-  window.dayRelic=function(){ return give(pick(Math.random()<0.7?2:3)); };
+  window.campRelic=function(ci){ if(ci>=13&&![13,17,21,25].includes(ci)) return null; return give(pick(1)); };
+  window.dayRelic=function(){ return give(pick(1)); };
 })();
 
 
-/* p32/relreset.js — 211: дурсгалын нэг удаагийн шинэчлэл. Админаас бусад бүх тоглогчийн дурсгал 0 болно (нөхөн олговоргүй).
+/* p32/relreset.js — 211: сахиусны нэг удаагийн шинэчлэл. Админаас бусад бүх тоглогчийн сахиус 0 болно (нөхөн олговоргүй).
    Эхлээд Firebase нэвтрэлт дуустал хүлээнэ (isAdm зөв гарахын тулд). S.rlReset1 тугаар нэг л удаа ажиллана. */
 (function(){
   setInterval(()=>{ try{
@@ -10881,7 +10881,7 @@ window.duStart=duStart; window.duStartBot=duStartBot; window.duCancel=duCancel; 
     if(isAdm()||em==='ankhbayarbatzorig13@gmail.com'||em==='ankhbayarbatzorig@gmail.com'){ S.rlReset1=1; return; }
     let n=0; Object.keys(S.relics||{}).forEach(k=>{ n+=S.relics[k]||0; });
     S.relics={}; S.heq={}; S.equip=[]; S.rlReset1=1;
-    if(n>0){ try{ mailAdd('Дурсгал шинэчлэгдлээ','Дурсгалын шинэ дүрмийн дагуу бүх дурсгал 0 болсон ('+n+' ширхэг). 4★ ба 5★ дурсгал одоо зөвхөн хайрцгаас олдоно. Тулаанд ялах, аймаг нэгдэх, өдрийн даалгавраар 1–3★ дурсгал авна.'); }catch(e){} }
+    if(n>0){ try{ mailAdd('Сахиус шинэчлэгдлээ','Сахиусны шинэ дүрмийн дагуу бүх сахиус 0 болсон ('+n+' ширхэг). 4★ ба 5★ сахиус одоо зөвхөн хайрцгаас олдоно. Тулаанд ялах, аймаг нэгдэх, өдрийн даалгавраар 1★ сахиус авна.'); }catch(e){} }
     try{ refresh(); }catch(e){}
     try{ clPushL(true); }catch(e){}
   }catch(e){} },3000);
@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e166164514';
+var UPDB='a8166eb562';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -12952,7 +12952,7 @@ bcard=function(k){
 
 
 /* p32/nutag.js — №3: Шинэ нутаг (дахин эхлэх). Гол гэр 25 түвшинд хүрч, бүх бүлгийг дуусгасан тоглогч шинэ нутагт нүүнэ.
-   Устах: барилга, мал, нөөц, тариалан. Үлдэх: баатрууд, дурсгал, судалгаа, аймгийн аян, Алт, тамга, найз, түвшин. Нэмэгдэх: орлого +5% (Шинэ нутаг бүрт, дээд 20), эхлэх зоос. */
+   Устах: барилга, мал, нөөц, тариалан. Үлдэх: баатрууд, сахиус, судалгаа, аймгийн аян, Алт, тамга, найз, түвшин. Нэмэгдэх: орлого +5% (Шинэ нутаг бүрт, дээд 20), эхлэх зоос. */
 (function(){
   const NMAX=20, BON=0.05, NEED_GER=25;
   const nn=()=>Math.max(0,Math.min(NMAX,(S&&S.nn)||0));
@@ -12983,7 +12983,7 @@ bcard=function(k){
     try{
       if(!eligible()){ say('Нөхцөл биелээгүй байна'); return; }
       closeM && closeM();
-      dxAsk('🌅 <b>Шинэ нутаг '+((S.nn||0)+1)+'</b><br>Бүх барилга, мал, нөөц, тариалан <b>устаж</b>, шинээр эхэлнэ.<br>Үлдэх: баатар, дурсгал, судалгаа, аймгийн аян, Алт, тамга.<br>Шагнал: орлого +5% (байнга), эхлэх зоос.','Үргэлжлүүлэх',()=>{
+      dxAsk('🌅 <b>Шинэ нутаг '+((S.nn||0)+1)+'</b><br>Бүх барилга, мал, нөөц, тариалан <b>устаж</b>, шинээр эхэлнэ.<br>Үлдэх: баатар, сахиус, судалгаа, аймгийн аян, Алт, тамга.<br>Шагнал: орлого +5% (байнга), эхлэх зоос.','Үргэлжлүүлэх',()=>{
         setTimeout(()=>dxAsk('⚠ Сүүлчийн асуулт. Үнэхээр шинэ нутагт нүүх үү? Буцаах боломжгүй.','Тийм, нүүе',()=>nnDo(),'Үгүй'),200);
       },'Болих');
     }catch(e){ console.log('nnAsk',e); }
@@ -12993,7 +12993,7 @@ bcard=function(k){
   function card(){
     const g=S.bld.ger||1, ch=(S.chap||0), ok=eligible(), n=(S.nn||0);
     let h='<div class="card" style="border:1px solid #9b6bd6"><h3>🌅 Шинэ нутаг'+(n?' · '+n+'-р':'')+'</h3>'+
-      '<div class="sm">Бүгдийг дуусгасан хаан шинэ нутагт нүүж, эхнээс нь эхэлнэ. Баатар, дурсгал, судалгаа, аймгийн аян, Алт үлдэнэ. Шинэ нутаг бүрт орлого <b>+5%</b> (одоо +'+Math.round(BON*nn()*100)+'%).</div>'+
+      '<div class="sm">Бүгдийг дуусгасан хаан шинэ нутагт нүүж, эхнээс нь эхэлнэ. Баатар, сахиус, судалгаа, аймгийн аян, Алт үлдэнэ. Шинэ нутаг бүрт орлого <b>+5%</b> (одоо +'+Math.round(BON*nn()*100)+'%).</div>'+
       '<div class="sm" style="margin-top:6px">'+(g>=NEED_GER?'✅':'⬜')+' Гол гэр '+g+'/'+NEED_GER+' · '+(ch>=CHAP.length?'✅':'⬜')+' Бүлэг '+Math.min(ch,CHAP.length)+'/'+CHAP.length+'</div>'+
       '<button class="btn" style="margin-top:8px" '+(ok?'':'disabled')+' onclick="nnAsk()">🌅 Шинэ нутагт нүүх</button></div>';
     return h;
@@ -13066,7 +13066,7 @@ SPRDATA['em30']=['data:image/webp;base64,UklGRiI3AABXRUJQVlA4WAoAAAAQAAAAvwAAvwA
 
 /* p32/camp30.js — Түүхэн аян 30 бүлэг хүртэл (1-р багц: 14-17). 1-13-р бүлэгт 5-р тулаан (босс) нэмэгдсэн.
    Бүлгийн алхмын тоо: CAMP[ci].ns (1-13: 5, 14-20: 7, 21-25: 10, 26-30: 12; сүүлийнх нь босс).
-   Дайсны хүч (stepP) patch31.py-д. Шагнал: дурсгал 14/18/22/26-р бүлэгт, баатар сонгох 16/20/25-д. */
+   Дайсны хүч (stepP) patch31.py-д. Шагнал: сахиус 14/18/22/26-р бүлэгт, баатар сонгох 16/20/25-д. */
 (function(){
   const KEYS=k=>!!SPRDATA[k];
   const pick=(a,b,c)=>KEYS(a)?a:KEYS(b)?b:c;
@@ -13300,7 +13300,7 @@ heroListHTML=function(){
   h+='<div class="hl-chs">'+[['','Бүх төрөл'],['archer','🏹 Харваач'],['cav','🐎 Морьт'],['heavy','🛡 Хуягт'],['foot','🗡 Явган']].map(([k,n])=>'<button class="hl-ch'+(HTF===k?' on':'')+'" onclick="HTF=\''+k+'\';fillM()">'+n+'</button>').join('')+'</div>';
   h+='<div class="hl-chs hl-so"><span style="color:#c9b58a;font:bold 12px sans-serif;align-self:center">Эрэмбэ:</span>'+[['star','Од'],['pow','Хүч'],['lvl','Түвшин']].map(([k,n])=>'<button class="hl-ch'+(HSO===k?' on':'')+'" onclick="HSO=\''+k+'\';fillM()">'+n+'</button>').join('')+'</div>';
   h+=list.length?'<div class="hl-grid">'+list.map(hCard).join('')+'</div>':'<div class="card"><div class="sm">Энэ төрөлд баатар алга.</div></div>';
-  h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Дурсгал</button></div>';
+  h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="openM(\'relics\')">🏺 Сахиус</button></div>';
   return h; };
 
 
@@ -15953,7 +15953,7 @@ window.sdDbg={build,step,startRound,endRound,aiOrders,cleanOrd,cleanPack,myPack,
   rewT=function(r){ const it=[]; if(r.alt) it.push('<span style="white-space:nowrap">'+ico('ui_gem',16)+' <b>'+r.alt+'</b></span>');
     if(r.res){ for(const k in r.res){ const ic=(k==='gold')?'<span style="font-size:15px">🪙</span>':iconHTML(k,18); it.push('<span style="white-space:nowrap">'+ic+' <b>'+fm(r.res[k])+'</b></span>'); } }
     let h='<div style="display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px 8px">'+it.join('')+'</div>';
-    if(r.relic) h+='<small>+ '+'★'.repeat(r.relic)+' дурсгал</small>';
+    if(r.relic) h+='<small>+ '+'★'+' сахиус</small>';
     return h; };
   const _giv=givR;
   givR=function(r){ if(r.res){ for(const k in r.res){ S.res[k]=(S.res[k]||0)+r.res[k]; } } return _giv.apply(this,arguments); };
@@ -19032,7 +19032,7 @@ body.sh2fs #modal .box>.x{position:fixed!important;left:10px!important;right:aut
     try{ const H=ctHolder(); if(!H||!TIMG.complete||!TIMG.naturalWidth) return; const i=H.k, q=CLN[i]; if(!q) return;
       const my=wmClanId(), ok=WMT.ok&&wmS('wm_hq0'), s=ok?wmS('wm_hq'+i):null, isMy=i===my, ww=s?(isMy?0.85:0.78)*s.iw:0, hh=s?ww*s.ih/s.iw:0, qx=isMy&&s?q.x-170:q.x, qy=isMy&&s?q.y-110:q.y;
       if(!vis(qx,qy,320)) return;
-      /* дурсгал: кланы төвийн баруун талд зогсоно */
+      /* сахиус: кланы төвийн баруун талд зогсоно */
       const th=210, tw=th*TIMG.naturalWidth/TIMG.naturalHeight, mx=qx+(s?ww*0.74:160), my2=qy+(s?hh*0.06:30);
       items.push({y:1e5+my2,f:()=>{ c.save(); const pu=0.5+0.5*Math.sin(t*2.2);
         c.globalAlpha=0.16+0.1*pu; c.fillStyle='#ffd770'; c.beginPath(); c.ellipse(mx,my2-th*0.55,tw*0.5,th*0.5,0,0,7); c.fill(); c.globalAlpha=1;
@@ -21146,7 +21146,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   window.taGoGrid=function(){ const e=document.getElementById('t2pk'); if(e) e.scrollIntoView({behavior:'smooth',block:'center'}); };
   window.taTog=function(id){ X.tInit(); const T=S.ta.team, i=T.indexOf(id); if(i>=0){ if(T.length<=1){ say('Дор хаяж 1 баатар'); return; } T.splice(i,1); S.ta.ed=1; } else { if(T.length>=3){ say('Хамгийн ихдээ 3 баатар. Нэгийг нь хас'); return; } T.push(id); }
     try{ save(); }catch(e){} clearTimeout(TS.pt); TS.pt=setTimeout(pushMe,1200); rr(); };
-  /* Баатрын цэс (дурсгал, од, түвшин, чадвар): арена дотроос гарахгүйгээр нээнэ; хаахад арена дэлгэц гүйлгэлтээ хадгалан шинэчлэгдэнэ */
+  /* Баатрын цэс (сахиус, од, түвшин, чадвар): арена дотроос гарахгүйгээр нээнэ; хаахад арена дэлгэц гүйлгэлтээ хадгалан шинэчлэгдэнэ */
   window.taHero=function(id){ try{ if(typeof heroInfo!=='function') return; heroInfo(id); const o=document.getElementById('hd'); if(o) o.style.zIndex=9200; }catch(e){} };
   { const _hi=window.heroInfo||heroInfo; if(!window.__taHcw){ window.__taHcw=1; const _hc=hdClose; hdClose=function(){ const s=document.getElementById('tascr'), t=s?s.scrollTop:0, g=document.getElementById('t2g'), gt=g?g.scrollTop:0, r=_hc.apply(this,arguments); try{ const n=document.getElementById('tascr'); if(n&&t) n.scrollTop=t; const g2=document.getElementById('t2g'); if(g2&&gt) g2.scrollTop=gt; }catch(e){} return r; }; } }
   window.taRef=function(){ TS.t=0; TS.opp=[]; rr(); };
@@ -22233,7 +22233,7 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
 
   /* ---- шагнал ---- */
   const AN={honi:'хонь',yamaa:'ямаа',uher:'үхэр',aduu:'адуу',temee:'тэмээ'};
-  function rwTxt(r){ let t=[r.alt+' Алт']; if(r.grain) t.push(r.grain+' тариа'); if(r.wood) t.push(r.wood+' мод'); if(r.meat) t.push(r.meat+' мах'); if(r.mal) Object.keys(r.mal).forEach(k=>t.push(r.mal[k]+' '+(AN[k]||k))); if(r.relic) t.push('дурсгал'); return t.join(', '); }
+  function rwTxt(r){ let t=[r.alt+' Алт']; if(r.grain) t.push(r.grain+' тариа'); if(r.wood) t.push(r.wood+' мод'); if(r.meat) t.push(r.meat+' мах'); if(r.mal) Object.keys(r.mal).forEach(k=>t.push(r.mal[k]+' '+(AN[k]||k))); if(r.relic) t.push('сахиус'); return t.join(', '); }
   function giveAnimals(k,n){ let got=0, ov=0;
     try{ for(let i=0;i<n;i++){ if((S.animals[k]||0)>=penCap(k)){ ov++; S.res.meat=(S.res.meat||0)+Math.round(ANIMALS[k].cost/4+6); } else { S.animals[k]=(S.animals[k]||0)+1; got++; } } try{ syncEnts(false); }catch(e){} }catch(e){}
     return {got:got,ov:ov}; }
@@ -22355,8 +22355,8 @@ const ox=W-52*U-6, oy=112*U, Ls=40*U, r0=10*U, lw=4*U, ro=r0+5*lw; c.fillStyle='
     else b=ST.rows.map((x,i)=>'<div class="row'+(CL&&x.u===CL.uid?' me':'')+'"><span style="width:24px;color:'+(i<3?'#ffd770':'#c9a46a')+'">'+(i+1)+'.</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.n)+'</span><span>'+x.cn+' улс</span><span style="width:60px;text-align:right;color:#e0b070;font-size:11px">'+PRIZE[i]+' Алт</span></div>').join('');
     let h='<h3>Сарын Топ 10 · '+mname(mi())+'</h3><div class="qd" style="text-align:center">Энэ сард ялсан улсын тоогоор.</div>'+(window.DLB?DLB.note():'')+b;
     h+='<div class="qc" style="text-align:center">Таны энэ сард ялсан улс: <b>'+m.c+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'<div class="qd">Таны тоо тоглоом дээр шууд нэмэгдэнэ. Жагсаалтад тусах нь өдөрт нэг шинэчлэгдэнэ.</div></div>';
-    h+='<div class="qd" style="text-align:center">Шагнал сар дуусахад: 1-р 300, 2-р 200, 3-р 150 Алт (+дурсгал), 4-10-р 50 Алт.</div>';
-    if(ST.prev){ h+='<div class="qc" style="text-align:center;border-color:#ffd770"><b>Өнгөрсөн сар '+ST.prev.rank+'-р байр</b><div class="qs">'+PRIZE[ST.prev.rank-1]+' Алт'+(ST.prev.rank<=3?' + дурсгал':'')+'</div><button class="qb" onclick="wmTopClaim()">Шагнал авах</button></div>'; }
+    h+='<div class="qd" style="text-align:center">Шагнал сар дуусахад: 1-р 300, 2-р 200, 3-р 150 Алт (+сахиус), 4-10-р 50 Алт.</div>';
+    if(ST.prev){ h+='<div class="qc" style="text-align:center;border-color:#ffd770"><b>Өнгөрсөн сар '+ST.prev.rank+'-р байр</b><div class="qs">'+PRIZE[ST.prev.rank-1]+' Алт'+(ST.prev.rank<=3?' + сахиус':'')+'</div><button class="qb" onclick="wmTopClaim()">Шагнал авах</button></div>'; }
     return h;
   }
   window.wmTopClaim=function(){
@@ -23286,8 +23286,8 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
 })();
 
 
-/* p32/arrel.js — Арена: дурсгал жаахан нөлөөлдөг болно (зөвхөн «Багийн арена»). Бусад тулаанд (кампани, дээрэмчид…) хуучнаараа бүрэн хүчээр.
-   Цохилтын дурсгал ×1/3 (Хөх сүлд +36% → +12%), HP-ийн дурсгал ×0.47 (Хар сүлд +34% → +16%). HP-ийн дурсгал нэмэгдсэн HP-ийн ¼-ээр хамгаалалт нэмнэ (+16% → +4).
+/* p32/arrel.js — Арена: сахиус жаахан нөлөөлдөг болно (зөвхөн «Багийн арена»). Бусад тулаанд (кампани, дээрэмчид…) хуучнаараа бүрэн хүчээр.
+   Цохилтын сахиус ×1/3 (Хөх сүлд +36% → +12%), HP-ийн сахиус ×0.47 (Хар сүлд +34% → +16%). HP-ийн сахиус нэмэгдсэн HP-ийн ¼-ээр хамгаалалт нэмнэ (+16% → +4).
    Зөвхөн миний талын баатарт. Нэмэлт өгөөж: arMod-ийг ороож хамгаалалтыг тооцно. */
 (function(){
   const KA=1/3, KH=0.47, KD=0.25;
@@ -23496,8 +23496,8 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
 })();
 
 
-/* p32/relart.js — дурсгалын шинэ AI зургууд (rts/rl_*.webp, хүрээ + од зурган дотроо), 20 шинэ дурсгал нэмж,
-   Алтан ташуур / Дайны бүрээ / Гахиилд-ийг хасч, эзэмшигчдийг ижил од, ижил төрлийн дурсгал руу шилжүүлнэ. */
+/* p32/relart.js — сахиусны шинэ AI зургууд (rts/rl_*.webp, хүрээ + од зурган дотроо), 20 шинэ сахиус нэмж,
+   Алтан ташуур / Дайны бүрээ / Гахиилд-ийг хасч, эзэмшигчдийг ижил од, ижил төрлийн сахиус руу шилжүүлнэ. */
 (function(){
   var D={"seal": [192, 185], "banner1": [189, 192], "banner2": [185, 192], "goldsword": [186, 192], "drum": [186, 192], "hadag": [187, 192], "feather": [192, 183], "bow": [192, 189], "saddle": [192, 191], "helm": [191, 192], "jade": [192, 190], "armor": [192, 174], "shield": [192, 179], "spear": [192, 177], "quiver": [192, 176], "horse": [192, 186], "eagle": [192, 187], "flag": [192, 188], "map": [192, 187], "cauldron": [192, 191], "pouch": [192, 190], "bedroll": [192, 187], "pot": [192, 192], "dagger": [192, 188], "binoc": [192, 185], "map2": [192, 184], "bandage": [192, 192], "flask": [192, 192], "fur": [192, 192], "horseshoe": [192, 189], "coinbag": [192, 189]};
   try{ Object.keys(D).forEach(function(k){ var key='r_'+k, v=['rts/rl_'+k+'.webp?v=1',D[k][0],D[k][1]];
@@ -23516,7 +23516,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   { var _m=relMig; relMig=function(){ mig(); return _m.apply(this,arguments); }; }
   try{ var _rh=relicsHTML; relicsHTML=function(){ mig(); return _rh.apply(this,arguments); }; }catch(e){}
 })();
-/* өмссөн дурсгалын нүд: зургийн өөрийн хүрээ байгаа тул нүдний давхар хүрээг авна */
+/* өмссөн сахиусны нүд: зургийн өөрийн хүрээ байгаа тул нүдний давхар хүрээг авна */
 (function(){ var st=document.createElement('style'); st.textContent=
   ".hd-s.on[onclick^=\"hdSel('r'\"]{background:none;border:0!important;border-radius:0;box-shadow:none!important;width:58px;height:58px}"+
   ".hd-s.on[onclick^=\"hdSel('r'\"] img{max-width:58px;max-height:58px;filter:drop-shadow(0 2px 3px #000a)}"+

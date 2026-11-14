@@ -3421,7 +3421,7 @@ function gerCard(){ const nx=gerNext(), have=1+GK.filter(k=>S.bld[k]>0||S.sites[
 
 // ================= Нэгдсэн Цэс =================
 const MENU=[
- {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"],['','Картын тулаан',"cardOpen()"]]},
+ {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"],['','Картын тулаан',"cardOpen()"],['','Шатар',"chessOpen()"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
  {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fdcc87cf0c';
+var UPDB='21c027d0db';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23622,6 +23622,235 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
         if(car&&car.m){ var pts=path(D,car.m.id), f=1; if(car.state==='in') f=Math.max(0,Math.min(1,(car.x+50)/((car.tx||1)+50))); else if(car.state==='out') f=Math.max(0,1-(car.x-(car.tx||0))/(((window.WW||2000)+60)-(car.tx||0)));
           var q=pts.length>1?pos(pts,f):D.C; items.push({y:q.y+998,f:function(){ drawCar(c,D,z,t); }}); } }catch(e){ window.__silkErr=String(e&&e.stack||e); }
       return r; }; }catch(e){ console.error(e); }
+})();
+
+
+/* p32/chess.js — Шатар (Цэс → Шатар). Энгийн стандарт шатар, Монгол нэртэй хэсгүүд.
+   Эсрэг тоглогч: бот (Хөнгөн / Дунд / Хүнд). Харагдац: 2.5D бага налуу тавцан.
+   Хадгалалт: S.chs = {w,d,l,day:{date,e,m,h}}.  Зураг: ART=true болгоход rts/ch_<w|b><K|Q|R|B|N|P>.webp хэрэглэнэ. */
+(function(){
+  /* ===================== ЭНДЖИН ===================== */
+  /* хэсэг: 1 Хүү(P) 2 Морь(N) 3 Тэмээ(B) 4 Тэрэг(R) 5 Бэрс(Q) 6 Ноён(K); эерэг = цагаан, сөрөг = хар. Нүд = r*8+c, r=0 дээд (8-р эгнээ). */
+  const VAL=[0,100,320,330,500,900,0];
+  const KN=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+  const KG=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  const DI=[[-1,-1],[-1,1],[1,-1],[1,1]], OR=[[-1,0],[1,0],[0,-1],[0,1]];
+  const START=[-4,-2,-3,-5,-6,-3,-2,-4, -1,-1,-1,-1,-1,-1,-1,-1, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1, 4,2,3,5,6,3,2,4];
+  function newState(){ return {b:Int8Array.from(START),turn:1,castle:15,ep:-1,hm:0}; }
+  function attacked(b,sq,by){ /* by: 1 цагаан / -1 хар хэсгүүд sq-г дайрч байна уу */
+    const r=sq>>3,c=sq&7;
+    const pr=r+(by===1?1:-1); /* цагаан хүү дээш явж дайрна: хүү нь sq-ээс доош нэг эгнээнд */
+    if(pr>=0&&pr<8){ for(const dc of [-1,1]){ const cc=c+dc; if(cc>=0&&cc<8&&b[pr*8+cc]===by) return true; } }
+    for(const [dr,dc] of KN){ const rr=r+dr,cc=c+dc; if(rr>=0&&rr<8&&cc>=0&&cc<8&&b[rr*8+cc]===2*by) return true; }
+    for(const [dr,dc] of KG){ const rr=r+dr,cc=c+dc; if(rr>=0&&rr<8&&cc>=0&&cc<8&&b[rr*8+cc]===6*by) return true; }
+    for(const [dr,dc] of DI){ let rr=r+dr,cc=c+dc; while(rr>=0&&rr<8&&cc>=0&&cc<8){ const v=b[rr*8+cc]; if(v){ if(v===3*by||v===5*by) return true; break; } rr+=dr; cc+=dc; } }
+    for(const [dr,dc] of OR){ let rr=r+dr,cc=c+dc; while(rr>=0&&rr<8&&cc>=0&&cc<8){ const v=b[rr*8+cc]; if(v){ if(v===4*by||v===5*by) return true; break; } rr+=dr; cc+=dc; } }
+    return false;
+  }
+  function kingSq(b,side){ for(let i=0;i<64;i++) if(b[i]===6*side) return i; return -1; }
+  function inCheck(s,side){ const k=kingSq(s.b,side); return k>=0&&attacked(s.b,k,-side); }
+  function pseudo(s){
+    const b=s.b,side=s.turn,out=[];
+    const add=(f,t,fl,p)=>out.push({f:f,t:t,fl:fl||0,p:p||0});
+    for(let f=0;f<64;f++){ const v=b[f]; if(!v||(v>0?1:-1)!==side) continue; const a=Math.abs(v),r=f>>3,c=f&7;
+      if(a===1){ const dr=-side, r1=r+dr, start=side===1?6:1, last=side===1?0:7;
+        if(r1>=0&&r1<8){ const t=r1*8+c;
+          if(!b[t]){ if(r1===last){ for(const p of [5,4,3,2]) add(f,t,0,p); } else { add(f,t); if(r===start&&!b[(r+2*dr)*8+c]) add(f,(r+2*dr)*8+c,2); } }
+          for(const dc of [-1,1]){ const cc=c+dc; if(cc<0||cc>7) continue; const t2=r1*8+cc; const tv=b[t2];
+            if(tv&&(tv>0?1:-1)!==side){ if(r1===last){ for(const p of [5,4,3,2]) add(f,t2,1,p); } else add(f,t2,1); }
+            else if(!tv&&t2===s.ep) add(f,t2,3); } } }
+      else if(a===2||a===6){ const D=a===2?KN:KG; for(const [dr,dc] of D){ const rr=r+dr,cc=c+dc; if(rr<0||rr>7||cc<0||cc>7) continue; const t=rr*8+cc,tv=b[t]; if(!tv||(tv>0?1:-1)!==side) add(f,t,tv?1:0); }
+        if(a===6){ const row=side===1?7:0, ks=side===1?1:4, qs=side===1?2:8;
+          if(f===row*8+4&&!attacked(b,f,-side)){
+            if((s.castle&ks)&&!b[row*8+5]&&!b[row*8+6]&&b[row*8+7]===4*side&&!attacked(b,row*8+5,-side)&&!attacked(b,row*8+6,-side)) add(f,row*8+6,4);
+            if((s.castle&qs)&&!b[row*8+3]&&!b[row*8+2]&&!b[row*8+1]&&b[row*8]===4*side&&!attacked(b,row*8+3,-side)&&!attacked(b,row*8+2,-side)) add(f,row*8+2,5); } } }
+      else { const D=a===3?DI:a===4?OR:DI.concat(OR); for(const [dr,dc] of D){ let rr=r+dr,cc=c+dc; while(rr>=0&&rr<8&&cc>=0&&cc<8){ const t=rr*8+cc,tv=b[t]; if(!tv) add(f,t); else { if((tv>0?1:-1)!==side) add(f,t,1); break; } rr+=dr; cc+=dc; } } }
+    }
+    return out;
+  }
+  function make(s,m){
+    const b=Int8Array.from(s.b),side=s.turn,v=b[m.f],a=Math.abs(v); let castle=s.castle,ep=-1,hm=s.hm+1;
+    if(a===1||b[m.t]) hm=0;
+    b[m.t]=m.p?m.p*side:v; b[m.f]=0;
+    if(m.fl===3) b[(m.f>>3)*8+(m.t&7)]=0;
+    if(m.fl===4){ const row=m.f>>3; b[row*8+5]=b[row*8+7]; b[row*8+7]=0; }
+    if(m.fl===5){ const row=m.f>>3; b[row*8+3]=b[row*8]; b[row*8]=0; }
+    if(m.fl===2) ep=((m.f>>3)+(m.t>>3))/2*8+(m.f&7);
+    if(a===6) castle&=side===1?~3:~12;
+    if(m.f===56||m.t===56) castle&=~2; if(m.f===63||m.t===63) castle&=~1;
+    if(m.f===0||m.t===0) castle&=~8; if(m.f===7||m.t===7) castle&=~4;
+    return {b:b,turn:-side,castle:castle,ep:ep,hm:hm};
+  }
+  function legal(s){ const out=[]; for(const m of pseudo(s)){ const n=make(s,m); if(!inCheck(n,s.turn)) out.push(m); } return out; }
+  function perft(s,d){ if(d===0) return 1; let n=0; for(const m of legal(s)) n+=perft(make(s,m),d-1); return n; }
+  function fromFEN(fen){
+    const p=fen.split(' '), b=new Int8Array(64); let i=0; const map={p:1,n:2,b:3,r:4,q:5,k:6};
+    for(const ch of p[0]){ if(ch==='/') continue; if(ch>='1'&&ch<='8'){ i+=+ch; continue; } const lo=ch.toLowerCase(); b[i++]=map[lo]*(ch===lo?-1:1); }
+    let castle=0; for(const ch of p[2]||'-'){ if(ch==='K')castle|=1; if(ch==='Q')castle|=2; if(ch==='k')castle|=4; if(ch==='q')castle|=8; }
+    let ep=-1; if(p[3]&&p[3]!=='-') ep=(8-(+p[3][1]))*8+(p[3].charCodeAt(0)-97);
+    return {b:b,turn:p[1]==='b'?-1:1,castle:castle,ep:ep,hm:+(p[4]||0)};
+  }
+  function status(s){ const L=legal(s); if(L.length) return inCheck(s,s.turn)?'check':'play'; return inCheck(s,s.turn)?'mate':'stale'; }
+  function insufficient(b){ let mi=0; for(let i=0;i<64;i++){ const a=Math.abs(b[i]); if(a===1||a===4||a===5) return false; if(a===2||a===3) mi++; } return mi<=1; }
+  /* үнэлгээ: материал + байрлал (төв рүү, хүү урагш) */
+  function evalS(s){
+    const b=s.b; let sc=0;
+    for(let i=0;i<64;i++){ const v=b[i]; if(!v) continue; const a=Math.abs(v),side=v>0?1:-1,r=i>>3,c=i&7;
+      let x=VAL[a]; const cr=3.5-Math.abs(c-3.5), rr=3.5-Math.abs(r-3.5);
+      if(a===2) x+=(cr+rr)*9; else if(a===3) x+=(cr+rr)*5; else if(a===1){ const adv=side===1?6-r:r-1; x+=adv*6+cr*2+(adv>=5?30:0); } else if(a===5) x+=(cr+rr)*1.5; else if(a===6){ const home=side===1?r===7:r===0; x+=home?10:-8; }
+      sc+=side*x; }
+    return sc*s.turn;
+  }
+  const ord=(s,m)=>{ let k=0; const t=s.b[m.t]; if(t) k+=10*Math.abs(t)-Math.abs(s.b[m.f])/10+20; if(m.p) k+=15; if(m.fl>=4) k+=2; return k; };
+  let nodes=0,deadline=0,abort=false;
+  function qs(s,al,be,d){
+    const st=evalS(s); if(st>=be) return be; if(st>al) al=st; if(d<=0) return al;
+    const ms=pseudo(s).filter(m=>s.b[m.t]||m.fl===3||m.p).sort((x,y)=>ord(s,y)-ord(s,x));
+    for(const m of ms){ const n=make(s,m); if(inCheck(n,s.turn)) continue; const sc=-qs(n,-be,-al,d-1); if(sc>=be) return be; if(sc>al) al=sc; }
+    return al;
+  }
+  function nega(s,d,al,be,ply,useQ){
+    if(++nodes%400===0&&Date.now()>deadline){ abort=true; return 0; }
+    if(d<=0) return useQ?qs(s,al,be,3):evalS(s);
+    const ms=legal(s); if(!ms.length) return inCheck(s,s.turn)?-100000+ply:0;
+    if(s.hm>=100) return 0;
+    ms.sort((x,y)=>ord(s,y)-ord(s,x));
+    let best=-1e9;
+    for(const m of ms){ const sc=-nega(make(s,m),d-1,-be,-al,ply+1,useQ); if(abort) return 0; if(sc>best) best=sc; if(sc>al) al=sc; if(al>=be) break; }
+    return best;
+  }
+  /* түвшин: e = хөнгөн, m = дунд, h = хүнд */
+  function bestMove(s,lv){
+    const ms=legal(s); if(!ms.length) return null;
+    if(ms.length===1) return ms[0];
+    const cfg={e:{d:1,ms:300,rnd:0.3,q:false},m:{d:3,ms:700,rnd:0,q:true},h:{d:6,ms:1500,rnd:0,q:true}}[lv]||{d:2,ms:900,rnd:0,q:true};
+    if(cfg.rnd&&Math.random()<cfg.rnd){ const caps=ms.filter(m=>s.b[m.t]); const pool=Math.random()<0.5&&caps.length?caps:ms; return pool[Math.floor(Math.random()*pool.length)]; }
+    deadline=Date.now()+cfg.ms; abort=false; nodes=0;
+    for(let i=ms.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=ms[i]; ms[i]=ms[j]; ms[j]=t; }
+    ms.sort((x,y)=>ord(s,y)-ord(s,x));
+    let best=ms[0], bestSc=-1e9;
+    for(let d=1;d<=cfg.d;d++){
+      let cur=null,curSc=-1e9,al=-1e9; const sorted=ms.slice();
+      for(const m of sorted){ const sc=-nega(make(s,m),d-1,-1e9,-al,1,cfg.q); if(abort) break; if(sc>curSc){ curSc=sc; cur=m; } if(sc>al) al=sc; }
+      if(abort&&d>1) break; if(cur){ best=cur; bestSc=curSc; const i=ms.indexOf(cur); if(i>0){ ms.splice(i,1); ms.unshift(cur); } }
+      if(abort||bestSc>90000) break;
+    }
+    return best;
+  }
+  window.CHESS_ENG={newState,legal,make,perft,fromFEN,status,inCheck,bestMove,insufficient};
+  if(typeof document==='undefined'||typeof S==='undefined') return;
+
+  /* ===================== ДЭЛГЭЦ ===================== */
+  const ART=false;
+  const NM={1:'Хүү',2:'Морь',3:'Тэмээ',4:'Тэрэг',5:'Бэрс',6:'Ноён'};
+  const GL={1:'♟︎',2:'♞',3:'♝',4:'♜',5:'♛',6:'♚'}, LTR={1:'P',2:'N',3:'B',4:'R',5:'Q',6:'K'};
+  const LV={e:{n:'Хөнгөн',g:300},m:{n:'Дунд',g:800},h:{n:'Хүнд',g:2000}};
+  const TILT=34;
+  let G=null, el=null, lv='m', pc=1, busy=false, sel=-1, msg='';
+  const st=()=>{ if(!S.chs) S.chs={w:0,d:0,l:0,day:{}}; return S.chs; };
+  const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); };
+  const css='#chv{position:fixed;inset:0;z-index:99980;background:radial-gradient(#3a2a18,#120c07);color:#f3e3bd;display:flex;flex-direction:column;align-items:center;overflow:auto;font-family:Georgia,serif;-webkit-user-select:none;user-select:none}'+
+    '#chv *{box-sizing:border-box}#chv .chh{width:100%;max-width:560px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px}'+
+    '#chv h2{margin:0;font-size:20px;color:#ffd770;letter-spacing:1px}'+
+    '#chv .chb{border:2px solid #c9972b;background:linear-gradient(#7a1d12,#3d0d08);color:#ffe9b0;border-radius:10px;padding:8px 14px;font:bold 14px Georgia,serif;cursor:pointer}'+
+    '#chv .chb.g{background:linear-gradient(#e8b53a,#a8741a);color:#2a1600}#chv .chb.on{box-shadow:0 0 0 3px #ffd770 inset}'+
+    '#chv .chc{width:min(94vw,520px);background:#251a10;border:2px solid #c9972b;border-radius:12px;padding:12px;margin:8px 0}'+
+    '#chv .chr{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}#chv .sm{font-size:13px;color:#d9bd80;line-height:1.45}'+
+    '#chv .chs{--bs:min(92vw,62vh,500px);height:calc(var(--bs)*0.9);display:flex;align-items:center;justify-content:center;perspective:'+'900px'+';margin:6px 0}'+
+    '#chv .chbd{width:var(--bs);height:var(--bs);display:grid;grid-template-columns:repeat(8,1fr);border:6px solid #c9972b;box-shadow:0 10px 24px #000c;transform-style:preserve-3d;transform:rotateX('+TILT+'deg);position:relative}'+
+    '#chv .chq{position:relative;transform-style:preserve-3d}#chv .chq.l{background:#d9a43a}#chv .chq.d{background:#8e1d14}'+
+    '#chv .chq.lm{box-shadow:inset 0 0 0 100px #ffe45a55}#chv .chq.ck{box-shadow:inset 0 0 0 100px #ff2a1a99}#chv .chq.sl{box-shadow:inset 0 0 0 3px #fff6a0,inset 0 0 0 100px #ffe45a66}'+
+    '#chv .chq .dt{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:50%;background:#2a6a1e;opacity:.8;pointer-events:none}'+
+    '#chv .chq .dt.cp{left:6%;top:6%;width:88%;height:88%;background:none;border:3px solid #2a6a1e;border-radius:50%}'+
+    '#chv .chp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/8*0.78);line-height:1;transform-origin:50% 100%;transform:rotateX(-'+TILT+'deg) scale(1.25);pointer-events:none}'+
+    '#chv .chp img{width:100%;height:100%;object-fit:contain;pointer-events:none}'+
+    '#chv .chp.w{color:#fff1c8;-webkit-text-stroke:1.3px #6a4a10;text-shadow:0 2px 2px #0008}#chv .chp.k{color:#2b1a12;-webkit-text-stroke:1.3px #ffd24a;text-shadow:0 2px 2px #0008}'+
+    '#chv .chsh{position:absolute;left:18%;right:18%;bottom:6%;height:16%;border-radius:50%;background:#0007;filter:blur(2px);pointer-events:none}'+
+    '#chv .cht{min-height:26px;font:bold 15px Georgia,serif;color:#ffe29a;text-align:center;padding:4px 10px}'+
+    '#chv .chcp{min-height:24px;font-size:20px;letter-spacing:1px;color:#e9cf93}#chv .chcp.k{color:#2b1a12;-webkit-text-stroke:.6px #ffd24a}';
+  const sti=document.createElement('style'); sti.id='csschs'; sti.textContent=css; document.head.appendChild(sti);
+
+  const piece=(v,side)=>{ const a=Math.abs(v); const g=ART?'<img src="rts/ch_'+(v>0?'w':'b')+LTR[a]+'.webp" onerror="this.replaceWith(document.createTextNode(\''+GL[a]+'\'))">':GL[a];
+    return '<span class="chsh"></span><span class="chp '+(v>0?'w':'k')+'">'+g+'</span>'; };
+  const capHTML=side=>{ /* side: тухайн тал авсан хэсгүүд */ const a=G.cap[side>0?'w':'b']; return a.map(v=>GL[v]).join(''); };
+
+  function render(){
+    if(!el) return;
+    const sti_=st();
+    if(!G){
+      el.innerHTML='<div class="chh"><h2>Шатар</h2><button class="chb" onclick="chessClose()">Гарах</button></div>'+
+        '<div class="chc"><div class="sm">Энгийн шатар. Хэсгүүд: Ноён, Бэрс, Тэрэг, Тэмээ, Морь, Хүү. Хүү эцсийн эгнээнд хүрвэл Бэрс болно.</div>'+
+        '<div class="chr">'+Object.keys(LV).map(k=>'<button class="chb'+(lv===k?' on':'')+'" onclick="chessLv(\''+k+'\')">'+LV[k].n+'</button>').join('')+'</div>'+
+        '<div class="chr"><button class="chb'+(pc===1?' on':'')+'" onclick="chessCol(1)">Цагаан</button><button class="chb'+(pc===-1?' on':'')+'" onclick="chessCol(-1)">Хар</button></div>'+
+        '<div class="chr"><button class="chb g" onclick="chessStart()">Эхлэх</button></div></div>'+
+        '<div class="chc"><div class="sm">Ялалт <b>'+sti_.w+'</b> · Тэнцэл <b>'+sti_.d+'</b> · Ялагдал <b>'+sti_.l+'</b><br>Шагнал (түвшин бүрт өдөрт нэг удаа): Хөнгөн '+LV.e.g+', Дунд '+LV.m.g+', Хүнд '+LV.h.g+' Зоос.</div></div>';
+      return; }
+    const b=G.s.b, flip=pc===-1; let h='<div class="chh"><h2>Шатар · '+LV[lv].n+'</h2><button class="chb" onclick="chessMenu()">Цэс</button></div>';
+    h+='<div class="chcp'+(pc===1?' k':'')+'">'+capHTML(-pc)+'</div><div class="chs"><div class="chbd" id="chbd">';
+    const legalSet={}; if(sel>=0) G.legal.filter(m=>m.f===sel).forEach(m=>{ legalSet[m.t]=(b[m.t]||m.fl===3)?2:1; });
+    const kS=G.chk>=0?G.chk:-1;
+    for(let i=0;i<64;i++){ const idx=flip?63-i:i, r=idx>>3, c=idx&7, v=b[idx];
+      let cl='chq '+((r+c)%2?'d':'l'); if(G.last&&(G.last.f===idx||G.last.t===idx)) cl+=' lm'; if(idx===sel) cl+=' sl'; if(idx===kS) cl+=' ck';
+      h+='<div class="'+cl+'" data-q="'+idx+'">'+(v?piece(v):'')+(legalSet[idx]?'<span class="dt'+(legalSet[idx]===2?' cp':'')+'"></span>':'')+'</div>'; }
+    h+='</div></div><div class="chcp'+(pc===1?'':' k')+'">'+capHTML(pc)+'</div><div class="cht" id="chsmsg">'+msg+'</div>';
+    h+='<div class="chr" style="justify-content:center;margin-bottom:14px">'+(G.over?'<button class="chb g" onclick="chessStart()">Дахин тоглох</button>':'<button class="chb" onclick="chessResign()">Бууж өгөх</button>')+'<button class="chb" onclick="chessMenu()">Цэс</button></div>';
+    el.innerHTML=h;
+  }
+  function setMsg(t){ msg=t; const e=document.getElementById('chsmsg'); if(e) e.textContent=t; }
+  function newGame(){
+    const s=CHESS_ENG.newState();
+    G={s:s,legal:CHESS_ENG.legal(s),last:null,chk:-1,over:false,cap:{w:[],b:[]},rep:{},mv:0}; G.rep[key(s)]=1; sel=-1; busy=false;
+    setMsg(pc===1?'Таны нүүдэл':'Бот бодож байна…'); render();
+    if(pc===-1) botMove();
+  }
+  const key=s=>Array.prototype.join.call(s.b,',')+'|'+s.turn+'|'+s.castle+'|'+s.ep;
+  function applyMove(m){
+    const s=G.s, v=s.b[m.f], tv=s.b[m.t]; const side=s.turn;
+    if(tv) G.cap[side===1?'w':'b'].push(Math.abs(tv)); else if(m.fl===3) G.cap[side===1?'w':'b'].push(1);
+    G.s=CHESS_ENG.make(s,m); G.legal=CHESS_ENG.legal(G.s); G.last={f:m.f,t:m.t}; G.mv++; sel=-1;
+    const k=key(G.s); G.rep[k]=(G.rep[k]||0)+1;
+    const stt=CHESS_ENG.status(G.s); G.chk=(stt==='check'||stt==='mate')?kingIdx(G.s,G.s.turn):-1;
+    let end=null;
+    if(stt==='mate') end=(side===pc)?'win':'loss';
+    else if(stt==='stale'||CHESS_ENG.insufficient(G.s.b)||G.s.hm>=100||G.rep[k]>=3) end='draw';
+    if(end){ finish(end,stt); return; }
+    setMsg(G.s.turn===pc?(stt==='check'?'Шах! Таны нүүдэл':'Таны нүүдэл'):(stt==='check'?'Шах! Бот бодож байна…':'Бот бодож байна…'));
+  }
+  const kingIdx=(s,side)=>{ for(let i=0;i<64;i++) if(s.b[i]===6*side) return i; return -1; };
+  function finish(res,stt){
+    G.over=true; const c=st(); let t='';
+    if(res==='win'){ c.w++; const d=c.day||(c.day={}); if(d.date!==today()){ c.day={date:today()}; } const dd=c.day; if(!dd[lv]){ dd[lv]=1; const g=LV[lv].g; S.res.gold=(S.res.gold||0)+g; t='Мат! Та хожлоо. +'+g+' Зоос'; try{ say('Шатар: хожлоо! +'+g+' Зоос'); }catch(e){} } else t='Мат! Та хожлоо. (Өнөөдрийн шагнал авсан)'; }
+    else if(res==='loss'){ c.l++; t=stt==='mate'?'Мат! Та ялагдлаа':'Та ялагдлаа'; }
+    else { c.d++; t='Тэнцлээ'; }
+    try{ save(); updateHUD(); }catch(e){}
+    msg=t; render();
+  }
+  function botMove(){
+    if(!G||G.over) return; busy=true;
+    setTimeout(()=>{ if(!G||G.over){ busy=false; return; } const m=CHESS_ENG.bestMove(G.s,lv); busy=false; if(m){ applyMove(m); render(); } },60);
+  }
+  function onClick(e){
+    let q=e.target.closest('[data-q]'); if(!q&&e.clientX!=null){ q=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.dataset&&n.dataset.q!==undefined)||null; } if(!q||!G||G.over||busy||G.s.turn!==pc) return;
+    const idx=+q.dataset.q, b=G.s.b, v=b[idx];
+    if(sel>=0){ const ms=G.legal.filter(m=>m.f===sel&&m.t===idx);
+      if(ms.length){ const m=ms.find(x=>x.p===5)||ms[0]; applyMove(m); render(); if(!G.over) botMove(); return; } }
+    if(v&&(v>0?1:-1)===pc){ sel=(sel===idx)?-1:idx; if(sel>=0) setMsg(NM[Math.abs(v)]); else setMsg('Таны нүүдэл'); render(); }
+    else if(sel>=0){ sel=-1; setMsg('Таны нүүдэл'); render(); }
+  }
+  function open(){
+    try{ closeM(); }catch(e){}
+    let e=document.getElementById('chv'); if(e) e.remove();
+    el=document.createElement('div'); el.id='chv'; document.body.appendChild(el); el.addEventListener('click',onClick);
+    G=null; msg=''; render();
+  }
+  window.chessOpen=open;
+  window.chessClose=function(){ G=null; if(el){ el.remove(); el=null; } };
+  window.chessLv=function(k){ lv=k; render(); };
+  window.chessCol=function(c){ pc=c; render(); };
+  window.chessStart=function(){ newGame(); };
+  window.chessMenu=function(){ G=null; render(); };
+  window.chessResign=function(){ if(!G||G.over) return; finish('loss','resign'); };
+  window.CHESS={state:()=>G,pc:()=>pc,lv:()=>lv,click:i=>{ onClick({target:{closest:()=>({dataset:{q:i}})}}); }};
 })();
 
 

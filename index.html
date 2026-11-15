@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='a977902a59';
+var UPDB='f32aaff584';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23181,6 +23181,69 @@ window.STIC='data:image/webp;base64,UklGRtZMAABXRUJQVlA4WAoAAAAQAAAADwIAKwAAQUxQ
     return ''; };
   const _bp=btPick; btPick=function(id){ try{ if(BT&&BT.wait&&!BT.vs&&BT.sel&&BT.sel.indexOf(id)<0&&id!==BT.req){ const w=fmWhy(BT.sel.filter(x=>!SUPP[x]),id); if(w){ say(w); try{ sfx('err'); }catch(e){} return; } } }catch(e){} return _bp.apply(this,arguments); };
   squad=function(){ const out=[]; Object.keys(S.heroes).filter(id=>!(typeof SUPP!=='undefined'&&SUPP[id])).sort((a,b)=>heroPower(b)-heroPower(a)).forEach(id=>{ if(out.length<heroSlots()&&!fmWhy(out,id)) out.push(id); }); return out; };
+})();
+
+
+/* ===== Cut-in: баатар 4-р (хамгийн хүчтэй) скилээ хэрэглэхэд том зураг гулсан орж ирнэ =====
+   Манайх зүүнээс, дайсных баруунаас (толин тусгал). Тулаан зөвхөн cut-in үеэр түр зогсоно.
+   Хугацаа: ×1 = 1.5с, ×2 = 1с, ×3 = 0.8с. Зураг: cutin.bin (24 баатар, WebP alpha). */
+(function(){
+  const CI={}; let loading=0;
+  function ld(n){ try{ fetch('cutin.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+      Object.keys(hd).forEach(k=>{ const a=hd[k], im=new Image(); im.onload=()=>{ CI[k]=im; }; im.src=URL.createObjectURL(new Blob([new Uint8Array(buf,base+a[0],a[1])],{type:'image/webp'})); });
+    }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
+  function boot(){ if(loading) return; loading=1; ld(0); }
+  setTimeout(boot,4500);
+
+  const st=document.createElement('style');
+  st.textContent='#cutin{position:fixed;left:0;top:0;right:0;bottom:0;z-index:9990;pointer-events:none;overflow:hidden;display:none}'
+   +'#cutin .cb{position:absolute;left:0;right:0;top:25%;height:50%;transform-origin:50% 50%;background:linear-gradient(90deg,rgba(40,24,6,.0),rgba(48,28,6,.88) 18%,rgba(48,28,6,.88) 82%,rgba(40,24,6,0));box-shadow:0 0 0 0 transparent}'
+   +'#cutin .cb:before,#cutin .cb:after{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#f3cf7a 20%,#fff3c4 50%,#f3cf7a 80%,transparent)}'
+   +'#cutin .cb:before{top:0}#cutin .cb:after{bottom:0}'
+   +'#cutin.e .cb{background:linear-gradient(90deg,rgba(40,6,6,0),rgba(70,10,10,.9) 18%,rgba(70,10,10,.9) 82%,rgba(40,6,6,0))}'
+   +'#cutin.e .cb:before,#cutin.e .cb:after{background:linear-gradient(90deg,transparent,#e86a5a 20%,#ffd2c8 50%,#e86a5a 80%,transparent)}'
+   +'#cutin img{position:absolute;bottom:16%;height:80%;width:auto;aspect-ratio:1/1;left:calc(env(safe-area-inset-left,0px) + 2%);filter:drop-shadow(0 0 14px rgba(255,200,90,.55));-webkit-mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%),linear-gradient(to top,transparent 0,#000 16%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent 0,#000 7%,#000 93%,transparent 100%),linear-gradient(to top,transparent 0,#000 16%);mask-composite:intersect}'
+   +'#cutin.e img{left:auto;right:calc(env(safe-area-inset-right,0px) + 2%);transform:scaleX(-1)}'
+   +'#cutin .tx{position:absolute;top:50%;margin-top:-6%;left:calc(env(safe-area-inset-left,0px) + 2% + 81vh);right:5%;text-align:left;color:#fff3d0;text-shadow:0 2px 0 #3a1f06,0 0 12px rgba(255,190,70,.7);font-family:Georgia,"Times New Roman",serif;line-height:1.1}'
+   +'#cutin.e .tx{left:5%;right:calc(env(safe-area-inset-right,0px) + 2% + 81vh);text-align:right;text-shadow:0 2px 0 #3a0808,0 0 12px rgba(255,90,70,.7)}'
+   +'#cutin .tx b{display:block;font-size:min(7.2vh,40px);font-weight:700;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+   +'#cutin .tx i{display:block;font-style:normal;font-size:min(4vh,22px);opacity:.85;margin-top:.3em}';
+  document.head.appendChild(st);
+  let box=null;
+  function mk(){ if(box) return box; box=document.createElement('div'); box.id='cutin'; box.innerHTML='<div class="cb"></div><img alt=""><div class="tx"><b></b><i></i></div>'; document.body.appendChild(box); return box; }
+
+  const Q=[]; let busy=0, had, hadSet=0;
+  function durOf(sp){ return sp>=3?0.8:(sp>=2?1.0:1.5); }
+  function run(){
+    if(busy) return; const it=Q.shift(); if(!it){ if(hadSet){ hadSet=0; try{ if(typeof BT!=='undefined'&&BT&&BT.sp===0) BT.sp=had||1; }catch(e){} } return; }
+    busy=1; const b=mk(), im=b.querySelector('img'), cb=b.querySelector('.cb'), tx=b.querySelector('.tx');
+    im.src=it.src; b.className=it.e?'e':''; tx.querySelector('b').textContent=it.sk||''; tx.querySelector('i').textContent=it.nm||'';
+    b.style.display='block'; const D=it.d*1000, flip=it.e?-1:1, from=(it.e?1:-1)*38;
+    const ease='cubic-bezier(.2,.8,.25,1)';
+    try{
+      cb.animate([{transform:'scaleY(.05)',opacity:0},{transform:'scaleY(1)',opacity:1,offset:.14},{transform:'scaleY(1)',opacity:1,offset:.86},{transform:'scaleY(.05)',opacity:0}],{duration:D,easing:'ease-out'});
+      im.animate([{transform:'translateX('+from+'%) scaleX('+flip+')',opacity:0},{transform:'translateX(0) scaleX('+flip+')',opacity:1,offset:.18,easing:ease},{transform:'translateX('+(-from*0.05)+'%) scaleX('+flip+')',opacity:1,offset:.86},{transform:'translateX('+(-from*0.4)+'%) scaleX('+flip+')',opacity:0}],{duration:D});
+      tx.animate([{opacity:0,transform:'translateX('+(-from*0.5)+'%)'},{opacity:0,offset:.15},{opacity:1,transform:'translateX(0)',offset:.3,easing:ease},{opacity:1,offset:.86},{opacity:0}],{duration:D});
+    }catch(e){}
+    setTimeout(()=>{ b.style.display='none'; busy=0; run(); },D+30);
+  }
+  window.__CI=CI;
+  window.cutinShow=function(id,enemy,skName,heroName){
+    const im=CI[id]; if(!im) return false;
+    let sp=1; try{ sp=(typeof BT!=='undefined'&&BT&&BT.sp)||1; }catch(e){}
+    if(!hadSet){ try{ if(typeof BT!=='undefined'&&BT&&BT.sp>0){ had=BT.sp; hadSet=1; } }catch(e){} }
+    Q.push({src:im.src,e:!!enemy,sk:skName,nm:heroName,d:durOf(sp)});
+    try{ if(hadSet&&BT) BT.sp=0; }catch(e){}
+    run(); return true; };
+  /* ширээлэх: castWith-ээр 4-р (i===3) скил хэрэглэсэн үед */
+  const _cw=window.castWith;
+  if(typeof _cw==='function') window.castWith=function(u,sk,tg){
+    const r=_cw.apply(this,arguments);
+    try{ if(r&&sk&&sk.i===3&&u&&u.id){ let nm=''; try{ nm=u.name||(typeof hname==='function'?hname(u.id):''); }catch(e){} cutinShow(u.id,!!u.side,sk.n,nm); } }catch(e){}
+    return r; };
+  /* тулаан дуусах/гарахад түр зогсоолтоос үлдэхгүй */
+  try{ const _be=window.btEnd; if(typeof _be==='function') window.btEnd=function(){ Q.length=0; hadSet=0; try{ if(typeof BT!=='undefined'&&BT&&BT.sp===0) BT.sp=had||1; }catch(e){} if(box) box.style.display='none'; busy=0; return _be.apply(this,arguments); }; }catch(e){}
 })();
 
 

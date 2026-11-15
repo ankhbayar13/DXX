@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='ae55c6facb';
+var UPDB='2f6e4555a8';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -24020,13 +24020,13 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     }catch(e){}
   }
   function pushRating(){ try{ if(!nb().ok()) return; const a=ar(); nb().set('chessr',nb().uid(),{n:String(nb().name()).slice(0,14),e:a.e,g:a.g,w:a.w,d:a.d,l:a.l,mk:mkey(),t:Date.now()},true).catch(()=>{}); }catch(e){} }
-  async function topList(){ const l=await nb().list('chessr',[],['e','desc'],50); return l.filter(x=>(x.g||0)>=10).slice(0,10); }
+  async function topList(){ const l=await nb().list('chessr',[],['e','desc'],50); return l.filter(x=>(x.g||0)>=10).slice(0,50); }
 
   /* ---- сарын шагнал ---- */
   async function checkReward(){
     try{ const a=ar(), pm=prevMk(); if(a.cl[pm]!==undefined||!nb().ok()) return;
       let snap=await nb().get('chessm',pm);
-      if(!snap){ const top=await topList(); snap={top:top.map(x=>({u:x.id,n:x.n,e:x.e}))}; await nb().set('chessm',pm,{t:Date.now(),top:snap.top}); }
+      if(!snap){ const top=(await topList()).slice(0,10); snap={top:top.map(x=>({u:x.id,n:x.n,e:x.e}))}; await nb().set('chessm',pm,{t:Date.now(),top:snap.top}); }
       const i=(snap.top||[]).findIndex(x=>x.u===nb().uid());
       if(i>=0&&i<10){ rw={mk:pm,i:i,alt:PRIZE[i]}; } else { a.cl[pm]=-1; try{ save(); }catch(e){} }
       if(el&&!G&&scr==='arena') render();
@@ -24042,16 +24042,21 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     const head=(t,back)=>'<div class="chh"><h2>'+t+'</h2><button class="chb" onclick="'+(back?'chessArena()':'chessClose()')+'">'+(back?'Буцах':'Гарах')+'</button></div>';
     const msgH=info?'<div class="chc"><div class="sm" style="color:#ffe29a">'+esc(info)+'</div></div>':'';
     if(scr==='find'){ const f=fl||{}; return head('Шатрын арена')+'<div class="chc"><div class="sm" style="font-size:16px;text-align:center" id="chfs">'+(f.friend?esc(f.friend.n)+'-г хүлээж байна…':'Өрсөлдөгч хайж байна…')+'</div><div class="chr" style="justify-content:center;margin-top:12px"><button class="chb" onclick="chessCancel()">Болих</button></div></div>'; }
-    if(scr==='top'){ const L=topL; let b='<div class="sm">Уншиж байна…</div>';
-      if(L){ b=L.length?'<table class="tbl">'+L.map((x,i)=>'<tr'+(x.id===(nb().ok()?nb().uid():'')?' class="me"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.n||'Тоглогч')+'<br><span style="font-size:12px;color:#d9bd80">'+rkS(x.e)+' · '+(x.e|0)+' Elo</span></td><td>'+PRIZE[i]+' Алт</td></tr>').join('')+'</table>':'<div class="sm">Одоохондоо жагсаалт хоосон байна. Top 10-д орохын тулд хамгийн багадаа 10 тоглолт хэрэгтэй.</div>'; }
-      return head('Top 10',1)+'<div class="chc">'+b+'<div class="sm" style="margin-top:10px">Сар бүрийн эцэст шагнал: 1-р 500, 2-р 400, 3-р 300, 4-р 200, 5-р 100, 6–10-р байр тус бүр 50 Алт.</div></div>'; }
+    if(scr==='top'){ const L=topL; let b='<div class="sm">Уншиж байна…</div>', myId=nb().ok()?nb().uid():'';
+      if(L){ b=L.length?'<table class="tbl">'+L.map((x,i)=>'<tr'+(x.id===myId?' class="me"':'')+(i===9?' style="border-bottom:2px solid #c9972b"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.n||'Тоглогч')+'<br><span style="font-size:12px;color:#d9bd80">'+rkS(x.e)+' · '+(x.e|0)+' Elo</span></td><td>'+(i<10?PRIZE[i]+' Алт':'')+'</td></tr>').join('')+'</table>':'<div class="sm">Одоохондоо жагсаалт хоосон байна. Жагсаалтад орохын тулд хамгийн багадаа 10 тоглолт хэрэгтэй.</div>';
+        const mi=L.findIndex(x=>x.id===myId), g=a.g|0; let m;
+        if(mi>=0) m='Таны байр: <b>'+(mi+1)+'-р</b> · '+a.e+' Elo'+(mi<10?' · шагналтай байр':'');
+        else if(g<10) m='Жагсаалтад орохын тулд <b>'+(10-g)+' тоглолт дутуу</b> ('+g+'/10) · '+a.e+' Elo';
+        else m='Таны байр: <b>50-аас доош</b> · '+a.e+' Elo';
+        b='<div class="chc" style="margin:0 0 10px;text-align:center;color:#ffe29a">'+m+'</div>'+b; }
+      return head('Top 50',1)+'<div class="chc">'+b+'<div class="sm" style="margin-top:10px">Сар бүрийн эцэст эхний 10 байр шагналтай: 1-р 500, 2-р 400, 3-р 300, 4-р 200, 5-р 100, 6–10-р байр тус бүр 50 Алт. Жагсаалтад орохын тулд хамгийн багадаа 10 тоглолт хэрэгтэй.</div></div>'; }
     if(scr==='friends'){ const F=(S.friends||[]);
       return head('Найзаа урих',1)+msgH+'<div class="chc"><div class="sm">Бооцоо (Зоос, 0 = бооцоогүй)</div><div class="chr"><input id="chbet" type="number" min="0" value="'+betV+'" oninput="chessBet(this.value)" style="width:140px;padding:8px;border-radius:8px;border:2px solid #c9972b;background:#1a0f08;color:#ffe9b0;font:bold 16px Georgia,serif"></div><div class="sm" style="margin-top:6px">Найзын тоглолт Elo-д нөлөөлөхгүй. Хоёулаа ижил бооцоо тавина, хожсон нь бүгдийг авна.</div></div>'+
         '<div class="chc">'+(F.length?F.map((f,i)=>'<div class="chr" style="justify-content:space-between;align-items:center;margin:6px 0"><span>'+esc(f.n||'Найз')+'</span><button class="chb" onclick="chessInvite('+i+')">Урих</button></div>').join(''):'<div class="sm">Найз алга байна. Нийгмийн цэснээс найз нэмнэ үү.</div>')+'</div>'; }
     let b=head('Шатрын арена')+msgH+
       '<div class="chc"><div class="sm" style="color:#d9bd80">Таны цол</div><div style="font-size:22px;font-weight:bold;color:#ffd770;margin:2px 0">'+RK[r]+'</div><div class="sm">Elo <b>'+a.e+'</b>'+(nx?' · дараагийн цол '+nx+'-д':'')+'</div><div class="elob"><i style="width:'+pct+'%"></i></div><div class="sm">Ялалт <b>'+a.w+'</b> · Тэнцэл <b>'+a.d+'</b> · Ялагдал <b>'+a.l+'</b></div></div>';
     if(rw) b+='<div class="chc"><div class="sm">Өнгөрсөн сарын Top 10-д <b>'+(rw.i+1)+'-р байр</b> эзэллээ!</div><div class="chr"><button class="chb g" onclick="chessClaim()">Шагнал авах: '+rw.alt+' Алт</button></div></div>';
-    b+='<div class="chc"><div class="arb"><button class="chb g" onclick="chessFind()">Тоглолт хайх (Elo)</button><button class="chb" onclick="chessFriends()">Найзаа урих</button><button class="chb" onclick="chessBots()">AI ботоор бэлтгэл</button><button class="chb" onclick="chessTop()">Top 10</button></div></div>';
+    b+='<div class="chc"><div class="arb"><button class="chb g" onclick="chessFind()">Тоглолт хайх (Elo)</button><button class="chb" onclick="chessFriends()">Найзаа урих</button><button class="chb" onclick="chessBots()">AI ботоор бэлтгэл</button><button class="chb" onclick="chessTop()">Top 50</button></div></div>';
     return b; }
   window.chessArena=function(){ stopFind(true); scr='arena'; info=''; render(); };
   window.chessBots=function(){ scr='bots'; render(); };

@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='2f6e4555a8';
+var UPDB='8d96ab2817';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -21049,8 +21049,8 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   /* ---------- Сарын Топ 10 + шагнал ---------- */
   async function fetchMonth(m){ const {F,db}=FBM;
     try{ const c=window.DLB&&DLB.get('am'+m); if(c) return c; }catch(e){}
-    const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('sc','>=',m*MB),F.orderBy('sc','desc'),F.limit(40)));
-    const rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='t'&&x.sc<(m+1)*MB&&x.mp>0);
+    const sn=await F.getDocs(F.query(F.collection(db,'duel'),F.where('sc','>=',m*MB),F.orderBy('sc','desc'),F.limit(60)));
+    const rows=sn.docs.map(d=>d.data()).filter(x=>x&&x.g==='t'&&x.sc<(m+1)*MB&&x.mp>0).slice(0,50);
     try{ window.DLB&&DLB.set('am'+m,rows); }catch(e){}
     return rows; }
   async function loadLb(){ TS.lbSt='load'; TS.lb=null; rr(); if(!on()){ TS.lbSt='off'; rr(); return; }
@@ -21069,7 +21069,7 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   const RN=k=>{ const fb={heavy:'Хамгаалагч',cav:'Довтлогч',archer:'Нумтан',support:'Дэмжигч'}; try{ return (TNAME&&TNAME[k])||fb[k]||k; }catch(e){ return fb[k]||k; } };
   const pimg=(id,cls)=>'<span class="'+cls+'">'+(typeof hdImg==='function'?hdImg(id,0,'ta-img',120):'')+((cls==='t2vp'||cls==='tpkq')?elImg(id,'right:4%;bottom:4%;width:40%;height:auto'):'')+'</span>';
   const fst=id=>X.hn(id).split(' ')[0];
-  const CFGT=['fight','league','prize','top'], TABN={fight:'Тулалдах',league:'Лиг',prize:'Шагнал',top:'Топ 10'};
+  const CFGT=['fight','league','prize','top'], TABN={fight:'Тулалдах',league:'Лиг',prize:'Шагнал',top:'Топ 50'};
   function rankPct(r){ const R=window.ARR||null; try{ const a=ARR, c=arRank(r), i=a.indexOf(c), n=a[i+1]; if(!n) return 100; return Math.max(3,Math.min(100,100*(r-c[1])/(n[1]-c[1]))); }catch(e){ return 5; } }
   function tagB(i){ return [['Сул','#8fe39a'],['Адил','#ffd770'],['Хүчтэй','#ff8a7a']][Math.max(0,Math.min(2,i|0))]; }
   function tag(r){ return r<0.96?['Сул','#8fe39a']:(r<1.06?['Адил','#ffd770']:['Хүчтэй','#ff8a7a']); }
@@ -21125,15 +21125,15 @@ function sbAdminHTML(){ const on=SBX.chat||SBX.dm||SBX.fr;
   function prizeView(){
     let h='<div class="t2pn"><div class="t2sec"><b>Сарын шагнал</b><span>'+mname(mi())+'</span></div>';
     CFG.prize.forEach((pz,i)=>{ h+='<div class="t2pr"><b>'+(i+1)+'-р байр</b><span>'+pz.alt+' Алт + '+pz.tier+'-р түвшний зэр зэвсэг</span></div>'; });
-    h+='<div class="t2dg" style="text-align:left">Сарын Топ 10-ыг Эло рейтингээр гаргана (улирал = сар). Сар шинэчлэгдэхэд өмнөх сарын Топ 3 тоглогч арена руу ороод шагналаа авна. Таны Эло: <b>'+erGet()+'</b></div>';
+    h+='<div class="t2dg" style="text-align:left">Сарын Топ 50-ыг Эло рейтингээр гаргана (шагнал эхний 3 байранд) (улирал = сар). Сар шинэчлэгдэхэд өмнөх сарын Топ 3 тоглогч арена руу ороод шагналаа авна. Таны Эло: <b>'+erGet()+'</b></div>';
     if(TS.prev){ const pz=CFG.prize[TS.prev.rank-1]; h+='<div class="t2pr cl"><b>Өнгөрсөн сар '+TS.prev.rank+'-р байр</b><span>'+pz.alt+' Алт + '+pz.tier+'-р түвшний зэр зэвсэг</span><button class="t2cb" onclick="taClaim()">Шагнал авах</button></div>'; }
     return h+'</div>'; }
   function topView(){
-    const rows=(TS.lb||[]).slice(0,10), me=(TS.lb||[]).findIndex(x=>x.u===(CL&&CL.uid)); let b;
+    const rows=(TS.lb||[]).slice(0,50), me=rows.findIndex(x=>x.u===(CL&&CL.uid)); let b;
     if(TS.lbSt==='load') b='<div class="t2em">Ачаалж байна…</div>'; else if(TS.lbSt==='off') b='<div class="t2em">Интернет холбогдоогүй байна.</div>'; else if(TS.lbSt==='err') b='<div class="t2em">Жагсаалтыг ачаалж чадсангүй.</div>';
     else if(!rows.length) b='<div class="t2em">Энэ сар жагсаалт хоосон байна. Тулаанд орж Эло цуглуул.</div>';
     else b=rows.map((x,i)=>{ const pz=CFG.prize[i]; return '<div class="t2lr'+(x.u===(CL&&CL.uid)?' me':'')+'"><div class="t2lk">'+(i<3?'<i class="t2md" style="background-image:'+SL('tas_md'+(i+1))+'"></i>':'<i class="t2rk" style="background-image:'+SL('tas_rk')+'"><u>'+(i+1)+'</u></i>')+'</div><b class="t2ln">'+esc(x.n)+'</b><span class="t2lp"><em>'+x.mp+' Эло</em>'+(pz?'<small>'+pz.alt+' Алт</small>':'')+'</span></div>'; }).join('');
-    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 10</b><span>'+mname(mi())+'</span></div>'+(window.DLB?DLB.note():'')+b+'<div class="t2dg">Таны Эло: <b>'+erGet()+'</b>'+(me>=0?' · '+(me+1)+'-р байр':'')+'</div></div>'; }
+    return '<div class="t2pn"><div class="t2sec"><b>Сарын Топ 50</b><span>'+mname(mi())+'</span></div>'+(window.DLB?DLB.note():'')+'<div class="t2dg">Таны Эло: <b>'+erGet()+'</b>'+(me>=0?' · <b>'+(me+1)+'-р байр</b>':(TS.lbSt==='ok'?' · 50-аас доош':''))+'</div>'+b+'</div>'; }
   function arenaHTML(){
     X.tInit(); const F=X.fighters(); const tb=TS.tab||'fight'; let body;
     if(F.length<3) body='<div class="t2pn"><div class="t2em">3 баатартай болбол 3 vs 3 тулаанд орно. Одоо '+F.length+' баатар байна.</div></div>';

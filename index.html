@@ -6444,10 +6444,10 @@ function isNavPt(u,tx,ty){ const R=RT; if(R.t>=(u.nvT||0)){ u.nvT=R.t+0.22+Math.
   for(let k=0;k<6;k++){ let bv=cur,bx=-1,by=-1; for(let a=-1;a<=1;a++){ for(let b=-1;b<=1;b++){ if(!a&&!b) continue; const x=cx+a, y=cy+b; if(x<0||y<0||x>=ISGW||y>=ISGH) continue; const v=d[y*ISGW+x]; if(v<bv){ bv=v; bx=x; by=y; } } } if(bx<0) break; cx=bx; cy=by; cur=bv; if(cur===0) break; }
   return [cx*4+2,cy*4+2]; }
 function isMove(u,tx,ty,dt,mul){ const R=RT; let wx=tx, wy=ty, fin=true; const rt=isRoute(u,tx,ty); if(rt){ wx=rt[0]; wy=rt[1]; fin=false; }
-  else if(ISMAP>=4&&Math.hypot(tx-u.x,ty-u.y)>26){ const np=isNavPt(u,tx,ty); if(np){ wx=np[0]; wy=np[1]; fin=false; } }
+  else if(ISMAP>=1&&Math.hypot(tx-u.x,ty-u.y)>26){ const np=isNavPt(u,tx,ty); if(np){ wx=np[0]; wy=np[1]; fin=false; } }
   const dx=wx-u.x, dy=wy-u.y, L=Math.hypot(dx,dy); if(L<3) return fin; u.lx=dx; u.ly=dy;
   const s=u.spd*dt*(mul||1)*(u.hasteT>R.t?1.4:1); let nx,ny; if(L<=s){ nx=wx; ny=wy; } else { nx=u.x+dx/L*s; ny=u.y+dy/L*s; }
-  if(isWalk(nx,ny)){ u.x=nx; u.y=ny; } else if(isWalk(nx,u.y)){ u.x=nx; } else if(isWalk(u.x,ny)){ u.y=ny; } else { u.stuck=(u.stuck||0)+dt; if(u.stuck>1.2){ const p=isNear(u.x+dx/L*30,u.y+dy/L*30); u.x=p.x; u.y=p.y; u.stuck=0; } return false; }
+  if(isWalk(nx,ny)){ u.x=nx; u.y=ny; u.stuck=0; } else if(isWalk(nx,u.y)){ u.x=nx; } else if(isWalk(u.x,ny)){ u.y=ny; } else { u.stuck=(u.stuck||0)+dt; let mvd=false; if(L>1){ const ang=Math.atan2(dy,dx); for(const da of [0.6,-0.6,1.2,-1.2,1.9,-1.9]){ const ax=u.x+Math.cos(ang+da)*s, ay=u.y+Math.sin(ang+da)*s; if(isWalk(ax,ay)){ u.x=ax; u.y=ay; mvd=true; break; } } } if(mvd){ u.mv=true; u.nvT=0; return false; } if(u.stuck>1.2){ const p=isNear(u.x+dx/L*30,u.y+dy/L*30); u.x=p.x; u.y=p.y; u.stuck=0; } return false; }
   u.mv=true; u.vy=dy/L; if(Math.abs(dx)>3) u.fd=dx>0?1:-1; return fin&&L<=s; }
 function isPick(u){ const R=RT; let best=null,bs=1e18; const acq=u.acqE!=null?u.acqE:u.acq, mel=u.type!=='archer', us=isSide(u.x);
   for(const o of R.U){ if(o.side===u.side||o.hp<=0) continue; const dx=o.x-u.x, dy=o.y-u.y; if(dx>acq||dx<-acq||dy>acq||dy<-acq) continue; const d=Math.hypot(dx,dy); if(d>acq) continue; let sc=d-(BTBEAT[u.type]===o.type?25:0)-(u.pref&&u.pref===o.type?90:0)+(o.tc||0)*20; if(mel&&isSide(o.x)!==us) sc+=260; if(sc<bs){ bs=sc; best=o; } }
@@ -11050,7 +11050,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='e1cc69e395';
+var UPDB='c414d92753';
 (function(){
   const K='updTry';
   const _go=updGo;

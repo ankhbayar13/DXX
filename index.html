@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='5722e80af8';
+var UPDB='1af8a89f5f';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23204,6 +23204,13 @@ window.RINGAR=0.4557291666666667;
   window.dxArrow=function(c,k,x,tipY,h){
     const a=A[k]; if(!a||!a.im||!a.im.complete||!a.im.naturalWidth) return false;
     const w=h*a.w/a.h; c.drawImage(a.im,x-w/2,tipY-h,w,h); return true; };
+})();
+
+
+/* Скиллийн эффект ~1.8x удаан харагдана (0.5с -> 0.9с, 0.7с -> 1.26с) */
+(function(){
+  const _ea=window.efAdd; if(typeof _ea!=='function') return;
+  window.efAdd=function(i,x,y,s,d,bot){ return _ea.call(this,i,x,y,s,(d||0.5)*1.8,bot); };
 })();
 
 

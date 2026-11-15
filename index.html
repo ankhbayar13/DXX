@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='1af8a89f5f';
+var UPDB='1c6df0858b';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23211,6 +23211,21 @@ window.RINGAR=0.4557291666666667;
 (function(){
   const _ea=window.efAdd; if(typeof _ea!=='function') return;
   window.efAdd=function(i,x,y,s,d,bot){ return _ea.call(this,i,x,y,s,(d||0.5)*1.8,bot); };
+})();
+
+
+/* Баатар дуудах дэлгэц: ордны дэвсгэр (хайрцаг, бамбар, далбаа) */
+(function(){
+  const st=document.createElement('style');
+  st.textContent='#boxov.smbg{background:#0b0603 url(hf/sum_bg.webp?v=1) 50% 100%/cover no-repeat}'
+   +'@media (min-aspect-ratio:1/1){#boxov.smbg{background-size:contain;background-position:50% 50%}}'
+   +'#boxov.smbg .bxbox{display:none}'
+   +'#boxov.smbg .bxs{text-shadow:0 2px 6px #000,0 0 14px #000}';
+  document.head.appendChild(st);
+  const _rr=window.rlRun; if(typeof _rr!=='function') return;
+  window.rlRun=function(o,w,done){
+    try{ if(o&&o.id==='boxov') o.classList.add('smbg'); }catch(e){}
+    return _rr.call(this,o,w,function(){ try{ if(o) o.classList.remove('smbg'); }catch(e){} return done&&done.apply(this,arguments); }); };
 })();
 
 

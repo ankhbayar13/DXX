@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='76a36e0c40';
+var UPDB='88aa5e2c9e';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23034,12 +23034,19 @@ window.STIC='data:image/webp;base64,UklGRtZMAABXRUJQVlA4WAoAAAAQAAAADwIAKwAAQUxQ
       Object.keys(hd).forEach(k=>{ const a=hd[k], im=new Image(); im.onload=()=>{ SFX[k]={img:im,fw:a[2],fh:a[3]}; }; im.src=URL.createObjectURL(new Blob([new Uint8Array(buf,base+a[0],a[1])],{type:'image/webp'})); });
     }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
     setTimeout(()=>ld(0),3000); })();
+  /* баатар бүрийн скиллийн өөрийн эффект (hfx.bin) */
+  const HFXN=["hfx_arav_1", "hfx_arav_2", "hfx_arav_3", "hfx_arav_4", "hfx_boorchu_1", "hfx_boorchu_2", "hfx_boorchu_3", "hfx_boorchu_4", "hfx_borchi_1", "hfx_borchi_2", "hfx_borchi_3", "hfx_borchi_4", "hfx_borte_1", "hfx_borte_2", "hfx_borte_3", "hfx_borte_4", "hfx_chagadai_1", "hfx_chagadai_2", "hfx_chagadai_3", "hfx_chagadai_4", "hfx_chinggis_1", "hfx_chinggis_2", "hfx_chinggis_3", "hfx_chinggis_4", "hfx_haiyun_1", "hfx_haiyun_2", "hfx_haiyun_3", "hfx_haiyun_4", "hfx_harvaach_1", "hfx_harvaach_2", "hfx_harvaach_3", "hfx_harvaach_4", "hfx_hulan_1", "hfx_hulan_2", "hfx_hulan_3", "hfx_hulan_4", "hfx_jamukha_1", "hfx_jamukha_2", "hfx_jamukha_3", "hfx_jamukha_4", "hfx_jelme_1", "hfx_jelme_2", "hfx_jelme_3", "hfx_jelme_4", "hfx_jochi_1", "hfx_jochi_2", "hfx_jochi_3", "hfx_jochi_4", "hfx_khubilai_1", "hfx_khubilai_2", "hfx_khubilai_3", "hfx_khubilai_4", "hfx_khukhchu_1", "hfx_khukhchu_2", "hfx_khukhchu_3", "hfx_khukhchu_4", "hfx_mukhulai_1", "hfx_mukhulai_2", "hfx_mukhulai_3", "hfx_mukhulai_4", "hfx_oelun_1", "hfx_oelun_2", "hfx_oelun_3", "hfx_oelun_4", "hfx_ogodei_1", "hfx_ogodei_2", "hfx_ogodei_3", "hfx_ogodei_4", "hfx_sorkh_1", "hfx_sorkh_2", "hfx_sorkh_3", "hfx_sorkh_4", "hfx_subeedei_1", "hfx_subeedei_2", "hfx_subeedei_3", "hfx_subeedei_4", "hfx_tolui_1", "hfx_tolui_2", "hfx_tolui_3", "hfx_tolui_4", "hfx_yelu_1", "hfx_yelu_2", "hfx_yelu_3", "hfx_yelu_4"], HFB={};
+  (function(){ function ld(n){ try{ fetch('hfx.bin?v=1').then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(buf=>{
+      const dv=new DataView(buf), hl=dv.getUint32(0,true), hd=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl))), base=4+hl;
+      Object.keys(hd).forEach(k=>{ const a=hd[k], im=new Image(); im.onload=()=>{ SFX[k]={img:im,fw:a[2],fh:a[3]}; }; im.src=URL.createObjectURL(new Blob([new Uint8Array(buf,base+a[0],a[1])],{type:'image/webp'})); });
+    }).catch(()=>{ if(n<40) setTimeout(()=>ld(n+1),Math.min(30000,5000+n*2500)); }); }catch(e){} }
+    setTimeout(()=>ld(0),3500); })();
   /* fx нэмэх: n нэр, x,y хөл, o:{d хугацаа, z хэмжээ×, dl саатал, x1,y1 нисэх, fl эргүүлэх, a чиглэл} */
   window.fxs=function(n,x,y,o){ try{ if(!BT||!FXD[n]) return; o=o||{}; const L=BT.fs||(BT.fs=[]); if(L.length>60) L.splice(0,L.length-60);
     L.push({n:n,x:x,y:y,x1:o.x1,y1:o.y1,fl:o.fl?-1:1,d:o.d||0.7,z:o.z||1,t:-(o.dl||0)}); }catch(e){} };
   const _et=efTick; efTick=function(dt){ try{ if(BT&&BT.fs){ BT.fs.forEach(e=>e.t+=dt/e.d); BT.fs=BT.fs.filter(e=>e.t<1); } }catch(e){} return _et.apply(this,arguments); };
   const _ed=efDraw; efDraw=function(c){ const r=_ed.apply(this,arguments);
-    try{ (BT.fs||[]).forEach(e=>{ if(e.t<0) return; const s=SFX[e.n]; if(!s) return; const D=FXD[e.n], i=Math.min(5,Math.floor(e.t*6)), w=D[2]*e.z, h=w*s.fh/s.fw;
+    try{ (BT.fs||[]).forEach(e=>{ if(e.t<0) return; let nn=e.n; if(!SFX[nn]&&HFB[nn]) nn=HFB[nn]; const s=SFX[nn]; if(!s) return; const D=FXD[nn], i=Math.min(5,Math.floor(e.t*6)), w=D[2]*e.z, h=w*s.fh/s.fw;
         let x=e.x, y=e.y; if(e.x1!=null){ const p=Math.min(1,e.t*1.6); x=e.x+(e.x1-e.x)*p; y=e.y+(e.y1-e.y)*p; }
         c.save(); if(D[0]) c.globalCompositeOperation='lighter'; c.globalAlpha=0.96;
         c.translate(x,y); if(D[1]==='b') c.translate(0,4); else if(D[1]==='m') c.translate(0,-22); else c.translate(0,-62); if(e.fl<0) c.scale(-1,1);
@@ -23107,6 +23114,11 @@ window.STIC='data:image/webp;base64,UklGRtZMAABXRUJQVlA4WAoAAAAQAAAADwIAKwAAQUxQ
     /* шат 6: түргэн үйлдэл (qa) · таслах (it) */
     SK.oelun[1][1].qa=1; SK.sorkh[1][1].qa=1; SK.haiyun[1][1].qa=1; SK.yelu[1][1].qa=1; SK.borte[0][1].qa=1;
     SK.belgutei[0][1].it=1; SK.yelu[0][1].it=1; SK.mukhulai[2][1].it=1; SK.zev[2][1].it=1; }
+  /* баатар бүрийн өөрийн эффект: нэг скилл = нэг зураг (hfx_<баатар>_<дугаар>) */
+  { const HS={}; HFXN.forEach(n=>{ HS[n]=1; });
+    Object.keys(SK).forEach(id=>SK[id].forEach((e,i)=>{ const n='hfx_'+id+'_'+(i+1); if(!HS[n]) return; const sp=e[1], old=sp.f||[], f0=old[0]||['slash','t'], k0=f0[1], nf=[];
+      if(sp.e) nf.push([n,k0==='p'?'p':'t',0]); if(sp.a) nf.push([n,(k0==='c'&&!sp.e)?'c':'a',sp.e?0.2:0]); if(!nf.length) nf.push([n,k0==='p'?'p':'t',0]);
+      FXD[n]=[0,'m',k0==='p'?84:112]; HFB[n]=f0[0]; sp.f=nf; })); }
   const pc=x=>Math.round(x*100);
   function descOf(sp,m){ const o=[]; const hh=sp.h?(sp.h*m).toFixed(1):''; const hn=sp.hn||1;
     if(sp.e){ const who=sp.e==='one'?'Сонгосон дайсанд':sp.e==='all'?'Бүх дайсанд':'3 дайсанд'; if(sp.h) o.push(who+' '+hh+' дахин цохилт'+(hn>1?' ×'+hn:'')+(sp.ex?' (HP '+pc(sp.ex[0])+'%-иас доош бол '+(sp.ex[1]*m).toFixed(0)+' дахин)':'')); else o.push(who); }

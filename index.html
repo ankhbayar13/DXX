@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='81e5a5c261';
+var UPDB='dc16b65fa1';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23226,6 +23226,14 @@ window.RINGAR=0.4557291666666667;
   window.rlRun=function(o,w,done){
     try{ if(o&&o.id==='boxov') o.classList.add('smbg'); }catch(e){}
     return _rr.call(this,o,w,function(){ try{ if(o) o.classList.remove('smbg'); }catch(e){} return done&&done.apply(this,arguments); }); };
+})();
+
+
+/* Баатрын түүхийн самбар: алтан хүрээ (монгол үүлэн хээтэй булан) */
+(function(){
+  const st=document.createElement('style');
+  st.textContent='#boxov .srstory{border:12px solid transparent;border-image:url(hf/sr_panel.webp?v=1) 110 108 110 108/48px 48px 48px 48px stretch;background:linear-gradient(#3a1208,#1d0a05);padding:12px 30px;box-sizing:border-box;filter:drop-shadow(0 0 8px var(--c1,#c9972b))}';
+  document.head.appendChild(st);
 })();
 
 

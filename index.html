@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='edb95db694';
+var UPDB='fac72e1906';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23054,7 +23054,7 @@ window.STIC='data:image/webp;base64,UklGRtZMAABXRUJQVlA4WAoAAAAQAAAADwIAKwAAQUxQ
       /* төлвийн жижиг тэмдэг */
       BT.units.forEach(u=>{ if(u.hp<=0||u.sup) return; const t=BT.t, L=[]; const add=k=>{ if(L.indexOf(k)<0) L.push(k); }, dk=c=>c==='b'?1:c==='f'?2:0;
         (u.dots||[]).forEach(s=>{ if(s.n>0) add(dk(s.c)); }); if(u.stun>0) add(3); if(u.ctn>0) add(4); if(u.sln>0) add(5); if(u.dot&&u.dot.until>t) add(dk(u.dot.c)); if(u.cd>1.5&&u.side) add(11); if(u.arm&&u.arm.t>t) add(6); if(u.vu&&u.vu.t>t) add(7); if(u.tn&&u.tn>t) add(8); if(u.bAtk&&u.bAtk.t>t&&u.bAtk.m>1) add(9); if(u.wk&&u.wk>t) add(10); if(!L.length) return;
-        const y=u.y-STDH-14, z=14, x0=u.x-(L.length*(z+1))/2;
+        const y=u.y-STDH-21, z=21, x0=u.x-(L.length*(z+1))/2;
         if(STIM&&STIM.complete&&STIM.naturalWidth){ L.forEach((k,j)=>{ c.drawImage(STIM,k*STICN,0,STICN,STICN,x0+j*(z+1),y,z,z); }); }
         else { const CL=['#b45cff','#e23b34','#ff9a2a','#ffe14a','#ff7ad9','#8be0c8','#5fb8ff','#ff6a3a','#ffa530','#fff07a','#9aa4b4','#ffe14a']; const x1=u.x-(L.length*7)/2; L.forEach((k,j)=>{ c.fillStyle='#000'; c.fillRect(x1+j*7-1,y-1,7,7); c.fillStyle=CL[k]; c.fillRect(x1+j*7,y,5,5); }); } });
     }catch(e){}

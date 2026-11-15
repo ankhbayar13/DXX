@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='fac72e1906';
+var UPDB='4ac2197b13';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16581,7 +16581,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
   '.bu-ot{position:absolute;left:0;right:0;top:'+U(-31)+';height:'+U(26)+';display:flex;align-items:center;justify-content:center;text-align:center;font-size:'+U(8.5)+';font-weight:bold;color:#f1d896;line-height:1.1;padding:0 '+U(4)+';text-shadow:0 1px 2px #000}'+
   '#bu-ol{display:flex;flex-direction:column;gap:'+U(4)+';align-items:center}'+
   '.bu-oi{position:relative;width:'+U(30)+';height:'+U(30)+';border-radius:50%;border:'+U(2.5)+' solid #d9a43a;background:#0d2a55;overflow:hidden;pointer-events:auto;flex:none;box-shadow:inset 0 0 0 1px #000a,0 1px 3px #000a}'+
-  '.bu-oi.r{background:radial-gradient(#7a2018,#2a0c08)}'+
+  '.bu-oi.r{background:radial-gradient(#7a2018,#2a0c08);border-color:#d6372a}'+
   '.bu-oi img{width:100%!important;height:100%!important;object-fit:cover;display:block}'+
   '.bu-oi em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:'+U(14)+'}'+
   '.bu-oi i{position:absolute;left:0;right:0;bottom:0;text-align:center;font:bold '+U(9)+'/1 sans-serif;color:#fff;font-style:normal;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 1px #000;background:linear-gradient(transparent,#0009);padding-top:'+U(3)+'}'+
@@ -16881,7 +16881,7 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
     $$('bu-rr').querySelectorAll('s b').forEach((b,i)=>{ if(E[i]) b.style.width=hw(E[i])+'%'; });
     /* дараалал */
     const ord=order(), cur=curActor();
-    setHTML($$('bu-ol'),'ol',ord.map((u,i)=>'<div class="bu-oi'+(u.side?' r':'')+((u.go||(BT.pick&&BT.pick.u===u))?' act':'')+'"'+(u.side?' onclick="buTg('+foes().indexOf(u)+')"':' onclick="buSel(\''+u.id+'\')"')+'>'+(u.side?'<em>'+cl(u.type)+'</em>':hpi(u.id,30))+'<i>'+(i+1)+'</i></div>').join(''));
+    setHTML($$('bu-ol'),'ol',ord.map((u,i)=>'<div class="bu-oi'+(u.side?' r':'')+((u.go||(BT.pick&&BT.pick.u===u))?' act':'')+'"'+(u.side?' onclick="buTg('+foes().indexOf(u)+')"':' onclick="buSel(\''+u.id+'\')"')+'>'+(function(){ if(!u.side) return hpi(u.id,30); let hid=null; try{ const H=(typeof HEROES!=='undefined')?HEROES:[]; hid=(u.id&&H.some(h=>h.id===u.id))?u.id:((H.find(h=>h.n&&h.n===u.name)||{}).id||null); }catch(e){} return hid?hpi(hid,30):'<em>'+cl(u.type)+'</em>'; })()+'<i>'+(i+1)+'</i></div>').join(''));
     /* сонгогдсон баатар: гараар сонгосон бол 7с барина, үгүй бол ээлж авсан нь */
     const manual=!BT.pick&&BT.bselM&&(performance.now()-BT.bselM<7000)&&M.some(u=>u.id===BT.bsel&&u.hp>0);
     if(!manual){ if(cur) BT.bsel=cur.id; else if(!BT.bsel||!M.some(u=>u.id===BT.bsel&&u.hp>0)){ const al=M.find(u=>u.hp>0); BT.bsel=al?al.id:(M[0]&&M[0].id); } }

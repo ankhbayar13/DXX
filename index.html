@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='62e1adc704';
+var UPDB='8d96ab2817';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -24176,39 +24176,6 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   window.chessResign=function(){ if(!G||G.over) return; finish('loss','resign'); };
   try{ invInit(); }catch(e){}
   window.CHESS={state:()=>G,pc:()=>pc,lv:()=>lv,net:()=>O,ar:()=>ar(),rw:()=>rw,click:i=>{ onClick({target:{closest:()=>({dataset:{q:i}})}}); }};
-})();
-
-
-/* p32/land.js — ХЭВТЭЭ байрлал (утас хэвтээ): газрын зураг дэлгэцийг бүтнээр эзэлнэ, цэс баруун доод буланд жижиг товчоор,
-   цонхууд хэвтээд таарна. Босоо барьвал «Утсаа хэвтээ болго» гэж сануулна. Зөвхөн (landscape, өндөр ≤560px) үед үйлчилнэ. */
-(function(){
-  const L='@media (orientation:landscape) and (max-height:560px){';
-  let css='';
-  css+=L+
-   /* босоо сануулгыг хэвтээ үед нууна */
-   '#rotov{display:none!important}'+
-   /* дээд нөөцийн мөр: нарийн, голд */
-   '#res{left:96px!important;right:96px!important;top:4px!important;height:30px!important}'+
-   /* доод цэс: баруун доод буланд жижиг 5 товч */
-   '#menu{left:auto!important;right:8px!important;top:auto!important;bottom:8px!important;width:auto!important;height:auto!important;display:flex!important;gap:6px!important;grid-template-columns:none!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important}'+
-   '#menu button{width:72px!important;height:78px!important;flex:none!important;background-size:cover!important;background-position:center 20%!important;border-radius:10px!important}'+
-   '#menu button i{left:3px!important;right:3px!important;top:auto!important;bottom:3px!important;height:20px!important;width:auto!important;font-size:10px!important;padding:0!important;line-height:20px!important}'+
-   /* зүүн талын даалгавар жижиг */
-   '#tasks{top:100px!important;bottom:auto!important;height:auto!important;max-height:calc(100vh - 190px)!important;width:150px!important;overflow:auto!important}'+
-   /* томруулах товч */
-   '#zb{top:auto!important;bottom:96px!important;right:8px!important;height:auto!important;flex-direction:row!important;width:auto!important;gap:6px!important}'+
-   /* цонх: хэвтээд өргөн, босоо хэмжээ нь дэлгэцэд багтана */
-   '#modal .box{max-width:min(94vw,820px)!important;max-height:92vh!important;border-radius:14px!important}'+
-   '#modal{align-items:center!important}'+
-   '#mbody .mng{grid-template-columns:repeat(4,minmax(0,1fr))!important}#mbody .bgrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}#mbody .hl-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}'+
-  '}';
-  /* босоо барьвал сануулга */
-  css+='#rotv2{position:fixed;inset:0;z-index:901;background:#1b120af2;display:none;align-items:center;justify-content:center;text-align:center;color:#ffe9b0;padding:16px}#rotv2 .rb2{max-width:300px;line-height:1.4;font-size:15px}#rotv2 .big{font-size:44px;margin-bottom:4px;display:inline-block;animation:rotv2a 2.2s ease-in-out infinite}#rotv2 b{font-size:19px}#rotv2 .btn{margin-top:12px;padding:10px 24px}@keyframes rotv2a{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}';
-  const st=document.createElement('style'); st.id='cssland'; st.textContent=css; document.head.appendChild(st);
-  let dis=0; const o=document.createElement('div'); o.id='rotv2'; o.innerHTML='<div class="rb2"><div class="big">&#128241;</div><br><b>Утсаа хэвтээ болго</b><br><span>Энэ тоглоом хэвтээ дэлгэцэнд зориулагдсан.</span><br><button class="btn" id="rotok2">Ойлголоо</button></div>'; document.body.appendChild(o);
-  function chk(){ const port=innerHeight>innerWidth*1.1&&innerWidth<700; o.style.display=(port&&!dis)?'flex':'none'; if(!port) dis=0; }
-  o.querySelector('#rotok2').onclick=()=>{ dis=1; chk(); };
-  addEventListener('resize',chk); addEventListener('orientationchange',()=>setTimeout(chk,300)); chk();
 })();
 
 

@@ -3421,7 +3421,7 @@ function gerCard(){ const nx=gerNext(), have=1+GK.filter(k=>S.bld[k]>0||S.sites[
 
 // ================= Нэгдсэн Цэс =================
 const MENU=[
- {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"],['','Картын тулаан',"cardOpen()"],['','Шатар',"chessOpen()"]]},
+ {t:'⚔ Тулалдаан',i:[['🗺','Түүхэн аян',"openM('camp')"],['🏟','Тэмцээн',"openM('arena')"],['🏇','Наадам',"openM('naadam')"],['🌍','Дэлхий',"openM('wmap')"],['','Картын тулаан',"cardOpen()"],['','Шатрын арена',"chessOpen()"]]},
  {t:'📈 Хөгжил',i:[['🔬','Судалгаа',"openM('res')"],['🏆','Дайн',"openM('dain')"],['📜','Даалгавар',"openM('quests')",'q'],['📦','Захиалга',"openM('orders')"]]},
  {t:'💰 Хөрөнгө',i:[['🎒','Цүнх',"openM('bag')"],['🏚','Агуулах',"openM('agh')"],['💎','Дэлгүүр',"openM('shop')"],['⚡','Нөөц нэмэх',"openM('sup')"]]},
  {t:'⚙ Бусад',i:[['✉','Шуудан',"openM('mail')",'m'],['📣','Найзаа урь',"inviteFriend()"],['🎵','Хөгжим',"musVolOpen()"],['👤','Хөрөг',"openM('profile')"],['☁','Cloud',"openM('cloud')"],['⚔','Хүч',"openM('pwr')"],['👑','Хааны зэрэг',"openM('rank')",'r']]}];
@@ -11035,7 +11035,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='41c60f4de1';
+var UPDB='ae55c6facb';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -23626,7 +23626,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
 
 
 /* p32/chess.js — Шатар (Цэс → Шатар). Энгийн стандарт шатар, Монгол нэртэй хэсгүүд.
-   Эсрэг тоглогч: бот (Хөнгөн / Дунд / Хүнд). Харагдац: 2.5D бага налуу тавцан.
+   Эсрэг тоглогч: бот (Муу / Дунд / Сайн). Харагдац: 2.5D бага налуу тавцан.
    Хадгалалт: S.chs = {w,d,l,day:{date,e,m,h}}.  Зураг: ART=true болгоход rts/ch_<w|b><K|Q|P|R1|R2|N1|N2|B1|B2>.webp хэрэглэнэ. */
 (function(){
   /* ===================== ЭНДЖИН ===================== */
@@ -23744,7 +23744,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   const ART=true;
   const NM={1:'Хүү',2:'Морь',3:'Тэмээ',4:'Тэрэг',5:'Бэрс',6:'Ноён'};
   const GL={1:'♟︎',2:'♞',3:'♝',4:'♜',5:'♛',6:'♚'}, LTR={1:'P',2:'N',3:'B',4:'R',5:'Q',6:'K'};
-  const LV={e:{n:'Хөнгөн',g:300},m:{n:'Дунд',g:800},h:{n:'Хүнд',g:2000}};
+  const LV={e:{n:'Муу',g:500},m:{n:'Дунд',g:1000},h:{n:'Сайн',g:2000}};
   const TILT=34;
   let G=null, el=null, lv='m', pc=1, busy=false, sel=-1, msg='';
   const st=()=>{ if(!S.chs) S.chs={w:0,d:0,l:0,day:{}}; return S.chs; };
@@ -23774,6 +23774,9 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     '#chv .bdg{position:absolute;right:-3px;top:-5px;min-width:20px;height:20px;border-radius:10px;background:#e8b53a;color:#2a1600;font:bold 12px Georgia,serif;display:flex;align-items:center;justify-content:center;padding:0 4px;border:1px solid #6a4616}'+
     '#chv .chq.hn{box-shadow:inset 0 0 0 8px #7dffb0,inset 0 0 0 100px #7dffb055}#chv .chq.ad{box-shadow:inset 0 0 0 8px #ffb347,inset 0 0 0 100px #ffb34766}'+
     '#chv .cht:before,#chv .cht:after{content:"";flex:1;height:2px;max-width:70px;background:linear-gradient(90deg,transparent,#c9972b)}#chv .cht:after{transform:scaleX(-1)}'+
+    '#chv .elob{height:8px;border-radius:4px;background:#1a0f08;border:1px solid #6a4616;margin:6px 0;overflow:hidden}#chv .elob i{display:block;height:100%;background:linear-gradient(90deg,#c9972b,#ffd770)}'+
+    '#chv .arb{display:flex;flex-direction:column;gap:8px;margin-top:8px}#chv .arb .chb{width:100%;padding:12px 14px;font-size:16px}'+
+    '#chv .tbl{width:100%;border-collapse:collapse;font-size:14px}#chv .tbl td{padding:6px 4px;border-bottom:1px solid #5a3a1a}#chv .tbl tr.me td{background:#5a3a1455;color:#ffe29a}#chv .tbl td:first-child{width:28px;color:#ffd770;font-weight:bold}#chv .tbl td:last-child{text-align:right;color:#ffe29a}'+
     '#chv .chmd{position:fixed;inset:0;background:#000c;z-index:5;display:flex;align-items:center;justify-content:center;padding:14px}'+
     '#chv .chmc{width:min(94vw,480px);max-height:86vh;overflow:auto;background:linear-gradient(#3a2418,#22130d);border:2px solid #c9972b;border-radius:16px;padding:16px;color:#f3e3bd;box-shadow:0 10px 30px #000}'+
     '#chv .chmc h3{margin:0 0 8px;color:#ffd770;font-size:20px}#chv .chmc p,#chv .chmc li{font-size:14px;line-height:1.5;margin:4px 0}#chv .chmc ul{padding-left:18px;margin:4px 0}#chv .chmc b{color:#ffe29a}'+
@@ -23799,13 +23802,13 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
       '<p><b>Тусгай нүүдэл:</b> Ноён, Тэрэг хөдлөөгүй бол «орох» (ноён 2 нүд, тэрэг нөгөө талд нь орно), мөн хүүгийн «хажуугаар авах».</p>'+
       '<p><b>Тэнцэх:</b> Ноёнд шах байхгүй ч нүүх нүүдэл байхгүй, хэсэг хүрэлцэхгүй, 50 нүүдэлд авалт/хүү байхгүй, эсвэл нэг байрлал 3 удаа давтагдвал.</p>'+
       '<p><b>Тусламж:</b> Санамж - 1 тоглолтод 3 удаа, хэсгийг тодруулна. Буцах - 3 удаа. Зөвлөх - хамгийн сайн нүүдлийг харуулна, гэхдээ тэр тоглолтод шагнал өгөхгүй. Тэмцээнд тусламж ашиглахгүй.</p>'+
-      '<p><b>Шагнал:</b> Хөнгөн '+LV.e.g+', Дунд '+LV.m.g+', Хүнд '+LV.h.g+' Зоос (түвшин бүрт өдөрт нэг удаа).</p>'+x;
+      '<p><b>Шагнал:</b> Муу '+LV.e.g+', Дунд '+LV.m.g+', Сайн '+LV.h.g+' Зоос (түвшин бүрт өдөрт нэг удаа).</p>'+x;
     else if(modal==='stats'){ const L=c.lv||{}, n=c.w+c.d+c.l, pr=n?Math.round(c.w*100/n):0, dd=(c.day&&c.day.date===today())?c.day:{}, t=c.t||{p:0,w:0};
       b='<h3>Статистик</h3><table><tr><td>Нийт тоглолт</td><td>'+n+'</td></tr><tr><td>Ялалт</td><td>'+c.w+'</td></tr><tr><td>Тэнцэл</td><td>'+c.d+'</td></tr><tr><td>Ялагдал</td><td>'+c.l+'</td></tr><tr><td>Ялалтын хувь</td><td>'+pr+'%</td></tr></table>'+
       '<h3 style="margin-top:12px;font-size:16px">Түвшнээр</h3><table>'+Object.keys(LV).map(k=>{ const q=L[k]||{w:0,d:0,l:0}; return '<tr><td>'+LV[k].n+' ('+q.w+' / '+q.d+' / '+q.l+')</td><td>'+(dd[k]?'Шагнал авсан':'+'+LV[k].g+' Зоос')+'</td></tr>'; }).join('')+'</table>'+
       '<h3 style="margin-top:12px;font-size:16px">Тэмцээн</h3><table><tr><td>Оролцсон</td><td>'+t.p+'</td></tr><tr><td>Аварга болсон</td><td>'+t.w+'</td></tr></table>'+x; }
     else if(modal==='tour'){ const got=c.tday===today();
-      b='<h3>Тэмцээн</h3><p>3 тоглолтыг дараалан хожих ёстой:</p><ul><li>1. Хөнгөн бот (та цагаан)</li><li>2. Дунд бот (та хар)</li><li>3. Хүнд бот (та цагаан)</li></ul><p>Нэгд нь хожигдох, тэнцэхэд тэмцээн дуусна. Тэмцээнд Санамж, Буцах, Зөвлөх ашиглахгүй. Хожлын шагнал: <b>'+TPRIZE+' Зоос</b>, өдөрт нэг удаа'+(got?' (өнөөдөр авсан)':'')+'.</p>'+
+      b='<h3>Тэмцээн</h3><p>3 тоглолтыг дараалан хожих ёстой:</p><ul><li>1. Муу бот (та цагаан)</li><li>2. Дунд бот (та хар)</li><li>3. Сайн бот (та цагаан)</li></ul><p>Нэгд нь хожигдох, тэнцэхэд тэмцээн дуусна. Тэмцээнд Санамж, Буцах, Зөвлөх ашиглахгүй. Хожлын шагнал: <b>'+TPRIZE+' Зоос</b>, өдөрт нэг удаа'+(got?' (өнөөдөр авсан)':'')+'.</p>'+
       '<div class="chr" style="justify-content:center;margin-top:12px"><button class="chb g" onclick="chessTourStart()">Эхлэх</button><button class="chb" onclick="chessModal(null)">Хаах</button></div>'; }
     else if(modal==='nogame') b='<h3>Тоглолт үзэх</h3><p>Үзэх тоглолт одоохондоо алга. Нэг тоглолт дуустал тоглоод дараа нь эндээс дахин үзнэ.</p>'+x;
     return '<div class="chmd" onclick="if(event.target===this)chessModal(null)"><div class="chmc">'+b+'</div></div>';
@@ -23813,17 +23816,18 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
   function render(){
     if(!el) return;
     const sti_=st();
+    if(!G&&scr!=='bots'){ el.innerHTML=arenaScreen()+modalHTML(); return; }
     if(!G){
-      el.innerHTML='<div class="chh"><h2>Шатар</h2><button class="chb" onclick="chessClose()">Гарах</button></div>'+
+      el.innerHTML='<div class="chh"><h2>Бэлтгэл</h2><button class="chb" onclick="chessArena()">Арена</button></div>'+
         '<div class="chpn">'+topRow()+'</div>'+
         '<div class="chc"><div class="sm">Энгийн шатар. Хэсгүүд: Ноён, Бэрс, Тэрэг, Тэмээ, Морь, Хүү. Хүү эцсийн эгнээнд хүрвэл Бэрс болно.</div>'+
         '<div class="chr">'+Object.keys(LV).map(k=>'<button class="chb'+(lv===k?' on':'')+'" onclick="chessLv(\''+k+'\')">'+LV[k].n+'</button>').join('')+'</div>'+
         '<div class="chr"><button class="chb'+(pc===1?' on':'')+'" onclick="chessCol(1)">Цагаан</button><button class="chb'+(pc===-1?' on':'')+'" onclick="chessCol(-1)">Хар</button></div>'+
         '<div class="chr"><button class="chb g" onclick="chessStart()">Эхлэх</button></div></div>'+
-        '<div class="chc"><div class="sm">Ялалт <b>'+sti_.w+'</b> · Тэнцэл <b>'+sti_.d+'</b> · Ялагдал <b>'+sti_.l+'</b><br>Шагнал (түвшин бүрт өдөрт нэг удаа): Хөнгөн '+LV.e.g+', Дунд '+LV.m.g+', Хүнд '+LV.h.g+' Зоос.</div></div>'+modalHTML();
+        '<div class="chc"><div class="sm">Ялалт <b>'+sti_.w+'</b> · Тэнцэл <b>'+sti_.d+'</b> · Ялагдал <b>'+sti_.l+'</b><br>Шагнал (түвшин бүрт өдөрт нэг удаа): Муу '+LV.e.g+', Дунд '+LV.m.g+', Сайн '+LV.h.g+' Зоос.</div></div>'+modalHTML();
       return; }
     const b=G.s.b, flip=pc===-1, rp=G.replay;
-    let h='<div class="chh"><h2>'+(rp?'Шатар · Тоглолт үзэх':(T?'Тэмцээн '+(T.r+1)+'/3 · '+LV[lv].n:'Шатар · '+LV[lv].n))+'</h2></div>';
+    let h='<div class="chh"><h2>'+(G.online?(O.opName+' · '+rkS(O.opElo)+(O.mode==='f'&&O.bet?' · '+O.bet+' Зоос':'')):rp?'Шатар · Тоглолт үзэх':(T?'Тэмцээн '+(T.r+1)+'/3 · '+LV[lv].n:'Шатар · '+LV[lv].n))+'</h2></div>';
     h+='<div class="chcp'+(pc===1?' k':'')+'">'+capHTML(-pc)+'</div><div class="chs"><div class="chbd" id="chbd">';
     const legalSet={}; if(sel>=0) G.legal.filter(m=>m.f===sel).forEach(m=>{ legalSet[m.t]=(b[m.t]||m.fl===3)?2:1; });
     const kS=G.chk>=0?G.chk:-1;
@@ -23833,6 +23837,8 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     h+='</div><div class="chpl" id="chpl"></div></div><div class="chcp'+(pc===1?'':' k')+'">'+capHTML(pc)+'</div>';
     if(rp){
       const R=G.rp; h+='<div class="chpn"><div class="cht" id="chsmsg">'+msg+'</div><div class="chr" style="justify-content:center"><button class="chb" onclick="chessRp(-1)">Өмнөх</button><button class="chb g" onclick="chessRp(0)">'+(R.auto?'Зогсоох':'Автомат')+'</button><button class="chb" onclick="chessRp(1)">Дараах</button><button class="chb" onclick="chessRp(9)">Гарах</button></div></div>';
+    } else if(G.online){
+      h+='<div class="chpn"><div class="cht" id="chsmsg">'+msg+'</div><div class="cbr" style="align-items:center">'+(G.over?'<button class="chb g" style="min-width:46%" onclick="chessMenu()">Арена руу</button>':bt('resign',46))+'</div></div>';
     } else {
       const lim=T?true:false, dU=G.over||lim||G.undos>=3||G.mvs.length-2<(pc===1?0:1), dR=G.over||lim||!G.redoSt.length, dH=G.over||lim||G.hints>=3, dA=G.over||lim;
       const left=G.over?(T&&T.next?'<button class="chb g" style="min-width:42%" onclick="chessTourNext()">Дараагийн тоглолт</button>':'<button class="chb g" style="min-width:42%" onclick="chessStart()">Дахин тоглох</button>'):bt('resign',46);
@@ -23878,7 +23884,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     return {stt:stt,side:side,k:k};
   }
   function rebuild(list){
-    const keep={hints:G.hints,undos:G.undos,adv:G.adv,redoSt:G.redoSt,replay:G.replay,rp:G.rp};
+    const keep={hints:G.hints,undos:G.undos,adv:G.adv,redoSt:G.redoSt,replay:G.replay,rp:G.rp,online:G.online};
     G=Object.assign(freshFields(),keep,{mvs:[]}); list.forEach(m=>{ G.mvs.push(m); step(m); });
   }
   function applyMove(m){
@@ -23887,7 +23893,8 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     let end=null;
     if(stt==='mate') end=(side===pc)?'win':'loss';
     else if(stt==='stale'||CHESS_ENG.insufficient(G.s.b)||G.s.hm>=100||G.rep[r.k]>=3) end='draw';
-    if(end){ finish(end,stt); return; }
+    if(end){ if(G.online) onlineEnd(end,stt,true); else finish(end,stt); return; }
+    if(G.online){ O.dl=Date.now()+60000; O.warn=0; tickNow(); return; }
     setMsg(G.s.turn===pc?(stt==='check'?'Шах! Таны нүүдэл':'Таны нүүдэл'):(stt==='check'?'Шах! Бот бодож байна…':'Бот бодож байна…'));
   }
   function finish(res,stt){
@@ -23919,7 +23926,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     let q=e.target.closest('[data-q]'); if(!q&&e.clientX!=null){ q=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.dataset&&n.dataset.q!==undefined)||null; } if(!q||!G||G.over||busy||G.s.turn!==pc) return;
     const idx=+q.dataset.q, b=G.s.b, v=b[idx];
     if(sel>=0){ const ms=G.legal.filter(m=>m.f===sel&&m.t===idx);
-      if(ms.length){ const m=ms.find(x=>x.p===5)||ms[0]; G.redoSt.length=0; applyMove(m); render(); if(!G.over) botMove(); return; } }
+      if(ms.length){ const m=ms.find(x=>x.p===5)||ms[0]; G.redoSt.length=0; applyMove(m); render(); if(G.online){ netPush(m,false); } else if(!G.over) botMove(); return; } }
     if(v&&(v>0?1:-1)===pc){ sel=(sel===idx)?-1:idx; hn=-1; adT=-1; if(sel>=0) setMsg(NM[Math.abs(v)]); else setMsg('Таны нүүдэл'); render(); }
     else if(sel>=0){ sel=-1; setMsg('Таны нүүдэл'); render(); }
   }
@@ -23960,7 +23967,7 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     if(k==='rules'||k==='stats'||k==='tour'){ modal=k; render(); }
     else if(k==='watch') watch();
     else if(k==='hint') doHint(); else if(k==='advice') doAdvice(); else if(k==='undo') doUndo(); else if(k==='redo') doRedo();
-    else if(k==='resign'){ if(G&&!G.over) finish('loss','resign'); }
+    else if(k==='resign'){ if(G&&G.online) netResign(); else if(G&&!G.over) finish('loss','resign'); }
     else if(k==='menu') window.chessMenu();
   };
   window.chessTourStart=function(){ modal=null; const c=st(); (c.t||(c.t={p:0,w:0})).p++; T={r:0,next:false}; lv=TS[0].lv; pc=TS[0].pc; newGame(); };
@@ -23969,16 +23976,201 @@ function wmPayGo(){ const q=window.WM_PQ; if(!q) return; window.WM_PQ=null; wind
     try{ closeM(); }catch(e){}
     let e=document.getElementById('chv'); if(e) e.remove();
     el=document.createElement('div'); el.id='chv'; document.body.appendChild(el); el.addEventListener('click',onClick);
-    G=null; msg=''; render();
+    G=null; msg=''; scr='arena'; render(); arenaEnter();
+  }
+
+  /* ===================== АРЕНА (онлайн) ===================== */
+  const RK=['Шатрын цэрэг','Шатрын баатар','Шатрын мянгатын ноён','Шатрын түмтийн ноён','Шатрын жанжин','Шатрын их жанжин','Шатрын хаан'];
+  const rankOf=e=>Math.min(6,Math.floor(Math.max(0,e|0)/200)), rkS=e=>RK[rankOf(e||0)].replace('Шатрын ','');
+  const eloD=(ra,rb,sc)=>Math.round(32*(sc-1/(1+Math.pow(10,((rb||0)-(ra||0))/400))));
+  const mkey=d=>{ d=d||new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2); };
+  const prevMk=()=>{ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return mkey(d); };
+  const ar=()=>{ const c=st(); return c.ar||(c.ar={e:0,g:0,w:0,d:0,l:0,opd:{},cl:{}}); };
+  const PRIZE=[500,400,300,200,100,50,50,50,50,50];
+  const enc=m=>m.f|(m.t<<6)|((m.fl||0)<<12)|((m.p||0)<<15), dec=v=>({f:v&63,t:(v>>6)&63,fl:(v>>12)&7,p:(v>>15)&7});
+  const esc=t=>String(t==null?'':t).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const fmt=n=>{ n=Math.max(0,n|0); return Math.floor(n/60)+':'+('0'+(n%60)).slice(-2); };
+  let scr='arena', O=null, fl=null, betV=0, topL=null, rw=null, info='';
+  const inv={unsub:null,cur:null};
+
+  /* Firestore (FBM) дээрх бодит холболт. Туршилтад window.CHESS_NET-ээр солино */
+  const real={
+    ok(){ return typeof FBM!=='undefined'&&!!FBM&&typeof CL!=='undefined'&&!!CL.ok&&!!CL.uid; },
+    uid(){ return CL.uid; },
+    name(){ try{ return myName(); }catch(e){ return (S.prof&&S.prof.name)||'Тоглогч'; } },
+    async create(col,data){ const {F,db}=FBM; const ref=F.doc(F.collection(db,col)); await F.setDoc(ref,data); return ref.id; },
+    async get(col,id){ const {F,db}=FBM; const x=await F.getDoc(F.doc(db,col,id)); return x.exists()?Object.assign({id:x.id},x.data()):null; },
+    async set(col,id,data,merge){ const {F,db}=FBM; if(merge) await F.setDoc(F.doc(db,col,id),data,{merge:true}); else await F.setDoc(F.doc(db,col,id),data); },
+    async upd(col,id,patch){ const {F,db}=FBM; await F.updateDoc(F.doc(db,col,id),patch); },
+    async del(col,id){ const {F,db}=FBM; await F.deleteDoc(F.doc(db,col,id)); },
+    async list(col,conds,order,lim){ const {F,db}=FBM; const a=[F.collection(db,col)].concat((conds||[]).map(c=>F.where(c[0],c[1],c[2]))); if(order) a.push(F.orderBy(order[0],order[1])); a.push(F.limit(lim||25)); const x=await F.getDocs(F.query.apply(null,a)); return x.docs.map(d=>Object.assign({id:d.id},d.data())); },
+    async tx(col,id,fn){ const {F,db}=FBM; const ref=F.doc(db,col,id); let out=null; await F.runTransaction(db,async t=>{ const r=await t.get(ref); if(!r.exists()) throw new Error('gone'); const p=fn(r.data()); if(!p){ out=null; return; } t.update(ref,p); out=p; }); return out; },
+    watch(col,id,cb,err){ const {F,db}=FBM; return F.onSnapshot(F.doc(db,col,id),x=>cb(x.exists()?Object.assign({id:x.id},x.data()):null),e=>{ if(err) err(e); }); },
+    watchQ(col,conds,cb,err){ const {F,db}=FBM; const a=[F.collection(db,col)].concat(conds.map(c=>F.where(c[0],c[1],c[2]))); return F.onSnapshot(F.query.apply(null,a),x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{ if(err) err(e); }); }
+  };
+  const nb=()=>window.CHESS_NET||real;
+  const netErr=e=>{ const c=(e&&e.code)||''; return /permission/.test(c)?'Онлайн шатар хараахан идэвхжээгүй байна':'Холбогдож чадсангүй, дахин оролдоно уу'; };
+  const setInfo=t=>{ info=t; if(el&&!G) render(); };
+
+  /* ---- Elo хадгалалт ---- */
+  async function syncRating(){
+    try{ if(!nb().ok()) return; const a=ar(), id=nb().uid(); const r=await nb().get('chessr',id);
+      if(r&&(r.g||0)>a.g){ a.e=r.e|0; a.g=r.g|0; a.w=r.w|0; a.d=r.d|0; a.l=r.l|0; try{ save(); }catch(e){} if(el&&!G&&scr==='arena') render(); }
+      else if(a.g>0&&(!r||(r.g||0)<a.g)) pushRating();
+    }catch(e){}
+  }
+  function pushRating(){ try{ if(!nb().ok()) return; const a=ar(); nb().set('chessr',nb().uid(),{n:String(nb().name()).slice(0,14),e:a.e,g:a.g,w:a.w,d:a.d,l:a.l,mk:mkey(),t:Date.now()},true).catch(()=>{}); }catch(e){} }
+  async function topList(){ const l=await nb().list('chessr',[],['e','desc'],50); return l.filter(x=>(x.g||0)>=10).slice(0,10); }
+
+  /* ---- сарын шагнал ---- */
+  async function checkReward(){
+    try{ const a=ar(), pm=prevMk(); if(a.cl[pm]!==undefined||!nb().ok()) return;
+      let snap=await nb().get('chessm',pm);
+      if(!snap){ const top=await topList(); snap={top:top.map(x=>({u:x.id,n:x.n,e:x.e}))}; await nb().set('chessm',pm,{t:Date.now(),top:snap.top}); }
+      const i=(snap.top||[]).findIndex(x=>x.u===nb().uid());
+      if(i>=0&&i<10){ rw={mk:pm,i:i,alt:PRIZE[i]}; } else { a.cl[pm]=-1; try{ save(); }catch(e){} }
+      if(el&&!G&&scr==='arena') render();
+    }catch(e){}
+  }
+  window.chessClaim=function(){ if(!rw) return; const a=ar(); S.res.alt=(S.res.alt||0)+rw.alt; a.cl[rw.mk]=1; const t=rw.alt; rw=null; try{ save(); updateHUD(); say('Шатрын арена шагнал: +'+t+' Алт'); }catch(e){} render(); };
+
+  function arenaEnter(){ info=''; syncRating(); checkReward(); invInit(); }
+
+  /* ---- дэлгэцүүд ---- */
+  function arenaScreen(){
+    const a=ar(), r=rankOf(a.e), nx=r<6?(r+1)*200:0, pct=r<6?Math.round((a.e-r*200)*100/200):100;
+    const head=(t,back)=>'<div class="chh"><h2>'+t+'</h2><button class="chb" onclick="'+(back?'chessArena()':'chessClose()')+'">'+(back?'Буцах':'Гарах')+'</button></div>';
+    const msgH=info?'<div class="chc"><div class="sm" style="color:#ffe29a">'+esc(info)+'</div></div>':'';
+    if(scr==='find'){ const f=fl||{}; return head('Шатрын арена')+'<div class="chc"><div class="sm" style="font-size:16px;text-align:center" id="chfs">'+(f.friend?esc(f.friend.n)+'-г хүлээж байна…':'Өрсөлдөгч хайж байна…')+'</div><div class="chr" style="justify-content:center;margin-top:12px"><button class="chb" onclick="chessCancel()">Болих</button></div></div>'; }
+    if(scr==='top'){ const L=topL; let b='<div class="sm">Уншиж байна…</div>';
+      if(L){ b=L.length?'<table class="tbl">'+L.map((x,i)=>'<tr'+(x.id===(nb().ok()?nb().uid():'')?' class="me"':'')+'><td>'+(i+1)+'</td><td>'+esc(x.n||'Тоглогч')+'<br><span style="font-size:12px;color:#d9bd80">'+rkS(x.e)+' · '+(x.e|0)+' Elo</span></td><td>'+PRIZE[i]+' Алт</td></tr>').join('')+'</table>':'<div class="sm">Одоохондоо жагсаалт хоосон байна. Top 10-д орохын тулд хамгийн багадаа 10 тоглолт хэрэгтэй.</div>'; }
+      return head('Top 10',1)+'<div class="chc">'+b+'<div class="sm" style="margin-top:10px">Сар бүрийн эцэст шагнал: 1-р 500, 2-р 400, 3-р 300, 4-р 200, 5-р 100, 6–10-р байр тус бүр 50 Алт.</div></div>'; }
+    if(scr==='friends'){ const F=(S.friends||[]);
+      return head('Найзаа урих',1)+msgH+'<div class="chc"><div class="sm">Бооцоо (Зоос, 0 = бооцоогүй)</div><div class="chr"><input id="chbet" type="number" min="0" value="'+betV+'" oninput="chessBet(this.value)" style="width:140px;padding:8px;border-radius:8px;border:2px solid #c9972b;background:#1a0f08;color:#ffe9b0;font:bold 16px Georgia,serif"></div><div class="sm" style="margin-top:6px">Найзын тоглолт Elo-д нөлөөлөхгүй. Хоёулаа ижил бооцоо тавина, хожсон нь бүгдийг авна.</div></div>'+
+        '<div class="chc">'+(F.length?F.map((f,i)=>'<div class="chr" style="justify-content:space-between;align-items:center;margin:6px 0"><span>'+esc(f.n||'Найз')+'</span><button class="chb" onclick="chessInvite('+i+')">Урих</button></div>').join(''):'<div class="sm">Найз алга байна. Нийгмийн цэснээс найз нэмнэ үү.</div>')+'</div>'; }
+    let b=head('Шатрын арена')+msgH+
+      '<div class="chc"><div class="sm" style="color:#d9bd80">Таны цол</div><div style="font-size:22px;font-weight:bold;color:#ffd770;margin:2px 0">'+RK[r]+'</div><div class="sm">Elo <b>'+a.e+'</b>'+(nx?' · дараагийн цол '+nx+'-д':'')+'</div><div class="elob"><i style="width:'+pct+'%"></i></div><div class="sm">Ялалт <b>'+a.w+'</b> · Тэнцэл <b>'+a.d+'</b> · Ялагдал <b>'+a.l+'</b></div></div>';
+    if(rw) b+='<div class="chc"><div class="sm">Өнгөрсөн сарын Top 10-д <b>'+(rw.i+1)+'-р байр</b> эзэллээ!</div><div class="chr"><button class="chb g" onclick="chessClaim()">Шагнал авах: '+rw.alt+' Алт</button></div></div>';
+    b+='<div class="chc"><div class="arb"><button class="chb g" onclick="chessFind()">Тоглолт хайх (Elo)</button><button class="chb" onclick="chessFriends()">Найзаа урих</button><button class="chb" onclick="chessBots()">AI ботоор бэлтгэл</button><button class="chb" onclick="chessTop()">Top 10</button></div></div>';
+    return b; }
+  window.chessArena=function(){ stopFind(true); scr='arena'; info=''; render(); };
+  window.chessBots=function(){ scr='bots'; render(); };
+  window.chessTop=function(){ scr='top'; topL=null; render(); if(!nb().ok()){ topL=[]; setInfo('Интернэт холбогдоогүй байна'); render(); return; } topList().then(l=>{ topL=l; if(scr==='top') render(); }).catch(e=>{ topL=[]; scr='arena'; setInfo(netErr(e)); }); };
+  window.chessFriends=function(){ scr='friends'; info=''; render(); };
+  window.chessBet=function(v){ betV=Math.max(0,Math.floor(+v||0)); };
+  window.chessFind=function(){ startFind('r',null,0); };
+  window.chessInvite=function(i){ const f=(S.friends||[])[i]; if(!f) return; if(betV>(S.res.gold||0)){ setInfo('Зоос хүрэлцэхгүй байна'); return; } startFind('f',f,betV); };
+  window.chessCancel=function(){ cancelFind(''); };
+
+  /* ---- хайлт, өрөө ---- */
+  function stopFind(del){ if(!fl) return; try{ if(fl.unsub) fl.unsub(); }catch(e){} clearInterval(fl.hb); clearInterval(fl.tk); fl.cancel=true; if(del&&fl.id&&!fl.started) nb().del('chess',fl.id).catch(()=>{}); fl=null; }
+  function cancelFind(t){ stopFind(true); scr='arena'; info=t||''; if(el&&!G) render(); }
+  async function startFind(mode,friend,bet){
+    if(!nb().ok()){ setInfo('Интернэт холбогдоогүй байна'); return; }
+    if(fl) stopFind(true);
+    const me=nb().uid(), name=String(nb().name()).slice(0,14), myE=ar().e;
+    const f=fl={t0:Date.now(),mode:mode,friend:friend,bet:bet,id:null,cancel:false}; scr='find'; render();
+    try{
+      if(mode==='r'){
+        const now=Date.now(), a=ar(), od=a.opd&&a.opd.d===today()?a.opd:{};
+        const cands=(await nb().list('chess',[['s','==',0],['m','==','r']],null,25)).filter(x=>x.a&&x.a!==me&&now-(x.ta||0)<30000&&(od[x.a]||0)<3).sort((p,q)=>Math.abs((p.ae||0)-myE)-Math.abs((q.ae||0)-myE));
+        for(const c of cands){ if(f.cancel) return;
+          let p=null; try{ p=await nb().tx('chess',c.id,d=>{ if(d.s!==0||d.b) return null; return {s:1,b:me,bn:name,be:myE,w:((d.seed|0)%2?d.a:me)}; }); }catch(e){ p=null; }
+          if(p){ f.started=true; stopFind(false); startOnline(Object.assign({},c,p,{id:c.id})); return; } }
+        if(f.cancel) return; }
+      const doc={s:0,m:mode,a:me,an:name,ae:myE,ta:Date.now(),t:Date.now(),bet:bet||0,to:friend?friend.id:'',mv:[],n:0,seed:(Math.random()*4e9)>>>0,acw:0,acb:0};
+      const id=await nb().create('chess',doc); if(f.cancel){ nb().del('chess',id).catch(()=>{}); return; } f.id=id;
+      f.unsub=nb().watch('chess',id,d=>{ if(!fl||fl!==f) return;
+        if(!d){ cancelFind('Өрөө хаагдлаа'); return; }
+        if(d.s===1&&d.b){ f.started=true; stopFind(false); startOnline(d); }
+        else if(d.s===2){ cancelFind('Найз татгалзлаа'); } },e=>{ cancelFind(netErr(e)); });
+      f.hb=setInterval(()=>{ nb().upd('chess',id,{ta:Date.now()}).catch(()=>{}); },6000);
+      f.tk=setInterval(()=>{ const sec=Math.floor((Date.now()-f.t0)/1000), x=document.getElementById('chfs'); if(x) x.textContent=(friend?esc(friend.n)+'-г хүлээж байна… ':'Өрсөлдөгч хайж байна… ')+sec+' с'; if(sec>=(friend?120:90)) cancelFind(friend?'Найз хариу өгсөнгүй':'Өрсөлдөгч олдсонгүй'); },1000);
+    }catch(e){ cancelFind(netErr(e)); }
+  }
+
+  /* ---- урилга хүлээн авах ---- */
+  function hideInv(){ const b=document.getElementById('chinv'); if(b) b.remove(); }
+  function showInv(d){ hideInv(); const b=document.createElement('div'); b.id='chinv';
+    b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:99990;width:min(92vw,420px);background:linear-gradient(#3a2418,#22130d);border:2px solid #c9972b;border-radius:14px;padding:12px;color:#f3e3bd;font:14px Georgia,serif;box-shadow:0 8px 24px #000c';
+    b.innerHTML='<div style="margin-bottom:8px"><b style="color:#ffd770">'+esc(d.an||'Найз')+'</b> тантай шатар тоглохыг хүсч байна'+((+d.bet)>0?'. Бооцоо: <b>'+(+d.bet)+' Зоос</b>':'')+'</div><div style="display:flex;gap:8px;justify-content:flex-end"><button style="border:2px solid #c9972b;background:linear-gradient(#e8b53a,#a8741a);color:#2a1600;border-radius:10px;padding:8px 14px;font:bold 14px Georgia,serif" onclick="chessInvAcc()">Зөвшөөрөх</button><button style="border:2px solid #c9972b;background:linear-gradient(#7a1d12,#3d0d08);color:#ffe9b0;border-radius:10px;padding:8px 14px;font:bold 14px Georgia,serif" onclick="chessInvNo()">Татгалзах</button></div>';
+    document.body.appendChild(b); inv.d=d; }
+  window.chessInvNo=function(){ const d=inv.d; hideInv(); if(d) nb().tx('chess',d.id,x=>x.s===0?{s:2,why:'decline'}:null).catch(()=>{}); inv.d=null; };
+  window.chessInvAcc=async function(){ const d=inv.d; hideInv(); inv.d=null; if(!d) return;
+    if((+d.bet||0)>(S.res.gold||0)){ try{ say('Зоос хүрэлцэхгүй байна ('+d.bet+')'); }catch(e){} nb().tx('chess',d.id,x=>x.s===0?{s:2,why:'decline'}:null).catch(()=>{}); return; }
+    if(G&&G.online&&!G.over){ try{ say('Та тоглолтын дунд байна'); }catch(e){} return; }
+    if(!el) open(); const me=nb().uid(), myE=ar().e;
+    try{ const p=await nb().tx('chess',d.id,x=>{ if(x.s!==0||x.b) return null; return {s:1,b:me,bn:String(nb().name()).slice(0,14),be:myE,w:((x.seed|0)%2?x.a:me)}; });
+      if(p) startOnline(Object.assign({},d,p,{id:d.id})); else setInfo('Урилга хүчингүй болсон байна'); }catch(e){ setInfo(netErr(e)); } };
+  function invInit(){ if(inv.unsub||inv.t) return;
+    inv.t=setInterval(()=>{ if(inv.unsub){ clearInterval(inv.t); return; } if(!nb().ok()) return; clearInterval(inv.t); inv.t=null;
+      try{ const me=nb().uid(); inv.unsub=nb().watchQ('chess',[['to','==',me],['s','==',0]],docs=>{ const now=Date.now(), d=docs.find(x=>x.a!==me&&now-(x.ta||0)<30000);
+          if(d){ if(!inv.d||inv.d.id!==d.id) showInv(d); } else { hideInv(); inv.d=null; } },()=>{}); }catch(e){} },4000); }
+
+  /* ---- онлайн тоглолт ---- */
+  function startOnline(d){
+    const me=nb().uid(), host=d.a===me;
+    O={id:d.id,mode:d.m||'r',bet:+d.bet||0,opName:String((host?d.bn:d.an)||'Тоглогч'),opElo:+(host?d.be:d.ae)||0,opId:host?d.b:d.a,myElo:ar().e,dl:Date.now()+60000,warn:0,done:false,acting:false,host:host};
+    pc=(d.w===me)?1:-1; rpStop(); T=null; modal=null; sel=-1; hn=-1; adT=-1; busy=false;
+    G=Object.assign(freshFields(),{mvs:[],redoSt:[],hints:0,undos:0,adv:false,online:true});
+    if(O.mode==='f'&&O.bet>0){ S.res.gold=Math.max(0,(S.res.gold||0)-O.bet); try{ save(); updateHUD(); }catch(e){} }
+    O.unsub=nb().watch('chess',d.id,syncRoom,e=>{ setMsg(netErr(e)); });
+    O.tk=setInterval(tick,1000); render(); tickNow();
+    if(d.mv&&d.mv.length) syncRoom(d);
+  }
+  function netStop(){ if(!O) return; try{ if(O.unsub) O.unsub(); }catch(e){} clearInterval(O.tk); const o=O; O=null; if(o.host&&o.done) nb().del('chess',o.id).catch(()=>{}); }
+  function syncRoom(d){
+    if(!O||!G||!G.online||O.done) return;
+    if(!d){ if(!G.over){ onlineEnd('draw','gone',false); setMsg('Өрөө хаагдсан. Тоглолт хүчингүй'); } return; }
+    const L=(d.mv||[]).map(dec), cur=G.mvs; let pre=true;
+    for(let i=0;i<Math.min(L.length,cur.length);i++){ if(enc(L[i])!==enc(cur[i])){ pre=false; break; } }
+    if(!pre){ rebuild(L); G.online=true; G.over=false; O.dl=Date.now()+60000; O.warn=0; render(); }
+    else if(L.length>cur.length){ O.fromSync=true; for(let i=cur.length;i<L.length;i++){ if(G.over||O.done) break; sel=-1; applyMove(L[i]); } O.fromSync=false; if(!O.done) render(); }
+    if(d.s===2&&d.res&&!O.done&&!G.over){ const r=d.res==='d'?'draw':(((d.res==='w')===(pc===1))?'win':'loss'); onlineEnd(r,d.why||'',false); }
+  }
+  function netPush(m,auto){
+    if(!O) return; const n0=G.mvs.length-1, ei=O.endInfo; O.endInfo=null;
+    nb().tx('chess',O.id,d=>{ if(d.s!==1||(d.n|0)!==n0) return null; const mv=(d.mv||[]).concat([enc(m)]); const p={mv:mv,n:mv.length,tm:Date.now()}; const k=(n0%2===0)?'acw':'acb'; p[k]=auto?((d[k]||0)+1):0; if(p[k]>=3){ p.s=2; p.res=(n0%2===0)?'b':'w'; p.why='abandon'; } else if(ei){ p.s=2; p.res=ei.res; p.why=ei.why; } return p; })
+      .catch(e=>{ setMsg(netErr(e)); });
+  }
+  function netResign(){ if(!O||!G||G.over) return; const res=pc===1?'b':'w'; nb().tx('chess',O.id,d=>d.s===1?{s:2,res:res,why:'resign'}:null).catch(()=>{}); onlineEnd('loss','resign',false); }
+  function onlineEnd(end,stt,writeRoom){
+    if(!O||O.done) return; O.done=true; G.over=true; clearInterval(O.tk); sel=-1; hn=-1; adT=-1;
+    const c=st(), a=ar(); let t='';
+    if(O.mode==='r'&&stt!=='gone'){
+      const sc=end==='win'?1:end==='draw'?0.5:0, d=eloD(O.myElo,O.opElo,sc), rb=rankOf(a.e);
+      a.e=Math.max(0,a.e+d); a.g++; if(end==='win') a.w++; else if(end==='loss') a.l++; else a.d++;
+      if(!a.opd||a.opd.d!==today()) a.opd={d:today()}; a.opd[O.opId]=(a.opd[O.opId]||0)+1;
+      t=(end==='win'?'Ялалт':end==='loss'?'Ялагдал':'Тэнцлээ')+' · '+(d>=0?'+':'')+d+' Elo'; if(rankOf(a.e)>rb) t+=' · Шинэ цол: '+RK[rankOf(a.e)];
+      pushRating();
+    } else if(O.mode==='f'&&stt!=='gone'){
+      if(end==='win'){ S.res.gold=(S.res.gold||0)+2*O.bet; t='Ялалт'+(O.bet?' · +'+O.bet+' Зоос':''); } else if(end==='draw'){ S.res.gold=(S.res.gold||0)+O.bet; t='Тэнцлээ'+(O.bet?' · бооцоо буцлаа':''); } else t='Ялагдал'+(O.bet?' · -'+O.bet+' Зоос':'');
+    } else if(stt==='gone'){ if(O.mode==='f'&&O.bet) S.res.gold=(S.res.gold||0)+O.bet; t='Тоглолт хүчингүй болсон'; }
+    if(stt==='abandon') t+=' (тоглогч гарсан)'; else if(stt==='resign') t+=end==='win'?' (өрсөлдөгч бууж өгсөн)':''; else if(stt==='time') t+=' (хугацаа)';
+    c.last={pc:pc,lv:'m',res:end,mv:G.mvs.map(enc)};
+    try{ save(); updateHUD(); }catch(e){}
+    if(writeRoom&&stt!=='gone'){ const res=end==='draw'?'d':(end==='win'?(pc===1?'w':'b'):(pc===1?'b':'w')); if(O.fromSync) nb().upd('chess',O.id,{s:2,res:res,why:stt}).catch(()=>{}); else O.endInfo={res:res,why:stt}; }
+    msg=t; render();
+  }
+  function tickNow(){ tick(); }
+  function tick(){
+    if(!O||!G||!G.online||G.over||O.done) return; const my=G.s.turn===pc, now=Date.now(), left=Math.ceil((O.dl-now)/1000), extra=Math.ceil((O.dl+30000-now)/1000);
+    if(left>0){ setMsg((my?'Таны нүүдэл · ':'Өрсөлдөгч · ')+fmt(left)); return; }
+    if(extra>0){ if(!O.warn){ O.warn=1; if(my){ try{ say('Хугацаа дууслаа! 30 секунд'); }catch(e){} } } setMsg((my?'Хугацаа дууслаа! ':'Өрсөлдөгчийн хугацаа дууссан · ')+fmt(extra)); return; }
+    if(O.acting) return;
+    if(!my&&extra>-6){ setMsg('Өрсөлдөгчийн нүүдэл автоматаар хийгдэнэ…'); return; }
+    O.acting=true; setMsg('Автомат нүүдэл…');
+    setTimeout(()=>{ try{ if(!O||!G||G.over||O.done) return; const m=CHESS_ENG.bestMove(G.s,'e'); if(!m) return; applyMove(m); render(); netPush(m,true); }catch(e){} if(O) O.acting=false; },40);
   }
   window.chessOpen=open;
-  window.chessClose=function(){ rpStop(); G=null; T=null; modal=null; if(el){ el.remove(); el=null; } };
+  window.chessClose=function(){ if(G&&G.online&&!G.over) netResign(); stopFind(true); netStop(); rpStop(); G=null; T=null; modal=null; if(el){ el.remove(); el=null; } };
   window.chessLv=function(k){ lv=k; render(); };
   window.chessCol=function(c){ pc=c; render(); };
   window.chessStart=function(){ T=null; newGame(); };
-  window.chessMenu=function(){ rpStop(); T=null; G=null; modal=null; busy=false; render(); };
+  window.chessMenu=function(){ if(G&&G.online){ if(!G.over) return; netStop(); G=null; scr='arena'; render(); arenaEnter(); return; } rpStop(); T=null; G=null; modal=null; busy=false; scr='bots'; render(); };
   window.chessResign=function(){ if(!G||G.over) return; finish('loss','resign'); };
-  window.CHESS={state:()=>G,pc:()=>pc,lv:()=>lv,click:i=>{ onClick({target:{closest:()=>({dataset:{q:i}})}}); }};
+  try{ invInit(); }catch(e){}
+  window.CHESS={state:()=>G,pc:()=>pc,lv:()=>lv,net:()=>O,ar:()=>ar(),rw:()=>rw,click:i=>{ onClick({target:{closest:()=>({dataset:{q:i}})}}); }};
 })();
 
 

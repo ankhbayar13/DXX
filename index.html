@@ -6585,16 +6585,16 @@ const ISLN={10:'Арван',100:'Зуут',1000:'Мянгат'};
 function isSelSync(){ const R=RT; R.selG=(R.selSq&&R.selSq.size)?new Set(R.selSq):new Set(R.G.filter(g=>!g.side&&R.sel.has(g.type))); }
 function isGroups(){ const R=RT; if(R.selSq&&R.selSq.size){ const a=[...R.selSq].filter(g=>g.us.some(u=>u.hp>0)); if(a.length) return a; R.selSq=null; isSelSync(); } return R.G.filter(g=>!g.side&&g.us.some(u=>u.hp>0)&&R.sel.has(g.type)); }
 function isToggle(ty){ const R=RT; if(!R) return; R.selSq=null; R.tysel=null; R.pickKey=null; isTyUI(); if(R.sel.has(ty)){ if(R.sel.size>1) R.sel.delete(ty); else R.sel=new Set(['foot','cav','archer']); } else R.sel.add(ty); isSelSync(); isHud(); }
-function isLvl(k){ const R=RT; if(!R) return; R.lvl=k; [0,10,100,1000].forEach(v=>{ const b=$('ilv'+v); if(b) b.className=(v===k)?'on':''; }); if(k){ R.banner(ISLN[k].toUpperCase()); R.hint(ISLN[k]+(R.tysel?' ('+ISTN[R.tysel]+')':'')+': цэргээ дарж '+ISLN[k]+'-аа сонго, дараа нь газар дарж явуул'); } else { R.selSq=null; R.pickKey=null; if(R.tysel) R.sel=new Set([R.tysel]); isSelSync(); isHud(); } if(k&&R.tysel) isPick(); }
+function isLvl(k){ const R=RT; if(!R) return; R.lvl=k; [0,10,100,1000].forEach(v=>{ const b=$('ilv'+v); if(b) b.className=(v===k)?'on':''; }); if(k){ R.banner(ISLN[k].toUpperCase()); R.hint(ISLN[k]+(R.tysel?' ('+ISTN[R.tysel]+')':'')+': цэргээ дарж '+ISLN[k]+'-аа сонго, дараа нь газар дарж явуул'); } else { R.selSq=null; R.pickKey=null; if(R.tysel) R.sel=new Set([R.tysel]); isSelSync(); isHud(); } if(k&&R.tysel) isTyPick(); }
 const ISTN={archer:'Харваач',cav:'Морьт',foot:'Явган'};
 function isTyUI(){ const R=RT; ['archer','cav','foot'].forEach(t=>{ const b=$('ity_'+t); if(!b) return; const al=R&&R.G.some(g=>!g.side&&g.type===t&&g.us.some(u=>u.hp>0)); b.className=(R&&R.tysel===t?'on':'')+(al?'':' dead'); }); }
-function isPick(){ const R=RT, ty=R&&R.tysel; if(!R||!ty||!R.lvl) return; const key=ty+':'+R.lvl; if(R.pickKey===key&&R.selSq&&R.selSq.size&&[...R.selSq].some(g=>g.us.some(u=>u.hp>0))){ isSelSync(); isHud(); return; }
+function isTyPick(){ const R=RT, ty=R&&R.tysel; if(!R||!ty||!R.lvl) return; const key=ty+':'+R.lvl; if(R.pickKey===key&&R.selSq&&R.selSq.size&&[...R.selSq].some(g=>g.us.some(u=>u.hp>0))){ isSelSync(); isHud(); return; }
   let mine=R.U.filter(u=>!u.side&&u.hp>0&&u.g.type===ty&&!u.g.per); if(!mine.length) mine=R.U.filter(u=>!u.side&&u.hp>0&&u.g.type===ty); if(!mine.length){ say(ISTN[ty]+' үлдсэнгүй'); return; }
   const en=R.U.filter(u=>u.side&&u.hp>0); let ex=0,ey=0; if(en.length){ ex=en.reduce((a,u)=>a+u.x,0)/en.length; ey=en.reduce((a,u)=>a+u.y,0)/en.length; } else { ex=R.hq.x; ey=R.hq.y; }
   let bu=mine[0],bd=1e9; mine.forEach(u=>{ const d=Math.hypot(u.x-ex,u.y-ey); if(d<bd){ bd=d; bu=u; } }); R.pickKey=key; isSquad(bu); R.hint(ISLN[R.lvl]+' ('+ISTN[ty]+') сонгогдлоо, газар дарж явуул'); }
 function isType(ty){ const R=RT; if(!R||R.done) return; if(R.tysel===ty){ R.tysel=null; R.pickKey=null; R.selSq=null; R.sel=new Set(['foot','cav','archer']); isSelSync(); isTyUI(); isHud(); return; }
   R.tysel=ty; R.pickKey=null; R.selSq=null; R.sel=new Set([ty]); isSelSync(); isTyUI(); try{ sfx('click'); }catch(e){}
-  if(R.lvl) isPick(); else { R.banner(ISTN[ty].toUpperCase()); isHud(); } }
+  if(R.lvl) isTyPick(); else { R.banner(ISTN[ty].toUpperCase()); isHud(); } }
 function isSquad(u){ const R=RT, g=u.g, al=g.us.filter(x=>x.hp>0); if(!al.length) return; const per=g.n/Math.max(1,g.us.length), k=Math.max(1,Math.min(al.length,Math.round(R.lvl/Math.max(1,per))));
   if(k>=al.length){ R.selSq=new Set([g]); }
   else { al.sort((a,b)=>Math.hypot(a.x-u.x,a.y-u.y)-Math.hypot(b.x-u.x,b.y-u.y)); const S=al.slice(0,k), total=g.us.length, g2=rtsMkG(0,g.kind,g.type,{T:g.T,n:0,name:g.name,mode:'hold'});
@@ -11050,7 +11050,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='b31f491b14';
+var UPDB='e1cc69e395';
 (function(){
   const K='updTry';
   const _go=updGo;

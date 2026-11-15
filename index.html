@@ -11051,7 +11051,7 @@ function actHTML(){
 /* p32/updfix.js — «Шинэ хувилбар гарлаа» цонх давтан гарах асуудал:
    өмнө нь index.html-ийн ETag-ийг HEAD-ээр харьцуулдаг байсан (CDN-ийн өөр өөр зангилаа өөр ETag өгч, шинэчилсний дараа ч дахин гардаг).
    Одоо хуудас өөрийн хувилбарын дугаарыг (UPDB) агуулж, ver.txt-тэй харьцуулна. Ижил хувилбарт 2 удаа шинэчилсэний дараа дахин асуухгүй. */
-var UPDB='9119589105';
+var UPDB='b5f3c0f1f9';
 (function(){
   const K='updTry';
   const _go=updGo;
@@ -16932,16 +16932,16 @@ window.skMul=function(id,i){ return 1+SKLM*(skLv(id,i)-1); };
         });
         const ac=BT.units.filter(u=>u.go&&u.hp>0&&!u.sup).sort((a,b)=>(b.lastGo||0)-(a.lastGo||0)).slice(0,3);
         if(BT.pick&&BT.pick.u.hp>0&&!ac.includes(BT.pick.u)) ac.unshift(BT.pick.u);
-        if(BT.pick){ const pu=Math.abs(Math.sin(t*5)); BT.units.forEach(e=>{ if(!e.side||e.hp<=0||e.sup) return; c.save(); if(!dxRing(c,'r',e.x,e.y+2,78+pu*6,0.7+0.3*pu)){ c.strokeStyle='rgba(255,70,50,'+(0.55+0.45*pu)+')'; c.lineWidth=3; c.setLineDash([7,5]); c.beginPath(); c.ellipse(e.x,e.y+2,34+pu*3,12+pu,0,0,7); c.stroke(); c.setLineDash([]); } c.fillStyle='#ff4a3a'; const my=e.y-H-26+Math.sin(t*6)*3; c.beginPath(); c.moveTo(e.x-8,my-9); c.lineTo(e.x+8,my-9); c.lineTo(e.x,my+3); c.closePath(); c.fill(); c.restore(); }); }
+        if(BT.pick){ const pu=Math.abs(Math.sin(t*5)); BT.units.forEach(e=>{ if(!e.side||e.hp<=0||e.sup) return; c.save();  c.fillStyle='#ff4a3a'; const my=e.y-H-26+Math.sin(t*6)*3; c.beginPath(); c.moveTo(e.x-8,my-9); c.lineTo(e.x+8,my-9); c.lineTo(e.x,my+3); c.closePath(); c.fill(); c.restore(); }); }
         const bob=Math.sin(t*6)*2;
         ac.forEach((u,ai)=>{
           c.save(); c.lineWidth=3; c.strokeStyle='#ffd24a'; c.shadowColor='#ffb53a'; c.shadowBlur=10;
-          if(!dxRing(c,'g',u.x,u.y+2,76+Math.abs(bob)*1.2,1)){ c.beginPath(); c.ellipse(u.x,u.y+2,32,11,0,0,7); c.stroke(); c.shadowBlur=0; }
+          c.shadowBlur=0;
           c.fillStyle='#ffd24a'; c.strokeStyle='#5a3a08'; c.lineWidth=1.5; const my=u.y-H-27+bob; c.beginPath(); c.moveTo(u.x-8,my-9); c.lineTo(u.x+8,my-9); c.lineTo(u.x,my+3); c.closePath(); c.fill(); c.stroke();
           c.restore();
           const g=u.go, tg=g&&g.tg; if(!tg||tg.hp<=0&&g.ph==='back') return;
           if(g.ph==='back'||ai>1) return;
-          c.save(); c.strokeStyle='#ff4a3a'; c.lineWidth=3; c.shadowColor='#ff3a2a'; c.shadowBlur=9; if(!dxRing(c,'r',tg.x,tg.y+2,76,1)){ c.beginPath(); c.ellipse(tg.x,tg.y+2,32,11,0,0,7); c.stroke(); c.restore(); } else c.restore();
+          c.save(); c.strokeStyle='#ff4a3a'; c.lineWidth=3; c.shadowColor='#ff3a2a'; c.shadowBlur=9; c.restore();
           const x0=u.x, y0=u.y-H*0.55, x1=tg.x, y1=tg.y-H*0.55, mx=(x0+x1)/2, my2=Math.min(y0,y1)-46-Math.abs(x1-x0)*0.12;
           c.save(); c.strokeStyle='#ffe08a'; c.lineWidth=2.5; c.shadowColor='#ff9a2a'; c.shadowBlur=6; c.setLineDash([]);
           c.beginPath(); c.moveTo(x0,y0); c.quadraticCurveTo(mx,my2,x1,y1); c.stroke();
